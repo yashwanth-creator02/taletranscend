@@ -12,6 +12,7 @@
         <nav class=" px-4 flex justify-between items-center">
             <span class="font-bold text-indigo-600">TaleTranscend</span>
             <div class="flex items-center space-x-6">
+                <!-- logo for website -->
                 <a href="home.html" class="text-slate-600 hover:text-indigo-600">
                     <i data-lucide="home"></i>
                 </a>
@@ -24,7 +25,73 @@
                 </a>
             </div>
         </nav>
-    </header>
+    </header>   
+    <!-- Profile content -->
+    <main class="flex flex-col md:flex-row min-h-screen ">  
+
+        <!-- User Profile left side -->
+        <div class="py-10 flex flex-col items-center md:w-1/5 border-r border-zinc-800">
+
+            <!-- The Avatar (Circle) -->
+            <div class="relative group">
+                <div class="w-28 h-28 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    <i data-lucide="user" class="w-14 h-14 text-white"></i>
+                </div>
+                <div class="absolute bottom-1 right-1 w-6 h-6 bg-green-500 border-4 border-black rounded-full"></div>
+            </div>
+            <span class="mt-4 text-xs font-bold tracking-widest text-indigo-500 uppercase">Your Profile</span>
+
+            <!-- User Info -->
+            <h1 class="mt-2 text-3xl font-bold text-white text-center">User_Name</h1>
+            <p class="mt-1 mb-1 text-slate-400">User_Bio</p>
+            
+            <!-- Edit Button -->
+            <button class="mt-8 bg-zinc-900 hover:bg-zinc-800 text-white px-4 py-3 rounded-xl border border-zinc-700 hover:border-indigo-500 transition-all duration-300 flex items-center justify-center gap-2 group">
+                <i data-lucide="edit-3" class="w-4 h-4 text-slate-400 group-hover:text-indigo-400"></i>
+                <span class="font-medium text-sm">Edit Profile</span>
+            </button>
+        </div>
+        <!-- Main Content Area -->
+        <div class="flex-1 overflow-hidden">   
+            <!-- history -->
+            <div class="mb-20 p-6 items-center">
+                <!-- Recent History Section -->
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class=" flex items-center font-bold mb-4 text-white text-3xl">
+                        <i data-lucide="history" class=" h-8 text-indigo-600 ml-2 mr-2"></i>
+                        Your History
+                    </h2>
+                    <a href="#" class="text-sm text-indigo-400 hover:underline">View all</a>
+                </div>
+                <!-- history List -->
+                <div class="space-x-6 bg-zinc-900/30 rounded-xl border border-zinc-800 p-4 pd-4 flex overflow-x-auto">
+                    <!-- Example history Item -->
+                    <div class="flex-shrink-0 w-64 p-5 bg-zinc-900/50 rounded-2xl border border-zinc-800 hover:border-zinc-700 transition-all snap-start">
+                        <div class="w-full h-40 bg-zinc-800 rounded-lg mb-4 flex items-center justify-center overflow-hidden">
+                             <i data-lucide="book-open" class="w-10 h-10 text-zinc-700"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-1">The Shadow Realm</h3>
+                        <p class="text-xs text-slate-500 mb-4 line-clamp-2">A journey through a world where light is a luxury and silence is survival.</p>
+                        
+                        <div class="flex justify-between text-[10px] text-slate-400 mb-1 font-medium">
+                            <span>Progress</span>
+                            <span>70%</span>
+                        </div>
+                        <div class="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
+                            <div class="h-full bg-indigo-500 rounded-full" style="width: 70%;"></div>
+                        </div>
+                    </div>
+                    <!-- More history items can be added here --> 
+                    <button class="flex-shrink-0 w-32 flex flex-col items-center justify-center gap-3 group">
+                        <div class="w-12 h-12 bg-zinc-900 rounded-full flex items-center justify-center border border-zinc-800 group-hover:bg-indigo-600 group-hover:border-indigo-500 transition-all">
+                            <i data-lucide="arrow-right" class="w-6 h-6 text-slate-500 group-hover:text-white"></i>
+                        </div>
+                        <span class="text-xs font-bold text-slate-500 group-hover:text-white uppercase tracking-widest">More</span>
+                    </button>  
+                </div>
+            </div>
+        </div>
+    </main>
 <script>
   lucide.createIcons();
 </script>
