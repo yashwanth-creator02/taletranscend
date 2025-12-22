@@ -48,18 +48,57 @@
         @keyframes gradient-flow {
             to { background-position: 200% center; }
         }
+
+        /* Circular Header Styling */
+        .header-orb {
+            position: relative;
+            width: 56px;
+            height: 56px;
+            background: #000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            box-shadow: 0 0 20px rgba(79, 70, 229, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .header-orb::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            padding: 2px;
+            background: conic-gradient(from 0deg, transparent, #4f46e5, transparent, #4f46e5, transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            animation: rotate 4s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 
 <body class="bg-black text-slate-300">
-    <header class="sticky top-0 z-50 bg-zinc-900/90 backdrop-blur-md border-b border-zinc-800 p-4 shadow-sm">
+    <header class="sticky top-0 z-50 bg-zinc-900/110 backdrop-blur-md border-b border-zinc-800 p-4 shadow-sm">
         <nav class="px-4 flex justify-between items-center">
             <span class="font-bold text-indigo-600">TaleTranscend</span>
             <div class="flex items-center space-x-6">
                 <!-- logo for website -->
-                <a href="home.html" class="flex items-center gap-2 font-bold text-indigo-600">
-                    <i data-lucide="home"></i><span>Home</span>
-                </a>
+                <div class="flex items-center gap-12">
+                    <div class="group flex flex-col items-center gap-1 cursor-pointer">
+                        <div class="header-orb group-hover:scale-110 transition-transform">
+                            <i data-lucide="home" class="w-6 h-6 text-indigo-500"></i>
+                        </div>
+                        <span class="text-[9px] font-black uppercase tracking-widest text-indigo-400 mt-2">Home</span>
+                    </div>
+                </div>
                 <a href="library.html" class="text-slate-600 hover:text-indigo-600">
                     <i data-lucide="library"></i>
                 </a>
@@ -108,7 +147,7 @@
         <section class="max-w-7xl mx-auto px-4 py-20">
 
             <!-- Section Header -->
-            <div class="flex flex-col md:flex-row justify-between items-end gap-4 mb-12">
+            <div class="flex flex-col md:flex-row justify-between items-start gap-4 mb-12">
                 <div>
                     <h2 class="text-3xl font-extrabold text-white tracking-tight">Trending Tales</h2>
                     <p class="text-slate-500 mt-2">The most read chronicles this week.</p>
