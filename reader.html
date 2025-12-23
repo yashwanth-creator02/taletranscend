@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Whispering Sands | TaleTranscend</title>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --paper-bg: #050505;
+            --text-main: #e4e4e7;
+            --text-muted: #a1a1aa;
+            --accent: #6366f1;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Themes */
+        body.theme-sepia {
+            --paper-bg: #f4ecd8;
+            --text-main: #433422;
+            --text-muted: #6b5a45;
+            --glass: rgba(0, 0, 0, 0.03);
+            --border: rgba(0, 0, 0, 0.08);
+            --accent: #936639;
+        }
+        body.theme-light {
+            --paper-bg: #ffffff;
+            --text-main: #18181b;
+            --text-muted: #52525b;
+            --glass: rgba(0, 0, 0, 0.02);
+            --border: rgba(0, 0, 0, 0.06);
+            --accent: #4f46e5;
+        }
+
+        body {
+            background-color: var(--paper-bg);
+            color: var(--text-muted);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: background-color 0.4s ease, color 0.4s ease;
+            overflow-x: hidden;
+        }
+
+        /* Desktop Independent Scroll & Thoroughly Sticky Sidebar */
+        @media (min-width: 1024px) {
+            .app-container {
+                display: flex;
+                height: 100vh;
+                overflow: hidden;
+            }
+            .story-scroll-area {
+                flex: 1;
+                overflow-y: auto;
+                scrollbar-width: thin;
+                scrollbar-color: var(--border) transparent;
+            }
+            .sidebar-fixed-area {
+                width: 380px;
+                height: 100vh;
+                overflow-y: auto;
+                border-left: 1px solid var(--border);
+                background-color: var(--paper-bg);
+                scrollbar-width: none;
+            }
+            .sidebar-fixed-area::-webkit-scrollbar { display: none; }
+        }
+
+        .serif-content {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.25rem;
+            line-height: 1.8;
+            color: var(--text-main);
+        }
+
+        @media (min-width: 768px) {
+            .serif-content { font-size: 1.4rem; line-height: 1.9; }
+        }
+
+        .drop-cap::first-letter {
+            float: left;
+            font-size: 4.5rem;
+            line-height: 0.85;
+            padding: 0.5rem 0.75rem 0 0;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .wisdom-card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+            transition: all 0.3s ease;
+        }
+
+        #mobile-drawer {
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #mobile-drawer.open {
+            transform: translateY(0);
+        }
+
+        #reading-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: var(--accent);
+            z-index: 1001;
+            transition: width 0.1s linear;
+        }
+
+        .theme-btn.active {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: white;
+        }
+
+        /* Smooth scrollbar for the story area */
+        .story-scroll-area::-webkit-scrollbar { width: 6px; }
+        .story-scroll-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="reading-progress"></div>
+
+    <!-- Persistent Header -->
+    <header class="fixed top-0 w-full z-50 bg-[var(--paper-bg)]/80 backdrop-blur-md border-b border-[var(--border)]">
+        <div class="max-w-[1600px] mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <button aria-label="Go back" class="p-2 -ml-2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors">
+                    <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                </button>
+                <div class="hidden sm:block h-4 w-[1px] bg-[var(--border)]"></div>
+                <div class="truncate max-w-[150px] md:max-w-none">
+                    <h1 class="text-xs md:text-sm font-bold text-[var(--text-main)] truncate tracking-tight">The Whispering Sands</h1>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2 md:gap-4">
+                <!-- Theme Switcher Desktop -->
+                <div class="hidden md:flex items-center gap-2 mr-2 bg-[var(--glass)] p-1 rounded-full border border-[var(--border)]">
+                    <button onclick="setTheme('dark')" aria-label="Dark mode" class="theme-btn active w-8 h-8 rounded-full flex items-center justify-center transition-all"><i data-lucide="moon" class="w-4 h-4"></i></button>
+                    <button onclick="setTheme('sepia')" aria-label="Sepia mode" class="theme-btn w-8 h-8 rounded-full flex items-center justify-center transition-all"><i data-lucide="coffee" class="w-4 h-4"></i></button>
+                    <button onclick="setTheme('light')" aria-label="Light mode" class="theme-btn w-8 h-8 rounded-full flex items-center justify-center transition-all"><i data-lucide="sun" class="w-4 h-4"></i></button>
+                </div>
+                <button aria-label="Save story" class="p-2 rounded-lg hover:bg-[var(--glass)] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all">
+                    <i data-lucide="bookmark" class="w-5 h-5"></i>
+                </button>
+                <button class="bg-[var(--accent)] hover:opacity-90 text-white px-5 py-2 rounded-full text-xs font-bold transition-all shadow-lg">
+                    Share
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="app-container max-w-[1600px] mx-auto">
+        
+        <!-- LEFT: MAIN STORY -->
+        <main class="story-scroll-area w-full px-4 md:px-12 lg:px-24 pt-24 pb-32">
+            <article class="max-w-3xl mx-auto">
+                <div class="mb-12">
+                    <span class="text-[10px] font-bold tracking-[0.2em] text-[var(--accent)] uppercase">Chapter One</span>
+                    <h2 class="text-4xl md:text-6xl font-bold text-[var(--text-main)] mt-4 mb-6 leading-tight serif-content italic">A sea of silver and secrets.</h2>
+                    
+                    <div class="flex items-center gap-3 mb-12">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Arjun" class="w-10 h-10 rounded-full border border-[var(--border)]" alt="Collector Arjun Dev">
+                        <div class="flex flex-col">
+                            <span class="text-xs text-[var(--text-main)] font-bold">Arjun Dev</span>
+                            <span class="text-[10px] text-[var(--text-muted)]">8 min read • Field Anthropologist</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="serif-content space-y-8 drop-cap">
+                    <p>The desert does not keep secrets; it only waits for the wind to carry them away. Old man Ishwar used to say that every grain of sand in the Thar was once a word spoken by an ancestor.</p>
+                    
+                    <p>When the Ghibli winds blow from the west, they aren't just shifting dunes—they are reciting history to those who know how to listen. I remember the night we sat by the acacia fire, the smoke curling toward a moon so bright it turned the sand into a sea of silver.</p>
+
+                    <blockquote class="border-l-4 border-[var(--accent)] pl-6 my-12 bg-[var(--glass)] py-8 pr-8 rounded-r-2xl">
+                        <p class="text-xl md:text-2xl italic text-[var(--text-main)] leading-relaxed">"A well that dries is not empty of water; it is simply full of silence. We do not dig for liquid; we dig for the spirit to return."</p>
+                    </blockquote>
+
+                    <p>"You see that ridge?" Ishwar pointed a gnarled finger toward the horizon. "Underneath that lies the village of the copper-smiths. They didn't leave because of war; they left because the water spirit, the <span class="text-[var(--accent)] font-semibold border-b border-[var(--accent)]/30 cursor-help">Jal-Devta</span>, decided to sleep for a hundred years."</p>
+
+                    <p>In our modern world of plastic pipes and digital maps, we forget that the earth has a memory. The copper-smiths understood the rhythm of the soil. They knew that the earth breathes, and sometimes, it needs to hold its breath.</p>
+
+                    <!-- Large Image Placeholder -->
+                    <div class="my-16 rounded-3xl overflow-hidden bg-[var(--glass)] aspect-video flex flex-col items-center justify-center border border-[var(--border)] group">
+                        <div class="transform transition-transform group-hover:scale-110 duration-500">
+                            <i data-lucide="image" class="w-16 h-16 text-[var(--text-muted)] opacity-20 mx-auto mb-4"></i>
+                        </div>
+                        <p class="text-xs text-[var(--text-muted)] tracking-widest uppercase font-medium">Visualization: The Night of the Silver Moon</p>
+                    </div>
+
+                    <p>Ishwar took a sip of his chai, the steam ghosting against his weathered skin. "The young ones," he sighed, "they look at the dunes and see a barrier. I look at the dunes and see a library."</p>
+                </div>
+
+                <footer class="mt-24 pt-12 border-t border-[var(--border)]">
+                    <div class="flex flex-col md:flex-row justify-between gap-8">
+                        <div class="group cursor-pointer">
+                            <p class="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-widest mb-2">Previous Chapter</p>
+                            <h4 class="text-lg font-bold text-[var(--text-main)] group-hover:text-[var(--accent)] transition-colors">The Weaver's Silence</h4>
+                        </div>
+                        <div class="group cursor-pointer md:text-right">
+                            <p class="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-widest mb-2">Next Chapter</p>
+                            <h4 class="text-lg font-bold text-[var(--text-main)] group-hover:text-[var(--accent)] transition-colors">Echoes of the High Pass</h4>
+                        </div>
+                    </div>
+                </footer>
+            </article>
+        </main>
+
+        <!-- RIGHT: SIDEBAR -->
+        <aside class="sidebar-fixed-area hidden lg:block p-8">
+            <div class="space-y-8 py-10">
+                <!-- Cultural Context Card -->
+                <div class="wisdom-card p-6 rounded-2xl shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2 text-[var(--accent)]">
+                            <i data-lucide="book-open" class="w-4 h-4"></i>
+                            <span class="text-[10px] font-bold uppercase tracking-widest">Context</span>
+                        </div>
+                        <span class="text-[9px] bg-[var(--accent)]/10 px-2 py-0.5 rounded text-[var(--accent)] font-bold">Verified</span>
+                    </div>
+                    <h3 class="text-[var(--text-main)] font-bold text-lg mb-2">The 'Jal-Devta'</h3>
+                    <p class="text-sm text-[var(--text-muted)] leading-relaxed mb-4">
+                        In Rajasthan, the Jal-Devta is more than a deity—it's an indicator of aquifer health. "Sleeping" signifies depletion cycles.
+                    </p>
+                    <div class="pt-4 border-t border-[var(--border)] flex items-center justify-between">
+                        <span class="text-[10px] text-[var(--text-muted)] opacity-70 italic font-medium">Thar Ethno-ecology</span>
+                        <button class="text-[var(--accent)] text-xs font-bold hover:underline">Explore</button>
+                    </div>
+                </div>
+
+                <!-- Audio Archive Card -->
+                <div class="wisdom-card p-6 rounded-2xl border-[var(--accent)]/20">
+                    <div class="flex items-center gap-2 text-[var(--accent)] mb-4">
+                        <i data-lucide="mic-2" class="w-4 h-4"></i>
+                        <span class="text-[10px] font-bold uppercase tracking-widest">Oral History</span>
+                    </div>
+                    <div class="flex items-center gap-4 mb-4">
+                        <button aria-label="Play recording" class="w-12 h-12 flex-shrink-0 bg-[var(--accent)] rounded-full flex items-center justify-center text-white hover:scale-105 transition-all">
+                            <i data-lucide="play" class="w-6 h-6 fill-current"></i>
+                        </button>
+                        <div>
+                            <h4 class="text-sm font-bold text-[var(--text-main)]">Ishwar's 2024 Story</h4>
+                            <p class="text-[10px] text-[var(--text-muted)] font-medium">Dialect: Marwari</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Community Card -->
+                <div class="wisdom-card p-6 rounded-2xl">
+                    <h4 class="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-6">Knowledge Guardians</h4>
+                    <div class="flex -space-x-3 mb-6">
+                        <div class="w-10 h-10 rounded-full border-2 border-[var(--paper-bg)] bg-indigo-500 flex items-center justify-center text-xs font-bold text-white shadow-lg">JD</div>
+                        <div class="w-10 h-10 rounded-full border-2 border-[var(--paper-bg)] bg-emerald-500 flex items-center justify-center text-xs font-bold text-white shadow-lg">MK</div>
+                        <div class="w-10 h-10 rounded-full border-2 border-[var(--paper-bg)] bg-[var(--border)] flex items-center justify-center text-xs font-bold text-[var(--text-muted)]">+9</div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-full bg-[var(--glass)] border border-[var(--border)] flex-shrink-0 flex items-center justify-center text-[10px] text-[var(--text-main)] font-bold">SD</div>
+                            <div>
+                                <p class="text-xs font-bold text-[var(--text-main)]">Sanjay D.</p>
+                                <p class="text-[10px] text-[var(--text-muted)] leading-tight">"My grandfather told the same story in 1982."</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="w-full mt-8 py-2.5 rounded-xl bg-[var(--accent)] text-white text-xs font-bold transition-all hover:brightness-110 shadow-lg">
+                        Contribute Memory
+                    </button>
+                </div>
+            </div>
+
+            <!-- Metadata Footer -->
+                <div class="px-2 space-y-2">
+                    <div class="flex justify-between text-[10px] font-bold text-zinc-600 uppercase">
+                        <span>License</span>
+                        <span class="text-zinc-400">CC BY-NC 4.0</span>
+                    </div>
+                    <div class="flex justify-between text-[10px] font-bold text-zinc-600 uppercase">
+                        <span>Collection</span>
+                        <span class="text-zinc-400">Desert Echoes</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+    </div>
+
+    <!-- MOBILE DRAWER -->
+    <div id="mobile-drawer" class="lg:hidden fixed inset-x-0 bottom-0 z-[60] bg-[var(--paper-bg)] border-t border-[var(--border)] rounded-t-[32px] shadow-2xl p-8 pb-12">
+        <div class="w-12 h-1.5 bg-[var(--border)] rounded-full mx-auto mb-10"></div>
+        <div class="space-y-8">
+            <h3 class="text-2xl font-bold text-[var(--text-main)]">Reading Settings</h3>
+            
+            <div class="grid grid-cols-3 gap-3">
+                <button onclick="setTheme('dark')" class="theme-btn py-4 rounded-2xl border border-[var(--border)] text-xs font-bold">Dark</button>
+                <button onclick="setTheme('sepia')" class="theme-btn py-4 rounded-2xl border border-[var(--border)] text-xs font-bold">Sepia</button>
+                <button onclick="setTheme('light')" class="theme-btn py-4 rounded-2xl border border-[var(--border)] text-xs font-bold">Light</button>
+            </div>
+
+            <div class="wisdom-card p-6 rounded-2xl">
+                <p class="text-sm text-[var(--text-muted)] leading-relaxed">Story insights and community translations will appear here as you read.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Action Bar -->
+    <div class="lg:hidden fixed bottom-0 inset-x-0 h-20 bg-[var(--paper-bg)]/90 backdrop-blur-2xl border-t border-[var(--border)] px-8 flex items-center justify-between z-50">
+        <div class="flex gap-6">
+            <button aria-label="Like" class="text-[var(--text-muted)]"><i data-lucide="heart" class="w-6 h-6"></i></button>
+            <button aria-label="Share" class="text-[var(--text-muted)]"><i data-lucide="share" class="w-6 h-6"></i></button>
+        </div>
+        <button id="drawer-btn" class="flex items-center gap-2 bg-[var(--accent)] px-6 py-3 rounded-full text-xs font-bold text-white shadow-xl">
+            Settings <i data-lucide="settings" class="w-4 h-4"></i>
+        </button>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        const storyArea = document.querySelector('.story-scroll-area');
+        const progressBar = document.getElementById("reading-progress");
+
+        const updateProgress = () => {
+            const target = window.innerWidth >= 1024 ? storyArea : document.documentElement;
+            const winScroll = target.scrollTop;
+            const height = target.scrollHeight - target.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            progressBar.style.width = scrolled + "%";
+        };
+
+        storyArea.addEventListener('scroll', updateProgress);
+        window.addEventListener('scroll', updateProgress);
+
+        function setTheme(theme) {
+            document.body.classList.remove('theme-sepia', 'theme-light');
+            document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+            
+            let index = 0;
+            if (theme === 'sepia') { document.body.classList.add('theme-sepia'); index = 1; }
+            else if (theme === 'light') { document.body.classList.add('theme-light'); index = 2; }
+            
+            // Sync all theme buttons (desktop and mobile)
+            document.querySelectorAll(`.theme-btn:nth-child(${index + 1})`).forEach(b => b.classList.add('active'));
+        }
+
+        const drawer = document.getElementById('mobile-drawer');
+        const drawerBtn = document.getElementById('drawer-btn');
+
+        drawerBtn.addEventListener('click', () => drawer.classList.toggle('open'));
+
+        document.addEventListener('click', (e) => {
+            if (drawer.classList.contains('open') && !drawer.contains(e.target) && !drawerBtn.contains(e.target)) {
+                drawer.classList.remove('open');
+            }
+        });
+    </script>
+</body>
+</html>
