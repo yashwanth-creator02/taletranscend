@@ -13,12 +13,25 @@
             font-family: 'Plus Jakarta Sans', sans-serif; 
             background-color: #050505; 
             color: #cbd5e1; 
-            overflow-x: hidden; 
+             
         }
 
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #27272a; border-radius: 10px; }
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        /* Target the bar itself */
+        ::-webkit-scrollbar {
+        width: 4px;
+        }
+
+        /* Target the track */
+        ::-webkit-scrollbar-track {
+        background: transparent;
+        }
+
+        /* Target the thumb */
+        ::-webkit-scrollbar-thumb {
+        background: #27272a;
+        border-radius: 10px;
+        }
 
         /* Sidebar Transition Logic */
         #sidebar { 
@@ -37,6 +50,7 @@
 
         /* Enhanced Card Hover Effects */
         .tale-card { 
+            will-change: transfrom;
             transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
             position: relative;
             z-index: 1;
@@ -45,7 +59,7 @@
         .tale-card:hover { 
             transform: translateY(-12px) scale(1.02);
             z-index: 10;
-            box-shadow: 0 25px 50px -12px rgba(79, 70, 229, 0.4);
+            box-shadow: 0 25px 50px -12px var(--accent-soft);
             border-color: rgba(99, 102, 241, 0.4);
         }
 
@@ -123,8 +137,8 @@
 
     </style>
 </head>
-<body class="bg-black text-slate-300">
-    <header class="sticky top-0 z-50 bg-zinc-900/110 backdrop-blur-md border-b border-zinc-800 p-4 shadow-sm">
+<body class="bg-[#050505] text-slate-300 antialiased selection:bg-indigo-500/30">
+    <header id="main-header" class="sticky top-0 z-50 bg-black/60 backdrop-blur-md border-b border-zinc-800 p-4 shadow-sm">
         <nav class="px-4 flex justify-between items-center">
             <span class="font-bold text-indigo-600">TaleTranscend</span>
             <div class="flex items-center space-x-6">
@@ -132,12 +146,9 @@
                 <a href="home.html" class="text-slate-600 hover:text-indigo-600">
                     <i data-lucide="home"></i>
                 </a>
-                <div class="flex items-center gap-12">
-                    <div class="group flex flex-col items-center gap-1 cursor-pointer">
-                        <div class="header-orb group-hover:scale-110 transition-transform">
-                            <i data-lucide="library" class="w-6 h-6 text-indigo-500"></i>
-                        </div>
-                        <span class="text-[9px] font-black uppercase tracking-widest text-indigo-400 mt-2">The Library</span>
+                <div class="group flex flex-col items-center gap-1 cursor-pointer">
+                    <div class="header-orb group-hover:scale-110 transition-transform">
+                        <i data-lucide="library" class="w-6 h-6 text-indigo-500"></i>
                     </div>
                 </div>
                 <a href="profile.html" class="text-slate-600 hover:text-indigo-600">
@@ -146,141 +157,126 @@
             </div>
         </nav>
     </header>
-    <!-- Library content -->
+
+    <!-- Main Content Area  -->
     <div class="flex min-h-screen">
-
-        <!-- 1. The Sidebar (Sticky & Collapsible) -->
-        <aside id="sidebar" class="w-72 sticky top-[100px] h-[calc(100vh-95px)] flex flex-col transition-all duration-300 ease-in-out overflow-y-auto">
-            <!-- Sidebar Wrapper with Refined Border -->
-            <div class="flex flex-col h-full m-2 bg-zinc-900/40 border border-white/10 rounded-2xl overflow-hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="hidden md:flex w-72 sticky top-[89px] h-[calc(100vh-89px)] flex-col self-start p-3">
+            <div class="flex flex-col h-full bg-zinc-900/30 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-sm">
                 
-                <!-- 1. Header Section -->
-                <div class="flex items-center p-4 border-b border-white/5 bg-white/[0.02] sidebar-center">
-                    <button id="toggle-sidebar" class="p-2 hover:bg-white/5 rounded-lg cursor-pointer hover:scale-110 transition-all">
-                        <i data-lucide="menu" class="w-7 h-6 text-zinc-400 hover:text-indigo-400"></i>
+                <!-- Toggle & Title -->
+                <div class="flex items-center p-5 border-b border-white/5 sidebar-center">
+                    <button id="toggle-sidebar" class="p-2 hover:bg-white/5 rounded-xl transition-all text-zinc-400 hover:text-indigo-400">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
                     </button>
-                    <span class="ml-3 font-bold text-white tracking-tight sidebar-hide whitespace-nowrap">
-                        TaleTranscend
-                    </span>
-                </div>
-                <!-- 2. Scrollable Content Area -->
-                <div class="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-6">
-                        
-                    <!-- Filter Area -->
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between px-1 sidebar-hide">
-                            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 ">Filters</span>
-                            <button class="text-[10px] text-indigo-400 font-bold hover:text-indigo-300 transition-colors sidebar-hide">CLEAR ALL</button>
-                        </div>
-                        <div class="group p-3 bg-white/[0.03] flex items-center border border-white/5 rounded-xl sidebar-center hover:bg-white/[0.05] transition-colors cursor-pointer">
-                            <!-- Filter content will live here -->
-                            <i data-lucide="sliders" class="w-5 h-5 text-zinc-500 group-hover:text-indigo-400 transition-colors"></i>
-                            <div class="sidebar-hide ml-2 flex-1 items-start border border-dashed border-white/10 rounded-lg">    
-                                <span class="h-10 text-[10px] text-zinc-600 italic flex items-center justify-center">No active filters</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!--User list-->
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between px-1 sidebar-hide">
-                            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">Collection</span>
-                            <button class="text-[10px] text-indigo-400 font-bold hover:text-indigo-300 transition-colors sidebar-hide">My Collection</button>
-                        </div>
-                        <div class="group p-3 bg-white/[0.03] flex items-center border border-white/5 rounded-xl sidebar-center hover:bg-white/[0.05] transition-colors cursor-pointer">
-                            <i data-lucide="list" class="w-5 h-5 text-zinc-500 group-hover:text-indigo-400 transition-colors"></i>
-                            <div class="sidebar-hide ml-2 flex-1 items-start border border-dashed border-white/10 rounded-lg">    
-                                <p class="h-10 text-[10px] text-zinc-600 italic flex items-center justify-center">View My Lists</p>
-                            </div>
-                        </div>
-                    </div>
-
-
-                    <!-- Contributions Area -->
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between px-1 sidebar-hide">
-                            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">Contributions</span>
-                            <i data-lucide="arrow-up-right" class="w-3 h-3 hover:scale-110 hover:text-indigo-400 text-zinc-600 sidebar-hide"></i>
-                        </div>
-                        <div class="group p-3 bg-white/[0.03] flex items-center border border-white/5 rounded-xl sidebar-center hover:bg-white/[0.05] transition-colors cursor-pointer">
-                            <!-- Contribution items will live here -->
-                            <i data-lucide="feather" class="w-5 h-5 text-zinc-500 group-hover:text-indigo-400 transition-colors"></i>
-                            <div class="sidebar-hide ml-2 flex-1 items-start border border-dashed border-white/10 rounded-lg">
-                                <span class="h-10 text-[10px] text-zinc-600 italic flex items-center justify-center">Archive empty</span>
-                            </div>
-                        </div>
-                    </div>
-
+                    <span class="ml-3 font-bold text-sm text-white sidebar-hide">Navigation</span>
                 </div>
 
-                <!-- 3. Add New Tale Area (Centered Action) -->
-                <div class="p-3 border-t border-white/5 bg-black/20 overflow-hidden">
-                    <div class="group relative flex flex-col items-center justify-center w-full py-5 px-2 bg-zinc-900/40 border border-white/5 rounded-2xl hover:bg-indigo-500/10 hover:border-indigo-500/40 cursor-pointer transition-all duration-300">
-                        
-                        <!-- Animated Icon Container -->
-                        <div class="p-2.5 bg-zinc-800 rounded-xl text-zinc-400 group-hover:bg-indigo-600 group-hover:text-white group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(79,70,229,0.4)] transition-all duration-300 shrink-0">
-                            <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                <!-- Navigation Groups -->
+                <div class="flex-1 overflow-y-auto p-4 space-y-8">
+                    <!-- Section: Filters -->
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center px-2 sidebar-hide">
+                            <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">Browse By</h4>
+                            <button class="text-[9px] text-indigo-400 font-bold hover:underline">Reset</button>
                         </div>
+                        <div class="space-y-1">
+                            <button class="w-full flex items-center gap-3 p-3 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 sidebar-center">
+                                <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                                <span class="text-xs font-bold sidebar-hide">All Eras</span>
+                            </button>
+                            <button class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-zinc-500 hover:text-white transition-all sidebar-center">
+                                <i data-lucide="scroll" class="w-4 h-4"></i>
+                                <span class="text-xs font-bold sidebar-hide">Manuscripts</span>
+                            </button>
+                            <button class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-zinc-500 hover:text-white transition-all sidebar-center">
+                                <i data-lucide="clock" class="w-4 h-4"></i>
+                                <span class="text-xs font-bold sidebar-hide">Recent Myths</span>
+                            </button>
+                        </div>
+                    </div>
 
-                        <!-- Label with improved typography -->
-                        <span class="mt-3 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 group-hover:text-indigo-300 transition-colors sidebar-hide whitespace-nowrap">
-                            Add New Tale
-                        </span>
-
-                        <!-- Subtle indicator glow on hover -->
-                        <div class="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-b from-indigo-500/5 to-transparent pointer-events-none"></div>
+                    <!-- Section: Collection -->
+                    <div class="space-y-4">
+                        <h4 class="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600 sidebar-hide">Personal</h4>
+                        <div class="space-y-1">
+                            <button class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-zinc-500 hover:text-white transition-all sidebar-center">
+                                <i data-lucide="bookmark" class="w-4 h-4"></i>
+                                <span class="text-xs font-bold sidebar-hide">Bookmarks</span>
+                            </button>
+                            <button class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-zinc-500 hover:text-white transition-all sidebar-center">
+                                <i data-lucide="feather" class="w-4 h-4"></i>
+                                <span class="text-xs font-bold sidebar-hide">My Tales</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- User Status (Footer of Sidebar) -->
-                <div class="mt-auto p-6 border-t border-white/5 flex items-center gap-3 sidebar-center">
-                    <div class="relative sidebar-center">
-                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 p-[1px]">
-                            <div class="w-full h-full bg-[#030303] rounded-[11px] flex items-center justify-center overflow-hidden">
-                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Archivist" alt="avatar" class="w-8 h-8">
-                            </div>
-                        </div>
-                        <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-[#030303] rounded-full"></div>
-                    </div>
-                    <div class="sidebar-hide">
-                        <p class="text-xs font-bold text-white">Archivist Prime</p>
-                            <p class="text-[10px] text-indigo-400 font-medium">Rank: Sage</p>
-                    </div>
+                <!-- Add Action -->
+                <div class="p-4">
+                    <button class="w-full bg-indigo-600 hover:bg-indigo-500 text-white p-4 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-lg shadow-indigo-600/20 sidebar-center">
+                        <i data-lucide="plus" class="w-5 h-5"></i>
+                        <span class="text-xs font-black uppercase tracking-widest sidebar-hide">Submit Tale</span>
+                    </button>
                 </div>
 
+                <!-- Profile Info -->
+                <div class="mt-auto p-4 border-t border-white/5 bg-white/[0.02]">
+                    <div class="flex items-center gap-3 sidebar-center">
+                        <div class="relative flex-shrink-0">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Archivist" alt="avatar" class="w-10 h-10 rounded-xl bg-zinc-800 border border-white/10">
+                            <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-zinc-900 rounded-full"></div>
+                        </div>
+                        <div class="sidebar-hide overflow-hidden">
+                            <p class="text-xs font-bold text-white truncate">Archivist Prime</p>
+                            <p class="text-[10px] text-indigo-400 font-medium">Lvl 42 Sage</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </aside>
 
         <!-- Main Content -->
-        <main class="p-6 lg:p-10">
-            <div class="max-w-[1600px] mx-auto">
+        <main class="flex-1 p-6 lg:p-12">
+            <div class="max-w-[1500px] mx-auto">
                 
-                <!-- Header & Search Section -->
-                <section class="mb-12 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-                    <div class="space-y-2">
-                        <h2 class="text-indigo-500 text-[10px] font-black uppercase tracking-[0.4em]">Ancient Knowledge</h2>
-                        <h1 class="text-5xl font-black text-white tracking-tighter uppercase">The <span class="text-indigo-600">Archives</span></h1>
+                <!-- Hero Heading & Search -->
+                <header class="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-16">
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-2">
+                            <span class="h-[1px] w-8 bg-indigo-500"></span>
+                            <h2 class="text-indigo-500 text-[10px] font-black uppercase tracking-[0.4em]">Knowledge Repository</h2>
+                        </div>
+                        <h1 class="text-6xl font-black text-white tracking-tighter uppercase leading-none">
+                            The <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Archives</span>
+                        </h1>
                     </div>
 
-                    <!-- Enhanced Search Bar -->
-                    <div class="search-container flex items-center bg-zinc-900/50 border border-white/5 rounded-[1.5rem] px-5 py-3.5 w-full lg:w-[450px]">
-                        <i data-lucide="search" class="w-4 h-4 text-zinc-500 mr-4"></i>
-                        <input type="text" placeholder="Search by era, myth, or weaver..." 
-                               class="bg-transparent border-none text-sm focus:outline-none w-full text-white placeholder:text-zinc-600">
-                        <kbd class="ml-4 px-2 py-1 rounded-md border border-white/10 bg-black text-[9px] text-zinc-600 font-bold uppercase">⌘ F</kbd>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+                            <i data-lucide="search" class="w-4 h-4 text-zinc-500 group-focus-within:text-indigo-400 transition-colors"></i>
+                        </div>
+                        <input type="text" placeholder="Search the weave..." 
+                               class="w-full lg:w-[400px] bg-zinc-900/50 border border-white/10 rounded-2xl py-4 pl-14 pr-16 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/40 transition-all text-white placeholder:text-zinc-600">
+                        <div class="absolute inset-y-0 right-4 flex items-center">
+                            <kbd class="px-2 py-1 rounded bg-black border border-white/10 text-[9px] font-bold text-zinc-500">CMD K</kbd>
+                        </div>
                     </div>
-                </section>
+                </header>
 
-                <!-- Stats/Filter Bar -->
-                <div class="flex flex-wrap items-center gap-3 mb-10">
-                    <button class="px-5 py-2.5 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-indigo-600/20">All Tales</button>
-                    <button class="px-5 py-2.5 bg-zinc-900 border border-white/5 text-zinc-500 hover:text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all">Nordic Lore</button>
-                    <button class="px-5 py-2.5 bg-zinc-900 border border-white/5 text-zinc-500 hover:text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all">Mesoamerica</button>
-                    <button class="px-5 py-2.5 bg-zinc-900 border border-white/5 text-zinc-500 hover:text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all">Eastern Spirit</button>
+                <!-- Filter Bar -->
+                <div class="flex overflow-x-auto pb-4 gap-3 mb-12 no-scrollbar">
+                    <button class="flex-shrink-0 px-6 py-3 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-xl shadow-indigo-600/20">All Scrolls</button>
+                    <button class="flex-shrink-0 px-6 py-3 bg-zinc-900/50 border border-white/5 text-zinc-500 hover:text-white hover:border-white/20 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all">Nordic Lore</button>
+                    <button class="flex-shrink-0 px-6 py-3 bg-zinc-900/50 border border-white/5 text-zinc-500 hover:text-white hover:border-white/20 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all">Mesoamerican</button>
+                    <button class="flex-shrink-0 px-6 py-3 bg-zinc-900/50 border border-white/5 text-zinc-500 hover:text-white hover:border-white/20 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all">Eastern Spirit</button>
+                    <button class="flex-shrink-0 px-6 py-3 bg-zinc-900/50 border border-white/5 text-zinc-500 hover:text-white hover:border-white/20 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all">Neo-Solar</button>
                 </div>
 
-                <!-- Library Grid -->
-                <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                <!-- Content Grid -->
+                <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-8">
+                    
+                    <!-- Card Template (Repeated 4 times with unique content) -->
                     <!-- Updated Card 1: High Resolution Aspect Ratio 2:3 -->
                     <div class="tale-card rounded-[2rem] overflow-hidden border border-white/5 bg-zinc-900/40 cursor-pointer group">
                         <div class="aspect-[2/3] overflow-hidden relative">
@@ -460,16 +456,19 @@
                             </div>
                         </div>
                     </div>
+
                 </section>
-                </div>
             </div>
         </main>
     </div>
 
     <script>
-        lucide.createIcons();
+        // Initialize Icons
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
 
-        // Sidebar Toggle Logic
+        // Sidebar Collapse Logic
         const sidebar = document.getElementById('sidebar');
         const toggleBtn = document.getElementById('toggle-sidebar');
         
@@ -478,19 +477,19 @@
             
             if (isCollapsed) {
                 sidebar.classList.remove('collapsed');
-                sidebar.style.width = '288px'; // 72rem
+                sidebar.style.width = '288px'; // 72 units (w-72)
             } else {
                 sidebar.classList.add('collapsed');
-                sidebar.style.width = '96px'; // 24rem
+                sidebar.style.width = '100px'; 
             }
             
-            // Refresh icons in case of layout shifts
-            setTimeout(() => lucide.createIcons(), 300);
+            // Re-render icons for position adjustments
+            setTimeout(() => lucide.createIcons(), 350);
         });
 
-        // Search Hotkey
+        // Global Keybindings (CMD/CTRL + K for search)
         document.addEventListener('keydown', (e) => {
-            if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
                 e.preventDefault();
                 document.querySelector('input').focus();
             }
