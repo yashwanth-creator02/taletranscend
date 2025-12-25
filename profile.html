@@ -254,7 +254,7 @@
                     </div>
 
                     <!-- CTA -->
-                    <button class="group p-8 bg-zinc-900/20 border-2 border-dashed border-zinc-800 hover:border-emerald-500/50 rounded-3xl flex flex-col items-center justify-center transition-all min-h-[200px]">
+                    <button onclick="toggleEditor()" class="group p-8 bg-zinc-900/20 border-2 border-dashed border-zinc-800 hover:border-emerald-500/50 rounded-3xl flex flex-col items-center justify-center transition-all min-h-[200px]">
                         <div class="w-14 h-14 bg-emerald-500/10 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                             <i data-lucide="plus" class="text-emerald-500 w-6 h-6"></i>
                         </div>
@@ -286,9 +286,40 @@
                 </div>
                 <div class="flex gap-3 pt-4">
                     <button type="button" onclick="toggleModal()" class="flex-1 py-3 px-6 bg-zinc-800 text-white rounded-xl font-medium hover:bg-zinc-700 transition-colors">Cancel</button>
-                    <button type="submit" class="flex-1 py-3 px-6 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-500 transition-colors">Save Changes</button>
+                    <button type="submit" onclick="saveProfile()" class="flex-1 py-3 px-6 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-500 transition-colors">Save Changes</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Story Writing Overlay (Hidden by default) -->
+    <div id="story-editor" class="fixed inset-0 z-[100] bg-black hidden flex flex-col">
+        <!-- Editor Header -->
+        <div class="p-4 border-b border-zinc-800 flex justify-between items-center bg-zinc-900">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleEditor()" class="text-zinc-400 hover:text-white transition-colors">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+                <h2 class="text-white font-bold tracking-tight">Drafting New Tale</h2>
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="ai-title-btn" onclick="suggestStoryTitle()" class="flex items-center gap-2 px-3 py-1.5 bg-indigo-500/10 text-indigo-400 rounded-lg text-xs font-bold hover:bg-indigo-500/20 transition-all">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                    AI Title
+                </button>
+                <button onclick="shareTale()" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full text-sm font-bold shadow-lg shadow-indigo-500/20 transition-all active:scale-95">
+                    Share Tale
+                </button>
+            </div>
+        </div>
+
+        <!-- Writing Area -->
+        <div class="flex-1 overflow-y-auto p-6 md:p-12 lg:px-64">
+            <input type="text" id="story-title-input" placeholder="Title of your legend..." 
+                class="w-full bg-transparent text-4xl md:text-6xl font-black text-white placeholder:text-zinc-800 focus:outline-none mb-8">
+            
+            <textarea id="story-content-input" placeholder="Once upon a time in the realm of..." 
+                    class="w-full bg-transparent text-lg md:text-xl text-zinc-300 placeholder:text-zinc-700 focus:outline-none min-h-[50vh] resize-none leading-relaxed"></textarea>
         </div>
     </div>
 
@@ -301,11 +332,30 @@
         
         // Modal Toggle
         function toggleModal() {
+            const modal = document.getElementById('edit-modal');
             modal.classList.toggle('hidden');
+            
+            // If we are OPENING the modal (not hiding it)
             if (!modal.classList.contains('hidden')) {
-                // Populate inputs with current values
-                document.getElementById('input-name').value = document.getElementById('desktop-display-name').innerText;
-                document.getElementById('input-bio').value = document.getElementById('desktop-display-bio').innerText;
+                const currentName = document.getElementById('desktop-display-name').innerText;
+                const currentBio = document.getElementById('desktop-display-bio').innerText;
+                
+                // Logical Check: If the text is still the "Loading" placeholder, 
+                // leave the input empty instead of copying "Loading..."
+                const nameInput = document.getElementById('input-name');
+                const bioInput = document.getElementById('input-bio');
+
+                if (currentName !== "Loading...") {
+                    nameInput.value = currentName;
+                } else {
+                    nameInput.value = ""; // Keep empty for user to fill
+                }
+
+                if (currentBio !== "Connecting to backend..." && currentBio !== "Syncing...") {
+                    bioInput.value = currentBio;
+                } else {
+                    bioInput.value = "";
+                }
             }
         }
 
@@ -313,18 +363,7 @@
         profileForm.addEventListener('submit', (e) => {
             e.preventDefault();
             
-            const newName = document.getElementById('input-name').value || "User_Name";
-            const newBio = document.getElementById('input-bio').value || "User_Bio";
-
-            // Update Desktop View
-            document.getElementById('desktop-display-name').innerText = newName;
-            document.getElementById('desktop-display-bio').innerText = newBio;
-
-            // Update Mobile View
-            document.getElementById('mobile-display-name').innerText = newName;
-            document.getElementById('mobile-display-bio').innerText = newBio;
-
-            // Close Modal
+            window.saveProfile();
             toggleModal();
 
             // Simple Feedback
@@ -336,5 +375,217 @@
             if (e.target === modal) toggleModal();
         });
     </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        // ADDED: You must import these specific functions to use them
+        import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import firebaseConfig from '/firebase-config.js';
+        import { query, collection , addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // SIGN IN
+        signInAnonymously(auth).then(() => {
+            console.log("The user now has a 'Key'!");
+        }).catch(err => console.error("Auth Error:", err));
+
+        async function getTaleNameRecommendation(storyContent) {
+            const apiKey = ""; // Leave empty, system provides this at runtime
+            const model = "gemini-2.5-flash-preview-09-2025";
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+            const systemPrompt = "You are a creative naming assistant for a fantasy writing platform. Based on the story snippet provided, suggest one short, evocative, and mysterious title or character name. Return ONLY the name, no extra text.";
+            
+            const payload = {
+                contents: [{
+                    parts: [{ text: `Story Snippet: ${storyContent}` }]
+                }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                }
+            };
+
+            // Exponential Backoff Implementation (for reliability)
+            const fetchWithRetry = async (retries = 5, delay = 1000) => {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (!response.ok) throw new Error('API Request Failed');
+                    
+                    const result = await response.json();
+                    return result.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "Untitled Tale";
+                } catch (error) {
+                    if (retries > 0) {
+                        await new Promise(res => setTimeout(res, delay));
+                        return fetchWithRetry(retries - 1, delay * 2);
+                    }
+                    throw error;
+                }
+            };
+
+            try {
+                return await fetchWithRetry();
+            } catch (error) {
+                console.error("Gemini Error:", error);
+                return "Legendary Author"; // User-friendly fallback
+            }
+        }
+
+        // 1. Toggle the Editor
+        window.toggleEditor = function() {
+            const editor = document.getElementById('story-editor');
+            editor.classList.toggle('hidden');
+            // Prevent background scrolling when writing
+            document.body.style.overflow = editor.classList.contains('hidden') ? 'auto' : 'hidden';
+        };
+
+
+        async function shareTale(title, content) {
+            if (!auth.currentUser) return;
+
+            // Point to the PUBLIC collection
+            const communityFolder = collection(db, 'artifacts', 'taletranscend-pro', 'public', 'data', 'shared_tales');
+
+            try {
+                await addDoc(communityFolder, {
+                    title: title,
+                    content: content,
+                    authorName: document.getElementById('desktop-display-name').innerText,
+                    authorId: auth.currentUser.uid,
+                    createdAt: serverTimestamp(), // Uses the cloud's clock for fairness
+                    likes: 0
+                });
+                document.getElementById('story-title-input').value = '';
+                document.getElementById('story-content-input').value = '';
+                toggleEditor();
+                console.log("Tale shared with the world!");
+            } catch (e) {
+                console.error("Sharing failed:", e);
+            }
+        }
+        window.shareTale = shareTale();
+
+        // 3. AI Title Suggestion
+        window.suggestStoryTitle = async function() {
+            const content = document.getElementById('story-content-input').value;
+            if (content.length < 20) return;
+
+            const btn = document.getElementById('ai-title-btn');
+            btn.innerText = "Chanting...";
+            
+            // Call the same Gemini function we built earlier
+            const recommendation = await getTaleNameRecommendation(content);
+            
+            document.getElementById('story-title-input').value = recommendation.replace(/['"]+/g, '');
+            btn.innerHTML = `<i data-lucide="sparkles" class="w-3.5 h-3.5"></i> AI Title`;
+            lucide.createIcons();
+        };
+
+        
+        // --- EXAMPLE USAGE IN YOUR UI ---
+        window.suggestName = async function() {
+            const bioInput = document.getElementById('input-bio');
+            const nameInput = document.getElementById('input-name');
+            const suggestBtn = document.getElementById('suggest-btn');
+
+            if (!bioInput.value || bioInput.value.length < 5) {
+                // Simple feedback if bio is too short to give a good suggestion
+                const originalText = suggestBtn.innerHTML;
+                suggestBtn.innerHTML = "Tell more in bio!";
+                setTimeout(() => suggestBtn.innerHTML = originalText, 2000);
+                return;
+            }
+
+            // Visual Loading State
+            const originalContent = suggestBtn.innerHTML;
+            suggestBtn.disabled = true;
+            suggestBtn.innerHTML = `<i class="animate-spin" data-lucide="loader-2"></i> Thinking...`;
+            lucide.createIcons(); // Refresh icon for the spinner
+
+            const recommended = await getTaleNameRecommendation(bioInput.value);
+            
+            // Fill the name and restore button
+            nameInput.value = recommended.replace(/['"]+/g, ''); // Remove quotes if AI adds them
+            suggestBtn.innerHTML = originalContent;
+            suggestBtn.disabled = false;
+            lucide.createIcons();
+        };
+
+        // SYNC FROM CLOUD
+        function setupCloudSync(uid) {
+            const myDrawer = doc(db, 'artifacts', 'taletranscend-pro', 'users', uid);
+
+            onSnapshot(myDrawer, (snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.data();
+                    // Get all possible display elements
+                    const deskName = document.getElementById('desktop-display-name');
+                    const mobName = document.getElementById('mobile-display-name');
+                    const deskBio = document.getElementById('desktop-display-bio');
+                    const mobBio = document.getElementById('mobile-display-bio');
+
+                    // ... existing code that updates innerText ...
+                    const nameInput = document.getElementById('input-name');
+                    const bioInput = document.getElementById('input-bio');
+
+                    // If the modal is open, update the inputs too so they match the cloud
+                    if (nameInput) nameInput.value = data.name || "";
+                    if (bioInput) bioInput.value = data.bio || "";
+
+                    // Update Desktop
+                    if (deskName) deskName.innerText = data.name || "Explorer";
+                    if (deskBio) deskBio.innerText = data.bio || "Preserving legends...";
+
+                    // Update Mobile
+                    if (mobName) mobName.innerText = data.name || "Explorer";
+                    if (mobBio) mobBio.innerText = data.bio || "Syncing...";
+                    
+                    console.log("Display names updated to:", data.name);
+                }
+            });
+        } 
+
+        // SAVE TO CLOUD
+        // I made this "window.saveProfile" so your HTML button can find it
+        window.saveProfile = async function() {
+            if (!auth.currentUser) return;
+
+            // Get value from input box (not display label)
+            const newName = document.getElementById('input-name').value;
+            const newBio = document.getElementById('input-bio').value;
+            
+            const myDrawer = doc(db, 'artifacts', 'taletranscend-pro', 'users', auth.currentUser.uid);
+
+            try {
+                await setDoc(myDrawer, { 
+                    name: newName, 
+                    bio: newBio 
+                }, { merge: true });
+                console.log("Saved to cloud!");
+                
+            } catch (e) {
+                console.error("Save Error:", e);
+            }
+        }
+
+        // AUTH LISTENER
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log("Your drawer ID is: " + user.uid);
+                setupCloudSync(user.uid);
+            }
+        });
+        
+    </script>
+
 </body>
 </html>

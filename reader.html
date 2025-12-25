@@ -123,6 +123,12 @@
         /* Smooth scrollbar for the story area */
         .story-scroll-area::-webkit-scrollbar { width: 6px; }
         .story-scroll-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        
+        /* Highlight sections for the backend logger */
+        section {
+            padding-bottom: 2rem;
+            transition: opacity 0.3s;
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -149,12 +155,8 @@
                     <button onclick="setTheme('sepia')" aria-label="Sepia mode" class="theme-btn w-8 h-8 rounded-full flex items-center justify-center transition-all"><i data-lucide="coffee" class="w-4 h-4"></i></button>
                     <button onclick="setTheme('light')" aria-label="Light mode" class="theme-btn w-8 h-8 rounded-full flex items-center justify-center transition-all"><i data-lucide="sun" class="w-4 h-4"></i></button>
                 </div>
-                <button aria-label="Save story" class="p-2 rounded-lg hover:bg-[var(--glass)] text-[var(--text-muted)] hover:text-[var(--text-main)] transition-all">
-                    <i data-lucide="bookmark" class="w-5 h-5"></i>
-                </button>
-                <button class="bg-[var(--accent)] hover:opacity-90 text-white px-5 py-2 rounded-full text-xs font-bold transition-all shadow-lg">
-                    Share
-                </button>
+                <button aria-label="Save story" class="p-2 rounded-lg hover:bg-[var(--glass)] text-[var(--text-muted)]"><i data-lucide="bookmark" class="w-5 h-5"></i></button>
+                <button class="bg-[var(--accent)] hover:opacity-90 text-white px-5 py-2 rounded-full text-xs font-bold shadow-lg">Share</button>
             </div>
         </div>
     </header>
@@ -169,7 +171,7 @@
                     <h2 class="text-4xl md:text-6xl font-bold text-[var(--text-main)] mt-4 mb-6 leading-tight serif-content italic">A sea of silver and secrets.</h2>
                     
                     <div class="flex items-center gap-3 mb-12">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Arjun" class="w-10 h-10 rounded-full border border-[var(--border)]" alt="Collector Arjun Dev">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Arjun" class="w-10 h-10 rounded-full border border-[var(--border)]" alt="Arjun">
                         <div class="flex flex-col">
                             <span class="text-xs text-[var(--text-main)] font-bold">Arjun Dev</span>
                             <span class="text-[10px] text-[var(--text-muted)]">8 min read • Field Anthropologist</span>
@@ -186,36 +188,36 @@
                         <p class="text-xl md:text-2xl italic text-[var(--text-main)] leading-relaxed">"A well that dries is not empty of water; it is simply full of silence. We do not dig for liquid; we dig for the spirit to return."</p>
                     </blockquote>
 
-                    <p>"You see that ridge?" Ishwar pointed a gnarled finger toward the horizon. "Underneath that lies the village of the copper-smiths. They didn't leave because of war; they left because the water spirit, the <span class="text-[var(--accent)] font-semibold border-b border-[var(--accent)]/30 cursor-help">Jal-Devta</span>, decided to sleep for a hundred years."</p>
+                        <p>"You see that ridge?" Ishwar pointed a gnarled finger toward the horizon. "Underneath that lies the village of the copper-smiths. They didn't leave because of war; they left because the water spirit decided to sleep for a hundred years."</p>
+                    </section>
 
-                    <p>In our modern world of plastic pipes and digital maps, we forget that the earth has a memory. The copper-smiths understood the rhythm of the soil. They knew that the earth breathes, and sometimes, it needs to hold its breath.</p>
-
-                    <!-- Large Image Placeholder -->
-                    <div class="my-16 rounded-3xl overflow-hidden bg-[var(--glass)] aspect-video flex flex-col items-center justify-center border border-[var(--border)] group">
-                        <div class="transform transition-transform group-hover:scale-110 duration-500">
-                            <i data-lucide="image" class="w-16 h-16 text-[var(--text-muted)] opacity-20 mx-auto mb-4"></i>
+                    <section id="sec-visualization">
+                        <div class="my-16 rounded-3xl overflow-hidden bg-[var(--glass)] aspect-video flex flex-col items-center justify-center border border-[var(--border)] group">
+                            <i data-lucide="image" class="w-16 h-16 text-[var(--text-muted)] opacity-20 mb-4"></i>
+                            <p class="text-xs text-[var(--text-muted)] tracking-widest uppercase font-medium">Visualization: The Night of the Silver Moon</p>
                         </div>
-                        <p class="text-xs text-[var(--text-muted)] tracking-widest uppercase font-medium">Visualization: The Night of the Silver Moon</p>
-                    </div>
+                        <p>In our modern world of plastic pipes and digital maps, we forget that the earth has a memory. The copper-smiths understood the rhythm of the soil.</p>
+                    </section>
 
-                    <p>Ishwar took a sip of his chai, the steam ghosting against his weathered skin. "The young ones," he sighed, "they look at the dunes and see a barrier. I look at the dunes and see a library."</p>
+                    <section id="sec-library">
+                        <p>Ishwar took a sip of his chai, the steam ghosting against his weathered skin. "The young ones," he sighed, "they look at the dunes and see a barrier. I look at the dunes and see a library."</p>
+                    </section>
                 </div>
 
-                <footer class="mt-24 pt-12 border-t border-[var(--border)]">
-                    <div class="flex flex-col md:flex-row justify-between gap-8">
-                        <div class="group cursor-pointer">
-                            <p class="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-widest mb-2">Previous Chapter</p>
-                            <h4 class="text-lg font-bold text-[var(--text-main)] group-hover:text-[var(--accent)] transition-colors">The Weaver's Silence</h4>
-                        </div>
-                        <div class="group cursor-pointer md:text-right">
-                            <p class="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-widest mb-2">Next Chapter</p>
-                            <h4 class="text-lg font-bold text-[var(--text-main)] group-hover:text-[var(--accent)] transition-colors">Echoes of the High Pass</h4>
-                        </div>
+                <footer class="mt-24 pt-12 border-t border-[var(--border)] flex justify-between">
+                    <div>
+                        <p class="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-widest mb-2">Previous</p>
+                        <h4 class="text-lg font-bold text-[var(--text-main)]">The Weaver's Silence</h4>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-widest mb-2">Next</p>
+                        <h4 class="text-lg font-bold text-[var(--text-main)]">Echoes of the High Pass</h4>
                     </div>
                 </footer>
             </article>
         </main>
 
+        <!-- RIGHT: SIDEBAR -->
         <!-- RIGHT: SIDEBAR -->
         <aside class="sidebar-fixed-area hidden lg:block p-8">
             <div class="space-y-8 py-10">
@@ -327,21 +329,6 @@
 
     <script>
         lucide.createIcons();
-
-        const storyArea = document.querySelector('.story-scroll-area');
-        const progressBar = document.getElementById("reading-progress");
-
-        const updateProgress = () => {
-            const target = window.innerWidth >= 1024 ? storyArea : document.documentElement;
-            const winScroll = target.scrollTop;
-            const height = target.scrollHeight - target.clientHeight;
-            const scrolled = (winScroll / height) * 100;
-            progressBar.style.width = scrolled + "%";
-        };
-
-        storyArea.addEventListener('scroll', updateProgress);
-        window.addEventListener('scroll', updateProgress);
-
         function setTheme(theme) {
             document.body.classList.remove('theme-sepia', 'theme-light');
             document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
@@ -356,13 +343,61 @@
 
         const drawer = document.getElementById('mobile-drawer');
         const drawerBtn = document.getElementById('drawer-btn');
+        if (drawerBtn) drawerBtn.addEventListener('click', () => drawer.classList.toggle('open'));
+    </script>
 
-        drawerBtn.addEventListener('click', () => drawer.classList.toggle('open'));
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+        import firebaseConfig from './firebase-config.js';
 
-        document.addEventListener('click', (e) => {
-            if (drawer.classList.contains('open') && !drawer.contains(e.target) && !drawerBtn.contains(e.target)) {
-                drawer.classList.remove('open');
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const storyArea = document.querySelector('.story-scroll-area');
+        const progressBar = document.getElementById("reading-progress");
+        let lastSavedSection = "";
+
+        async function saveProgress(sectionId) {
+            const user = auth.currentUser;
+            if (!user) return;
+            const userDocRef = doc(db, 'artifacts', 'taletranscend-pro', 'users', user.uid);
+            try {
+                await setDoc(userDocRef, { lastReadSection: sectionId, lastSeen: new Date().toISOString() }, { merge: true });
+                console.log("Cloud Saved:", sectionId);
+            } catch (e) { console.error("Cloud Error:", e); }
+        }
+
+        const updateProgressAndSave = () => {
+            const target = window.innerWidth >= 1024 ? storyArea : document.documentElement;
+            const scrolled = (target.scrollTop / (target.scrollHeight - target.clientHeight)) * 100;
+            if (progressBar) progressBar.style.width = scrolled + "%";
+
+            const sections = document.querySelectorAll('section[id]');
+            let currentId = "";
+            sections.forEach(section => {
+                const rect = section.getBoundingClientRect();
+                // Logic: Which section is currently occupying the center-top of the screen?
+                if (rect.top <= 400 && rect.bottom >= 400) { currentId = section.id; }
+            });
+
+            if (currentId && currentId !== lastSavedSection) {
+                lastSavedSection = currentId;
+                saveProgress(currentId);
             }
+        };
+
+        
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log("Backend Connected:", user.uid);
+                storyArea.addEventListener('scroll', updateProgressAndSave);
+                window.addEventListener('scroll', updateProgressAndSave);
+            } else { signInAnonymously(auth); }
         });
     </script>
 </body>
