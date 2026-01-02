@@ -5,9 +5,26 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Whispering Sands | TaleTranscend</title>
+    <title>reader</title>
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
+
+        /* Target the bar itself */
+        ::-webkit-scrollbar {
+        width: 4px;
+        }
+
+        /* Target the track */
+        ::-webkit-scrollbar-track {
+        background: transparent;
+        }
+
+        /* Target the thumb */
+        ::-webkit-scrollbar-thumb {
+        background: #27272a;
+        border-radius: 10px;
+        }
+
         :root {
             --paper-bg: #050505;
             --text-main: #e4e4e7;
@@ -144,7 +161,7 @@
                 </button>
                 <div class="hidden sm:block h-4 w-[1px] bg-[var(--border)]"></div>
                 <div class="truncate max-w-[150px] md:max-w-none">
-                    <h1 class="text-xs md:text-sm font-bold text-[var(--text-main)] truncate tracking-tight">The Whispering Sands</h1>
+                    <h1 id="header-story-title" class="text-xs md:text-sm font-bold text-[var(--text-main)] truncate tracking-tight">Loading...</h1>
                 </div>
             </div>
             
@@ -167,52 +184,35 @@
         <main class="story-scroll-area w-full px-4 md:px-12 lg:px-24 pt-24 pb-32">
             <article class="max-w-3xl mx-auto">
                 <div class="mb-12">
-                    <span class="text-[10px] font-bold tracking-[0.2em] text-[var(--accent)] uppercase">Chapter One</span>
-                    <h2 class="text-4xl md:text-6xl font-bold text-[var(--text-main)] mt-4 mb-6 leading-tight serif-content italic">A sea of silver and secrets.</h2>
+                    <span id="chapter-label" class="text-[10px] font-bold tracking-[0.2em] text-[var(--accent)] uppercase">Chapter</span>
+                    <h2 id="chapter-title" class="text-4xl md:text-6xl font-bold text-[var(--text-main)] mt-4 mb-6 leading-tight serif-content italic">Loading Chapter...</h2>
                     
                     <div class="flex items-center gap-3 mb-12">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Arjun" class="w-10 h-10 rounded-full border border-[var(--border)]" alt="Arjun">
+                        <img id="author-img" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Reader" class="w-10 h-10 rounded-full border border-[var(--border)]">
                         <div class="flex flex-col">
-                            <span class="text-xs text-[var(--text-main)] font-bold">Arjun Dev</span>
-                            <span class="text-[10px] text-[var(--text-muted)]">8 min read • Field Anthropologist</span>
+                            <span id="author-name" class="text-xs text-[var(--text-main)] font-bold">Author</span>
+                            <span id="read-time" class="text-[10px] text-[var(--text-muted)]">Calculating read time...</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="serif-content space-y-8 drop-cap">
-                    <p>The desert does not keep secrets; it only waits for the wind to carry them away. Old man Ishwar used to say that every grain of sand in the Thar was once a word spoken by an ancestor.</p>
-                    
-                    <p>When the Ghibli winds blow from the west, they aren't just shifting dunes—they are reciting history to those who know how to listen. I remember the night we sat by the acacia fire, the smoke curling toward a moon so bright it turned the sand into a sea of silver.</p>
-
-                    <blockquote class="border-l-4 border-[var(--accent)] pl-6 my-12 bg-[var(--glass)] py-8 pr-8 rounded-r-2xl">
-                        <p class="text-xl md:text-2xl italic text-[var(--text-main)] leading-relaxed">"A well that dries is not empty of water; it is simply full of silence. We do not dig for liquid; we dig for the spirit to return."</p>
-                    </blockquote>
-
-                        <p>"You see that ridge?" Ishwar pointed a gnarled finger toward the horizon. "Underneath that lies the village of the copper-smiths. They didn't leave because of war; they left because the water spirit decided to sleep for a hundred years."</p>
-                    </section>
-
-                    <section id="sec-visualization">
-                        <div class="my-16 rounded-3xl overflow-hidden bg-[var(--glass)] aspect-video flex flex-col items-center justify-center border border-[var(--border)] group">
-                            <i data-lucide="image" class="w-16 h-16 text-[var(--text-muted)] opacity-20 mb-4"></i>
-                            <p class="text-xs text-[var(--text-muted)] tracking-widest uppercase font-medium">Visualization: The Night of the Silver Moon</p>
-                        </div>
-                        <p>In our modern world of plastic pipes and digital maps, we forget that the earth has a memory. The copper-smiths understood the rhythm of the soil.</p>
-                    </section>
-
-                    <section id="sec-library">
-                        <p>Ishwar took a sip of his chai, the steam ghosting against his weathered skin. "The young ones," he sighed, "they look at the dunes and see a barrier. I look at the dunes and see a library."</p>
-                    </section>
+                <div id="story-content" class="serif-content space-y-8 drop-cap">
+                    <!-- Dynamic content injected here -->
+                    <p class="animate-pulse bg-[var(--glass)] h-4 w-full rounded"></p>
+                    <p class="animate-pulse bg-[var(--glass)] h-4 w-3/4 rounded"></p>
+                    <p class="animate-pulse bg-[var(--glass)] h-4 w-5/6 rounded"></p>
                 </div>
 
                 <footer class="mt-24 pt-12 border-t border-[var(--border)] flex justify-between">
-                    <div>
+                    <a id="prev-link" href="#" class="group hidden">
                         <p class="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-widest mb-2">Previous</p>
-                        <h4 class="text-lg font-bold text-[var(--text-main)]">The Weaver's Silence</h4>
-                    </div>
-                    <div class="text-right">
+                        <h4 id="prev-title" class="text-lg font-bold text-[var(--text-main)] group-hover:text-[var(--accent)] transition-colors">Previous Chapter</h4>
+                    </a>
+                    <div class="flex-1"></div>
+                    <a id="next-link" href="#" class="group text-right hidden">
                         <p class="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-widest mb-2">Next</p>
-                        <h4 class="text-lg font-bold text-[var(--text-main)]">Echoes of the High Pass</h4>
-                    </div>
+                        <h4 id="next-title" class="text-lg font-bold text-[var(--text-main)] group-hover:text-[var(--accent)] transition-colors">Next Chapter</h4>
+                    </a>
                 </footer>
             </article>
         </main>
@@ -349,9 +349,9 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
-        import firebaseConfig from './firebase-config.js';
-
+        import { getFirestore, doc, setDoc , getDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+        
+        import firebaseConfig from '/firebase-config.js';
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -364,7 +364,7 @@
         async function saveProgress(sectionId) {
             const user = auth.currentUser;
             if (!user) return;
-            const userDocRef = doc(db, 'artifacts', 'taletranscend-pro', 'users', user.uid);
+            const userDocRef = doc(db, 'artifacts', 'taletranscend-pro' , 'users', user.uid);
             try {
                 await setDoc(userDocRef, { lastReadSection: sectionId, lastSeen: new Date().toISOString() }, { merge: true });
                 console.log("Cloud Saved:", sectionId);
@@ -390,7 +390,70 @@
             }
         };
 
-        
+        // 1. Get Variables from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const storyId = urlParams.get('id');
+        const chapterIdx = parseInt(urlParams.get('ch')) || 0;
+
+        // dynamic chapter content loader
+        async function loadChapterContent() {
+            if (!storyId) {
+                document.getElementById('story-content').innerHTML = "No story selected.";
+                return;
+            }
+
+            try {
+                // 2. Fetch Tale Document
+                const taleRef = doc(db, 'artifacts', 'taletranscend-pro', 'public', 'data', 'community_tales', storyId);
+                const taleSnap = await getDoc(taleRef);
+
+                if (taleSnap.exists()) {
+                    const data = taleSnap.data();
+                    const chapters = data.chapters || [];
+                    const currentChapter = chapters[chapterIdx];
+
+                    if (!currentChapter) {
+                        document.getElementById('story-content').innerHTML = "Chapter not found.";
+                        return;
+                    }
+
+                    // 3. Inject Content
+                    document.title = `${currentChapter.title} | ${data.title}`;
+                    document.getElementById('header-story-title').textContent = data.title;
+                    document.getElementById('chapter-label').textContent = `Chapter ${chapterIdx + 1}`;
+                    document.getElementById('chapter-title').textContent = currentChapter.title;
+                    document.getElementById('author-name').textContent = data.authorName || "Anonymous";
+                    document.getElementById('sidebar-story-name').textContent = data.title;
+                    document.getElementById('sidebar-description').textContent = data.description || "No description provided.";
+                    
+                    // Format content (assuming it's a string with newlines)
+                    const formattedContent = currentChapter.content.split('\n').map(p => `<p>${p}</p>`).join('');
+                    document.getElementById('story-content').innerHTML = formattedContent;
+
+                    // 4. Setup Navigation
+                    if (chapterIdx > 0) {
+                        const prevLink = document.getElementById('prev-link');
+                        prevLink.href = `reader.html?id=${storyId}&ch=${chapterIdx - 1}`;
+                        prevLink.classList.remove('hidden');
+                        document.getElementById('prev-title').textContent = chapters[chapterIdx - 1].title;
+                    }
+
+                    if (chapterIdx < chapters.length - 1) {
+                        const nextLink = document.getElementById('next-link');
+                        nextLink.href = `reader.html?id=${storyId}&ch=${chapterIdx + 1}`;
+                        nextLink.classList.remove('hidden');
+                        document.getElementById('next-title').textContent = chapters[chapterIdx + 1].title;
+                    }
+
+                    lucide.createIcons();
+                } else {
+                    document.getElementById('story-content').innerHTML = "Story does not exist in our library.";
+                }
+            } catch (error) {
+                console.error("Load Error:", error);
+                document.getElementById('story-content').innerHTML = "Error loading content from cloud.";
+            }
+        }
 
         onAuthStateChanged(auth, (user) => {
             if (user) {

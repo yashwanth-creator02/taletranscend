@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Connection Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-2xl">
+        <h1 class="text-xl font-bold mb-4 border-b pb-2">Database Connection Monitor</h1>
+        
+        <!-- Status Bar -->
+        <div id="status" class="mb-4 p-3 rounded text-sm font-mono bg-yellow-100 text-yellow-800">
+            Initializing Firebase...
+        </div>
+
+        <!-- Data List -->
+        <div class="space-y-2">
+            <h2 class="text-sm font-semibold text-gray-500 uppercase">Documents in Collection:</h2>
+            <div id="data-container" class="border rounded-lg p-4 bg-gray-50 min-h-[100px] max-h-[400px] overflow-auto">
+                <p class="text-gray-400 italic">Waiting for data...</p>
+            </div>
+        </div>
+
+        <!-- Debug Info -->
+        <div class="mt-4 pt-4 border-t text-xs text-gray-400">
+            <p>Check the Browser Console (F12) for detailed error logs.</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+        // 1. REPLACE THIS WITH YOUR SETTINGS FROM FIREBASE CONSOLE
+        import firebaseConfig from '/firebase-config.js';
+        const statusEl = document.getElementById('status');
+        const containerEl = document.getElementById('data-container');
+
+        function updateStatus(msg, type = 'info') {
+            statusEl.textContent = msg;
+            statusEl.className = `mb-4 p-3 rounded text-sm font-mono ${
+                type === 'error' ? 'bg-red-100 text-red-800' : 
+                type === 'success' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+            }`;
+        }
+
+        try {
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+
+            updateStatus("Firebase Initialized. Authenticating...");
+
+            // 2. Authenticate
+            signInAnonymously(auth).catch(err => {
+                updateStatus("Auth Error: " + err.message + " (Make sure Anonymous Auth is enabled!)", "error");
+            });
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    updateStatus(`Authenticated as ${user.uid}. Fetching data...`, "success");
+                    
+                    // 3. Listen to Data
+                    // Adjust the path below to match your structure
+                    // For example: collection(db, 'messages') or the platform's long path
+                    const collectionRef = collection(db, 'artifacts', 'taletranscend-pro', 'public', 'data', 'community_tales');
+
+                    onSnapshot(collectionRef, (snapshot) => {
+                        if (snapshot.empty) {
+                            containerEl.innerHTML = '<p class="text-orange-500">Connected! But the collection is empty.</p>';
+                            return;
+                        }
+
+                        containerEl.innerHTML = '';
+                        snapshot.forEach((doc) => {
+                            const pre = document.createElement('pre');
+                            pre.className = "text-xs bg-white border mb-2 p-2 rounded shadow-sm overflow-x-auto";
+                            pre.textContent = JSON.stringify({ id: doc.id, ...doc.data() }, null, 2);
+                            containerEl.appendChild(pre);
+                        });
+                        updateStatus(`Receiving live updates. Total docs: ${snapshot.size}`, "success");
+                    }, (err) => {
+                        console.error(err);
+                        updateStatus("Firestore Error: " + err.message, "error");
+                        containerEl.innerHTML = `<p class="text-red-500 font-bold">Access Denied: Check Security Rules.</p>`;
+                    });
+
+                } else {
+                    updateStatus("User signed out.", "info");
+                }
+            });
+
+        } catch (err) {
+            updateStatus("Initialization Failed: " + err.message, "error");
+        }
+    </script>
+</body>
+</html>

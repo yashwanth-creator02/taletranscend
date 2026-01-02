@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <div id="status">Connecting to Cloud...</div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+        import firebaseConfig from '/firebase-config.js';
+        const appId = 'taletranscend-pro'; 
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const demoStory = {
+            title: "The Whispering Sands",
+            authorName: "Arjun Dev",
+            description: "An ethno-ecological journey through the Thar desert.",
+            chapters: [
+                {
+                    title: "A Sea of Silver",
+                    content: "The desert does not keep secrets; it only waits for the wind to carry them away.\n\nOld man Ishwar used to say that every grain of sand was once a word spoken by an ancestor."
+                },
+                {
+                    title: "The Copper Smiths",
+                    content: "Underneath that ridge lies the village of the copper-smiths. They didn't leave because of war; they left because the water spirit decided to sleep."
+                }
+            ]
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                document.getElementById('status').innerText = "Uploading Demo Story...";
+                try {
+                    // Path: artifacts/appId/public/data/collection/docId
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'community_tales', 'demo-story-001');
+                    await setDoc(docRef, demoStory);
+                    document.getElementById('status').innerHTML = "<b>SUCCESS!</b><br>Story ID: <code>demo-story-001</code><br>You can now test your reader with: <br><code>reader.html?id=demo-story-001&ch=0</code>";
+                } catch (e) {
+                    document.getElementById('status').innerText = "Error: " + e.message;
+                }
+            } else {
+                signInAnonymously(auth);
+            }
+        });
+    </script>
+</body>
+</html>
