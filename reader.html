@@ -156,7 +156,7 @@
     <header class="fixed top-0 w-full z-50 bg-[var(--paper-bg)]/80 backdrop-blur-md border-b border-[var(--border)]">
         <div class="max-w-[1600px] mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center gap-4">
-                <button aria-label="Go back" class="p-2 -ml-2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors">
+                <button onclick="GoBack()" aria-label="Go back" class="p-2 -ml-2 text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors">
                     <i data-lucide="arrow-left" class="w-5 h-5"></i>
                 </button>
                 <div class="hidden sm:block h-4 w-[1px] bg-[var(--border)]"></div>
@@ -179,8 +179,6 @@
     </header>
 
     <div class="app-container max-w-[1600px] mx-auto">
-        
-        <!-- LEFT: MAIN STORY -->
         <main class="story-scroll-area w-full px-4 md:px-12 lg:px-24 pt-24 pb-32">
             <article class="max-w-3xl mx-auto">
                 <div class="mb-12">
@@ -191,111 +189,52 @@
                         <img id="author-img" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Reader" class="w-10 h-10 rounded-full border border-[var(--border)]">
                         <div class="flex flex-col">
                             <span id="author-name" class="text-xs text-[var(--text-main)] font-bold">Author</span>
-                            <span id="read-time" class="text-[10px] text-[var(--text-muted)]">Calculating read time...</span>
+                            <span id="read-time" class="text-[10px] text-[var(--text-muted)]">5 min read</span>
                         </div>
                     </div>
                 </div>
 
                 <div id="story-content" class="serif-content space-y-8 drop-cap">
-                    <!-- Dynamic content injected here -->
-                    <p class="animate-pulse bg-[var(--glass)] h-4 w-full rounded"></p>
-                    <p class="animate-pulse bg-[var(--glass)] h-4 w-3/4 rounded"></p>
-                    <p class="animate-pulse bg-[var(--glass)] h-4 w-5/6 rounded"></p>
+                    <div class="animate-pulse space-y-4">
+                        <div class="h-4 bg-[var(--glass)] w-full rounded"></div>
+                        <div class="h-4 bg-[var(--glass)] w-5/6 rounded"></div>
+                        <div class="h-4 bg-[var(--glass)] w-4/6 rounded"></div>
+                    </div>
                 </div>
 
-                <footer class="mt-24 pt-12 border-t border-[var(--border)] flex justify-between">
-                    <a id="prev-link" href="#" class="group hidden">
-                        <p class="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-widest mb-2">Previous</p>
-                        <h4 id="prev-title" class="text-lg font-bold text-[var(--text-main)] group-hover:text-[var(--accent)] transition-colors">Previous Chapter</h4>
+                <footer class="mt-24 pt-12 border-t border-[var(--border)] flex justify-between items-center">
+                    <a id="prev-link" href="#" class="group hidden max-w-[45%]">
+                        <p class="text-[10px] uppercase font-bold text-[var(--text-muted)] mb-1">Previous</p>
+                        <h4 id="prev-title" class="text-sm font-bold text-[var(--text-main)] group-hover:text-[var(--accent)] truncate">Chapter Name</h4>
                     </a>
                     <div class="flex-1"></div>
-                    <a id="next-link" href="#" class="group text-right hidden">
-                        <p class="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-widest mb-2">Next</p>
-                        <h4 id="next-title" class="text-lg font-bold text-[var(--text-main)] group-hover:text-[var(--accent)] transition-colors">Next Chapter</h4>
+                    <a id="next-link" href="#" class="group text-right hidden max-w-[45%]">
+                        <p class="text-[10px] uppercase font-bold text-[var(--text-muted)] mb-1">Next</p>
+                        <h4 id="next-title" class="text-sm font-bold text-[var(--text-main)] group-hover:text-[var(--accent)] truncate">Chapter Name</h4>
                     </a>
                 </footer>
             </article>
         </main>
 
-        <!-- RIGHT: SIDEBAR -->
-        <!-- RIGHT: SIDEBAR -->
         <aside class="sidebar-fixed-area hidden lg:block p-8">
             <div class="space-y-8 py-10">
-                <!-- Cultural Context Card -->
-                <div class="wisdom-card p-6 rounded-2xl shadow-sm">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center gap-2 text-[var(--accent)]">
-                            <i data-lucide="book-open" class="w-4 h-4"></i>
-                            <span class="text-[10px] font-bold uppercase tracking-widest">Context</span>
-                        </div>
-                        <span class="text-[9px] bg-[var(--accent)]/10 px-2 py-0.5 rounded text-[var(--accent)] font-bold">Verified</span>
-                    </div>
-                    <h3 class="text-[var(--text-main)] font-bold text-lg mb-2">The 'Jal-Devta'</h3>
-                    <p class="text-sm text-[var(--text-muted)] leading-relaxed mb-4">
-                        In Rajasthan, the Jal-Devta is more than a deity—it's an indicator of aquifer health. "Sleeping" signifies depletion cycles.
-                    </p>
-                    <div class="pt-4 border-t border-[var(--border)] flex items-center justify-between">
-                        <span class="text-[10px] text-[var(--text-muted)] opacity-70 italic font-medium">Thar Ethno-ecology</span>
-                        <button class="text-[var(--accent)] text-xs font-bold hover:underline">Explore</button>
-                    </div>
-                </div>
-
-                <!-- Audio Archive Card -->
-                <div class="wisdom-card p-6 rounded-2xl border-[var(--accent)]/20">
-                    <div class="flex items-center gap-2 text-[var(--accent)] mb-4">
-                        <i data-lucide="mic-2" class="w-4 h-4"></i>
-                        <span class="text-[10px] font-bold uppercase tracking-widest">Oral History</span>
-                    </div>
-                    <div class="flex items-center gap-4 mb-4">
-                        <button aria-label="Play recording" class="w-12 h-12 flex-shrink-0 bg-[var(--accent)] rounded-full flex items-center justify-center text-white hover:scale-105 transition-all">
-                            <i data-lucide="play" class="w-6 h-6 fill-current"></i>
-                        </button>
-                        <div>
-                            <h4 class="text-sm font-bold text-[var(--text-main)]">Ishwar's 2024 Story</h4>
-                            <p class="text-[10px] text-[var(--text-muted)] font-medium">Dialect: Marwari</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Community Card -->
                 <div class="wisdom-card p-6 rounded-2xl">
-                    <h4 class="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-6">Knowledge Guardians</h4>
-                    <div class="flex -space-x-3 mb-6">
-                        <div class="w-10 h-10 rounded-full border-2 border-[var(--paper-bg)] bg-indigo-500 flex items-center justify-center text-xs font-bold text-white shadow-lg">JD</div>
-                        <div class="w-10 h-10 rounded-full border-2 border-[var(--paper-bg)] bg-emerald-500 flex items-center justify-center text-xs font-bold text-white shadow-lg">MK</div>
-                        <div class="w-10 h-10 rounded-full border-2 border-[var(--paper-bg)] bg-[var(--border)] flex items-center justify-center text-xs font-bold text-[var(--text-muted)]">+9</div>
+                    <div class="flex items-center gap-2 text-[var(--accent)] mb-4">
+                        <i data-lucide="book-open" class="w-4 h-4"></i>
+                        <span class="text-[10px] font-bold uppercase">About this Tale</span>
                     </div>
-                    
-                    <div class="space-y-4">
-                        <div class="flex items-start gap-3">
-                            <div class="w-8 h-8 rounded-full bg-[var(--glass)] border border-[var(--border)] flex-shrink-0 flex items-center justify-center text-[10px] text-[var(--text-main)] font-bold">SD</div>
-                            <div>
-                                <p class="text-xs font-bold text-[var(--text-main)]">Sanjay D.</p>
-                                <p class="text-[10px] text-[var(--text-muted)] leading-tight">"My grandfather told the same story in 1982."</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <button class="w-full mt-8 py-2.5 rounded-xl bg-[var(--accent)] text-white text-xs font-bold transition-all hover:brightness-110 shadow-lg">
-                        Contribute Memory
-                    </button>
+                    <h3 id="sidebar-story-name" class="text-[var(--text-main)] font-bold text-lg mb-2">Story Title</h3>
+                    <p id="sidebar-description" class="text-sm text-[var(--text-muted)] leading-relaxed">Loading details...</p>
                 </div>
-            </div>
 
-            <!-- Metadata Footer -->
-                <div class="px-2 space-y-2">
-                    <div class="flex justify-between text-[10px] font-bold text-zinc-600 uppercase">
-                        <span>License</span>
-                        <span class="text-zinc-400">CC BY-NC 4.0</span>
-                    </div>
-                    <div class="flex justify-between text-[10px] font-bold text-zinc-600 uppercase">
-                        <span>Collection</span>
-                        <span class="text-zinc-400">Desert Echoes</span>
+                <div class="wisdom-card p-6 rounded-2xl">
+                    <h4 class="text-[10px] font-bold text-[var(--text-muted)] uppercase mb-4">Reading Progress</h4>
+                    <div class="w-full bg-[var(--border)] h-1.5 rounded-full overflow-hidden">
+                        <div id="sidebar-progress-bar" class="bg-[var(--accent)] h-full w-0 transition-all duration-300"></div>
                     </div>
                 </div>
             </div>
         </aside>
-
     </div>
 
     <!-- MOBILE DRAWER -->
@@ -326,6 +265,10 @@
             Settings <i data-lucide="settings" class="w-4 h-4"></i>
         </button>
     </div>
+    <div class="lg:hidden fixed bottom-0 inset-x-0 h-16 bg-[var(--paper-bg)]/90 backdrop-blur-xl border-t border-[var(--border)] px-6 flex items-center justify-between z-50">
+        <button onclick="window.history.back()" class="text-[var(--text-muted)]"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
+        <button id="drawer-btn" class="bg-[var(--accent)] px-6 py-2 rounded-full text-xs font-bold text-white shadow-xl">Settings</button>
+    </div>
 
     <script>
         lucide.createIcons();
@@ -348,120 +291,112 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-        import { getFirestore, doc, setDoc , getDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
         
         import firebaseConfig from '/firebase-config.js';
-
+        const appId = 'taletranscend-pro';
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        const storyArea = document.querySelector('.story-scroll-area');
-        const progressBar = document.getElementById("reading-progress");
-        let lastSavedSection = "";
-
-        async function saveProgress(sectionId) {
-            const user = auth.currentUser;
-            if (!user) return;
-            const userDocRef = doc(db, 'artifacts', 'taletranscend-pro' , 'users', user.uid);
-            try {
-                await setDoc(userDocRef, { lastReadSection: sectionId, lastSeen: new Date().toISOString() }, { merge: true });
-                console.log("Cloud Saved:", sectionId);
-            } catch (e) { console.error("Cloud Error:", e); }
-        }
-
-        const updateProgressAndSave = () => {
-            const target = window.innerWidth >= 1024 ? storyArea : document.documentElement;
-            const scrolled = (target.scrollTop / (target.scrollHeight - target.clientHeight)) * 100;
-            if (progressBar) progressBar.style.width = scrolled + "%";
-
-            const sections = document.querySelectorAll('section[id]');
-            let currentId = "";
-            sections.forEach(section => {
-                const rect = section.getBoundingClientRect();
-                // Logic: Which section is currently occupying the center-top of the screen?
-                if (rect.top <= 400 && rect.bottom >= 400) { currentId = section.id; }
-            });
-
-            if (currentId && currentId !== lastSavedSection) {
-                lastSavedSection = currentId;
-                saveProgress(currentId);
-            }
-        };
-
-        // 1. Get Variables from URL
         const urlParams = new URLSearchParams(window.location.search);
-        const storyId = urlParams.get('id');
-        const chapterIdx = parseInt(urlParams.get('ch')) || 0;
+        const taleId = urlParams.get('taleId');
+        const chapterIdx = parseInt(urlParams.get('chapterId')) || 0;
 
-        // dynamic chapter content loader
         async function loadChapterContent() {
-            if (!storyId) {
-                document.getElementById('story-content').innerHTML = "No story selected.";
+            if (!taleId) {
+                document.getElementById('story-content').innerHTML = "<p class='text-center py-20'>No story selected.</p>";
                 return;
             }
 
             try {
-                // 2. Fetch Tale Document
-                const taleRef = doc(db, 'artifacts', 'taletranscend-pro', 'public', 'data', 'community_tales', storyId);
+                // 1. Fetch Main Tale Metadata
+                const taleRef = doc(db, 'artifacts', appId, 'public', 'data', 'community_tales', taleId);
                 const taleSnap = await getDoc(taleRef);
 
-                if (taleSnap.exists()) {
-                    const data = taleSnap.data();
-                    const chapters = data.chapters || [];
-                    const currentChapter = chapters[chapterIdx];
-
-                    if (!currentChapter) {
-                        document.getElementById('story-content').innerHTML = "Chapter not found.";
-                        return;
-                    }
-
-                    // 3. Inject Content
-                    document.title = `${currentChapter.title} | ${data.title}`;
-                    document.getElementById('header-story-title').textContent = data.title;
-                    document.getElementById('chapter-label').textContent = `Chapter ${chapterIdx + 1}`;
-                    document.getElementById('chapter-title').textContent = currentChapter.title;
-                    document.getElementById('author-name').textContent = data.authorName || "Anonymous";
-                    document.getElementById('sidebar-story-name').textContent = data.title;
-                    document.getElementById('sidebar-description').textContent = data.description || "No description provided.";
-                    
-                    // Format content (assuming it's a string with newlines)
-                    const formattedContent = currentChapter.content.split('\n').map(p => `<p>${p}</p>`).join('');
-                    document.getElementById('story-content').innerHTML = formattedContent;
-
-                    // 4. Setup Navigation
-                    if (chapterIdx > 0) {
-                        const prevLink = document.getElementById('prev-link');
-                        prevLink.href = `reader.html?id=${storyId}&ch=${chapterIdx - 1}`;
-                        prevLink.classList.remove('hidden');
-                        document.getElementById('prev-title').textContent = chapters[chapterIdx - 1].title;
-                    }
-
-                    if (chapterIdx < chapters.length - 1) {
-                        const nextLink = document.getElementById('next-link');
-                        nextLink.href = `reader.html?id=${storyId}&ch=${chapterIdx + 1}`;
-                        nextLink.classList.remove('hidden');
-                        document.getElementById('next-title').textContent = chapters[chapterIdx + 1].title;
-                    }
-
-                    lucide.createIcons();
-                } else {
-                    document.getElementById('story-content').innerHTML = "Story does not exist in our library.";
+                if (!taleSnap.exists()) {
+                    document.getElementById('story-content').innerHTML = "Story not found.";
+                    return;
                 }
-            } catch (error) {
-                console.error("Load Error:", error);
-                document.getElementById('story-content').innerHTML = "Error loading content from cloud.";
+
+                const taleData = taleSnap.data();
+                document.getElementById('header-story-title').textContent = taleData.title;
+                document.getElementById('sidebar-story-name').textContent = taleData.title;
+                document.getElementById('sidebar-description').textContent = taleData.description || "A community-shared tale.";
+                document.getElementById('author-name').textContent = taleData.authorName || "Anonymous";
+
+                // 2. Fetch Chapters Sub-collection
+                const chaptersRef = collection(db, 'artifacts', appId, 'public', 'data', 'community_tales', taleId, 'chapters');
+                const chaptersSnap = await getDocs(chaptersRef);
+                
+                // Sort chapters by ID or chapterNum
+                const allChapters = chaptersSnap.docs
+                    .map(d => ({ id: d.id, ...d.data() }))
+                    .sort((a, b) => (a.chapterNum || 0) - (b.chapterNum || 0));
+
+                const currentChapter = allChapters[chapterIdx];
+
+                if (!currentChapter) {
+                    document.getElementById('story-content').innerHTML = "Chapter not found.";
+                    return;
+                }
+
+                // 3. Render Content
+                document.title = `${currentChapter.title} - ${taleData.title}`;
+                document.getElementById('chapter-label').textContent = `Chapter ${chapterIdx + 1}`;
+                document.getElementById('chapter-title').textContent = currentChapter.title;
+                
+                const contentHtml = currentChapter.content
+                    .split('\n')
+                    .filter(p => p.trim() !== '')
+                    .map(p => `<p class="mb-6">${p}</p>`)
+                    .join('');
+                
+                document.getElementById('story-content').innerHTML = contentHtml;
+
+                // 4. Navigation Logic
+                if (chapterIdx > 0) {
+                    const prev = document.getElementById('prev-link');
+                    prev.href = `reader.html?taleId=${taleId}&chapterId=${chapterIdx - 1}`;
+                    prev.classList.remove('hidden');
+                    document.getElementById('prev-title').textContent = allChapters[chapterIdx - 1].title;
+                }
+
+                if (chapterIdx < allChapters.length - 1) {
+                    const next = document.getElementById('next-link');
+                    next.href = `reader.html?taleId=${taleId}&chapterId=${chapterIdx + 1}`;
+                    next.classList.remove('hidden');
+                    document.getElementById('next-title').textContent = allChapters[chapterIdx + 1].title;
+                }
+
+                lucide.createIcons();
+            } catch (err) {
+                console.error("Load Error:", err);
+                document.getElementById('story-content').innerHTML = "Error connecting to library.";
             }
         }
 
+        // Initialize Auth and Load
+        const init = async () => {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                await signInAnonymously(auth);
+            }
+        };
+
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                console.log("Backend Connected:", user.uid);
-                storyArea.addEventListener('scroll', updateProgressAndSave);
-                window.addEventListener('scroll', updateProgressAndSave);
-            } else { signInAnonymously(auth); }
+                loadChapterContent();
+            }
         });
+
+        init();
+
+        window.GoBack = () => {
+            window.location.href = `Tale_page.html?id=${taleId}`;
+        }
     </script>
 </body>
 </html>

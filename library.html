@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-<head class="bg-zinc-900">
+<head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>library</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
@@ -13,44 +13,22 @@
             font-family: 'Plus Jakarta Sans', sans-serif; 
             background-color: #050505; 
             color: #cbd5e1; 
-             
         }
 
-        /* Hide scrollbar for Chrome, Safari and Opera */
-        /* Target the bar itself */
-        ::-webkit-scrollbar {
-        width: 4px;
-        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 10px; }
 
-        /* Target the track */
-        ::-webkit-scrollbar-track {
-        background: transparent;
-        }
-
-        /* Target the thumb */
-        ::-webkit-scrollbar-thumb {
-        background: #27272a;
-        border-radius: 10px;
-        }
-
-        /* Sidebar Transition Logic */
         #sidebar { 
             transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
             will-change: width;
         }
+        .collapsed { width: 80px !important; }
         .collapsed .sidebar-hide { display: none; }
         .collapsed .sidebar-center { justify-content: center; padding-left: 0; padding-right: 0; }
 
-        /* Main Content Scaling */
-        main {
-            flex: 1;
-            min-width: 0; /* Prevents compression of grid items */
-            transition: padding 0.4s ease;
-        }
-
-        /* Enhanced Card Hover Effects */
         .tale-card { 
-            will-change: transfrom;
+            will-change: transform;
             transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
             position: relative;
             z-index: 1;
@@ -59,11 +37,10 @@
         .tale-card:hover { 
             transform: translateY(-12px) scale(1.02);
             z-index: 10;
-            box-shadow: 0 25px 50px -12px var(--accent-soft);
+            box-shadow: 0 25px 50px -12px rgba(79, 70, 229, 0.2);
             border-color: rgba(99, 102, 241, 0.4);
         }
 
-        /* Soft Glow Outer */
         .tale-card::after {
             content: '';
             position: absolute;
@@ -76,7 +53,6 @@
         }
         .tale-card:hover::after { opacity: 1; }
 
-        /* Shine Sweep Animation */
         .shine-layer {
             position: absolute;
             top: 0; left: -100%;
@@ -87,21 +63,9 @@
         }
         .tale-card:hover .shine-layer { left: 150%; }
 
-        /* Image Zoom */
         .tale-image { transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1); }
         .tale-card:hover .tale-image { transform: scale(1.1); }
 
-        /* Search Bar Focus Animation */
-        .search-container {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .search-container:focus-within {
-            border-color: rgba(99, 102, 241, 0.5);
-            box-shadow: 0 0 20px rgba(79, 70, 229, 0.1);
-            transform: translateY(-2px);
-        }
-
-        /* Circular Header Styling */
         .header-orb {
             position: relative;
             width: 56px;
@@ -134,7 +98,7 @@
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
-
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="bg-[#050505] text-slate-300 antialiased selection:bg-indigo-500/30">
@@ -151,20 +115,15 @@
                         <i data-lucide="library" class="w-6 h-6 text-indigo-500"></i>
                     </div>
                 </div>
-                <a href="profile.html" class="text-slate-600 hover:text-indigo-600">
-                    <i data-lucide="user"></i>
-                </a>
+                <a href="profile.html" class="text-slate-600 hover:text-indigo-600"><i data-lucide="user"></i></a>
             </div>
         </nav>
     </header>
 
-    <!-- Main Content Area  -->
     <div class="flex min-h-screen">
         <!-- Sidebar -->
         <aside id="sidebar" class="hidden md:flex w-72 sticky top-[89px] h-[calc(100vh-89px)] flex-col self-start p-3">
             <div class="flex flex-col h-full bg-zinc-900/30 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-sm">
-                
-                <!-- Toggle & Title -->
                 <div class="flex items-center p-5 border-b border-white/5 sidebar-center">
                     <button id="toggle-sidebar" class="p-2 hover:bg-white/5 rounded-xl transition-all text-zinc-400 hover:text-indigo-400">
                         <i data-lucide="menu" class="w-6 h-6"></i>
@@ -172,13 +131,10 @@
                     <span class="ml-3 font-bold text-sm text-white sidebar-hide">Navigation</span>
                 </div>
 
-                <!-- Navigation Groups -->
                 <div class="flex-1 overflow-y-auto p-4 space-y-8">
-                    <!-- Section: Filters -->
                     <div class="space-y-4">
                         <div class="flex justify-between items-center px-2 sidebar-hide">
                             <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">Browse By</h4>
-                            <button class="text-[9px] text-indigo-400 font-bold hover:underline">Reset</button>
                         </div>
                         <div class="space-y-1">
                             <button class="w-full flex items-center gap-3 p-3 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 sidebar-center">
@@ -210,9 +166,9 @@
                             </button>
                         </div>
                     </div>
+                    
                 </div>
 
-                <!-- Add Action -->
                 <div class="p-4">
                     <button class="w-full bg-indigo-600 hover:bg-indigo-500 text-white p-4 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-lg shadow-indigo-600/20 sidebar-center">
                         <i data-lucide="plus" class="w-5 h-5"></i>
@@ -220,7 +176,6 @@
                     </button>
                 </div>
 
-                <!-- Profile Info -->
                 <div class="mt-auto p-4 border-t border-white/5 bg-white/[0.02]">
                     <div class="flex items-center gap-3 sidebar-center">
                         <div class="relative flex-shrink-0">
@@ -239,8 +194,6 @@
         <!-- Main Content -->
         <main class="flex-1 p-6 lg:p-12">
             <div class="max-w-[1500px] mx-auto">
-                
-                <!-- Hero Heading & Search -->
                 <header class="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-16">
                     <div class="space-y-4">
                         <div class="flex items-center gap-2">
@@ -256,7 +209,8 @@
                         <div class="absolute inset-y-0 left-5 flex items-center pointer-events-none">
                             <i data-lucide="search" class="w-4 h-4 text-zinc-500 group-focus-within:text-indigo-400 transition-colors"></i>
                         </div>
-                        <input type="text" placeholder="Search the weave..." 
+                        <!-- ADDED ID HERE -->
+                        <input type="text" id="search-input" placeholder="Search the weave..." 
                                class="w-full lg:w-[400px] bg-zinc-900/50 border border-white/10 rounded-2xl py-4 pl-14 pr-16 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/40 transition-all text-white placeholder:text-zinc-600">
                         <div class="absolute inset-y-0 right-4 flex items-center">
                             <kbd class="px-2 py-1 rounded bg-black border border-white/10 text-[9px] font-bold text-zinc-500">CMD K</kbd>
@@ -273,227 +227,142 @@
                     <button class="flex-shrink-0 px-6 py-3 bg-zinc-900/50 border border-white/5 text-zinc-500 hover:text-white hover:border-white/20 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all">Neo-Solar</button>
                 </div>
 
-                <!-- Content Grid -->
-                <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-8">
-                    
-                    <!-- Card Template (Repeated 4 times with unique content) -->
-                    <!-- Updated Card 1: High Resolution Aspect Ratio 2:3 -->
-                    <div class="tale-card rounded-[2rem] overflow-hidden border border-white/5 bg-zinc-900/40 cursor-pointer group">
-                        <div class="aspect-[2/3] overflow-hidden relative">
-                            <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=800" class="tale-image w-full h-full object-cover grayscale-[20%]">
-                            <div class="shine-layer"></div>
-                            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent"></div>
-                            
-                            <!-- Badges -->
-                            <div class="absolute top-4 left-4 flex flex-col gap-2">
-                                <span class="px-3 py-1 bg-indigo-600/90 text-white text-[9px] font-black uppercase tracking-widest rounded-md backdrop-blur-md">Entry #402</span>
-                                <span class="px-3 py-1 bg-black/60 text-indigo-400 text-[8px] font-bold uppercase border border-white/10 rounded-md backdrop-blur-md">Era: Iron Age</span>
-                            </div>
-                        </div>
-                        <div class="p-6 relative">
-                            <!-- Detail Area -->
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="text-[9px] font-black text-indigo-400 uppercase tracking-widest">Mythic Cycle</span>
-                                <div class="flex items-center gap-1 text-[9px] text-zinc-500">
-                                    <i data-lucide="clock" class="w-3 h-3"></i> 12m Read
-                                </div>
-                            </div>
-                            <h3 class="text-xl font-black text-white uppercase tracking-tighter leading-tight group-hover:text-indigo-400 transition-colors">The Frost Weaver</h3>
-                            <p class="text-[11px] text-zinc-500 mt-2 line-clamp-3 leading-relaxed">Decrypting the frozen fractals found within the ancient Yggdrasil bark remains. Investigating the thermal resonance of runic inscriptions.</p>
-                            
-                            <!-- Progress/Decryption Bar -->
-                            <div class="mt-4 space-y-1">
-                                <div class="flex justify-between text-[8px] font-bold uppercase tracking-tighter">
-                                    <span class="text-zinc-600">Decryption Progress</span>
-                                    <span class="text-indigo-500">74%</span>
-                                </div>
-                                <div class="w-full h-1 bg-zinc-800 rounded-full overflow-hidden">
-                                    <div class="h-full bg-indigo-500 w-[74%]"></div>
-                                </div>
-                            </div>
-
-                            <div class="mt-5 pt-4 border-t border-white/5 flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sean" class="w-5 h-5 rounded-full bg-zinc-800">
-                                    <span class="text-[9px] font-bold text-zinc-400">S. O'Neill</span>
-                                </div>
-                                <div class="flex gap-3">
-                                    <i data-lucide="heart" class="w-3.5 h-3.5 text-zinc-600 hover:text-rose-500 transition-colors"></i>
-                                    <i data-lucide="share-2" class="w-3.5 h-3.5 text-zinc-600 hover:text-indigo-400 transition-colors"></i>
-                                </div>
-                            </div>
-                        </div>
+                <section id="cards-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-8">
+                    // cards are added here
+                    <div class="col-span-full text-center py-20">
+                        <div class="inline-block w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                        <p class="mt-4 text-zinc-500 font-medium">Synchronizing with Archives...</p>
                     </div>
-
-                    <!-- Card 2 -->
-                    <div class="tale-card rounded-[2rem] overflow-hidden border border-white/5 bg-zinc-900/40 cursor-pointer group">
-                        <div class="aspect-[2/3] overflow-hidden relative">
-                            <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=800" class="tale-image w-full h-full object-cover grayscale-[20%]">
-                            <div class="shine-layer"></div>
-                            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent"></div>
-                            <div class="absolute top-4 left-4 flex flex-col gap-2">
-                                <span class="px-3 py-1 bg-purple-600/90 text-white text-[9px] font-black uppercase tracking-widest rounded-md backdrop-blur-md">Entry #891</span>
-                                <span class="px-3 py-1 bg-black/60 text-purple-400 text-[8px] font-bold uppercase border border-white/10 rounded-md backdrop-blur-md">Era: Neo-Solar</span>
-                            </div>
-                        </div>
-                        <div class="p-6 relative">
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="text-[9px] font-black text-purple-400 uppercase tracking-widest">Celestial Lore</span>
-                                <div class="flex items-center gap-1 text-[9px] text-zinc-500">
-                                    <i data-lucide="clock" class="w-3 h-3"></i> 8m Read
-                                </div>
-                            </div>
-                            <h3 class="text-xl font-black text-white uppercase tracking-tighter leading-tight group-hover:text-purple-400 transition-colors">Solaris Echo</h3>
-                            <p class="text-[11px] text-zinc-500 mt-2 line-clamp-3 leading-relaxed">When the twin suns aligned for the final time over the Obsidian Citadel, a frequency was born that never faded.</p>
-                            
-                            <div class="mt-4 space-y-1">
-                                <div class="flex justify-between text-[8px] font-bold uppercase tracking-tighter">
-                                    <span class="text-zinc-600">Decryption Progress</span>
-                                    <span class="text-purple-500">32%</span>
-                                </div>
-                                <div class="w-full h-1 bg-zinc-800 rounded-full overflow-hidden">
-                                    <div class="h-full bg-purple-500 w-[32%]"></div>
-                                </div>
-                            </div>
-
-                            <div class="mt-5 pt-4 border-t border-white/5 flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Vance" class="w-5 h-5 rounded-full bg-zinc-800">
-                                    <span class="text-[9px] font-bold text-zinc-400">M. Vance</span>
-                                </div>
-                                <div class="flex gap-3">
-                                    <i data-lucide="heart" class="w-3.5 h-3.5 text-zinc-600"></i>
-                                    <i data-lucide="share-2" class="w-3.5 h-3.5 text-zinc-600"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Card 3 -->
-                    <div class="tale-card rounded-[2rem] overflow-hidden border border-white/5 bg-zinc-900/40 cursor-pointer group">
-                        <div class="aspect-[2/3] overflow-hidden relative">
-                            <img src="https://images.unsplash.com/photo-1518156677180-95a2893f3e9f?q=80&w=800" class="tale-image w-full h-full object-cover grayscale-[20%]">
-                            <div class="shine-layer"></div>
-                            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent"></div>
-                            <div class="absolute top-4 left-4 flex flex-col gap-2">
-                                <span class="px-3 py-1 bg-amber-600/90 text-white text-[9px] font-black uppercase tracking-widest rounded-md backdrop-blur-md">Entry #112</span>
-                                <span class="px-3 py-1 bg-black/60 text-amber-400 text-[8px] font-bold uppercase border border-white/10 rounded-md backdrop-blur-md">Era: Mayan Peak</span>
-                            </div>
-                        </div>
-                        <div class="p-6 relative">
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="text-[9px] font-black text-amber-400 uppercase tracking-widest">Mesoamerican</span>
-                                <div class="flex items-center gap-1 text-[9px] text-zinc-500">
-                                    <i data-lucide="clock" class="w-3 h-3"></i> 20m Read
-                                </div>
-                            </div>
-                            <h3 class="text-xl font-black text-white uppercase tracking-tighter leading-tight group-hover:text-amber-400 transition-colors">Plumed Serpent</h3>
-                            <p class="text-[11px] text-zinc-500 mt-2 line-clamp-3 leading-relaxed">The mathematical prophecy of the feathered sky-god's return encoded in cosmic alignments.</p>
-                            
-                            <div class="mt-4 space-y-1">
-                                <div class="flex justify-between text-[8px] font-bold uppercase tracking-tighter">
-                                    <span class="text-zinc-600">Decryption Progress</span>
-                                    <span class="text-amber-500">100%</span>
-                                </div>
-                                <div class="w-full h-1 bg-zinc-800 rounded-full overflow-hidden">
-                                    <div class="h-full bg-amber-500 w-[100%]"></div>
-                                </div>
-                            </div>
-
-                            <div class="mt-5 pt-4 border-t border-white/5 flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Reyes" class="w-5 h-5 rounded-full bg-zinc-800">
-                                    <span class="text-[9px] font-bold text-zinc-400">A. Reyes</span>
-                                </div>
-                                <div class="flex gap-3">
-                                    <i data-lucide="heart" class="w-3.5 h-3.5 text-rose-500"></i>
-                                    <i data-lucide="share-2" class="w-3.5 h-3.5 text-zinc-600"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Card 4 -->
-                    <div class="tale-card rounded-[2rem] overflow-hidden border border-white/5 bg-zinc-900/40 cursor-pointer group">
-                        <div class="aspect-[2/3] overflow-hidden relative">
-                            <img src="https://images.unsplash.com/photo-1528164344705-47542687000d?q=80&w=800" class="tale-image w-full h-full object-cover grayscale-[20%]">
-                            <div class="shine-layer"></div>
-                            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent"></div>
-                            <div class="absolute top-4 left-4 flex flex-col gap-2">
-                                <span class="px-3 py-1 bg-emerald-600/90 text-white text-[9px] font-black uppercase tracking-widest rounded-md backdrop-blur-md">Entry #056</span>
-                                <span class="px-3 py-1 bg-black/60 text-emerald-400 text-[8px] font-bold uppercase border border-white/10 rounded-md backdrop-blur-md">Era: Cyber-Shinto</span>
-                            </div>
-                        </div>
-                        <div class="p-6 relative">
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Eastern Spirit</span>
-                                <div class="flex items-center gap-1 text-[9px] text-zinc-500">
-                                    <i data-lucide="clock" class="w-3 h-3"></i> 15m Read
-                                </div>
-                            </div>
-                            <h3 class="text-xl font-black text-white uppercase tracking-tighter leading-tight group-hover:text-emerald-400 transition-colors">Neon Shinto</h3>
-                            <p class="text-[11px] text-zinc-500 mt-2 line-clamp-3 leading-relaxed">How ancient spirits migrated to the city's neon-lit circuit boards to survive the silicon age.</p>
-                            
-                            <div class="mt-4 space-y-1">
-                                <div class="flex justify-between text-[8px] font-bold uppercase tracking-tighter">
-                                    <span class="text-zinc-600">Decryption Progress</span>
-                                    <span class="text-emerald-500">92%</span>
-                                </div>
-                                <div class="w-full h-1 bg-zinc-800 rounded-full overflow-hidden">
-                                    <div class="h-full bg-emerald-500 w-[92%]"></div>
-                                </div>
-                            </div>
-
-                            <div class="mt-5 pt-4 border-t border-white/5 flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Tanaka" class="w-5 h-5 rounded-full bg-zinc-800">
-                                    <span class="text-[9px] font-bold text-zinc-400">K. Tanaka</span>
-                                </div>
-                                <div class="flex gap-3">
-                                    <i data-lucide="heart" class="w-3.5 h-3.5 text-zinc-600"></i>
-                                    <i data-lucide="share-2" class="w-3.5 h-3.5 text-zinc-600"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                 </section>
             </div>
         </main>
     </div>
 
-    <script>
-        // Initialize Icons
-        document.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
-        });
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Sidebar Collapse Logic
+        // Fix: Use global __firebase_config and __app_id
+        import firebaseConfig from '/firebase-config.js';
+        const appId = 'taletranscend-pro'
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let allTales = [];
+
+        // Sidebar Toggle Logic
         const sidebar = document.getElementById('sidebar');
         const toggleBtn = document.getElementById('toggle-sidebar');
-        
-        toggleBtn.addEventListener('click', () => {
-            const isCollapsed = sidebar.classList.contains('collapsed');
-            
-            if (isCollapsed) {
-                sidebar.classList.remove('collapsed');
-                sidebar.style.width = '288px'; // 72 units (w-72)
-            } else {
-                sidebar.classList.add('collapsed');
-                sidebar.style.width = '100px'; 
+        toggleBtn.onclick = () => sidebar.classList.toggle('collapsed');
+
+        const createTaleCard = (tale) => {
+            const id = tale.id || "0000";
+            const title = tale.title || "Untitled Echo";
+            const cover = tale.coverUrl || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800";
+            const desc = tale.description || "No description provided for this archive entry.";
+            const author = tale.authorName || "Scribe Unknown";
+            const era = tale.era || "Unknown Era";
+            const progress = tale.progress || 0;
+
+            return `
+                <div onclick="window.navigateToTale('${id}')" class="cursor-pointer tale-card rounded-[2rem] overflow-hidden border border-white/5 bg-zinc-900/40 cursor-pointer group">
+                    <div class="aspect-[2/3] overflow-hidden relative">
+                        <img src="${cover}" class="tale-image w-full h-full object-cover grayscale-[20%]" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800'">
+                        <div class="shine-layer"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent"></div>
+                        <div class="absolute top-4 left-4 flex flex-col gap-2">
+                            <span class="px-3 py-1 bg-indigo-600/90 text-white text-[9px] font-black uppercase tracking-widest rounded-md backdrop-blur-md">Entry #${id.slice(0,4)}</span>
+                            <span class="px-3 py-1 bg-black/60 text-indigo-400 text-[8px] font-bold uppercase border border-white/10 rounded-md backdrop-blur-md">Era: ${era}</span>
+                        </div>
+                    </div>
+                    <div class="p-6 relative">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[9px] font-black text-indigo-400 uppercase tracking-widest">Mythic Cycle</span>
+                            <div class="flex items-center gap-1 text-[9px] text-zinc-500">
+                                <i data-lucide="clock" class="w-3 h-3"></i> 12m Read
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-black text-white uppercase tracking-tighter leading-tight group-hover:text-indigo-400 transition-colors">${title}</h3>
+                        <p class="text-[11px] text-zinc-500 mt-2 line-clamp-3 leading-relaxed">${desc}</p>
+                        <div class="mt-4 space-y-1">
+                            <div class="flex justify-between text-[8px] font-bold uppercase tracking-tighter">
+                                <span class="text-zinc-600">Decryption Progress</span>
+                                <span class="text-indigo-500">${progress}%</span>
+                            </div>
+                            <div class="w-full h-1 bg-zinc-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-indigo-500" style="width: ${progress}%"></div>
+                            </div>
+                        </div>
+                        <div class="mt-5 pt-4 border-t border-white/5 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${author}" class="w-5 h-5 rounded-full bg-zinc-800">
+                                <span class="text-[9px] font-bold text-zinc-400">${author}</span>
+                            </div>
+                            <div class="flex gap-3">
+                                <i data-lucide="heart" class="w-3.5 h-3.5 text-zinc-600 hover:text-rose-500 transition-colors cursor-pointer"></i>
+                                <i data-lucide="share-2" class="w-3.5 h-3.5 text-zinc-600 hover:text-indigo-400 transition-colors cursor-pointer"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+
+        window.navigateToTale = (id) => {
+            window.location.href = `Tale_page.html?id=${id}`;
+        }
+
+        const renderLibrary = (talesArray) => {
+            const container = document.getElementById('cards-grid');
+            if (talesArray.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-20 text-zinc-600 italic">No tales found in the archives...</div>`;
+                return;
             }
-            
-            // Re-render icons for position adjustments
-            setTimeout(() => lucide.createIcons(), 350);
+            container.innerHTML = talesArray.map(tale => createTaleCard(tale)).join('');
+            lucide.createIcons();
+        };
+
+        // Search Logic
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = allTales.filter(t => 
+                (t.title || "").toLowerCase().includes(term) || 
+                (t.description || "").toLowerCase().includes(term) ||
+                (t.era || "").toLowerCase().includes(term)
+            );
+            renderLibrary(filtered);
         });
 
-        // Global Keybindings (CMD/CTRL + K for search)
-        document.addEventListener('keydown', (e) => {
-            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-                e.preventDefault();
-                document.querySelector('input').focus();
+        const init = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.error("Auth failed:", err);
+            }
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const talesCol = collection(db, 'artifacts', appId, 'public', 'data', 'community_tales');
+                onSnapshot(talesCol, (snapshot) => {
+                    allTales = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderLibrary(allTales);
+                }, (error) => {
+                    console.error("Firestore error:", error);
+                    document.getElementById('cards-grid').innerHTML = `<div class="col-span-full text-center py-20 text-red-500">Database connection failed.</div>`;
+                });
             }
         });
+
+        init();
+        lucide.createIcons();
     </script>
 </body>
 </html>
