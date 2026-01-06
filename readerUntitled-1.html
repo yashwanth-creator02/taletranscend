@@ -318,7 +318,152 @@
 
     </script>
 
-    <script type="module" src="/js/reader.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+        
+        import firebaseConfig from '/firebase-config.js';
+        const appId = 'taletranscend-pro';
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
+        const urlParams = new URLSearchParams(window.location.search);
+        const taleId = urlParams.get('taleId');
+        const chapterIdx = parseInt(urlParams.get('chapterId')) || 0;
+
+        // --- THEME LOGIC: Persist in LocalStorage ---
+        window.setTheme = (theme) => {
+            document.body.classList.remove('theme-sepia', 'theme-light');
+            document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+            
+            if (theme === 'sepia') document.body.classList.add('theme-sepia');
+            if (theme === 'light') document.body.classList.add('theme-light');
+            
+            // Highlight active button in both mobile and desktop menus
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                if (btn.getAttribute('onclick').includes(`'${theme}'`)) {
+                    btn.classList.add('active');
+                }
+            });
+
+            localStorage.setItem('reader-theme', theme);
+        };
+
+        window.setFont = (font) => {
+            const fontMap = { 
+                serif: "'Crimson Pro', serif", 
+                sans: "'Plus Jakarta Sans', sans-serif", 
+                mono: "'JetBrains Mono', monospace" 
+            };
+            document.documentElement.style.setProperty('--reader-font', fontMap[font]);
+            document.querySelectorAll('.font-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll(`.font-btn[onclick="setFont('${font}')"]`).forEach(b => b.classList.add('active'));
+            localStorage.setItem('reader-font', font);
+        };
+
+        window.updateSize = (val) => {
+            document.documentElement.style.setProperty('--reader-size', val + 'px');
+            localStorage.setItem('reader-size', val);
+        };
+
+
+        // Initialize saved theme
+        const savedTheme = localStorage.getItem('reader-theme') || 'dark';
+        window.setTheme(savedTheme);
+
+        
+
+        // --- PROGRESS LOGIC ---
+        const scrollContainer = document.querySelector('.story-scroll-area') || window;
+        const target = document.querySelector('.story-scroll-area') ? document.querySelector('.story-scroll-area') : document.documentElement;
+
+        target.addEventListener('scroll', () => {
+            const winScroll = target.scrollTop;
+            const height = target.scrollHeight - target.clientHeight;
+            if (height <= 0) return;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById("reading-progress").style.width = scrolled + "%";
+            document.getElementById("sidebar-progress-bar").style.width = scrolled + "%";
+            document.getElementById("progress-percent").innerText = Math.round(scrolled) + "%";
+        });
+
+        async function loadChapterContent() {
+            if (!taleId) return;
+
+            try {
+                // 1. Load Tale Metadata
+                const taleRef = doc(db, 'artifacts', appId, 'public', 'data', 'community_tales', taleId);
+                const taleSnap = await getDoc(taleRef);
+
+                if (taleSnap.exists()) {
+                    const taleData = taleSnap.data();
+                    document.getElementById('header-story-title').textContent = taleData.title;
+                    document.getElementById('sidebar-story-name').textContent = taleData.title;
+                    document.getElementById('sidebar-description').textContent = taleData.description;
+                    document.getElementById('author-name').textContent = taleData.authorName || "Unknown Scribe";
+                }
+
+                // 2. Load Chapters
+                const chaptersRef = collection(db, 'artifacts', appId, 'public', 'data', 'community_tales', taleId, 'chapters');
+                const chaptersSnap = await getDocs(chaptersRef);
+                const allChapters = chaptersSnap.docs
+                    .map(d => ({ id: d.id, ...d.data() }))
+                    .sort((a, b) => (a.chapterNum || 0) - (b.chapterNum || 0));
+
+                const currentChapter = allChapters[chapterIdx];
+                if (currentChapter) {
+                    document.getElementById('chapter-label').textContent = `Fragment ${String(chapterIdx + 1).padStart(2, '0')}`;
+                    document.getElementById('chapter-title').textContent = currentChapter.title;
+                    
+                    document.getElementById('story-content').innerHTML = currentChapter.content
+                        .split('\n')
+                        .filter(p => p.trim() !== '')
+                        .map(p => `<p class="mb-8">${p}</p>`)
+                        .join('');
+
+                    // --- 3. UPDATED NAVIGATION LOGIC ---
+                    const prev = document.getElementById('prev-link');
+                    const next = document.getElementById('next-link');
+
+                    // Reset
+                    prev.classList.add('hidden');
+                    next.classList.add('hidden');
+                    next.classList.remove('sm:ml-auto'); 
+
+                    if (chapterIdx > 0) {
+                        prev.href = `reader.html?taleId=${taleId}&chapterId=${chapterIdx - 1}`;
+                        prev.classList.remove('hidden');
+                        document.getElementById('prev-title').textContent = allChapters[chapterIdx - 1].title;
+                    }
+
+                    if (chapterIdx < allChapters.length - 1) {
+                        next.href = `reader.html?taleId=${taleId}&chapterId=${chapterIdx + 1}`;
+                        next.classList.remove('hidden');
+                        document.getElementById('next-title').textContent = allChapters[chapterIdx + 1].title;
+                        
+                        // If "Previous" is missing, push "Next" to the right
+                        if (chapterIdx === 0) {
+                            next.classList.add('sm:ml-auto');
+                        }
+                    }
+                }
+                lucide.createIcons();
+            } catch (err) { console.error(err); }
+        }
+
+        onAuthStateChanged(auth, (user) => { if (user) loadChapterContent(); });
+        
+        const init = async () => {
+            await signInAnonymously(auth);
+        };
+        init();
+
+        window.GoBack = () => { window.location.href = `Tale_page.html?id=${taleId}`; };
+        const drawer = document.getElementById('mobile-drawer');
+        document.getElementById('drawer-btn').addEventListener('click', () => drawer.classList.toggle('open'));
+        lucide.createIcons();
+    </script>
 </body>
 </html>

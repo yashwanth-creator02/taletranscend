@@ -5,57 +5,100 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tale Page | TaleTranscend</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Fauna+One&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #050505; 
+            color: #cbd5e1; 
+        }
 
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 10px; }
-        
-        body {
-            background: #060608;
-            color: #e2e8f0;
-            font-family: 'Fauna One', serif;
-            margin: 0;
+
+        /* --- THEME DNA: Glows & Cards --- */
+        .glass-card {
+            background: rgba(24, 24, 27, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
         }
-        .fancy-title { font-family: 'Cinzel', serif; }
-        
+
         .hero-gradient {
-            background: linear-gradient(to bottom, rgba(6, 6, 8, 0.7), #060608), var(--bg-url);
+            background: linear-gradient(to bottom, rgba(5, 5, 5, 0.2), #050505), var(--bg-url);
             background-size: cover;
             background-position: center;
         }
 
+        /* --- THEME DNA: The Shine Effect (Applied to Cover) --- */
+        .shine-container { position: relative; overflow: hidden; }
+        .shine-layer {
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.05), transparent);
+            transform: skewX(-25deg);
+            transition: 0.7s ease;
+            z-index: 2;
+        }
+        .shine-container:hover .shine-layer { left: 150%; }
+        .shine-container:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgba(79, 70, 229, 0.2);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        /* --- THEME DNA: Header Orb --- */
+        .header-orb {
+            position: relative;
+            width: 48px; height: 48px;
+            background: #000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            box-shadow: 0 0 20px rgba(79, 70, 229, 0.2);
+        }
+        .header-orb::before {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            padding: 2px;
+            background: conic-gradient(from 0deg, transparent, #4f46e5, transparent, #4f46e5, transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            animation: rotate 4s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
         .tab-btn {
             transition: all 0.3s ease;
-            opacity: 0.6;
+            color: #52525b;
             border-bottom: 2px solid transparent;
         }
         .tab-btn.active {
-            opacity: 1;
-            color: #a78bfa;
-            border-bottom: 2px solid #a78bfa;
-        }
-        
-        .glass-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(12px);
+            color: #6366f1;
+            border-bottom: 2px solid #6366f1;
         }
 
-        .comment-input {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        #custom-modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.9);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .arrow-right {
+            width: 0;
+            height: 0;
+            border-top: 10px solid transparent;    /* Top transparent border creates the top edge of the triangle */
+            border-bottom: 10px solid transparent; /* Bottom transparent border creates the bottom edge of the triangle */
+            border-left: 10px solid blue;          /* Colored left border forms the actual arrow shape */
         }
     </style>
 </head>
@@ -71,284 +114,78 @@
     </nav>
 
     <!-- Tale Hero Section -->
-    <div id="hero-section" class="hero-gradient h-[70vh] flex flex-col justify-end px-8 pb-16 transition-all duration-1000" style="--bg-url: url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2000');">
-        <div class="max-w-5xl mx-auto w-full">
-            <div id="loading-indicator" class="animate-pulse text-purple-400 text-xs mb-4">Summoning the narrative...</div>
-            <h1 id="display-title" class="fancy-title text-5xl md:text-7xl font-bold mb-6 opacity-0 transition-all duration-1000 transform translate-y-4">...</h1>
-            <div id="meta-container" class="flex flex-wrap items-center gap-6 text-sm text-gray-400 opacity-0 transition-all duration-1000 delay-300">
-                <span id="display-author" class="uppercase tracking-widest border-r border-white/20 pr-6">Unknown Scribe</span>
-                <span id="display-chapters">0 Chapters</span>
+    <div id="hero-section" class="hero-gradient h-[57vh] flex flex-col justify-end px-8 pb-12 transition-all duration-1000" style="--bg-url: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2000');">
+        <div class="max-w-6xl mx-auto w-full">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="h-[1px] w-12 bg-indigo-500"></span>
+                <h2 id="loading-indicator" class="text-indigo-500 text-[10px] font-black uppercase tracking-[0.5em]">Syncing Neural Link</h2>
+            </div>
+            <h1 id="display-title" class="text-6xl md:text-8xl font-black text-white tracking-tighter uppercase leading-[0.9] mb-8 opacity-0 transition-all duration-1000 transform translate-y-8">
+                ...
+            </h1>
+            <div id="meta-container" class="flex flex-wrap items-center gap-4 opacity-0 transition-all duration-1000 delay-300">
+                <span id="display-author" class="px-4 py-2 bg-indigo-600/10 border border-indigo-500/20 text-indigo-400 rounded-xl text-[10px] font-black uppercase tracking-widest backdrop-blur-md">
+                    Scribe Unknown
+                </span>
+                <span id="display-chapters" class="px-4 py-2 bg-white/5 border border-white/10 text-zinc-400 rounded-xl text-[10px] font-black uppercase tracking-widest backdrop-blur-md">
+                    0 Fragments
+                </span>
             </div>
         </div>
     </div>
 
-    <!-- Main Content -->
-    <main class="max-w-5xl mx-auto px-8 py-12">
-        <div class="flex flex-col lg:flex-row gap-12">
+    <main class="max-w-6xl mx-auto px-8 py-16">
+        <div class="flex flex-col lg:flex-row gap-20">
             
             <div class="flex-1">
-                <div class="flex gap-8 border-b border-white/10 mb-8 overflow-x-auto whitespace-nowrap">
-                    <button onclick="switchTab('about')" id="tab-about" class="tab-btn active pb-4 text-xs uppercase tracking-widest font-bold">Synopsis</button>
-                    <button onclick="switchTab('chapters')" id="tab-chapters" class="tab-btn pb-4 text-xs uppercase tracking-widest font-bold">Chapters</button>
-                    <button onclick="switchTab('comments')" id="tab-comments" class="tab-btn pb-4 text-xs uppercase tracking-widest font-bold">Echoes</button>
+                <div class="flex gap-12 border-b border-white/5 mb-12 overflow-x-auto no-scrollbar">
+                    <button onclick="switchTab('about')" id="tab-about" class="tab-btn active pb-5 text-[10px] uppercase tracking-[0.3em] font-black">Synopsis</button>
+                    <button onclick="switchTab('chapters')" id="tab-chapters" class="tab-btn pb-5 text-[10px] uppercase tracking-[0.3em] font-black">Chronicles</button>
+                    <button onclick="switchTab('comments')" id="tab-comments" class="tab-btn pb-5 text-[10px] uppercase tracking-[0.3em] font-black">Echoes</button>
                 </div>
 
                 <div id="content-about" class="tab-content block">
-                    <div id="display-description" class="text-lg leading-relaxed text-gray-300 space-y-6">
-                        Transcribing from the void...
+                    <div id="display-description" class="text-sm leading-relaxed text-zinc-500 space-y-6 max-w-2xl font-medium">
+                        Initialising narrative decryption...
                     </div>
                 </div>
 
                 <div id="content-chapters" class="tab-content hidden">
-                    <div id="chapter-list" class="space-y-4">
-                        <!-- Chapters injected here -->
-                    </div>
+                    <div id="chapter-list" class="grid gap-4">
+                        </div>
                 </div>
 
                 <div id="content-comments" class="tab-content hidden">
-                    <div class="glass-card p-6 rounded-lg mb-8">
-                        <textarea id="comment-text" class="comment-input w-full p-4 rounded-lg text-sm mb-4 h-24 text-white focus:outline-none focus:border-purple-500 transition-colors" placeholder="Leave your mark on this tale..."></textarea>
-                        <button id="post-btn" onclick="postComment()" class="px-6 py-2 bg-purple-600 hover:bg-purple-500 text-white text-[10px] uppercase tracking-widest font-bold rounded">Post Entry</button>
+                    <div class="glass-card p-10 rounded-[2.5rem] mb-12 border-indigo-500/10">
+                        <textarea id="comment-text" class="w-full bg-black/40 border border-white/5 p-6 rounded-2xl text-sm mb-6 h-32 text-white focus:outline-none focus:border-indigo-500/40 transition-all placeholder:text-zinc-700" placeholder="Submit your echo to the collective..."></textarea>
+                        <button id="post-btn" onclick="postComment()" class="px-10 py-4 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-indigo-600/20 transition-all">Transmit Entry</button>
                     </div>
                     <div id="comments-list" class="space-y-6">
-                        <!-- Comments -->
-                    </div>
+                        </div>
                 </div>
             </div>
 
-            <aside class="w-full lg:w-72">
-                <div id="cover-container" class="glass-card p-2 rounded-lg mb-6 group relative overflow-hidden shadow-2xl">
-                    <img id="display-cover" src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600" class="w-full h-96 object-cover rounded shadow-2xl transition-all duration-700" alt="Tale Cover">
-                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4 text-center">
-                        <p id="display-title" class="text-[10px] uppercase tracking-[0.2em] text-white">load</p>
-                    </div>
+            <aside class="w-full lg:w-80">
+                <div id="cover-container" class="glass-card p-3 rounded-[2.5rem] mb-10 shine-container group">
+                    <img id="display-cover" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800" class="w-full h-[480px] object-cover rounded-[2rem] grayscale-[15%] group-hover:grayscale-0 transition-all duration-1000" alt="Tale Cover">
+                    <div class="shine-layer"></div>
                 </div>
-                <button onclick="startReading()" class="w-full py-4 bg-white text-black font-bold text-xs uppercase tracking-[0.2em] rounded hover:bg-purple-400 transition-all mb-4">
-                    Begin Reading
+                
+                <button onclick="startReading()" class="w-full py-5 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-[10px] uppercase tracking-[0.4em] rounded-2xl shadow-2xl shadow-indigo-600/30 mb-8 transition-all active:scale-95">
+                    Initialize Sequence
                 </button>
-                <div id="creation-date" class="text-[10px] text-gray-500 uppercase tracking-widest text-center italic">
-                    Universal Era
+                
+                <div class="glass-card p-8 rounded-[2rem] text-center border-white/5">
+                    <p class="text-[9px] text-indigo-500 font-black uppercase tracking-widest mb-1">Archived Status</p>
+                    <div id="creation-date" class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">
+                        Universal Era
+                    </div>
                 </div>
             </aside>
 
         </div>
     </main>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getDocs, query , getFirestore, doc, getDoc, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        /** * LINKING INSTRUCTIONS:
-         * In your library.html, ensure your cards use a link like this:
-         * <a href="tale_page.html?id=DOCUMENT_ID_HERE">View Tale</a>
-         */
-
-        import firebaseConfig from '/firebase-config.js';
-        const appId = 'taletranscend-pro';
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const taleId = urlParams.get('id'); // This retrieves the ID from the URL
-        
-        let taleData = null;
-        let currentUser = null;
-
-        // Auth initialization (Rule 3)
-        const initAuth = async () => {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (e) { console.error("Auth failed", e); }
-        };
-
-        initAuth();
-
-        onAuthStateChanged(auth, (user) => {
-            currentUser = user;
-            if (user && taleId) {
-                loadPublicTale();
-                listenToComments();
-            } else if (!taleId) {
-                showModal("No tale specified. Returning to Library.");
-                setTimeout(() => window.location.href = 'library.html', 3000);
-            }
-        });
-
-        // Load Public Data (Rule 1: Use the public path for general access)
-        async function loadPublicTale() {
-            try {
-                // IMPORTANT: We look in public/data for the story so anyone can view it
-                const taleRef = doc(db, 'artifacts', appId, 'public', 'data', 'community_tales', taleId);
-                const snap = await getDoc(taleRef);
-
-                if (snap.exists()) {
-                    taleData = snap.data();
-                    renderTale();
-                } else {
-                    // Fallback: Check if it's a draft (for previewing your own)
-                    const draftRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'drafts', taleId);
-                    const draftSnap = await getDoc(draftRef);
-                    if (draftSnap.exists()) {
-                        taleData = draftSnap.data();
-                        renderTale();
-                    } else {
-                        document.getElementById('display-title').innerText = "Tale Not Found";
-                        document.getElementById('display-title').style.opacity = 1;
-                    }
-                }
-            } catch (err) {
-                console.error("Fetch error", err);
-                showModal("The archives are currently unreachable.");
-            }
-            showTaleDetails();
-        }
-
-        function renderTale() {
-            document.getElementById('loading-indicator')?.remove();
-            
-            const titleEl = document.getElementById('display-title');
-            const metaEl = document.getElementById('meta-container');
-            
-            titleEl.innerText = taleData.title || "Untitled Legend";
-            titleEl.style.opacity = 1;
-            titleEl.style.transform = "translateY(0)";
-            metaEl.style.opacity = 1;
-            
-
-            document.getElementById('display-author').innerText = taleData.authorName || `Scribe ${taleId.slice(0,5)}`;
-            document.getElementById('display-chapters').innerText = `${taleData.chapterCount || 0} Chapters`;
-            document.getElementById('display-description').innerText = taleData.description || "A mysterious tale waiting to be uncovered...";
-
-            if (taleData.coverUrl) {
-                document.getElementById('display-cover').src = taleData.coverUrl;
-                document.getElementById('hero-section').style.setProperty('--bg-url', `url('${taleData.coverUrl}')`);
-            }
-        }
-        async function showTaleDetails() {
-            // 3. Target the chapter list container
-            const chapterList = document.getElementById('chapter-list');
-            chapterList.innerHTML = '<p class="text-purple-400 animate-pulse">Decrypting fragments...</p>';
-
-            try {
-                // 4. Fetch from the sub-collection (Rule 1: Strict Paths)
-                const chaptersRef = collection(db, 'artifacts', appId, 'public', 'data', 'community_tales', taleId, 'chapters');
-                const snap = await getDocs(chaptersRef);
-                
-                // 5. Handle empty state
-                if (snap.empty) {
-                    chapterList.innerHTML = `<p class="text-xs text-gray-400 italic">This tale has no written chapters yet.</p>`;
-                    return;
-                }
-
-                // 6. Map and Sort in memory (Rule 2: No complex queries)
-                const chapters = snap.docs
-                    .map(doc => ({ id: doc.id, ...doc.data() }))
-                    .sort((a, b) => (a.chapterNum || 0) - (b.chapterNum || 0));
-
-                // 7. Inject the HTML
-                chapterList.innerHTML = chapters.map((ch, idx) => `
-                    <div onclick="openReader('${taleId}', '${ch.id}')" 
-                        class="glass-card p-6 rounded-lg flex justify-between items-center group hover:border-purple-500/50 transition-all cursor-pointer mb-4">
-                        <div>
-                            <span class="text-[10px] text-purple-400 font-bold block mb-1">FRAGMENT 0${idx + 1}</span>
-                            <h3 class="fancy-title text-xl text-white group-hover:text-purple-300 transition-colors">
-                                ${ch.title || 'Untitled Chapter'}
-                            </h3>
-                        </div>
-                        <div class="text-[10px] text-gray-500 uppercase tracking-widest group-hover:text-white transition">
-                            Begin Fragment →
-                        </div>
-                    </div>
-                `).join('');
-
-            } catch (err) {
-                chapterList.innerHTML = `<p class="text-red-400">Error: ${err.message}</p>`;
-            }
-        }
-
-        // Tabs
-        window.switchTab = (tabKey) => {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(p => { p.classList.add('hidden'); p.classList.remove('block'); });
-
-            document.getElementById(`tab-${tabKey}`).classList.add('active');
-            const activePanel = document.getElementById(`content-${tabKey}`);
-            activePanel.classList.remove('hidden');
-            activePanel.classList.add('block');
-        };
-
-        const getCommentsRef = () => {
-            // Path construction: 
-            // artifacts -> {appId} -> public -> data -> community_tales (collection) -> {taleId} (doc) -> comments (sub-collection)
-            return collection(
-                db, 
-                'artifacts', appId, 
-                'public', 'data', 
-                'community_tales', taleId, 
-                'comments'
-            );
-        };
-
-        // Comments (Rule 1 & 2)
-        function listenToComments() {
-            const commentsRef = getCommentsRef();
-            onSnapshot(commentsRef, (snap) => {
-                const list = document.getElementById('comments-list');
-                const items = [];
-                snap.forEach(d => items.push(d.data()));
-                
-                items.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-
-                list.innerHTML = items.map(c => `
-                    <div class="border-l border-purple-900/50 pl-6 py-2">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-[10px] text-purple-400 font-bold uppercase">${c.authorName}</span>
-                            <span class="text-[8px] text-gray-600">${c.timestamp ? new Date(c.timestamp.seconds * 1000).toLocaleDateString() : 'Now'}</span>
-                        </div>
-                        <p class="text-sm text-gray-400">${c.text}</p>
-                    </div>
-                `).join('') || '<p class="text-xs text-gray-600 italic">The echoes are silent.</p>';
-            });
-        }
-
-        window.postComment = async () => {
-            const inputElement = document.getElementById('comment-text');
-            const text = inputElement.value.trim();
-            if (!text || !currentUser) return;
-            if (!auth.currentUser) return;
-
-            try {
-                const commentsRef = getCommentsRef();
-                await addDoc(commentsRef, {
-                    text: text,
-                    authorId: auth.currentUser.uid,
-                    authorName: auth.currentUser.displayName || "Anonymous Scribe",
-                    timestamp: serverTimestamp()
-                });
-                        // 2. Clear the box only on success
-                inputElement.value = '';
-                
-                // 3. Optional: Refocus the input for a better user experience
-                inputElement.focus();
-            } catch (err) {
-                console.error("Post failed:", err);
-            }
-            
-        };
-
-        window.openReader = async (taleId, chapterId) => {
-            console.log(`Loading Tale: ${taleId}, Chapter: ${chapterId}`);
-            window.location.href = `reader.html?taleId=${taleId}&chapterId=${chapterId}`;
-        };
-
-        
-    </script>
+    <script type="module" src="/js/tale.js"></script>
 </body>
 </html>
