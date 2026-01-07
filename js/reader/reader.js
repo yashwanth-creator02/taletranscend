@@ -2,9 +2,9 @@
 
 /* ================= Firebase ================= */
 
-import { loadReaderContent } from "./reader/content.js";
-import { initMobileDrawer } from "./reader/mobile.js";
-import { goBackToTale } from "./reader/navigation.js";
+import { loadReaderContent } from "./content.js";
+import { initMobileDrawer } from "./mobile.js";
+import { goBackToTale } from "./navigation.js";
 
 
 import {
@@ -13,11 +13,11 @@ import {
   setTheme,
   setFont,
   updateSize
-} from "./reader/theme.js";
+} from "./theme.js";
 
-import { initReadingProgress } from "./reader/progress.js";
-import { initAuth } from "./reader/auth.js";
-import { initNavigation } from "./reader/navigation.js";
+import { initReadingProgress } from "./progress.js";
+import { initAuth } from "./auth.js";
+import { initNavigation } from "./navigation.js";
 
 
 
