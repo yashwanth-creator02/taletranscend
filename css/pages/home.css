@@ -1,0 +1,13 @@
+.hero-glow {
+    background: radial-gradient(
+        circle at 50% 50%,
+        color-mix(in srgb, var(--accent) 25%, transparent),
+        transparent 70%
+    );
+    animation: pulse-glow 8s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-glow {
+    from { transform: scale(1); opacity: .8; }
+    to { transform: scale(1.1); opacity: 1; }
+}

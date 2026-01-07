@@ -1,4 +1,4 @@
-import { db, auth, APP_ID } from "../firebase.js";
+import { db, auth, appId } from "../firebase.js";
 import { doc, onSnapshot, setDoc }
   from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 import { updateProfileUI } from "./ui.js";
@@ -6,7 +6,7 @@ import { updateProfileUI } from "./ui.js";
 let unsubscribe = null;
 
 export function startProfileSync(uid) {
-    const ref = doc(db, "artifacts", APP_ID, "users", uid);
+    const ref = doc(db, "artifacts", appId , "users", uid);
 
     if (unsubscribe) unsubscribe();
 

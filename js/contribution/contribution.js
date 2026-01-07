@@ -1,17 +1,22 @@
-import { initContributionAuth } from "./auth.js";
-import { initContributionUI } from "./ui.js";
-import { submitTale } from "./submit.js";
+import { addNewChapter, updateSidebarTitle } from "./chapters.js";
+import { autoSaveLocal } from "./editor.js";
+import { saveToCloud } from "./cloud.js";
+import { publishFullTale } from "./publish.js";
 
-/* boot */
-initContributionAuth();
-initContributionUI();
+/* ---------------------------
+   EXPOSE FOR HTML
+---------------------------- */
+window.addNewChapter = addNewChapter;
+window.updateSidebarTitle = updateSidebarTitle;
+window.autoSaveLocal = autoSaveLocal;
+window.saveToCloud = saveToCloud;
+window.publishFullTale = publishFullTale;
 
-/* expose only what HTML needs */
-window.submitTale = submitTale;
-window.toggleEditor = () => {
-    document.getElementById("story-editor")?.classList.toggle("hidden");
-    document.body.style.overflow =
-        document.getElementById("story-editor")?.classList.contains("hidden")
-            ? "auto"
-            : "hidden";
-};
+/* ---------------------------
+   INIT
+---------------------------- */
+function init() {
+  addNewChapter(); // start with one chapter
+}
+
+init();

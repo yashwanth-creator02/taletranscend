@@ -6,67 +6,10 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>profile</title>
-    <style>
-        
-        /* Target the bar itself */
-        ::-webkit-scrollbar {
-        width: 4px;
-        }
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href=/css/pages/profile.css">
 
-        /* Target the track */
-        ::-webkit-scrollbar-track {
-        background: transparent;
-        }
-
-        /* Target the thumb */
-        ::-webkit-scrollbar-thumb {
-        background: #27272a;
-        border-radius: 10px;
-        }
-
-
-        /* Circular Header Styling */
-        .header-orb {
-            position: relative;
-            width: 56px;
-            height: 56px;
-            background: #000;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid rgba(99, 102, 241, 0.4);
-            box-shadow: 0 0 20px rgba(79, 70, 229, 0.2);
-            transition: all 0.3s ease;
-        }
-        
-        .header-orb::before {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            border-radius: 50%;
-            padding: 2px;
-            background: conic-gradient(from 0deg, transparent, #4f46e5, transparent, #4f46e5, transparent);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            animation: rotate 4s linear infinite;
-        }
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        .modal-enter {
-            animation: fadeIn 0.2s ease-out forwards;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-    </style>
 </head> 
 <body class="bg-[#050505] text-slate-300 antialiased selection:bg-indigo-500/30">
     <header class="sticky top-0 z-50 bg-black/60 backdrop-blur-md border-b border-zinc-800 p-4 shadow-sm">
@@ -292,36 +235,7 @@
         </div>
     </div>
 
-    <!-- Story Writing Overlay (Hidden by default) -->
-    <div id="story-editor" class="fixed inset-0 z-[100] bg-black hidden flex flex-col">
-        <!-- Editor Header -->
-        <div class="p-4 border-b border-zinc-800 flex justify-between items-center bg-zinc-900">
-            <div class="flex items-center gap-4">
-                <button onclick="toggleEditor()" class="text-zinc-400 hover:text-white transition-colors">
-                    <i data-lucide="x" class="w-6 h-6"></i>
-                </button>
-                <h2 class="text-white font-bold tracking-tight">Drafting New Tale</h2>
-            </div>
-            <div class="flex items-center gap-3">
-                <button id="ai-title-btn" onclick="suggestStoryTitle()" class="flex items-center gap-2 px-3 py-1.5 bg-indigo-500/10 text-indigo-400 rounded-lg text-xs font-bold hover:bg-indigo-500/20 transition-all">
-                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-                    AI Title
-                </button>
-                <button onclick="shareTale()" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full text-sm font-bold shadow-lg shadow-indigo-500/20 transition-all active:scale-95">
-                    Share Tale
-                </button>
-            </div>
-        </div>
-
-        <!-- Writing Area -->
-        <div class="flex-1 overflow-y-auto p-6 md:p-12 lg:px-64">
-            <input type="text" id="story-title-input" placeholder="Title of your legend..." 
-                class="w-full bg-transparent text-4xl md:text-6xl font-black text-white placeholder:text-zinc-800 focus:outline-none mb-8">
-            
-            <textarea id="story-content-input" placeholder="Once upon a time in the realm of..." 
-                    class="w-full bg-transparent text-lg md:text-xl text-zinc-300 placeholder:text-zinc-700 focus:outline-none min-h-[50vh] resize-none leading-relaxed"></textarea>
-        </div>
-    </div>
+    
 
     <script>
         // Initialize Lucide Icons

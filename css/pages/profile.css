@@ -1,0 +1,55 @@
+/* ---------- PROFILE LAYOUT ---------- */
+
+.profile-container {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* ---------- AVATAR ---------- */
+
+.profile-avatar {
+    position: relative;
+}
+
+.profile-avatar img {
+    border: 2px solid var(--border);
+    background: var(--glass);
+}
+
+/* ---------- DISPLAY CARDS ---------- */
+
+.profile-card {
+    transition: transform .3s ease, border-color .3s ease;
+}
+
+.profile-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+}
+
+/* ---------- EDITOR MODAL ---------- */
+
+#profile-editor {
+    backdrop-filter: blur(24px);
+}
+
+#profile-editor input,
+#profile-editor textarea {
+    background: transparent;
+    color: var(--text-main);
+    border: 1px solid var(--border);
+}
+
+#profile-editor input:focus,
+#profile-editor textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+/* ---------- MOBILE ---------- */
+
+@media (max-width: 768px) {
+    .profile-container {
+        padding: 1rem;
+    }
+}

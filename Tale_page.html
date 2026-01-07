@@ -6,101 +6,10 @@
     <title>Tale Page | TaleTranscend</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href=/css/pages/tale.css">
 
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-color: #050505; 
-            color: #cbd5e1; 
-        }
-
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 10px; }
-
-        /* --- THEME DNA: Glows & Cards --- */
-        .glass-card {
-            background: rgba(24, 24, 27, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(12px);
-            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-
-        .hero-gradient {
-            background: linear-gradient(to bottom, rgba(5, 5, 5, 0.2), #050505), var(--bg-url);
-            background-size: cover;
-            background-position: center;
-        }
-
-        /* --- THEME DNA: The Shine Effect (Applied to Cover) --- */
-        .shine-container { position: relative; overflow: hidden; }
-        .shine-layer {
-            position: absolute;
-            top: 0; left: -100%;
-            width: 50%; height: 100%;
-            background: linear-gradient(to right, transparent, rgba(255,255,255,0.05), transparent);
-            transform: skewX(-25deg);
-            transition: 0.7s ease;
-            z-index: 2;
-        }
-        .shine-container:hover .shine-layer { left: 150%; }
-        .shine-container:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 25px 50px -12px rgba(79, 70, 229, 0.2);
-            border-color: rgba(99, 102, 241, 0.4);
-        }
-
-        /* --- THEME DNA: Header Orb --- */
-        .header-orb {
-            position: relative;
-            width: 48px; height: 48px;
-            background: #000;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid rgba(99, 102, 241, 0.4);
-            box-shadow: 0 0 20px rgba(79, 70, 229, 0.2);
-        }
-        .header-orb::before {
-            content: '';
-            position: absolute;
-            inset: -3px;
-            border-radius: 50%;
-            padding: 2px;
-            background: conic-gradient(from 0deg, transparent, #4f46e5, transparent, #4f46e5, transparent);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            animation: rotate 4s linear infinite;
-        }
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .tab-btn {
-            transition: all 0.3s ease;
-            color: #52525b;
-            border-bottom: 2px solid transparent;
-        }
-        .tab-btn.active {
-            color: #6366f1;
-            border-bottom: 2px solid #6366f1;
-        }
-
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .arrow-right {
-            width: 0;
-            height: 0;
-            border-top: 10px solid transparent;    /* Top transparent border creates the top edge of the triangle */
-            border-bottom: 10px solid transparent; /* Bottom transparent border creates the bottom edge of the triangle */
-            border-left: 10px solid blue;          /* Colored left border forms the actual arrow shape */
-        }
-    </style>
 </head>
 <body class="min-h-screen">
 
