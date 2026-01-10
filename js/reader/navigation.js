@@ -34,5 +34,5 @@ export function initNavigation({ taleId, chapterIdx, chapters }) {
   }
 }
 export function goBackToTale(taleId) {
-  window.location.href = `Tale_page.html?id=${taleId}`;
+  window.location.href = `tale.html?id=${taleId}`;
 }

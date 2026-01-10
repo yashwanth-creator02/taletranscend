@@ -1,9 +1,13 @@
-import { initProfileAuth } from "./auth.js";
+import { initAuth } from "../core/index.js";
 import { initProfileUI } from "./ui.js";
-import { saveProfile } from "./sync.js";
+import { saveProfile , startProfileSync } from "./sync.js";
 
 /* boot */
-initProfileAuth();
+initAuth((user) => {
+    if (user) {
+        startProfileSync(user.uid);
+    }
+})
 initProfileUI();
 
 /* expose only what HTML needs */

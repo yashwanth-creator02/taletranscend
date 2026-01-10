@@ -5,7 +5,7 @@ export function setupNavigation() {
             if (!card) return;
 
             const id = card.dataset.id;
-            window.location.href = `Tale_page.html?id=${id}`;
+            window.location.href = `tale.html?id=${id}`;
         });
 }
 

@@ -16,7 +16,7 @@ import {
 } from "./theme.js";
 
 import { initReadingProgress } from "./progress.js";
-import { initAuth } from "./auth.js";
+import { initAuth } from "../core/index.js";
 import { initNavigation } from "./navigation.js";
 
 

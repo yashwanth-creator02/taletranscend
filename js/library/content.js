@@ -1,6 +1,4 @@
-import { db, appId } from "../firebase.js";
-import { collection, onSnapshot } 
-from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { db, appId , collection, onSnapshot } from "../core/index.js";
 
 let unsubscribe = null;
 

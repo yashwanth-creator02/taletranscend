@@ -1,4 +1,4 @@
-import { initAuth } from "./auth.js";
+import { initAuth } from "../core/index.js";
 import { loadTale, loadChapters } from "./content.js";
 import { renderTale, renderChapters } from "./ui.js";
 import { bindChapterClicks, setupTabs, setupStartReading } from "./interactions.js";

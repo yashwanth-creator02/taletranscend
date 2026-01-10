@@ -1,4 +1,5 @@
-import { initAuth } from "./auth.js";
+// NEW
+import { initAuth } from "../core/index.js";
 import { subscribeToTales, stopTalesSubscription } from "./content.js";
 import { renderLibrary } from "./ui.js";
 import {

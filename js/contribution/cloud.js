@@ -1,10 +1,8 @@
-import { auth, db } from "../firebase.js";
-import { state } from "./state.js";
-import {
+import { auth, db ,
   doc,
   setDoc,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+  serverTimestamp } from "../core/index.js";
+import { state } from "./state.js";
 
 export async function saveToCloud() {
   if (!auth.currentUser) return;

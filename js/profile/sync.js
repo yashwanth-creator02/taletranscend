@@ -1,6 +1,4 @@
-import { db, auth, appId } from "../firebase.js";
-import { doc, onSnapshot, setDoc }
-  from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { db, auth, appId , doc, onSnapshot, setDoc } from "../core/index.js";
 import { updateProfileUI } from "./ui.js";
 
 let unsubscribe = null;
@@ -26,7 +24,7 @@ export async function saveProfile() {
     const ref = doc(
         db,
         "artifacts",
-        APP_ID,
+        appId,
         "users",
         auth.currentUser.uid
     );

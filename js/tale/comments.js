@@ -1,10 +1,7 @@
-import { db, appId, auth } from "../firebase.js";
-import {
-    collection,
+import { db, appId, auth , collection,
     onSnapshot,
     addDoc,
-    serverTimestamp
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    serverTimestamp } from "../core/index.js";
 
 /**
  * Start listening to comments in real-time

@@ -1,14 +1,9 @@
 // js/reader/content.js
 
-import { db } from "../firebase.js";
-import {
-  doc,
+import { db ,  doc, appId ,
   getDoc,
   collection,
-  getDocs
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-const appId = "taletranscend-pro";
+  getDocs } from "../core/index.js";
 
 export async function loadReaderContent({ taleId, chapterIdx }) {
   if (!taleId) return;
