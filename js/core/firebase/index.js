@@ -8,5 +8,5 @@ export { db , doc,
   onSnapshot,
   addDoc,
   serverTimestamp
-} from './firebase/db.js';
+} from './db.js';
 export const appId = 'taletranscend-pro';

@@ -1,13 +1,8 @@
 // NEW
-import { initAuth } from "../core/index.js";
-import { subscribeToTales, stopTalesSubscription } from "./content.js";
-import { renderLibrary } from "./ui.js";
-import {
+import { initAuth ,subscribeToTales, stopTalesSubscription ,renderLibrary ,initIcons,
     setupNavigation,
     setupSearch,
-    setupSidebarToggle
-} from "./interactions.js";
-import { initIcons } from "../ui/icons.js";
+    setupSidebarToggle} from "./index.js";
 
 let allTales = [];
 

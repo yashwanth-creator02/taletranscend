@@ -1,7 +1,7 @@
 import { auth, db ,
   doc,
   setDoc,
-  serverTimestamp } from "../core/index.js";
+  serverTimestamp } from "../../core/firebase/index.js";
 import { state } from "./state.js";
 
 export async function saveToCloud() {

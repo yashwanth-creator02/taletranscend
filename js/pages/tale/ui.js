@@ -25,7 +25,7 @@ export function renderChapters(chapters, taleId) {
     }
 
     list.innerHTML = chapters.map((ch, idx) => `
-        <div data-chapter="${ch.id}"
+        <div  data-chapter-index="${idx}"
              class="chapter-item glass-card p-8 rounded-3xl flex justify-between items-center group hover:border-indigo-500/40 transition-all cursor-pointer">
             <div>
                 <span class="text-[9px] text-indigo-500 font-black block mb-2 uppercase tracking-[0.3em]">

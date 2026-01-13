@@ -1,4 +1,4 @@
-import { db, appId , doc, getDoc, collection, getDocs} from "../core/index.js";
+import { db, appId , doc, getDoc, collection, getDocs} from "../../core/firebase/index.js";
 
 export async function loadTale(taleId, user) {
     const publicRef = doc(db, "artifacts", appId, "public", "data", "community_tales", taleId);

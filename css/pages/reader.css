@@ -57,3 +57,7 @@
 #mobile-drawer.open {
     transform: translateY(0);
 }
+.story-scroll-area {
+    height: 100vh; /* Or a fixed height */
+    overflow-y: auto;
+}

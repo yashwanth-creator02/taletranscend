@@ -4,7 +4,7 @@ import {
   signInWithCustomToken,
   onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import app from "./firebase/app.js";
+import app from "./app.js";
 
 export const auth = getAuth(app);
 

@@ -1,9 +1,4 @@
-import { initAuth } from "../core/index.js";
-import { loadTale, loadChapters } from "./content.js";
-import { renderTale, renderChapters } from "./ui.js";
-import { bindChapterClicks, setupTabs, setupStartReading } from "./interactions.js";
-import { listenToComments, postComment } from "./comments.js";
-import { initIcons } from "../ui/icons.js";
+import { initAuth,loadTale, loadChapters,renderTale, renderChapters,bindChapterClicks, setupTabs, setupStartReading ,listenToComments, postComment, initIcons} from "./index.js";
 
 const taleId = new URLSearchParams(window.location.search).get("id");
 if (!taleId) location.href = "library.html";

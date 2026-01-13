@@ -1,7 +1,4 @@
-import { initAuth } from "../core/index.js";
-import { initProfileUI } from "./ui.js";
-import { saveProfile , startProfileSync } from "./sync.js";
-
+import { initAuth , initProfileUI , saveProfile , startProfileSync } from "./index.js";
 /* boot */
 initAuth((user) => {
     if (user) {

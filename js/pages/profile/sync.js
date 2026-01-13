@@ -1,4 +1,4 @@
-import { db, auth, appId , doc, onSnapshot, setDoc } from "../core/index.js";
+import { db, auth, appId , doc, onSnapshot, setDoc } from "../../core/firebase/index.js";
 import { updateProfileUI } from "./ui.js";
 
 let unsubscribe = null;

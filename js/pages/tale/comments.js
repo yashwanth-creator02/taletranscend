@@ -1,7 +1,7 @@
 import { db, appId, auth , collection,
     onSnapshot,
     addDoc,
-    serverTimestamp } from "../core/index.js";
+    serverTimestamp } from "../../core/firebase/index.js";
 
 /**
  * Start listening to comments in real-time

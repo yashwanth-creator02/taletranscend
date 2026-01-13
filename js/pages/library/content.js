@@ -1,4 +1,4 @@
-import { db, appId , collection, onSnapshot } from "../core/index.js";
+import { db, appId , collection, onSnapshot } from "../../core/firebase/index.js";
 
 let unsubscribe = null;
 

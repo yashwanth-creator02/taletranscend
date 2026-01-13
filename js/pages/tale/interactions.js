@@ -1,12 +1,14 @@
 export function bindChapterClicks(taleId) {
-    document.getElementById("chapter-list")
-        .addEventListener("click", (e) => {
-            const item = e.target.closest(".chapter-item");
-            if (!item) return;
+    const list = document.getElementById("chapter-list");
+    if (!list) return;
 
-            const chapterId = item.dataset.chapter;
-            window.location.href = `reader.html?taleId=${taleId}&chapterId=${chapterId}`;
-        });
+    list.addEventListener("click", (e) => {
+        const item = e.target.closest(".chapter-item");
+        if (!item) return;
+
+        const chapterId = item.dataset.chapterIndex;
+        window.location.href = `reader.html?taleId=${taleId}&chapterId=${chapterId}`;
+    });
 }
 export function setupTabs() {
     window.switchTab = (tabKey) => {
