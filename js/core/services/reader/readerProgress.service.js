@@ -1,63 +1,82 @@
 // js/core/services/reader/readerProgress.service.js
 
+/**
+ * js/core/services/reader/readerProgress.service.js
+ * Firebase cloud progress sync
+ */
+
 import { db, appId, doc, getDoc, setDoc } from "../../firebase/index.js";
 
-/* ================= Cloud Sync ================= */
-export async function syncChapterProgressToCloud({ userId, taleId, chapterIndex, scrollPercent }) {
-  if (!userId || !taleId) return;
+/* ================= Cloud API ================= */
+
+export async function syncChapterProgressToCloud({
+  userId,
+  taleId,
+  chapterIndex,
+  scrollPercent
+}) {
+  if (!userId || !taleId || typeof chapterIndex !== "number") return;
 
   const ref = doc(db, "artifacts", appId, "users", userId, "readerProgress", taleId);
 
-  await setDoc(ref, {
-    chapters: {
-      [chapterIndex]: { scrollPercent, updatedAt: Date.now() }
-    }
-  }, { merge: true });
+  await setDoc(
+    ref,
+    {
+      chapters: {
+        [chapterIndex]: {
+          scrollPercent,
+          updatedAt: Date.now()
+        }
+      }
+    },
+    { merge: true }
+  );
 }
 
 export async function getCloudChapterProgress({ userId, taleId, chapterIndex }) {
-  if (!userId || !taleId) return null;
+  if (!userId || !taleId || typeof chapterIndex !== "number") return null;
+
   const ref = doc(db, "artifacts", appId, "users", userId, "readerProgress", taleId);
   const snap = await getDoc(ref);
+
   if (!snap.exists()) return null;
-  const data = snap.data();
-  return data.chapters?.[chapterIndex] || null;
+  return snap.data()?.chapters?.[chapterIndex] || null;
 }
 
 export async function getCloudProgress({ userId, taleId }) {
   if (!userId || !taleId) return null;
+
   const ref = doc(db, "artifacts", appId, "users", userId, "readerProgress", taleId);
   const snap = await getDoc(ref);
+
   if (!snap.exists()) return null;
   return snap.data();
 }
 
-// ================= Debounced Sync =================
-const userTimers = new Map();
+/* ================= Debounced Sync ================= */
 
-export function scheduleProgressSync({ userId, taleId, delay = 5000 }) {
-  if (!userId || !taleId) return;
+const timers = new Map();
 
-  // Clear previous timer for this user
-  const key = `${userId}:${taleId}`;
-  if (userTimers.has(key)) clearTimeout(userTimers.get(key));
+export function scheduleProgressSync({
+  userId,
+  taleId,
+  chapterIndex,
+  scrollPercent,
+  delay = 4000
+}) {
+  if (!userId || !taleId || typeof chapterIndex !== "number") return;
 
-  const timer = setTimeout(async () => {
-    try {
-      // ✅ Use local storage function directly
-      const local = JSON.parse(localStorage.getItem(`reader-progress:${userId}:${taleId}`) || "{}");
-      if (!local) return;
+  const key = `${userId}:${taleId}:${chapterIndex}`;
+  if (timers.has(key)) clearTimeout(timers.get(key));
 
-      await syncChapterProgressToCloud({
-        userId,
-        taleId,
-        chapterIndex: Object.keys(local.chapters || {})[0] || 0, // simple sync of first chapter
-        scrollPercent: Object.values(local.chapters || {})[0]?.scrollPercent || 0
-      });
-    } catch (err) {
-      console.warn("Progress sync failed:", err);
-    }
+  const timer = setTimeout(() => {
+    syncChapterProgressToCloud({
+      userId,
+      taleId,
+      chapterIndex,
+      scrollPercent
+    }).catch(console.warn);
   }, delay);
 
-  userTimers.set(key, timer);
+  timers.set(key, timer);
 }

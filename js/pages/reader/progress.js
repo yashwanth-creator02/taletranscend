@@ -1,71 +1,71 @@
-// js/reader/progress.js
+// js/pages/reader/progress.js
 
 import { getOverallProgress } from "./progress.utils.js";
-import { saveReaderProgress, getChapterProgress } from "../../core/services/reader/index.js";
+import {
+  saveReaderProgress,
+  scheduleProgressSync
+} from "../../core/services/reader/index.js";
 
-/* =========================================================
-   OVERALL READING PROGRESS (chapter-based)
-   ========================================================= */
+/* ================= Overall Progress ================= */
+
 export function updateReaderProgress({ chapterIndex, totalChapters }) {
   const progress = getOverallProgress({ chapterIndex, totalChapters });
 
-  const sidebarBar = document.getElementById("sidebar-progress-bar");
-  const percentLabel = document.getElementById("progress-percent");
+  const bar = document.getElementById("sidebar-progress-bar");
+  const label = document.getElementById("progress-percent");
 
-  if (sidebarBar) sidebarBar.style.width = `${progress.percent}%`;
-  if (percentLabel) percentLabel.textContent = `${progress.percent}%`;
+  if (bar) bar.style.width = `${progress.percent}%`;
+  if (label) label.textContent = `${progress.percent}%`;
 }
 
-/* =========================================================
-   SCROLL PROGRESS (chapter-local) with debounce
-   ========================================================= */
+/* ================= Scroll Progress ================= */
+
 function getScrollTarget() {
   return document.querySelector(".story-scroll-area") || document.documentElement;
 }
 
 function calculateScrollPercent(target) {
-  const scrollTop = target.scrollTop;
-  const scrollHeight = target.scrollHeight - target.clientHeight;
-  if (scrollHeight <= 0) return 0;
-  return Math.min(100, Math.round((scrollTop / scrollHeight) * 100));
+  const max = target.scrollHeight - target.clientHeight;
+  if (max <= 0) return 0;
+  return Math.min(100, Math.round((target.scrollTop / max) * 100));
 }
 
 export function bindScrollProgress({ userId, taleId, chapterIndex }) {
   const target = getScrollTarget();
-  let throttleTimeout = null;
+  let ticking = false;
 
   target.addEventListener("scroll", () => {
-    if (throttleTimeout) return;
+    if (ticking) return;
 
-    throttleTimeout = setTimeout(() => {
+    ticking = true;
+    requestAnimationFrame(() => {
       const scrollPercent = calculateScrollPercent(target);
-      updateScrollUI(scrollPercent);
 
       saveReaderProgress({ userId, taleId, chapterIndex, scrollPercent });
+      scheduleProgressSync({ userId, taleId, chapterIndex, scrollPercent });
 
-      throttleTimeout = null;
-    }, 200); // ✅ throttle: max once per 200ms
+      const bar = document.getElementById("reading-progress");
+      if (bar) bar.style.width = `${scrollPercent}%`;
+
+      ticking = false;
+    });
   });
 }
 
-function updateScrollUI(scrollPercent) {
-  const bar = document.getElementById("reading-progress");
-  if (bar) bar.style.width = `${scrollPercent}%`;
-}
+/* ================= Restore Scroll ================= */
 
-/* =========================================================
-   RESTORE SCROLL POSITION
-   ========================================================= */
-export function restoreScrollProgress({ userId, taleId, chapterIndex, resolvedProgress }) {
-  if (!resolvedProgress || typeof resolvedProgress.scrollPercent !== "number") return;
+export function restoreScrollProgress({ resolvedProgress }) {
+  if (!resolvedProgress) return;
 
   const target = getScrollTarget();
 
   requestAnimationFrame(() => {
-    const scrollHeight = target.scrollHeight - target.clientHeight;
-    if (scrollHeight <= 0) return;
+    const max = target.scrollHeight - target.clientHeight;
+    if (max <= 0) return;
 
-    target.scrollTop = (resolvedProgress.scrollPercent / 100) * scrollHeight;
-    updateScrollUI(resolvedProgress.scrollPercent);
+    target.scrollTop = (resolvedProgress.scrollPercent / 100) * max;
+
+    const bar = document.getElementById("reading-progress");
+    if (bar) bar.style.width = `${resolvedProgress.scrollPercent}%`;
   });
 }

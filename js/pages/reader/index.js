@@ -15,4 +15,3 @@ export { loadReaderMeta, loadReaderChapter } from "./content.js";
 export { applyNavigation, goBackToTale } from "./navigation.js";
 export { updateReaderProgress, bindScrollProgress, restoreScrollProgress } from "./progress.js";
 export * from "../../core/services/reader/index.js";
-export { resolveProgress } from "../../core/services/reader/reader.progress.js";
