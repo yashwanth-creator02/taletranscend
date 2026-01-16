@@ -1,8 +1,6 @@
 // js/core/services/reader.service.js
 
-import { db , doc, getDoc, collection, getDocs } from "../../firebase/index.js";
-
-const APP_ID = "taletranscend-pro";
+import { db ,appId, doc, getDoc, collection, getDocs } from "../../firebase/index.js";
 
 /**
  * Fetches tale metadata
@@ -10,7 +8,7 @@ const APP_ID = "taletranscend-pro";
 export async function getTaleMeta(taleId) {
   if (!taleId) throw new Error("getTaleMeta: taleId is required");
 
-  const taleRef = doc(db, "artifacts", APP_ID, "public", "data", "community_tales", taleId);
+  const taleRef = doc(db, "artifacts", appId, "public", "data", "community_tales", taleId);
   const snap = await getDoc(taleRef);
   if (!snap.exists()) throw new Error(`Tale not found: ${taleId}`);
 
@@ -29,7 +27,7 @@ export async function getChapter({ taleId, chapterIndex }) {
   if (!taleId) throw new Error("getChapter: taleId is required");
   if (typeof chapterIndex !== "number") throw new Error("getChapter: chapterIndex must be a number");
 
-  const chaptersRef = collection(db, "artifacts", APP_ID, "public", "data", "community_tales", taleId, "chapters");
+  const chaptersRef = collection(db, "artifacts", appId, "public", "data", "community_tales", taleId, "chapters");
   const snap = await getDocs(chaptersRef);
 
   const chapters = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (a.chapterNum || 0) - (b.chapterNum || 0));

@@ -1,19 +1,20 @@
 // NEW
 import { initAuth ,subscribeToTales, stopTalesSubscription ,renderLibrary ,initIcons,
     setupNavigation,
-    setupSearch,
+    setupSearch,jumptoReader,setupOptionsMenu,
     setupSidebarToggle} from "./index.js";
 
 let allTales = [];
 
 setupSidebarToggle();
 
-initAuth(() => {
+initAuth(async (user) => {
+    const userId = user.uid;
     subscribeToTales(
-        (tales) => {
+        async (tales) => {
             allTales = tales;
-            renderLibrary(tales);
-            initIcons();
+            await renderLibrary(userId, tales); // <-- REQUIRED
+            initIcons(); // now icons exist
         },
         () => {
             document.getElementById("cards-grid").innerHTML = `
@@ -24,8 +25,16 @@ initAuth(() => {
         }
     );
 
+
     setupNavigation();
-    setupSearch(() => allTales, renderLibrary);
+    jumptoReader(userId);
+    setupOptionsMenu();
+
+    setupSearch(
+        () => allTales,
+        (filtered) => renderLibrary(userId, filtered),
+        initIcons
+    );
 });
 
 window.addEventListener("beforeunload", stopTalesSubscription);

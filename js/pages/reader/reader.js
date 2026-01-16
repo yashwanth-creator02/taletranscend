@@ -11,12 +11,15 @@ import {
   initTheme,
   initFont,
   setTheme,
-  setFont,
   updateSize,
   loadReaderMeta,
   loadReaderChapter,
   applyNavigation,
-  goBackToTale
+  goBackToTale,
+  saveReaderProgress,
+  scheduleProgressSync,
+  getLocalTotalReadTime,
+  addReadTime
 } from "./index.js";
 
 /* ================= URL Params ================= */
@@ -30,8 +33,8 @@ const chapterIndex = parseInt(params.get("chapterId")) || 0;
 initTheme();
 initFont();
 
+
 window.setTheme = setTheme;
-window.setFont = setFont;
 window.updateSize = updateSize;
 
 /* ================= Progress Resolver ================= */
@@ -54,6 +57,18 @@ async function resolveProgress({ userId, taleId, chapterIndex }) {
 initAuth(async (user) => {
   const userId = user.uid;
 
+  let sessionStart = Date.now();
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+      const duration = Date.now() - sessionStart;
+      if (duration > 1000) {
+        addReadTime({ userId, taleId, durationMs: duration });
+      }
+      sessionStart = Date.now();
+    }
+  });
+
   const resolvedProgress = await resolveProgress({
     userId,
     taleId,
@@ -71,9 +86,25 @@ initAuth(async (user) => {
     totalChapters: navigation.totalChapters
   });
 
-  restoreScrollProgress({ resolvedProgress });
+  restoreScrollProgress({
+    scrollPercent: resolvedProgress?.scrollPercent
+  });
 
-  bindScrollProgress({ userId, taleId, chapterIndex });
+  bindScrollProgress({
+    onScroll(scrollPercent) {
+      saveReaderProgress({ userId, taleId, chapterIndex, scrollPercent });
+
+      const totalReadTimeMs = getLocalTotalReadTime({ userId, taleId });
+
+      scheduleProgressSync({
+        userId,
+        taleId,
+        chapterIndex,
+        scrollPercent,
+        totalReadTimeMs
+      });
+    }
+  });
 });
 
 /* ================= Mobile ================= */

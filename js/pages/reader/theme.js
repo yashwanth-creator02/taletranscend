@@ -1,4 +1,5 @@
 // js/reader/theme.js
+import { READER_FONTS,applyReaderFont, loadReaderFont } from "../../core/ui/font.registry.js";
 
 export function initTheme() {
   const saved = localStorage.getItem("reader-theme") || "dark";
@@ -22,30 +23,40 @@ export function setTheme(theme) {
 }
 
 export function initFont() {
-  const font = localStorage.getItem("reader-font") || "serif";
-  setFont(font);
+  const container = document.getElementById("font-controls");
+  if (!container) return;
 
-  const size = localStorage.getItem("reader-size");
-  if (size) {
-    document.documentElement.style.setProperty("--reader-size", size + "px");
-  }
+  container.innerHTML = "";
+
+  Object.entries(READER_FONTS).forEach(([key, font]) => {
+    const btn = document.createElement("button");
+    btn.className = "font-btn";
+    btn.textContent = font.label;
+    btn.dataset.font = key;
+
+    btn.addEventListener("click", () => {
+      applyReaderFont(key);
+      markActiveFont(key);
+    });
+
+    container.appendChild(btn);
+  });
+
+  const savedFont = loadReaderFont();
+  applyReaderFont(savedFont);
+  markActiveFont(savedFont);
 }
 
-export function setFont(font) {
-  const map = {
-    serif: "'Crimson Pro', serif",
-    sans: "'Plus Jakarta Sans', sans-serif",
-    mono: "'JetBrains Mono', monospace"
-  };
 
-  document.documentElement.style.setProperty("--reader-font", map[font]);
-  document.querySelectorAll(".font-btn").forEach(b => b.classList.remove("active"));
-  document
-    .querySelectorAll(`.font-btn[onclick="setFont('${font}')"]`)
-    .forEach(b => b.classList.add("active"));
+/* ================= UI helpers ================= */
 
-  localStorage.setItem("reader-font", font);
+function markActiveFont(activeKey) {
+  document.querySelectorAll(".font-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.font === activeKey);
+  });
 }
+
+
 
 export function updateSize(val) {
   document.documentElement.style.setProperty("--reader-size", val + "px");

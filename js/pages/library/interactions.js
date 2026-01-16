@@ -1,18 +1,110 @@
-export function setupNavigation() {
-    document.getElementById("cards-grid")
-        .addEventListener("click", (e) => {
-            const card = e.target.closest(".tale-card");
-            if (!card) return;
+import { resolveResumePoint } from "../../core/services/reader/index.js";
 
-            const id = card.dataset.id;
-            window.location.href = `tale.html?id=${id}`;
-        });
+/* ======================================
+   CARD NAVIGATION (WHOLE CARD)
+====================================== */
+
+export function setupNavigation() {
+    const grid = document.getElementById("cards-grid");
+    if (!grid) return;
+
+    grid.addEventListener("click", (e) => {
+        // Ignore clicks coming from resume or options
+        if (
+            e.target.closest(".play-btn") ||
+            e.target.closest('[data-action="resume"]') ||
+            e.target.closest('[data-action="options"]') ||
+            e.target.closest(".options-menu")
+        ) {
+            return;
+        }
+
+        const card = e.target.closest(".tale-card");
+        if (!card) return;
+
+        const id = card.dataset.id;
+        window.location.href = `tale.html?id=${id}`;
+    });
 }
 
-export function setupSearch(getAllTales, onFilter) {
-    const input = document.getElementById("search-input");
+/* ======================================
+   RESUME (PLAY BUTTON ONLY)
+====================================== */
 
-    input.addEventListener("input", (e) => {
+export function jumptoReader(userId) {
+    const grid = document.getElementById("cards-grid");
+    if (!grid) return;
+
+    grid.addEventListener("click", (e) => {
+        const playBtn =
+            e.target.closest(".play-btn") ||
+            e.target.closest('[data-action="resume"]');
+
+        if (!playBtn) return;
+
+        e.stopPropagation();
+
+        const taleCard = playBtn.closest(".tale-card");
+        if (!taleCard) return;
+
+        const taleId = taleCard.dataset.id;
+        const resume = resolveResumePoint({ userId, taleId });
+
+        if (!resume) {
+            window.location.href =
+                `reader.html?taleId=${taleId}&chapterId=0`;
+            return;
+        }
+
+        window.location.href =
+            `reader.html?taleId=${taleId}&chapterId=${resume.chapterIndex}`;
+    });
+}
+
+/* ======================================
+   OPTIONS MENU
+====================================== */
+
+export function setupOptionsMenu() {
+    const grid = document.getElementById("cards-grid");
+    if (!grid) return;
+
+    // Toggle menu
+    grid.addEventListener("click", (e) => {
+        const optionsBtn = e.target.closest('[data-action="options"]');
+        if (!optionsBtn) return;
+
+        e.stopPropagation();
+
+        const menuId = optionsBtn.dataset.menuId;
+
+        document.querySelectorAll(".options-menu").forEach(menu => {
+            if (menu.id !== menuId) {
+                menu.classList.add("hidden");
+            }
+        });
+
+        const menu = document.getElementById(menuId);
+        menu?.classList.toggle("hidden");
+    });
+
+    // Close menus on outside click
+    document.addEventListener("click", () => {
+        document
+            .querySelectorAll(".options-menu")
+            .forEach(menu => menu.classList.add("hidden"));
+    });
+}
+
+/* ======================================
+   SEARCH
+====================================== */
+
+export function setupSearch(getAllTales, onFilter, initIcons) {
+    const input = document.getElementById("search-input");
+    if (!input) return;
+
+    input.addEventListener("input", async (e) => {
         const term = e.target.value.toLowerCase();
 
         const filtered = getAllTales().filter(t =>
@@ -21,13 +113,22 @@ export function setupSearch(getAllTales, onFilter) {
             (t.era || "").toLowerCase().includes(term)
         );
 
-        onFilter(filtered);
+        await onFilter(filtered);
+        initIcons();
     });
 }
+
+/* ======================================
+   SIDEBAR
+====================================== */
 
 export function setupSidebarToggle() {
     const sidebar = document.getElementById("sidebar");
     const toggleBtn = document.getElementById("toggle-sidebar");
 
-    toggleBtn.onclick = () => sidebar.classList.toggle("collapsed");
+    if (!sidebar || !toggleBtn) return;
+
+    toggleBtn.addEventListener("click", () => {
+        sidebar.classList.toggle("collapsed");
+    });
 }

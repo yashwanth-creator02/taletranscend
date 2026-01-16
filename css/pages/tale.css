@@ -69,6 +69,8 @@
         transform: translateY(0);
     }
 }
+.chapter-item.completed { opacity: 0.6; }
+.chapter-item.in_progress { font-weight: 600; }
 
 /* ---------- COMMENTS ---------- */
 
