@@ -19,20 +19,19 @@ import {
   saveReaderProgress,
   scheduleProgressSync,
   getLocalTotalReadTime,
-  addReadTime
-} from "./index.js";
+  addReadTime,
+} from './index.js';
 
 /* ================= URL Params ================= */
 
 const params = new URLSearchParams(window.location.search);
-const taleId = params.get("taleId");
-const chapterIndex = parseInt(params.get("chapterId")) || 0;
+const taleId = params.get('taleId');
+const chapterIndex = parseInt(params.get('chapterId')) || 0;
 
 /* ================= Theme ================= */
 
 initTheme();
 initFont();
-
 
 window.setTheme = setTheme;
 window.updateSize = updateSize;
@@ -59,8 +58,8 @@ initAuth(async (user) => {
 
   let sessionStart = Date.now();
 
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "hidden") {
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
       const duration = Date.now() - sessionStart;
       if (duration > 1000) {
         addReadTime({ userId, taleId, durationMs: duration });
@@ -72,7 +71,7 @@ initAuth(async (user) => {
   const resolvedProgress = await resolveProgress({
     userId,
     taleId,
-    chapterIndex
+    chapterIndex,
   });
 
   await loadReaderMeta(taleId);
@@ -83,11 +82,11 @@ initAuth(async (user) => {
 
   updateReaderProgress({
     chapterIndex,
-    totalChapters: navigation.totalChapters
+    totalChapters: navigation.totalChapters,
   });
 
   restoreScrollProgress({
-    scrollPercent: resolvedProgress?.scrollPercent
+    scrollPercent: resolvedProgress?.scrollPercent,
   });
 
   bindScrollProgress({
@@ -101,9 +100,9 @@ initAuth(async (user) => {
         taleId,
         chapterIndex,
         scrollPercent,
-        totalReadTimeMs
+        totalReadTimeMs,
       });
-    }
+    },
   });
 });
 

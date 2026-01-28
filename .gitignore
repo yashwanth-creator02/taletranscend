@@ -1,1 +1,31 @@
-firebase-config.js
+# --- Environment & Secrets ---
+.env
+.env.local
+.env.*.local
+
+# --- Dependencies ---
+node_modules/
+.pnp
+.pnp.js
+
+# --- System Files ---
+.DS_Store
+Thumbs.db
+*.log
+firebase-debug.log*
+
+# --- Build & Cache ---
+dist/
+.vite/
+.eslintcache
+.prettiercache
+
+# --- Configuration ---
+# We keep the structure but ignore any potential hardcoded secrets
+*.json
+!package.json
+!package-lock.json
+!jsconfig.json
+
+# If you moved secrets to .env, you can un-ignore this file:
+!config/firebase-config.js

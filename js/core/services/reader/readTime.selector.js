@@ -1,5 +1,5 @@
-import { getLocalTotalReadTime } from "./localProgress.service.js";
-import { getCloudProgress } from "./cloudProgress.service.js";
+import { getLocalTotalReadTime } from './localProgress.service.js';
+import { getCloudProgress } from './cloudProgress.service.js';
 
 export async function getTotalReadTime({ userId, taleId }) {
   if (!userId || !taleId) return 0;

@@ -1,15 +1,15 @@
 // js/core/ui/font.registry.js
 
-const FONT_STORAGE_KEY = "taletranscend:reader-font";
+const FONT_STORAGE_KEY = 'taletranscend:reader-font';
 
 /**
  * Available reader fonts
  */
 export const READER_FONTS = {
-  serif: { label: "Serif", css: "'Crimson Pro', serif" },
-  sans: { label: "Sans", css: "'Plus Jakarta Sans', sans-serif" },
-  mono: { label: "Mono", css: "'JetBrains Mono', monospace" },
-  dyslexic: { label: "Dyslexic", css: "'OpenDyslexic', sans-serif" }
+  serif: { label: 'Serif', css: "'Crimson Pro', serif" },
+  sans: { label: 'Sans', css: "'Plus Jakarta Sans', sans-serif" },
+  mono: { label: 'Mono', css: "'JetBrains Mono', monospace" },
+  dyslexic: { label: 'Dyslexic', css: "'OpenDyslexic', sans-serif" },
 };
 
 /**
@@ -19,10 +19,7 @@ export function applyReaderFont(fontKey) {
   const font = READER_FONTS[fontKey];
   if (!font) return;
 
-  document.documentElement.style.setProperty(
-    "--reader-font-family",
-    font.css
-  );
+  document.documentElement.style.setProperty('--reader-font-family', font.css);
 
   localStorage.setItem(FONT_STORAGE_KEY, fontKey);
 }
@@ -32,5 +29,5 @@ export function applyReaderFont(fontKey) {
  */
 export function loadReaderFont() {
   const saved = localStorage.getItem(FONT_STORAGE_KEY);
-  return READER_FONTS[saved] ? saved : "serif";
+  return READER_FONTS[saved] ? saved : 'serif';
 }

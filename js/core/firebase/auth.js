@@ -1,10 +1,10 @@
-import { 
-  getAuth, 
-  signInAnonymously, 
+import {
+  getAuth,
+  signInAnonymously,
   signInWithCustomToken,
-  onAuthStateChanged 
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import app from "./app.js";
+  onAuthStateChanged,
+} from 'firebase/auth';
+import app from './app.js';
 
 export const auth = getAuth(app);
 
@@ -25,13 +25,13 @@ export function initAuth(onReady) {
 
     try {
       // Check for custom token (often provided by server-side templates)
-      if (typeof __initial_auth_token !== "undefined" && __initial_auth_token) {
+      if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
         await signInWithCustomToken(auth, __initial_auth_token);
       } else {
         await signInAnonymously(auth);
       }
     } catch (err) {
-      console.error("Core Auth initialization failed:", err);
+      console.error('Core Auth initialization failed:', err);
     }
   })();
 }

@@ -1,40 +1,40 @@
 /* Layout */
 @media (min-width: 1024px) {
-    .app-container {
-        display: flex;
-        height: 100vh;
-        overflow: hidden;
-    }
-    .story-scroll-area {
-        flex: 1;
-        overflow-y: auto;
-        scroll-behavior: smooth;
-    }
-    .sidebar-fixed-area {
-        width: 400px;
-        height: 100vh;
-        border-left: 1px solid var(--border);
-        background: var(--paper-bg);
-    }
+  .app-container {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+  .story-scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+  }
+  .sidebar-fixed-area {
+    width: 400px;
+    height: 100vh;
+    border-left: 1px solid var(--border);
+    background: var(--paper-bg);
+  }
 }
 
 .font-btn {
   /* grow */
-  flex: 1 1 0%; 
-  
+  flex: 1 1 0%;
+
   /* py-3 */
-  padding-top: 0.75rem;   /* 12px */
+  padding-top: 0.75rem; /* 12px */
   padding-bottom: 0.75rem;
-  
+
   /* rounded-xl */
   border-radius: 0.75rem; /* 12px */
-  
+
   /* text-[10px] */
   font-size: 10px;
-  
+
   /* border border-[var(--border)] */
   border: 1px solid var(--border);
-  
+
   /* Recommended additions for button behavior */
   display: flex;
   align-items: center;
@@ -56,44 +56,46 @@
 }
 /* Typography */
 .serif-content {
-    font-family: var(--reader-font-family);
-    font-size: var(--reader-size);
-    line-height: var(--reader-height);
-    color: var(--text-main);
-    transition: font-size .2s ease, line-height .2s ease;
+  font-family: var(--reader-font-family);
+  font-size: var(--reader-size);
+  line-height: var(--reader-height);
+  color: var(--text-main);
+  transition:
+    font-size 0.2s ease,
+    line-height 0.2s ease;
 }
 
 .drop-cap::first-letter {
-    float: left;
-    font-size: 5rem;
-    line-height: .8;
-    padding: .5rem .75rem 0 0;
-    font-weight: 800;
-    color: var(--accent);
-    text-transform: uppercase;
+  float: left;
+  font-size: 5rem;
+  line-height: 0.8;
+  padding: 0.5rem 0.75rem 0 0;
+  font-weight: 800;
+  color: var(--accent);
+  text-transform: uppercase;
 }
 
 /* Progress */
 #reading-progress {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 0%;
-    height: 3px;
-    background: var(--accent);
-    z-index: 1001;
-    transition: width .2s;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 3px;
+  background: var(--accent);
+  z-index: 1001;
+  transition: width 0.2s;
 }
 
 /* Mobile drawer */
 #mobile-drawer {
-    transform: translateY(100%);
-    transition: transform .5s cubic-bezier(.23,1,.32,1);
+  transform: translateY(100%);
+  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
 }
 #mobile-drawer.open {
-    transform: translateY(0);
+  transform: translateY(0);
 }
 .story-scroll-area {
-    height: 100vh; /* Or a fixed height */
-    overflow-y: auto;
+  height: 100vh; /* Or a fixed height */
+  overflow-y: auto;
 }

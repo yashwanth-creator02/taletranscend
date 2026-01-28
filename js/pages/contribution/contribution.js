@@ -1,7 +1,7 @@
-import { addNewChapter, updateSidebarTitle } from "./chapters.js";
-import { autoSaveLocal } from "./editor.js";
-import { saveToCloud } from "./cloud.js";
-import { publishFullTale } from "./publish.js";
+import { addNewChapter, updateSidebarTitle } from './chapters.js';
+import { autoSaveLocal } from './editor.js';
+import { saveToCloud } from './cloud.js';
+import { publishFullTale } from './publish.js';
 
 /* ---------------------------
    EXPOSE FOR HTML

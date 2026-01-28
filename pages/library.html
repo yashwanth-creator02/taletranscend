@@ -1,153 +1,240 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <title>library</title>
-    <link rel="stylesheet" href="../css/base.css">
-    <link rel="stylesheet" href="../css/components.css">
-    <link rel="stylesheet" href="../css/pages/library.css">
-</head>
-<body class="bg-[#050505] text-slate-300 antialiased selection:bg-indigo-500/30">
-    <header id="main-header" class="max-w-[1500px] mx-auto sticky top-0 z-50 bg-black/60 backdrop-blur-md border-b border-zinc-800 p-4 shadow-sm">
-        <nav class="px-4 flex justify-between items-center">
-            <span class="shrink-0 font-bold text-indigo-600">TaleTranscend</span>
-            <div class="flex items-center space-x-6">
-                <!-- logo for website -->
-                <a href="index.html" class="text-slate-600 hover:text-indigo-600">
-                    <i data-lucide="home"></i>
-                </a>
-                <div class="group flex items-center gap-3 p-1 pr-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full transition-all">
-                    <div class="header-orb w-8 h-8 rounded-full bg-transparent flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
-                        <i data-lucide="library" class="w-4 h-4 text-indigo-500"></i>
-                    </div>
-                    <span class="text-[9px] font-black uppercase tracking-widest text-zinc-400 group-hover:text-white transition-colors">LIBRARY</span>
-                </div>
-                <a href="profile.html" class="text-slate-600 hover:text-indigo-600"><i data-lucide="user"></i></a>
+    <link rel="stylesheet" href="../css/base.css" />
+    <link rel="stylesheet" href="../css/components.css" />
+    <link rel="stylesheet" href="../css/pages/library.css" />
+  </head>
+  <body class="bg-[#050505] text-slate-300 antialiased selection:bg-indigo-500/30">
+    <header
+      id="main-header"
+      class="max-w-[1500px] mx-auto sticky top-0 z-50 bg-black/60 backdrop-blur-md border-b border-zinc-800 p-4 shadow-sm"
+    >
+      <nav class="px-4 flex justify-between items-center">
+        <span class="shrink-0 font-bold text-indigo-600">TaleTranscend</span>
+        <div class="flex items-center space-x-6">
+          <!-- logo for website -->
+          <a href="index.html" class="text-slate-600 hover:text-indigo-600">
+            <i data-lucide="home"></i>
+          </a>
+          <div
+            class="group flex items-center gap-3 p-1 pr-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full transition-all"
+          >
+            <div
+              class="header-orb w-8 h-8 rounded-full bg-transparent flex items-center justify-center text-white shadow-lg shadow-indigo-500/20"
+            >
+              <i data-lucide="library" class="w-4 h-4 text-indigo-500"></i>
             </div>
-        </nav>
+            <span
+              class="text-[9px] font-black uppercase tracking-widest text-zinc-400 group-hover:text-white transition-colors"
+              >LIBRARY</span
+            >
+          </div>
+          <a href="profile.html" class="text-slate-600 hover:text-indigo-600"
+            ><i data-lucide="user"></i
+          ></a>
+        </div>
+      </nav>
     </header>
 
-    <div class="flex min-h-screen ">
-        <!-- Sidebar -->
-        <aside id="sidebar" class="hidden md:flex w-72 sticky top-[75px] h-[calc(100vh-89px)] flex-col self-start p-3">
-            <div class="flex flex-col h-full bg-zinc-900/30 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-sm">
-                <div class="flex items-center p-5 border-b border-white/5 sidebar-center">
-                    <button id="toggle-sidebar" class="p-2 hover:bg-white/5 rounded-xl transition-all text-zinc-400 hover:text-indigo-400">
-                        <i data-lucide="menu" class="w-6 h-6"></i>
-                    </button>
-                    <span class="ml-3 font-bold text-sm text-white sidebar-hide">Navigation</span>
-                </div>
+    <div class="flex min-h-screen">
+      <!-- Sidebar -->
+      <aside
+        id="sidebar"
+        class="hidden md:flex w-72 sticky top-[75px] h-[calc(100vh-89px)] flex-col self-start p-3"
+      >
+        <div
+          class="flex flex-col h-full bg-zinc-900/30 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-sm"
+        >
+          <div class="flex items-center p-5 border-b border-white/5 sidebar-center">
+            <button
+              id="toggle-sidebar"
+              class="p-2 hover:bg-white/5 rounded-xl transition-all text-zinc-400 hover:text-indigo-400"
+            >
+              <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+            <span class="ml-3 font-bold text-sm text-white sidebar-hide">Navigation</span>
+          </div>
 
-                <div class="flex-1 overflow-y-auto p-4 space-y-8">
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center px-2 sidebar-hide">
-                            <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">Browse By</h4>
-                        </div>
-                        <div class="space-y-1">
-                            <button class="w-full flex items-center gap-3 p-3 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 sidebar-center">
-                                <i data-lucide="layout-grid" class="w-4 h-4"></i>
-                                <span class="text-xs font-bold sidebar-hide">All Eras</span>
-                            </button>
-                            <button class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-zinc-500 hover:text-white transition-all sidebar-center">
-                                <i data-lucide="scroll" class="w-4 h-4"></i>
-                                <span class="text-xs font-bold sidebar-hide">Manuscripts</span>
-                            </button>
-                            <button class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-zinc-500 hover:text-white transition-all sidebar-center">
-                                <i data-lucide="clock" class="w-4 h-4"></i>
-                                <span class="text-xs font-bold sidebar-hide">Recent Myths</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Section: Collection -->
-                    <div class="space-y-4">
-                        <h4 class="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600 sidebar-hide">Personal</h4>
-                        <div class="space-y-1">
-                            <button class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-zinc-500 hover:text-white transition-all sidebar-center">
-                                <i data-lucide="bookmark" class="w-4 h-4"></i>
-                                <span class="text-xs font-bold sidebar-hide">Bookmarks</span>
-                            </button>
-                            <button class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-zinc-500 hover:text-white transition-all sidebar-center">
-                                <i data-lucide="feather" class="w-4 h-4"></i>
-                                <span class="text-xs font-bold sidebar-hide">My Tales</span>
-                            </button>
-                        </div>
-                    </div>
-                    
-                </div>
-
-                <div class="p-4">
-                    <button class="w-full bg-indigo-600 hover:bg-indigo-500 text-white p-4 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-lg shadow-indigo-600/20 sidebar-center">
-                        <i data-lucide="plus" class="w-5 h-5"></i>
-                        <span class="text-xs font-black uppercase tracking-widest sidebar-hide">Submit Tale</span>
-                    </button>
-                </div>
-
-                <div class="mt-auto p-4 border-t border-white/5 bg-white/[0.02]">
-                    <div class="flex items-center gap-3 sidebar-center">
-                        <div class="relative flex-shrink-0">
-                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Archivist" alt="avatar" class="w-10 h-10 rounded-xl bg-zinc-800 border border-white/10">
-                            <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-zinc-900 rounded-full"></div>
-                        </div>
-                        <div class="sidebar-hide overflow-hidden">
-                            <p class="text-xs font-bold text-white truncate">Archivist Prime</p>
-                            <p class="text-[10px] text-indigo-400 font-medium">Lvl 42 Sage</p>
-                        </div>
-                    </div>
-                </div>
+          <div class="flex-1 overflow-y-auto p-4 space-y-8">
+            <div class="space-y-4">
+              <div class="flex justify-between items-center px-2 sidebar-hide">
+                <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">
+                  Browse By
+                </h4>
+              </div>
+              <div class="space-y-1">
+                <button
+                  class="w-full flex items-center gap-3 p-3 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 sidebar-center"
+                >
+                  <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                  <span class="text-xs font-bold sidebar-hide">All Eras</span>
+                </button>
+                <button
+                  class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-zinc-500 hover:text-white transition-all sidebar-center"
+                >
+                  <i data-lucide="scroll" class="w-4 h-4"></i>
+                  <span class="text-xs font-bold sidebar-hide">Manuscripts</span>
+                </button>
+                <button
+                  class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-zinc-500 hover:text-white transition-all sidebar-center"
+                >
+                  <i data-lucide="clock" class="w-4 h-4"></i>
+                  <span class="text-xs font-bold sidebar-hide">Recent Myths</span>
+                </button>
+              </div>
             </div>
-        </aside>
 
-        <!-- Main Content -->
-        <main class="min-w-0 overflow-y-auto flex-1 p-6 lg:p-12">
-            <div class="max-w-[1500px] mx-auto">
-                <header class="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-16">
-                    <div class="space-y-4">
-                        <div class="flex items-center gap-2">
-                            <span class="h-[1px] w-8 bg-indigo-500"></span>
-                            <h2 class="text-indigo-500 text-[10px] font-black uppercase tracking-[0.4em]">Knowledge Repository</h2>
-                        </div>
-                        <h1 class="text-4xl md:text-6xl font-black text-white tracking-tighter uppercase leading-none">
-                            The <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Archives</span>
-                        </h1>
-                    </div>
-
-                    <div class="relative group">
-                        <div class="absolute inset-y-0 left-5 flex items-center pointer-events-none">
-                            <i data-lucide="search" class="w-4 h-4 text-zinc-500 group-focus-within:text-indigo-400 transition-colors"></i>
-                        </div>
-                        <!-- ADDED ID HERE -->
-                        <input type="text" id="search-input" placeholder="Search the weave..." 
-                               class="w-full lg:w-[400px] bg-zinc-900/50 border border-white/10 rounded-2xl py-4 pl-14 pr-16 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/40 transition-all text-white placeholder:text-zinc-600">
-                        <div class="absolute inset-y-0 right-4 flex items-center">
-                            <kbd class="px-2 py-1 rounded bg-black border border-white/10 text-[9px] font-bold text-zinc-500">CMD K</kbd>
-                        </div>
-                    </div>
-                </header>
-
-                <!-- Filter Bar -->
-                <div class="flex overflow-x-auto pb-4 gap-3 mb-12 no-scrollbar">
-                    <button class="flex-shrink-0 px-6 py-3 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-xl shadow-indigo-600/20">All Scrolls</button>
-                    <button class="flex-shrink-0 px-6 py-3 bg-zinc-900/50 border border-white/5 text-zinc-500 hover:text-white hover:border-white/20 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all">Nordic Lore</button>
-                    <button class="flex-shrink-0 px-6 py-3 bg-zinc-900/50 border border-white/5 text-zinc-500 hover:text-white hover:border-white/20 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all">Mesoamerican</button>
-                    <button class="flex-shrink-0 px-6 py-3 bg-zinc-900/50 border border-white/5 text-zinc-500 hover:text-white hover:border-white/20 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all">Eastern Spirit</button>
-                    <button class="flex-shrink-0 px-6 py-3 bg-zinc-900/50 border border-white/5 text-zinc-500 hover:text-white hover:border-white/20 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all">Neo-Solar</button>
-                </div>
-
-                <section id="cards-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-8">
-                    <div class="col-span-full text-center py-20">
-                        <div class="inline-block w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-                        <p class="mt-4 text-zinc-500 font-medium">Synchronizing with Archives...</p>
-                    </div>
-                </section>
+            <!-- Section: Collection -->
+            <div class="space-y-4">
+              <h4
+                class="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600 sidebar-hide"
+              >
+                Personal
+              </h4>
+              <div class="space-y-1">
+                <button
+                  class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-zinc-500 hover:text-white transition-all sidebar-center"
+                >
+                  <i data-lucide="bookmark" class="w-4 h-4"></i>
+                  <span class="text-xs font-bold sidebar-hide">Bookmarks</span>
+                </button>
+                <button
+                  class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-zinc-500 hover:text-white transition-all sidebar-center"
+                >
+                  <i data-lucide="feather" class="w-4 h-4"></i>
+                  <span class="text-xs font-bold sidebar-hide">My Tales</span>
+                </button>
+              </div>
             </div>
-        </main>
+          </div>
+
+          <div class="p-4">
+            <button
+              class="w-full bg-indigo-600 hover:bg-indigo-500 text-white p-4 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-lg shadow-indigo-600/20 sidebar-center"
+            >
+              <i data-lucide="plus" class="w-5 h-5"></i>
+              <span class="text-xs font-black uppercase tracking-widest sidebar-hide"
+                >Submit Tale</span
+              >
+            </button>
+          </div>
+
+          <div class="mt-auto p-4 border-t border-white/5 bg-white/[0.02]">
+            <div class="flex items-center gap-3 sidebar-center">
+              <div class="relative flex-shrink-0">
+                <img
+                  src="https://api.dicebear.com/7.x/avataaars/svg?seed=Archivist"
+                  alt="avatar"
+                  class="w-10 h-10 rounded-xl bg-zinc-800 border border-white/10"
+                />
+                <div
+                  class="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-zinc-900 rounded-full"
+                ></div>
+              </div>
+              <div class="sidebar-hide overflow-hidden">
+                <p class="text-xs font-bold text-white truncate">Archivist Prime</p>
+                <p class="text-[10px] text-indigo-400 font-medium">Lvl 42 Sage</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="min-w-0 overflow-y-auto flex-1 p-6 lg:p-12">
+        <div class="max-w-[1500px] mx-auto">
+          <header class="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-16">
+            <div class="space-y-4">
+              <div class="flex items-center gap-2">
+                <span class="h-[1px] w-8 bg-indigo-500"></span>
+                <h2 class="text-indigo-500 text-[10px] font-black uppercase tracking-[0.4em]">
+                  Knowledge Repository
+                </h2>
+              </div>
+              <h1
+                class="text-4xl md:text-6xl font-black text-white tracking-tighter uppercase leading-none"
+              >
+                The
+                <span
+                  class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400"
+                  >Archives</span
+                >
+              </h1>
+            </div>
+
+            <div class="relative group">
+              <div class="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+                <i
+                  data-lucide="search"
+                  class="w-4 h-4 text-zinc-500 group-focus-within:text-indigo-400 transition-colors"
+                ></i>
+              </div>
+              <!-- ADDED ID HERE -->
+              <input
+                type="text"
+                id="search-input"
+                placeholder="Search the weave..."
+                class="w-full lg:w-[400px] bg-zinc-900/50 border border-white/10 rounded-2xl py-4 pl-14 pr-16 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/40 transition-all text-white placeholder:text-zinc-600"
+              />
+              <div class="absolute inset-y-0 right-4 flex items-center">
+                <kbd
+                  class="px-2 py-1 rounded bg-black border border-white/10 text-[9px] font-bold text-zinc-500"
+                  >CMD K</kbd
+                >
+              </div>
+            </div>
+          </header>
+
+          <!-- Filter Bar -->
+          <div class="flex overflow-x-auto pb-4 gap-3 mb-12 no-scrollbar">
+            <button
+              class="flex-shrink-0 px-6 py-3 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-xl shadow-indigo-600/20"
+            >
+              All Scrolls
+            </button>
+            <button
+              class="flex-shrink-0 px-6 py-3 bg-zinc-900/50 border border-white/5 text-zinc-500 hover:text-white hover:border-white/20 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all"
+            >
+              Nordic Lore
+            </button>
+            <button
+              class="flex-shrink-0 px-6 py-3 bg-zinc-900/50 border border-white/5 text-zinc-500 hover:text-white hover:border-white/20 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all"
+            >
+              Mesoamerican
+            </button>
+            <button
+              class="flex-shrink-0 px-6 py-3 bg-zinc-900/50 border border-white/5 text-zinc-500 hover:text-white hover:border-white/20 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all"
+            >
+              Eastern Spirit
+            </button>
+            <button
+              class="flex-shrink-0 px-6 py-3 bg-zinc-900/50 border border-white/5 text-zinc-500 hover:text-white hover:border-white/20 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all"
+            >
+              Neo-Solar
+            </button>
+          </div>
+
+          <section
+            id="cards-grid"
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8"
+          >
+            <div class="col-span-full text-center py-20">
+              <div
+                class="inline-block w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"
+              ></div>
+              <p class="mt-4 text-zinc-500 font-medium">Synchronizing with Archives...</p>
+            </div>
+          </section>
+        </div>
+      </main>
     </div>
 
     <script type="module" src="../js/pages/library/library.js"></script>
-
-</body>
+  </body>
 </html>

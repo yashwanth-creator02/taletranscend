@@ -1,0 +1,12 @@
+.gitignore
+README.md
+*.min.js
+*.min.css
+# Ignore the lock file (it's auto-generated)
+package-lock.json
+
+# Ignore the build or dependency folders
+node_modules/
+
+# Ignore your git folder
+.git/

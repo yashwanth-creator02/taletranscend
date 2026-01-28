@@ -1,0 +1,39 @@
+.studio-tab-active {
+  color: white;
+  position: relative;
+}
+
+.studio-tab-active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+
+.glass-panel {
+  background: var(--glass);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+}
+
+.tale-card-glow:hover {
+  box-shadow: 0 0 30px rgba(99, 102, 241, 0.1);
+}
+
+.progress-bar-fill {
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.options-menu {
+  transform-origin: top right;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.options-menu.hidden {
+  display: none;
+  opacity: 0;
+  transform: scale(0.95) translateY(-10px);
+}

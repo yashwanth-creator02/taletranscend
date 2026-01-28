@@ -1,4 +1,4 @@
-const STORAGE_KEY = "taletranscend:reader-progress";
+const STORAGE_KEY = 'taletranscend:reader-progress';
 
 /* ================= Helpers ================= */
 
@@ -19,7 +19,7 @@ function writeStorage(data) {
 /* ================= Progress ================= */
 
 export function saveReaderProgress({ userId, taleId, chapterIndex, scrollPercent }) {
-  if (!userId || !taleId || typeof chapterIndex !== "number") return;
+  if (!userId || !taleId || typeof chapterIndex !== 'number') return;
 
   const store = readStorage();
   store[userId] ??= {};
@@ -27,7 +27,7 @@ export function saveReaderProgress({ userId, taleId, chapterIndex, scrollPercent
 
   store[userId][taleId].chapters[chapterIndex] = {
     scrollPercent,
-    updatedAt: Date.now()
+    updatedAt: Date.now(),
   };
 
   writeStorage(store);
@@ -42,16 +42,14 @@ export function getLastReadChapter({ userId, taleId }) {
   const chapters = readStorage()[userId]?.[taleId]?.chapters;
   if (!chapters) return null;
 
-  return Number(
-    Object.entries(chapters).sort((a, b) => b[1].updatedAt - a[1].updatedAt)[0]?.[0]
-  );
+  return Number(Object.entries(chapters).sort((a, b) => b[1].updatedAt - a[1].updatedAt)[0]?.[0]);
 }
 
 export function getChapterState(progress) {
-  if (!progress) return "not_started";
-  if (progress.scrollPercent >= 95) return "completed";
-  if (progress.scrollPercent > 0) return "in_progress";
-  return "not_started";
+  if (!progress) return 'not_started';
+  if (progress.scrollPercent >= 95) return 'completed';
+  if (progress.scrollPercent > 0) return 'in_progress';
+  return 'not_started';
 }
 
 /* ================= Read Time ================= */

@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@services/*": ["js/core/services/*"],
+      "@core/*": ["js/core/*"],
+      "@pages/*": ["js/pages/*"],
+      "@css/*": ["css/*"],
+      "@/*": ["js/*"]
+    }
+  },
+  "exclude": ["node_modules", "dist"]
+}

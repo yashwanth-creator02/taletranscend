@@ -1,5 +1,4 @@
-import { getTotalReadTime } from "./readTime.selector.js";
-
+import { getTotalReadTime } from './readTime.selector.js';
 
 export async function getTotalReadTimes({ userId, taleIds }) {
   if (!userId || !Array.isArray(taleIds) || taleIds.length === 0) {

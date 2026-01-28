@@ -1,6 +1,7 @@
-// js/core/firebase/db.js
-import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-import app from "./app.js";
+import { getFirestore } from 'firebase/firestore';
+import app from './app.js';
+
+// No more URLs! We import directly from the 'firebase' package
 import {
   doc,
   setDoc,
@@ -9,17 +10,12 @@ import {
   getDocs,
   onSnapshot,
   addDoc,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+  serverTimestamp,
+  deleteDoc,
+} from 'firebase/firestore';
+
 // Initialize Firestore
 export const db = getFirestore(app);
-export {
-  doc,
-  setDoc,
-  getDoc,
-  collection,
-  getDocs,
-  onSnapshot,
-  addDoc,
-  serverTimestamp
-};
+
+// Re-exporting these
+export { doc, setDoc, getDoc, collection, getDocs, onSnapshot, addDoc, serverTimestamp, deleteDoc };

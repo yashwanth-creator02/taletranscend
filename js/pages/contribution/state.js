@@ -2,5 +2,5 @@
 
 export const state = {
   chapters: [],
-  currentChapterIndex: 0
+  currentChapterIndex: 0,
 };

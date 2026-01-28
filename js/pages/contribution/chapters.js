@@ -1,12 +1,12 @@
-import { state } from "./state.js";
+import { state } from './state.js';
 
 /* ---------------------------
    CHAPTER MANAGEMENT
 ---------------------------- */
 export function addNewChapter() {
   state.chapters.push({
-    title: "Untitled Chapter",
-    content: ""
+    title: 'Untitled Chapter',
+    content: '',
   });
 
   state.currentChapterIndex = state.chapters.length - 1;
@@ -15,13 +15,12 @@ export function addNewChapter() {
 }
 
 export function renderChapterList() {
-  const list = document.getElementById("chapter-list");
-  list.innerHTML = "";
+  const list = document.getElementById('chapter-list');
+  list.innerHTML = '';
 
   state.chapters.forEach((ch, index) => {
-    const item = document.createElement("div");
-    item.className =
-      "px-6 py-3 text-xs cursor-pointer text-zinc-400 hover:text-white";
+    const item = document.createElement('div');
+    item.className = 'px-6 py-3 text-xs cursor-pointer text-zinc-400 hover:text-white';
     item.textContent = ch.title;
 
     item.onclick = () => {
@@ -37,8 +36,8 @@ export function loadCurrentChapter() {
   const chapter = state.chapters[state.currentChapterIndex];
   if (!chapter) return;
 
-  document.getElementById("current-chapter-title").value = chapter.title;
-  document.getElementById("chapter-content").value = chapter.content;
+  document.getElementById('current-chapter-title').value = chapter.title;
+  document.getElementById('chapter-content').value = chapter.content;
 }
 
 export function updateSidebarTitle(value) {

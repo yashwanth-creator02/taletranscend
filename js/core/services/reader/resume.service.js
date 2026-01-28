@@ -1,5 +1,5 @@
-import { readStorage } from "./localProgress.service.js";
-import { getCloudProgress } from "./cloudProgress.service.js";
+import { readStorage } from './localProgress.service.js';
+import { getCloudProgress } from './cloudProgress.service.js';
 
 export async function resolveResumePoint({ userId, taleId }) {
   if (!userId || !taleId) return null;

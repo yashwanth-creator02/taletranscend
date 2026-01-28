@@ -1,48 +1,48 @@
 /* ---------- CONTRIBUTION EDITOR ---------- */
 
 #story-editor {
-    backdrop-filter: blur(28px);
+  backdrop-filter: blur(28px);
 }
 
 /* ---------- INPUTS ---------- */
 
 #story-editor input,
 #story-editor textarea {
-    background: transparent;
-    color: var(--text-main);
-    border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-main);
+  border: 1px solid var(--border);
 }
 
 #story-editor input::placeholder,
 #story-editor textarea::placeholder {
-    color: var(--text-muted);
+  color: var(--text-muted);
 }
 
 /* ---------- FOCUS ---------- */
 
 #story-editor input:focus,
 #story-editor textarea:focus {
-    outline: none;
-    border-color: var(--accent);
+  outline: none;
+  border-color: var(--accent);
 }
 
 /* ---------- SUBMIT BUTTON ---------- */
 
 .contribute-btn {
-    background: var(--accent);
-    color: white;
+  background: var(--accent);
+  color: white;
 }
 
 .contribute-btn:hover {
-    filter: brightness(1.1);
+  filter: brightness(1.1);
 }
 #story-editor {
-    background: var(--glass);
-    border: 1px solid var(--border);
-    border-radius: 2rem;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 2rem;
 }
 
 #story-editor textarea {
-    font-family: var(--reader-font);
-    line-height: 1.75;
+  font-family: var(--reader-font);
+  line-height: 1.75;
 }

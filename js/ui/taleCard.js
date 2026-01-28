@@ -1,75 +1,73 @@
-import { getTotalReadTime } from "../../core/services/reader/index.js";
+import { getTotalReadTime } from '@services/index.js';
 
 /* =========================
    RENDER
 ========================= */
 
-export async function renderLibrary(userId, tales) {
-    const container = document.getElementById("cards-grid");
+export async function renderCardsGrid(userId, tales) {
+  const container = document.getElementById('cards-grid');
 
-    if (!tales.length) {
-        container.innerHTML = `
+  if (!tales.length) {
+    container.innerHTML = `
             <div class="col-span-full text-center py-20 text-zinc-600 italic">
                 No tales found in the archives...
             </div>
         `;
-        return;
-    }
+    return;
+  }
 
-    // Resolve async read times BEFORE rendering
-    const readTimeEntries = await Promise.all(
-        tales.map(async (tale) => {
-            const ms = await getTotalReadTime({
-                userId,
-                taleId: tale.id
-            });
-            return [tale.id, ms];
-        })
-    );
+  // Resolve async read times BEFORE rendering
+  const readTimeEntries = await Promise.all(
+    tales.map(async (tale) => {
+      const ms = await getTotalReadTime({
+        userId,
+        taleId: tale.id,
+      });
+      return [tale.id, ms];
+    })
+  );
 
-    const readTimeMap = Object.fromEntries(readTimeEntries);
+  const readTimeMap = Object.fromEntries(readTimeEntries);
 
-    container.innerHTML = tales
-        .map(tale => createTaleCard(tale, readTimeMap))
-        .join("");
+  container.innerHTML = tales.map((tale) => createTaleCard(tale, readTimeMap)).join('');
 }
 
 /* =========================
    CARD TEMPLATE
 ========================= */
-
 function createTaleCard(tale, readTimeMap = {}) {
-    const {
-        id = "0000",
-        title = "Untitled Echo",
-        coverUrl,
-        description = "No description provided.",
-        era = "Unknown Era",
-        progress = 0,
-        chapterCount = 0,
-        estimatedReadTime = "—"
-    } = tale;
+  const {
+    id = '0000',
+    title = 'Untitled Echo',
+    coverUrl,
+    description = 'No description provided.',
+    era = 'Unknown Era',
+    progress = 0,
+    chapterCount = 0,
+    estimatedReadTime = '—',
+  } = tale;
 
-    const menuId = `menu-${id}`;
+  const menuId = `menu-${id}`;
 
-    const totalMs = readTimeMap[id] || 0;
-    const minutes = Math.floor(totalMs / 60000);
-    const progressPercent = Math.min(100, Math.max(0, progress));
-    const time =minutes > 1 ? `<div class="flex items-center gap-2">
+  const totalMs = readTimeMap[id] || 0;
+  const minutes = Math.floor(totalMs / 60000);
+  const progressPercent = Math.min(100, Math.max(0, progress));
+  const time =
+    minutes > 1
+      ? `<div class="flex items-center gap-2">
                     <i data-lucide="clock" class="w-3.5 h-3.5 text-zinc-600"></i>
                     <span class="text-[9px] font-bold uppercase text-zinc-500 tracking-widest">
                         ${minutes > 0 ? `${minutes}m read` : estimatedReadTime}
                     </span>
-                </div>` : "" ;
-    
+                </div>`
+      : '';
 
-    const cover =
-        coverUrl ||
-        "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=800";
+  const cover =
+    coverUrl || 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=800';
 
-    return `
+  return `
     <div
-        class="glass-panel group relative p-5 rounded-[2.5rem] hover:border-indigo-500/40 transition-all cursor-pointer tale-card-glow overflow-visible tale-card"
+        class="tale-card-glow glass-panel group relative p-5 rounded-[2.5rem] hover:border-indigo-500/40 transition-all cursor-pointer tale-card-glow overflow-visible tale-card"
         data-id="${id}">
 
         <!-- HEADER -->
@@ -93,7 +91,7 @@ function createTaleCard(tale, readTimeMap = {}) {
 
                 <div id="${menuId}"
                     class="options-menu hidden absolute right-0 mt-2 w-48 bg-[#0a0a0a]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl z-[60] py-2">
-                
+
                     <div class="px-4 py-1 mb-2">
                         <span class="text-[7px] font-black text-zinc-600 uppercase tracking-[0.3em]">Quick Actions</span>
                     </div>
@@ -106,7 +104,7 @@ function createTaleCard(tale, readTimeMap = {}) {
                     <button class="menu-btn w-full px-4 py-2 text-left text-[9px] uppercase tracking-widest font-bold text-zinc-400 hover:text-white hover:bg-indigo-500/10 transition flex items-center gap-3">
                         <i data-lucide="download" class="w-3.5 h-3.5"></i> Force Offline Sync
                     </button>
-                    
+
                     <div class="h-[1px] bg-white/5 my-2 mx-2"></div>
                     <div class="px-4 py-1 mb-1">
                         <span class="text-[7px] font-black text-zinc-600 uppercase tracking-[0.3em]">Management</span>
@@ -123,8 +121,8 @@ function createTaleCard(tale, readTimeMap = {}) {
                     </button>
 
                     <div class="h-[1px] bg-white/5 my-2 mx-2"></div>
-                    
-                    <button class="menu-btn w-full px-4 py-2 text-left text-[9px] uppercase tracking-widest font-bold text-red-400 hover:bg-red-500/20 transition flex items-center gap-3">
+
+                    <button class="menu-btn w-full px-4 py-2 text-left text-[9px] uppercase tracking-widest font-bold  hover:bg-red-500/20 transition flex items-center gap-3">
                         <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Decouple Fragment
                     </button>
                 </div>
