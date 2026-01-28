@@ -1,3 +1,4 @@
+// js/reader/comments.js
 import {
   db,
   appId,
@@ -8,8 +9,16 @@ import {
   serverTimestamp,
 } from '@core/firebase/index.js';
 
+/* ======================================
+   COMMENTS MODULE
+   - Real-time listener
+   - Posting comments
+   - Safe HTML escaping
+====================================== */
+
 /**
- * Start listening to comments in real-time
+ * Start listening to comments in real-time.
+ * Returns an unsubscribe function to stop listening.
  */
 export function listenToComments(taleId) {
   const commentsRef = collection(
@@ -23,7 +32,7 @@ export function listenToComments(taleId) {
     'comments'
   );
 
-  onSnapshot(commentsRef, (snap) => {
+  const unsubscribe = onSnapshot(commentsRef, (snap) => {
     const list = document.getElementById('comments-list');
     if (!list) return;
 
@@ -33,6 +42,8 @@ export function listenToComments(taleId) {
 
     list.innerHTML = items.length ? items.map(renderComment).join('') : emptyState();
   });
+
+  return unsubscribe;
 }
 
 /**
@@ -67,35 +78,48 @@ export async function postComment(taleId) {
 
 /* ---------------- UI helpers ---------------- */
 
+/**
+ * Render a single comment safely
+ */
 function renderComment(c) {
-  const date = c.timestamp ? new Date(c.timestamp.seconds * 1000).toLocaleDateString() : 'Syncing';
+  const date = c.timestamp ? new Date(c.timestamp.seconds * 1000).toLocaleString() : 'Syncing';
 
   return `
-        <div class="glass-card p-8 rounded-[2rem] border-l-4 border-l-indigo-600 bg-white/[0.02]">
-            <div class="flex justify-between items-center mb-4">
-                <span class="text-[10px] text-indigo-400 font-black uppercase tracking-widest">
-                    ${c.authorName || 'Unknown'}
-                </span>
-                <span class="text-[8px] text-zinc-600 font-black uppercase tracking-widest">
-                    ${date}
-                </span>
-            </div>
-            <p class="text-sm text-zinc-400 leading-relaxed font-medium">
-                ${escapeHTML(c.text)}
-            </p>
+    <div class="glass-card p-8 rounded-[2rem] border-l-4 border-l-indigo-600 bg-white/[0.02]">
+        <div class="flex justify-between items-center mb-4">
+            <span class="text-[10px] text-indigo-400 font-black uppercase tracking-widest">
+                ${escapeHTML(c.authorName || 'Unknown')}
+            </span>
+            <span class="text-[8px] text-zinc-600 font-black uppercase tracking-widest">
+                ${escapeHTML(date)}
+            </span>
         </div>
-    `;
+        <p class="text-sm text-zinc-400 leading-relaxed font-medium">
+            ${escapeHTML(c.text)}
+        </p>
+    </div>
+  `;
 }
 
+/**
+ * Empty state for no comments
+ */
 function emptyState() {
   return `
-        <p class="text-[10px] text-zinc-700 font-black uppercase tracking-widest text-center py-20">
-            The echoes remain silent.
-        </p>
-    `;
+    <p class="text-[10px] text-zinc-700 font-black uppercase tracking-widest text-center py-20">
+        The echoes remain silent.
+    </p>
+  `;
 }
 
-/* Prevent XSS (important even for MVPs) */
+/**
+ * Escape HTML to prevent XSS
+ */
 function escapeHTML(str = '') {
-  return str.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+  return str
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
 }
