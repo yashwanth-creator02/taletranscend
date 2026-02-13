@@ -13,6 +13,8 @@ import {
   addDoc,
   serverTimestamp,
   deleteDoc,
+  updateDoc,
+  writeBatch,
 } from 'firebase/firestore';
 
 // Initialize the Firestore database instance
@@ -21,4 +23,16 @@ export const db = getFirestore(app);
 
 // Re-export commonly used Firestore utilities
 // This creates a single import surface for Firestore across the app
-export { doc, setDoc, getDoc, collection, getDocs, onSnapshot, addDoc, serverTimestamp, deleteDoc };
+export {
+  doc,
+  setDoc,
+  getDoc,
+  collection,
+  writeBatch,
+  getDocs,
+  onSnapshot,
+  addDoc,
+  serverTimestamp,
+  deleteDoc,
+  updateDoc,
+};

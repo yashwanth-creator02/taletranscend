@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import tailwindcss from '@tailwindcss/vite';
 
 // Fix for __dirname in ES Modules
 const __filename = fileURLToPath(import.meta.url);
@@ -23,6 +24,7 @@ export default defineConfig({
   },
   server: {
     // Since your HTML files are in /pages/, this will open the landing page
-    open: '/pages/index.html',
+    open: '/pages/library.html',
   },
+  plugins: [tailwindcss()],
 });

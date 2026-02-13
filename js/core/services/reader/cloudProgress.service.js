@@ -1,4 +1,4 @@
-import { db, appId, doc, getDoc, setDoc } from '../../firebase/index.js';
+import { db, appId, doc, getDoc, setDoc, serverTimestamp } from '../../firebase/index.js';
 
 /* ================= Firestore Structure Reference =================
 artifacts (collection)
@@ -7,11 +7,11 @@ artifacts (collection)
          └─ <userId> (document)
              └─ readerProgress (collection)
                  └─ <taleId> (document)
-                     ├─ chapters (map/object)
-                     │    ├─ 0: { scrollPercent, updatedAt }
-                     │    ├─ 1: { scrollPercent, updatedAt }
-                     │    └─ ...
-                     └─ totalReadTimeMs
+                     ├─ totalReadTimeMs
+                     └─ chapters (subcollection)
+                          └─ <chapterIndex> (document)
+                              ├─ scrollPercent
+                              └─ updatedAt
 ==================================================================== */
 
 /* ================= Cloud API ================= */
@@ -36,32 +36,46 @@ export async function syncChapterProgressToCloud({
   // Validate required parameters
   if (!userId || !taleId || typeof chapterIndex !== 'number') return;
 
-  // Reference to the user's progress document in Firestore
-  const ref = doc(db, 'artifacts', appId, 'users', userId, 'readerProgress', taleId);
+  // Tale-level progress document
+  const taleRef = doc(db, 'artifacts', appId, 'users', userId, 'readerProgress', taleId);
 
-  // Merge the chapter progress into Firestore document
-  await setDoc(
-    ref,
-    {
-      chapters: {
-        [chapterIndex]: {
-          scrollPercent,
-          updatedAt: Date.now(), // Track last updated timestamp
-        },
-      },
-      totalReadTimeMs, // Aggregate read time
-    },
-    { merge: true } // Keep existing data intact
+  // Chapter-level progress document (subcollection)
+  const chapterRef = doc(
+    db,
+    'artifacts',
+    appId,
+    'users',
+    userId,
+    'readerProgress',
+    taleId,
+    'chapters',
+    String(chapterIndex)
   );
+
+  // Persist chapter progress
+  await setDoc(
+    chapterRef,
+    {
+      scrollPercent,
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true }
+  );
+
+  // Persist aggregate tale-level data
+  if (typeof totalReadTimeMs === 'number') {
+    await setDoc(taleRef, { totalReadTimeMs }, { merge: true });
+  }
 }
 
 /**
  * Retrieves a user's progress for a specific tale from Firestore.
+ * (Tale-level data only; chapters are read separately)
  *
  * @param {Object} payload
  * @param {string} payload.userId
  * @param {string} payload.taleId
- * @returns {Object|null} Progress data or null if none exists
+ * @returns {Object|null} Tale-level progress or null
  */
 export async function getCloudProgress({ userId, taleId }) {
   const ref = doc(db, 'artifacts', appId, 'users', userId, 'readerProgress', taleId);

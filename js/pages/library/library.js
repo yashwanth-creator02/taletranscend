@@ -5,10 +5,8 @@ import {
   stopTalesSubscription,
   renderCardsGrid,
   initIcons,
-  setupNavigation,
   setupSearch,
-  jumptoReader,
-  setupOptionsMenu,
+  setupCardInteractions,
   setupSidebarToggle,
   db,
 } from './index.js';
@@ -53,9 +51,7 @@ initAuth(async (user) => {
   );
 
   /* ==================== UI Event Handlers ==================== */
-  setupNavigation(); // Card-wide click navigation
-  jumptoReader(userId); // Resume reading on play buttons
-  setupOptionsMenu(); // Options menus for each tale card
+  setupCardInteractions(userId);
 
   setupSearch(
     () => allTales, // Function to get all tales

@@ -1,4 +1,13 @@
-import { db, appId, doc, getDocs, deleteDoc, setDoc, collection } from '../firebase/index.js';
+import {
+  db,
+  appId,
+  doc,
+  getDocs,
+  deleteDoc,
+  setDoc,
+  collection,
+  serverTimestamp,
+} from '../firebase/index.js';
 
 /* ================= Bookmarks Service ================= */
 
@@ -20,7 +29,7 @@ export async function addToBookmarks({ userId, taleId }) {
   await setDoc(
     ref,
     {
-      bookmarkedAt: Date.now(), // Track when the story was bookmarked
+      bookmarkedAt: serverTimestamp(), // Track when the story was bookmarked
     },
     { merge: true }
   );

@@ -50,3 +50,4 @@ body {
   background: var(--border);
   border-radius: 10px;
 }
+@import 'tailwindcss';

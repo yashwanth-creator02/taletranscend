@@ -18,11 +18,13 @@ export async function resolveResumePoint({ userId, taleId }) {
   // -------------------- LOCAL CHAPTERS --------------------
   const localChapters = readStorage()[userId]?.[taleId]?.chapters;
 
-  if (localChapters) {
-    // Include only chapters not fully read (<100%)
+  if (localChapters && typeof localChapters === 'object') {
     for (const [chapterIndex, data] of Object.entries(localChapters)) {
-      if (data.scrollPercent < 100) {
-        candidates.push({ chapterIndex: +chapterIndex, ...data });
+      if (data?.scrollPercent < 100) {
+        candidates.push({
+          chapterIndex: Number(chapterIndex),
+          ...data,
+        });
       }
     }
   }
@@ -30,15 +32,41 @@ export async function resolveResumePoint({ userId, taleId }) {
   // -------------------- CLOUD CHAPTERS --------------------
   const cloud = await getCloudProgress({ userId, taleId });
 
-  if (cloud?.chapters) {
+  /**
+   * Supports BOTH:
+   * 1. Legacy object-based chapters
+   * 2. New subcollection-based array of chapters
+   */
+
+  // Case 1: chapters is an ARRAY (subcollection)
+  if (Array.isArray(cloud?.chapters)) {
+    for (const chapter of cloud.chapters) {
+      if (chapter?.scrollProgress < 100) {
+        candidates.push({
+          chapterIndex: chapter.chapterIndex,
+          scrollPercent: chapter.scrollProgress,
+          updatedAt: chapter.updatedAt,
+        });
+      }
+    }
+  }
+
+  // Case 2: chapters is an OBJECT (legacy)
+  else if (cloud?.chapters && typeof cloud.chapters === 'object') {
     for (const [chapterIndex, data] of Object.entries(cloud.chapters)) {
-      if (data.scrollPercent < 100) {
-        candidates.push({ chapterIndex: +chapterIndex, ...data });
+      if (data?.scrollPercent < 100) {
+        candidates.push({
+          chapterIndex: Number(chapterIndex),
+          ...data,
+        });
       }
     }
   }
 
   // -------------------- RESUME POINT SELECTION --------------------
-  // Pick the most recently updated chapter among all candidates
-  return candidates.sort((a, b) => b.updatedAt - a.updatedAt)[0] || null;
+  return (
+    candidates
+      .filter((c) => typeof c.updatedAt === 'number')
+      .sort((a, b) => b.updatedAt - a.updatedAt)[0] || null
+  );
 }

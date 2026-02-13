@@ -19,11 +19,11 @@ async function getAllTales(userId) {
   const user_tales_ids = user_tales.map((bookmark) => bookmark.id);
 
   // Filter community tales to only those bookmarked by the user
-  const filterd_tales = comm_tales.filter((tale) => {
+  const filtered_tales = comm_tales.filter((tale) => {
     return user_tales_ids.includes(tale.id);
   });
 
-  return filterd_tales;
+  return filtered_tales;
 }
 
 /* ==================== Render Tales ==================== */

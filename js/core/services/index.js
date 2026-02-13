@@ -29,3 +29,5 @@ export * from './bookmark.service.js';
 // -------------------- Tales --------------------
 // Fetch all available community tales
 export * from './tale/getTales.js';
+export * from './markFinish.service.js';
+export * from './progress.utils.service.js';
