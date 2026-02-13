@@ -1,34 +1,45 @@
 <!doctype html>
 <html lang="en">
-  <head class="bg-zinc-900">
+  <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TaleTranscend | Profile</title>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>profile</title>
     <link rel="stylesheet" href="../css/base.css" />
     <link rel="stylesheet" href="../css/components.css" />
     <link rel="stylesheet" href="../css/pages/profile.css" />
   </head>
+
   <body class="bg-[#050505] text-slate-300 antialiased selection:bg-indigo-500/30">
+    <div
+      id="toast-container"
+      class="fixed top-24 right-6 z-[200] flex flex-col gap-3 pointer-events-none"
+    ></div>
+
     <header
       class="sticky top-0 z-50 bg-black/60 backdrop-blur-md border-b border-zinc-800 p-4 shadow-sm"
     >
       <nav class="px-4 flex justify-between items-center">
-        <span class="font-bold text-indigo-600">TaleTranscend</span>
+        <span class="font-bold text-indigo-600 text-lg tracking-tighter">TaleTranscend</span>
         <div class="flex items-center space-x-6">
-          <!-- logo for website -->
-          <a href="index.html" class="text-slate-600 hover:text-indigo-600">
+          <a
+            href="index.html"
+            class="text-slate-400 hover:text-indigo-600 transition-all duration-300"
+          >
             <i data-lucide="home"></i>
           </a>
-          <a href="library.html" class="text-slate-600 hover:text-indigo-600">
+          <a
+            href="library.html"
+            class="text-slate-400 hover:text-indigo-600 transition-all duration-300"
+          >
             <i data-lucide="library"></i>
           </a>
           <div
-            class="group flex items-center gap-3 p-1 pr-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full transition-all"
+            class="group flex items-center gap-3 p-1 pr-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full transition-all cursor-pointer"
           >
             <div
-              class="header-orb w-8 h-8 rounded-full bg-transparent flex items-center justify-center text-white shadow-lg shadow-indigo-500/20"
+              class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-white"
             >
               <i data-lucide="user" class="w-4 h-4 text-indigo-500"></i>
             </div>
@@ -41,38 +52,14 @@
       </nav>
     </header>
 
-    <!-- Profile content -->
     <main class="max-w-7xl mx-auto flex flex-col md:flex-row min-h-screen">
-      <!-- Mobile Header (Visible only on small screens) -->
-      <div class="md:hidden flex flex-col items-center py-8 px-4 border-b border-zinc-800/50">
-        <div class="relative">
-          <div
-            class="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-2xl"
-          >
-            <i data-lucide="user" class="w-10 h-10 text-white"></i>
-          </div>
-          <div
-            class="absolute bottom-1 right-1 w-5 h-5 bg-green-500 border-2 border-black rounded-full"
-          ></div>
-        </div>
-        <h1 id="mobile-display-name" class="mt-4 text-2xl font-bold text-white">User_Name</h1>
-        <p id="mobile-display-bio" class="text-slate-400 text-sm italic">User_Bio</p>
-        <button
-          onclick="toggleModal()"
-          class="mt-4 flex items-center gap-2 px-6 py-2 bg-zinc-900 border border-zinc-800 rounded-full text-sm hover:border-indigo-500 transition-all"
-        >
-          <i data-lucide="edit-3" class="w-4 h-4"></i> Edit Profile
-        </button>
-      </div>
-
-      <!-- Desktop Sidebar -->
       <aside
         class="hidden md:flex flex-col w-1/4 sticky top-[89px] h-[calc(100vh-89px)] border-r border-zinc-800/50 p-8 overflow-y-auto"
       >
         <div class="flex flex-col items-center text-center">
           <div class="relative group cursor-pointer">
             <div
-              class="w-32 h-32 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-full flex items-center justify-center shadow-indigo-500/10 shadow-2xl"
+              class="w-32 h-32 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-full flex items-center justify-center shadow-indigo-500/10 shadow-2xl group-hover:scale-105 transition-transform duration-500"
             >
               <i data-lucide="user" class="w-16 h-16 text-white"></i>
             </div>
@@ -84,7 +71,9 @@
           <span class="mt-6 text-[10px] font-bold tracking-[0.2em] text-indigo-500 uppercase"
             >Explorer</span
           >
-          <h1 id="desktop-display-name" class="mt-2 text-3xl font-bold text-white">User_Name</h1>
+          <h1 id="desktop-display-name" class="mt-2 text-3xl font-bold text-white tracking-tight">
+            User_Name
+          </h1>
           <p
             id="desktop-display-bio"
             class="mt-2 text-slate-400 text-sm leading-relaxed max-w-[200px]"
@@ -93,7 +82,7 @@
           </p>
 
           <button
-            onclick="toggleModal()"
+            id="btn-edit-desktop"
             class="mt-8 w-full bg-zinc-900 hover:bg-zinc-800 text-white py-3 rounded-xl border border-zinc-800 hover:border-indigo-500 transition-all duration-300 flex items-center justify-center gap-2 group"
           >
             <i data-lucide="edit-3" class="w-4 h-4 text-slate-500 group-hover:text-indigo-400"></i>
@@ -101,17 +90,16 @@
           </button>
         </div>
 
-        <!-- Achievements -->
         <div class="mt-12">
           <h2 class="text-[10px] font-bold tracking-widest text-slate-500 uppercase mb-6">
             Achievements
           </h2>
           <div class="space-y-4">
             <div
-              class="flex items-center gap-4 p-3 bg-zinc-900/30 border border-zinc-800/50 rounded-2xl group hover:bg-zinc-900/50 transition-colors"
+              class="flex items-center gap-4 p-3 bg-zinc-900/30 border border-zinc-800/50 rounded-2xl group hover:bg-zinc-900/50 transition-all cursor-default"
             >
               <div
-                class="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center flex-shrink-0"
+                class="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:rotate-12 transition-transform"
               >
                 <i data-lucide="trophy" class="w-5 h-5 text-amber-500"></i>
               </div>
@@ -120,34 +108,69 @@
                 <p class="text-[11px] text-slate-500">Contributed 1st story</p>
               </div>
             </div>
-            <div
-              class="flex items-center gap-4 p-3 bg-zinc-900/30 border border-zinc-800/50 rounded-2xl group hover:bg-zinc-900/50 transition-colors"
-            >
-              <div
-                class="w-10 h-10 bg-indigo-500/10 rounded-xl flex items-center justify-center flex-shrink-0"
-              >
-                <i data-lucide="book-marked" class="w-5 h-5 text-indigo-500"></i>
-              </div>
-              <div>
-                <p class="text-sm font-bold text-white">Avid Reader</p>
-                <p class="text-[11px] text-slate-500">Finished 5 stories</p>
-              </div>
-            </div>
           </div>
         </div>
       </aside>
 
-      <!-- Main Content Area -->
+      <section class="md:hidden mb-10 mt-4 px-4">
+        <div
+          class="glass-panel p-6 rounded-[2.5rem] flex items-center gap-6 relative overflow-hidden border border-white/5"
+        >
+          <div
+            class="absolute -top-10 -left-10 w-32 h-32 bg-indigo-500/10 blur-[50px] pointer-events-none"
+          ></div>
+
+          <div class="relative flex-shrink-0">
+            <div
+              class="w-20 h-20 bg-gradient-to-tr from-indigo-600 to-violet-600 rounded-2xl p-0.5 shadow-xl shadow-indigo-500/10"
+            >
+              <div
+                class="w-full h-full bg-[#0c0c0e] rounded-[calc(1rem-2px)] flex items-center justify-center"
+              >
+                <i data-lucide="user" class="w-8 h-8 text-indigo-400/80"></i>
+              </div>
+            </div>
+            <div
+              class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-[#0c0c0e] rounded-full"
+            ></div>
+          </div>
+
+          <div class="flex-1 min-w-0">
+            <span class="text-[9px] font-black tag-gradient uppercase tracking-[0.2em] mb-1 block"
+              >Explorer</span
+            >
+            <h1
+              id="mobile-display-name"
+              class="text-xl font-bold text-white tracking-tight truncate loading-pulse"
+            >
+              User_Name
+            </h1>
+            <p
+              id="mobile-display-bio"
+              class="text-slate-500 text-xs mt-1 line-clamp-1 leading-relaxed"
+            >
+              User_Bio
+            </p>
+
+            <button
+              id="btn-edit-mobile"
+              class="mt-3 flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-widest hover:text-indigo-300 transition-colors"
+            >
+              <i data-lucide="settings-2" class="w-3 h-3"></i>
+              Edit Profile
+            </button>
+          </div>
+        </div>
+      </section>
+
       <div class="flex-1 p-6 md:p-12 overflow-y-auto">
-        <!-- History Section -->
         <section class="mb-16">
           <div class="flex justify-between items-end mb-8">
             <div>
               <h2
                 class="text-2xl md:text-3xl font-bold text-white tracking-tight flex items-center gap-3"
               >
-                <i data-lucide="history" class="text-indigo-500"></i>
-                Your History
+                <i data-lucide="history" class="text-indigo-500"></i>Your History
               </h2>
               <p class="text-slate-500 text-sm mt-1">Pick up where you left off</p>
             </div>
@@ -159,9 +182,8 @@
           </div>
 
           <div class="flex gap-6 overflow-x-auto pb-4 no-scrollbar snap-x py-5">
-            <!-- Book Card 1 -->
             <div
-              class="snap-start flex-shrink-0 w-72 p-6 bg-zinc-900/40 border border-zinc-800 rounded-3xl group hover:border-zinc-600 transition-all hover:-translate-y-1"
+              class="snap-start flex-shrink-0 w-72 p-6 bg-zinc-900/40 border border-zinc-800 rounded-3xl group hover:border-zinc-600 transition-all hover:-translate-y-2 glass-card"
             >
               <div
                 class="aspect-[4/3] bg-zinc-800 rounded-2xl mb-6 flex items-center justify-center overflow-hidden relative"
@@ -173,55 +195,23 @@
               </div>
               <h3 class="text-lg font-bold text-white mb-2">The Shadow Realm</h3>
               <p class="text-sm text-slate-500 line-clamp-2 mb-6 leading-relaxed">
-                A journey through a world where light is a luxury and silence is survival.
+                A journey through a world where light is a luxury.
               </p>
-
               <div class="space-y-2">
-                <div
-                  class="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest"
-                >
-                  <span>Progress</span>
-                  <span>72%</span>
+                <div class="flex justify-between text-[10px] font-bold text-slate-400 uppercase">
+                  <span>Progress</span><span>72%</span>
                 </div>
                 <div class="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
-                  <div class="h-full bg-indigo-500 rounded-full" style="width: 72%"></div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Book Card 2 -->
-            <div
-              class="snap-start flex-shrink-0 w-72 p-6 bg-zinc-900/40 border border-zinc-800 rounded-3xl group hover:border-zinc-600 transition-all hover:-translate-y-1"
-            >
-              <div
-                class="aspect-[4/3] bg-zinc-800 rounded-2xl mb-6 flex items-center justify-center overflow-hidden"
-              >
-                <i
-                  data-lucide="book-open"
-                  class="w-12 h-12 text-zinc-700 group-hover:scale-110 group-hover:text-indigo-500 transition-all duration-500"
-                ></i>
-              </div>
-              <h3 class="text-lg font-bold text-white mb-2">Mountain Spirits</h3>
-              <p class="text-sm text-slate-500 line-clamp-2 mb-6 leading-relaxed">
-                A historical collection of mountain folklore and forgotten peaks.
-              </p>
-
-              <div class="space-y-2">
-                <div
-                  class="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest"
-                >
-                  <span>Progress</span>
-                  <span>12%</span>
-                </div>
-                <div class="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
-                  <div class="h-full bg-indigo-500 rounded-full" style="width: 12%"></div>
+                  <div
+                    class="h-full bg-indigo-500 rounded-full shadow-[0_0_10px_rgba(79,70,229,0.5)]"
+                    style="width: 72%"
+                  ></div>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- Contributions Section -->
         <section>
           <div class="flex items-center gap-3 mb-8">
             <i data-lucide="feather" class="text-emerald-500"></i>
@@ -229,67 +219,13 @@
               Your Contributions
             </h2>
           </div>
-
           <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            <!-- Stats -->
-            <div
-              class="p-8 bg-zinc-900/40 border border-zinc-800 rounded-3xl flex flex-col justify-between min-h-[200px]"
-            >
-              <div>
-                <h3 class="text-white font-semibold mb-2">Community Impact</h3>
-                <p class="text-sm text-slate-500 leading-relaxed">
-                  Your stories preserve local wisdom for the future.
-                </p>
-              </div>
-              <div class="flex items-center gap-8 mt-6">
-                <div>
-                  <div class="text-3xl font-bold text-white">4</div>
-                  <div class="text-[10px] uppercase text-emerald-500 font-bold tracking-widest">
-                    Stories
-                  </div>
-                </div>
-                <div class="h-10 w-px bg-zinc-800"></div>
-                <div>
-                  <div class="text-3xl font-bold text-white">128</div>
-                  <div class="text-[10px] uppercase text-emerald-500 font-bold tracking-widest">
-                    Total Reads
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Under Review -->
-            <div
-              class="p-8 bg-gradient-to-br from-zinc-900 to-zinc-800/50 border border-zinc-700 rounded-3xl border-l-4 border-l-emerald-500 flex flex-col justify-between"
-            >
-              <div>
-                <div class="flex justify-between items-center mb-4">
-                  <span
-                    class="px-2 py-1 bg-emerald-500/10 text-emerald-500 text-[10px] font-bold rounded uppercase tracking-tighter"
-                    >Under Review</span
-                  >
-                  <span class="text-slate-500 text-[10px]">2 days ago</span>
-                </div>
-                <h3 class="text-white font-bold text-lg mb-1">The Whispering Sands</h3>
-                <p class="text-sm text-slate-400 italic mb-4">
-                  "The desert remembers the trade routes..."
-                </p>
-              </div>
-              <div
-                class="flex items-center gap-2 text-[10px] text-slate-500 uppercase font-bold tracking-widest"
-              >
-                <i data-lucide="message-square" class="w-3 h-3"></i>
-                <span>3 feedback items</span>
-              </div>
-            </div>
-
-            <!-- CTA -->
             <button
-              onclick="toggleEditor()"
+              id="btn-new-story"
               class="group p-8 bg-zinc-900/20 border-2 border-dashed border-zinc-800 hover:border-emerald-500/50 rounded-3xl flex flex-col items-center justify-center transition-all min-h-[200px]"
             >
               <div
-                class="w-14 h-14 bg-emerald-500/10 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"
+                class="w-14 h-14 bg-emerald-500/10 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-emerald-500/20 transition-all"
               >
                 <i data-lucide="plus" class="text-emerald-500 w-6 h-6"></i>
               </div>
@@ -303,17 +239,19 @@
       </div>
     </main>
 
-    <!-- Edit Profile Modal -->
     <div
       id="edit-modal"
       class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm"
     >
       <div
-        class="bg-zinc-900 border border-zinc-800 w-full max-w-lg rounded-3xl overflow-hidden modal-enter"
+        class="bg-zinc-900 border border-zinc-800 w-full max-w-lg rounded-3xl overflow-hidden modal-enter shadow-2xl"
       >
-        <div class="p-6 border-b border-zinc-800 flex justify-between items-center">
+        <div class="p-6 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50">
           <h2 class="text-xl font-bold text-white">Edit Profile</h2>
-          <button onclick="toggleModal()" class="text-slate-400 hover:text-white transition-colors">
+          <button
+            id="btn-close-modal"
+            class="text-slate-400 hover:text-white transition-colors p-2 hover:bg-zinc-800 rounded-full"
+          >
             <i data-lucide="x" class="w-6 h-6"></i>
           </button>
         </div>
@@ -325,7 +263,7 @@
             <input
               type="text"
               id="input-name"
-              class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors"
+              class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
               placeholder="Enter name..."
             />
           </div>
@@ -336,22 +274,22 @@
             <textarea
               id="input-bio"
               rows="3"
-              class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors"
+              class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
               placeholder="Tell us your story..."
             ></textarea>
           </div>
           <div class="flex gap-3 pt-4">
             <button
               type="button"
-              onclick="toggleModal()"
+              id="btn-cancel-modal"
               class="flex-1 py-3 px-6 bg-zinc-800 text-white rounded-xl font-medium hover:bg-zinc-700 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
-              onclick="saveProfile()"
-              class="flex-1 py-3 px-6 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-500 transition-colors"
+              id="btn-submit-profile"
+              class="flex-1 py-3 px-6 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-500/20"
             >
               Save Changes
             </button>
@@ -359,59 +297,6 @@
         </form>
       </div>
     </div>
-
-    <script>
-      // Initialize Lucide Icons
-      lucide.createIcons();
-
-      const modal = document.getElementById('edit-modal');
-      const profileForm = document.getElementById('profile-form');
-
-      // Modal Toggle
-      function toggleModal() {
-        const modal = document.getElementById('edit-modal');
-        modal.classList.toggle('hidden');
-
-        // If we are OPENING the modal (not hiding it)
-        if (!modal.classList.contains('hidden')) {
-          const currentName = document.getElementById('desktop-display-name').innerText;
-          const currentBio = document.getElementById('desktop-display-bio').innerText;
-
-          // Logical Check: If the text is still the "Loading" placeholder,
-          // leave the input empty instead of copying "Loading..."
-          const nameInput = document.getElementById('input-name');
-          const bioInput = document.getElementById('input-bio');
-
-          if (currentName !== 'Loading...') {
-            nameInput.value = currentName;
-          } else {
-            nameInput.value = ''; // Keep empty for user to fill
-          }
-
-          if (currentBio !== 'Connecting to backend...' && currentBio !== 'Syncing...') {
-            bioInput.value = currentBio;
-          } else {
-            bioInput.value = '';
-          }
-        }
-      }
-
-      // Form Submission Logic
-      profileForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-
-        window.saveProfile();
-        toggleModal();
-
-        // Simple Feedback
-        console.log('Profile updated successfully!');
-      });
-
-      // Close modal on outside click
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) toggleModal();
-      });
-    </script>
 
     <script type="module" src="../js/pages/profile/profile.js"></script>
   </body>

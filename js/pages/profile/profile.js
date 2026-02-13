@@ -1,26 +1,26 @@
-import { initAuth, initProfileUI, saveProfile, startProfileSync } from './index.js';
+import { initAuth } from '@core/firebase/index.js'; // Assuming initAuth is here
+import { initProfileUI, saveProfile, startProfileSync } from './index.js';
+import { initIcons } from '@/ui/icons.js';
 
 /* ==================== Profile Boot ==================== */
 
-/**
- * Initialize Firebase authentication and profile synchronization.
- * When a user is logged in, start real-time sync of their profile data.
- */
+// 1. Initialize Authentication & Sync
 initAuth((user) => {
   if (user) {
     startProfileSync(user.uid);
+    console.log(`Authenticated as: ${user.uid}`);
+  } else {
+    // Optional: Redirect to login if not authenticated
+    // window.location.href = 'login.html';
   }
 });
 
-/**
- * Initialize the profile UI components.
- * This sets up input fields, buttons, and any reactive UI elements.
- */
-initProfileUI();
+// 2. Initialize UI (Event Listeners)
+document.addEventListener('DOMContentLoaded', () => {
+  initProfileUI();
+  initIcons();
+});
 
-/* ==================== HTML Exposure ==================== */
-/**
- * Expose only the saveProfile function to the global window object
- * so it can be called directly from HTML event handlers (e.g., save button).
- */
+/* ==================== Global Exposure ==================== */
+// Keep this so the UI form can trigger the saveProfile function
 window.saveProfile = saveProfile;

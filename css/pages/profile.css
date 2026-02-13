@@ -47,7 +47,55 @@
   outline: none;
   border-color: var(--accent);
 }
+@keyframes fab-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 15px rgba(79, 70, 229, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
+  }
+}
 
+/* Optional: Apply a subtle pulse to the floating button when the page loads */
+.floating-shelf-init {
+  animation: fab-pulse 2s infinite;
+}
+
+/* Modal Animation */
+.modal-enter {
+  animation: modalScale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes modalScale {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Notification Toast Animation */
+.toast-in {
+  animation: toastIn 0.4s ease forwards;
+}
+@keyframes toastIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
 /* ---------- MOBILE ---------- */
 
 @media (max-width: 768px) {

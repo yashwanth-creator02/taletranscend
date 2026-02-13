@@ -1,16 +1,49 @@
-/* ==================== Profile Module Exports ====================
-   Centralized exports for user profile functionality.
-   Provides authentication, UI setup, and cloud sync.
-=================================================================== */
+import { db, auth, appId, doc, onSnapshot, setDoc } from '@core/firebase/index.js';
+import { updateProfileUI, showNotification } from './ui.js';
+export * from './ui.js';
+let unsubscribe = null;
 
-/* -------------------- Firebase Auth -------------------- */
-// Initialize Firebase authentication for profile
-export { initAuth } from '@core/firebase/index.js';
+/**
+ * Starts real-time synchronization
+ */
+export function startProfileSync(uid) {
+  const ref = doc(db, 'artifacts', appId, 'users', uid);
 
-/* -------------------- Profile UI -------------------- */
-// Initialize and render the profile user interface
-export { initProfileUI } from './ui.js';
+  if (unsubscribe) unsubscribe();
 
-/* -------------------- Profile Sync -------------------- */
-// Save profile data and start real-time profile synchronization
-export { saveProfile, startProfileSync } from './sync.js';
+  unsubscribe = onSnapshot(
+    ref,
+    (snap) => {
+      if (snap.exists()) {
+        updateProfileUI(snap.data());
+      }
+    },
+    (error) => {
+      console.error('Sync Error:', error);
+      showNotification('Sync failed. Check connection.', 'error');
+    }
+  );
+}
+
+/**
+ * Saves profile data to Firestore
+ */
+export async function saveProfile() {
+  if (!auth.currentUser) {
+    showNotification('You must be logged in to save.', 'error');
+    return;
+  }
+
+  const name = document.getElementById('input-name')?.value.trim() || '';
+  const bio = document.getElementById('input-bio')?.value.trim() || '';
+
+  const ref = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid);
+
+  try {
+    await setDoc(ref, { name, bio }, { merge: true });
+    // Notification is handled in the UI form submit listener
+  } catch (error) {
+    console.error('Save Error:', error);
+    showNotification('Failed to save profile.', 'error');
+  }
+}
