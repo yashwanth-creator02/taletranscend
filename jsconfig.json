@@ -5,7 +5,9 @@
     "paths": {
       "@services/*": ["js/core/services/*"],
       "@core/*": ["js/core/*"],
+      "@ui/*": ["js/ui/*"],
       "@pages/*": ["js/pages/*"],
+      "@config/*": ["config/*"],
       "@css/*": ["css/*"],
       "@/*": ["js/*"]
     }
