@@ -1,105 +1,101 @@
-/* ---------- PROFILE LAYOUT ---------- */
+/* Ensure these variables exist or use the values below */
+:root {
+  --indigo-accent: #4f46e5;
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --text-main: #f1f5f9;
+}
 
+/* ---------- PROFILE LAYOUT ---------- */
 .profile-container {
-  max-width: 1100px;
+  max-width: 1280px; /* Matched to max-w-7xl */
   margin: 0 auto;
 }
 
 /* ---------- AVATAR ---------- */
-
-.profile-avatar {
+.profile-avatar-container {
   position: relative;
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.profile-avatar img {
-  border: 2px solid var(--border);
-  background: var(--glass);
+.profile-avatar-container:hover {
+  transform: rotate(3deg) scale(1.02);
 }
 
 /* ---------- DISPLAY CARDS ---------- */
-
-.profile-card {
-  transition:
-    transform 0.3s ease,
-    border-color 0.3s ease;
+/* Using class from HTML */
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  transition: all 0.3s ease;
 }
 
-.profile-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--accent);
+.glass-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(79, 70, 229, 0.4);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
-/* ---------- EDITOR MODAL ---------- */
-
-#profile-editor {
-  backdrop-filter: blur(24px);
+/* ---------- EDITOR MODAL (Matched to HTML IDs) ---------- */
+#edit-modal {
+  backdrop-filter: blur(8px); /* Subtle blur for the overlay */
 }
 
-#profile-editor input,
-#profile-editor textarea {
-  background: transparent;
+/* Targeting inputs inside the modal specifically */
+#profile-form input,
+#profile-form textarea {
+  background: rgba(0, 0, 0, 0.2);
   color: var(--text-main);
-  border: 1px solid var(--border);
+  border: 1px solid var(--glass-border);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-#profile-editor input:focus,
-#profile-editor textarea:focus {
+#profile-form input:focus,
+#profile-form textarea:focus {
   outline: none;
-  border-color: var(--accent);
-}
-@keyframes fab-pulse {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4);
-  }
-  70% {
-    transform: scale(1.05);
-    box-shadow: 0 0 0 15px rgba(79, 70, 229, 0);
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
-  }
+  border-color: var(--indigo-accent);
+  box-shadow: 0 0 0 1px var(--indigo-accent);
 }
 
-/* Optional: Apply a subtle pulse to the floating button when the page loads */
-.floating-shelf-init {
-  animation: fab-pulse 2s infinite;
-}
-
-/* Modal Animation */
+/* ---------- ANIMATIONS ---------- */
 .modal-enter {
-  animation: modalScale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: modalScale 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
+
 @keyframes modalScale {
   from {
-    transform: scale(0.95);
+    transform: scale(0.9) translateY(20px);
     opacity: 0;
   }
   to {
-    transform: scale(1);
+    transform: scale(1) translateY(0);
     opacity: 1;
   }
 }
 
-/* Notification Toast Animation */
+/* Notification Toast */
 .toast-in {
-  animation: toastIn 0.4s ease forwards;
+  animation: toastIn 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
+
 @keyframes toastIn {
   from {
-    transform: translateX(100%);
+    transform: translateX(100%) scale(0.9);
     opacity: 0;
   }
   to {
-    transform: translateX(0);
+    transform: translateX(0) scale(1);
     opacity: 1;
   }
 }
-/* ---------- MOBILE ---------- */
 
-@media (max-width: 768px) {
-  .profile-container {
-    padding: 1rem;
-  }
+/* Mesh Background - Applied to Body */
+.mesh-gradient {
+  background-color: #050505;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.12) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.12) 0px, transparent 50%);
+  background-attachment: fixed;
 }
