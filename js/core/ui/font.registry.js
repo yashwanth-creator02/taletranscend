@@ -3,6 +3,14 @@
 // Key used to store the user's selected reader font in localStorage
 const FONT_STORAGE_KEY = 'taletranscend:reader-font';
 
+/* ================= Font Sources ================= */
+
+export const FONT_STYLESHEETS = [
+  'https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap',
+
+  'https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/open-dyslexic.min.css',
+];
+
 /* ================= Reader Fonts ================= */
 
 /**

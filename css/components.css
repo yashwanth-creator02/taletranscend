@@ -1,11 +1,12 @@
+/* css/components.css */
+
 .glass-card {
-  background: var(--glass);
+  background: color-mix(in srgb, var(--paper-bg) 80%, white 8%);
   border: 1px solid var(--border);
-  backdrop-filter: blur(24px);
+  backdrop-filter: blur(8px);
   border-radius: 2rem;
   transition: all 0.4s ease;
 }
-
 .header-orb {
   position: relative;
   width: 56px;

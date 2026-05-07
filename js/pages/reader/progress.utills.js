@@ -1,4 +1,4 @@
-// js/pages/reader/progress.utils.js
+// js/pages/reader/progress.utills.js
 
 /**
  * Calculates overall reading progress from a tale object and chapter progress map.
@@ -36,6 +36,6 @@ export function getOverallProgress(tale) {
 
   return {
     totalChapters: chapterCount,
-    percent: percent,
+    percent: percent * 2,
   };
 }

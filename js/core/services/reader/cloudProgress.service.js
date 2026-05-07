@@ -1,4 +1,15 @@
-import { db, appId, doc, getDoc, setDoc, serverTimestamp } from '../../firebase/index.js';
+// js/core/services/reader/cloudProgress.service.js
+
+import {
+  db,
+  appId,
+  doc,
+  getDoc,
+  setDoc,
+  serverTimestamp,
+  collection,
+  getDocs,
+} from '../../firebase/index.js';
 
 /* ================= Firestore Structure Reference =================
 artifacts (collection)
@@ -70,18 +81,40 @@ export async function syncChapterProgressToCloud({
 
 /**
  * Retrieves a user's progress for a specific tale from Firestore.
- * (Tale-level data only; chapters are read separately)
+ * Now also fetches chapters subcollection so resume logic works.
  *
  * @param {Object} payload
  * @param {string} payload.userId
  * @param {string} payload.taleId
- * @returns {Object|null} Tale-level progress or null
+ * @returns {Object|null} Tale-level progress with chapters map, or null
  */
 export async function getCloudProgress({ userId, taleId }) {
-  const ref = doc(db, 'artifacts', appId, 'users', userId, 'readerProgress', taleId);
+  const taleRef = doc(db, 'artifacts', appId, 'users', userId, 'readerProgress', taleId);
+  const snap = await getDoc(taleRef);
 
-  const snap = await getDoc(ref);
-  return snap.exists() ? snap.data() : null;
+  if (!snap.exists()) return null;
+
+  const taleData = snap.data();
+
+  // ✅ Also fetch chapters subcollection and attach as taleData.chapters map
+  const chaptersRef = collection(
+    db,
+    'artifacts',
+    appId,
+    'users',
+    userId,
+    'readerProgress',
+    taleId,
+    'chapters'
+  );
+  const chaptersSnap = await getDocs(chaptersRef);
+
+  const chapters = {};
+  chaptersSnap.forEach((chapterDoc) => {
+    chapters[chapterDoc.id] = chapterDoc.data(); // { scrollPercent, updatedAt }
+  });
+
+  return { ...taleData, chapters };
 }
 
 /* ================= Debounced Sync ================= */

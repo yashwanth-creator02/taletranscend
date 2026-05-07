@@ -1,3 +1,5 @@
+// js/pages/tale/interactions.js
+
 import { resolveResumePoint } from '@services/index.js';
 
 /* ======================================
@@ -83,8 +85,8 @@ export function setupResumeReading(userId, taleId) {
   const btn = document.getElementById('resume-btn');
   if (!btn) return; // Exit if resume button doesn't exist
 
-  btn.addEventListener('click', () => {
-    const resume = resolveResumePoint({ userId, taleId }); // Get the last unfinished chapter
+  btn.addEventListener('click', async () => {
+    const resume = await resolveResumePoint({ userId, taleId });
 
     if (!resume) {
       // No saved progress found; start from the first chapter

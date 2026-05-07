@@ -8,7 +8,6 @@ import tailwindcss from '@tailwindcss/vite';
 // Fix for __dirname in ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 export default defineConfig({
   resolve: {
     alias: {
@@ -22,6 +21,19 @@ export default defineConfig({
 
       // The general shortcut for anything in js
       '@': path.resolve(__dirname, './js'),
+    },
+  },
+  build: {
+    rollupOptions: {
+      input: {
+        library: path.resolve(__dirname, 'pages/library.html'),
+        shelf: path.resolve(__dirname, 'pages/shelf.html'),
+        reader: path.resolve(__dirname, 'pages/reader.html'),
+        tale: path.resolve(__dirname, 'pages/tale.html'),
+        contribution: path.resolve(__dirname, 'pages/contribution.html'),
+        profile: path.resolve(__dirname, 'pages/profile.html'),
+        index: path.resolve(__dirname, 'pages/index.html'),
+      },
     },
   },
   server: {

@@ -1,48 +1,89 @@
-import { db, auth, appId, doc, onSnapshot, setDoc } from '@core/firebase/index.js';
-import { updateProfileUI } from './ui.js';
+// js/pages/profile/sync.js
+import {
+  db,
+  auth,
+  appId,
+  doc,
+  onSnapshot,
+  setDoc,
+  serverTimestamp,
+  getDoc,
+} from '@core/firebase/index.js';
+
+import { updateProfileUI, showNotification } from './ui.js';
+
+export * from './ui.js';
 
 /* ==================== Real-Time Profile Sync ==================== */
 
-// Holds the unsubscribe function for Firestore listener
+// Holds the current Firestore listener unsubscribe function
 let unsubscribe = null;
 
 /**
- * Starts real-time synchronization of a user's profile.
- * Updates the UI whenever the profile document changes in Firestore.
+ * Starts real-time synchronization of the user's profile.
+ * Updates the UI whenever Firestore data changes.
  *
- * @param {string} uid - User ID
+ * @param {string} uid - Firebase Auth User ID
  */
 export function startProfileSync(uid) {
+  // Reference to user's Firestore document
   const ref = doc(db, 'artifacts', appId, 'users', uid);
 
-  // Unsubscribe previous listener if any
+  // Remove previous listener before creating a new one
   if (unsubscribe) unsubscribe();
 
-  // Listen for changes on the user's profile document
-  unsubscribe = onSnapshot(ref, (snap) => {
-    if (snap.exists()) {
-      // Update the UI with the latest profile data
-      updateProfileUI(snap.data());
+  // Listen for real-time updates
+  unsubscribe = onSnapshot(
+    ref,
+
+    // Success callback
+    (snap) => {
+      if (snap.exists()) {
+        updateProfileUI(snap.data());
+      }
+    },
+
+    // Error callback
+    (error) => {
+      console.error('Profile Sync Error:', error);
+
+      showNotification('Failed to sync profile. Check your connection.', 'error');
     }
-  });
+  );
 }
 
 /* ==================== Save Profile ==================== */
 
 /**
- * Saves the current profile data (name and bio) to Firestore.
- * Uses merge to preserve any other existing fields in the document.
+ * Saves the user's profile data to Firestore.
+ * Uses merge:true to preserve existing fields.
  */
 export async function saveProfile() {
-  // Only allow saving if user is logged in
-  if (!auth.currentUser) return;
-
-  // Get values from input fields
-  const name = document.getElementById('input-name')?.value || '';
-  const bio = document.getElementById('input-bio')?.value || '';
-
+  // Ensure user is authenticated
+  if (!auth.currentUser) {
+    showNotification('You must be logged in to save.', 'error');
+    return;
+  }
+  // Firestore document reference
   const ref = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid);
+  const snap = await getDoc(ref);
+  const data = {
+    name: document.getElementById('input-name')?.value.trim() || '',
 
-  // Save profile data to Firestore (merge with existing data)
-  await setDoc(ref, { name, bio }, { merge: true });
+    bio: document.getElementById('input-bio')?.value.trim() || '',
+
+    updatedAt: serverTimestamp(),
+  };
+  try {
+    // Save profile data
+    if (!snap.exists()) {
+      data.createdAt = serverTimestamp();
+    }
+
+    await setDoc(ref, data, { merge: true });
+  } catch (error) {
+    console.error('Profile Save Error:', error);
+
+    showNotification('Failed to save profile.', 'error');
+  }
 }

@@ -1,3 +1,5 @@
+// js/core/services/markFinish.service.js
+
 import {
   db,
   appId,
@@ -29,7 +31,7 @@ export async function markTaleFinished({ userId, taleId }) {
   }
 
   // =========================
-  // Update ALL chapters sub collection
+  // Update ALL chapters subcollection
   // =========================
   const chaptersRef = collection(
     db,
@@ -49,7 +51,7 @@ export async function markTaleFinished({ userId, taleId }) {
 
     chaptersSnap.forEach((chapterDoc) => {
       batch.update(chapterDoc.ref, {
-        scrollProgress: 100,
+        scrollPercent: 100,
       });
     });
 

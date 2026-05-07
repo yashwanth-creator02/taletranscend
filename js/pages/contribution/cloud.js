@@ -1,4 +1,6 @@
-import { auth, db, doc, setDoc, serverTimestamp } from '@core/firebase/index.js';
+// js/pages/contribution/cloud.js
+
+import { auth, db, doc, setDoc, serverTimestamp, appId } from '@core/firebase/index.js';
 import { state } from './state.js';
 
 /**
@@ -16,7 +18,7 @@ export async function saveToCloud() {
   const ref = doc(
     db,
     'artifacts',
-    'taletranscend-pro', // App ID
+    appId, // App ID
     'users',
     auth.currentUser.uid, // Current user
     'drafts',

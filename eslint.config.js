@@ -1,4 +1,6 @@
-import js from '@eslint/js.js';
+// eslint.config.js
+
+import js from '@eslint/js';
 import skipFormatting from 'eslint-config-prettier';
 import globals from 'globals';
 

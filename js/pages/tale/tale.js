@@ -1,3 +1,5 @@
+// js/pages/tale/tale.js
+
 import {
   setupResumeReading,
   initAuth,
@@ -40,7 +42,7 @@ initAuth(async (user) => {
   if (!tale) return;
 
   // Render the main tale overview
-  renderTale(userId, tale, taleId);
+  await renderTale(userId, tale, taleId);
 
   // Load all chapters for the tale
   const chapters = await loadChapters(taleId);

@@ -106,6 +106,8 @@ initAuth(async (user) => {
 
   // Bind scroll listener to update progress
   bindScrollProgress({
+    chapterIndex,
+    totalChapters: navigation.totalChapters,
     onScroll(scrollPercent) {
       saveReaderProgress({ userId, taleId, chapterIndex, scrollPercent });
 

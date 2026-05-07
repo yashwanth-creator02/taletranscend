@@ -1,4 +1,4 @@
-import { initAuth } from '@core/firebase/index.js'; // Assuming initAuth is here
+import { initAuth } from '@core/firebase/index.js';
 import { initProfileUI, saveProfile, startProfileSync } from './index.js';
 import { initIcons } from '@/ui/icons.js';
 

@@ -1,3 +1,5 @@
+// js/pages/tale/ui.js
+
 import { getChapterState, getChapterProgress } from '@services/index.js';
 import { getLastReadChapter, getTotalReadTime } from '@services/index.js';
 
@@ -14,7 +16,7 @@ import { getLastReadChapter, getTotalReadTime } from '@services/index.js';
  * @param {Object} tale - Tale object containing metadata (title, authorName, description, chapterCount, coverUrl)
  * @param {string} taleId - Unique identifier for the tale
  */
-export function renderTale(userId, tale, taleId) {
+export async function renderTale(userId, tale, taleId) {
   // Get the last read chapter index and display as fragment number
   const last = getLastReadChapter({ userId, taleId }) + 1;
 
@@ -55,7 +57,7 @@ export function renderTale(userId, tale, taleId) {
   }
 
   // Display total read time if available
-  const totalMs = getTotalReadTime({ userId, taleId });
+  const totalMs = await getTotalReadTime({ userId, taleId });
   const readEl = document.getElementById('read-time');
   if (totalMs > 0) {
     const minutes = Math.floor(totalMs / 60000);
