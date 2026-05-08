@@ -21,7 +21,10 @@ import {
   getLocalTotalReadTime,
   addReadTime,
 } from './index.js';
-
+// CSS imports — Vite handles bundling and cache fingerprinting
+import '@css/base.css';
+import '@css/components.css';
+import '@css/pages/reader.css';
 /* ==================== URL Parameters ==================== */
 // Extract taleId and chapterId from query parameters
 const params = new URLSearchParams(window.location.search);

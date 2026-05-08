@@ -14,7 +14,10 @@ import {
   postComment,
   initIcons,
 } from './index.js';
-
+// CSS imports — Vite handles bundling and cache fingerprinting
+import '@css/base.css';
+import '@css/components.css';
+import '@css/pages/tale.css';
 /* -------------------------------
    Extract Tale ID from URL
 --------------------------------- */

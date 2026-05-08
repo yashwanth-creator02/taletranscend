@@ -1,11 +1,16 @@
-// Key used to store reader progress in localStorage
+// src/services/reader/localProgress.service.js
+// Manages reader progress in localStorage for offline-first persistence.
+// All cloud syncing is handled separately in cloudProgress.service.js.
+
 const STORAGE_KEY = 'taletranscend:reader-progress';
 
-/* ================= Helpers ================= */
+/* ================= Storage Helpers ================= */
 
 /**
- * Reads the entire reader progress store from localStorage.
- * Returns an empty object if nothing is stored or parsing fails.
+ * Reads the entire progress store from localStorage.
+ * Returns an empty object if nothing is stored or if parsing fails.
+ *
+ * @returns {Object} Full progress store keyed by userId
  */
 export function readStorage() {
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -13,16 +18,16 @@ export function readStorage() {
   try {
     return JSON.parse(raw);
   } catch {
-    // Fallback to empty object if stored data is corrupted
+    // Return empty store if data is corrupted
     return {};
   }
 }
 
 /**
- * Writes the provided data object to localStorage.
- * Internal helper; should not be called directly outside this module.
+ * Writes the full progress store back to localStorage.
+ * Internal helper — do not call this directly outside this module.
  *
- * @param {Object} data - The full reader progress store
+ * @param {Object} data - Full progress store
  */
 function writeStorage(data) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -31,7 +36,7 @@ function writeStorage(data) {
 /* ================= Progress ================= */
 
 /**
- * Saves a user's scroll progress for a specific chapter locally.
+ * Saves scroll progress for a specific chapter to localStorage.
  *
  * @param {Object} params
  * @param {string} params.userId
@@ -44,11 +49,10 @@ export function saveReaderProgress({ userId, taleId, chapterIndex, scrollPercent
 
   const store = readStorage();
 
-  // Initialize nested objects if they do not exist
+  // Initialize nested structure if it does not exist
   store[userId] ??= {};
   store[userId][taleId] ??= { chapters: {}, totalReadTimeMs: 0 };
 
-  // Save chapter scroll progress with timestamp
   store[userId][taleId].chapters[chapterIndex] = {
     scrollPercent,
     updatedAt: Date.now(),
@@ -58,37 +62,35 @@ export function saveReaderProgress({ userId, taleId, chapterIndex, scrollPercent
 }
 
 /**
- * Retrieves the local progress for a specific chapter.
+ * Retrieves stored progress for a specific chapter.
  *
  * @param {Object} params
  * @param {string} params.userId
  * @param {string} params.taleId
  * @param {number} params.chapterIndex
- * @returns {Object|null} Progress object or null if not found
+ * @returns {Object|null} Progress object with scrollPercent and updatedAt, or null
  */
 export function getChapterProgress({ userId, taleId, chapterIndex }) {
-  const store = readStorage();
-  return store[userId]?.[taleId]?.chapters?.[chapterIndex] || null;
+  return readStorage()[userId]?.[taleId]?.chapters?.[chapterIndex] || null;
 }
 
 /**
- * Returns the last chapter the user read (based on latest updatedAt timestamp).
+ * Returns the index of the most recently read chapter based on updatedAt timestamp.
  *
  * @param {Object} params
  * @param {string} params.userId
  * @param {string} params.taleId
- * @returns {number|null} Last read chapter index or null
+ * @returns {number|null} Chapter index or null if no progress exists
  */
 export function getLastReadChapter({ userId, taleId }) {
   const chapters = readStorage()[userId]?.[taleId]?.chapters;
   if (!chapters) return null;
 
-  // Sort chapters by last updated timestamp descending and pick the first
   return Number(Object.entries(chapters).sort((a, b) => b[1].updatedAt - a[1].updatedAt)[0]?.[0]);
 }
 
 /**
- * Determines the state of a chapter based on scrollPercent.
+ * Determines the reading state of a chapter based on its scroll progress.
  *
  * @param {Object|null} progress - Progress object from getChapterProgress
  * @returns {'not_started'|'in_progress'|'completed'}
@@ -103,12 +105,12 @@ export function getChapterState(progress) {
 /* ================= Read Time ================= */
 
 /**
- * Adds reading duration (in ms) to a tale's total read time locally.
+ * Adds a reading session duration to a tale's cumulative read time in localStorage.
  *
  * @param {Object} params
  * @param {string} params.userId
  * @param {string} params.taleId
- * @param {number} params.durationMs - Duration in milliseconds
+ * @param {number} params.durationMs - Duration of the session in milliseconds
  */
 export function addReadTime({ userId, taleId, durationMs }) {
   if (!userId || !taleId || durationMs <= 0) return;
@@ -124,24 +126,24 @@ export function addReadTime({ userId, taleId, durationMs }) {
 }
 
 /**
- * Retrieves total read time for a tale from local storage.
+ * Returns the total read time for a tale from localStorage.
  *
  * @param {Object} params
  * @param {string} params.userId
  * @param {string} params.taleId
- * @returns {number} Total read time in milliseconds
+ * @returns {number} Total read time in milliseconds, 0 if none recorded
  */
 export function getLocalTotalReadTime({ userId, taleId }) {
   return readStorage()[userId]?.[taleId]?.totalReadTimeMs || 0;
 }
 
 /**
- * Retrieves all chapter progress objects for a tale from local storage.
+ * Returns all chapter progress entries for a tale from localStorage.
  *
  * @param {Object} params
  * @param {string} params.userId
  * @param {string} params.taleId
- * @returns {Object} Mapping of chapterIndex => progress object
+ * @returns {Object} Map of chapterIndex => { scrollPercent, updatedAt }
  */
 export function getAllLocalChapters({ userId, taleId }) {
   return readStorage()[userId]?.[taleId]?.chapters || {};

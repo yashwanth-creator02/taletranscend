@@ -1,29 +1,38 @@
-// js/core/services/reader.service.js
+// src/services/reader/reader.service.js
+// Fetches tale metadata and chapter content from Firestore.
+// This is the primary data access layer for the reader page.
 
-import { db, appId, doc, getDoc, collection, getDocs } from '../../firebase/index.js';
+import { db, appId, doc, getDoc, collection, getDocs } from '@firebase/index.js';
 
-/* ================= Tale Metadata ================= */
+/* ================= Firestore Structure Reference =================
+artifacts (collection)
+ └─ {appId} (document)
+     └─ public (collection)
+         └─ data (document)
+             └─ community_tales (collection)
+                 └─ {taleId} (document)
+                     └─ chapters (subcollection)
+                         └─ {chapterId} (document)
+==================================================================== */
 
 /**
  * Fetches metadata for a specific tale.
+ * Returns sanitized fields with fallback values for missing data.
  *
  * @param {string} taleId - ID of the tale to fetch
- * @returns {Object} { title, description, authorName }
- * @throws {Error} If taleId is missing or the tale does not exist
+ * @returns {Promise<Object>} { title, description, authorName }
+ * @throws {Error} If taleId is missing or the tale document does not exist
  */
 export async function getTaleMeta(taleId) {
   if (!taleId) throw new Error('getTaleMeta: taleId is required');
 
-  // Reference to the specific tale document in Firestore
   const taleRef = doc(db, 'artifacts', appId, 'public', 'data', 'community_tales', taleId);
-
   const snap = await getDoc(taleRef);
 
   if (!snap.exists()) throw new Error(`Tale not found: ${taleId}`);
 
   const data = snap.data();
 
-  // Return sanitized metadata with fallback values
   return {
     title: data.title || 'Untitled Tale',
     description: data.description || '',
@@ -31,23 +40,21 @@ export async function getTaleMeta(taleId) {
   };
 }
 
-/* ================= Chapter Fetching ================= */
-
 /**
- * Fetches a single chapter and provides navigation context.
+ * Fetches a single chapter and returns it alongside navigation context.
+ * Sorts all chapters by chapterNum before resolving the requested index.
  *
  * @param {Object} params
- * @param {string} params.taleId - Tale ID
- * @param {number} params.chapterIndex - Index of the chapter to fetch
- * @returns {Object} { chapter: {index, title, content}, navigation: {...} }
- * @throws {Error} If taleId is missing or chapterIndex is invalid/missing
+ * @param {string} params.taleId - ID of the tale
+ * @param {number} params.chapterIndex - Zero-based index of the chapter to fetch
+ * @returns {Promise<Object>} { chapter: { index, title, content }, navigation: { ... } }
+ * @throws {Error} If taleId is missing, chapterIndex is not a number, or chapter is not found
  */
 export async function getChapter({ taleId, chapterIndex }) {
   if (!taleId) throw new Error('getChapter: taleId is required');
   if (typeof chapterIndex !== 'number')
     throw new Error('getChapter: chapterIndex must be a number');
 
-  // Reference to the chapters collection for this tale
   const chaptersRef = collection(
     db,
     'artifacts',
@@ -59,10 +66,9 @@ export async function getChapter({ taleId, chapterIndex }) {
     'chapters'
   );
 
-  // Fetch all chapters for the tale
   const snap = await getDocs(chaptersRef);
 
-  // Map Firestore docs to JS objects and sort by chapter number
+  // Sort chapters by chapterNum field to ensure correct ordering
   const chapters = snap.docs
     .map((d) => ({ id: d.id, ...d.data() }))
     .sort((a, b) => (a.chapterNum || 0) - (b.chapterNum || 0));
@@ -72,7 +78,6 @@ export async function getChapter({ taleId, chapterIndex }) {
 
   if (!chapter) throw new Error(`Chapter not found at index ${chapterIndex}`);
 
-  // Return the chapter content and navigation info
   return {
     chapter: {
       index: chapterIndex,

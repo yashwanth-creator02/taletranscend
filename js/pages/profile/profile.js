@@ -1,7 +1,12 @@
+// js/pages/profile/profile.js
+
 import { initAuth } from '@core/firebase/index.js';
 import { initProfileUI, saveProfile, startProfileSync } from './index.js';
 import { initIcons } from '@/ui/icons.js';
-
+// CSS imports — Vite handles bundling and cache fingerprinting
+import '@css/base.css';
+import '@css/components.css';
+import '@css/pages/profile.css';
 /* ==================== Profile Boot ==================== */
 
 // 1. Initialize Authentication & Sync

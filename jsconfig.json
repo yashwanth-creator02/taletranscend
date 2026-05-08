@@ -3,12 +3,13 @@
     "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
-      "@services/*": ["js/core/services/*"],
+      "@services/*": ["src/services/*"],
       "@core/*": ["js/core/*"],
       "@ui/*": ["js/ui/*"],
       "@pages/*": ["js/pages/*"],
       "@config/*": ["config/*"],
-      "@css/*": ["css/*"],
+      "@css/*": ["src/assets/css/*"],
+      "@firebase/*": ["src/firebase/*"],
       "@/*": ["js/*"]
     }
   },

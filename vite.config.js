@@ -13,12 +13,12 @@ export default defineConfig({
     alias: {
       // Direct access to your major folders
       '@core': path.resolve(__dirname, './js/core'),
-      '@services': path.resolve(__dirname, './js/core/services'),
+      '@services': path.resolve(__dirname, './src/services'),
       '@ui': path.resolve(__dirname, './js/ui'),
       '@pages': path.resolve(__dirname, './js/pages'),
       '@config': path.resolve(__dirname, './config'),
-      '@css': path.resolve(__dirname, './css'),
-
+      '@css': path.resolve(__dirname, './src/assets/css'),
+      '@firebase': path.resolve(__dirname, './src/firebase'),
       // The general shortcut for anything in js
       '@': path.resolve(__dirname, './js'),
     },
@@ -26,19 +26,18 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        library: path.resolve(__dirname, 'pages/library.html'),
-        shelf: path.resolve(__dirname, 'pages/shelf.html'),
-        reader: path.resolve(__dirname, 'pages/reader.html'),
-        tale: path.resolve(__dirname, 'pages/tale.html'),
-        contribution: path.resolve(__dirname, 'pages/contribution.html'),
-        profile: path.resolve(__dirname, 'pages/profile.html'),
-        index: path.resolve(__dirname, 'pages/index.html'),
+        library: path.resolve(__dirname, 'src/views/library.html'),
+        shelf: path.resolve(__dirname, 'src/views/shelf.html'),
+        reader: path.resolve(__dirname, 'src/views/reader.html'),
+        tale: path.resolve(__dirname, 'src/views/tale.html'),
+        contribution: path.resolve(__dirname, 'src/views/contribution.html'),
+        profile: path.resolve(__dirname, 'src/views/profile.html'),
+        index: path.resolve(__dirname, 'src/views/index.html'),
       },
     },
   },
   server: {
-    // Since your HTML files are in /pages/, this will open the landing page
-    open: '/pages/library.html',
+    open: '/src/views/library.html', // update dev server open path
   },
   plugins: [tailwindcss()],
 });

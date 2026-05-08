@@ -1,0 +1,18 @@
+// src/services/tale/getTales.js
+// Fetches all community tales from Firestore.
+// Used by the library and shelf pages to populate tale listings.
+
+import { db, appId, getDocs, collection } from '@firebase/index.js';
+
+/**
+ * Retrieves all community tales for this application from Firestore.
+ * Each returned object includes the Firestore document ID as the id field.
+ *
+ * @returns {Promise<Array<Object>>} Array of tale objects, empty array if none exist
+ */
+export async function getTales() {
+  const ref = collection(db, 'artifacts', appId, 'public', 'data', 'community_tales');
+  const snap = await getDocs(ref);
+
+  return snap.empty ? [] : snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+}

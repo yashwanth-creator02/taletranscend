@@ -1,3 +1,8 @@
+/* src/assets/css/base.css */
+/* Global base styles, CSS variables, themes, and scrollbar styling. */
+
+@import 'tailwindcss';
+
 :root {
   --paper-bg: #0a0a0b;
   --text-main: #e2e8f0;
@@ -11,7 +16,7 @@
   --reader-font: 'Crimson Pro', serif;
 }
 
-/* Themes */
+/* Sepia theme overrides */
 body.theme-sepia {
   --paper-bg: #f4ecd8;
   --text-main: #433422;
@@ -21,6 +26,7 @@ body.theme-sepia {
   --accent: #936639;
 }
 
+/* Light theme overrides */
 body.theme-light {
   --paper-bg: #f8fafc;
   --text-main: #0f172a;
@@ -39,9 +45,7 @@ body {
     color 0.6s ease;
 }
 
-/* Scrollbar */
-
-/* Custom Scrollbar for a premium feel */
+/* Custom scrollbar styling for a premium feel */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -57,7 +61,7 @@ body {
   background: #4f46e5;
 }
 
-/* Hide horizontal scrollbar for the history section */
+/* Hide horizontal scrollbar for elements with no-scrollbar class */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -65,4 +69,3 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-@import 'tailwindcss';

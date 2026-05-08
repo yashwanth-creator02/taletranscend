@@ -1,6 +1,11 @@
-// js/pages/library/library.js
+// src/pages/library/library.js
+// Entry point for the library page.
+// Handles authentication, tale subscriptions, search, and UI interactions.
 
-// NEW
+import '@css/base.css';
+import '@css/components.css';
+import '@css/pages/library.css';
+
 import {
   initAuth,
   subscribeToTales,
@@ -12,59 +17,54 @@ import {
   setupSidebarToggle,
   db,
 } from './index.js';
-// CSS imports — Vite handles bundling and cache fingerprinting
-import '@css/base.css';
-import '@css/components.css';
-import '@css/pages/library.css';
+
 /* ==================== Global Variables ==================== */
-// Stores all tales fetched from Firestore
+// Stores all tales fetched from Firestore for use across handlers
 let allTales = [];
 
-/* ==================== Debugging ==================== */
-console.log('Checking Firestore connection...');
-console.log('Current Database Instance:', db);
-
 /* ==================== UI Initialization ==================== */
-// Set up sidebar toggle button behavior
+// Set up sidebar toggle button before auth resolves
 setupSidebarToggle();
 
 /* ==================== Firebase Auth & Tales Subscription ==================== */
 initAuth(async (user) => {
   const userId = user.uid;
 
-  // Subscribe to community tales updates
+  // Subscribe to live community tales updates from Firestore
   subscribeToTales(
     async (tales) => {
       allTales = tales;
 
-      // Render the tale cards grid for this user
+      // Render the tale cards grid for the current user
       await renderCardsGrid(userId, tales);
 
-      // Initialize icons now that cards exist
+      // Initialize icons after cards are rendered in the DOM
       initIcons();
     },
     (error) => {
-      console.error('Detailed Error:', error);
+      console.error('Tales subscription error:', error);
 
-      // Show database error in UI
+      // Show a database error message in the cards grid
       document.getElementById('cards-grid').innerHTML = `
         <div class="col-span-full text-center py-20 text-red-500">
-            Database connection failed.
+          Database connection failed.
         </div>
       `;
     }
   );
 
   /* ==================== UI Event Handlers ==================== */
+  // Bind card click, like, and bookmark interactions
   setupCardInteractions(userId);
 
+  // Bind search input to filter tales and re-render results
   setupSearch(
-    () => allTales, // Function to get all tales
-    (filtered) => renderCardsGrid(userId, filtered), // Render filtered results
-    initIcons // Re-initialize icons after filtering
+    () => allTales,
+    (filtered) => renderCardsGrid(userId, filtered),
+    initIcons
   );
 });
 
 /* ==================== Cleanup ==================== */
-// Unsubscribe from Firestore updates when the page is closed or refreshed
+// Unsubscribe from Firestore when the page unloads to prevent memory leaks
 window.addEventListener('beforeunload', stopTalesSubscription);
