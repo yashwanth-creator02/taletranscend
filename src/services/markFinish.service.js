@@ -13,7 +13,7 @@ import {
   getDocs,
   writeBatch,
   serverTimestamp,
-} from '@firebase/index.js';
+} from '@fb/index.js';
 
 /* ================= Firestore Structure Reference =================
 artifacts (collection)

@@ -1,188 +1,62 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Studio | TaleTranscend</title>
-    <link rel="stylesheet" href="../css/base.css" />
 
-    <script src="https://unpkg.com/lucide@latest"></script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Studio | TaleTranscend</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script type="module" src="../pages/shelf/shelf.js"></script>
+</head>
 
-    <link rel="stylesheet" href="../css/pages/shelf.css" />
-  </head>
-  <body class="text-slate-300 antialiased min-h-screen">
-    <!-- NAVIGATION -->
-    <nav
-      class="fixed top-0 w-full z-50 px-8 py-4 flex justify-between items-center bg-black/40 backdrop-blur-xl border-b border-white/5"
-    >
-      <a href="index.html" class="font-black text-xl tracking-[0.3em] text-white uppercase italic"
-        >Tale<span class="text-indigo-500">Transcend</span></a
-      >
-
-      <div class="flex items-center gap-10">
-        <!-- Nav Links -->
-        <div class="hidden md:flex gap-8 text-[10px] uppercase tracking-[0.2em] font-bold">
-          <a href="library.html" class="text-zinc-500 hover:text-white transition">Library</a>
-        </div>
-
-        <!-- Profile Entry -->
-        <a
-          href="profile.html"
-          class="group flex items-center gap-3 p-1 pr-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full transition-all"
-        >
-          <div
-            class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20"
-          >
-            <i data-lucide="user" class="w-4 h-4"></i>
-          </div>
-          <span
-            class="text-[9px] font-black uppercase tracking-widest text-zinc-400 group-hover:text-white transition-colors"
-            >Profile</span
-          >
-        </a>
+<body class="text-slate-300 antialiased min-h-screen">
+  <nav
+    class="fixed top-0 w-full z-50 px-8 py-4 flex justify-between items-center bg-black/40 backdrop-blur-xl border-b border-white/5">
+    <a href="index.html" class="font-black text-xl tracking-[0.3em] text-white uppercase italic">Tale<span
+        class="text-indigo-500">Transcend</span></a>
+    <div class="flex items-center gap-10">
+      <div class="hidden md:flex gap-8 text-[10px] uppercase tracking-[0.2em] font-bold">
+        <a href="library.html" class="text-zinc-500 hover:text-white transition">Library</a>
       </div>
-    </nav>
-
-    <main class="pt-32 pb-20 max-w-[1500px] mx-auto px-8">
-      <!-- STUDIO HEADER -->
-      <header class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
-        <div>
-          <p class="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500 mb-2">
-            Neural Hub / Workspace
-          </p>
-          <h1 class="text-5xl font-black uppercase tracking-tighter text-white">My Studio</h1>
+      <a href="profile.html"
+        class="group flex items-center gap-3 p-1 pr-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full transition-all">
+        <div
+          class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
+          <i data-lucide="user" class="w-4 h-4"></i>
         </div>
-      </header>
+        <span
+          class="text-[9px] font-black uppercase tracking-widest text-zinc-400 group-hover:text-white transition-colors">Profile</span>
+      </a>
+    </div>
+  </nav>
 
-      <!-- TABS SECTION -->
-      <div class="py-1 flex gap-10 border-b border-white/5 mb-12 overflow-x-auto no-scrollbar">
-        <button
-          onclick="switchTab('bookmarked')"
-          id="tab-bookmarked"
-          class="studio-tab-active pb-6 text-[11px] uppercase tracking-[0.25em] font-black transition-all"
-        >
-          Bookmarked Fragments
-        </button>
-        <button
-          onclick="switchTab('drafts')"
-          id="tab-drafts"
-          class="pb-6 text-zinc-500 hover:text-white text-[11px] uppercase tracking-[0.25em] font-black transition-all"
-        >
-          Active Drafts
-        </button>
+  <main class="pt-32 pb-20 max-w-[1500px] mx-auto px-8">
+    <header class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
+      <div>
+        <p class="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500 mb-2">Neural Hub / Workspace</p>
+        <h1 class="text-5xl font-black uppercase tracking-tighter text-white">My Studio</h1>
       </div>
+    </header>
 
-      <!-- REFACTORED TALE GRID -->
-      <div
-        id="studio-grid"
-        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8"
-      >
-        <!-- TALE CARD -->
+    <div class="py-1 flex gap-10 border-b border-white/5 mb-12 overflow-x-auto no-scrollbar">
+      <button id="tab-bookmarked" data-tab="bookmarked"
+        class="shelf-tab studio-tab-active pb-6 text-[11px] uppercase tracking-[0.25em] font-black transition-all">
+        Bookmarked Fragments
+      </button>
+      <button id="tab-drafts" data-tab="drafts"
+        class="shelf-tab pb-6 text-zinc-500 hover:text-white text-[11px] uppercase tracking-[0.25em] font-black transition-all">
+        Active Drafts
+      </button>
+    </div>
 
-        <!-- Visual Element -->
-        <div class="relative h-56 bg-zinc-900 rounded-[1.8rem] mb-6 overflow-hidden">
-          <img
-            src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=800"
-            class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
-            alt="Tale Cover"
-          />
-          <div
-            class="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md p-3 rounded-2xl border border-white/5"
-          >
-            <div class="flex items-center justify-between mb-1">
-              <span class="text-[8px] text-zinc-400 uppercase font-bold tracking-widest"
-                >Reading Progress</span
-              >
-              <span class="text-[8px] text-indigo-400 font-black">74%</span>
-            </div>
-            <div class="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-              <div class="progress-bar-fill h-full bg-indigo-500" style="width: 74%"></div>
-            </div>
-          </div>
+    <div id="studio-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
+      <div class="col-span-full text-center py-20">
+        <div class="inline-block w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin">
         </div>
-
-        <!-- Content -->
-        <div class="px-2">
-          <h3
-            class="text-xl font-bold text-white uppercase tracking-wider mb-2 group-hover:text-indigo-400 transition-colors"
-          >
-            The Emerald Citadel
-          </h3>
-          <p class="text-xs text-zinc-400 leading-relaxed line-clamp-2 mb-4 italic">
-            A record of the fall of the floating cities and the rise of the cloud-dwellers...
-          </p>
-
-          <!-- Stats Bar -->
-          <div class="grid grid-cols-2 gap-4 py-4 border-t border-white/5">
-            <div class="flex items-center gap-2">
-              <i data-lucide="layers" class="w-3.5 h-3.5 text-zinc-600"></i>
-              <span class="text-[9px] font-bold uppercase text-zinc-500 tracking-widest"
-                >12 Chapters</span
-              >
-            </div>
-            <div class="flex items-center gap-2">
-              <i data-lucide="clock" class="w-3.5 h-3.5 text-zinc-600"></i>
-              <span class="text-[9px] font-bold uppercase text-zinc-500 tracking-widest"
-                >4h 20m</span
-              >
-            </div>
-          </div>
-
-          <!-- RESUME BUTTON -->
-          <div class="mt-4 flex items-center justify-end">
-            <button
-              class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-white hover:text-indigo-400 transition group/btn"
-            >
-              Resume Link
-              <i
-                data-lucide="arrow-right-circle"
-                class="w-4 h-4 transition-transform group-hover/btn:translate-x-1"
-              ></i>
-            </button>
-          </div>
-        </div>
+        <p class="mt-4 text-zinc-500 font-medium">Loading your studio...</p>
       </div>
-    </main>
+    </div>
+  </main>
+</body>
 
-    <script>
-      lucide.createIcons();
-
-      function toggleOptions(event, menuId) {
-        event.stopPropagation();
-        const menu = document.getElementById(menuId);
-        const allMenus = document.querySelectorAll('.options-menu');
-        allMenus.forEach((m) => {
-          if (m.id !== menuId) m.classList.add('hidden');
-        });
-        if (menu) {
-          const isHidden = menu.classList.contains('hidden');
-          menu.classList.toggle('hidden');
-        }
-      }
-
-      document.addEventListener('click', (e) => {
-        const isMenuTrigger =
-          e.target.closest('button') &&
-          e.target.closest('button').getAttribute('onclick')?.includes('toggleOptions');
-        const isInsideMenu = e.target.closest('.options-menu');
-        if (!isInsideMenu && !isMenuTrigger) {
-          document.querySelectorAll('.options-menu').forEach((m) => m.classList.add('hidden'));
-        }
-      });
-
-      function switchTab(type) {
-        const tabs = ['bookmarked', 'drafts'];
-        tabs.forEach((t) => {
-          const el = document.getElementById(`tab-${t}`);
-          if (t === type) {
-            el.classList.add('studio-tab-active');
-            el.classList.remove('text-zinc-500');
-          } else {
-            el.classList.remove('studio-tab-active');
-            el.classList.add('text-zinc-500');
-          }
-        });
-      }
-    </script>
-  </body>
 </html>

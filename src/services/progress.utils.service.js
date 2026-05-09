@@ -2,7 +2,7 @@
 // Fetches chapter-level progress data for a tale from Firestore.
 // Used for rendering progress indicators across the UI.
 
-import { db, appId, collection, getDocs } from '@firebase/index.js';
+import { db, appId, collection, getDocs } from '@fb/index.js';
 
 /* ================= Firestore Structure Reference =================
 artifacts (collection)

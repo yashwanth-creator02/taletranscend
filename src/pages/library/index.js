@@ -3,7 +3,7 @@
 // Import from here instead of reaching into individual files directly.
 
 /* -------------------- Firebase -------------------- */
-export { initAuth, db } from '@firebase/index.js';
+export { initAuth, db } from '@fb/index.js';
 
 /* -------------------- Tales Content -------------------- */
 export { subscribeToTales, stopTalesSubscription } from './content.js';

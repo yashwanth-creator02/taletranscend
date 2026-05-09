@@ -1,0 +1,62 @@
+// src/pages/tale/tale.js
+// Entry point for the tale overview page.
+// Bootstraps auth, loads tale data, renders UI, and binds interactions.
+
+import '@css/base.css';
+import '@css/components.css';
+import '@css/pages/tale.css';
+
+import {
+  initAuth,
+  loadTale,
+  loadChapters,
+  renderTale,
+  renderChapters,
+  bindChapterClicks,
+  setupTabs,
+  setupStartReading,
+  setupResumeReading,
+  listenToComments,
+  postComment,
+  initIcons,
+} from './index.js';
+
+/* ==================== URL Parameters ==================== */
+const taleId = new URLSearchParams(window.location.search).get('id');
+
+// Redirect to library if no tale ID is present in the URL
+if (!taleId) location.href = 'library.html';
+
+/* ==================== Initialization ==================== */
+
+/**
+ * Bootstraps the tale page after authentication:
+ * - Loads and renders tale metadata
+ * - Loads and renders chapter list
+ * - Binds all user interactions
+ * - Starts real-time comment listener
+ */
+initAuth(async (user) => {
+  const userId = user.uid;
+
+  const tale = await loadTale(taleId, user);
+  if (!tale) return;
+
+  await renderTale(userId, tale, taleId);
+
+  const chapters = await loadChapters(taleId);
+  renderChapters(userId, chapters, taleId);
+
+  bindChapterClicks(taleId);
+  setupStartReading(taleId, chapters);
+  setupResumeReading(userId, taleId);
+  setupTabs();
+
+  listenToComments(taleId);
+
+  // Expose comment posting for HTML inline handler
+  document.getElementById('post-btn')?.addEventListener('click', () => postComment(taleId));
+});
+
+/* ==================== Icons ==================== */
+initIcons();

@@ -2,7 +2,7 @@
 // Fetches tale metadata and chapter content from Firestore.
 // This is the primary data access layer for the reader page.
 
-import { db, appId, doc, getDoc, collection, getDocs } from '@firebase/index.js';
+import { db, appId, doc, getDoc, collection, getDocs } from '@fb/index.js';
 
 /* ================= Firestore Structure Reference =================
 artifacts (collection)

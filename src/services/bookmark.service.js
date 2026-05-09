@@ -11,7 +11,7 @@ import {
   setDoc,
   collection,
   serverTimestamp,
-} from '@firebase/index.js';
+} from '@fb/index.js';
 
 /* ================= Firestore Structure Reference =================
 artifacts (collection)

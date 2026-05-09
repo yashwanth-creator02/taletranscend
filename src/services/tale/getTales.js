@@ -2,7 +2,7 @@
 // Fetches all community tales from Firestore.
 // Used by the library and shelf pages to populate tale listings.
 
-import { db, appId, getDocs, collection } from '@firebase/index.js';
+import { db, appId, getDocs, collection } from '@fb/index.js';
 
 /**
  * Retrieves all community tales for this application from Firestore.

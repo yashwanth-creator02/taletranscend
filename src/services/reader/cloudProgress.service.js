@@ -2,16 +2,7 @@
 // Handles syncing and retrieving reader progress from Firestore.
 // Chapter progress is stored in a subcollection for efficient per-chapter reads.
 
-import {
-  db,
-  appId,
-  doc,
-  getDoc,
-  setDoc,
-  serverTimestamp,
-  collection,
-  getDocs,
-} from '@firebase/index.js';
+import { db, appId, doc, getDoc, setDoc, serverTimestamp, collection, getDocs } from '@fb/index.js';
 
 import { PROGRESS_SYNC_DELAY_MS } from '@config/app.config.js';
 
