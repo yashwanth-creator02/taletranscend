@@ -4,7 +4,7 @@
 
 // The Firestore root document ID under the artifacts collection.
 // All user data is scoped under: artifacts/{APP_ID}/users/{userId}/...
-export const APP_ID = import.meta.env.VITE_APP_ID || 'taletranscend-pro';
+export const APP_ID = 'taletranscend-pro';
 
 // Application display name used in page titles and UI labels.
 export const APP_NAME = 'TaleTranscend';

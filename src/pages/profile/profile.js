@@ -10,7 +10,7 @@ import { initNav } from '@ui/components/nav.js';
 import { initAuth } from '@fb/index.js';
 import { initProfileUI, saveProfile, startProfileSync } from './index.js';
 import { initIcons } from '@ui/components/icons.js';
-import { getContinueReading, getUserPublishedTales } from '@services/profile.service.js';
+import { getContinueReading, getUserPublishedTales } from '@services/index.js';
 
 // Inject shared nav
 initNav();

@@ -9,7 +9,6 @@ import {
   onAuthStateChanged,
 } from 'firebase/auth';
 import app from './app.js';
-
 // Single shared Auth instance used across the entire application.
 export const auth = getAuth(app);
 

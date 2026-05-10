@@ -4,24 +4,21 @@ import { defineConfig } from 'vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import tailwindcss from '@tailwindcss/vite';
+import { visualizer } from 'rollup-plugin-visualizer';
 
-// Fix for __dirname in ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
 export default defineConfig({
   resolve: {
     alias: {
-      // Direct access to your major folders
-
+      // Points to the folder so '@fb/db.js' works correctly
       '@fb': path.resolve(__dirname, './src/firebase'),
       '@services': path.resolve(__dirname, './src/services'),
       '@ui': path.resolve(__dirname, './src/ui'),
       '@pages': path.resolve(__dirname, './src/pages'),
       '@config': path.resolve(__dirname, './src/config'),
       '@css': path.resolve(__dirname, './src/assets/css'),
-      '@core': path.resolve(__dirname, './js/core'),
-
-      // The general shortcut for anything in src
       '@': path.resolve(__dirname, './src'),
     },
   },
@@ -41,5 +38,14 @@ export default defineConfig({
   server: {
     open: '/src/views/library.html',
   },
-  plugins: [tailwindcss()],
+  plugins: [
+    tailwindcss(),
+
+    visualizer({
+      filename: 'stats.html',
+      open: true,
+      gzipSize: true,
+      template: 'treemap',
+    }),
+  ],
 });

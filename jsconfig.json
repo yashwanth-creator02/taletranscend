@@ -9,7 +9,6 @@
       "@pages/*": ["src/pages/*"],
       "@config/*": ["src/config/*"],
       "@css/*": ["src/assets/css/*"],
-      "@core/*": ["js/core/*"],
       "@/*": ["src/*"]
     }
   },

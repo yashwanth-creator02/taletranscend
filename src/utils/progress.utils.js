@@ -1,4 +1,5 @@
-// src/pages/reader/progress.utils.js
+// src/utils/progress.utils.js
+
 // Pure utility for calculating overall reading progress across all chapters.
 // Used by the library and shelf card renderers to show per-tale progress.
 

@@ -13,10 +13,4 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-// Warn during development if the API key is missing.
-// This check is stripped out in production builds by Vite.
-if (import.meta.env.DEV && !firebaseConfig.apiKey) {
-  console.warn('Firebase API key is missing. Check your .env file.');
-}
-
 export default firebaseConfig;

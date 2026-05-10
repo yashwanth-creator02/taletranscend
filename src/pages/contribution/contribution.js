@@ -5,10 +5,13 @@ import '@css/base.css';
 import '@css/components.css';
 import '@css/pages/contribution.css';
 
-import { addNewChapter, updateSidebarTitle } from './chapters.js';
-import { autoSaveLocal } from './editor.js';
-import { saveToCloud } from './cloud.js';
-import { publishFullTale } from './publish.js';
+import {
+  addNewChapter,
+  updateSidebarTitle,
+  autoSaveLocal,
+  saveToCloud,
+  publishFullTale,
+} from './index.js';
 import { initNav } from '@ui/components/nav.js';
 initNav();
 /* ==================== Initialization ==================== */

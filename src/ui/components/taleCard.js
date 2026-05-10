@@ -3,7 +3,7 @@
 // Used by the library and shelf pages to display community tales.
 
 import { getTotalReadTime, getBookmarks, getTaleProgressData } from '@services/index.js';
-import { getOverallProgress } from '@pages/reader/progress.utils.js';
+import { getOverallProgress } from '@/utils/progress.utils.js';
 
 /* ================= Grid Renderer ================= */
 

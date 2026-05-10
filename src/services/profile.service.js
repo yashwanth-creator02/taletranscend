@@ -3,8 +3,7 @@
 
 import { db, appId, collection, getDocs, doc, getDoc, query, where } from '@fb/index.js';
 
-import { readStorage } from './reader/localProgress.service.js';
-import { getTotalReadTime } from './reader/readTime.selector.js';
+import { readStorage, getTotalReadTime } from '@services/index.js';
 
 /**
  * Fetches the tales the user has started reading, sorted by most recently read.
