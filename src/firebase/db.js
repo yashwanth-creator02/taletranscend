@@ -18,6 +18,11 @@ import {
   deleteDoc,
   updateDoc,
   writeBatch,
+  query,
+  orderBy,
+  limit,
+  startAfter,
+  where,
 } from 'firebase/firestore';
 
 // Single shared Firestore instance bound to the initialized Firebase app.
@@ -37,4 +42,9 @@ export {
   deleteDoc,
   updateDoc,
   writeBatch,
+  query,
+  orderBy,
+  limit,
+  startAfter,
+  where,
 };

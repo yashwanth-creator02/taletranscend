@@ -15,9 +15,23 @@ import {
   setupSearch,
   setupCardInteractions,
   setupSidebarToggle,
-  db,
 } from './index.js';
-
+import { createIcons, icons } from 'lucide';
+import { initNav } from '@ui/components/nav.js';
+initNav();
+/* ==================== URL Search Pre-fill ==================== */
+// If the user arrived from the home page search, pre-fill and trigger search on load
+document.addEventListener('DOMContentLoaded', () => {
+  const urlSearch = new URLSearchParams(window.location.search).get('search');
+  if (urlSearch) {
+    const input = document.getElementById('search-input');
+    if (input) {
+      input.value = urlSearch;
+      // Dispatch input event so setupSearch picks it up naturally
+      input.dispatchEvent(new Event('input'));
+    }
+  }
+});
 /* ==================== Global Variables ==================== */
 // Stores all tales fetched from Firestore for use across handlers
 let allTales = [];
@@ -27,9 +41,17 @@ let allTales = [];
 setupSidebarToggle();
 
 /* ==================== Firebase Auth & Tales Subscription ==================== */
+const authTimeout = setTimeout(() => {
+  document.getElementById('cards-grid').innerHTML = `
+    <div class="col-span-full text-center py-20 text-red-500">
+      Connection timed out. Please refresh.
+    </div>
+  `;
+}, 10000);
 initAuth(async (user) => {
   const userId = user.uid;
-
+  createIcons({ icons });
+  clearTimeout(authTimeout);
   // Subscribe to live community tales updates from Firestore
   subscribeToTales(
     async (tales) => {

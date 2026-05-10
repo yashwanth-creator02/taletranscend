@@ -25,7 +25,7 @@ export function getOverallProgress({ chapterCount = 0, chaptersProgress = {} }) 
   let progressUnits = 0;
 
   for (let i = 0; i < chapterCount; i++) {
-    const p = Math.min(100, Math.max(0, chaptersProgress[i] ?? 0));
+    const p = Math.min(100, Math.max(0, chaptersProgress[String(i)] ?? 0));
     progressUnits += p / 100;
   }
 

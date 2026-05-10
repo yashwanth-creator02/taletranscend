@@ -1,17 +1,50 @@
 // src/pages/tale/comments.js
 // Real-time comments listener and comment posting for the tale page.
+// Supports paginated loading via a Load More button.
 // All user-generated text is escaped before rendering to prevent XSS.
 
-import { db, appId, auth, collection, onSnapshot, addDoc, serverTimestamp } from '@fb/index.js';
+import {
+  db,
+  appId,
+  auth,
+  collection,
+  onSnapshot,
+  addDoc,
+  serverTimestamp,
+  query,
+  orderBy,
+  limit,
+  startAfter,
+  getDocs,
+} from '@fb/index.js';
+
+const PAGE_SIZE = 20;
+
+// Tracks the last visible Firestore document for pagination cursor
+let lastVisible = null;
+
+// Tracks whether all comments have been loaded
+let allLoaded = false;
+
+// Holds the current unsubscribe function for the real-time listener
+let unsubscribe = null;
+
+// Stores taleId for use in loadMoreComments
+let currentTaleId = null;
 
 /**
- * Starts a real-time listener on the tale's comments collection.
- * Renders comments sorted by newest first whenever the collection changes.
+ * Starts a real-time listener on the first page of comments.
+ * Renders comments sorted by newest first.
+ * Shows a Load More button if there may be additional comments.
  *
  * @param {string} taleId - ID of the tale to listen to
  * @returns {Function} Unsubscribe function to stop the listener
  */
 export function listenToComments(taleId) {
+  currentTaleId = taleId;
+  lastVisible = null;
+  allLoaded = false;
+
   const commentsRef = collection(
     db,
     'artifacts',
@@ -23,16 +56,105 @@ export function listenToComments(taleId) {
     'comments'
   );
 
-  return onSnapshot(commentsRef, (snap) => {
+  const q = query(commentsRef, orderBy('timestamp', 'desc'), limit(PAGE_SIZE));
+
+  // Stop any existing listener before starting a new one
+  if (unsubscribe) unsubscribe();
+
+  unsubscribe = onSnapshot(q, (snap) => {
     const list = document.getElementById('comments-list');
     if (!list) return;
 
-    const items = snap.docs
-      .map((d) => d.data())
-      .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+    if (snap.empty) {
+      list.innerHTML = emptyState();
+      return;
+    }
 
-    list.innerHTML = items.length ? items.map(renderComment).join('') : emptyState();
+    // Update the pagination cursor to the last document in this page
+    lastVisible = snap.docs[snap.docs.length - 1];
+
+    // If fewer docs than PAGE_SIZE came back, there are no more to load
+    allLoaded = snap.docs.length < PAGE_SIZE;
+
+    const items = snap.docs.map((d) => d.data());
+    list.innerHTML = items.map(renderComment).join('');
+
+    // Append Load More button if more comments may exist
+    if (!allLoaded) {
+      list.insertAdjacentHTML('beforeend', renderLoadMoreButton());
+      document
+        .getElementById('load-more-comments')
+        ?.addEventListener('click', () => loadMoreComments(taleId));
+    }
   });
+
+  return unsubscribe;
+}
+
+/**
+ * Loads the next page of comments and appends them to the list.
+ * Uses the last visible document as the Firestore pagination cursor.
+ * Removes the Load More button when all comments have been loaded.
+ *
+ * @param {string} taleId - ID of the tale
+ */
+async function loadMoreComments(taleId) {
+  if (!lastVisible || allLoaded) return;
+
+  const btn = document.getElementById('load-more-comments');
+  if (btn) {
+    btn.textContent = 'Loading...';
+    btn.disabled = true;
+  }
+
+  const commentsRef = collection(
+    db,
+    'artifacts',
+    appId,
+    'public',
+    'data',
+    'community_tales',
+    taleId,
+    'comments'
+  );
+
+  // Query starting after the last loaded document
+  const q = query(
+    commentsRef,
+    orderBy('timestamp', 'desc'),
+    startAfter(lastVisible),
+    limit(PAGE_SIZE)
+  );
+
+  const snap = await getDocs(q);
+
+  if (snap.empty) {
+    allLoaded = true;
+    btn?.remove();
+    return;
+  }
+
+  // Update cursor to the new last document
+  lastVisible = snap.docs[snap.docs.length - 1];
+  allLoaded = snap.docs.length < PAGE_SIZE;
+
+  const list = document.getElementById('comments-list');
+  if (!list) return;
+
+  // Remove existing Load More button before appending new comments
+  btn?.remove();
+
+  // Append new comments to the existing list
+  const newItems = snap.docs.map((d) => d.data());
+  list.insertAdjacentHTML('beforeend', newItems.map(renderComment).join(''));
+
+  // Re-add Load More button if there are still more comments
+  if (!allLoaded) {
+    list.insertAdjacentHTML('beforeend', renderLoadMoreButton());
+    document
+      .getElementById('load-more-comments')
+      ?.addEventListener('click', () => loadMoreComments(taleId));
+  }
 }
 
 /**
@@ -93,6 +215,23 @@ function renderComment(c) {
       <p class="text-sm text-zinc-400 leading-relaxed font-medium">
         ${escapeHTML(c.text)}
       </p>
+    </div>
+  `;
+}
+
+/**
+ * Returns the Load More button HTML string.
+ *
+ * @returns {string} HTML string for the Load More button
+ */
+function renderLoadMoreButton() {
+  return `
+    <div class="text-center pt-8">
+      <button
+        id="load-more-comments"
+        class="px-8 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-400 hover:text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all">
+        Load More Echoes
+      </button>
     </div>
   `;
 }

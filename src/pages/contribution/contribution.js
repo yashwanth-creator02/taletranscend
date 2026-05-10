@@ -9,11 +9,15 @@ import { addNewChapter, updateSidebarTitle } from './chapters.js';
 import { autoSaveLocal } from './editor.js';
 import { saveToCloud } from './cloud.js';
 import { publishFullTale } from './publish.js';
-
+import { initNav } from '@ui/components/nav.js';
+initNav();
 /* ==================== Initialization ==================== */
 function init() {
   addNewChapter();
   bindEditorEvents();
+
+  // Initialize icons via CDN
+  if (window.lucide) window.lucide.createIcons();
 }
 
 /* ==================== Event Bindings ==================== */
@@ -23,24 +27,19 @@ function init() {
  * No onclick attributes are used in the HTML.
  */
 function bindEditorEvents() {
-  // Add chapter button
   document.getElementById('add-chapter-btn')?.addEventListener('click', addNewChapter);
 
-  // Save draft button
   document.getElementById('save-draft-btn')?.addEventListener('click', saveToCloud);
 
-  // Publish button
   document.getElementById('publish-btn')?.addEventListener('click', publishFullTale);
 
-  // Chapter title input — updates sidebar title on every keystroke
   document
     .getElementById('current-chapter-title')
     ?.addEventListener('input', (e) => updateSidebarTitle(e.target.value));
 
-  // Chapter content textarea — auto-saves on every keystroke
   document.getElementById('chapter-content')?.addEventListener('input', autoSaveLocal);
 
-  // AI helper buttons — placeholders for future implementation
+  // AI helpers — placeholders for future implementation
   document
     .getElementById('ai-continue-btn')
     ?.addEventListener('click', () => console.log('AI continue: not yet implemented'));

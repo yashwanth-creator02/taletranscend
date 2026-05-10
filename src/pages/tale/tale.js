@@ -20,12 +20,17 @@ import {
   postComment,
   initIcons,
 } from './index.js';
-
+import { createIcons, icons } from 'lucide';
+import { initNav } from '@ui/components/nav.js';
+initNav();
 /* ==================== URL Parameters ==================== */
 const taleId = new URLSearchParams(window.location.search).get('id');
 
 // Redirect to library if no tale ID is present in the URL
-if (!taleId) location.href = 'library.html';
+if (!taleId) {
+  location.replace('library.html');
+  throw new Error('No taleId');
+}
 
 /* ==================== Initialization ==================== */
 
@@ -36,8 +41,16 @@ if (!taleId) location.href = 'library.html';
  * - Binds all user interactions
  * - Starts real-time comment listener
  */
+const authTimeout = setTimeout(() => {
+  document.getElementById('cards-grid').innerHTML = `
+    <div class="col-span-full text-center py-20 text-red-500">
+      Connection timed out. Please refresh.
+    </div>
+  `;
+}, 10000);
 initAuth(async (user) => {
   const userId = user.uid;
+  clearTimeout(authTimeout);
 
   const tale = await loadTale(taleId, user);
   if (!tale) return;
@@ -60,3 +73,4 @@ initAuth(async (user) => {
 
 /* ==================== Icons ==================== */
 initIcons();
+createIcons({ icons });

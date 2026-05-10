@@ -18,12 +18,19 @@ export function applyNavigation(navigation, taleId) {
   const prev = document.getElementById('prev-link');
   const next = document.getElementById('next-link');
 
+  if (!prev || !next) return;
+
   if (navigation.hasPrev) {
     prev.href = `reader.html?taleId=${taleId}&chapterId=${navigation.prevIndex}`;
     prev.classList.remove('hidden');
 
     const prevTitle = document.getElementById('prev-title');
     if (prevTitle) prevTitle.textContent = navigation.prevTitle;
+
+    prev.addEventListener('click', () => {
+      document.body.style.opacity = '0';
+      document.body.style.transition = 'opacity 0.2s ease';
+    });
   } else {
     prev.classList.add('hidden');
   }
@@ -34,11 +41,15 @@ export function applyNavigation(navigation, taleId) {
 
     const nextTitle = document.getElementById('next-title');
     if (nextTitle) nextTitle.textContent = navigation.nextTitle;
+
+    next.addEventListener('click', () => {
+      document.body.style.opacity = '0';
+      document.body.style.transition = 'opacity 0.2s ease';
+    });
   } else {
     next.classList.add('hidden');
   }
 }
-
 /**
  * Navigates the user back to the tale overview page.
  *

@@ -8,14 +8,34 @@ import '@css/pages/shelf.css';
 
 import { initAuth } from '@fb/index.js';
 import { initIcons } from '@ui/components/icons.js';
-import { renderCards } from './content.js';
+import { renderBookmarkedCards, renderDraftCards } from './content.js';
+import { initNav } from '@ui/components/nav.js';
+initNav();
+// Holds the authenticated user ID for tab switching after auth resolves
+let currentUserId = null;
 
 /* ==================== Authentication ==================== */
+
+const authTimeout = setTimeout(() => {
+  const grid = document.getElementById('studio-grid');
+  if (grid)
+    grid.innerHTML = `
+    <div class="col-span-full text-center py-20 text-red-500">
+      Connection timed out. Please refresh.
+    </div>
+  `;
+}, 10000);
+
 initAuth(async (user) => {
-  await renderCards(user.uid);
+  clearTimeout(authTimeout);
+  currentUserId = user.uid;
+
+  // Default to bookmarked tab on load
+  await renderBookmarkedCards(currentUserId);
 });
 
-/* ==================== Icons ==================== */
+/* ==================== Icons & UI ==================== */
+
 document.addEventListener('DOMContentLoaded', () => {
   initIcons();
   initShelfTabs();
@@ -25,16 +45,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 /**
  * Initializes tab switching for the shelf page.
- * Uses event delegation on the tab buttons via data-tab attributes.
+ * Renders the appropriate content when each tab is selected.
  */
 function initShelfTabs() {
   const tabs = document.querySelectorAll('.shelf-tab');
 
   tabs.forEach((tab) => {
-    tab.addEventListener('click', () => {
+    tab.addEventListener('click', async () => {
       const selected = tab.dataset.tab;
 
-      // Update tab active state
+      // Update active tab styles
       tabs.forEach((t) => {
         t.classList.remove('studio-tab-active');
         t.classList.add('text-zinc-500');
@@ -42,7 +62,15 @@ function initShelfTabs() {
       tab.classList.add('studio-tab-active');
       tab.classList.remove('text-zinc-500');
 
-      // Tab content switching can be extended here when drafts are implemented
+      // Render content for selected tab
+      // Wait for auth to resolve before rendering
+      if (!currentUserId) return;
+
+      if (selected === 'bookmarked') {
+        await renderBookmarkedCards(currentUserId);
+      } else if (selected === 'drafts') {
+        await renderDraftCards(currentUserId);
+      }
     });
   });
 }
