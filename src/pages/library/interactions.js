@@ -290,3 +290,110 @@ export function setupSidebarToggle() {
     sidebar.classList.toggle('collapsed');
   });
 }
+
+/* ==================== ERA FILTER ==================== */
+
+/**
+ * Initializes the era filter buttons in the top filter bar.
+ * Filters the cards grid by era when a button is clicked.
+ *
+ * @param {Function} getAllTales - Returns the full tales array
+ * @param {Function} onFilter - Callback to render filtered tales
+ * @param {Function} initIcons - Re-initializes icons after render
+ */
+export function setupEraFilter(getAllTales, onFilter, initIcons) {
+  const buttons = document.querySelectorAll('.era-filter');
+  if (!buttons.length) return;
+
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const era = btn.dataset.era;
+
+      // Update active button styles
+      buttons.forEach((b) => {
+        b.classList.remove('bg-indigo-600', 'text-white', 'shadow-xl', 'shadow-indigo-600/20');
+        b.classList.add('bg-zinc-900/50', 'border', 'border-white/5', 'text-zinc-500');
+      });
+      btn.classList.add('bg-indigo-600', 'text-white', 'shadow-xl', 'shadow-indigo-600/20');
+      btn.classList.remove('bg-zinc-900/50', 'border', 'border-white/5', 'text-zinc-500');
+
+      const tales = getAllTales();
+      const filtered =
+        era === 'all' ? tales : tales.filter((t) => t.era?.toLowerCase() === era.toLowerCase());
+
+      await onFilter(filtered);
+      if (typeof initIcons === 'function') initIcons();
+    });
+  });
+}
+
+/* ==================== SIDEBAR FILTER ==================== */
+
+/**
+ * Initializes the sidebar filter buttons.
+ * Handles All, Recent, Bookmarked, My Tales, and Completed filters.
+ *
+ * @param {string} userId - Current user ID
+ * @param {Function} getAllTales - Returns the full tales array
+ * @param {Function} onFilter - Callback to render filtered tales
+ * @param {Function} initIcons - Re-initializes icons after render
+ */
+export function setupSidebarFilter(userId, getAllTales, onFilter, initIcons) {
+  const buttons = document.querySelectorAll('.sidebar-filter');
+  if (!buttons.length) return;
+
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const filter = btn.dataset.filter;
+
+      // Update active button styles
+      buttons.forEach((b) => {
+        b.classList.remove('bg-indigo-500/10', 'text-indigo-400', 'border', 'border-indigo-500/20');
+        b.classList.add('text-zinc-500');
+      });
+      btn.classList.add('bg-indigo-500/10', 'text-indigo-400', 'border', 'border-indigo-500/20');
+      btn.classList.remove('text-zinc-500');
+
+      const tales = getAllTales();
+      let filtered = tales;
+
+      switch (filter) {
+        case 'all':
+          filtered = tales;
+          break;
+
+        case 'recent': {
+          // Sort by publishedAt descending, take top 20
+          filtered = [...tales]
+            .filter((t) => t.publishedAt)
+            .sort((a, b) => (b.publishedAt?.seconds || 0) - (a.publishedAt?.seconds || 0))
+            .slice(0, 20);
+          break;
+        }
+
+        case 'finished':
+          filtered = tales.filter((t) => t.status === 'finished');
+          break;
+
+        case 'bookmarked': {
+          // Import dynamically to avoid circular deps
+          const { getBookmarks } = await import('@services/index.js');
+          const bookmarks = await getBookmarks({ userId });
+          const ids = new Set(bookmarks.map((b) => b.id));
+          filtered = tales.filter((t) => ids.has(t.id));
+          break;
+        }
+
+        case 'my-tales':
+          filtered = tales.filter((t) => t.authorId === userId);
+          break;
+
+        default:
+          filtered = tales;
+      }
+
+      await onFilter(filtered);
+      if (typeof initIcons === 'function') initIcons();
+    });
+  });
+}

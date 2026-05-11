@@ -32,34 +32,35 @@
               <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">Browse By</h4>
             </div>
             <div class="space-y-1">
-              <button
-                class="w-full flex items-center gap-3 p-3 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 sidebar-center">
+              <button data-filter="all"
+                class="sidebar-filter w-full flex items-center gap-3 p-3 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 sidebar-center">
                 <i data-lucide="layout-grid" class="w-4 h-4"></i>
                 <span class="text-xs font-bold sidebar-hide">All Eras</span>
               </button>
-              <button
-                class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-zinc-500 hover:text-white transition-all sidebar-center">
-                <i data-lucide="scroll" class="w-4 h-4"></i>
-                <span class="text-xs font-bold sidebar-hide">Manuscripts</span>
-              </button>
-              <button
-                class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-zinc-500 hover:text-white transition-all sidebar-center">
+              <button data-filter="recent"
+                class="sidebar-filter w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-zinc-500 hover:text-white transition-all sidebar-center">
                 <i data-lucide="clock" class="w-4 h-4"></i>
                 <span class="text-xs font-bold sidebar-hide">Recent Myths</span>
+              </button>
+              <button data-filter="finished"
+                class="sidebar-filter w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-zinc-500 hover:text-white transition-all sidebar-center">
+                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                <span class="text-xs font-bold sidebar-hide">Completed</span>
               </button>
             </div>
           </div>
 
           <div class="space-y-4">
             <h4 class="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600 sidebar-hide">Personal</h4>
+            <!-- Personal section buttons -->
             <div class="space-y-1">
-              <button
-                class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-zinc-500 hover:text-white transition-all sidebar-center">
+              <button data-filter="bookmarked"
+                class="sidebar-filter w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-zinc-500 hover:text-white transition-all sidebar-center">
                 <i data-lucide="bookmark" class="w-4 h-4"></i>
                 <span class="text-xs font-bold sidebar-hide">Bookmarks</span>
               </button>
-              <button
-                class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-zinc-500 hover:text-white transition-all sidebar-center">
+              <button data-filter="my-tales"
+                class="sidebar-filter w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-zinc-500 hover:text-white transition-all sidebar-center">
                 <i data-lucide="feather" class="w-4 h-4"></i>
                 <span class="text-xs font-bold sidebar-hide">My Tales</span>
               </button>
@@ -120,20 +121,28 @@
           </div>
         </header>
 
+        <!-- Era filter bar — replace existing buttons -->
         <div class="flex overflow-x-auto pb-4 gap-3 mb-12 no-scrollbar">
-          <button
-            class="flex-shrink-0 px-6 py-3 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-xl shadow-indigo-600/20">All
-            Scrolls</button>
-          <button
-            class="flex-shrink-0 px-6 py-3 bg-zinc-900/50 border border-white/5 text-zinc-500 hover:text-white hover:border-white/20 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all">Nordic
-            Lore</button>
-          <button
-            class="flex-shrink-0 px-6 py-3 bg-zinc-900/50 border border-white/5 text-zinc-500 hover:text-white hover:border-white/20 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all">Mesoamerican</button>
-          <button
-            class="flex-shrink-0 px-6 py-3 bg-zinc-900/50 border border-white/5 text-zinc-500 hover:text-white hover:border-white/20 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all">Eastern
-            Spirit</button>
-          <button
-            class="flex-shrink-0 px-6 py-3 bg-zinc-900/50 border border-white/5 text-zinc-500 hover:text-white hover:border-white/20 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all">Neo-Solar</button>
+          <button data-era="all"
+            class="era-filter flex-shrink-0 px-6 py-3 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-xl shadow-indigo-600/20">
+            All Scrolls
+          </button>
+          <button data-era="Nordic Lore"
+            class="era-filter flex-shrink-0 px-6 py-3 bg-zinc-900/50 border border-white/5 text-zinc-500 hover:text-white hover:border-white/20 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all">
+            Nordic Lore
+          </button>
+          <button data-era="Mesoamerican"
+            class="era-filter flex-shrink-0 px-6 py-3 bg-zinc-900/50 border border-white/5 text-zinc-500 hover:text-white hover:border-white/20 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all">
+            Mesoamerican
+          </button>
+          <button data-era="Eastern Spirit"
+            class="era-filter flex-shrink-0 px-6 py-3 bg-zinc-900/50 border border-white/5 text-zinc-500 hover:text-white hover:border-white/20 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all">
+            Eastern Spirit
+          </button>
+          <button data-era="Neo-Solar"
+            class="era-filter flex-shrink-0 px-6 py-3 bg-zinc-900/50 border border-white/5 text-zinc-500 hover:text-white hover:border-white/20 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all">
+            Neo-Solar
+          </button>
         </div>
 
         <section id="cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8">

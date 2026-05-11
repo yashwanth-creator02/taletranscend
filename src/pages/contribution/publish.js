@@ -3,11 +3,12 @@
 //
 // Flow:
 //   1. Validate tale has a title and at least one chapter with content
-//   2. Save current draft to Firestore
-//   3. Submit to pending_tales collection for review
-//   4. Auto-approve (review is bypassed for now — structure exists for future moderation)
+//   2. Save all chapters to Firestore draft subcollection
+//   3. Submit to pending_tales for review
+//   4. Auto-approve (review bypassed for now — structure exists for future moderation)
 //   5. Write approved tale to community_tales (publicly visible)
-//   6. Update draft with published status and taleId reference
+//   6. Write each chapter as a subcollection document in community_tales
+//   7. Update draft document with published reference
 //
 // The draft is preserved after publishing so the user can edit and re-publish.
 
@@ -23,12 +24,10 @@ import {
   appId,
 } from '@fb/index.js';
 import { state } from './state.js';
-import { saveToCloud } from './cloud.js';
+import { saveAllChapters } from './cloud.js';
 
 /**
  * Runs the full publish pipeline for the current tale.
- * Validates input, saves draft, submits for review, auto-approves,
- * and writes to community_tales.
  */
 export async function publishFullTale() {
   if (!auth.currentUser) {
@@ -59,32 +58,30 @@ export async function publishFullTale() {
   setPublishButtonState(true);
 
   try {
-    // -------------------- Step 1: Save draft --------------------
-    await saveToCloud();
-
-    // -------------------- Step 2: Submit to pending review --------------------
     const userId = auth.currentUser.uid;
     const authorName = auth.currentUser.displayName || `Scribe ${userId.slice(0, 5)}`;
 
-    const pendingRef = collection(db, 'artifacts', appId, 'public', 'pending_tales');
+    // -------------------- Step 1: Save all chapters to draft --------------------
+    // Ensures every chapter is persisted before publishing,
+    // not just the currently active one.
+    await saveAllChapters(userId);
+
+    // -------------------- Step 2: Submit to pending review --------------------
+    const pendingRef = collection(db, 'artifacts', appId, 'public', 'data', 'pending_tales');
 
     const pendingDoc = await addDoc(pendingRef, {
       title: taleTitle,
       authorId: userId,
       authorName,
-      chapters: state.chapters.map((ch, idx) => ({
-        chapterNum: idx,
-        title: ch.title || 'Untitled Chapter',
-        content: ch.content || '',
-      })),
       chapterCount: state.chapters.length,
+      description: extractDescription(state.chapters),
       status: 'pending',
       submittedAt: serverTimestamp(),
     });
 
     // -------------------- Step 3: Auto-approve --------------------
-    // Review is bypassed for now. This update exists so future moderation
-    // logic can check status before the next step runs.
+    // Review is bypassed for now.
+    // Future moderation checks status before the community_tales write.
     await updateDoc(pendingDoc, {
       status: 'approved',
       reviewedAt: serverTimestamp(),
@@ -112,7 +109,9 @@ export async function publishFullTale() {
       updatedAt: serverTimestamp(),
     });
 
-    // Write each chapter as a subcollection document
+    // -------------------- Step 5: Write chapters subcollection --------------------
+    // Each chapter is its own document — mirrors the draft structure
+    // and avoids the 1MB document size limit.
     await Promise.all(
       state.chapters.map((ch, idx) =>
         setDoc(
@@ -136,8 +135,8 @@ export async function publishFullTale() {
       )
     );
 
-    // -------------------- Step 5: Update draft with published reference --------------------
-    const draftRef = doc(db, 'artifacts', appId, 'users', userId, 'drafts', 'current');
+    // -------------------- Step 6: Update draft with published reference --------------------
+    const draftRef = doc(db, 'artifacts', appId, 'users', userId, 'drafts', state.draftId);
 
     await updateDoc(draftRef, {
       publishedTaleId: pendingDoc.id,
@@ -161,8 +160,8 @@ export async function publishFullTale() {
 /* ==================== Helpers ==================== */
 
 /**
- * Extracts a short description from the first chapter's content.
- * Used as the tale description in community_tales if none is provided.
+ * Extracts a short description from the first chapter with content.
+ * Used as the tale description in community_tales.
  *
  * @param {Array<Object>} chapters - Array of chapter objects
  * @returns {string} First 200 characters of the first chapter's content
@@ -174,14 +173,16 @@ function extractDescription(chapters) {
 }
 
 /**
- * Updates the status indicator in the editor footer.
+ * Updates the status indicator in the editor header.
  *
- * @param {string} message - Status message to display
+ * @param {string} message - Status message
  * @param {'loading'|'success'|'error'} type - Visual style
  */
 function showStatus(message, type) {
   const status = document.getElementById('stat-status');
   if (!status) return;
+
+  status.classList.remove('text-indigo-400', 'text-emerald-400', 'text-red-400');
 
   const colors = {
     loading: 'text-indigo-400',
@@ -189,9 +190,7 @@ function showStatus(message, type) {
     error: 'text-red-400',
   };
 
-  // Remove all color classes first
-  status.classList.remove('text-indigo-400', 'text-emerald-400', 'text-red-400');
-  status.classList.add(colors[type] || '');
+  status.classList.add(colors[type] || 'text-zinc-500');
   status.textContent = message;
 }
 
@@ -201,11 +200,16 @@ function showStatus(message, type) {
  * @param {boolean} disabled - Whether to disable the button
  */
 function setPublishButtonState(disabled) {
-  const btn = document.getElementById('publish-btn');
-  if (!btn) return;
+  const btns = [
+    document.getElementById('publish-btn'),
+    document.getElementById('publish-btn-mobile'),
+  ];
 
-  btn.disabled = disabled;
-  btn.textContent = disabled ? 'Publishing...' : 'Publish';
-  btn.classList.toggle('opacity-50', disabled);
-  btn.classList.toggle('cursor-not-allowed', disabled);
+  btns.forEach((btn) => {
+    if (!btn) return;
+    btn.disabled = disabled;
+    btn.textContent = disabled ? 'Publishing...' : 'Publish';
+    btn.classList.toggle('opacity-50', disabled);
+    btn.classList.toggle('cursor-not-allowed', disabled);
+  });
 }

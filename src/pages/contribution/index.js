@@ -6,6 +6,6 @@ export {
   loadCurrentChapter,
 } from './chapters.js';
 export { autoSaveLocal } from './editor.js';
-export { saveToCloud } from './cloud.js';
+export { saveToCloud, loadDraft } from './cloud.js';
 export { publishFullTale } from './publish.js';
 export { state } from './state.js';
