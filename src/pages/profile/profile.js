@@ -6,7 +6,7 @@ import '@css/base.css';
 import '@css/components.css';
 import '@css/pages/profile.css';
 
-import { initNav } from '@ui/components/nav.js';
+import { initNav } from '@ui/components/nav/nav.js';
 import { initAuth } from '@fb/index.js';
 import { initProfileUI, saveProfile, startProfileSync } from './index.js';
 import { initIcons } from '@ui/components/icons.js';

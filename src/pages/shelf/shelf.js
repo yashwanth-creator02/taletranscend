@@ -9,7 +9,7 @@ import '@css/pages/shelf.css';
 import { initAuth } from '@fb/index.js';
 import { initIcons } from '@ui/components/icons.js';
 import { renderBookmarkedCards, renderDraftCards } from './index.js';
-import { initNav } from '@ui/components/nav.js';
+import { initNav } from '@ui/components/nav/nav.js';
 initNav();
 // Holds the authenticated user ID for tab switching after auth resolves
 let currentUserId = null;

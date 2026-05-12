@@ -21,7 +21,7 @@ import {
   initIcons,
 } from './index.js';
 import { createIcons, icons } from 'lucide';
-import { initNav } from '@ui/components/nav.js';
+import { initNav } from '@ui/components/nav/nav.js';
 initNav();
 /* ==================== URL Parameters ==================== */
 const taleId = new URLSearchParams(window.location.search).get('id');

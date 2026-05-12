@@ -5,7 +5,7 @@ import '@css/base.css';
 import '@css/components.css';
 import '@css/pages/library.css';
 
-import { initNav } from '@ui/components/nav.js';
+import { initNav } from '@ui/components/nav/nav.js';
 import {
   initAuth,
   subscribeToTales,

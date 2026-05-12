@@ -27,7 +27,7 @@ import {
 } from './index.js';
 
 import { applyReaderFont } from '@ui/font.registry.js';
-import { initNav } from '@ui/components/nav.js';
+import { initNav } from '@ui/components/nav/nav.js';
 initNav();
 /* ==================== URL Parameters ==================== */
 const params = new URLSearchParams(window.location.search);
