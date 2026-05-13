@@ -1,97 +1,697 @@
 // src/pages/profile/ui.js
-// Profile page UI — modal controls, form handling, display updates, and toast notifications.
+// Profile page UI — tabbed modal controls, all field rendering,
+// genre multi-select, avatar preview, toast notifications.
 
+import { profileState, GENRE_OPTIONS } from './state.js';
+import { suggestNameFromBio } from './ai-name.js';
+
+/* ─────────────────────────────────────────────
+   Modal
+   ───────────────────────────────────────────── */
+
+/**
+ * Bootstraps all profile UI interactions:
+ * - Modal open/close
+ * - Tab switching
+ * - Genre multi-select
+ * - Avatar preview
+ * - AI name suggestion button
+ * - Backdrop click to close
+ */
 export function initProfileUI() {
+  _bindModalTriggers();
+  _bindTabSwitching();
+  _buildGenreSelector();
+  _bindAvatarPreview();
+  _bindAiNameButton();
+  _bindBackdropClose();
+}
+
+function _bindModalTriggers() {
+  ['btn-edit-desktop', 'btn-edit-mobile'].forEach((id) => {
+    document.getElementById(id)?.addEventListener('click', openModal);
+  });
+
+  ['btn-close-modal', 'btn-cancel-modal'].forEach((id) => {
+    document.getElementById(id)?.addEventListener('click', closeModal);
+  });
+}
+
+export function openModal() {
   const modal = document.getElementById('edit-modal');
-  const profileForm = document.getElementById('profile-form');
-  const btnEditDesktop = document.getElementById('btn-edit-desktop');
-  const btnCloseModal = document.getElementById('btn-close-modal');
-  const btnCancelModal = document.getElementById('btn-cancel-modal');
-  const btnNewStory = document.getElementById('btn-new-story');
-  const btnEditMobile = document.getElementById('btn-edit-mobile');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  // Switch to basic tab on open
+  switchTab('basic');
+  document.body.style.overflow = 'hidden';
+}
 
-  const toggleModal = () => modal.classList.toggle('hidden');
+export function closeModal() {
+  const modal = document.getElementById('edit-modal');
+  if (!modal) return;
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+  document.body.style.overflow = '';
+}
 
-  if (btnEditDesktop) btnEditDesktop.addEventListener('click', toggleModal);
-  if (btnEditMobile) btnEditMobile.addEventListener('click', toggleModal);
-  if (btnCloseModal) btnCloseModal.addEventListener('click', toggleModal);
-  if (btnCancelModal) btnCancelModal.addEventListener('click', toggleModal);
+function _bindBackdropClose() {
+  document.getElementById('edit-modal')?.addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeModal();
+  });
+  // Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+  });
+}
 
-  if (btnNewStory) {
-    btnNewStory.addEventListener('click', () => {
-      showNotification('Opening Story Editor...', 'success');
-    });
-  }
+/* ─────────────────────────────────────────────
+   Tabs
+   ───────────────────────────────────────────── */
 
-  if (profileForm) {
-    profileForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if (window.saveProfile) {
-        await window.saveProfile();
-        toggleModal();
-        showNotification('Profile synced with legends.', 'success');
+/**
+ * Switches the visible tab panel and updates tab button styles.
+ *
+ * @param {'basic'|'identity'|'social'|'goals'} tab
+ */
+export function switchTab(tab) {
+  profileState.activeModalTab = tab;
+
+  // Toggle panel visibility
+  ['basic', 'identity', 'social', 'goals'].forEach((t) => {
+    const panel = document.getElementById(`tab-panel-${t}`);
+    if (panel) panel.hidden = t !== tab;
+
+    const btn = document.querySelector(`[data-tab="${t}"]`);
+    if (btn) {
+      btn.classList.toggle('tab-btn--active', t === tab);
+      btn.classList.toggle('tab-btn--inactive', t !== tab);
+    }
+  });
+}
+
+function _bindTabSwitching() {
+  document.querySelectorAll('[data-tab]').forEach((btn) => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+}
+
+/* ─────────────────────────────────────────────
+   Genre Multi-Select
+   ───────────────────────────────────────────── */
+
+/**
+ * Builds the genre chip selector inside #genre-selector.
+ * Chips are toggled; selected genres are stored in profileState.favouriteGenres.
+ */
+function _buildGenreSelector() {
+  const container = document.getElementById('genre-selector');
+  if (!container) return;
+
+  container.innerHTML = GENRE_OPTIONS.map(
+    (genre) => `
+    <button
+      type="button"
+      class="genre-chip"
+      data-genre="${genre}"
+      aria-pressed="false"
+    >${genre}</button>
+  `
+  ).join('');
+
+  container.addEventListener('click', (e) => {
+    const chip = e.target.closest('.genre-chip');
+    if (!chip) return;
+
+    const genre = chip.dataset.genre;
+    const isSelected = chip.getAttribute('aria-pressed') === 'true';
+
+    chip.setAttribute('aria-pressed', String(!isSelected));
+    chip.classList.toggle('genre-chip--selected', !isSelected);
+
+    if (!isSelected) {
+      if (!profileState.favouriteGenres.includes(genre)) {
+        profileState.favouriteGenres.push(genre);
       }
-    });
-  }
-
-  window.addEventListener('click', (e) => {
-    if (e.target === modal) toggleModal();
+    } else {
+      profileState.favouriteGenres = profileState.favouriteGenres.filter((g) => g !== genre);
+    }
   });
 }
 
 /**
- * Updates visible profile fields and form inputs with data from Firestore.
- *
- * @param {Object} data - Profile data object with name and bio fields
+ * Updates genre chip visual state to match the current profileState.
  */
-export function updateProfileUI(data) {
-  setText('desktop-display-name', data.name || 'Explorer');
-  setText('mobile-display-name', data.name || 'Explorer');
-  setText('desktop-display-bio', data.bio || 'Preserving legends...');
-  setText('mobile-display-bio', data.bio || 'Preserving legends...');
-  setInput('input-name', data.name || '');
-  setInput('input-bio', data.bio || '');
+export function syncGenreChips() {
+  document.querySelectorAll('.genre-chip').forEach((chip) => {
+    const selected = profileState.favouriteGenres.includes(chip.dataset.genre);
+    chip.setAttribute('aria-pressed', String(selected));
+    chip.classList.toggle('genre-chip--selected', selected);
+  });
 }
 
+/* ─────────────────────────────────────────────
+   Avatar Preview
+   ───────────────────────────────────────────── */
+
+function _bindAvatarPreview() {
+  const input = document.getElementById('input-avatar-url');
+  const preview = document.getElementById('modal-avatar-preview');
+  if (!input || !preview) return;
+
+  const FALLBACK = '';
+
+  input.addEventListener(
+    'input',
+    debounce((e) => {
+      const url = e.target.value.trim();
+      if (!url) {
+        preview.src = FALLBACK;
+        return;
+      }
+      const test = new Image();
+      test.onload = () => {
+        preview.src = url;
+      };
+      test.onerror = () => {
+        preview.src = FALLBACK;
+      };
+      test.src = url;
+    }, 500)
+  );
+}
+
+/* ─────────────────────────────────────────────
+   AI Name Suggestion
+   ───────────────────────────────────────────── */
+
+function _bindAiNameButton() {
+  const btn = document.getElementById('btn-suggest-name');
+  const nameInput = document.getElementById('input-name');
+  const bioInput = document.getElementById('input-bio');
+  if (!btn || !nameInput || !bioInput) return;
+
+  btn.addEventListener('click', async () => {
+    const bio = bioInput.value.trim();
+    if (!bio || bio.length < 5) {
+      showNotification('Write a short bio first to get a name suggestion.', 'info');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Conjuring…';
+
+    // API key should come from your environment/config — not hardcoded
+    const apiKey = window.__GEMINI_KEY__ ?? null;
+    const suggested = await suggestNameFromBio(bio, apiKey);
+
+    btn.disabled = false;
+    btn.textContent = 'Suggest Name';
+
+    if (suggested) {
+      nameInput.value = suggested;
+      showNotification(`Suggested: "${suggested}"`, 'success');
+    } else {
+      showNotification('Could not generate a name. Add your Gemini API key or try later.', 'error');
+    }
+  });
+}
+
+/* ─────────────────────────────────────────────
+   Profile UI Update
+   ───────────────────────────────────────────── */
+
 /**
- * Shows a toast notification with a success or error style.
- * Automatically removes the toast after 3 seconds.
+ * Updates all visible profile display fields and modal inputs
+ * from the provided data object.
  *
- * @param {string} message - Message text to display
- * @param {'success'|'error'} type - Visual style of the toast
+ * @param {Partial<import('./state.js').ProfileState>} data
+ */
+export function updateProfileUI(data) {
+  // Display fields
+  setText('desktop-display-name', data.name || 'Explorer');
+  setText('mobile-display-name', data.name || 'Explorer');
+  setText('desktop-display-bio', data.bio || 'Whispering stories to the stars…');
+  setText('mobile-display-bio', data.bio || 'Whispering stories to the stars…');
+  setText('profile-location', data.location || '');
+  setText('profile-website-display', data.website || '');
+  setText('profile-pronouns', data.pronouns || '');
+  setText('profile-joined', data.joinedAt ? `Joined ${formatJoinDate(data.joinedAt)}` : '');
+
+  // Avatar
+  if (data.avatarUrl) {
+    ['profile-avatar-desktop', 'profile-avatar-mobile', 'modal-avatar-preview'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.src = data.avatarUrl;
+    });
+    document.querySelectorAll('.avatar-placeholder').forEach((el) => el.classList.add('hidden'));
+    document.querySelectorAll('.avatar-img').forEach((el) => el.classList.remove('hidden'));
+  }
+
+  // Social links
+  _setSocialLink(
+    'social-link-twitter',
+    data.twitterHandle ? `https://twitter.com/${data.twitterHandle}` : null
+  );
+  _setSocialLink(
+    'social-link-instagram',
+    data.instagramHandle ? `https://instagram.com/${data.instagramHandle}` : null
+  );
+  _setSocialLink('social-link-website', data.website || null);
+
+  // Stats
+  setEl('stat-words-written', formatNumber(data.totalWordsWritten || 0));
+  setEl('stat-total-readers', formatNumber(data.totalReaders || 0));
+  setEl('stat-reading-streak', String(data.writingStreak || 0));
+
+  // Reading goal progress
+  if (data.readingGoal) {
+    setText('reading-goal-target', `${data.readingGoal} tales / yr`);
+  }
+
+  // Favourite genres pills
+  _renderGenrePills(data.favouriteGenres || []);
+
+  // Modal inputs
+  setInput('input-name', data.name || '');
+  setInput('input-bio', data.bio || '');
+  setInput('input-pronouns', data.pronouns || '');
+  setInput('input-avatar-url', data.avatarUrl || '');
+  setInput('input-location', data.location || '');
+  setInput('input-website', data.website || '');
+  setInput('input-twitter', data.twitterHandle || '');
+  setInput('input-instagram', data.instagramHandle || '');
+  setInput('input-reading-goal', String(data.readingGoal || 12));
+
+  // Sync genre chips
+  if (data.favouriteGenres) {
+    profileState.favouriteGenres = [...data.favouriteGenres];
+    syncGenreChips();
+  }
+}
+
+function _renderGenrePills(genres) {
+  const container = document.getElementById('profile-genres');
+  if (!container) return;
+  if (!genres.length) {
+    container.innerHTML = '<span class="text-xs text-slate-600 italic">No genres set</span>';
+    return;
+  }
+  container.innerHTML = genres
+    .map(
+      (g) => `
+    <span class="genre-pill">${g}</span>
+  `
+    )
+    .join('');
+}
+
+function _setSocialLink(id, href) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (href) {
+    el.href = href;
+    el.closest('[data-social-wrap]')?.classList.remove('hidden');
+  } else {
+    el.closest('[data-social-wrap]')?.classList.add('hidden');
+  }
+}
+
+/* ─────────────────────────────────────────────
+   Stats Rendering
+   ───────────────────────────────────────────── */
+
+/**
+ * Updates the chronicle stats panel with computed values.
+ *
+ * @param {{ wordsWritten: number, readers: number, readingTime: number, streak: number }} stats
+ */
+export function updateStatsUI(stats) {
+  setEl('stat-words-written', formatNumber(stats.wordsWritten ?? 0));
+  setEl('stat-total-readers', formatNumber(stats.readers ?? 0));
+  setEl('stat-reading-time-given', `${Math.round((stats.readingTime ?? 0) / 60)}h`);
+  setEl('stat-streak', String(stats.streak ?? 0));
+}
+
+/* ─────────────────────────────────────────────
+   Toast Notifications
+   ───────────────────────────────────────────── */
+
+/**
+ * Shows a toast notification. Auto-removes after 3.5s.
+ *
+ * @param {string} message
+ * @param {'success'|'error'|'info'} type
  */
 export function showNotification(message, type = 'success') {
   const container = document.getElementById('toast-container');
   if (!container) return;
 
+  const iconMap = { success: 'check-circle', error: 'alert-circle', info: 'info' };
+  const colorMap = {
+    success: 'border-indigo-500/40 text-white',
+    error: 'border-red-500/40 text-red-200',
+    info: 'border-slate-500/40 text-slate-200',
+  };
+  const iconColorMap = {
+    success: 'text-indigo-400',
+    error: 'text-red-400',
+    info: 'text-slate-400',
+  };
+
   const toast = document.createElement('div');
-  toast.className = `toast-in flex items-center gap-3 px-5 py-4 rounded-2xl border bg-zinc-900 shadow-2xl pointer-events-auto ${
-    type === 'success' ? 'border-indigo-500/50 text-white' : 'border-red-500/50 text-red-200'
-  }`;
+  toast.className = `flex items-center gap-3 px-5 py-4 rounded-2xl border bg-zinc-900/95 backdrop-blur-xl shadow-2xl pointer-events-auto transition-all duration-300 translate-x-0 opacity-100 ${colorMap[type]}`;
 
   toast.innerHTML = `
-    <i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}"
-       class="${type === 'success' ? 'text-indigo-500' : 'text-red-500'}"></i>
-    <span class="text-sm font-semibold">${message}</span>
+    <i data-lucide="${iconMap[type]}" class="w-4 h-4 flex-shrink-0 ${iconColorMap[type]}"></i>
+    <span class="text-sm font-medium">${message}</span>
   `;
 
   container.appendChild(toast);
-  if (window.lucide) window.lucide.createIcons();
+  window.lucide?.createIcons?.();
 
   setTimeout(() => {
     toast.style.opacity = '0';
-    toast.style.transform = 'translateX(20px)';
-    toast.style.transition = 'all 0.5s ease';
-    setTimeout(() => toast.remove(), 500);
-  }, 3000);
+    toast.style.transform = 'translateX(16px)';
+    setTimeout(() => toast.remove(), 400);
+  }, 3500);
 }
+
+/* ─────────────────────────────────────────────
+   Continue Reading Cards
+   ───────────────────────────────────────────── */
+
+/**
+ * Renders the continue reading horizontal scroll section.
+ *
+ * @param {Array<Object>} tales
+ */
+export function renderContinueReading(tales) {
+  const container = document.getElementById('continue-reading-list');
+  if (!container) return;
+
+  if (!tales.length) {
+    container.innerHTML = `
+      <div class="flex items-center gap-3 py-8 px-4 text-sm text-slate-600 italic">
+        No tales in progress.
+        <a href="library.html" class="text-indigo-400 hover:text-indigo-300 font-semibold not-italic ml-1">Browse Library →</a>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = tales.map(_buildContinueReadingCard).join('');
+  window.lucide?.createIcons?.();
+}
+
+function _buildContinueReadingCard(tale) {
+  const cover =
+    tale.coverUrl ||
+    'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=400';
+
+  return `
+    <a
+      href="reader.html?taleId=${tale.id}&chapterId=${tale.lastChapterIndex}"
+      class="continue-card snap-start flex-shrink-0"
+    >
+      <div class="relative aspect-[16/10] rounded-2xl overflow-hidden mb-4 bg-zinc-900">
+        <img
+          src="${cover}"
+          alt="${tale.title}"
+          class="w-full h-full object-cover opacity-70 group-hover:opacity-90 group-hover:scale-105 transition-all duration-700"
+          loading="lazy"
+        />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+        <div class="absolute bottom-3 left-3">
+          <span class="px-2 py-1 bg-black/60 backdrop-blur-md rounded-md text-[9px] font-bold text-white/80 uppercase tracking-wider">
+            ${tale.era || 'Unknown Era'}
+          </span>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <h3 class="text-base font-bold text-white group-hover:text-indigo-300 transition-colors truncate">
+          ${tale.title || 'Untitled Tale'}
+        </h3>
+        <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+          ${tale.description || ''}
+        </p>
+
+        <div class="pt-3 space-y-1.5">
+          <div class="flex items-center justify-between text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+            <span>Progress</span>
+            <span class="text-indigo-400">${tale.percent}%</span>
+          </div>
+          <div class="h-1 w-full bg-white/[0.06] rounded-full overflow-hidden">
+            <div
+              class="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-700"
+              style="width: ${Math.max(2, tale.percent)}%"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </a>
+  `;
+}
+
+/* ─────────────────────────────────────────────
+   Contributions + Drafts
+   ───────────────────────────────────────────── */
+
+/**
+ * Renders published tales into #contributions-grid (before the New Tale button).
+ *
+ * @param {Array<Object>} tales
+ */
+export function renderPublishedTales(tales) {
+  const container = document.getElementById('contributions-grid');
+  if (!container) return;
+
+  // Remove any previously injected cards (not the New Tale button)
+  container.querySelectorAll('.contribution-card').forEach((el) => el.remove());
+
+  if (!tales.length) return;
+
+  const cards = tales.map(_buildPublishedCard).join('');
+  container.insertAdjacentHTML('afterbegin', cards);
+  window.lucide?.createIcons?.();
+}
+
+function _buildPublishedCard(tale) {
+  const cover =
+    tale.coverUrl ||
+    'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=400';
+
+  const tags = (tale.tags || [])
+    .slice(0, 2)
+    .map(
+      (t) => `
+    <span class="px-2 py-0.5 bg-indigo-500/10 text-indigo-400 text-[9px] font-medium rounded-md">${t}</span>
+  `
+    )
+    .join('');
+
+  return `
+    <a href="tale.html?id=${tale.id}" class="contribution-card group block glass-panel-elevated rounded-[1.75rem] overflow-hidden hover:-translate-y-1 transition-all duration-400">
+      <div class="relative aspect-[16/10] bg-zinc-900 overflow-hidden">
+        <img src="${cover}" alt="${tale.title}"
+          class="w-full h-full object-cover opacity-60 group-hover:opacity-80 group-hover:scale-103 transition-all duration-600" loading="lazy" />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+        <div class="absolute top-3 left-3">
+          <span class="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 text-[9px] font-bold uppercase tracking-wider rounded-full border border-emerald-500/25">
+            Published
+          </span>
+        </div>
+        <div class="absolute bottom-3 left-4 right-4">
+          <h3 class="font-bold text-white text-base leading-snug group-hover:text-indigo-300 transition-colors line-clamp-2">
+            ${tale.title || 'Untitled Tale'}
+          </h3>
+        </div>
+      </div>
+      <div class="p-4 space-y-3">
+        <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed">${tale.description || ''}</p>
+        ${tags ? `<div class="flex items-center gap-1.5 flex-wrap">${tags}</div>` : ''}
+        <div class="pt-2 border-t border-white/[0.04] flex items-center justify-between">
+          <div class="flex items-center gap-3 text-[10px] text-slate-600">
+            <span class="flex items-center gap-1">
+              <i data-lucide="layers" class="w-3 h-3"></i>
+              ${tale.chapterCount || 0} ch
+            </span>
+            ${tale.readCount ? `<span class="flex items-center gap-1"><i data-lucide="eye" class="w-3 h-3"></i>${formatNumber(tale.readCount)}</span>` : ''}
+          </div>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-indigo-500 group-hover:translate-x-1 transition-transform"></i>
+        </div>
+      </div>
+    </a>
+  `;
+}
+
+/**
+ * Renders draft tiles into #drafts-grid.
+ *
+ * @param {Array<Object>} drafts
+ */
+export function renderDrafts(drafts) {
+  const container = document.getElementById('drafts-grid');
+  if (!container) return;
+
+  if (!drafts.length) {
+    container.innerHTML = `
+      <div class="col-span-full text-sm text-slate-600 italic py-8">No drafts yet.</div>
+    `;
+    return;
+  }
+
+  container.innerHTML = drafts.map(_buildDraftCard).join('');
+  window.lucide?.createIcons?.();
+}
+
+function _buildDraftCard(draft) {
+  const updated = draft.updatedAt?.seconds
+    ? timeAgo(new Date(draft.updatedAt.seconds * 1000))
+    : 'Recently';
+
+  return `
+    <a
+      href="contribution.html?draft=${draft.id}"
+      class="group block glass-panel rounded-[1.5rem] p-4 hover:border-indigo-500/25 transition-all duration-300 border border-transparent"
+    >
+      <div class="flex items-start justify-between gap-3 mb-3">
+        <span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 text-[9px] font-bold uppercase tracking-wider rounded-full border border-amber-500/20">
+          Draft
+        </span>
+        <span class="text-[10px] text-slate-600">${updated}</span>
+      </div>
+      <h3 class="font-semibold text-white text-sm group-hover:text-indigo-300 transition-colors truncate mb-1">
+        ${draft.title || 'Untitled Draft'}
+      </h3>
+      <p class="text-[11px] text-slate-600 line-clamp-2 leading-relaxed mb-3">
+        ${draft.synopsis || 'No synopsis yet.'}
+      </p>
+      <div class="flex items-center justify-between text-[10px] text-slate-600">
+        <span>${draft.chapterCount || 0} chapters</span>
+        <span class="flex items-center gap-1 text-indigo-500 group-hover:gap-2 transition-all">
+          Continue <i data-lucide="arrow-right" class="w-3 h-3"></i>
+        </span>
+      </div>
+    </a>
+  `;
+}
+
+/* ─────────────────────────────────────────────
+   Contribution / Draft Tab Switcher
+   ───────────────────────────────────────────── */
+
+/**
+ * Switches the contributions section between Published and Drafts tabs.
+ *
+ * @param {'published'|'drafts'} tab
+ */
+export function switchContribTab(tab) {
+  ['published', 'drafts'].forEach((t) => {
+    const panel = document.getElementById(`contrib-panel-${t}`);
+    if (panel) panel.hidden = t !== tab;
+
+    const btn = document.querySelector(`[data-contrib-tab="${t}"]`);
+    if (btn) {
+      btn.classList.toggle('contrib-tab--active', t === tab);
+      btn.classList.toggle('contrib-tab--inactive', t !== tab);
+    }
+  });
+}
+
+/* ─────────────────────────────────────────────
+   Skeleton Loaders
+   ───────────────────────────────────────────── */
+
+export function showContinueReadingSkeleton() {
+  const container = document.getElementById('continue-reading-list');
+  if (!container) return;
+  container.innerHTML = Array.from(
+    { length: 3 },
+    () => `
+    <div class="flex-shrink-0 w-72 rounded-[1.75rem] overflow-hidden">
+      <div class="aspect-[16/10] skeleton rounded-2xl mb-4"></div>
+      <div class="space-y-2 px-1">
+        <div class="skeleton h-4 w-3/4 rounded"></div>
+        <div class="skeleton h-3 w-full rounded"></div>
+        <div class="skeleton h-3 w-2/3 rounded"></div>
+      </div>
+    </div>
+  `
+  ).join('');
+}
+
+export function showContributionsSkeleton() {
+  const container = document.getElementById('contributions-grid');
+  if (!container) return;
+  const newBtn = document.getElementById('btn-new-story');
+  container.querySelectorAll('.skeleton-card').forEach((el) => el.remove());
+  const skeletons = Array.from(
+    { length: 2 },
+    () => `
+    <div class="skeleton-card rounded-[1.75rem] overflow-hidden">
+      <div class="aspect-[16/10] skeleton"></div>
+      <div class="p-4 space-y-2">
+        <div class="skeleton h-4 w-2/3 rounded"></div>
+        <div class="skeleton h-3 w-full rounded"></div>
+      </div>
+    </div>
+  `
+  ).join('');
+  if (newBtn) {
+    newBtn.insertAdjacentHTML('beforebegin', skeletons);
+  } else {
+    container.insertAdjacentHTML('afterbegin', skeletons);
+  }
+}
+
+/* ─────────────────────────────────────────────
+   Helpers
+   ───────────────────────────────────────────── */
 
 function setText(id, value) {
   const el = document.getElementById(id);
-  if (el) el.innerText = value;
+  if (el) el.textContent = value;
+}
+
+function setEl(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
 }
 
 function setInput(id, value) {
   const el = document.getElementById(id);
-  if (el) el.value = value;
+  if (el) el.value = value ?? '';
+}
+
+function formatNumber(n) {
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
+  return String(n);
+}
+
+function formatJoinDate(iso) {
+  try {
+    return new Date(iso).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  } catch {
+    return '';
+  }
+}
+
+function timeAgo(date) {
+  const diff = Date.now() - date.getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  return `${days}d ago`;
+}
+
+function debounce(fn, delay) {
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), delay);
+  };
 }
