@@ -1,76 +1,70 @@
 // src/pages/shelf/shelf.js
 // Entry point for the shelf page.
-// Authenticates the user, renders bookmarked tales, and handles tab switching.
+// Authenticates the user, loads both data sets in parallel,
+// then hands off to interactions and renderers.
 
 import '@css/base.css';
 import '@css/components.css';
 import '@css/pages/shelf.css';
 
 import { initAuth } from '@fb/index.js';
-import { initIcons } from '@ui/components/icons.js';
-import { renderBookmarkedCards, renderDraftCards } from './index.js';
 import { initNav } from '@ui/components/nav/nav.js';
-initNav();
-// Holds the authenticated user ID for tab switching after auth resolves
-let currentUserId = null;
+import { initShelfInteractions } from './interactions.js';
+import { loadBookmarkedTales, loadDrafts, computeAndRenderHeroStats } from './content.js';
+import { setGridLoading, setActiveTab } from './ui.js';
+import { shelfState } from './state.js';
 
-/* ==================== Authentication ==================== */
+initNav();
+
+/* ─────────────────────────────────────────────
+   Auth timeout guard
+   ───────────────────────────────────────────── */
 
 const authTimeout = setTimeout(() => {
   const grid = document.getElementById('studio-grid');
-  if (grid)
+  if (grid) {
     grid.innerHTML = `
-    <div class="col-span-full text-center py-20 text-red-500">
-      Connection timed out. Please refresh.
-    </div>
-  `;
-}, 10000);
+      <div class="col-span-full text-center py-20 text-red-500/80 text-sm">
+        Connection timed out. Please refresh.
+      </div>
+    `;
+  }
+}, 10_000);
+
+/* ─────────────────────────────────────────────
+   Auth + Data
+   ───────────────────────────────────────────── */
 
 initAuth(async (user) => {
   clearTimeout(authTimeout);
-  currentUserId = user.uid;
+  shelfState.userId = user.uid;
 
-  // Default to bookmarked tab on load
-  await renderBookmarkedCards(currentUserId);
+  // Show skeleton immediately
+  setGridLoading();
+
+  // Load both data sets in parallel so hero stats can be computed
+  // once both resolve — no sequential waterfall.
+  const [,] = await Promise.all([loadBookmarkedTales(user.uid), loadDrafts(user.uid)]);
+
+  // Default view: bookmarked tab
+  // loadBookmarkedTales already rendered the grid — just sync tab UI
+  setActiveTab('bookmarked');
+  shelfState.activeTab = 'bookmarked';
+
+  // Re-render bookmarked tab (drafts loaded in background for stats)
+  await loadBookmarkedTales(user.uid);
+
+  // Compute hero stats from both cached data sets
+  computeAndRenderHeroStats();
+
+  window.lucide?.createIcons?.();
 });
 
-/* ==================== Icons & UI ==================== */
+/* ─────────────────────────────────────────────
+   DOM Ready
+   ───────────────────────────────────────────── */
 
 document.addEventListener('DOMContentLoaded', () => {
-  initIcons();
-  initShelfTabs();
+  initShelfInteractions();
+  window.lucide?.createIcons?.();
 });
-
-/* ==================== Tab Switching ==================== */
-
-/**
- * Initializes tab switching for the shelf page.
- * Renders the appropriate content when each tab is selected.
- */
-function initShelfTabs() {
-  const tabs = document.querySelectorAll('.shelf-tab');
-
-  tabs.forEach((tab) => {
-    tab.addEventListener('click', async () => {
-      const selected = tab.dataset.tab;
-
-      // Update active tab styles
-      tabs.forEach((t) => {
-        t.classList.remove('studio-tab-active');
-        t.classList.add('text-zinc-500');
-      });
-      tab.classList.add('studio-tab-active');
-      tab.classList.remove('text-zinc-500');
-
-      // Render content for selected tab
-      // Wait for auth to resolve before rendering
-      if (!currentUserId) return;
-
-      if (selected === 'bookmarked') {
-        await renderBookmarkedCards(currentUserId);
-      } else if (selected === 'drafts') {
-        await renderDraftCards(currentUserId);
-      }
-    });
-  });
-}

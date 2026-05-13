@@ -1,98 +1,428 @@
 // src/pages/shelf/ui.js
-// Standalone card template for the shelf page.
-// Note: the library page uses the shared renderCardsGrid from src/ui/components/taleCard.js.
-// This template is shelf-specific and includes shelf-only menu actions.
+// All HTML string builders and DOM renderers for the shelf page.
+// No data fetching happens here — pure presentation layer.
+
+import { shelfState } from './state.js';
+
+/* ─────────────────────────────────────────────
+   Grid Renderers
+   ───────────────────────────────────────────── */
 
 /**
- * Generates the HTML string for a single shelf tale card.
+ * Renders an array of items into #studio-grid.
+ * Dispatches to the correct card builder based on tab type.
  *
- * @param {Object} tale - Tale metadata object from Firestore
- * @param {Object} readTimeMap - Map of taleId => totalReadTimeMs
- * @returns {string} HTML string for the tale card
+ * @param {Array<Object>} items
+ * @param {'bookmarked' | 'drafts'} type
  */
-export function createTaleCard(tale, readTimeMap = {}) {
+export function renderGrid(items, type) {
+  const grid = document.getElementById('studio-grid');
+  if (!grid) return;
+
+  if (!items.length) {
+    setGridEmpty(
+      type === 'bookmarked'
+        ? 'No bookmarked tales match your filter.'
+        : 'No drafts match your filter.'
+    );
+    return;
+  }
+
+  grid.innerHTML = items
+    .map((item) => (type === 'drafts' ? buildDraftCard(item) : buildBookmarkCard(item)))
+    .join('');
+
+  window.lucide?.createIcons?.();
+}
+
+export function setGridLoading() {
+  const grid = document.getElementById('studio-grid');
+  if (!grid) return;
+
+  grid.innerHTML = Array.from(
+    { length: 6 },
+    () => `
+    <div class="rounded-[2rem] overflow-hidden border border-white/[0.04]">
+      <div class="aspect-[4/3] skeleton"></div>
+      <div class="p-5 space-y-3">
+        <div class="skeleton h-4 w-2/3 rounded-lg"></div>
+        <div class="skeleton h-3 w-full rounded-lg"></div>
+        <div class="skeleton h-3 w-3/4 rounded-lg"></div>
+        <div class="flex gap-3 pt-2">
+          <div class="skeleton h-3 w-16 rounded-lg"></div>
+          <div class="skeleton h-3 w-16 rounded-lg"></div>
+        </div>
+      </div>
+    </div>
+  `
+  ).join('');
+}
+
+export function setGridEmpty(message) {
+  const grid = document.getElementById('studio-grid');
+  if (!grid) return;
+
+  grid.innerHTML = `
+    <div class="col-span-full">
+      <div class="glass-panel-elevated rounded-[2rem] py-20 px-8 text-center border border-white/[0.04] flex flex-col items-center gap-5">
+        <div class="w-14 h-14 rounded-2xl bg-indigo-500/[0.07] border border-indigo-500/15 flex items-center justify-center">
+          <i data-lucide="archive" class="w-6 h-6 text-indigo-500/50"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-cinzel font-bold text-white mb-2">Nothing here yet</h3>
+          <p class="text-sm text-slate-600 max-w-sm leading-relaxed">${message}</p>
+        </div>
+        <a href="library.html"
+          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold uppercase tracking-[0.15em] hover:bg-indigo-500/20 transition-colors">
+          <i data-lucide="compass" class="w-3.5 h-3.5"></i>
+          Browse Library
+        </a>
+      </div>
+    </div>
+  `;
+  window.lucide?.createIcons?.();
+}
+
+export function setGridError() {
+  const grid = document.getElementById('studio-grid');
+  if (!grid) return;
+
+  grid.innerHTML = `
+    <div class="col-span-full text-center py-16">
+      <div class="inline-flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-red-500/[0.07] border border-red-500/15 text-red-400 text-sm">
+        <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+        Failed to load. Check your connection and
+        <button onclick="window.location.reload()" class="underline hover:no-underline ml-1">refresh</button>.
+      </div>
+    </div>
+  `;
+  window.lucide?.createIcons?.();
+}
+
+/* ─────────────────────────────────────────────
+   Bookmark Card
+   ───────────────────────────────────────────── */
+
+/**
+ * Builds the HTML for a single bookmarked tale card.
+ *
+ * @param {Object} tale
+ * @returns {string}
+ */
+export function buildBookmarkCard(tale) {
   const {
     id = '0000',
     title = 'Untitled Echo',
     coverUrl,
-    description = 'No description provided.',
+    description = '',
     era = 'Unknown Era',
-    progress = 0,
     chapterCount = 0,
-    estimatedReadTime = '—',
+    progress = 0,
   } = tale;
-
-  const menuId = `menu-${id}`;
-  const totalMs = readTimeMap[id] || 0;
-  const minutes = Math.floor(totalMs / 60000);
-  const progressPercent = Math.min(100, Math.max(0, progress));
-
-  const time = `
-    <div class="flex items-center gap-2">
-      <i data-lucide="clock" class="w-3.5 h-3.5 text-zinc-600"></i>
-      <span class="text-[9px] font-bold uppercase text-zinc-500 tracking-widest">
-        ${minutes > 0 ? `${minutes}m` : estimatedReadTime}
-      </span>
-    </div>
-  `;
 
   const cover =
     coverUrl || 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=800';
+  const progressPercent = Math.min(100, Math.max(0, Math.round(progress)));
+  const menuId = `menu-${id}`;
+  const isFinished = progress >= 100;
 
   return `
-    <div class="glass-panel group relative p-5 rounded-[2.5rem] hover:border-indigo-500/40 transition-all cursor-pointer tale-card-glow overflow-visible" data-id="${id}">
-      <div class="flex justify-between items-start mb-4">
-        <div class="flex flex-col">
-          <span class="text-[9px] font-black text-indigo-400 uppercase tracking-widest bg-indigo-500/10 px-2 py-1 rounded-md w-fit mb-1">${era}</span>
-          <span class="text-[8px] text-zinc-500 uppercase tracking-tighter">ID: ${id.slice(0, 6)}</span>
+    <article
+      class="shelf-card group relative rounded-[2rem] overflow-hidden border border-white/[0.05] bg-white/[0.025] hover:border-indigo-500/25 transition-all duration-400 cursor-pointer"
+      data-id="${id}"
+    >
+      <!-- Cover -->
+      <div class="relative aspect-[16/10] bg-zinc-900 overflow-hidden">
+        <img
+          src="${cover}"
+          alt="${title}"
+          class="w-full h-full object-cover opacity-55 group-hover:opacity-80 group-hover:scale-105 transition-all duration-700"
+          loading="lazy"
+        />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+
+        <!-- Era badge -->
+        <div class="absolute top-3 left-3">
+          <span class="shelf-era-badge">${era}</span>
         </div>
-        <div class="relative">
-          <button data-action="options" data-menu-id="${menuId}" class="p-2 hover:bg-white/5 rounded-full transition text-zinc-500 hover:text-white">
-            <i data-lucide="more-vertical" class="w-4 h-4"></i>
+
+        <!-- Options button -->
+        <div class="absolute top-3 right-3">
+          <button
+            type="button"
+            class="shelf-options-btn"
+            data-action="options"
+            data-menu-id="${menuId}"
+            aria-label="More options for ${title}"
+            aria-haspopup="menu"
+            aria-expanded="false"
+          >
+            <i data-lucide="more-horizontal" class="w-3.5 h-3.5"></i>
           </button>
-          <div id="${menuId}" class="options-menu hidden absolute right-0 mt-2 w-56 bg-[#0a0a0a]/95 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[60] py-3">
-            <div class="px-4 py-1 mb-2"><span class="text-[7px] font-black text-zinc-600 uppercase tracking-[0.3em]">Quick Actions</span></div>
-            <button class="w-full px-4 py-2 text-left text-[9px] uppercase tracking-widest font-bold text-zinc-400 hover:text-white hover:bg-indigo-500/10 transition flex items-center gap-3"><i data-lucide="share-2" class="w-3.5 h-3.5"></i> Share Signal</button>
-            <button class="w-full px-4 py-2 text-left text-[9px] uppercase tracking-widest font-bold text-zinc-400 hover:text-white hover:bg-indigo-500/10 transition flex items-center gap-3"><i data-lucide="link" class="w-3.5 h-3.5"></i> Copy Universal Link</button>
-            <button class="w-full px-4 py-2 text-left text-[9px] uppercase tracking-widest font-bold text-zinc-400 hover:text-white hover:bg-indigo-500/10 transition flex items-center gap-3"><i data-lucide="download" class="w-3.5 h-3.5"></i> Force Offline Sync</button>
-            <div class="h-[1px] bg-white/5 my-2 mx-2"></div>
-            <div class="px-4 py-1 mb-1"><span class="text-[7px] font-black text-zinc-600 uppercase tracking-[0.3em]">Management</span></div>
-            <button class="w-full px-4 py-2 text-left text-[9px] uppercase tracking-widest font-bold text-zinc-400 hover:text-white hover:bg-indigo-500/10 transition flex items-center gap-3"><i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Mark Finished</button>
-            <button class="w-full px-4 py-2 text-left text-[9px] uppercase tracking-widest font-bold text-orange-400/80 hover:text-orange-400 hover:bg-orange-500/10 transition flex items-center gap-3"><i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> Report Anomaly</button>
-            <div class="h-[1px] bg-white/5 my-2 mx-2"></div>
-            <button class="w-full px-4 py-2 text-left text-[9px] uppercase tracking-widest font-bold text-red-400 hover:bg-red-500/20 transition flex items-center gap-3"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Decouple Fragment</button>
+
+          <!-- Options dropdown -->
+          <div
+            id="${menuId}"
+            class="shelf-menu"
+            role="menu"
+            hidden
+          >
+            <p class="shelf-menu-label">Actions</p>
+            <button class="shelf-menu-item" role="menuitem" type="button" data-action="copy-link" data-id="${id}">
+              <i data-lucide="link" class="w-3.5 h-3.5"></i> Copy link
+            </button>
+            <button class="shelf-menu-item" role="menuitem" type="button">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i> Save offline
+            </button>
+            <div class="shelf-menu-divider"></div>
+            <p class="shelf-menu-label">Manage</p>
+            <button class="shelf-menu-item" role="menuitem" type="button"
+              data-action="${isFinished ? '' : 'mark-finished'}" data-id="${id}"
+              ${isFinished ? 'disabled aria-disabled="true"' : ''}>
+              <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+              ${isFinished ? 'Already finished' : 'Mark as finished'}
+            </button>
+            <button class="shelf-menu-item shelf-menu-item--danger" role="menuitem" type="button"
+              data-action="decouple" data-id="${id}">
+              <i data-lucide="bookmark-minus" class="w-3.5 h-3.5"></i> Remove from shelf
+            </button>
+          </div>
+        </div>
+
+        <!-- Progress overlay -->
+        <div class="absolute bottom-0 left-0 right-0 px-4 pb-4 pt-6 bg-gradient-to-t from-black/70 to-transparent">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-[9px] font-bold uppercase tracking-wider text-white/40">Progress</span>
+            <span class="text-[9px] font-bold text-indigo-400">${isFinished ? '✓ Done' : `${progressPercent}%`}</span>
+          </div>
+          <div class="h-1 w-full bg-white/10 rounded-full overflow-hidden">
+            <div
+              class="h-full rounded-full transition-all duration-700 ${isFinished ? 'bg-indigo-400 shadow-[0_0_8px_rgba(99,102,241,0.6)]' : 'bg-gradient-to-r from-indigo-500 to-violet-500'}"
+              style="width: ${Math.max(isFinished ? 100 : 2, progressPercent)}%"
+            ></div>
           </div>
         </div>
       </div>
-      <div class="relative h-56 bg-zinc-900 rounded-[1.8rem] mb-6 overflow-hidden">
-        <img src="${cover}" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700">
-        <div class="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md p-3 rounded-2xl border border-white/5">
-          <div class="flex items-center justify-between mb-1">
-            <span class="text-[8px] text-zinc-400 uppercase font-bold tracking-widest">Reading Progress</span>
-            <span class="text-[8px] text-indigo-400 font-black">${progressPercent}%</span>
+
+      <!-- Body -->
+      <div class="p-4">
+        <h3 class="font-bold text-white text-sm leading-snug mb-1.5 group-hover:text-indigo-300 transition-colors line-clamp-2">
+          ${title}
+        </h3>
+        <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed mb-3">
+          ${description}
+        </p>
+
+        <div class="flex items-center justify-between pt-3 border-t border-white/[0.04]">
+          <div class="flex items-center gap-3 text-[10px] text-slate-600">
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="layers" class="w-3 h-3"></i>
+              ${chapterCount} ch
+            </span>
           </div>
-          <div class="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-            <div class="h-full bg-indigo-500" style="width:${progressPercent}%"></div>
-          </div>
-        </div>
-      </div>
-      <div class="px-2">
-        <h3 class="text-xl font-bold text-white uppercase tracking-wider mb-2 group-hover:text-indigo-400 transition-colors">${title}</h3>
-        <p class="text-xs text-zinc-400 leading-relaxed line-clamp-2 mb-4 italic">${description}</p>
-        <div class="grid grid-cols-2 gap-4 py-4 border-t border-white/5">
-          <div class="flex items-center gap-2">
-            <i data-lucide="layers" class="w-3.5 h-3.5 text-zinc-600"></i>
-            <span class="text-[9px] font-bold uppercase text-zinc-500 tracking-widest">${chapterCount} Chapters</span>
-          </div>
-          ${time}
-        </div>
-        <div class="mt-4 flex items-center justify-end">
-          <button data-action="resume" data-id="${id}" class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-white hover:text-indigo-400 transition group/btn">
-            Resume Link
-            <i data-lucide="arrow-right-circle" class="w-4 h-4 transition-transform group-hover/btn:translate-x-1"></i>
+          <button
+            class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 hover:text-indigo-400 transition-colors group/btn"
+            type="button"
+            data-action="resume"
+            data-id="${id}"
+          >
+            ${isFinished ? 'Re-read' : 'Continue'}
+            <i data-lucide="arrow-right" class="w-3 h-3 group-hover/btn:translate-x-0.5 transition-transform"></i>
           </button>
         </div>
       </div>
+    </article>
+  `;
+}
+
+/* ─────────────────────────────────────────────
+   Draft Card
+   ───────────────────────────────────────────── */
+
+/**
+ * Builds the HTML for a single draft card.
+ * Word count comes from the denormalized `totalWordsWritten` field on the draft doc.
+ *
+ * @param {Object} draft
+ * @returns {string}
+ */
+export function buildDraftCard(draft) {
+  const {
+    id,
+    title = 'Untitled Draft',
+    synopsis = '',
+    era = '',
+    chapterCount = 0,
+    totalWordsWritten = 0,
+    updatedAt,
+  } = draft;
+
+  const updated = updatedAt?.seconds ? timeAgo(new Date(updatedAt.seconds * 1000)) : 'Recently';
+
+  const wordLabel =
+    totalWordsWritten > 0
+      ? totalWordsWritten >= 1000
+        ? `${(totalWordsWritten / 1000).toFixed(1)}k words`
+        : `${totalWordsWritten} words`
+      : 'No content yet';
+
+  return `
+    <article
+      class="shelf-card group relative rounded-[2rem] border border-white/[0.05] bg-white/[0.025] hover:border-indigo-500/25 transition-all duration-400 overflow-hidden"
+      data-id="${id}"
+    >
+      <!-- Draft header band -->
+      <div class="flex items-center justify-between px-5 pt-4 pb-3 border-b border-white/[0.04]">
+        <span class="shelf-draft-badge">
+          <i data-lucide="feather" class="w-2.5 h-2.5"></i>
+          Draft
+        </span>
+        <span class="text-[9px] text-slate-700">${updated}</span>
+      </div>
+
+      <div class="p-5">
+        ${era ? `<span class="shelf-era-badge mb-3 inline-block">${era}</span>` : ''}
+
+        <h3 class="font-bold text-white text-base leading-snug mb-2 group-hover:text-indigo-300 transition-colors">
+          ${title}
+        </h3>
+
+        <p class="text-xs text-slate-600 line-clamp-3 leading-relaxed mb-4">
+          ${synopsis || 'No synopsis yet. Open the editor to add one.'}
+        </p>
+
+        <div class="grid grid-cols-2 gap-3 py-3 border-t border-white/[0.04] mb-4">
+          <div class="flex items-center gap-2 text-[10px] text-slate-600">
+            <i data-lucide="layers" class="w-3 h-3 text-slate-700"></i>
+            ${chapterCount} ${chapterCount === 1 ? 'chapter' : 'chapters'}
+          </div>
+          <div class="flex items-center gap-2 text-[10px] text-slate-600">
+            <i data-lucide="file-text" class="w-3 h-3 text-slate-700"></i>
+            ${wordLabel}
+          </div>
+        </div>
+
+        <a
+          href="contribution.html?draft=${id}"
+          class="flex items-center justify-between w-full px-4 py-2.5 rounded-xl bg-indigo-500/[0.07] border border-indigo-500/15 text-indigo-400 text-[10px] font-bold uppercase tracking-wider hover:bg-indigo-500/15 transition-colors group/btn"
+        >
+          Continue Writing
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform"></i>
+        </a>
+      </div>
+    </article>
+  `;
+}
+
+/* ─────────────────────────────────────────────
+   Hero Stats
+   ───────────────────────────────────────────── */
+
+/**
+ * Updates the three hero stat cards with real values.
+ *
+ * @param {{ draftCount: number, bookmarkCount: number, wordsPreserved: number }} stats
+ */
+export function renderHeroStats({ draftCount, bookmarkCount, wordsPreserved }) {
+  setEl('hero-stat-drafts', String(draftCount));
+  setEl('hero-stat-bookmarks', String(bookmarkCount));
+  setEl('hero-stat-words', formatNumber(wordsPreserved));
+}
+
+/* ─────────────────────────────────────────────
+   Sort Panel
+   ───────────────────────────────────────────── */
+
+/**
+ * Renders the sort dropdown panel into #sort-panel.
+ * Called once on init; panel visibility is toggled by interactions.js.
+ */
+export function buildSortPanel() {
+  const panel = document.getElementById('sort-panel');
+  if (!panel) return;
+
+  const options = [
+    { key: 'date', label: 'Date updated', icon: 'calendar' },
+    { key: 'title', label: 'Title A–Z', icon: 'type' },
+    { key: 'progress', label: 'Progress', icon: 'bar-chart-2' },
+  ];
+
+  panel.innerHTML = `
+    <div class="py-1">
+      <p class="sort-panel-label">Sort by</p>
+      ${options
+        .map(
+          (opt) => `
+        <button
+          type="button"
+          class="sort-option${shelfState.sortBy === opt.key ? ' sort-option--active' : ''}"
+          data-sort="${opt.key}"
+        >
+          <i data-lucide="${opt.icon}" class="w-3.5 h-3.5"></i>
+          ${opt.label}
+          ${
+            shelfState.sortBy === opt.key
+              ? `<i data-lucide="${shelfState.sortDir === 'asc' ? 'arrow-up' : 'arrow-down'}" class="w-3 h-3 ml-auto opacity-60"></i>`
+              : ''
+          }
+        </button>
+      `
+        )
+        .join('')}
     </div>
   `;
+
+  window.lucide?.createIcons?.();
+}
+
+/**
+ * Re-renders the sort panel to reflect updated state.
+ * Called after every sort change.
+ */
+export function refreshSortPanel() {
+  buildSortPanel();
+}
+
+/* ─────────────────────────────────────────────
+   Tab Styles
+   ───────────────────────────────────────────── */
+
+/**
+ * Updates tab button active/inactive visual state.
+ *
+ * @param {'bookmarked' | 'drafts'} activeTab
+ */
+export function setActiveTab(activeTab) {
+  document.querySelectorAll('.shelf-tab').forEach((btn) => {
+    const isActive = btn.dataset.tab === activeTab;
+    btn.classList.toggle('studio-tab-active', isActive);
+    btn.classList.toggle('text-zinc-500', !isActive);
+    btn.classList.remove(isActive ? 'text-zinc-500' : 'studio-tab-active');
+  });
+}
+
+/* ─────────────────────────────────────────────
+   Helpers
+   ───────────────────────────────────────────── */
+
+function setEl(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
+}
+
+function formatNumber(n) {
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
+  return String(n);
+}
+
+function timeAgo(date) {
+  const diff = Date.now() - date.getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 2) return 'Just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `${days}d ago`;
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }

@@ -1,150 +1,177 @@
 // src/pages/shelf/content.js
-// Fetches and renders bookmarked tales and user drafts for the shelf page.
+// Data fetching, filtering, sorting, and grid rendering for the shelf page.
+// Pure data layer — no direct DOM manipulation except delegating to ui.js renderers.
 
 import { getBookmarks, getTales, getUserDrafts } from '@services/index.js';
-import { renderCardsGrid } from '@ui/components/taleCard.js';
+import { shelfState } from './state.js';
+import { renderGrid, renderHeroStats, setGridLoading, setGridEmpty, setGridError } from './ui.js';
 
-/* ==================== Bookmarked Tales ==================== */
-
-/**
- * Fetches community tales filtered to only those bookmarked by the user.
- *
- * @param {string} userId - ID of the authenticated user
- * @returns {Promise<Array<Object>>} Array of bookmarked tale objects
- */
-async function getBookmarkedTales(userId) {
-  const [allTales, bookmarks] = await Promise.all([getTales(), getBookmarks({ userId })]);
-
-  const bookmarkedIds = new Set(bookmarks.map((b) => b.id));
-  return allTales.filter((tale) => bookmarkedIds.has(tale.id));
-}
+/* ─────────────────────────────────────────────
+   Bookmarked Tales
+   ───────────────────────────────────────────── */
 
 /**
- * Renders the user's bookmarked tales into the studio grid.
+ * Fetches bookmarked tales, stores them in state, and renders the grid.
+ * On subsequent calls (tab switch) uses cached state to avoid re-fetching.
  *
- * @param {string} userId - ID of the authenticated user
+ * @param {string} userId
+ * @param {boolean} [force=false] - Force re-fetch even if cache exists
  */
-export async function renderBookmarkedCards(userId) {
+export async function loadBookmarkedTales(userId, force = false) {
   if (!userId) return;
 
-  const grid = document.getElementById('studio-grid');
-  if (grid) grid.innerHTML = loadingState();
-
-  const tales = await getBookmarkedTales(userId);
-
-  if (!tales.length) {
-    if (grid) grid.innerHTML = emptyState('No bookmarked tales yet.');
+  // Use cache unless forced or empty
+  if (!force && shelfState.bookmarkedTales.length) {
+    renderGrid(applyFilterSort(shelfState.bookmarkedTales), 'bookmarked');
     return;
   }
 
-  await renderCardsGrid(userId, tales);
+  shelfState.isLoading = true;
+  setGridLoading();
+
+  try {
+    const [allTales, bookmarks] = await Promise.all([getTales(), getBookmarks({ userId })]);
+
+    const bookmarkedIds = new Set(bookmarks.map((b) => b.id));
+    const tales = allTales.filter((t) => bookmarkedIds.has(t.id));
+
+    shelfState.bookmarkedTales = tales;
+
+    if (!tales.length) {
+      setGridEmpty('No bookmarked tales yet. Head to the library to start saving.');
+      return;
+    }
+
+    renderGrid(applyFilterSort(tales), 'bookmarked');
+  } catch (err) {
+    console.error('[shelf] loadBookmarkedTales failed:', err);
+    setGridError();
+  } finally {
+    shelfState.isLoading = false;
+  }
 }
 
-/* ==================== Draft Tales ==================== */
+/* ─────────────────────────────────────────────
+   Drafts
+   ───────────────────────────────────────────── */
 
 /**
- * Renders the user's draft tales into the studio grid.
- * Drafts are displayed as simple cards since they are not published tales.
+ * Fetches user drafts, stores them in state, and renders the grid.
  *
- * @param {string} userId - ID of the authenticated user
+ * @param {string} userId
+ * @param {boolean} [force=false]
  */
-export async function renderDraftCards(userId) {
+export async function loadDrafts(userId, force = false) {
   if (!userId) return;
 
-  const grid = document.getElementById('studio-grid');
-  if (grid) grid.innerHTML = loadingState();
-
-  const drafts = await getUserDrafts(userId);
-
-  if (!drafts.length) {
-    if (grid) grid.innerHTML = emptyState('No drafts yet. Start writing in the contribution page.');
+  if (!force && shelfState.drafts.length) {
+    renderGrid(applyFilterSort(shelfState.drafts), 'drafts');
     return;
   }
 
-  if (grid) {
-    grid.innerHTML = drafts.map(renderDraftCard).join('');
-  }
+  shelfState.isLoading = true;
+  setGridLoading();
 
-  if (window.lucide) window.lucide.createIcons();
+  try {
+    const drafts = await getUserDrafts(userId);
+    shelfState.drafts = drafts;
+
+    if (!drafts.length) {
+      setGridEmpty('No drafts yet. Start writing in the contribution page.');
+      return;
+    }
+
+    renderGrid(applyFilterSort(drafts), 'drafts');
+  } catch (err) {
+    console.error('[shelf] loadDrafts failed:', err);
+    setGridError();
+  } finally {
+    shelfState.isLoading = false;
+  }
 }
 
-/* ==================== Draft Card Template ==================== */
+/* ─────────────────────────────────────────────
+   Hero Stats
+   ───────────────────────────────────────────── */
 
 /**
- * Renders a single draft card as an HTML string.
- *
- * @param {Object} draft - Draft object from Firestore
- * @returns {string} HTML string for the draft card
+ * Computes and renders real hero stat values from cached state.
+ * Call after both bookmarkedTales and drafts have been loaded.
  */
-function renderDraftCard(draft) {
-  const { id, title = 'Untitled Draft', chapters = [], updatedAt } = draft;
+export function computeAndRenderHeroStats() {
+  const bookmarkCount = shelfState.bookmarkedTales.length;
+  const draftCount = shelfState.drafts.length;
 
-  const chapterCount = chapters.length;
-  const wordCount = chapters.reduce((acc, ch) => {
-    const words = ch.content?.trim().split(/\s+/).filter(Boolean).length || 0;
-    return acc + words;
-  }, 0);
+  // totalWordsWritten is a denormalized field written by cloud.js on every save
+  const wordsPreserved = shelfState.drafts.reduce((acc, d) => acc + (d.totalWordsWritten || 0), 0);
 
-  const updated = updatedAt?.seconds
-    ? new Date(updatedAt.seconds * 1000).toLocaleDateString()
-    : 'Unknown';
-
-  return `
-    <div class="glass-panel group relative p-5 rounded-[2.5rem] hover:border-indigo-500/40 transition-all" data-id="${id}">
-      <div class="flex justify-between items-start mb-6">
-        <span class="text-[9px] font-black text-indigo-400 uppercase tracking-widest bg-indigo-500/10 px-2 py-1 rounded-md">
-          Draft
-        </span>
-        <span class="text-[9px] text-zinc-600 font-bold uppercase tracking-widest">
-          ${updated}
-        </span>
-      </div>
-
-      <h3 class="text-xl font-bold text-white uppercase tracking-wider mb-2 group-hover:text-indigo-400 transition-colors">
-        ${title}
-      </h3>
-
-      <div class="grid grid-cols-2 gap-4 py-4 border-t border-white/5 mt-4">
-        <div class="flex items-center gap-2">
-          <i data-lucide="layers" class="w-3.5 h-3.5 text-zinc-600"></i>
-          <span class="text-[9px] font-bold uppercase text-zinc-500 tracking-widest">
-            ${chapterCount} Chapters
-          </span>
-        </div>
-        <div class="flex items-center gap-2">
-          <i data-lucide="file-text" class="w-3.5 h-3.5 text-zinc-600"></i>
-          <span class="text-[9px] font-bold uppercase text-zinc-500 tracking-widest">
-            ${wordCount} Words
-          </span>
-        </div>
-      </div>
-
-      <div class="mt-4 flex items-center justify-end">
-        <a href="contribution.html"
-          class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-white hover:text-indigo-400 transition group/btn">
-          Continue Writing
-          <i data-lucide="arrow-right-circle" class="w-4 h-4 transition-transform group-hover/btn:translate-x-1"></i>
-        </a>
-      </div>
-    </div>
-  `;
+  shelfState.heroStats = { draftCount, bookmarkCount, wordsPreserved };
+  renderHeroStats(shelfState.heroStats);
 }
 
-/* ==================== UI Helpers ==================== */
+/* ─────────────────────────────────────────────
+   Filter + Sort
+   ───────────────────────────────────────────── */
 
-function loadingState() {
-  return `
-    <div class="col-span-full text-center py-20">
-      <div class="inline-block w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-      <p class="mt-4 text-zinc-500 font-medium">Loading...</p>
-    </div>
-  `;
+/**
+ * Re-applies the current filter + sort to the active tab's data
+ * and re-renders the grid. Called on every filter/sort change.
+ */
+export function applyAndRender() {
+  const data =
+    shelfState.activeTab === 'bookmarked' ? shelfState.bookmarkedTales : shelfState.drafts;
+
+  if (!data.length) return;
+
+  renderGrid(applyFilterSort(data), shelfState.activeTab);
 }
 
-function emptyState(message) {
-  return `
-    <div class="col-span-full text-center py-20 text-zinc-600 italic text-sm">
-      ${message}
-    </div>
-  `;
+/**
+ * Filters and sorts an array of tale/draft objects using current state.
+ *
+ * @param {Array<Object>} items
+ * @returns {Array<Object>}
+ */
+export function applyFilterSort(items) {
+  let result = [...items];
+
+  // Filter by query across title, description, era, tags
+  const q = shelfState.filterQuery.trim().toLowerCase();
+  if (q) {
+    result = result.filter((item) => {
+      const searchable = [
+        item.title,
+        item.description,
+        item.synopsis,
+        item.era,
+        ...(item.tags || []),
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return searchable.includes(q);
+    });
+  }
+
+  // Sort
+  const dir = shelfState.sortDir === 'asc' ? 1 : -1;
+
+  result.sort((a, b) => {
+    switch (shelfState.sortBy) {
+      case 'title':
+        return dir * (a.title || '').localeCompare(b.title || '');
+
+      case 'progress':
+        return dir * ((a.progress || a.percent || 0) - (b.progress || b.percent || 0));
+
+      case 'date':
+      default: {
+        const aTime = a.updatedAt?.seconds ?? a.lastUpdatedAt ?? 0;
+        const bTime = b.updatedAt?.seconds ?? b.lastUpdatedAt ?? 0;
+        return dir * (aTime - bTime);
+      }
+    }
+  });
+
+  return result;
 }

@@ -1,46 +1,523 @@
 <!-- src/views/shelf.html -->
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Studio | TaleTranscend</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+
   <script type="module" src="../pages/shelf/shelf.js"></script>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Cinzel:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    :root {
+      --paper-bg: #050509;
+      --panel-bg: rgba(255, 255, 255, 0.035);
+      --panel-bg-strong: rgba(255, 255, 255, 0.055);
+      --text-main: #f5f7ff;
+      --text-muted: #94a3b8;
+      --border: rgba(255, 255, 255, 0.08);
+      --glow-indigo: rgba(99, 102, 241, 0.18);
+      --glow-violet: rgba(139, 92, 246, 0.15);
+      --glow-amber: rgba(245, 158, 11, 0.12);
+    }
+
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(99, 102, 241, 0.25) transparent;
+    }
+
+    *::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    *::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    *::-webkit-scrollbar-thumb {
+      background: rgba(99, 102, 241, 0.25);
+      border-radius: 999px;
+    }
+
+    html,
+    body {
+      overflow-x: hidden;
+      background: #030305;
+      min-height: 100%;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      color: rgb(203 213 225);
+      font-family: 'Inter', sans-serif;
+      position: relative;
+    }
+
+    .font-cinzel {
+      font-family: 'Cinzel', serif;
+    }
+
+    .font-inter {
+      font-family: 'Inter', sans-serif;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .atmosphere-base {
+      position: fixed;
+      inset: 0;
+      z-index: -4;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse 70% 40% at 100% 100%, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
+        radial-gradient(ellipse 50% 30% at 0% 70%, rgba(99, 102, 241, 0.05) 0%, transparent 30%),
+        #030305;
+    }
+
+    .particle-field {
+      position: fixed;
+      inset: 0;
+      z-index: -3;
+      background-image:
+        radial-gradient(1px 1px at 20% 30%, rgba(255, 255, 255, 0.09) 0%, transparent 100%),
+        radial-gradient(1px 1px at 60% 20%, rgba(99, 102, 241, 0.12) 0%, transparent 100%),
+        radial-gradient(1px 1px at 80% 60%, rgba(139, 92, 246, 0.12) 0%, transparent 100%),
+        radial-gradient(1px 1px at 10% 90%, rgba(255, 255, 255, 0.08) 0%, transparent 100%);
+      animation: drift 50s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes drift {
+
+      0%,
+      100% {
+        transform: translateY(0px);
+      }
+
+      50% {
+        transform: translateY(-20px);
+      }
+    }
+
+    .glass-panel {
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.035) 0%, rgba(255, 255, 255, 0.015) 100%);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transform: translateZ(0);
+    }
+
+    .glass-panel-elevated {
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.045) 0%, rgba(255, 255, 255, 0.015) 100%);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow:
+        0 10px 40px rgba(0, 0, 0, 0.45),
+        0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+      transform: translateZ(0);
+    }
+
+    .studio-tab-active {
+      color: white;
+      position: relative;
+    }
+
+    .studio-tab-active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #6366f1, #8b5cf6);
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+    }
+
+    .panel-glow {
+      transition: all 0.35s ease;
+    }
+
+    .panel-glow:hover {
+      border-color: rgba(99, 102, 241, 0.18);
+      box-shadow:
+        0 0 30px var(--glow-indigo),
+        0 0 60px var(--glow-violet),
+        0 12px 35px rgba(0, 0, 0, 0.35);
+    }
+
+    .sacred-divider {
+      height: 1px;
+      background:
+        linear-gradient(90deg,
+          transparent,
+          rgba(99, 102, 241, 0.3),
+          rgba(139, 92, 246, 0.4),
+          transparent);
+    }
+
+    .archive-title {
+      position: relative;
+      display: inline-block;
+      letter-spacing: -0.06em;
+    }
+
+    .archive-title::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 0;
+      width: 42%;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(99, 102, 241, 0.8), transparent);
+    }
+
+    .studio-card {
+      transition:
+        transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+        border-color 0.35s ease,
+        box-shadow 0.35s ease;
+    }
+
+    .studio-card:hover {
+      transform: translateY(-6px);
+    }
+
+    .studio-card:hover .card-cover {
+      transform: scale(1.04);
+    }
+
+    .card-cover {
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .ambient-orb {
+      position: absolute;
+      border-radius: 999px;
+      filter: blur(80px);
+      opacity: 0.15;
+      pointer-events: none;
+    }
+
+    .section-heading {
+      text-wrap: balance;
+      letter-spacing: -0.04em;
+    }
+
+    .control-chip {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.25s ease;
+    }
+
+    .control-chip:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(99, 102, 241, 0.22);
+    }
+
+    .scroll-pane {
+      scrollbar-gutter: stable;
+    }
+
+    .hero-label {
+      border: 1px solid rgba(99, 102, 241, 0.18);
+      background: rgba(99, 102, 241, 0.08);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .panel-note {
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.03);
+    }
+  </style>
 </head>
 
-<body class="text-slate-300 antialiased min-h-screen">
+<body class="antialiased selection:bg-indigo-500/30 selection:text-white">
 
+  <div class="atmosphere-base"></div>
+  <div class="particle-field"></div>
 
-  <main class="pt-32 pb-20 max-w-[1500px] mx-auto px-8">
-    <header class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
-      <div>
-        <p class="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500 mb-2">Neural Hub / Workspace</p>
-        <h1 class="text-5xl font-black uppercase tracking-tighter text-white">My Studio</h1>
-      </div>
-    </header>
+  <div class="ambient-orb w-[400px] h-[400px] bg-indigo-500 top-[-100px] right-[-100px]"></div>
+  <div class="ambient-orb w-[300px] h-[300px] bg-violet-500 bottom-[-100px] left-[-100px]"></div>
 
-    <div class="py-1 flex gap-10 border-b border-white/5 mb-12 overflow-x-auto no-scrollbar">
-      <button id="tab-bookmarked" data-tab="bookmarked"
-        class="shelf-tab studio-tab-active pb-6 text-[11px] uppercase tracking-[0.25em] font-black transition-all">
-        Bookmarked Fragments
-      </button>
-      <button id="tab-drafts" data-tab="drafts"
-        class="shelf-tab pb-6 text-zinc-500 hover:text-white text-[11px] uppercase tracking-[0.25em] font-black transition-all">
-        Active Drafts
-      </button>
-    </div>
+  <main class="relative max-w-[1760px] mx-auto min-h-screen px-4 md:px-6 lg:px-8 xl:px-10 pt-8 pb-24">
 
-    <div id="studio-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
-      <div class="col-span-full text-center py-20">
-        <div class="inline-block w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin">
+    <!-- Hero -->
+    <section class="mb-10">
+      <div
+        class="glass-panel-elevated rounded-[2.75rem] p-6 md:p-10 lg:p-12 overflow-hidden relative border border-white/[0.06]">
+        <div
+          class="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.03] via-transparent to-violet-500/[0.03] pointer-events-none">
         </div>
-        <p class="mt-4 text-zinc-500 font-medium">Loading your studio...</p>
+
+        <div
+          class="absolute top-0 left-1/2 -translate-x-1/2 w-[72%] h-px bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent">
+        </div>
+
+        <div class="relative z-10 flex flex-col xl:flex-row xl:items-end xl:justify-between gap-10">
+          <div class="max-w-3xl">
+            <div
+              class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 text-indigo-300 text-[10px] uppercase tracking-[0.25em] font-bold">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+              Neural Archive Workspace
+            </div>
+
+            <h1
+              class="archive-title mt-8 text-5xl md:text-6xl xl:text-7xl font-cinzel font-black text-white tracking-tight leading-none">
+              My Studio
+            </h1>
+
+            <p class="mt-8 text-slate-400 max-w-2xl leading-relaxed text-sm md:text-base">
+              A sacred chamber of unfinished manuscripts, preserved fragments, forgotten drafts, and mythic chronicles
+              waiting to awaken.
+            </p>
+
+            <div class="mt-10 flex flex-wrap gap-4">
+              <div class="glass-panel rounded-2xl px-5 py-4 min-w-[140px]">
+                <p class="text-2xl font-bold text-white">12</p>
+                <p class="text-[10px] uppercase tracking-[0.2em] text-slate-500 mt-1">Drafts</p>
+              </div>
+
+              <div class="glass-panel rounded-2xl px-5 py-4 min-w-[140px]">
+                <p class="text-2xl font-bold text-white">47</p>
+                <p class="text-[10px] uppercase tracking-[0.2em] text-slate-500 mt-1">Saved Fragments</p>
+              </div>
+
+              <div class="glass-panel rounded-2xl px-5 py-4 min-w-[140px]">
+                <p class="text-2xl font-bold text-white">8.7k</p>
+                <p class="text-[10px] uppercase tracking-[0.2em] text-slate-500 mt-1">Words Preserved</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-4 xl:min-w-[420px]">
+            <button
+              class="group glass-panel px-6 py-4 rounded-2xl flex items-center gap-3 hover:border-indigo-500/20 transition-all">
+              <i data-lucide="mic" class="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform"></i>
+              <div class="text-left">
+                <p class="text-sm font-semibold text-white">Voice Chronicle</p>
+                <p class="text-[10px] text-slate-500 uppercase tracking-wider">Record orally</p>
+              </div>
+            </button>
+
+            <button
+              class="group bg-gradient-to-br from-indigo-500 to-violet-600 hover:shadow-[0_0_30px_rgba(99,102,241,0.45)] transition-all px-7 py-4 rounded-2xl flex items-center gap-3 text-white">
+              <i data-lucide="feather" class="w-4 h-4 group-hover:-translate-y-0.5 transition-transform"></i>
+              <div class="text-left">
+                <p class="text-sm font-semibold">Begin New Tale</p>
+                <p class="text-[10px] text-indigo-100/70 uppercase tracking-wider">Open manuscript</p>
+              </div>
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
+
+    <!-- Tabs + Controls -->
+    <section class="mb-10">
+      <div class="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-6 items-start">
+        <div class="glass-panel rounded-[2rem] p-2 overflow-x-auto no-scrollbar">
+          <div class="flex items-center gap-2 min-w-max">
+            <button id="tab-bookmarked" data-tab="bookmarked"
+              class="shelf-tab studio-tab-active rounded-2xl px-6 py-4 text-[11px] uppercase tracking-[0.22em] font-black transition-all">
+              <span class="flex items-center gap-3">
+                <i data-lucide="bookmark" class="w-4 h-4"></i>
+                Bookmarked Fragments
+              </span>
+            </button>
+
+            <button id="tab-drafts" data-tab="drafts"
+              class="shelf-tab rounded-2xl px-6 py-4 text-zinc-500 hover:text-white hover:bg-white/[0.03] text-[11px] uppercase tracking-[0.22em] font-black transition-all">
+              <span class="flex items-center gap-3">
+                <i data-lucide="scroll-text" class="w-4 h-4"></i>
+                Active Drafts
+              </span>
+            </button>
+
+            <button
+              class="rounded-2xl px-6 py-4 text-zinc-600 hover:text-slate-300 hover:bg-white/[0.03] text-[11px] uppercase tracking-[0.22em] font-black transition-all">
+              <span class="flex items-center gap-3">
+                <i data-lucide="clock-3" class="w-4 h-4"></i>
+                Recently Opened
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <div class="glass-panel rounded-[2rem] p-4 md:p-5">
+          <div class="flex items-center gap-3">
+            <div class="flex-1 relative">
+              <i data-lucide="filter" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500"></i>
+              <input id="shelf-filter-input" type="text" placeholder="Filter fragments, drafts, or notes..."
+                class="w-full pl-11 pr-4 py-3 rounded-2xl bg-black/35 border border-white/8 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/40 transition-all" />
+            </div>
+            <button
+              class="control-chip px-4 py-3 rounded-2xl text-[11px] uppercase tracking-[0.2em] text-slate-400 font-bold flex items-center gap-2">
+              <i data-lucide="arrow-up-down" class="w-4 h-4"></i>
+              Sort
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section Header -->
+    <section class="mb-8">
+      <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+        <div>
+          <div class="flex items-center gap-4 mb-4">
+            <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-indigo-400">
+              Archive Contents
+            </p>
+            <div class="flex-1 sacred-divider"></div>
+          </div>
+
+          <h2 class="section-heading text-3xl md:text-4xl font-cinzel font-bold text-white">
+            Preserved Manuscripts
+          </h2>
+
+          <p class="mt-3 text-slate-500 max-w-2xl">
+            Every fragment carries echoes of forgotten worlds and living myths.
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+          <button
+            class="glass-panel rounded-2xl px-5 py-3 text-[11px] uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-all flex items-center gap-2">
+            <i data-lucide="layout-grid" class="w-4 h-4"></i>
+            Grid View
+          </button>
+
+          <button
+            class="glass-panel rounded-2xl px-5 py-3 text-[11px] uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-all flex items-center gap-2">
+            <i data-lucide="search" class="w-4 h-4"></i>
+            Discover
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Workspace -->
+    <section class="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-8 items-start">
+
+      <div class="min-w-0">
+        <div id="studio-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 md:gap-8">
+
+          <!-- loading -->
+          <div class="col-span-full">
+            <div class="glass-panel-elevated rounded-[2rem] py-24 px-8 text-center border border-white/[0.04]">
+              <div class="relative inline-flex items-center justify-center">
+                <div class="absolute inset-0 rounded-full blur-2xl bg-indigo-500/20 animate-pulse"></div>
+                <div
+                  class="relative w-16 h-16 rounded-full border-2 border-indigo-500/20 border-t-indigo-400 animate-spin">
+                </div>
+              </div>
+
+              <h3 class="mt-8 text-xl font-cinzel font-bold text-white">
+                Accessing the Archive
+              </h3>
+
+              <p class="mt-3 text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
+                Gathering preserved fragments, unfinished chronicles, and sacred manuscripts from your private
+                collection.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right rail -->
+      <aside class="sticky top-6 space-y-6">
+        <div class="glass-panel-elevated rounded-[2rem] p-6 md:p-8">
+          <div class="flex items-center gap-2 text-indigo-300 mb-5">
+            <i data-lucide="wand-sparkles" class="w-4 h-4"></i>
+            <span class="text-[9px] font-black uppercase tracking-[0.3em]">Studio Rituals</span>
+          </div>
+
+          <div class="space-y-3">
+            <div class="control-chip rounded-2xl p-4 flex items-center justify-between">
+              <div>
+                <p class="text-sm font-semibold text-white">Fresh draft</p>
+                <p class="text-[10px] text-slate-500 mt-1">Future hook placeholder</p>
+              </div>
+              <i data-lucide="plus" class="w-4 h-4 text-slate-500"></i>
+            </div>
+
+            <div class="control-chip rounded-2xl p-4 flex items-center justify-between">
+              <div>
+                <p class="text-sm font-semibold text-white">Voice note</p>
+                <p class="text-[10px] text-slate-500 mt-1">Future hook placeholder</p>
+              </div>
+              <i data-lucide="mic" class="w-4 h-4 text-slate-500"></i>
+            </div>
+
+            <div class="control-chip rounded-2xl p-4 flex items-center justify-between">
+              <div>
+                <p class="text-sm font-semibold text-white">Publishing flow</p>
+                <p class="text-[10px] text-slate-500 mt-1">Future hook placeholder</p>
+              </div>
+              <i data-lucide="send" class="w-4 h-4 text-slate-500"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-panel rounded-[2rem] p-6 md:p-8">
+          <div class="flex items-center gap-2 text-indigo-300 mb-5">
+            <i data-lucide="scroll-text" class="w-4 h-4"></i>
+            <span class="text-[9px] font-black uppercase tracking-[0.3em]">Recent Notes</span>
+          </div>
+
+          <div class="scroll-pane max-h-[18rem] overflow-y-auto pr-1 space-y-3">
+            <div class="panel-note rounded-2xl p-4">
+              <p class="text-sm text-white font-semibold">Empty shelf placeholder</p>
+              <p class="text-xs text-slate-500 mt-1">Use this rail for drafts, saved states, or recent activity later.
+              </p>
+            </div>
+            <div class="panel-note rounded-2xl p-4">
+              <p class="text-sm text-white font-semibold">Autosave placeholder</p>
+              <p class="text-xs text-slate-500 mt-1">Independent scroll area for quick context and future hooks.</p>
+            </div>
+            <div class="panel-note rounded-2xl p-4">
+              <p class="text-sm text-white font-semibold">Editor placeholder</p>
+              <p class="text-xs text-slate-500 mt-1">This rail stays visually separate from the main archive grid.</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
   </main>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
+    });
+  </script>
 </body>
 
 </html>

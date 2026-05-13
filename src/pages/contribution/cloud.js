@@ -7,6 +7,10 @@
 //   - If absent, state.draftId stays 'new' until first cloud save,
 //     at which point a Firestore doc is created and state.draftId is
 //     updated + the URL param is set so refreshes reload the same draft.
+//
+// totalWordsWritten is computed from all chapters on every save and
+// written to the draft document so the shelf/profile page can show
+// accurate word counts without extra sub-collection reads.
 
 import {
   auth,
@@ -20,6 +24,7 @@ import {
   serverTimestamp,
   PATHS,
 } from '@fb/index.js';
+
 import { state } from './state.js';
 
 /* ── Draft ID from URL ────────────────────────────────────────────── */
@@ -31,7 +36,10 @@ import { state } from './state.js';
 export function initDraftId() {
   const params = new URLSearchParams(window.location.search);
   const id = params.get('draft');
-  if (id) state.draftId = id;
+
+  if (id) {
+    state.draftId = id;
+  }
 }
 
 /**
@@ -40,7 +48,9 @@ export function initDraftId() {
  */
 function syncDraftIdToUrl() {
   const url = new URL(window.location.href);
+
   url.searchParams.set('draft', state.draftId);
+
   window.history.replaceState({}, '', url.toString());
 }
 
@@ -62,32 +72,51 @@ export async function saveToCloud() {
   // Sync metadata from DOM into state before saving
   syncMetadataFromDom();
 
+  // Build Firestore payload
   const metadata = buildMetadataPayload();
 
   // First-time save: create a new draft document
   if (state.draftId === 'new') {
     const draftsCol = collection(db, PATHS.drafts(userId));
+
     const newRef = await addDoc(draftsCol, {
       ...metadata,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
+
+    // Persist the generated Firestore doc ID into state
     state.draftId = newRef.id;
+
+    // Keep the URL synced so refresh restores the same draft
     syncDraftIdToUrl();
   } else {
+    // Existing draft: merge updates into the same document
     const draftRef = doc(db, PATHS.draft(userId, state.draftId));
-    await setDoc(draftRef, { ...metadata, updatedAt: serverTimestamp() }, { merge: true });
+
+    await setDoc(
+      draftRef,
+      {
+        ...metadata,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
   }
 
-  // Save the currently active chapter
+  // Save only the currently active chapter
   const chapter = state.chapters[state.currentChapterIndex];
+
   if (chapter) {
     await saveChapter(userId, state.currentChapterIndex, chapter);
   }
 
+  // Draft is now synced
   state.isDirty = false;
 
+  // Update save status UI
   const status = document.getElementById('stat-status');
+
   if (status) {
     status.className = status.className.replace(/text-\w+-\d+/g, '');
     status.classList.add('text-emerald-400');
@@ -102,7 +131,7 @@ export async function saveToCloud() {
  * @param {string} userId
  */
 export async function saveAllChapters(userId) {
-  await Promise.all(state.chapters.map((ch, idx) => saveChapter(userId, idx, ch)));
+  await Promise.all(state.chapters.map((chapter, index) => saveChapter(userId, index, chapter)));
 }
 
 /**
@@ -114,6 +143,7 @@ export async function saveAllChapters(userId) {
  */
 async function saveChapter(userId, index, chapter) {
   const chapterRef = doc(db, PATHS.draftChapter(userId, state.draftId, String(index)));
+
   await setDoc(chapterRef, {
     chapterNum: index,
     title: chapter.title || 'Untitled Chapter',
@@ -132,9 +162,12 @@ async function saveChapter(userId, index, chapter) {
  */
 export async function loadDraft() {
   if (!auth.currentUser) return false;
+
   if (state.draftId === 'new') return false;
 
   const userId = auth.currentUser.uid;
+
+  // Load draft metadata document
   const draftRef = doc(db, PATHS.draft(userId, state.draftId));
   const draftSnap = await getDoc(draftRef);
 
@@ -156,21 +189,25 @@ export async function loadDraft() {
   state.worldSetting = data.worldSetting || '';
   state.authorNotes = data.authorNotes || '';
 
-  // Restore metadata into DOM
+  // Push metadata into DOM inputs
   syncMetadataToDom();
 
   // Fetch chapters sub-collection
   const chaptersRef = collection(db, PATHS.draftChapters(userId, state.draftId));
+
   const chaptersSnap = await getDocs(chaptersRef);
 
+  // Restore chapter list into state
   if (!chaptersSnap.empty) {
     state.chapters = chaptersSnap.docs
-      .map((d) => d.data())
+      .map((docSnap) => docSnap.data())
       .sort((a, b) => (a.chapterNum ?? 0) - (b.chapterNum ?? 0))
-      .map((ch) => ({
-        title: ch.title || 'Untitled Chapter',
-        content: ch.content || '',
+      .map((chapter) => ({
+        title: chapter.title || 'Untitled Chapter',
+        content: chapter.content || '',
       }));
+
+    // Reset editor to first chapter
     state.currentChapterIndex = 0;
   }
 
@@ -185,23 +222,33 @@ export async function loadDraft() {
  */
 export function syncMetadataFromDom() {
   state.title = document.getElementById('tale-title')?.value.trim() ?? '';
+
   state.synopsis = document.getElementById('tale-synopsis')?.value.trim() ?? '';
+
   state.coverUrl = document.getElementById('cover-url')?.value.trim() ?? '';
+
   state.era = document.getElementById('tale-era')?.value.trim() ?? '';
+
   state.contentWarnings = document.getElementById('content-warnings')?.value.trim() ?? '';
+
   state.worldSetting = document.getElementById('world-setting')?.value.trim() ?? '';
+
   state.authorNotes = document.getElementById('story-notes')?.value.trim() ?? '';
 
   // Tags: comma-separated string → string[]
   const tagsRaw = document.getElementById('genre-tags')?.value ?? '';
+
   state.tags = tagsRaw
     .split(',')
-    .map((t) => t.trim())
+    .map((tag) => tag.trim())
     .filter(Boolean);
 
   state.tone = document.getElementById('story-tone')?.value ?? 'Mythic';
+
   state.language = document.getElementById('story-language')?.value ?? 'English';
+
   state.visibility = document.getElementById('story-visibility')?.value ?? 'Public';
+
   state.audience = document.getElementById('target-audience')?.value ?? 'General';
 }
 
@@ -214,30 +261,51 @@ export function syncMetadataToDom() {
   setInput('tale-synopsis', state.synopsis);
   setInput('cover-url', state.coverUrl);
   setInput('tale-era', state.era);
+
+  // Convert tags array back into a comma-separated string
   setInput('genre-tags', state.tags.join(', '));
+
   setInput('content-warnings', state.contentWarnings);
   setInput('world-setting', state.worldSetting);
   setInput('story-notes', state.authorNotes);
+
   setSelect('story-tone', state.tone);
   setSelect('story-language', state.language);
   setSelect('story-visibility', state.visibility);
   setSelect('target-audience', state.audience);
 
-  // Update cover preview if a URL is stored
+  // Restore saved cover preview
   if (state.coverUrl) {
     const preview = document.getElementById('tale-cover-preview');
-    if (preview) preview.src = state.coverUrl;
+
+    if (preview) {
+      preview.src = state.coverUrl;
+    }
   }
 }
 
 /* ── Firestore Payload ────────────────────────────────────────────── */
 
 /**
- * Builds the metadata object to write to the draft Firestore document.
+ * Builds the metadata object written to the draft document.
+ *
+ * totalWordsWritten is denormalized so shelf/profile pages
+ * never need to fetch all chapter sub-collections just to
+ * display a word count.
  *
  * @returns {Object}
  */
 function buildMetadataPayload() {
+  // Compute total words across every chapter
+  const totalWordsWritten = state.chapters.reduce((accumulator, chapter) => {
+    const text = (chapter.content || '').trim();
+
+    // Empty chapters contribute 0 words
+    if (!text) return accumulator;
+
+    return accumulator + text.split(/\s+/).length;
+  }, 0);
+
   return {
     title: state.title,
     synopsis: state.synopsis,
@@ -251,20 +319,43 @@ function buildMetadataPayload() {
     contentWarnings: state.contentWarnings,
     worldSetting: state.worldSetting,
     authorNotes: state.authorNotes,
+
+    // Useful summary stats
     chapterCount: state.chapters.length,
+    totalWordsWritten,
   };
 }
 
 /* ── Tiny DOM helpers ─────────────────────────────────────────────── */
 
+/**
+ * Safely sets an input value if the element exists.
+ *
+ * @param {string} id
+ * @param {string} value
+ */
 function setInput(id, value) {
   const el = document.getElementById(id);
-  if (el) el.value = value ?? '';
+
+  if (el) {
+    el.value = value ?? '';
+  }
 }
 
+/**
+ * Safely sets a <select> value if the option exists.
+ *
+ * @param {string} id
+ * @param {string} value
+ */
 function setSelect(id, value) {
   const el = document.getElementById(id);
+
   if (!el || !value) return;
-  const opt = [...el.options].find((o) => o.value === value);
-  if (opt) el.value = value;
+
+  const optionExists = [...el.options].find((option) => option.value === value);
+
+  if (optionExists) {
+    el.value = value;
+  }
 }
