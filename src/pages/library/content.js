@@ -1,10 +1,18 @@
 // src/pages/library/content.js
 // Manages real-time subscription to the community tales collection in Firestore.
 
-import { db, appId, collection, onSnapshot, auth, PATHS } from '@fb/index.js';
+import { onSnapshot, auth, refs } from '@fb/index.js';
+
+/* ─────────────────────────────────────────────
+   Listener State
+   ───────────────────────────────────────────── */
 
 // Holds the active Firestore listener unsubscribe function
 let unsubscribe = null;
+
+/* ─────────────────────────────────────────────
+   Real-time Tales Subscription
+   ───────────────────────────────────────────── */
 
 /**
  * Subscribes to real-time updates for the public community tales collection.
@@ -15,17 +23,34 @@ let unsubscribe = null;
  * @param {Function} onError - Callback invoked with the Firestore error
  */
 export function subscribeToTales(onUpdate, onError) {
-  const talesCol = collection(db, PATHS.publicTales());
+  // Prevent duplicate listeners during hot reloads
+  if (unsubscribe) {
+    unsubscribe();
+    unsubscribe = null;
+  }
+
+  // Public tales collection reference
+  const talesRef = refs.tales();
 
   unsubscribe = onSnapshot(
-    talesCol,
-    (snap) => {
-      const tales = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    talesRef,
+
+    (snapshot) => {
+      // Normalize Firestore documents
+      const tales = snapshot.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...docSnap.data(),
+      }));
+
+      // Push latest tales into the UI
       onUpdate(tales);
     },
+
     (error) => {
       console.error('subscribeToTales error:', error.code, error.message);
+
       console.error('Auth status at failure:', auth.currentUser ? 'logged in' : 'logged out');
+
       onError(error);
     }
   );
@@ -36,5 +61,6 @@ export function subscribeToTales(onUpdate, onError) {
  * Should be called when the page unloads to prevent memory leaks.
  */
 export function stopTalesSubscription() {
-  if (unsubscribe) unsubscribe();
+  unsubscribe?.();
+  unsubscribe = null;
 }

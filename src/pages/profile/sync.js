@@ -4,18 +4,15 @@
 // social handles, reading goal, favourite genres.
 
 import {
-  db,
   auth,
-  doc,
   onSnapshot,
   setDoc,
   serverTimestamp,
   getDoc,
   getDocs,
-  collection,
   query,
   where,
-  PATHS,
+  refs,
 } from '@fb/index.js';
 
 import { updateProfileUI, showNotification } from './ui.js';
@@ -41,17 +38,21 @@ export function startProfileSync(uid) {
     profileState.unsubscribeProfile = null;
   }
 
+  // Persist active user ID into local state
   profileState.uid = uid;
 
-  const userRef = doc(db, PATHS.user(uid));
+  // User document reference
+  const userRef = refs.user(uid);
 
   profileState.unsubscribeProfile = onSnapshot(
     userRef,
-    (snap) => {
-      if (!snap.exists()) return;
-      const data = snap.data();
 
-      // Mirror into local state so modal reads from it
+    (snapshot) => {
+      if (!snapshot.exists()) return;
+
+      const data = snapshot.data();
+
+      // Mirror Firestore data into local state
       Object.assign(profileState, {
         name: data.name || '',
         bio: data.bio || '',
@@ -69,10 +70,13 @@ export function startProfileSync(uid) {
         writingStreak: data.writingStreak || 0,
       });
 
+      // Refresh UI
       updateProfileUI(profileState);
     },
+
     (error) => {
       console.error('[profile] Sync error:', error);
+
       showNotification('Failed to sync profile. Check your connection.', 'error');
     }
   );
@@ -99,12 +103,17 @@ export function stopProfileSync() {
 export async function saveProfile() {
   if (!auth.currentUser) {
     showNotification('You must be signed in to save.', 'error');
+
     return;
   }
 
-  const ref = doc(db, PATHS.user(auth.currentUser.uid));
-  const snap = await getDoc(ref);
+  // User document reference
+  const userRef = refs.user(auth.currentUser.uid);
 
+  // Detect first-time profile creation
+  const snapshot = await getDoc(userRef);
+
+  // Build profile payload from modal inputs
   const data = {
     name: getVal('input-name'),
     bio: getVal('input-bio'),
@@ -115,21 +124,29 @@ export async function saveProfile() {
     twitterHandle: getVal('input-twitter'),
     instagramHandle: getVal('input-instagram'),
     readingGoal: Number(getVal('input-reading-goal')) || 12,
+
+    // Genre picker state is managed elsewhere
     favouriteGenres: [...profileState.favouriteGenres],
+
     updatedAt: serverTimestamp(),
   };
 
-  if (!snap.exists()) {
-    // Capture join date on first profile creation
+  // First profile creation metadata
+  if (!snapshot.exists()) {
     data.createdAt = serverTimestamp();
     data.joinedAt = new Date().toISOString();
   }
 
   try {
-    await setDoc(ref, data, { merge: true });
+    // Merge profile updates into existing document
+    await setDoc(userRef, data, {
+      merge: true,
+    });
+
     showNotification('Profile saved.', 'success');
   } catch (error) {
     console.error('[profile] Save error:', error);
+
     showNotification('Failed to save profile. Please try again.', 'error');
   }
 }
@@ -147,6 +164,7 @@ export async function saveProfile() {
  */
 export async function computeAndSyncStats(uid) {
   try {
+    // Compute stats in parallel
     const [draftStats, publishedStats] = await Promise.all([
       _sumDraftWords(uid),
       _sumPublishedReaders(uid),
@@ -155,12 +173,17 @@ export async function computeAndSyncStats(uid) {
     const stats = {
       wordsWritten: draftStats.words,
       readers: publishedStats.readers,
-      readingTime: draftStats.words * 0.3, // ~0.3 seconds per word
-      streak: profileState.writingStreak, // managed separately
+
+      // Rough estimate: ~0.3 seconds per word
+      readingTime: draftStats.words * 0.3,
+
+      // Managed elsewhere
+      streak: profileState.writingStreak,
     };
 
-    // Persist computed stats back to the user doc
-    const userRef = doc(db, PATHS.user(uid));
+    // Persist computed stats into the user profile
+    const userRef = refs.user(uid);
+
     await setDoc(
       userRef,
       {
@@ -172,9 +195,15 @@ export async function computeAndSyncStats(uid) {
     );
 
     return stats;
-  } catch (err) {
-    console.error('[profile] computeAndSyncStats error:', err);
-    return { wordsWritten: 0, readers: 0, readingTime: 0, streak: 0 };
+  } catch (error) {
+    console.error('[profile] computeAndSyncStats error:', error);
+
+    return {
+      wordsWritten: 0,
+      readers: 0,
+      readingTime: 0,
+      streak: 0,
+    };
   }
 }
 
@@ -186,17 +215,25 @@ export async function computeAndSyncStats(uid) {
  */
 async function _sumDraftWords(uid) {
   try {
-    const draftsSnap = await getDocs(collection(db, PATHS.drafts(uid)));
-    if (draftsSnap.empty) return { words: 0 };
+    // All drafts for this user
+    const draftsSnap = await getDocs(refs.drafts(uid));
+
+    if (draftsSnap.empty) {
+      return { words: 0 };
+    }
 
     let totalWords = 0;
 
+    // Fetch all chapter collections in parallel
     await Promise.all(
       draftsSnap.docs.map(async (draftDoc) => {
-        const chaptersSnap = await getDocs(collection(db, PATHS.draftChapters(uid, draftDoc.id)));
-        chaptersSnap.forEach((ch) => {
-          const content = ch.data().content || '';
+        const chaptersSnap = await getDocs(refs.draftChapters(uid, draftDoc.id));
+
+        chaptersSnap.forEach((chapterDoc) => {
+          const content = chapterDoc.data().content || '';
+
           const words = content.trim() ? content.trim().split(/\s+/).length : 0;
+
           totalWords += words;
         });
       })
@@ -216,12 +253,23 @@ async function _sumDraftWords(uid) {
  */
 async function _sumPublishedReaders(uid) {
   try {
-    const q = query(collection(db, PATHS.publicTales()), where('authorId', '==', uid));
-    const snap = await getDocs(q);
-    if (snap.empty) return { readers: 0 };
+    // Query published tales by author ID
+    const publishedQuery = query(refs.tales(), where('authorId', '==', uid));
 
-    const total = snap.docs.reduce((acc, d) => acc + (d.data().readCount || 0), 0);
-    return { readers: total };
+    const snapshot = await getDocs(publishedQuery);
+
+    if (snapshot.empty) {
+      return { readers: 0 };
+    }
+
+    // Aggregate total read counts
+    const totalReaders = snapshot.docs.reduce((accumulator, docSnap) => {
+      return accumulator + (docSnap.data().readCount || 0);
+    }, 0);
+
+    return {
+      readers: totalReaders,
+    };
   } catch {
     return { readers: 0 };
   }
@@ -231,6 +279,12 @@ async function _sumPublishedReaders(uid) {
    Helpers
    ───────────────────────────────────────────── */
 
+/**
+ * Safely reads and trims an input value.
+ *
+ * @param {string} id
+ * @returns {string}
+ */
 function getVal(id) {
   return document.getElementById(id)?.value.trim() ?? '';
 }

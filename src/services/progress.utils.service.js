@@ -2,7 +2,7 @@
 // Fetches chapter-level progress data for a tale from Firestore.
 // Used for rendering progress indicators across the UI.
 
-import { db, appId, collection, getDocs, PATHS } from '@fb/index.js';
+import { getDocs, refs } from '@fb/index.js';
 
 /* ================= Firestore Structure Reference =================
 artifacts (collection)
@@ -26,18 +26,14 @@ artifacts (collection)
  */
 export async function getTaleProgressData(userId, taleId) {
   try {
-    const chaptersRef = collection(db, PATHS.progressChapters(userId, taleId));
-    const snapshot = await getDocs(chaptersRef);
-
+    const snap = await getDocs(refs.progressChapters(userId, taleId));
     const chaptersProgress = {};
-    snapshot.forEach((doc) => {
-      // doc.id is the chapter index as a string ('0', '1', '2' ...)
-      chaptersProgress[doc.id] = doc.data().scrollPercent || 0;
+    snap.forEach((d) => {
+      chaptersProgress[d.id] = d.data().scrollPercent || 0;
     });
-
     return chaptersProgress;
   } catch (err) {
-    console.error('Failed to fetch chapter progress from Firestore:', err);
+    console.error('Failed to fetch chapter progress:', err);
     return {};
   }
 }

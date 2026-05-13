@@ -4,31 +4,14 @@
 
 import {
   db,
-  appId,
   getDoc,
-  doc,
   setDoc,
   updateDoc,
-  collection,
   getDocs,
   writeBatch,
   serverTimestamp,
-  PATHS,
+  refs,
 } from '@fb/index.js';
-
-/* ================= Firestore Structure Reference =================
-artifacts (collection)
- └─ {appId} (document)
-     └─ users (collection)
-         └─ {userId} (document)
-             └─ readerProgress (collection)
-                 └─ {taleId} (document)
-                     ├─ status
-                     ├─ finishedAt
-                     └─ chapters (subcollection)
-                         └─ {chapterIndex} (document)
-                             └─ scrollPercent
-==================================================================== */
 
 /**
  * Marks a tale as finished for a given user.
@@ -40,35 +23,44 @@ artifacts (collection)
  * @param {string} params.taleId - ID of the tale to mark as finished
  */
 export async function markTaleFinished({ userId, taleId }) {
+  // Guard against invalid calls
   if (!userId || !taleId) return;
 
-  const taleRef = doc(db, PATHS.progress(userId, taleId));
-  const snap = await getDoc(taleRef);
+  // Main progress document reference
+  const progressRef = refs.progress(userId, taleId);
 
-  // Create the parent tale progress document if it does not exist yet
-  if (!snap.exists()) {
-    await setDoc(taleRef, {
+  // Check whether the progress document already exists
+  const progressSnap = await getDoc(progressRef);
+
+  // First completion: create the document
+  if (!progressSnap.exists()) {
+    await setDoc(progressRef, {
       status: 'finished',
       finishedAt: serverTimestamp(),
       createdAt: serverTimestamp(),
     });
   }
 
-  // Fetch all chapter documents in the subcollection
-  const chaptersRef = collection(db, PATHS.progressChapters(userId, taleId));
+  // Fetch all saved chapter progress docs
+  const chaptersRef = refs.progressChapters(userId, taleId);
+
   const chaptersSnap = await getDocs(chaptersRef);
 
-  // Batch update all chapters to scrollPercent 100 in a single write
+  // Mark every chapter as fully read
   if (!chaptersSnap.empty) {
     const batch = writeBatch(db);
+
     chaptersSnap.forEach((chapterDoc) => {
-      batch.update(chapterDoc.ref, { scrollPercent: 100 });
+      batch.update(chapterDoc.ref, {
+        scrollPercent: 100,
+      });
     });
+
     await batch.commit();
   }
 
-  // Update tale-level status and finish timestamp
-  await updateDoc(taleRef, {
+  // Ensure the parent progress doc is marked finished
+  await updateDoc(progressRef, {
     status: 'finished',
     finishedAt: serverTimestamp(),
   });

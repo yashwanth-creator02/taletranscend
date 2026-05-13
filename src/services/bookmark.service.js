@@ -2,17 +2,7 @@
 // Manages user bookmarks stored in Firestore.
 // Bookmarks are private to each user and scoped under their user document.
 
-import {
-  db,
-  appId,
-  doc,
-  getDocs,
-  deleteDoc,
-  setDoc,
-  collection,
-  serverTimestamp,
-  PATHS,
-} from '@fb/index.js';
+import { getDocs, deleteDoc, setDoc, serverTimestamp, refs } from '@fb/index.js';
 
 /* ================= Firestore Structure Reference =================
 artifacts (collection)
@@ -34,11 +24,7 @@ artifacts (collection)
  */
 export async function addToBookmarks({ userId, taleId }) {
   if (!userId || !taleId) return;
-
-  const ref = doc(db, PATHS.bookmark(userId, taleId));
-
-  // Merge to avoid overwriting if the bookmark already exists
-  await setDoc(ref, { bookmarkedAt: serverTimestamp() }, { merge: true });
+  await setDoc(refs.bookmark(userId, taleId), { bookmarkedAt: serverTimestamp() }, { merge: true });
 }
 
 /**
@@ -50,9 +36,7 @@ export async function addToBookmarks({ userId, taleId }) {
  */
 export async function removeFromBookmarks({ userId, taleId }) {
   if (!userId || !taleId) return;
-
-  const ref = doc(db, PATHS.bookmark(userId, taleId));
-  await deleteDoc(ref);
+  await deleteDoc(refs.bookmark(userId, taleId));
 }
 
 /**
@@ -64,9 +48,6 @@ export async function removeFromBookmarks({ userId, taleId }) {
  */
 export async function getBookmarks({ userId }) {
   if (!userId) return [];
-
-  const ref = collection(db, PATHS.bookmarks(userId));
-  const snap = await getDocs(ref);
-
-  return snap.empty ? [] : snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  const snap = await getDocs(refs.bookmarks(userId));
+  return snap.empty ? [] : snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }

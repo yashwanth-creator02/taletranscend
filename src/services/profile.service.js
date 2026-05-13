@@ -1,18 +1,7 @@
 // src/services/profile.service.js
 // Fetches profile-specific data: reading history, published tales, and drafts.
 
-import {
-  db,
-  collection,
-  getDocs,
-  doc,
-  getDoc,
-  query,
-  where,
-  orderBy,
-  limit,
-  PATHS,
-} from '@fb/index.js';
+import { getDocs, getDoc, query, where, refs } from '@fb/index.js';
 
 import { readStorage } from '@services/index.js';
 
@@ -32,20 +21,17 @@ export async function getContinueReading(userId) {
 
   const store = readStorage();
   const userProgress = store[userId];
-
   if (!userProgress) return [];
 
   const taleIds = Object.keys(userProgress).filter(
     (id) => Object.keys(userProgress[id]?.chapters || {}).length > 0
   );
-
   if (!taleIds.length) return [];
 
   const tales = await Promise.all(
     taleIds.map(async (taleId) => {
       try {
-        const ref = doc(db, PATHS.publicTale(taleId));
-        const snap = await getDoc(ref);
+        const snap = await getDoc(refs.tale(taleId));
         if (!snap.exists()) return null;
 
         const data = snap.data();
@@ -77,7 +63,6 @@ export async function getContinueReading(userId) {
     .sort((a, b) => b.lastUpdatedAt - a.lastUpdatedAt)
     .slice(0, 5);
 }
-
 /* ─────────────────────────────────────────────
    Published Tales
    ───────────────────────────────────────────── */
@@ -90,9 +75,7 @@ export async function getContinueReading(userId) {
  */
 export async function getUserPublishedTales(userId) {
   if (!userId) return [];
-
-  const q = query(collection(db, PATHS.publicTales()), where('authorId', '==', userId));
-
+  const q = query(refs.tales(), where('authorId', '==', userId));
   const snap = await getDocs(q);
   return snap.empty ? [] : snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
@@ -112,20 +95,34 @@ export async function getUserDrafts(userId) {
   if (!userId) return [];
 
   try {
-    const draftsCol = collection(db, PATHS.drafts(userId));
-    const snap = await getDocs(draftsCol);
+    // Drafts collection reference
+    const draftsRef = refs.drafts(userId);
 
-    if (snap.empty) return [];
+    // Fetch all draft documents
+    const snapshot = await getDocs(draftsRef);
 
-    return snap.docs
-      .map((d) => ({ id: d.id, ...d.data() }))
-      .sort((a, b) => {
-        const aTime = a.updatedAt?.seconds ?? 0;
-        const bTime = b.updatedAt?.seconds ?? 0;
-        return bTime - aTime;
-      });
-  } catch (err) {
-    console.error('[profile.service] getUserDrafts error:', err);
+    if (snapshot.empty) {
+      return [];
+    }
+
+    // Normalize Firestore docs into plain objects
+    const drafts = snapshot.docs.map((docSnap) => ({
+      id: docSnap.id,
+      ...docSnap.data(),
+    }));
+
+    // Sort newest-first using updatedAt timestamp
+    drafts.sort((a, b) => {
+      const aTime = a.updatedAt?.seconds ?? 0;
+      const bTime = b.updatedAt?.seconds ?? 0;
+
+      return bTime - aTime;
+    });
+
+    return drafts;
+  } catch (error) {
+    console.error('[profile.service] getUserDrafts error:', error);
+
     return [];
   }
 }

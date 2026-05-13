@@ -4,10 +4,7 @@
 // All user-generated text is escaped before rendering to prevent XSS.
 
 import {
-  db,
-  appId,
   auth,
-  collection,
   onSnapshot,
   addDoc,
   serverTimestamp,
@@ -16,10 +13,12 @@ import {
   limit,
   startAfter,
   getDocs,
-  PATHS,
+  refs,
 } from '@fb/index.js';
 
 const PAGE_SIZE = 20;
+
+/* ==================== Pagination State ==================== */
 
 // Tracks the last visible Firestore document for pagination cursor
 let lastVisible = null;
@@ -43,40 +42,56 @@ let currentTaleId = null;
  */
 export function listenToComments(taleId) {
   currentTaleId = taleId;
+
+  // Reset pagination state
   lastVisible = null;
   allLoaded = false;
 
-  const commentsRef = collection(db, PATHS.publicTaleComments(taleId));
+  // Comments collection reference
+  const commentsRef = refs.comments(taleId);
 
-  const q = query(commentsRef, orderBy('timestamp', 'desc'), limit(PAGE_SIZE));
+  // First page query
+  const commentsQuery = query(commentsRef, orderBy('timestamp', 'desc'), limit(PAGE_SIZE));
 
   // Stop any existing listener before starting a new one
-  if (unsubscribe) unsubscribe();
+  if (unsubscribe) {
+    unsubscribe();
+  }
 
-  unsubscribe = onSnapshot(q, (snap) => {
+  unsubscribe = onSnapshot(commentsQuery, (snapshot) => {
     const list = document.getElementById('comments-list');
+
     if (!list) return;
 
-    if (snap.empty) {
+    // Empty state
+    if (snapshot.empty) {
       list.innerHTML = emptyState();
       return;
     }
 
-    // Update the pagination cursor to the last document in this page
-    lastVisible = snap.docs[snap.docs.length - 1];
+    // Store pagination cursor
+    lastVisible = snapshot.docs[snapshot.docs.length - 1];
 
-    // If fewer docs than PAGE_SIZE came back, there are no more to load
-    allLoaded = snap.docs.length < PAGE_SIZE;
+    // If fewer than PAGE_SIZE docs came back,
+    // there are no more comments to load
+    allLoaded = snapshot.docs.length < PAGE_SIZE;
 
-    const items = snap.docs.map((d) => d.data());
-    list.innerHTML = items.map(renderComment).join('');
+    // Normalize comments
+    const comments = snapshot.docs.map((docSnap) => ({
+      id: docSnap.id,
+      ...docSnap.data(),
+    }));
 
-    // Append Load More button if more comments may exist
+    // Render comments
+    list.innerHTML = comments.map(renderComment).join('');
+
+    // Append Load More button if additional comments may exist
     if (!allLoaded) {
       list.insertAdjacentHTML('beforeend', renderLoadMoreButton());
-      document
-        .getElementById('load-more-comments')
-        ?.addEventListener('click', () => loadMoreComments(taleId));
+
+      document.getElementById('load-more-comments')?.addEventListener('click', () => {
+        loadMoreComments(currentTaleId);
+      });
     }
   });
 
@@ -93,50 +108,62 @@ export function listenToComments(taleId) {
 async function loadMoreComments(taleId) {
   if (!lastVisible || allLoaded) return;
 
-  const btn = document.getElementById('load-more-comments');
-  if (btn) {
-    btn.textContent = 'Loading...';
-    btn.disabled = true;
+  const button = document.getElementById('load-more-comments');
+
+  // Loading state
+  if (button) {
+    button.textContent = 'Loading...';
+    button.disabled = true;
   }
 
-  const commentsRef = collection(db, PATHS.publicTaleComments(taleId));
+  // Comments collection reference
+  const commentsRef = refs.comments(taleId);
 
-  // Query starting after the last loaded document
-  const q = query(
+  // Query next page after the last visible document
+  const commentsQuery = query(
     commentsRef,
     orderBy('timestamp', 'desc'),
     startAfter(lastVisible),
     limit(PAGE_SIZE)
   );
 
-  const snap = await getDocs(q);
+  const snapshot = await getDocs(commentsQuery);
 
-  if (snap.empty) {
+  // No more comments
+  if (snapshot.empty) {
     allLoaded = true;
-    btn?.remove();
+    button?.remove();
     return;
   }
 
-  // Update cursor to the new last document
-  lastVisible = snap.docs[snap.docs.length - 1];
-  allLoaded = snap.docs.length < PAGE_SIZE;
+  // Update pagination cursor
+  lastVisible = snapshot.docs[snapshot.docs.length - 1];
+
+  allLoaded = snapshot.docs.length < PAGE_SIZE;
 
   const list = document.getElementById('comments-list');
+
   if (!list) return;
 
-  // Remove existing Load More button before appending new comments
-  btn?.remove();
+  // Remove previous Load More button
+  button?.remove();
 
-  // Append new comments to the existing list
-  const newItems = snap.docs.map((d) => d.data());
-  list.insertAdjacentHTML('beforeend', newItems.map(renderComment).join(''));
+  // Normalize comments
+  const comments = snapshot.docs.map((docSnap) => ({
+    id: docSnap.id,
+    ...docSnap.data(),
+  }));
 
-  // Re-add Load More button if there are still more comments
+  // Append new comments
+  list.insertAdjacentHTML('beforeend', comments.map(renderComment).join(''));
+
+  // Re-add Load More button if additional pages exist
   if (!allLoaded) {
     list.insertAdjacentHTML('beforeend', renderLoadMoreButton());
-    document
-      .getElementById('load-more-comments')
-      ?.addEventListener('click', () => loadMoreComments(taleId));
+
+    document.getElementById('load-more-comments')?.addEventListener('click', () => {
+      loadMoreComments(currentTaleId);
+    });
   }
 }
 
@@ -148,11 +175,15 @@ async function loadMoreComments(taleId) {
  */
 export async function postComment(taleId) {
   const input = document.getElementById('comment-text');
+
   const text = input?.value.trim();
 
+  // Ignore empty comments or unauthenticated users
   if (!text || !auth.currentUser) return;
 
-  const commentsRef = collection(db, PATHS.publicTaleComments(taleId));
+  // Comments collection reference
+  const commentsRef = refs.comments(taleId);
+
   await addDoc(commentsRef, {
     text,
     authorId: auth.currentUser.uid,
@@ -160,6 +191,7 @@ export async function postComment(taleId) {
     timestamp: serverTimestamp(),
   });
 
+  // Clear input after successful post
   input.value = '';
 }
 
@@ -181,10 +213,12 @@ function renderComment(c) {
         <span class="text-[10px] text-indigo-400 font-black uppercase tracking-widest">
           ${escapeHTML(c.authorName || 'Unknown')}
         </span>
+
         <span class="text-[8px] text-zinc-600 font-black uppercase tracking-widest">
           ${escapeHTML(date)}
         </span>
       </div>
+
       <p class="text-sm text-zinc-400 leading-relaxed font-medium">
         ${escapeHTML(c.text)}
       </p>
@@ -202,7 +236,8 @@ function renderLoadMoreButton() {
     <div class="text-center pt-8">
       <button
         id="load-more-comments"
-        class="px-8 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-400 hover:text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all">
+        class="px-8 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-400 hover:text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all"
+      >
         Load More Echoes
       </button>
     </div>

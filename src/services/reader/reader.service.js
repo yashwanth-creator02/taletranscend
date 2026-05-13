@@ -2,7 +2,7 @@
 // Fetches tale metadata and chapter content from Firestore.
 // This is the primary data access layer for the reader page.
 
-import { db, appId, doc, getDoc, collection, getDocs, PATHS } from '@fb/index.js';
+import { refs, getDoc, collection, getDocs, PATHS } from '@fb/index.js';
 
 /* ================= Firestore Structure Reference =================
 artifacts (collection)
@@ -26,13 +26,10 @@ artifacts (collection)
 export async function getTaleMeta(taleId) {
   if (!taleId) throw new Error('getTaleMeta: taleId is required');
 
-  const taleRef = doc(db, PATHS.publicTale(taleId));
-  const snap = await getDoc(taleRef);
-
+  const snap = await getDoc(refs.tale(taleId));
   if (!snap.exists()) throw new Error(`Tale not found: ${taleId}`);
 
   const data = snap.data();
-
   return {
     title: data.title || 'Untitled Tale',
     description: data.description || '',
@@ -55,18 +52,13 @@ export async function getChapter({ taleId, chapterIndex }) {
   if (typeof chapterIndex !== 'number')
     throw new Error('getChapter: chapterIndex must be a number');
 
-  const chaptersRef = collection(db, PATHS.publicTaleChapters(taleId));
-
-  const snap = await getDocs(chaptersRef);
-
-  // Sort chapters by chapterNum field to ensure correct ordering
+  const snap = await getDocs(refs.chapters(taleId));
   const chapters = snap.docs
     .map((d) => ({ id: d.id, ...d.data() }))
     .sort((a, b) => (a.chapterNum || 0) - (b.chapterNum || 0));
 
   const total = chapters.length;
   const chapter = chapters[chapterIndex];
-
   if (!chapter) throw new Error(`Chapter not found at index ${chapterIndex}`);
 
   return {

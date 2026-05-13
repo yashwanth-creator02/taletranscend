@@ -2,17 +2,7 @@
 // Handles syncing and retrieving reader progress from Firestore.
 // Chapter progress is stored in a subcollection for efficient per-chapter reads.
 
-import {
-  db,
-  appId,
-  doc,
-  getDoc,
-  setDoc,
-  serverTimestamp,
-  collection,
-  getDocs,
-  PATHS,
-} from '@fb/index.js';
+import { getDoc, setDoc, serverTimestamp, getDocs, PATHS, refs } from '@fb/index.js';
 
 import { PROGRESS_SYNC_DELAY_MS } from '@config/app.config.js';
 
@@ -49,21 +39,16 @@ export async function syncChapterProgressToCloud({
 }) {
   if (!userId || !taleId || typeof chapterIndex !== 'number') return;
 
-  // Tale-level document stores aggregate data like totalReadTimeMs
-  const taleRef = doc(db, PATHS.progress(userId, taleId));
+  await setDoc(
+    refs.progressChapter(userId, taleId, chapterIndex),
+    { scrollPercent, updatedAt: serverTimestamp() },
+    { merge: true }
+  );
 
-  // Chapter-level document stores per-chapter scroll position
-  const chapterRef = doc(db, PATHS.progressChapter(userId, taleId, String(chapterIndex)));
-
-  // Write chapter scroll progress
-  await setDoc(chapterRef, { scrollPercent, updatedAt: serverTimestamp() }, { merge: true });
-
-  // Write aggregate read time at the tale level
   if (typeof totalReadTimeMs === 'number') {
-    await setDoc(taleRef, { totalReadTimeMs }, { merge: true });
+    await setDoc(refs.progress(userId, taleId), { totalReadTimeMs }, { merge: true });
   }
 }
-
 /**
  * Retrieves a user's full progress for a tale from Firestore.
  * Fetches both the tale-level document and the chapters subcollection.
@@ -75,21 +60,15 @@ export async function syncChapterProgressToCloud({
  * @returns {Promise<Object|null>} Tale progress with chapters map, or null if none exists
  */
 export async function getCloudProgress({ userId, taleId }) {
-  const taleRef = doc(db, PATHS.progress(userId, taleId));
-  const snap = await getDoc(taleRef);
-
+  const snap = await getDoc(refs.progress(userId, taleId));
   if (!snap.exists()) return null;
 
   const taleData = snap.data();
-
-  // Fetch chapters subcollection and build a chapterIndex => data map
-  const chaptersRef = collection(db, PATHS.progressChapters(userId, taleId));
-  const chaptersSnap = await getDocs(chaptersRef);
+  const chaptersSnap = await getDocs(refs.progressChapters(userId, taleId));
 
   const chapters = {};
-  chaptersSnap.forEach((chapterDoc) => {
-    // Each document id is the chapter index stored as a string
-    chapters[chapterDoc.id] = chapterDoc.data();
+  chaptersSnap.forEach((d) => {
+    chapters[d.id] = d.data();
   });
 
   return { ...taleData, chapters };
@@ -112,9 +91,7 @@ export function scheduleProgressSync(payload) {
   if (!userId || !taleId || typeof chapterIndex !== 'number') return;
 
   const key = `${userId}:${taleId}:${chapterIndex}`;
-
   clearTimeout(timers.get(key));
-
   timers.set(
     key,
     setTimeout(

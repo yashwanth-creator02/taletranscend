@@ -33,3 +33,5 @@ dist/
 
 migrate.js
 service-account.json
+stats.html
+graph.png

@@ -2,7 +2,7 @@
 // Fetches tale data and chapter list from Firestore.
 // Falls back to the user's draft if the public tale is not found.
 
-import { db, appId, doc, getDoc, collection, getDocs, PATHS } from '@fb/index.js';
+import { getDoc, getDocs, refs } from '@fb/index.js';
 
 /**
  * Loads a tale from Firestore.
@@ -14,16 +14,38 @@ import { db, appId, doc, getDoc, collection, getDocs, PATHS } from '@fb/index.js
  * @returns {Promise<Object|null>} Tale data or null if not found in either location
  */
 export async function loadTale(taleId, user) {
-  const publicRef = doc(db, PATHS.publicTale(taleId));
-  const snap = await getDoc(publicRef);
+  if (!taleId) return null;
 
-  if (snap.exists()) return snap.data();
+  // Attempt to load from the public tales collection first
+  const publicRef = refs.tale(taleId);
 
-  // Fall back to user's draft if no public tale exists
-  const draftRef = doc(db, PATHS.draft(user.uid, taleId));
+  const publicSnap = await getDoc(publicRef);
+
+  if (publicSnap.exists()) {
+    return {
+      id: publicSnap.id,
+      ...publicSnap.data(),
+    };
+  }
+
+  // No authenticated user means draft fallback is impossible
+  if (!user?.uid) {
+    return null;
+  }
+
+  // Fall back to the user's private draft
+  const draftRef = refs.draft(user.uid, taleId);
+
   const draftSnap = await getDoc(draftRef);
 
-  return draftSnap.exists() ? draftSnap.data() : null;
+  if (!draftSnap.exists()) {
+    return null;
+  }
+
+  return {
+    id: draftSnap.id,
+    ...draftSnap.data(),
+  };
 }
 
 /**
@@ -34,10 +56,23 @@ export async function loadTale(taleId, user) {
  * @returns {Promise<Array<Object>>} Sorted array of chapter objects
  */
 export async function loadChapters(taleId) {
-  const ref = collection(db, PATHS.publicTaleChapters(taleId));
-  const snap = await getDocs(ref);
+  if (!taleId) return [];
 
-  return snap.docs
-    .map((d) => ({ id: d.id, ...d.data() }))
-    .sort((a, b) => (a.chapterNum || 0) - (b.chapterNum || 0));
+  // Public chapters collection reference
+  const chaptersRef = refs.chapters(taleId);
+
+  const snapshot = await getDocs(chaptersRef);
+
+  // Normalize and sort chapters
+  return snapshot.docs
+    .map((docSnap) => ({
+      id: docSnap.id,
+      ...docSnap.data(),
+    }))
+    .sort((a, b) => {
+      const aNum = a.chapterNum || 0;
+      const bNum = b.chapterNum || 0;
+
+      return aNum - bNum;
+    });
 }

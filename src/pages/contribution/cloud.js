@@ -12,18 +12,7 @@
 // written to the draft document so the shelf/profile page can show
 // accurate word counts without extra sub-collection reads.
 
-import {
-  auth,
-  db,
-  doc,
-  setDoc,
-  getDoc,
-  getDocs,
-  addDoc,
-  collection,
-  serverTimestamp,
-  PATHS,
-} from '@fb/index.js';
+import { auth, getDoc, getDocs, addDoc, setDoc, serverTimestamp, refs } from '@fb/index.js';
 
 import { state } from './state.js';
 
@@ -77,7 +66,7 @@ export async function saveToCloud() {
 
   // First-time save: create a new draft document
   if (state.draftId === 'new') {
-    const draftsCol = collection(db, PATHS.drafts(userId));
+    const draftsCol = refs.drafts(userId);
 
     const newRef = await addDoc(draftsCol, {
       ...metadata,
@@ -92,7 +81,7 @@ export async function saveToCloud() {
     syncDraftIdToUrl();
   } else {
     // Existing draft: merge updates into the same document
-    const draftRef = doc(db, PATHS.draft(userId, state.draftId));
+    const draftRef = refs.draft(userId, state.draftId);
 
     await setDoc(
       draftRef,
@@ -142,7 +131,7 @@ export async function saveAllChapters(userId) {
  * @param {{ title: string, content: string }} chapter
  */
 async function saveChapter(userId, index, chapter) {
-  const chapterRef = doc(db, PATHS.draftChapter(userId, state.draftId, String(index)));
+  const chapterRef = refs.draftChapter(userId, state.draftId, String(index));
 
   await setDoc(chapterRef, {
     chapterNum: index,
@@ -168,7 +157,7 @@ export async function loadDraft() {
   const userId = auth.currentUser.uid;
 
   // Load draft metadata document
-  const draftRef = doc(db, PATHS.draft(userId, state.draftId));
+  const draftRef = refs.draft(userId, state.draftId);
   const draftSnap = await getDoc(draftRef);
 
   if (!draftSnap.exists()) return false;
@@ -193,7 +182,7 @@ export async function loadDraft() {
   syncMetadataToDom();
 
   // Fetch chapters sub-collection
-  const chaptersRef = collection(db, PATHS.draftChapters(userId, state.draftId));
+  const chaptersRef = refs.draftChapters(userId, state.draftId);
 
   const chaptersSnap = await getDocs(chaptersRef);
 
