@@ -1,9 +1,12 @@
 // src/pages/contribution/cloud.js
 // Saves and loads the current tale draft from Firestore.
 //
-// Firestore structure:
-//   users/{userId}/drafts/{draftId}               <- title, chapterCount, updatedAt
-//   users/{userId}/drafts/{draftId}/chapters/{idx} <- title, content, chapterNum
+// Draft ID lifecycle:
+//   - On page load, checks ?draft=<id> URL param.
+//   - If present, loads that draft.
+//   - If absent, state.draftId stays 'new' until first cloud save,
+//     at which point a Firestore doc is created and state.draftId is
+//     updated + the URL param is set so refreshes reload the same draft.
 
 import {
   auth,
@@ -12,72 +15,105 @@ import {
   setDoc,
   getDoc,
   getDocs,
+  addDoc,
   collection,
   serverTimestamp,
-  appId,
   PATHS,
 } from '@fb/index.js';
 import { state } from './state.js';
 
-/* ==================== Save Draft ==================== */
+/* ── Draft ID from URL ────────────────────────────────────────────── */
 
 /**
- * Persists the current draft to Firestore.
- * Saves the tale title and chapter count to the parent document.
- * Saves each chapter as a separate document in the chapters subcollection.
- * Only the current chapter is written on each save to minimize writes.
+ * Reads the ?draft=<id> URL param and sets state.draftId.
+ * Call this before loadDraft().
+ */
+export function initDraftId() {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('draft');
+  if (id) state.draftId = id;
+}
+
+/**
+ * Pushes the current draftId into the URL without a page reload.
+ * Called after the first cloud save so refreshes reload the same draft.
+ */
+function syncDraftIdToUrl() {
+  const url = new URL(window.location.href);
+  url.searchParams.set('draft', state.draftId);
+  window.history.replaceState({}, '', url.toString());
+}
+
+/* ── Save Draft ───────────────────────────────────────────────────── */
+
+/**
+ * Persists the full draft (metadata + current chapter) to Firestore.
  *
- * For a full save of all chapters (e.g. on publish), use saveAllChapters().
+ * If this is the first save (state.draftId === 'new'), creates a new
+ * Firestore document and updates state.draftId + the URL param.
+ *
+ * Saves all metadata fields from state so they survive page refreshes.
  */
 export async function saveToCloud() {
   if (!auth.currentUser) return;
 
   const userId = auth.currentUser.uid;
-  const taleTitle = document.getElementById('tale-title')?.value || '';
 
-  const draftRef = doc(db, PATHS.draft(userId, state.draftId));
+  // Sync metadata from DOM into state before saving
+  syncMetadataFromDom();
 
-  // Update the parent draft document with metadata
-  await setDoc(
-    draftRef,
-    {
-      title: taleTitle,
-      chapterCount: state.chapters.length,
+  const metadata = buildMetadataPayload();
+
+  // First-time save: create a new draft document
+  if (state.draftId === 'new') {
+    const draftsCol = collection(db, PATHS.drafts(userId));
+    const newRef = await addDoc(draftsCol, {
+      ...metadata,
+      createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
-    },
-    { merge: true }
-  );
+    });
+    state.draftId = newRef.id;
+    syncDraftIdToUrl();
+  } else {
+    const draftRef = doc(db, PATHS.draft(userId, state.draftId));
+    await setDoc(draftRef, { ...metadata, updatedAt: serverTimestamp() }, { merge: true });
+  }
 
-  // Save only the current chapter to minimize Firestore writes
+  // Save the currently active chapter
   const chapter = state.chapters[state.currentChapterIndex];
   if (chapter) {
     await saveChapter(userId, state.currentChapterIndex, chapter);
   }
 
+  state.isDirty = false;
+
   const status = document.getElementById('stat-status');
-  if (status) status.textContent = 'Saved to Cloud';
+  if (status) {
+    status.className = status.className.replace(/text-\w+-\d+/g, '');
+    status.classList.add('text-emerald-400');
+    status.textContent = 'Saved to cloud';
+  }
 }
 
 /**
  * Saves all chapters to Firestore in parallel.
- * Used during publish to ensure all chapters are persisted before publishing.
+ * Used during publish to ensure every chapter is persisted.
  *
- * @param {string} userId - ID of the authenticated user
+ * @param {string} userId
  */
 export async function saveAllChapters(userId) {
   await Promise.all(state.chapters.map((ch, idx) => saveChapter(userId, idx, ch)));
 }
 
 /**
- * Saves a single chapter document to the chapters subcollection.
+ * Saves a single chapter document to the chapters sub-collection.
  *
- * @param {string} userId - ID of the authenticated user
- * @param {number} index - Chapter index
- * @param {Object} chapter - Chapter object with title and content
+ * @param {string} userId
+ * @param {number} index
+ * @param {{ title: string, content: string }} chapter
  */
 async function saveChapter(userId, index, chapter) {
   const chapterRef = doc(db, PATHS.draftChapter(userId, state.draftId, String(index)));
-
   await setDoc(chapterRef, {
     chapterNum: index,
     title: chapter.title || 'Untitled Chapter',
@@ -86,49 +122,149 @@ async function saveChapter(userId, index, chapter) {
   });
 }
 
-/* ==================== Load Draft ==================== */
+/* ── Load Draft ───────────────────────────────────────────────────── */
 
 /**
- * Loads the user's current draft from Firestore into local state.
- * Fetches the parent document for metadata and the chapters subcollection
- * for chapter content.
- * Returns true if a draft was found and loaded, false if none exists.
+ * Loads the draft identified by state.draftId from Firestore.
+ * Restores all metadata fields and chapters into state + DOM.
  *
- * @returns {Promise<boolean>} Whether a draft was found and loaded
+ * @returns {Promise<boolean>} true if a draft was found and loaded
  */
 export async function loadDraft() {
   if (!auth.currentUser) return false;
+  if (state.draftId === 'new') return false;
 
   const userId = auth.currentUser.uid;
-
   const draftRef = doc(db, PATHS.draft(userId, state.draftId));
-
   const draftSnap = await getDoc(draftRef);
+
   if (!draftSnap.exists()) return false;
 
-  const draftData = draftSnap.data();
+  const data = draftSnap.data();
 
-  // Restore tale title
-  const titleInput = document.getElementById('tale-title');
-  if (titleInput && draftData.title) titleInput.value = draftData.title;
+  // Restore metadata into state
+  state.title = data.title || '';
+  state.synopsis = data.synopsis || '';
+  state.coverUrl = data.coverUrl || '';
+  state.era = data.era || '';
+  state.tags = data.tags || [];
+  state.tone = data.tone || 'Mythic';
+  state.language = data.language || 'English';
+  state.visibility = data.visibility || 'Public';
+  state.audience = data.audience || 'General';
+  state.contentWarnings = data.contentWarnings || '';
+  state.worldSetting = data.worldSetting || '';
+  state.authorNotes = data.authorNotes || '';
 
-  // Fetch all chapters from subcollection
+  // Restore metadata into DOM
+  syncMetadataToDom();
+
+  // Fetch chapters sub-collection
   const chaptersRef = collection(db, PATHS.draftChapters(userId, state.draftId));
-
   const chaptersSnap = await getDocs(chaptersRef);
-  if (chaptersSnap.empty) return false;
 
-  // Sort chapters by chapterNum and restore into state
-  const chapters = chaptersSnap.docs
-    .map((d) => d.data())
-    .sort((a, b) => (a.chapterNum || 0) - (b.chapterNum || 0))
-    .map((ch) => ({
-      title: ch.title || 'Untitled Chapter',
-      content: ch.content || '',
-    }));
-
-  state.chapters = chapters;
-  state.currentChapterIndex = 0;
+  if (!chaptersSnap.empty) {
+    state.chapters = chaptersSnap.docs
+      .map((d) => d.data())
+      .sort((a, b) => (a.chapterNum ?? 0) - (b.chapterNum ?? 0))
+      .map((ch) => ({
+        title: ch.title || 'Untitled Chapter',
+        content: ch.content || '',
+      }));
+    state.currentChapterIndex = 0;
+  }
 
   return true;
+}
+
+/* ── DOM ↔ State Sync ─────────────────────────────────────────────── */
+
+/**
+ * Reads all metadata input fields from the DOM into state.
+ * Called before every cloud save.
+ */
+export function syncMetadataFromDom() {
+  state.title = document.getElementById('tale-title')?.value.trim() ?? '';
+  state.synopsis = document.getElementById('tale-synopsis')?.value.trim() ?? '';
+  state.coverUrl = document.getElementById('cover-url')?.value.trim() ?? '';
+  state.era = document.getElementById('tale-era')?.value.trim() ?? '';
+  state.contentWarnings = document.getElementById('content-warnings')?.value.trim() ?? '';
+  state.worldSetting = document.getElementById('world-setting')?.value.trim() ?? '';
+  state.authorNotes = document.getElementById('story-notes')?.value.trim() ?? '';
+
+  // Tags: comma-separated string → string[]
+  const tagsRaw = document.getElementById('genre-tags')?.value ?? '';
+  state.tags = tagsRaw
+    .split(',')
+    .map((t) => t.trim())
+    .filter(Boolean);
+
+  state.tone = document.getElementById('story-tone')?.value ?? 'Mythic';
+  state.language = document.getElementById('story-language')?.value ?? 'English';
+  state.visibility = document.getElementById('story-visibility')?.value ?? 'Public';
+  state.audience = document.getElementById('target-audience')?.value ?? 'General';
+}
+
+/**
+ * Writes state metadata back into the DOM fields.
+ * Called after a draft is loaded from Firestore.
+ */
+export function syncMetadataToDom() {
+  setInput('tale-title', state.title);
+  setInput('tale-synopsis', state.synopsis);
+  setInput('cover-url', state.coverUrl);
+  setInput('tale-era', state.era);
+  setInput('genre-tags', state.tags.join(', '));
+  setInput('content-warnings', state.contentWarnings);
+  setInput('world-setting', state.worldSetting);
+  setInput('story-notes', state.authorNotes);
+  setSelect('story-tone', state.tone);
+  setSelect('story-language', state.language);
+  setSelect('story-visibility', state.visibility);
+  setSelect('target-audience', state.audience);
+
+  // Update cover preview if a URL is stored
+  if (state.coverUrl) {
+    const preview = document.getElementById('tale-cover-preview');
+    if (preview) preview.src = state.coverUrl;
+  }
+}
+
+/* ── Firestore Payload ────────────────────────────────────────────── */
+
+/**
+ * Builds the metadata object to write to the draft Firestore document.
+ *
+ * @returns {Object}
+ */
+function buildMetadataPayload() {
+  return {
+    title: state.title,
+    synopsis: state.synopsis,
+    coverUrl: state.coverUrl,
+    era: state.era,
+    tags: state.tags,
+    tone: state.tone,
+    language: state.language,
+    visibility: state.visibility,
+    audience: state.audience,
+    contentWarnings: state.contentWarnings,
+    worldSetting: state.worldSetting,
+    authorNotes: state.authorNotes,
+    chapterCount: state.chapters.length,
+  };
+}
+
+/* ── Tiny DOM helpers ─────────────────────────────────────────────── */
+
+function setInput(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.value = value ?? '';
+}
+
+function setSelect(id, value) {
+  const el = document.getElementById(id);
+  if (!el || !value) return;
+  const opt = [...el.options].find((o) => o.value === value);
+  if (opt) el.value = value;
 }

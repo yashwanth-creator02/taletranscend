@@ -1,14 +1,37 @@
 // src/pages/contribution/state.js
-// Centralized state for the tale editor.
+// Centralised state for the tale editor.
 // All editor modules read and write through this shared object.
+// Fields mirror the Firestore draft document schema.
 
 export const state = {
-  // Array of chapter objects, each with { title, content, chapterNum }
+  // ── Identity ──────────────────────────────────────────────────────
+  // Firestore draft document ID.
+  // Populated from ?draft=<id> URL param on load, or set after first cloud save.
+  // 'new' means the draft hasn't been saved to Firestore yet.
+  draftId: 'new',
+
+  // ── Tale Metadata ─────────────────────────────────────────────────
+  title: '',
+  synopsis: '',
+  coverUrl: '',
+  era: '',
+  tags: [], // string[]
+  tone: 'Mythic',
+  language: 'English',
+  visibility: 'Public',
+  audience: 'General',
+  contentWarnings: '',
+  worldSetting: '',
+  authorNotes: '',
+
+  // ── Chapters ──────────────────────────────────────────────────────
+  // Array of { title: string, content: string }
   chapters: [],
 
   // Index of the chapter currently loaded in the editor
   currentChapterIndex: 0,
 
-  // Firestore draft document ID — 'current' for the active working draft
-  draftId: 'current',
+  // ── UI Flags ──────────────────────────────────────────────────────
+  // True when there are unsaved changes in the current chapter
+  isDirty: false,
 };

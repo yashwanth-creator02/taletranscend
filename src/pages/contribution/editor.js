@@ -1,19 +1,18 @@
 // src/pages/contribution/editor.js
-// Handles auto-saving chapter content to local state and updating the word count.
-// Auto-save is debounced to avoid excessive writes on every keystroke.
+// Handles auto-saving chapter content to local state and updating all
+// writing statistics (word count, character count, estimated reading time).
+// Auto-save to state is debounced to avoid excessive writes on every keystroke.
 
 import { state } from './state.js';
 
-/* ==================== Debounce Helper ==================== */
+/* ── Debounce Helper ──────────────────────────────────────────────── */
 
 /**
  * Returns a debounced version of the provided function.
- * The function only executes after the specified delay has passed
- * without it being called again.
  *
- * @param {Function} fn - Function to debounce
- * @param {number} delay - Delay in milliseconds
- * @returns {Function} Debounced function
+ * @param {Function} fn
+ * @param {number} delay - ms
+ * @returns {Function}
  */
 function debounce(fn, delay) {
   let timer = null;
@@ -23,36 +22,66 @@ function debounce(fn, delay) {
   };
 }
 
-/* ==================== Auto-Save ==================== */
+/* ── Auto-Save ────────────────────────────────────────────────────── */
 
 /**
  * Saves the current chapter content from the textarea into local state.
- * Updates the word count display immediately on every keystroke.
- * The actual state save and status update are debounced at 800ms.
+ * Updates all stat displays immediately on every keystroke via updateStats().
+ * The state write and status indicator update are debounced at 600ms.
  */
 export const autoSaveLocal = debounce(function () {
   const chapter = state.chapters[state.currentChapterIndex];
   if (!chapter) return;
 
-  // Sync textarea content into current chapter in state
-  chapter.content = document.getElementById('chapter-content').value;
+  const content = document.getElementById('chapter-content')?.value ?? '';
+  chapter.content = content;
+  state.isDirty = true;
 
-  updateWordCount();
+  updateStats();
 
   const status = document.getElementById('stat-status');
-  if (status) status.textContent = 'Draft Saved';
-}, 800);
+  if (status) {
+    status.className = status.className.replace(/text-(indigo|emerald|red|zinc)-\d+/g, '');
+    status.classList.add('text-zinc-500');
+    status.textContent = 'Unsaved changes';
+  }
+}, 600);
 
-/* ==================== Word Count ==================== */
+/* ── Statistics ───────────────────────────────────────────────────── */
 
 /**
- * Counts words in the current chapter textarea and updates the word count element.
- * Called immediately on every keystroke so the count stays responsive.
+ * Counts words and characters in the chapter textarea and updates
+ * every stat element on the page:
+ *   #stat-words          (footer bar, bottom-center)
+ *   #stat-words-right    (right analytics panel)
+ *   #stat-chars          (footer bar)
+ *   #stat-reading-time   (right analytics panel, if present)
  */
-function updateWordCount() {
-  const text = document.getElementById('chapter-content').value || '';
-  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+export function updateStats() {
+  const content = document.getElementById('chapter-content')?.value ?? '';
+  const trimmed = content.trim();
+  const words = trimmed ? trimmed.split(/\s+/).length : 0;
+  const chars = content.length;
 
-  const stat = document.getElementById('stat-words');
-  if (stat) stat.textContent = `${words} Words`;
+  // Average reading speed: 200 wpm
+  const readingMinutes = Math.ceil(words / 200);
+  const readingLabel = readingMinutes < 1 ? '< 1m' : `${readingMinutes}m`;
+
+  setEl('stat-words', `${words} Words`);
+  setEl('stat-words-right', String(words));
+  setEl('stat-chars', `${chars} Characters`);
+  setEl('stat-reading-time', readingLabel);
+}
+
+/* ── Helpers ──────────────────────────────────────────────────────── */
+
+/**
+ * Safely sets the textContent of an element by id.
+ *
+ * @param {string} id
+ * @param {string} text
+ */
+function setEl(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
 }
