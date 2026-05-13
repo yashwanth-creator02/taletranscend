@@ -1,7 +1,17 @@
 // src/pages/profile/sync.js
 // Manages real-time Firestore sync and save operations for the user profile.
 
-import { db, auth, appId, doc, onSnapshot, setDoc, serverTimestamp, getDoc } from '@fb/index.js';
+import {
+  db,
+  auth,
+  appId,
+  doc,
+  onSnapshot,
+  setDoc,
+  serverTimestamp,
+  getDoc,
+  PATHS,
+} from '@fb/index.js';
 
 import { updateProfileUI, showNotification } from './ui.js';
 
@@ -18,12 +28,12 @@ let unsubscribe = null;
  * @param {string} uid - Firebase Auth user ID
  */
 export function startProfileSync(uid) {
-  const ref = doc(db, 'artifacts', appId, 'users', uid);
+  const userRef = doc(db, PATHS.user(uid));
 
   if (unsubscribe) unsubscribe();
 
   unsubscribe = onSnapshot(
-    ref,
+    userRef,
     (snap) => {
       if (snap.exists()) {
         updateProfileUI(snap.data());
@@ -47,7 +57,7 @@ export async function saveProfile() {
     return;
   }
 
-  const ref = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid);
+  const ref = doc(db, PATHS.user(auth.currentUser.uid));
   const snap = await getDoc(ref);
 
   const data = {

@@ -11,6 +11,7 @@ import {
   setDoc,
   collection,
   serverTimestamp,
+  PATHS,
 } from '@fb/index.js';
 
 /* ================= Firestore Structure Reference =================
@@ -34,7 +35,7 @@ artifacts (collection)
 export async function addToBookmarks({ userId, taleId }) {
   if (!userId || !taleId) return;
 
-  const ref = doc(db, 'artifacts', appId, 'users', userId, 'bookmarks', taleId);
+  const ref = doc(db, PATHS.bookmark(userId, taleId));
 
   // Merge to avoid overwriting if the bookmark already exists
   await setDoc(ref, { bookmarkedAt: serverTimestamp() }, { merge: true });
@@ -50,7 +51,7 @@ export async function addToBookmarks({ userId, taleId }) {
 export async function removeFromBookmarks({ userId, taleId }) {
   if (!userId || !taleId) return;
 
-  const ref = doc(db, 'artifacts', appId, 'users', userId, 'bookmarks', taleId);
+  const ref = doc(db, PATHS.bookmark(userId, taleId));
   await deleteDoc(ref);
 }
 
@@ -64,7 +65,7 @@ export async function removeFromBookmarks({ userId, taleId }) {
 export async function getBookmarks({ userId }) {
   if (!userId) return [];
 
-  const ref = collection(db, 'artifacts', appId, 'users', userId, 'bookmarks');
+  const ref = collection(db, PATHS.bookmarks(userId));
   const snap = await getDocs(ref);
 
   return snap.empty ? [] : snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));

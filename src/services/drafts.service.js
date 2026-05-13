@@ -1,7 +1,7 @@
 // src/services/drafts.service.js
 // Fetches the user's tale drafts from Firestore.
 
-import { db, appId, collection, getDocs } from '@fb/index.js';
+import { db, appId, collection, getDocs, PATHS } from '@fb/index.js';
 
 /**
  * Retrieves all draft tales saved by the user.
@@ -13,7 +13,7 @@ import { db, appId, collection, getDocs } from '@fb/index.js';
 export async function getUserDrafts(userId) {
   if (!userId) return [];
 
-  const ref = collection(db, 'artifacts', appId, 'users', userId, 'drafts');
+  const ref = collection(db, PATHS.drafts(userId));
   const snap = await getDocs(ref);
 
   return snap.empty ? [] : snap.docs.map((d) => ({ id: d.id, ...d.data() }));

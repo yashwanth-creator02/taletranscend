@@ -13,6 +13,7 @@ import {
   getDocs,
   writeBatch,
   serverTimestamp,
+  PATHS,
 } from '@fb/index.js';
 
 /* ================= Firestore Structure Reference =================
@@ -41,7 +42,7 @@ artifacts (collection)
 export async function markTaleFinished({ userId, taleId }) {
   if (!userId || !taleId) return;
 
-  const taleRef = doc(db, 'artifacts', appId, 'users', userId, 'readerProgress', taleId);
+  const taleRef = doc(db, PATHS.progress(userId, taleId));
   const snap = await getDoc(taleRef);
 
   // Create the parent tale progress document if it does not exist yet
@@ -54,16 +55,7 @@ export async function markTaleFinished({ userId, taleId }) {
   }
 
   // Fetch all chapter documents in the subcollection
-  const chaptersRef = collection(
-    db,
-    'artifacts',
-    appId,
-    'users',
-    userId,
-    'readerProgress',
-    taleId,
-    'chapters'
-  );
+  const chaptersRef = collection(db, PATHS.progressChapters(userId, taleId));
   const chaptersSnap = await getDocs(chaptersRef);
 
   // Batch update all chapters to scrollPercent 100 in a single write

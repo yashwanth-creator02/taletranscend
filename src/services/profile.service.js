@@ -1,7 +1,7 @@
 // src/services/profile.service.js
 // Fetches profile-specific data: reading history and published tales.
 
-import { db, appId, collection, getDocs, doc, getDoc, query, where } from '@fb/index.js';
+import { db, appId, collection, getDocs, doc, getDoc, query, where, PATHS } from '@fb/index.js';
 
 import { readStorage, getTotalReadTime } from '@services/index.js';
 
@@ -31,7 +31,7 @@ export async function getContinueReading(userId) {
   const tales = await Promise.all(
     taleIds.map(async (taleId) => {
       try {
-        const ref = doc(db, 'artifacts', appId, 'public', 'data', 'community_tales', taleId);
+        const ref = doc(db, PATHS.publicTale(taleId));
         const snap = await getDoc(ref);
         if (!snap.exists()) return null;
 
@@ -85,9 +85,9 @@ export async function getContinueReading(userId) {
 export async function getUserPublishedTales(userId) {
   if (!userId) return [];
 
-  const ref = collection(db, 'artifacts', appId, 'public', 'data', 'community_tales');
+  const talesCol = collection(db, PATHS.publicTales());
 
-  const q = query(ref, where('authorId', '==', userId));
+  const q = query(talesCol, where('authorId', '==', userId));
   const snap = await getDocs(q);
 
   return snap.empty ? [] : snap.docs.map((d) => ({ id: d.id, ...d.data() }));

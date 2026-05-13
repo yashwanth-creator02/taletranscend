@@ -2,7 +2,7 @@
 // Fetches tale data and chapter list from Firestore.
 // Falls back to the user's draft if the public tale is not found.
 
-import { db, appId, doc, getDoc, collection, getDocs } from '@fb/index.js';
+import { db, appId, doc, getDoc, collection, getDocs, PATHS } from '@fb/index.js';
 
 /**
  * Loads a tale from Firestore.
@@ -14,13 +14,13 @@ import { db, appId, doc, getDoc, collection, getDocs } from '@fb/index.js';
  * @returns {Promise<Object|null>} Tale data or null if not found in either location
  */
 export async function loadTale(taleId, user) {
-  const publicRef = doc(db, 'artifacts', appId, 'public', 'data', 'community_tales', taleId);
+  const publicRef = doc(db, PATHS.publicTale(taleId));
   const snap = await getDoc(publicRef);
 
   if (snap.exists()) return snap.data();
 
   // Fall back to user's draft if no public tale exists
-  const draftRef = doc(db, 'artifacts', appId, 'users', user.uid, 'drafts', taleId);
+  const draftRef = doc(db, PATHS.draft(user.uid, taleId));
   const draftSnap = await getDoc(draftRef);
 
   return draftSnap.exists() ? draftSnap.data() : null;
@@ -34,16 +34,7 @@ export async function loadTale(taleId, user) {
  * @returns {Promise<Array<Object>>} Sorted array of chapter objects
  */
 export async function loadChapters(taleId) {
-  const ref = collection(
-    db,
-    'artifacts',
-    appId,
-    'public',
-    'data',
-    'community_tales',
-    taleId,
-    'chapters'
-  );
+  const ref = collection(db, PATHS.publicTaleChapters(taleId));
   const snap = await getDocs(ref);
 
   return snap.docs

@@ -8,7 +8,7 @@ import '@css/pages/home.css';
 
 import { initNav } from '@ui/components/nav/nav.js';
 import { initIcons } from '@ui/components/icons.js';
-import { db, appId, collection, getDocs, query, orderBy, limit } from '@fb/index.js';
+import { db, appId, collection, getDocs, query, orderBy, limit, PATHS } from '@fb/index.js';
 
 initNav();
 
@@ -54,9 +54,9 @@ async function loadTrendingTales() {
   if (!container) return;
 
   try {
-    const ref = collection(db, 'artifacts', appId, 'public', 'data', 'community_tales');
+    const talesCol = collection(db, PATHS.publicTales());
 
-    const q = query(ref, orderBy('publishedAt', 'desc'), limit(3));
+    const q = query(talesCol, orderBy('publishedAt', 'desc'), limit(3));
     const snap = await getDocs(q);
 
     if (snap.empty) {

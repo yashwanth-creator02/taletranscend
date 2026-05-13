@@ -12,3 +12,5 @@ export * from './db.js';
 // Structure: artifacts/{APP_ID}/users/{userId}/...
 // Imported from app.config.js so it is defined in one place only.
 export { APP_ID as appId } from '@config/app.config.js';
+
+export * from './paths.js';

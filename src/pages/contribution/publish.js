@@ -22,6 +22,7 @@ import {
   collection,
   serverTimestamp,
   appId,
+  PATHS,
 } from '@fb/index.js';
 import { state } from './state.js';
 import { saveAllChapters } from './cloud.js';
@@ -67,7 +68,7 @@ export async function publishFullTale() {
     await saveAllChapters(userId);
 
     // -------------------- Step 2: Submit to pending review --------------------
-    const pendingRef = collection(db, 'artifacts', appId, 'public', 'data', 'pending_tales');
+    const pendingRef = collection(db, PATHS.pendingTales());
 
     const pendingDoc = await addDoc(pendingRef, {
       title: taleTitle,
@@ -88,15 +89,7 @@ export async function publishFullTale() {
     });
 
     // -------------------- Step 4: Write to community_tales --------------------
-    const communityRef = doc(
-      db,
-      'artifacts',
-      appId,
-      'public',
-      'data',
-      'community_tales',
-      pendingDoc.id
-    );
+    const communityRef = doc(db, PATHS.publicTale(pendingDoc.id));
 
     await setDoc(communityRef, {
       title: taleTitle,
@@ -136,7 +129,7 @@ export async function publishFullTale() {
     );
 
     // -------------------- Step 6: Update draft with published reference --------------------
-    const draftRef = doc(db, 'artifacts', appId, 'users', userId, 'drafts', state.draftId);
+    const draftRef = doc(db, PATHS.draft(userId, state.draftId));
 
     await updateDoc(draftRef, {
       publishedTaleId: pendingDoc.id,

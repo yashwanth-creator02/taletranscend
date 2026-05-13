@@ -1,7 +1,7 @@
 // src/pages/library/content.js
 // Manages real-time subscription to the community tales collection in Firestore.
 
-import { db, appId, collection, onSnapshot, auth } from '@fb/index.js';
+import { db, appId, collection, onSnapshot, auth, PATHS } from '@fb/index.js';
 
 // Holds the active Firestore listener unsubscribe function
 let unsubscribe = null;
@@ -15,7 +15,7 @@ let unsubscribe = null;
  * @param {Function} onError - Callback invoked with the Firestore error
  */
 export function subscribeToTales(onUpdate, onError) {
-  const talesCol = collection(db, 'artifacts', appId, 'public', 'data', 'community_tales');
+  const talesCol = collection(db, PATHS.publicTales());
 
   unsubscribe = onSnapshot(
     talesCol,

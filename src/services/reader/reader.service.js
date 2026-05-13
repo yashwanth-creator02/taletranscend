@@ -2,7 +2,7 @@
 // Fetches tale metadata and chapter content from Firestore.
 // This is the primary data access layer for the reader page.
 
-import { db, appId, doc, getDoc, collection, getDocs } from '@fb/index.js';
+import { db, appId, doc, getDoc, collection, getDocs, PATHS } from '@fb/index.js';
 
 /* ================= Firestore Structure Reference =================
 artifacts (collection)
@@ -26,7 +26,7 @@ artifacts (collection)
 export async function getTaleMeta(taleId) {
   if (!taleId) throw new Error('getTaleMeta: taleId is required');
 
-  const taleRef = doc(db, 'artifacts', appId, 'public', 'data', 'community_tales', taleId);
+  const taleRef = doc(db, PATHS.publicTale(taleId));
   const snap = await getDoc(taleRef);
 
   if (!snap.exists()) throw new Error(`Tale not found: ${taleId}`);
@@ -55,16 +55,7 @@ export async function getChapter({ taleId, chapterIndex }) {
   if (typeof chapterIndex !== 'number')
     throw new Error('getChapter: chapterIndex must be a number');
 
-  const chaptersRef = collection(
-    db,
-    'artifacts',
-    appId,
-    'public',
-    'data',
-    'community_tales',
-    taleId,
-    'chapters'
-  );
+  const chaptersRef = collection(db, PATHS.publicTaleChapters(taleId));
 
   const snap = await getDocs(chaptersRef);
 

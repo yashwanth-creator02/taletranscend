@@ -29,3 +29,7 @@ dist/
 
 # If you moved secrets to .env, you can un-ignore this file:
 !config/firebase-config.js
+
+
+migrate.js
+service-account.json

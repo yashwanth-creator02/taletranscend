@@ -15,6 +15,7 @@ import {
   collection,
   serverTimestamp,
   appId,
+  PATHS,
 } from '@fb/index.js';
 import { state } from './state.js';
 
@@ -34,7 +35,7 @@ export async function saveToCloud() {
   const userId = auth.currentUser.uid;
   const taleTitle = document.getElementById('tale-title')?.value || '';
 
-  const draftRef = doc(db, 'artifacts', appId, 'users', userId, 'drafts', state.draftId);
+  const draftRef = doc(db, PATHS.draft(userId, state.draftId));
 
   // Update the parent draft document with metadata
   await setDoc(
@@ -75,17 +76,7 @@ export async function saveAllChapters(userId) {
  * @param {Object} chapter - Chapter object with title and content
  */
 async function saveChapter(userId, index, chapter) {
-  const chapterRef = doc(
-    db,
-    'artifacts',
-    appId,
-    'users',
-    userId,
-    'drafts',
-    state.draftId,
-    'chapters',
-    String(index)
-  );
+  const chapterRef = doc(db, PATHS.draftChapter(userId, state.draftId, String(index)));
 
   await setDoc(chapterRef, {
     chapterNum: index,
@@ -110,7 +101,7 @@ export async function loadDraft() {
 
   const userId = auth.currentUser.uid;
 
-  const draftRef = doc(db, 'artifacts', appId, 'users', userId, 'drafts', state.draftId);
+  const draftRef = doc(db, PATHS.draft(userId, state.draftId));
 
   const draftSnap = await getDoc(draftRef);
   if (!draftSnap.exists()) return false;
@@ -122,16 +113,7 @@ export async function loadDraft() {
   if (titleInput && draftData.title) titleInput.value = draftData.title;
 
   // Fetch all chapters from subcollection
-  const chaptersRef = collection(
-    db,
-    'artifacts',
-    appId,
-    'users',
-    userId,
-    'drafts',
-    state.draftId,
-    'chapters'
-  );
+  const chaptersRef = collection(db, PATHS.draftChapters(userId, state.draftId));
 
   const chaptersSnap = await getDocs(chaptersRef);
   if (chaptersSnap.empty) return false;

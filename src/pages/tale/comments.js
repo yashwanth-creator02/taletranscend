@@ -16,6 +16,7 @@ import {
   limit,
   startAfter,
   getDocs,
+  PATHS,
 } from '@fb/index.js';
 
 const PAGE_SIZE = 20;
@@ -45,16 +46,7 @@ export function listenToComments(taleId) {
   lastVisible = null;
   allLoaded = false;
 
-  const commentsRef = collection(
-    db,
-    'artifacts',
-    appId,
-    'public',
-    'data',
-    'community_tales',
-    taleId,
-    'comments'
-  );
+  const commentsRef = collection(db, PATHS.publicTaleComments(taleId));
 
   const q = query(commentsRef, orderBy('timestamp', 'desc'), limit(PAGE_SIZE));
 
@@ -107,16 +99,7 @@ async function loadMoreComments(taleId) {
     btn.disabled = true;
   }
 
-  const commentsRef = collection(
-    db,
-    'artifacts',
-    appId,
-    'public',
-    'data',
-    'community_tales',
-    taleId,
-    'comments'
-  );
+  const commentsRef = collection(db, PATHS.publicTaleComments(taleId));
 
   // Query starting after the last loaded document
   const q = query(
@@ -169,17 +152,7 @@ export async function postComment(taleId) {
 
   if (!text || !auth.currentUser) return;
 
-  const commentsRef = collection(
-    db,
-    'artifacts',
-    appId,
-    'public',
-    'data',
-    'community_tales',
-    taleId,
-    'comments'
-  );
-
+  const commentsRef = collection(db, PATHS.publicTaleComments(taleId));
   await addDoc(commentsRef, {
     text,
     authorId: auth.currentUser.uid,

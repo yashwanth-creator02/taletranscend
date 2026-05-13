@@ -2,7 +2,17 @@
 // Handles syncing and retrieving reader progress from Firestore.
 // Chapter progress is stored in a subcollection for efficient per-chapter reads.
 
-import { db, appId, doc, getDoc, setDoc, serverTimestamp, collection, getDocs } from '@fb/index.js';
+import {
+  db,
+  appId,
+  doc,
+  getDoc,
+  setDoc,
+  serverTimestamp,
+  collection,
+  getDocs,
+  PATHS,
+} from '@fb/index.js';
 
 import { PROGRESS_SYNC_DELAY_MS } from '@config/app.config.js';
 
@@ -40,20 +50,10 @@ export async function syncChapterProgressToCloud({
   if (!userId || !taleId || typeof chapterIndex !== 'number') return;
 
   // Tale-level document stores aggregate data like totalReadTimeMs
-  const taleRef = doc(db, 'artifacts', appId, 'users', userId, 'readerProgress', taleId);
+  const taleRef = doc(db, PATHS.progress(userId, taleId));
 
   // Chapter-level document stores per-chapter scroll position
-  const chapterRef = doc(
-    db,
-    'artifacts',
-    appId,
-    'users',
-    userId,
-    'readerProgress',
-    taleId,
-    'chapters',
-    String(chapterIndex)
-  );
+  const chapterRef = doc(db, PATHS.progressChapter(userId, taleId, String(chapterIndex)));
 
   // Write chapter scroll progress
   await setDoc(chapterRef, { scrollPercent, updatedAt: serverTimestamp() }, { merge: true });
@@ -75,7 +75,7 @@ export async function syncChapterProgressToCloud({
  * @returns {Promise<Object|null>} Tale progress with chapters map, or null if none exists
  */
 export async function getCloudProgress({ userId, taleId }) {
-  const taleRef = doc(db, 'artifacts', appId, 'users', userId, 'readerProgress', taleId);
+  const taleRef = doc(db, PATHS.progress(userId, taleId));
   const snap = await getDoc(taleRef);
 
   if (!snap.exists()) return null;
@@ -83,16 +83,7 @@ export async function getCloudProgress({ userId, taleId }) {
   const taleData = snap.data();
 
   // Fetch chapters subcollection and build a chapterIndex => data map
-  const chaptersRef = collection(
-    db,
-    'artifacts',
-    appId,
-    'users',
-    userId,
-    'readerProgress',
-    taleId,
-    'chapters'
-  );
+  const chaptersRef = collection(db, PATHS.progressChapters(userId, taleId));
   const chaptersSnap = await getDocs(chaptersRef);
 
   const chapters = {};

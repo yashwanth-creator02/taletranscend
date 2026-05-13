@@ -2,7 +2,7 @@
 // Fetches chapter-level progress data for a tale from Firestore.
 // Used for rendering progress indicators across the UI.
 
-import { db, appId, collection, getDocs } from '@fb/index.js';
+import { db, appId, collection, getDocs, PATHS } from '@fb/index.js';
 
 /* ================= Firestore Structure Reference =================
 artifacts (collection)
@@ -26,16 +26,7 @@ artifacts (collection)
  */
 export async function getTaleProgressData(userId, taleId) {
   try {
-    const chaptersRef = collection(
-      db,
-      'artifacts',
-      appId,
-      'users',
-      userId,
-      'readerProgress',
-      taleId,
-      'chapters'
-    );
+    const chaptersRef = collection(db, PATHS.progressChapters(userId, taleId));
     const snapshot = await getDocs(chaptersRef);
 
     const chaptersProgress = {};
