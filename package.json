@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
+    "dotenv": "^17.4.2",
     "firebase": "^12.8.0",
     "firebase-admin": "^13.9.0",
     "lucide": "^1.14.0"
