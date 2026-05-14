@@ -1,109 +1,128 @@
 // src/pages/reader/reader.js
+// Entry point for the reader page.
+// Wires auth, content loading, progress tracking, theme, and interactions.
 
 import '@css/base.css';
 import '@css/components.css';
 import '@css/pages/reader.css';
 
 import {
-  getChapterProgress,
-  getCloudProgress,
-  updateReaderProgress,
-  bindScrollProgress,
-  restoreScrollProgress,
   initAuth,
-  initMobileDrawer,
+  readerState,
   initTheme,
-  initFont,
   setTheme,
+  setFontFamily,
   updateSize,
+  setLineHeight,
+  setReadingWidth,
   loadReaderMeta,
   loadReaderChapter,
   applyNavigation,
   goBackToTale,
+  updateReaderProgress,
+  bindScrollProgress,
+  restoreScrollProgress,
+  initMobileDrawer,
+  initSwipeNavigation,
+  initToolbarAutoHide,
+  getChapterProgress,
+  getCloudProgress,
   saveReaderProgress,
   scheduleProgressSync,
   getLocalTotalReadTime,
   addReadTime,
 } from './index.js';
 
-import { applyReaderFont } from '@ui/font.registry.js';
-import { initNav } from '@ui/components/nav/nav.js';
-initNav();
-/* ==================== URL Parameters ==================== */
+/* ─────────────────────────────────────────────
+   URL Params
+   ───────────────────────────────────────────── */
+
 const params = new URLSearchParams(window.location.search);
-const taleId = params.get('taleId');
+const taleId = params.get('taleId') || '';
 const chapterIndex = parseInt(params.get('chapterId')) || 0;
 
-/* ==================== Theme & Font ==================== */
-initTheme();
-initFont();
+readerState.taleId = taleId;
+readerState.chapterIndex = chapterIndex;
 
-/* ==================== Reader UI Bindings ==================== */
+/* ─────────────────────────────────────────────
+   Theme + Preferences (before auth)
+   ───────────────────────────────────────────── */
+
+initTheme();
+
+/* ─────────────────────────────────────────────
+   Desktop UI Bindings
+   ───────────────────────────────────────────── */
 
 function initReaderUI() {
-  // Go back buttons
-  document.getElementById('go-back-btn')?.addEventListener('click', () => goBackToTale(taleId));
+  // ── Back navigation ──────────────────────────────────────────
+  document.getElementById('reader-back-btn')?.addEventListener('click', () => goBackToTale(taleId));
   document
     .getElementById('go-back-mobile-btn')
     ?.addEventListener('click', () => goBackToTale(taleId));
 
-  // Theme buttons — all use data-theme attribute
+  // ── Theme buttons ─────────────────────────────────────────────
   document.querySelectorAll('[data-theme]').forEach((btn) => {
     btn.addEventListener('click', () => setTheme(btn.dataset.theme));
   });
 
-  // Font size ranges
-  document
-    .getElementById('font-size-range')
-    ?.addEventListener('input', (e) => updateSize(e.target.value));
-  document
-    .getElementById('mobile-font-size-range')
-    ?.addEventListener('input', (e) => updateSize(e.target.value));
-
-  // Mobile font buttons — use data-font attribute
+  // ── Font family buttons ───────────────────────────────────────
   document.querySelectorAll('[data-font]').forEach((btn) => {
-    btn.addEventListener('click', () => applyReaderFont(btn.dataset.font));
+    btn.addEventListener('click', () => setFontFamily(btn.dataset.font));
   });
 
-  // Popup toggles for desktop font controls
-  initPopup('font-style', 'font-style-popup');
-  initPopup('font-size', 'font-size-popup');
-}
+  // ── Font size sliders ─────────────────────────────────────────
+  document.querySelectorAll('[data-control="font-size"]').forEach((el) => {
+    el.addEventListener('input', (e) => updateSize(e.target.value));
+  });
 
-function initPopup(triggerId, popupId) {
-  const btn = document.getElementById(triggerId);
-  const popup = document.getElementById(popupId);
-  if (!btn || !popup) return;
+  // ── Line height sliders ───────────────────────────────────────
+  document.querySelectorAll('[data-control="line-height"]').forEach((el) => {
+    el.addEventListener('input', (e) => setLineHeight(e.target.value));
+  });
 
-  btn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const isHidden = popup.classList.contains('hidden');
+  // ── Reading width buttons ─────────────────────────────────────
+  document.querySelectorAll('[data-width]').forEach((btn) => {
+    btn.addEventListener('click', () => setReadingWidth(btn.dataset.width));
+  });
 
-    document.querySelectorAll('.popup-window').forEach((p) => p.classList.add('hidden'));
-
-    if (isHidden) {
-      const rect = btn.getBoundingClientRect();
-      popup.style.top = `${rect.bottom + window.scrollY + 10}px`;
-      popup.style.left = `${rect.left + window.scrollX - 50}px`;
-      popup.classList.remove('hidden');
+  // ── Bookmark button ───────────────────────────────────────────
+  document.getElementById('reader-bookmark-btn')?.addEventListener('click', () => {
+    // Bookmark toggling is handled via the bookmarks service — stub here
+    const btn = document.getElementById('reader-bookmark-btn');
+    if (btn) {
+      btn.classList.toggle('reader-action-btn--active');
     }
   });
 
-  document.addEventListener('click', (e) => {
-    if (!popup.contains(e.target) && e.target !== btn) {
-      popup.classList.add('hidden');
-    }
+  // ── Share button ──────────────────────────────────────────────
+  document.getElementById('reader-share-btn')?.addEventListener('click', () => {
+    const url = window.location.href;
+    navigator.clipboard?.writeText(url).then(() => {
+      _showToast('Link copied to clipboard.', 'success');
+    });
+  });
+
+  // ── Settings panel toggle (desktop sidebar) ───────────────────
+  document.getElementById('reader-settings-toggle')?.addEventListener('click', () => {
+    const panel = document.getElementById('reader-settings-sidebar');
+    panel?.classList.toggle('hidden');
+  });
+
+  // ── Chapter trail toggle ──────────────────────────────────────
+  document.getElementById('reader-trail-toggle')?.addEventListener('click', () => {
+    const trail = document.getElementById('chapter-trail-panel');
+    trail?.classList.toggle('hidden');
   });
 }
 
-initReaderUI();
-
-/* ==================== Progress Resolver ==================== */
+/* ─────────────────────────────────────────────
+   Progress Resolver
+   ───────────────────────────────────────────── */
 
 async function resolveProgress({ userId, taleId, chapterIndex }) {
   const local = getChapterProgress({ userId, taleId, chapterIndex });
   const cloud = await getCloudProgress({ userId, taleId });
-
   const cloudChapter = cloud?.chapters?.[chapterIndex];
 
   if (!local && !cloudChapter) return null;
@@ -111,64 +130,136 @@ async function resolveProgress({ userId, taleId, chapterIndex }) {
   if (!local) return cloudChapter;
 
   const localTime =
-    typeof local.updatedAt?.toMillis === 'function' ? local.updatedAt.toMillis() : local.updatedAt;
+    typeof local.updatedAt?.toMillis === 'function'
+      ? local.updatedAt.toMillis()
+      : local.updatedAt || 0;
   const cloudTime =
     typeof cloudChapter.updatedAt?.toMillis === 'function'
       ? cloudChapter.updatedAt.toMillis()
-      : cloudChapter.updatedAt;
+      : cloudChapter.updatedAt || 0;
 
   return cloudTime > localTime ? cloudChapter : local;
 }
 
-/* ==================== Auth & Initialization ==================== */
+/* ─────────────────────────────────────────────
+   Auth + Initialization
+   ───────────────────────────────────────────── */
 
-// Timeout for reader shows a message in the chapter title area, not cards-grid
 const authTimeout = setTimeout(() => {
   const title = document.getElementById('chapter-title');
   if (title) title.textContent = 'Connection timed out. Please refresh.';
-}, 10000);
+}, 10_000);
 
 initAuth(async (user) => {
   clearTimeout(authTimeout);
-  const userId = user.uid;
+  readerState.userId = user.uid;
+
   let sessionStart = Date.now();
 
+  // Track reading time via visibility change
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') {
       const duration = Date.now() - sessionStart;
-      if (duration > 1000) {
-        addReadTime({ userId, taleId, durationMs: duration });
-      }
+      if (duration > 1000) addReadTime({ userId: user.uid, taleId, durationMs: duration });
       sessionStart = Date.now();
     }
   });
 
-  const resolvedProgress = await resolveProgress({ userId, taleId, chapterIndex });
+  const resolvedProgress = await resolveProgress({
+    userId: user.uid,
+    taleId,
+    chapterIndex,
+  });
 
+  // Load tale meta (title, author, era, tags, etc.)
   await loadReaderMeta(taleId);
 
+  // Load chapter content + get navigation context
   const navigation = await loadReaderChapter({ taleId, chapterIndex });
   if (!navigation) return;
 
+  // Wire prev/next links
   applyNavigation(navigation, taleId);
-  updateReaderProgress({ chapterIndex, totalChapters: navigation.totalChapters });
-  restoreScrollProgress({ scrollPercent: resolvedProgress?.scrollPercent });
 
+  // Initial progress bar render
+  updateReaderProgress({
+    chapterIndex,
+    totalChapters: navigation.totalChapters,
+    scrollPercent: resolvedProgress?.scrollPercent ?? 0,
+  });
+
+  // Restore scroll position
+  restoreScrollProgress({ scrollPercent: resolvedProgress?.scrollPercent ?? 0 });
+
+  // Bind scroll tracking
   bindScrollProgress({
     chapterIndex,
     totalChapters: navigation.totalChapters,
     onScroll(scrollPercent) {
-      saveReaderProgress({ userId, taleId, chapterIndex, scrollPercent });
-      const totalReadTimeMs = getLocalTotalReadTime({ userId, taleId });
-      scheduleProgressSync({ userId, taleId, chapterIndex, scrollPercent, totalReadTimeMs });
+      saveReaderProgress({ userId: user.uid, taleId, chapterIndex, scrollPercent });
+      const totalReadTimeMs = getLocalTotalReadTime({ userId: user.uid, taleId });
+      scheduleProgressSync({
+        userId: user.uid,
+        taleId,
+        chapterIndex,
+        scrollPercent,
+        totalReadTimeMs,
+      });
     },
   });
+
+  // Swipe navigation (mobile)
+  initSwipeNavigation({
+    prevUrl: navigation.hasPrev
+      ? `reader.html?taleId=${taleId}&chapterId=${navigation.prevIndex}`
+      : null,
+    nextUrl: navigation.hasNext
+      ? `reader.html?taleId=${taleId}&chapterId=${navigation.nextIndex}`
+      : null,
+  });
+
+  window.lucide?.createIcons?.();
 });
 
-/* ==================== Mobile ==================== */
-initMobileDrawer();
+/* ─────────────────────────────────────────────
+   DOM Ready
+   ───────────────────────────────────────────── */
 
-// Initialize icons via CDN if available
-if (window.lucide) {
-  window.lucide.createIcons();
+document.addEventListener('DOMContentLoaded', () => {
+  initReaderUI();
+  initMobileDrawer();
+  initToolbarAutoHide();
+  window.lucide?.createIcons?.();
+});
+
+/* ─────────────────────────────────────────────
+   Toast (lightweight local)
+   ───────────────────────────────────────────── */
+
+function _showToast(message, type = 'success') {
+  let container = document.getElementById('reader-toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'reader-toast-container';
+    container.className = 'fixed top-6 right-6 z-[200] flex flex-col gap-2.5 pointer-events-none';
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement('div');
+  toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl border bg-zinc-900/95 backdrop-blur-xl shadow-2xl text-sm font-medium transition-all duration-300 ${
+    type === 'success' ? 'border-indigo-500/30 text-white' : 'border-red-500/30 text-red-200'
+  }`;
+  toast.innerHTML = `
+    <i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}"
+       class="w-4 h-4 flex-shrink-0 ${type === 'success' ? 'text-indigo-400' : 'text-red-400'}"></i>
+    ${message}
+  `;
+  container.appendChild(toast);
+  window.lucide?.createIcons?.();
+
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(10px)';
+    setTimeout(() => toast.remove(), 350);
+  }, 3000);
 }

@@ -8,7 +8,7 @@
 //   4. Submit to pending_tales
 //   5. Auto-approve (moderation hook ready for future use)
 //   6. Write to community_tales with all metadata fields
-//   7. Write each chapter to community_tales/{id}/chapters sub-collection via PATHS
+//   7. Write each chapter to community_tales/{id}/chapters sub-collection via refs
 //   8. Update draft document with published reference
 //
 // The draft is preserved after publishing so the user can edit and re-publish.

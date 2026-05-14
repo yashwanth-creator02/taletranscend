@@ -2,23 +2,9 @@
 // Handles syncing and retrieving reader progress from Firestore.
 // Chapter progress is stored in a subcollection for efficient per-chapter reads.
 
-import { getDoc, setDoc, serverTimestamp, getDocs, PATHS, refs } from '@fb/index.js';
+import { getDoc, setDoc, serverTimestamp, getDocs, refs } from '@fb/index.js';
 
 import { PROGRESS_SYNC_DELAY_MS } from '@config/app.config.js';
-
-/* ================= Firestore Structure Reference =================
-artifacts (collection)
- └─ {appId} (document)
-     └─ users (collection)
-         └─ {userId} (document)
-             └─ readerProgress (collection)
-                 └─ {taleId} (document)
-                     ├─ totalReadTimeMs
-                     └─ chapters (subcollection)
-                         └─ {chapterIndex} (document)
-                             ├─ scrollPercent
-                             └─ updatedAt
-==================================================================== */
 
 /**
  * Syncs a user's chapter scroll progress and total read time to Firestore.

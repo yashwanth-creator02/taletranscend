@@ -1,7 +1,5 @@
 // src/firebase/paths.js
 
-// src/firebase/paths.js
-
 /**
  * TaleTranscend Path Configuration
  * Centralized source of truth for Firestore paths.

@@ -3,6 +3,7 @@
 // Supports custom token, anonymous auth, and auth state listening.
 
 import {
+  signOut,
   getAuth,
   signInAnonymously,
   signInWithCustomToken,
@@ -51,3 +52,5 @@ export function initAuth(onReady) {
     }
   })();
 }
+
+export { onAuthStateChanged, signOut };

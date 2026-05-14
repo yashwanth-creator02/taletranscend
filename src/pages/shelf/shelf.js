@@ -6,13 +6,17 @@
 import '@css/base.css';
 import '@css/components.css';
 import '@css/pages/shelf.css';
-
-import { initAuth } from '@fb/index.js';
-import { initNav } from '@ui/components/nav/nav.js';
-import { initShelfInteractions } from './interactions.js';
-import { loadBookmarkedTales, loadDrafts, computeAndRenderHeroStats } from './content.js';
-import { setGridLoading, setActiveTab } from './ui.js';
-import { shelfState } from './state.js';
+import {
+  shelfState,
+  setGridLoading,
+  setActiveTab,
+  loadBookmarkedTales,
+  loadDrafts,
+  computeAndRenderHeroStats,
+  initShelfInteractions,
+  initNav,
+  initAuth,
+} from './index.js';
 
 initNav();
 

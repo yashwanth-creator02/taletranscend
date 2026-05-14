@@ -6,19 +6,22 @@ import '@css/base.css';
 import '@css/components.css';
 import '@css/pages/contribution.css';
 
-import { initNav } from '@ui/components/nav/nav.js';
-import { initAuth } from '@fb/index.js';
-
 import {
+  initNav,
+  initAuth,
   addNewChapter,
   updateSidebarTitle,
   renderChapterList,
   loadCurrentChapter,
-} from './chapters.js';
-import { autoSaveLocal, updateStats } from './editor.js';
-import { saveToCloud, loadDraft, initDraftId, syncMetadataFromDom } from './cloud.js';
-import { publishFullTale } from './publish.js';
-import { state } from './state.js';
+  autoSaveLocal,
+  updateStats,
+  saveToCloud,
+  loadDraft,
+  initDraftId,
+  syncMetadataFromDom,
+  publishFullTale,
+  state,
+} from './index.js';
 
 initNav();
 

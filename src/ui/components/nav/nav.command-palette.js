@@ -9,8 +9,7 @@
 //   nav.utils.js   — getNavElements, getCurrentPage, renderIcons
 //   nav.state.js   — read currentUser, commandPaletteOpen flag
 
-import { auth } from '@fb/index.js';
-import { signOut } from 'firebase/auth';
+import { auth, signOut } from '@fb/index.js';
 import { BASE_COMMANDS } from './nav.config.js';
 import { getNavElements, getCurrentPage, renderIcons } from './nav.utils.js';
 import { navState } from './nav.state.js';

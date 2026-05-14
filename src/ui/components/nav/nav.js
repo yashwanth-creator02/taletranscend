@@ -21,8 +21,7 @@
 //   nav.command-palette.js — Palette open/close/filter/execute
 //   nav.interactions.js    — Event listeners, scroll, auth sync
 
-import { auth } from '@fb/index.js';
-import { onAuthStateChanged } from 'firebase/auth';
+import { auth, onAuthStateChanged } from '@fb/index.js';
 
 import { navState } from './nav.state.js';
 import { injectNavStyles } from './nav.styles.js';

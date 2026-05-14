@@ -12,8 +12,7 @@
 //   nav.templates.js        — buildAuthenticatedUser, buildGuestUser, buildMobileDock
 //   nav.command-palette.js  — open/close/execute helpers
 
-import { auth } from '@fb/index.js';
-import { signOut } from 'firebase/auth';
+import { auth, signOut } from '@fb/index.js';
 import { navState } from './nav.state.js';
 import { getNavElements, renderIcons, getCurrentPage } from './nav.utils.js';
 import { USER_LINKS } from './nav.config.js';

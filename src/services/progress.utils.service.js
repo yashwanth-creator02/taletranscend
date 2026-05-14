@@ -4,18 +4,6 @@
 
 import { getDocs, refs } from '@fb/index.js';
 
-/* ================= Firestore Structure Reference =================
-artifacts (collection)
- └─ {appId} (document)
-     └─ users (collection)
-         └─ {userId} (document)
-             └─ readerProgress (collection)
-                 └─ {taleId} (document)
-                     └─ chapters (subcollection)
-                         └─ {chapterIndex} (document)
-                             └─ scrollPercent
-==================================================================== */
-
 /**
  * Fetches scroll progress for all chapters of a tale from Firestore.
  * Returns a map of chapterIndex => scrollPercent.

@@ -2,18 +2,7 @@
 // Fetches tale metadata and chapter content from Firestore.
 // This is the primary data access layer for the reader page.
 
-import { refs, getDoc, collection, getDocs, PATHS } from '@fb/index.js';
-
-/* ================= Firestore Structure Reference =================
-artifacts (collection)
- └─ {appId} (document)
-     └─ public (collection)
-         └─ data (document)
-             └─ community_tales (collection)
-                 └─ {taleId} (document)
-                     └─ chapters (subcollection)
-                         └─ {chapterId} (document)
-==================================================================== */
+import { refs, getDoc, getDocs } from '@fb/index.js';
 
 /**
  * Fetches metadata for a specific tale.

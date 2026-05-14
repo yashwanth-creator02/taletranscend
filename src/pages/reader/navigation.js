@@ -1,60 +1,105 @@
 // src/pages/reader/navigation.js
-// Manages chapter navigation links and back-navigation in the reader.
+// Chapter navigation: prev/next links, keyboard arrow shortcuts,
+// page transition fade, and back-to-tale navigation.
+
+import { readerState } from './state.js';
+
+/* ─────────────────────────────────────────────
+   Apply Navigation Links
+   ───────────────────────────────────────────── */
 
 /**
- * Updates the previous and next chapter navigation links in the reader UI.
- * Hides links that have no valid target (first or last chapter).
+ * Wires the previous and next chapter navigation links.
+ * Hides links when there is no adjacent chapter.
+ * Adds keyboard arrow key shortcuts for navigation.
  *
- * @param {Object} navigation - Navigation context from getChapter
- * @param {boolean} navigation.hasPrev - Whether a previous chapter exists
- * @param {boolean} navigation.hasNext - Whether a next chapter exists
- * @param {number|null} navigation.prevIndex - Index of the previous chapter
- * @param {number|null} navigation.nextIndex - Index of the next chapter
- * @param {string|null} navigation.prevTitle - Title of the previous chapter
- * @param {string|null} navigation.nextTitle - Title of the next chapter
- * @param {string} taleId - ID of the tale for building navigation URLs
+ * @param {Object} navigation
+ * @param {boolean}     navigation.hasPrev
+ * @param {boolean}     navigation.hasNext
+ * @param {number|null} navigation.prevIndex
+ * @param {number|null} navigation.nextIndex
+ * @param {string|null} navigation.prevTitle
+ * @param {string|null} navigation.nextTitle
+ * @param {number}      navigation.totalChapters
+ * @param {string} taleId
  */
 export function applyNavigation(navigation, taleId) {
   const prev = document.getElementById('prev-link');
   const next = document.getElementById('next-link');
 
-  if (!prev || !next) return;
-
-  if (navigation.hasPrev) {
-    prev.href = `reader.html?taleId=${taleId}&chapterId=${navigation.prevIndex}`;
+  if (navigation.hasPrev && prev) {
+    const url = _chapterUrl(taleId, navigation.prevIndex);
+    prev.href = url;
+    prev.hidden = false;
     prev.classList.remove('hidden');
 
     const prevTitle = document.getElementById('prev-title');
-    if (prevTitle) prevTitle.textContent = navigation.prevTitle;
+    if (prevTitle) prevTitle.textContent = navigation.prevTitle || 'Previous';
 
-    prev.addEventListener('click', () => {
-      document.body.style.opacity = '0';
-      document.body.style.transition = 'opacity 0.2s ease';
-    });
+    prev.addEventListener('click', _fadeOut);
   } else {
-    prev.classList.add('hidden');
+    prev?.classList.add('hidden');
   }
 
-  if (navigation.hasNext) {
-    next.href = `reader.html?taleId=${taleId}&chapterId=${navigation.nextIndex}`;
+  if (navigation.hasNext && next) {
+    const url = _chapterUrl(taleId, navigation.nextIndex);
+    next.href = url;
+    next.hidden = false;
     next.classList.remove('hidden');
 
     const nextTitle = document.getElementById('next-title');
-    if (nextTitle) nextTitle.textContent = navigation.nextTitle;
+    if (nextTitle) nextTitle.textContent = navigation.nextTitle || 'Next';
 
-    next.addEventListener('click', () => {
-      document.body.style.opacity = '0';
-      document.body.style.transition = 'opacity 0.2s ease';
-    });
+    next.addEventListener('click', _fadeOut);
   } else {
-    next.classList.add('hidden');
+    next?.classList.add('hidden');
   }
+
+  // ── Keyboard shortcuts ──────────────────────────────────────────
+  document.addEventListener('keydown', (e) => {
+    // Don't fire when user is typing
+    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+    if (e.key === 'ArrowLeft' && navigation.hasPrev) {
+      _fadeAndNavigate(_chapterUrl(taleId, navigation.prevIndex));
+    }
+    if (e.key === 'ArrowRight' && navigation.hasNext) {
+      _fadeAndNavigate(_chapterUrl(taleId, navigation.nextIndex));
+    }
+  });
 }
+
+/* ─────────────────────────────────────────────
+   Back Navigation
+   ───────────────────────────────────────────── */
+
 /**
- * Navigates the user back to the tale overview page.
+ * Navigates back to the tale overview page.
  *
- * @param {string} taleId - ID of the tale to return to
+ * @param {string} taleId
  */
 export function goBackToTale(taleId) {
-  window.location.href = `tale.html?id=${taleId}`;
+  _fadeAndNavigate(`tale.html?id=${taleId}`);
+}
+
+/* ─────────────────────────────────────────────
+   Helpers
+   ───────────────────────────────────────────── */
+
+function _chapterUrl(taleId, chapterId) {
+  return `reader.html?taleId=${taleId}&chapterId=${chapterId}`;
+}
+
+function _fadeOut(e) {
+  e?.preventDefault();
+  const target = e?.currentTarget?.href ?? '';
+  _fadeAndNavigate(target);
+}
+
+function _fadeAndNavigate(url) {
+  document.body.style.transition = 'opacity 180ms ease';
+  document.body.style.opacity = '0';
+  setTimeout(() => {
+    window.location.href = url;
+  }, 200);
 }
