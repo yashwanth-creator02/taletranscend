@@ -5,7 +5,7 @@
 
 import { libraryState } from './state.js';
 import { getBookmarks } from '@services/index.js';
-import { renderGrid, buildEraChips, setActiveEraChip, setActiveSidebarBtn } from './ui.js';
+import { buildEraChips, setActiveEraChip, setActiveSidebarBtn } from './ui.js';
 import { renderCardsGrid } from '@ui/components/taleCard.js';
 
 /* ─────────────────────────────────────────────
