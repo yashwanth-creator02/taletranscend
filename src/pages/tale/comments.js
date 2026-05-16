@@ -15,6 +15,7 @@ import {
   getDocs,
   refs,
 } from '@fb/index.js';
+import { escapeHtml } from '@/utils/string.utils';
 
 const PAGE_SIZE = 20;
 
@@ -211,16 +212,16 @@ function renderComment(c) {
     <div class="glass-card p-8 rounded-[2rem] border-l-4 border-l-indigo-600 bg-white/[0.02]">
       <div class="flex justify-between items-center mb-4">
         <span class="text-[10px] text-indigo-400 font-black uppercase tracking-widest">
-          ${escapeHTML(c.authorName || 'Unknown')}
+          ${escapeHtml(c.authorName || 'Unknown')}
         </span>
 
         <span class="text-[8px] text-zinc-600 font-black uppercase tracking-widest">
-          ${escapeHTML(date)}
+          ${escapeHtml(date)}
         </span>
       </div>
 
       <p class="text-sm text-zinc-400 leading-relaxed font-medium">
-        ${escapeHTML(c.text)}
+        ${escapeHtml(c.text)}
       </p>
     </div>
   `;
@@ -257,17 +258,3 @@ function emptyState() {
   `;
 }
 
-/**
- * Escapes HTML special characters to prevent XSS injection.
- *
- * @param {string} str - Raw string to escape
- * @returns {string} HTML-safe string
- */
-function escapeHTML(str = '') {
-  return str
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
-}

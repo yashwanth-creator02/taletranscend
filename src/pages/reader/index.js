@@ -19,4 +19,5 @@ export * from './progress.js';
 /* ==================== Services ==================== */
 export * from '@services/index.js';
 
+export { initIcons } from '@ui/components/icons.js';
 export * from './state.js';

@@ -2,6 +2,7 @@
 // Entry point for the library page.
 
 import '@css/base.css';
+import '@css/nav.css';
 import '@css/components.css';
 import '@css/pages/library.css';
 
@@ -20,6 +21,8 @@ import {
   setActiveSidebarBtn,
 } from './ui.js';
 
+import { setupAuthTimeout } from '@/utils/ui.utils';
+
 initNav();
 
 /* ─────────────────────────────────────────────
@@ -33,16 +36,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ─────────────────────────────────────────────
-   Auth timeout guard
+   Auth + Subscription
    ───────────────────────────────────────────── */
 
-const authTimeout = setTimeout(() => {
-  showGridError();
-}, 10_000);
-
-/* ─────────────────────────────────────────────
-   Auth + Data
-   ───────────────────────────────────────────── */
+const authTimeout = setupAuthTimeout('cards-grid');
 
 initAuth(async (user) => {
   clearTimeout(authTimeout);

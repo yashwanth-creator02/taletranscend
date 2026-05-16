@@ -31,6 +31,7 @@ import {
   scheduleProgressSync,
   getLocalTotalReadTime,
   addReadTime,
+  initIcons,
 } from './index.js';
 
 /* ─────────────────────────────────────────────
@@ -218,7 +219,7 @@ initAuth(async (user) => {
       : null,
   });
 
-  window.lucide?.createIcons?.();
+  initIcons();
 });
 
 /* ─────────────────────────────────────────────
@@ -229,7 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initReaderUI();
   initMobileDrawer();
   initToolbarAutoHide();
-  window.lucide?.createIcons?.();
+  initIcons();
 });
 
 /* ─────────────────────────────────────────────
@@ -255,7 +256,7 @@ function _showToast(message, type = 'success') {
     ${message}
   `;
   container.appendChild(toast);
-  window.lucide?.createIcons?.();
+  initIcons();
 
   setTimeout(() => {
     toast.style.opacity = '0';

@@ -4,23 +4,10 @@
 
 import { getTotalReadTime, getBookmarks, getTaleProgressData } from '@services/index.js';
 import { getOverallProgress } from '@/utils/progress.utils';
+import { escapeHtml } from '@/utils/string.utils';
+import { renderEmptyState, renderErrorState } from './feedback.js';
 
 /* ================= Helpers ================= */
-
-/**
- * Escapes a string for safe HTML insertion.
- *
- * @param {string} value
- * @returns {string}
- */
-function escapeHtml(value = '') {
-  return String(value)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
-}
 
 /**
  * Returns the default cover image when a tale has no custom cover.
@@ -103,36 +90,16 @@ function getProgressLabel(percent) {
 /* ================= Grid Renderer ================= */
 
 /**
- * Renders a grid of tale cards into the #cards-grid container.
- * Fetches progress, bookmarks, and read times in parallel for performance.
+ * Renders a skeleton loading state for the cards grid.
  *
- * @param {string} userId - ID of the authenticated user
- * @param {Array<Object>} tales - Array of tale objects from Firestore
+ * @param {HTMLElement} container - The container to render into
+ * @param {number} count - Number of skeleton cards to show
  */
-export async function renderCardsGrid(userId, tales) {
-  const container = document.getElementById('cards-grid');
+export function renderCardsSkeleton(container, count = 6) {
   if (!container) return;
-
-  const safeTales = Array.isArray(tales) ? tales : [];
-
-  if (!safeTales.length) {
-    container.innerHTML = `
-      <div class="col-span-full rounded-[2rem] border border-white/8 bg-white/5 px-6 py-20 text-center shadow-2xl shadow-black/20 backdrop-blur-xl">
-        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-white/5">
-          <i data-lucide="sparkles" class="h-6 w-6 text-zinc-500"></i>
-        </div>
-        <p class="text-sm font-medium text-zinc-400">No tales found in the archives.</p>
-        <p class="mt-2 text-xs text-zinc-600">Try a different filter or come back later.</p>
-      </div>
-    `;
-    if (window.lucide) window.lucide.createIcons();
-    return;
-  }
-
-  // Show a lightweight loading state before async data resolves.
   container.innerHTML = `
     <div class="col-span-full grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-      ${Array.from({ length: Math.min(6, safeTales.length) })
+      ${Array.from({ length: count })
         .map(
           () => `
             <div class="overflow-hidden rounded-[2.25rem] border border-white/8 bg-white/5 p-5 shadow-2xl shadow-black/20 backdrop-blur-xl">
@@ -161,60 +128,111 @@ export async function renderCardsGrid(userId, tales) {
         .join('')}
     </div>
   `;
+}
+
+/**
+ * Fetches all necessary metadata for a list of tales in parallel.
+ *
+ * @param {string|null} userId - ID of the authenticated user
+ * @param {Array<Object>} tales - Array of tale objects
+ * @returns {Promise<Object>} Object containing progressSnapshots, bookmarkMap, and readTimeMap
+ */
+export async function fetchTalesMetadata(userId, tales) {
+  const safeUserId = userId || null;
+  const safeTales = Array.isArray(tales) ? tales : [];
+
+  if (!safeTales.length) {
+    return {
+      progressSnapshots: [],
+      bookmarkMap: {},
+      readTimeMap: {},
+    };
+  }
+
+  const [progressSnapshots, bookmarks, readTimeEntries] = await Promise.all([
+    safeUserId
+      ? Promise.all(safeTales.map((tale) => getTaleProgressData(safeUserId, tale.id)))
+      : Promise.resolve(safeTales.map(() => ({}))),
+    safeUserId ? getBookmarks({ userId: safeUserId }) : Promise.resolve([]),
+    safeUserId
+      ? Promise.all(
+          safeTales.map(async (tale) => {
+            const ms = await getTotalReadTime({ userId: safeUserId, taleId: tale.id });
+            return [tale.id, ms];
+          })
+        )
+      : Promise.resolve([]),
+  ]);
+
+  const bookmarkMap = Object.fromEntries(
+    (bookmarks || []).map((bookmark) => [bookmark.id, true])
+  );
+  const readTimeMap = Object.fromEntries(readTimeEntries || []);
+
+  return { progressSnapshots, bookmarkMap, readTimeMap };
+}
+
+/**
+ * Renders the actual tale cards once metadata is available.
+ *
+ * @param {HTMLElement} container - Container to render into
+ * @param {Array<Object>} tales - Array of tale objects
+ * @param {Object} metadata - Metadata object from fetchTalesMetadata
+ */
+export function renderTaleCards(container, tales, metadata) {
+  if (!container) return;
+  const { progressSnapshots = [], bookmarkMap = {}, readTimeMap = {} } = metadata;
+
+  container.innerHTML = tales
+    .map((tale, index) => {
+      const chaptersProgress = progressSnapshots[index] || {};
+      const progressStats = getOverallProgress({
+        chapterCount: Number(tale.chapterCount) || 0,
+        chaptersProgress,
+      });
+
+      const displayPercent = tale.status === 'finished' ? 100 : progressStats.percent || 0;
+      return createTaleCard(tale, displayPercent, readTimeMap, bookmarkMap);
+    })
+    .join('');
+
+  if (window.lucide) window.lucide.createIcons();
+}
+
+/**
+ * Renders a grid of tale cards into the #cards-grid container.
+ * Convenience wrapper that handles both fetching and rendering.
+ *
+ * @param {string} userId - ID of the authenticated user
+ * @param {Array<Object>} tales - Array of tale objects from Firestore
+ */
+export async function renderCardsGrid(userId, tales) {
+  const container = document.getElementById('cards-grid');
+  if (!container) return;
+
+  const safeTales = Array.isArray(tales) ? tales : [];
+
+  if (!safeTales.length) {
+    renderEmptyState(container, {
+      message: 'No tales found in the archives.',
+      subMessage: 'Try a different filter or come back later.',
+      classes: 'col-span-full rounded-[2rem] border border-white/8 bg-white/5 px-6 py-20 text-center shadow-2xl shadow-black/20 backdrop-blur-xl'
+    });
+    return;
+  }
+
+  // Show a lightweight loading state before async data resolves.
+  renderCardsSkeleton(container, Math.min(6, safeTales.length));
 
   try {
-    const safeUserId = userId || null;
-
-    const [progressSnapshots, bookmarks, readTimeEntries] = await Promise.all([
-      safeUserId
-        ? Promise.all(safeTales.map((tale) => getTaleProgressData(safeUserId, tale.id)))
-        : Promise.resolve(safeTales.map(() => ({}))),
-      safeUserId ? getBookmarks({ userId: safeUserId }) : Promise.resolve([]),
-      safeUserId
-        ? Promise.all(
-            safeTales.map(async (tale) => {
-              const ms = await getTotalReadTime({ userId: safeUserId, taleId: tale.id });
-              return [tale.id, ms];
-            })
-          )
-        : Promise.resolve([]),
-    ]);
-
-    const bookmarkMap = Object.fromEntries(
-      (bookmarks || []).map((bookmark) => [bookmark.id, true])
-    );
-    const readTimeMap = Object.fromEntries(readTimeEntries || []);
-
-    container.innerHTML = safeTales
-      .map((tale, index) => {
-        const chaptersProgress = progressSnapshots[index] || {};
-
-        const progressStats = getOverallProgress({
-          chapterCount: Number(tale.chapterCount) || 0,
-          chaptersProgress,
-        });
-
-        const displayPercent = tale.status === 'finished' ? 100 : progressStats.percent || 0;
-
-        return createTaleCard(tale, displayPercent, readTimeMap, bookmarkMap);
-      })
-      .join('');
-
-    if (window.lucide) {
-      window.lucide.createIcons();
-    }
+    const metadata = await fetchTalesMetadata(userId, safeTales);
+    renderTaleCards(container, safeTales, metadata);
   } catch (err) {
     console.error('renderCardsGrid: failed to populate library:', err);
-    container.innerHTML = `
-      <div class="col-span-full rounded-[2rem] border border-red-500/10 bg-red-500/5 px-6 py-16 text-center shadow-2xl shadow-black/20 backdrop-blur-xl">
-        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-500/10">
-          <i data-lucide="triangle-alert" class="h-6 w-6 text-red-400"></i>
-        </div>
-        <p class="text-sm font-medium text-red-200">We could not load the tales right now.</p>
-        <p class="mt-2 text-xs text-red-300/70">Please refresh and try again.</p>
-      </div>
-    `;
-    if (window.lucide) window.lucide.createIcons();
+    renderErrorState(container, {
+      message: 'We could not load the tales right now.',
+      subMessage: 'Please refresh and try again.'
+    });
   }
 }
 

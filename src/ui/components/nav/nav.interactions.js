@@ -313,7 +313,7 @@ export function updateNavUser(user) {
   const dockContainer = document.getElementById('mobile-dock-container');
   if (dockContainer) {
     dockContainer.innerHTML = buildMobileDock(current, user);
-    window.lucide?.createIcons?.();
+    renderIcons();
   }
 
   renderIcons();

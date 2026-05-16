@@ -4,61 +4,99 @@
 @import 'tailwindcss';
 
 :root {
-  --paper-bg: #0a0a0b;
-  --text-main: #e2e8f0;
+  --paper-bg: #050509;
+  --panel-bg: rgba(255, 255, 255, 0.035);
+  --panel-bg-strong: rgba(255, 255, 255, 0.055);
+  --text-main: #f5f7ff;
   --text-muted: #94a3b8;
   --accent: #6366f1;
-  --glass: rgba(30, 30, 35, 0.4);
   --border: rgba(255, 255, 255, 0.08);
+  --glow-indigo: rgba(99, 102, 241, 0.18);
+  --glow-violet: rgba(139, 92, 246, 0.14);
+  --glow-amber: rgba(245, 158, 11, 0.10);
 
-  --reader-size: 1.25rem;
-  --reader-height: 1.85;
-  --reader-font: 'Crimson Pro', serif;
+  /* Reader defaults */
+  --reader-bg: #030305;
+  --reader-text: #e2e8f0;
+  --reader-font: 'Merriweather', Georgia, serif;
+  --reader-size: 18px;
+  --reader-lh: 1.9;
+  --reader-width: 720px;
+  --reader-nav-height: 60px;
+
+  color-scheme: dark;
 }
 
 /* Sepia theme overrides */
-body.theme-sepia {
+body.theme-sepia,
+.reader-theme-sepia {
   --paper-bg: #f4ecd8;
   --text-main: #433422;
   --text-muted: #8c7e6a;
-  --glass: rgba(67, 52, 34, 0.05);
+  --panel-bg: rgba(67, 52, 34, 0.05);
   --border: rgba(67, 52, 34, 0.12);
   --accent: #936639;
+
+  --reader-bg: #1a1208;
+  --reader-text: #c8a97a;
 }
 
 /* Light theme overrides */
-body.theme-light {
+body.theme-light,
+.reader-theme-light {
   --paper-bg: #f8fafc;
   --text-main: #0f172a;
   --text-muted: #64748b;
-  --glass: rgba(0, 0, 0, 0.03);
+  --panel-bg: rgba(0, 0, 0, 0.03);
   --border: rgba(0, 0, 0, 0.08);
   --accent: #4f46e5;
+
+  --reader-bg: #f5f3ee;
+  --reader-text: #1c1812;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99, 102, 241, 0.28) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.28);
+  border-radius: 999px;
+}
+
+html,
+body {
+  min-height: 100%;
+  overflow-x: hidden;
+  background: var(--paper-bg);
 }
 
 body {
-  background-color: var(--paper-bg);
-  color: var(--text-muted);
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: var(--text-main);
+  font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;
+  min-height: 100vh;
+  position: relative;
   transition:
     background-color 0.6s ease,
     color 0.6s ease;
 }
 
-/* Custom scrollbar styling for a premium feel */
-::-webkit-scrollbar {
-  width: 8px;
+.font-cinzel {
+  font-family: 'Cinzel', serif;
 }
-::-webkit-scrollbar-track {
-  background: #050505;
-}
-::-webkit-scrollbar-thumb {
-  background: #1e1e21;
-  border-radius: 10px;
-  border: 2px solid #050505;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #4f46e5;
+
+.font-merriweather {
+  font-family: 'Merriweather', serif;
 }
 
 /* Hide horizontal scrollbar for elements with no-scrollbar class */

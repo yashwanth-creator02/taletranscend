@@ -11,6 +11,7 @@ import {
   computeAndRenderHeroStats,
 } from './content.js';
 import { setActiveTab, buildSortPanel, refreshSortPanel } from './ui.js';
+import { initIcons } from '@ui/components/icons.js';
 
 /* ─────────────────────────────────────────────
    Public Init
@@ -321,7 +322,7 @@ function _showToast(message, type = 'success') {
   `;
 
   container.appendChild(toast);
-  window.lucide?.createIcons?.();
+  initIcons();
 
   setTimeout(() => {
     toast.style.opacity = '0';

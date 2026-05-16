@@ -12,5 +12,6 @@ export { autoSaveLocal, updateStats } from './editor.js';
 export { saveToCloud, loadDraft, initDraftId, syncMetadataFromDom } from './cloud.js';
 export { publishFullTale } from './publish.js';
 export { state } from './state.js';
+export { initIcons } from '@ui/components/icons.js';
 
 export * from '@fb/index.js';

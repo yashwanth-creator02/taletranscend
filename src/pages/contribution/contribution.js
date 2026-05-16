@@ -21,7 +21,10 @@ import {
   syncMetadataFromDom,
   publishFullTale,
   state,
+  initIcons,
 } from './index.js';
+import { debounce } from '@/utils/function.utils';
+import { setupAuthTimeout } from '@/utils/ui.utils';
 
 initNav();
 
@@ -31,11 +34,10 @@ initDraftId();
 
 /* ── Auth + Init ──────────────────────────────────────────────────── */
 
-const authTimeout = setTimeout(() => {
-  setStatus('Connection timed out. Please refresh.', 'error');
-}, 10_000);
+const authTimeout = setupAuthTimeout('stat-status', 'Connection timed out. Please refresh.');
 
 initAuth(async (user) => {
+
   clearTimeout(authTimeout);
   await init(user.uid);
 });
@@ -64,7 +66,7 @@ async function init(_userId) {
     setStatus('New tale started.', 'neutral');
   }
 
-  window.lucide?.createIcons?.();
+  initIcons();
 }
 
 /* ── Editor Events ────────────────────────────────────────────────── */
@@ -305,7 +307,7 @@ export function updateChecklist() {
     item.classList.toggle('opacity-50', !passed);
   });
 
-  window.lucide?.createIcons?.();
+  initIcons();
 }
 
 /* ── Status Helper ────────────────────────────────────────────────── */
@@ -333,12 +335,3 @@ export function setStatus(message, type) {
   status.textContent = message;
 }
 
-/* ── Debounce (local) ─────────────────────────────────────────────── */
-
-function debounce(fn, delay) {
-  let t;
-  return (...args) => {
-    clearTimeout(t);
-    t = setTimeout(() => fn(...args), delay);
-  };
-}

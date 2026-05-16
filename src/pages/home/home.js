@@ -97,7 +97,7 @@ async function loadTrendingTales() {
     container.innerHTML = tales.map(renderTrendingCard).join('');
 
     // Refresh Lucide icons
-    window.lucide?.createIcons?.();
+    initIcons();
   } catch (error) {
     console.error('[home] Failed to load trending tales:', error);
 

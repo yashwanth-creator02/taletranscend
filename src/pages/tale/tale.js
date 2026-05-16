@@ -20,8 +20,8 @@ import {
   postComment,
   initIcons,
 } from './index.js';
-import { createIcons, icons } from 'lucide';
 import { initNav } from '@ui/components/nav/nav.js';
+import { setupAuthTimeout } from '@/utils/ui.utils';
 initNav();
 /* ==================== URL Parameters ==================== */
 const taleId = new URLSearchParams(window.location.search).get('id');
@@ -41,13 +41,7 @@ if (!taleId) {
  * - Binds all user interactions
  * - Starts real-time comment listener
  */
-const authTimeout = setTimeout(() => {
-  document.getElementById('cards-grid').innerHTML = `
-    <div class="col-span-full text-center py-20 text-red-500">
-      Connection timed out. Please refresh.
-    </div>
-  `;
-}, 10000);
+const authTimeout = setupAuthTimeout('cards-grid');
 initAuth(async (user) => {
   const userId = user.uid;
   clearTimeout(authTimeout);
@@ -73,4 +67,3 @@ initAuth(async (user) => {
 
 /* ==================== Icons ==================== */
 initIcons();
-createIcons({ icons });

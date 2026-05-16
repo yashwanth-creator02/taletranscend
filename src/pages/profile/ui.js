@@ -4,6 +4,8 @@
 
 import { profileState, GENRE_OPTIONS } from './state.js';
 import { suggestNameFromBio } from './ai-name.js';
+import { debounce } from '@/utils/function.utils';
+import { initIcons } from '@ui/components/icons.js';
 
 /* ─────────────────────────────────────────────
    Modal
@@ -368,7 +370,7 @@ export function showNotification(message, type = 'success') {
   `;
 
   container.appendChild(toast);
-  window.lucide?.createIcons?.();
+  initIcons();
 
   setTimeout(() => {
     toast.style.opacity = '0';
@@ -401,7 +403,7 @@ export function renderContinueReading(tales) {
   }
 
   container.innerHTML = tales.map(_buildContinueReadingCard).join('');
-  window.lucide?.createIcons?.();
+  initIcons();
 }
 
 function _buildContinueReadingCard(tale) {
@@ -474,7 +476,7 @@ export function renderPublishedTales(tales) {
 
   const cards = tales.map(_buildPublishedCard).join('');
   container.insertAdjacentHTML('afterbegin', cards);
-  window.lucide?.createIcons?.();
+  initIcons();
 }
 
 function _buildPublishedCard(tale) {
@@ -543,7 +545,7 @@ export function renderDrafts(drafts) {
   }
 
   container.innerHTML = drafts.map(_buildDraftCard).join('');
-  window.lucide?.createIcons?.();
+  initIcons();
 }
 
 function _buildDraftCard(draft) {
@@ -688,10 +690,3 @@ function timeAgo(date) {
   return `${days}d ago`;
 }
 
-function debounce(fn, delay) {
-  let t;
-  return (...args) => {
-    clearTimeout(t);
-    t = setTimeout(() => fn(...args), delay);
-  };
-}

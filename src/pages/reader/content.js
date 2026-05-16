@@ -5,6 +5,7 @@
 
 import { getTaleMeta, getChapter } from '@services/index.js';
 import { readerState } from './state.js';
+import { initIcons } from '@ui/components/icons.js';
 
 /* ─────────────────────────────────────────────
    Tale Metadata
@@ -193,7 +194,7 @@ function _renderChapterTrail(navigation, taleId, currentIndex) {
     })
     .join('');
 
-  window.lucide?.createIcons?.();
+  initIcons();
 
   // Scroll active item into view
   const active = container.querySelector('.chapter-trail-item--active');

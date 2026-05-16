@@ -8,6 +8,7 @@ import '@css/pages/profile.css';
 
 import { initNav } from '@ui/components/nav/nav.js';
 import { initAuth } from '@fb/index.js';
+import { initIcons } from '@ui/components/icons.js';
 
 import {
   initProfileUI,
@@ -68,7 +69,7 @@ initAuth(async (user) => {
   renderDrafts(drafts);
   updateStatsUI(stats);
 
-  window.lucide?.createIcons?.();
+  initIcons();
 });
 
 /* ─────────────────────────────────────────────
