@@ -23,12 +23,8 @@ import {
   state,
   initIcons,
 } from './index.js';
-<<<<<<< HEAD
-import { debounce } from '@/utils/function.utils';
-import { setupAuthTimeout } from '@/utils/ui.utils';
-=======
+import { debounce, setupAuthTimeout } from '@utils/index.js';
 import { initNav } from '@ui/components/nav/nav.js';
->>>>>>> 127f397 (navbar and base aesthetics changes. to be uniform all around the website.)
 
 initNav();
 
@@ -41,7 +37,6 @@ initDraftId();
 const authTimeout = setupAuthTimeout('stat-status', 'Connection timed out. Please refresh.');
 
 initAuth(async (user) => {
-
   clearTimeout(authTimeout);
   await init(user.uid);
 });
@@ -338,4 +333,3 @@ export function setStatus(message, type) {
   status.classList.add(colors[type] ?? 'text-zinc-500');
   status.textContent = message;
 }
-

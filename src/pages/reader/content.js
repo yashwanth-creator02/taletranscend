@@ -1,253 +1,154 @@
 // src/pages/reader/content.js
-// Loads tale metadata and chapter content from Firestore.
-// Renders into the reader's custom header, article body, sidebar, chapter trail,
-// and lore/compass panels.
+// Optimized Content Loader for Reader
+// Renders tale metadata and semantic story content.
 
 import { getTaleMeta, getChapter } from '@services/index.js';
 import { readerState } from './state.js';
 import { initIcons } from '@ui/components/icons.js';
+import { escapeHtml } from '@/utils/string.utils.js';
 
 /* ─────────────────────────────────────────────
-   Tale Metadata
+   Public Fetchers
    ───────────────────────────────────────────── */
 
-/**
- * Fetches tale-level metadata and populates all static display areas.
- * Called once on load — chapter-specific data is populated by loadReaderChapter.
- *
- * @param {string} taleId
- */
 export async function loadReaderMeta(taleId) {
   try {
     const meta = await getTaleMeta(taleId);
-
-    // Mirror into state
+    
+    // 1. Sync State
     readerState.taleTitle = meta.title || 'Untitled Tale';
     readerState.authorName = meta.authorName || 'Unknown Scribe';
     readerState.coverUrl = meta.coverUrl || '';
-    readerState.era = meta.era || '';
-    readerState.language = meta.language || '';
     readerState.tags = meta.tags || [];
 
-    // Header
-    setText('reader-tale-title', readerState.taleTitle);
-    setText('reader-author-name', readerState.authorName);
-    setText('reader-era-badge', readerState.era);
-    setText('reader-language-badge', readerState.language);
+    // 2. Populate Header
+    _setText('reader-header-title', readerState.taleTitle);
 
-    // Sidebar
-    setText('sidebar-story-name', readerState.taleTitle);
-    setText('sidebar-description', meta.description || '');
-    setText('sidebar-author', readerState.authorName);
+    // 3. Populate Sidebar
+    _setText('sidebar-story-name', readerState.taleTitle);
+    _setText('sidebar-author', readerState.authorName);
+    _setText('sidebar-description', meta.description || 'A tale from the archives.');
+    
+    const cover = document.getElementById('sidebar-cover');
+    if (cover && readerState.coverUrl) {
+      cover.src = readerState.coverUrl;
+      cover.hidden = false;
+    }
 
-    // Author avatar
-    const uid = meta.authorId || 'scribe';
-    const avatarSrc = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(uid.slice(0, 8))}`;
-    const avatarEl = document.getElementById('author-avatar');
-    if (avatarEl) avatarEl.src = avatarSrc;
+    // 4. Author Branding
+    _renderAuthorRow(meta);
 
-    // Lore tags
+    // 5. Post-Content Data
     _renderLoreTags(readerState.tags);
-
-    // Story compass
     _renderCompass(meta);
 
-    // Cover art in sidebar
-    if (readerState.coverUrl) {
-      const coverEl = document.getElementById('sidebar-cover');
-      if (coverEl) {
-        coverEl.src = readerState.coverUrl;
-        coverEl.closest('[data-cover-wrap]')?.classList.remove('hidden');
-      }
-    }
   } catch (err) {
-    console.error('[reader] loadReaderMeta failed:', err);
+    console.error('[reader] Meta load failed:', err);
   }
 }
 
-/* ─────────────────────────────────────────────
-   Chapter Content
-   ───────────────────────────────────────────── */
-
-/**
- * Fetches a chapter, renders title + body, updates header meta,
- * and returns the navigation context for prev/next wiring.
- *
- * @param {{ taleId: string, chapterIndex: number }} params
- * @returns {Promise<Object|null>} navigation context or null on failure
- */
 export async function loadReaderChapter({ taleId, chapterIndex }) {
   try {
     const { chapter, navigation } = await getChapter({ taleId, chapterIndex });
-
+    
+    // 1. Update State
     readerState.chapterTitle = chapter.title || `Chapter ${chapterIndex + 1}`;
     readerState.totalChapters = navigation.totalChapters;
 
-    // Fragment label + chapter heading
-    const pad = String(chapter.index + 1).padStart(2, '0');
-    setText('chapter-label', `Fragment ${pad}`);
-    setText('chapter-title', readerState.chapterTitle);
+    // 2. Render Identifiers
+    const pad = String(chapterIndex + 1).padStart(2, '0');
+    _setText('reader-chapter-label', `Fragment ${pad} of ${navigation.totalChapters}`);
+    _setText('chapter-label', `Fragment ${pad}`);
+    _setText('chapter-title', readerState.chapterTitle);
 
-    // Update header chapter info
-    setText('reader-chapter-label', `Fragment ${pad} of ${navigation.totalChapters}`);
-    setText('reader-header-title', readerState.taleTitle);
-
-    // Render story content
-    const story = document.getElementById('story-content');
-    if (story) {
-      story.innerHTML = _renderContent(chapter.content || '');
+    // 3. Render Content
+    const container = document.getElementById('story-content');
+    if (container) {
+      container.innerHTML = _processContent(chapter.content || '');
     }
-
-    // Compute and display word count / read time
-    const wordCount = _countWords(chapter.content || '');
-    const readMins = Math.max(1, Math.ceil(wordCount / 200));
-    readerState.wordCount = wordCount;
-    readerState.estimatedReadMins = readMins;
-
-    setText('reader-wordcount', `${_formatNumber(wordCount)} words`);
-    setText('reader-readtime', `${readMins} min read`);
-
-    // Chapter trail update
-    _renderChapterTrail(navigation, taleId, chapterIndex);
 
     return navigation;
   } catch (err) {
-    console.error('[reader] loadReaderChapter failed:', err);
-    const title = document.getElementById('chapter-title');
-    if (title) title.textContent = 'Failed to load chapter. Please refresh.';
+    console.error('[reader] Chapter load failed:', err);
+    _setText('chapter-title', 'Chapter load failed.');
     return null;
   }
 }
 
 /* ─────────────────────────────────────────────
-   Content Renderer
+   Private Renderers
    ───────────────────────────────────────────── */
 
-/**
- * Converts raw chapter text into semantic HTML.
- * - Blank lines become paragraph breaks
- * - Lines starting with # become headings
- * - Lines starting with > become blockquotes
- * - First paragraph gets a drop cap via CSS class
- *
- * @param {string} raw
- * @returns {string} HTML string
- */
-function _renderContent(raw) {
-  const paragraphs = raw.split('\n').filter((l) => l.trim());
-  let isFirst = true;
+function _processContent(raw) {
+  const paragraphs = raw.split('\n').filter(l => l.trim());
+  let first = true;
 
-  return paragraphs
-    .map((line) => {
-      const trimmed = line.trim();
+  return paragraphs.map(p => {
+    const text = p.trim();
+    if (text.startsWith('## ')) return `<h3 class="text-xl font-bold mt-10 mb-5 text-white/90">${escapeHtml(text.slice(3))}</h3>`;
+    if (text.startsWith('# ')) return `<h2 class="text-2xl font-black uppercase tracking-tight mt-14 mb-8 text-white">${escapeHtml(text.slice(2))}</h2>`;
+    if (text.startsWith('> ')) return `<blockquote class="border-l-2 border-indigo-500/40 pl-8 my-10 italic text-slate-400 font-serif text-lg">${escapeHtml(text.slice(2))}</blockquote>`;
 
-      if (trimmed.startsWith('## ')) {
-        return `<h3 class="reader-h3">${_esc(trimmed.slice(3))}</h3>`;
-      }
-      if (trimmed.startsWith('# ')) {
-        return `<h2 class="reader-h2">${_esc(trimmed.slice(2))}</h2>`;
-      }
-      if (trimmed.startsWith('> ')) {
-        return `<blockquote class="reader-blockquote">${_esc(trimmed.slice(2))}</blockquote>`;
-      }
-
-      const cls = isFirst ? 'reader-p reader-p--dropcap' : 'reader-p';
-      isFirst = false;
-      return `<p class="${cls}">${_esc(trimmed)}</p>`;
-    })
-    .join('');
+    const cls = first ? 'mb-6 first-letter:float-left first-letter:text-[5em] first-letter:font-black first-letter:font-cinzel first-letter:mr-3 first-letter:text-indigo-400 first-letter:leading-[0.85] first-letter:mt-2' : 'mb-6';
+    first = false;
+    return `<p class="${cls}">${escapeHtml(text)}</p>`;
+  }).join('');
 }
 
-/* ─────────────────────────────────────────────
-   Chapter Trail
-   ───────────────────────────────────────────── */
+function _renderAuthorRow(meta) {
+  const container = document.getElementById('reader-author-row');
+  if (!container) return;
 
-/**
- * Renders the chapter trail list in the sidebar.
- * Shows all chapters with the current one highlighted.
- *
- * @param {Object} navigation
- * @param {string} taleId
- * @param {number} currentIndex
- */
-function _renderChapterTrail(navigation, taleId, currentIndex) {
-  const container = document.getElementById('chapter-trail-list');
-  if (!container || !navigation.allChapters?.length) return;
+  const uid = meta.authorId || 'scribe';
+  const seed = encodeURIComponent(uid.slice(0, 8));
 
-  container.innerHTML = navigation.allChapters
-    .map((ch, i) => {
-      const isCurrent = i === currentIndex;
-      const isPast = i < currentIndex;
-
-      return `
-      <a
-        href="reader.html?taleId=${taleId}&chapterId=${i}"
-        class="chapter-trail-item${isCurrent ? ' chapter-trail-item--active' : ''}${isPast ? ' chapter-trail-item--done' : ''}"
-        ${isCurrent ? 'aria-current="true"' : ''}
-      >
-        <span class="chapter-trail-item__num">${String(i + 1).padStart(2, '0')}</span>
-        <span class="chapter-trail-item__title">${_esc(ch.title || `Chapter ${i + 1}`)}</span>
-        ${isPast ? '<i data-lucide="check" class="chapter-trail-item__check"></i>' : ''}
-        ${isCurrent ? '<span class="chapter-trail-item__dot"></span>' : ''}
-      </a>
-    `;
-    })
-    .join('');
-
-  initIcons();
-
-  // Scroll active item into view
-  const active = container.querySelector('.chapter-trail-item--active');
-  active?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  container.innerHTML = `
+    <div class="glass flex items-center gap-3.5 px-5 py-3 rounded-2xl border-white/5">
+      <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}" class="w-10 h-10 rounded-xl bg-indigo-500/10 object-cover" />
+      <div>
+        <p class="text-[10px] font-black text-white uppercase tracking-[0.2em]">${escapeHtml(meta.authorName || 'Scribe')}</p>
+        <p class="text-[9px] text-slate-500 uppercase tracking-widest mt-0.5">${escapeHtml(meta.era || 'Unknown Era')}</p>
+      </div>
+    </div>
+  `;
 }
-
-/* ─────────────────────────────────────────────
-   Lore Tags + Compass
-   ───────────────────────────────────────────── */
 
 function _renderLoreTags(tags) {
   const container = document.getElementById('lore-tag-list');
   if (!container) return;
-
+  
   if (!tags.length) {
-    container.innerHTML = '<span class="text-xs text-slate-600 italic">No tags set</span>';
+    container.innerHTML = '<span class="text-[10px] text-slate-600 italic">Unclassified Archive</span>';
     return;
   }
 
-  container.innerHTML = tags
-    .map(
-      (t) => `
-    <span class="lore-tag">${_esc(t)}</span>
-  `
-    )
-    .join('');
+  container.innerHTML = tags.map(t => `<span class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">${escapeHtml(t)}</span>`).join('');
 }
 
 function _renderCompass(meta) {
-  setText('compass-setting', meta.worldSetting || '—');
-  setText('compass-tone', meta.tone || '—');
-  setText('compass-audience', meta.audience || '—');
-  setText('compass-language', meta.language || '—');
+  const container = document.getElementById('compass-data');
+  if (!container) return;
+
+  const items = [
+    { label: 'Setting', value: meta.worldSetting },
+    { label: 'Tone', value: meta.tone },
+    { label: 'Audience', value: meta.audience },
+    { label: 'Language', value: meta.language }
+  ];
+
+  container.innerHTML = items.map(item => `
+    <div class="glass p-3 rounded-xl border-white/5">
+      <p class="text-[8px] font-black text-slate-600 uppercase mb-1 tracking-widest">${item.label}</p>
+      <p class="font-bold text-white/80">${escapeHtml(item.value || '—')}</p>
+    </div>
+  `).join('');
 }
 
 /* ─────────────────────────────────────────────
    Helpers
    ───────────────────────────────────────────── */
 
-function setText(id, value) {
+function _setText(id, val) {
   const el = document.getElementById(id);
-  if (el) el.textContent = value ?? '';
-}
-
-function _countWords(text) {
-  const t = text.trim();
-  return t ? t.split(/\s+/).length : 0;
-}
-
-function _formatNumber(n) {
-  return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
-}
-
-function _esc(str) {
-  return String(str).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+  if (el) el.textContent = val ?? '';
 }

@@ -1,6 +1,6 @@
 // src/pages/reader/reader.js
-// Entry point for the reader page.
-// Wires auth, content loading, progress tracking, theme, and interactions.
+// Modernized Reader Entry Point
+// Strictly separates Mobile/Desktop UI paths and ensures smooth interactions.
 
 import '@css/base.css';
 import '@css/nav.css';
@@ -36,7 +36,7 @@ import {
 } from './index.js';
 
 /* ─────────────────────────────────────────────
-   URL Params
+   State Initialization
    ───────────────────────────────────────────── */
 
 const params = new URLSearchParams(window.location.search);
@@ -47,221 +47,235 @@ readerState.taleId = taleId;
 readerState.chapterIndex = chapterIndex;
 
 /* ─────────────────────────────────────────────
-   Theme + Preferences (before auth)
+   UI Templates
+   ───────────────────────────────────────────── */
+
+function renderSettingsTemplate() {
+  return `
+    <div class="space-y-8">
+      <!-- Theme -->
+      <div>
+        <p class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 mb-4">Reading Theme</p>
+        <div class="flex gap-2.5">
+          <button data-theme="dark" class="reader-option flex-1">Dark</button>
+          <button data-theme="sepia" class="reader-option flex-1">Sepia</button>
+          <button data-theme="light" class="reader-option flex-1">Light</button>
+        </div>
+      </div>
+
+      <!-- Font Style -->
+      <div>
+        <p class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 mb-4">Typography</p>
+        <div class="flex gap-2.5">
+          <button data-font="serif" class="reader-option flex-1">Serif</button>
+          <button data-font="sans" class="reader-option flex-1">Sans</button>
+          <button data-font="mono" class="reader-option flex-1">Mono</button>
+        </div>
+      </div>
+
+      <!-- Sliders -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6">
+        <div>
+           <div class="flex items-center justify-between mb-3">
+             <p class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">Size</p>
+             <span class="text-[10px] text-indigo-400 font-bold" data-val="font-size">18px</span>
+           </div>
+           <input type="range" min="14" max="26" value="18" step="1" data-control="font-size" class="w-full accent-indigo-500 cursor-pointer" />
+        </div>
+        <div>
+           <div class="flex items-center justify-between mb-3">
+             <p class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">Spacing</p>
+             <span class="text-[10px] text-indigo-400 font-bold" data-val="line-height">1.9</span>
+           </div>
+           <input type="range" min="1.4" max="2.2" value="1.9" step="0.1" data-control="line-height" class="w-full accent-indigo-500 cursor-pointer" />
+        </div>
+      </div>
+
+      <!-- Width (Desktop Only Utility) -->
+      <div class="hidden lg:block">
+        <p class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 mb-4">Reading Width</p>
+        <div class="flex gap-2.5">
+          <button data-width="narrow" class="reader-option flex-1">Narrow</button>
+          <button data-width="normal" class="reader-option flex-1">Normal</button>
+          <button data-width="wide" class="reader-option flex-1">Wide</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ─────────────────────────────────────────────
+   Interaction Logic
+   ───────────────────────────────────────────── */
+
+function initGlobalInteractions() {
+  // ── Header Scroll Logic ──────────────────────────────────────
+  const header = document.getElementById('reader-header');
+  window.addEventListener('scroll', () => {
+    header?.classList.toggle('is-scrolled', window.scrollY > 15);
+  }, { passive: true });
+
+  // ── Unified Settings Rendering ──────────────────────────────
+  const desktopContainer = document.getElementById('desktop-settings-container');
+  const mobileContainer = document.getElementById('mobile-settings-container');
+  if (desktopContainer) desktopContainer.innerHTML = renderSettingsTemplate();
+  if (mobileContainer) mobileContainer.innerHTML = renderSettingsTemplate();
+
+  // ── Button Listeners ─────────────────────────────────────────
+  
+  // Theme
+  document.querySelectorAll('[data-theme]').forEach(btn => {
+    btn.addEventListener('click', () => setTheme(btn.dataset.theme));
+  });
+
+  // Font
+  document.querySelectorAll('[data-font]').forEach(btn => {
+    btn.addEventListener('click', () => setFontFamily(btn.dataset.font));
+  });
+
+  // Sliders
+  document.querySelectorAll('[data-control]').forEach(el => {
+    el.addEventListener('input', (e) => {
+      const type = e.target.dataset.control;
+      const val = e.target.value;
+      if (type === 'font-size') {
+        updateSize(val);
+        document.querySelectorAll('[data-val="font-size"]').forEach(s => s.textContent = `${val}px`);
+      } else {
+        setLineHeight(val);
+        document.querySelectorAll('[data-val="line-height"]').forEach(s => s.textContent = val);
+      }
+    });
+  });
+
+  // Width
+  document.querySelectorAll('[data-width]').forEach(btn => {
+    btn.addEventListener('click', () => setReadingWidth(btn.dataset.width));
+  });
+
+  // ── Sidebars / Toggles ───────────────────────────────────────
+  
+  // Settings toggle (desktop)
+  document.getElementById('reader-settings-toggle')?.addEventListener('click', (e) => {
+    const btn = e.currentTarget;
+    const panel = document.getElementById('reader-settings-sidebar');
+    const isOpen = !panel.classList.contains('hidden');
+    panel.classList.toggle('hidden');
+    btn.classList.toggle('reader-action-btn--active', !isOpen);
+  });
+
+  // Chapters toggle (desktop)
+  document.getElementById('reader-trail-toggle')?.addEventListener('click', (e) => {
+    const btn = e.currentTarget;
+    const panel = document.getElementById('chapter-trail-panel');
+    const isOpen = !panel.classList.contains('hidden');
+    panel.classList.toggle('hidden');
+    btn.classList.toggle('reader-action-btn--active', !isOpen);
+  });
+
+  // ── Generic Actions ──────────────────────────────────────────
+  
+  // Bookmark
+  const handleBookmark = async () => {
+    // Shared logic for mobile/desktop buttons
+    const btns = document.querySelectorAll('#reader-bookmark-btn, #mobile-bookmark-btn');
+    const isActive = btns[0].classList.contains('reader-action-btn--active');
+    
+    btns.forEach(b => {
+      b.classList.toggle('reader-action-btn--active', !isActive);
+      b.querySelector('i')?.classList.toggle('text-indigo-400', !isActive);
+    });
+    
+    _showToast(!isActive ? 'Saved to Archive' : 'Removed from Archive');
+  };
+
+  document.getElementById('reader-bookmark-btn')?.addEventListener('click', handleBookmark);
+  document.getElementById('mobile-bookmark-btn')?.addEventListener('click', handleBookmark);
+
+  // Share
+  const handleShare = () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      navigator.share({ title: readerState.taleTitle, url }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(url);
+      _showToast('Link copied to clipboard');
+    }
+  };
+
+  document.getElementById('reader-share-btn')?.addEventListener('click', handleShare);
+  document.getElementById('reader-share-mobile')?.addEventListener('click', handleShare);
+
+  // Back
+  document.getElementById('reader-back-btn')?.addEventListener('click', () => goBackToTale(taleId));
+  document.getElementById('go-back-mobile-btn')?.addEventListener('click', () => goBackToTale(taleId));
+}
+
+/* ─────────────────────────────────────────────
+   Lifecycle
    ───────────────────────────────────────────── */
 
 initTheme();
 
-/* ─────────────────────────────────────────────
-   Desktop UI Bindings
-   ───────────────────────────────────────────── */
-
-function initReaderUI() {
-  // ── Back navigation ──────────────────────────────────────────
-  document.getElementById('reader-back-btn')?.addEventListener('click', () => goBackToTale(taleId));
-  document
-    .getElementById('go-back-mobile-btn')
-    ?.addEventListener('click', () => goBackToTale(taleId));
-
-  // ── Theme buttons ─────────────────────────────────────────────
-  document.querySelectorAll('[data-theme]').forEach((btn) => {
-    btn.addEventListener('click', () => setTheme(btn.dataset.theme));
-  });
-
-  // ── Font family buttons ───────────────────────────────────────
-  document.querySelectorAll('[data-font]').forEach((btn) => {
-    btn.addEventListener('click', () => setFontFamily(btn.dataset.font));
-  });
-
-  // ── Font size sliders ─────────────────────────────────────────
-  document.querySelectorAll('[data-control="font-size"]').forEach((el) => {
-    el.addEventListener('input', (e) => updateSize(e.target.value));
-  });
-
-  // ── Line height sliders ───────────────────────────────────────
-  document.querySelectorAll('[data-control="line-height"]').forEach((el) => {
-    el.addEventListener('input', (e) => setLineHeight(e.target.value));
-  });
-
-  // ── Reading width buttons ─────────────────────────────────────
-  document.querySelectorAll('[data-width]').forEach((btn) => {
-    btn.addEventListener('click', () => setReadingWidth(btn.dataset.width));
-  });
-
-  // ── Bookmark button ───────────────────────────────────────────
-  document.getElementById('reader-bookmark-btn')?.addEventListener('click', () => {
-    // Bookmark toggling is handled via the bookmarks service — stub here
-    const btn = document.getElementById('reader-bookmark-btn');
-    if (btn) {
-      btn.classList.toggle('reader-action-btn--active');
-    }
-  });
-
-  // ── Share button ──────────────────────────────────────────────
-  document.getElementById('reader-share-btn')?.addEventListener('click', () => {
-    const url = window.location.href;
-    navigator.clipboard?.writeText(url).then(() => {
-      _showToast('Link copied to clipboard.', 'success');
-    });
-  });
-
-  // ── Settings panel toggle (desktop sidebar) ───────────────────
-  document.getElementById('reader-settings-toggle')?.addEventListener('click', () => {
-    const panel = document.getElementById('reader-settings-sidebar');
-    panel?.classList.toggle('hidden');
-  });
-
-  // ── Chapter trail toggle ──────────────────────────────────────
-  document.getElementById('reader-trail-toggle')?.addEventListener('click', () => {
-    const trail = document.getElementById('chapter-trail-panel');
-    trail?.classList.toggle('hidden');
-  });
-}
-
-/* ─────────────────────────────────────────────
-   Progress Resolver
-   ───────────────────────────────────────────── */
-
-async function resolveProgress({ userId, taleId, chapterIndex }) {
-  const local = getChapterProgress({ userId, taleId, chapterIndex });
-  const cloud = await getCloudProgress({ userId, taleId });
-  const cloudChapter = cloud?.chapters?.[chapterIndex];
-
-  if (!local && !cloudChapter) return null;
-  if (!cloudChapter) return local;
-  if (!local) return cloudChapter;
-
-  const localTime =
-    typeof local.updatedAt?.toMillis === 'function'
-      ? local.updatedAt.toMillis()
-      : local.updatedAt || 0;
-  const cloudTime =
-    typeof cloudChapter.updatedAt?.toMillis === 'function'
-      ? cloudChapter.updatedAt.toMillis()
-      : cloudChapter.updatedAt || 0;
-
-  return cloudTime > localTime ? cloudChapter : local;
-}
-
-/* ─────────────────────────────────────────────
-   Auth + Initialization
-   ───────────────────────────────────────────── */
-
-const authTimeout = setTimeout(() => {
-  const title = document.getElementById('chapter-title');
-  if (title) title.textContent = 'Connection timed out. Please refresh.';
-}, 10_000);
-
 initAuth(async (user) => {
-  clearTimeout(authTimeout);
   readerState.userId = user.uid;
-
-  let sessionStart = Date.now();
-
-  // Track reading time via visibility change
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') {
-      const duration = Date.now() - sessionStart;
-      if (duration > 1000) addReadTime({ userId: user.uid, taleId, durationMs: duration });
-      sessionStart = Date.now();
-    }
-  });
-
-  const resolvedProgress = await resolveProgress({
-    userId: user.uid,
-    taleId,
-    chapterIndex,
-  });
-
-  // Load tale meta (title, author, era, tags, etc.)
+  
+  // 1. Load Data
   await loadReaderMeta(taleId);
-
-  // Load chapter content + get navigation context
   const navigation = await loadReaderChapter({ taleId, chapterIndex });
   if (!navigation) return;
 
-  // Wire prev/next links
+  // 2. Initialise Navigation
   applyNavigation(navigation, taleId);
-
-  // Initial progress bar render
-  updateReaderProgress({
-    chapterIndex,
-    totalChapters: navigation.totalChapters,
-    scrollPercent: resolvedProgress?.scrollPercent ?? 0,
+  initSwipeNavigation({
+    prevUrl: navigation.hasPrev ? `reader.html?taleId=${taleId}&chapterId=${navigation.prevIndex}` : null,
+    nextUrl: navigation.hasNext ? `reader.html?taleId=${taleId}&chapterId=${navigation.nextIndex}` : null,
   });
 
-  // Restore scroll position
-  restoreScrollProgress({ scrollPercent: resolvedProgress?.scrollPercent ?? 0 });
-
-  // Bind scroll tracking
+  // 3. Scroll Logic
+  const localProgress = getChapterProgress({ userId: user.uid, taleId, chapterIndex });
+  restoreScrollProgress({ scrollPercent: localProgress?.scrollPercent ?? 0 });
+  
   bindScrollProgress({
     chapterIndex,
     totalChapters: navigation.totalChapters,
     onScroll(scrollPercent) {
       saveReaderProgress({ userId: user.uid, taleId, chapterIndex, scrollPercent });
-      const totalReadTimeMs = getLocalTotalReadTime({ userId: user.uid, taleId });
-      scheduleProgressSync({
-        userId: user.uid,
-        taleId,
-        chapterIndex,
-        scrollPercent,
-        totalReadTimeMs,
-      });
-    },
-  });
-
-  // Swipe navigation (mobile)
-  initSwipeNavigation({
-    prevUrl: navigation.hasPrev
-      ? `reader.html?taleId=${taleId}&chapterId=${navigation.prevIndex}`
-      : null,
-    nextUrl: navigation.hasNext
-      ? `reader.html?taleId=${taleId}&chapterId=${navigation.nextIndex}`
-      : null,
+      scheduleProgressSync({ userId: user.uid, taleId, chapterIndex, scrollPercent });
+    }
   });
 
   initIcons();
 });
 
-/* ─────────────────────────────────────────────
-   DOM Ready
-   ───────────────────────────────────────────── */
-
 document.addEventListener('DOMContentLoaded', () => {
-  initReaderUI();
+  initGlobalInteractions();
   initMobileDrawer();
   initToolbarAutoHide();
   initIcons();
 });
 
 /* ─────────────────────────────────────────────
-   Toast (lightweight local)
+   Feedback Helpers
    ───────────────────────────────────────────── */
 
-function _showToast(message, type = 'success') {
-  let container = document.getElementById('reader-toast-container');
-  if (!container) {
-    container = document.createElement('div');
-    container.id = 'reader-toast-container';
-    container.className = 'fixed top-6 right-6 z-[200] flex flex-col gap-2.5 pointer-events-none';
-    document.body.appendChild(container);
-  }
+function _showToast(message) {
+  const container = document.getElementById('reader-toast-container');
+  if (!container) return;
 
   const toast = document.createElement('div');
-  toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl border bg-zinc-900/95 backdrop-blur-xl shadow-2xl text-sm font-medium transition-all duration-300 ${
-    type === 'success' ? 'border-indigo-500/30 text-white' : 'border-red-500/30 text-red-200'
-  }`;
-  toast.innerHTML = `
-    <i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}"
-       class="w-4 h-4 flex-shrink-0 ${type === 'success' ? 'text-indigo-400' : 'text-red-400'}"></i>
-    ${message}
-  `;
+  toast.className = 'glass-strong px-5 py-3.5 rounded-2xl border-indigo-500/20 text-white text-xs font-bold shadow-2xl flex items-center gap-3 transition-all duration-500 opacity-0 translate-y-4';
+  toast.innerHTML = `<i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-400"></i> ${message}`;
+  
   container.appendChild(toast);
   initIcons();
 
+  requestAnimationFrame(() => {
+    toast.classList.remove('opacity-0', 'translate-y-4');
+  });
+
   setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateX(10px)';
-    setTimeout(() => toast.remove(), 350);
+    toast.classList.add('opacity-0', 'scale-95');
+    setTimeout(() => toast.remove(), 500);
   }, 3000);
 }

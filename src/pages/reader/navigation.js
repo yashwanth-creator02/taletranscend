@@ -1,8 +1,6 @@
 // src/pages/reader/navigation.js
 // Chapter navigation: prev/next links, keyboard arrow shortcuts,
-// page transition fade, and back-to-tale navigation.
-
-import { readerState } from './state.js';
+// and page transition fade.
 
 /* ─────────────────────────────────────────────
    Apply Navigation Links
@@ -10,55 +8,37 @@ import { readerState } from './state.js';
 
 /**
  * Wires the previous and next chapter navigation links.
- * Hides links when there is no adjacent chapter.
- * Adds keyboard arrow key shortcuts for navigation.
- *
- * @param {Object} navigation
- * @param {boolean}     navigation.hasPrev
- * @param {boolean}     navigation.hasNext
- * @param {number|null} navigation.prevIndex
- * @param {number|null} navigation.nextIndex
- * @param {string|null} navigation.prevTitle
- * @param {string|null} navigation.nextTitle
- * @param {number}      navigation.totalChapters
- * @param {string} taleId
+ * Handles visibility, content, and click-fade.
  */
 export function applyNavigation(navigation, taleId) {
   const prev = document.getElementById('prev-link');
   const next = document.getElementById('next-link');
 
+  // 1. Previous Chapter
   if (navigation.hasPrev && prev) {
-    const url = _chapterUrl(taleId, navigation.prevIndex);
-    prev.href = url;
-    prev.hidden = false;
+    prev.href = _chapterUrl(taleId, navigation.prevIndex);
     prev.classList.remove('hidden');
-
-    const prevTitle = document.getElementById('prev-title');
-    if (prevTitle) prevTitle.textContent = navigation.prevTitle || 'Previous';
-
+    _setText('prev-title', navigation.prevTitle || 'Previous Chapter');
     prev.addEventListener('click', _fadeOut);
   } else {
     prev?.classList.add('hidden');
   }
 
+  // 2. Next Chapter
   if (navigation.hasNext && next) {
-    const url = _chapterUrl(taleId, navigation.nextIndex);
-    next.href = url;
-    next.hidden = false;
+    next.href = _chapterUrl(taleId, navigation.nextIndex);
     next.classList.remove('hidden');
-
-    const nextTitle = document.getElementById('next-title');
-    if (nextTitle) nextTitle.textContent = navigation.nextTitle || 'Next';
-
+    _setText('next-title', navigation.nextTitle || 'Next Chapter');
     next.addEventListener('click', _fadeOut);
   } else {
     next?.classList.add('hidden');
   }
 
-  // ── Keyboard shortcuts ──────────────────────────────────────────
-  document.addEventListener('keydown', (e) => {
-    // Don't fire when user is typing
-    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+  // 3. Keyboard Arrow Shortcuts
+  const onKeydown = (e) => {
+    // Only fire if not in input/textarea
+    const tag = e.target.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
 
     if (e.key === 'ArrowLeft' && navigation.hasPrev) {
       _fadeAndNavigate(_chapterUrl(taleId, navigation.prevIndex));
@@ -66,17 +46,14 @@ export function applyNavigation(navigation, taleId) {
     if (e.key === 'ArrowRight' && navigation.hasNext) {
       _fadeAndNavigate(_chapterUrl(taleId, navigation.nextIndex));
     }
-  });
-}
+  };
 
-/* ─────────────────────────────────────────────
-   Back Navigation
-   ───────────────────────────────────────────── */
+  document.removeEventListener('keydown', onKeydown);
+  document.addEventListener('keydown', onKeydown);
+}
 
 /**
  * Navigates back to the tale overview page.
- *
- * @param {string} taleId
  */
 export function goBackToTale(taleId) {
   _fadeAndNavigate(`tale.html?id=${taleId}`);
@@ -92,14 +69,19 @@ function _chapterUrl(taleId, chapterId) {
 
 function _fadeOut(e) {
   e?.preventDefault();
-  const target = e?.currentTarget?.href ?? '';
-  _fadeAndNavigate(target);
+  const url = e.currentTarget.href;
+  if (url) _fadeAndNavigate(url);
 }
 
 function _fadeAndNavigate(url) {
-  document.body.style.transition = 'opacity 180ms ease';
+  document.body.style.transition = 'opacity 0.25s ease';
   document.body.style.opacity = '0';
   setTimeout(() => {
     window.location.href = url;
-  }, 200);
+  }, 250);
+}
+
+function _setText(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val ?? '';
 }

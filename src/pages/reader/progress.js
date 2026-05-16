@@ -45,25 +45,17 @@ export function updateReaderProgress({ chapterIndex, totalChapters, scrollPercen
  * @param {{ chapterIndex: number, totalChapters: number, onScroll: (percent: number) => void }} params
  */
 export function bindScrollProgress({ chapterIndex, totalChapters, onScroll }) {
-  let ticking = false;
-
   const handler = () => {
-    if (ticking) return;
-    ticking = true;
+    const scrollPercent = _calcScrollPercent();
 
-    requestAnimationFrame(() => {
-      const scrollPercent = _calcScrollPercent();
+    // Top bar
+    const topBar = document.getElementById('reading-progress');
+    if (topBar) topBar.style.width = `${scrollPercent}%`;
 
-      // Top bar
-      const topBar = document.getElementById('reading-progress');
-      if (topBar) topBar.style.width = `${scrollPercent}%`;
+    // Sidebar overall bar
+    updateReaderProgress({ chapterIndex, totalChapters, scrollPercent });
 
-      // Sidebar overall bar
-      updateReaderProgress({ chapterIndex, totalChapters, scrollPercent });
-
-      onScroll(scrollPercent);
-      ticking = false;
-    });
+    onScroll(scrollPercent);
   };
 
   window.addEventListener('scroll', handler, { passive: true });

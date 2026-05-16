@@ -1,7 +1,6 @@
 // src/pages/reader/theme.js
-// Manages all reading preferences: theme, font family, font size,
-// line height, and reading width.
-// Persists to localStorage and applies CSS variables on init.
+// Optimized Theme Management for Reader
+// Handles Typography and Colour Themes with absolute consistency.
 
 import { readerState, THEMES, FONTS, WIDTHS } from './state.js';
 
@@ -14,13 +13,9 @@ const STORAGE_KEYS = {
 };
 
 /* ─────────────────────────────────────────────
-   Init — apply all saved preferences
+   Core Logic
    ───────────────────────────────────────────── */
 
-/**
- * Loads all saved preferences and applies them.
- * Call once on page load before auth resolves.
- */
 export function initTheme() {
   readerState.theme = localStorage.getItem(STORAGE_KEYS.theme) || 'dark';
   readerState.fontFamily = localStorage.getItem(STORAGE_KEYS.fontFamily) || 'serif';
@@ -31,132 +26,61 @@ export function initTheme() {
   _applyAll();
 }
 
-// Alias expected by reader.js
-export { initTheme as initFont };
-
-/* ─────────────────────────────────────────────
-   Theme
-   ───────────────────────────────────────────── */
-
 /**
- * Applies a colour theme to the reader.
- *
- * @param {'dark'|'sepia'|'light'} theme
+ * Applies a global colour theme.
+ * Updates both <body> and <html> to ensure total consistency.
  */
 export function setTheme(theme) {
   if (!THEMES[theme]) return;
   readerState.theme = theme;
   localStorage.setItem(STORAGE_KEYS.theme, theme);
 
-  // Use global theme classes instead of just reader-specific ones
-  document.body.classList.remove('theme-dark', 'theme-sepia', 'theme-light');
+  // 1. Update Body Classes (Global + Scoped)
+  const allThemes = ['theme-dark', 'theme-sepia', 'theme-light', 'reader-theme-dark', 'reader-theme-sepia', 'reader-theme-light'];
+  document.body.classList.remove(...allThemes);
   document.body.classList.add(`theme-${theme}`);
-  
-  // Also keep the reader-specific ones if reader.css still needs them for scoping
-  document.body.classList.remove('reader-theme-dark', 'reader-theme-sepia', 'reader-theme-light');
   document.body.classList.add(`reader-theme-${theme}`);
 
-  // We rely on CSS variables defined in base.css for these themes
-  _syncThemeButtons(theme);
+  // 2. Update Data Attribute for persistent styling
+  document.documentElement.setAttribute('data-theme', theme);
+
+  _syncUI();
 }
 
-function _syncThemeButtons(active) {
-  document.querySelectorAll('[data-theme]').forEach((btn) => {
-    const isActive = btn.dataset.theme === active;
-    btn.setAttribute('data-active', String(isActive));
-    btn.classList.toggle('reader-option--active', isActive);
-  });
-}
-
-/* ─────────────────────────────────────────────
-   Font Family
-   ───────────────────────────────────────────── */
-
-/**
- * @param {'serif'|'sans'|'mono'} family
- */
 export function setFontFamily(family) {
   if (!FONTS[family]) return;
   readerState.fontFamily = family;
   localStorage.setItem(STORAGE_KEYS.fontFamily, family);
-
   document.documentElement.style.setProperty('--reader-font', FONTS[family].css);
-
-  _syncFontButtons(family);
+  _syncUI();
 }
 
-// Alias used by reader.js and mobile buttons
-export function applyReaderFont(family) {
-  setFontFamily(family);
-}
-
-function _syncFontButtons(active) {
-  document.querySelectorAll('[data-font]').forEach((btn) => {
-    const isActive = btn.dataset.font === active;
-    btn.setAttribute('data-active', String(isActive));
-    btn.classList.toggle('reader-option--active', isActive);
-  });
-}
-
-/* ─────────────────────────────────────────────
-   Font Size
-   ───────────────────────────────────────────── */
-
-/**
- * @param {number|string} val - px value 14–26
- */
 export function updateSize(val) {
   const px = Math.min(26, Math.max(14, Number(val)));
   readerState.fontSize = px;
   localStorage.setItem(STORAGE_KEYS.fontSize, String(px));
   document.documentElement.style.setProperty('--reader-size', `${px}px`);
-
-  // Keep all sliders in sync
-  document.querySelectorAll('[data-control="font-size"]').forEach((el) => {
-    el.value = String(px);
-  });
+  _syncUI();
 }
 
-/* ─────────────────────────────────────────────
-   Line Height
-   ───────────────────────────────────────────── */
-
-/**
- * @param {number|string} val - multiplier 1.4–2.2
- */
 export function setLineHeight(val) {
   const lh = Math.min(2.2, Math.max(1.4, Number(val)));
   readerState.lineHeight = lh;
   localStorage.setItem(STORAGE_KEYS.lineHeight, String(lh));
   document.documentElement.style.setProperty('--reader-lh', String(lh));
-
-  document.querySelectorAll('[data-control="line-height"]').forEach((el) => {
-    el.value = String(lh);
-  });
+  _syncUI();
 }
 
-/* ─────────────────────────────────────────────
-   Reading Width
-   ───────────────────────────────────────────── */
-
-/**
- * @param {'narrow'|'normal'|'wide'} width
- */
 export function setReadingWidth(width) {
   if (!WIDTHS[width]) return;
   readerState.readingWidth = width;
   localStorage.setItem(STORAGE_KEYS.readingWidth, width);
   document.documentElement.style.setProperty('--reader-width', WIDTHS[width].value);
-
-  document.querySelectorAll('[data-width]').forEach((btn) => {
-    const isActive = btn.dataset.width === width;
-    btn.setAttribute('data-active', String(isActive));
-    btn.classList.toggle('reader-option--active', isActive);
-  });
+  _syncUI();
 }
 
 /* ─────────────────────────────────────────────
-   Internal
+   Internal Sync
    ───────────────────────────────────────────── */
 
 function _applyAll() {
@@ -165,4 +89,38 @@ function _applyAll() {
   updateSize(readerState.fontSize);
   setLineHeight(readerState.lineHeight);
   setReadingWidth(readerState.readingWidth);
+}
+
+/**
+ * Synchronizes all UI components (buttons, sliders) with current state.
+ * Prevents "duplicate button" sync issues by targeting all instances.
+ */
+function _syncUI() {
+  // Sync Buttons
+  document.querySelectorAll('[data-theme]').forEach(btn => {
+    btn.classList.toggle('reader-option--active', btn.dataset.theme === readerState.theme);
+  });
+
+  document.querySelectorAll('[data-font]').forEach(btn => {
+    btn.classList.toggle('reader-option--active', btn.dataset.font === readerState.fontFamily);
+  });
+
+  document.querySelectorAll('[data-width]').forEach(btn => {
+    btn.classList.toggle('reader-option--active', btn.dataset.width === readerState.readingWidth);
+  });
+
+  // Sync Sliders
+  document.querySelectorAll('[data-control="font-size"]').forEach(el => {
+    el.value = String(readerState.fontSize);
+  });
+  document.querySelectorAll('[data-val="font-size"]').forEach(s => {
+    s.textContent = `${readerState.fontSize}px`;
+  });
+
+  document.querySelectorAll('[data-control="line-height"]').forEach(el => {
+    el.value = String(readerState.lineHeight);
+  });
+  document.querySelectorAll('[data-val="line-height"]').forEach(s => {
+    s.textContent = String(readerState.lineHeight);
+  });
 }
