@@ -1,6 +1,6 @@
 // src/pages/tale/tale.js
-// Entry point for the tale overview page.
-// Bootstraps auth, loads tale data, renders UI, and binds interactions.
+// Modern Archive Entry Point
+// Orchestrates neural link, data hydration, and interactive states.
 
 import '@css/base.css';
 import '@css/nav.css';
@@ -17,54 +17,67 @@ import {
   setupTabs,
   setupStartReading,
   setupResumeReading,
+  initHeaderScroll,
   listenToComments,
   postComment,
   initIcons,
 } from './index.js';
 import { initNav } from '@ui/components/nav/nav.js';
 import { setupAuthTimeout } from '@/utils/ui.utils';
-initNav();
-/* ==================== URL Parameters ==================== */
+
+/* ─────────────────────────────────────────────
+   URL Parameters
+   ───────────────────────────────────────────── */
+
 const taleId = new URLSearchParams(window.location.search).get('id');
 
-// Redirect to library if no tale ID is present in the URL
 if (!taleId) {
   location.replace('library.html');
-  throw new Error('No taleId');
+  throw new Error('No taleId detected');
 }
 
-/* ==================== Initialization ==================== */
+/* ─────────────────────────────────────────────
+   Bootstrap Component
+   ───────────────────────────────────────────── */
 
-/**
- * Bootstraps the tale page after authentication:
- * - Loads and renders tale metadata
- * - Loads and renders chapter list
- * - Binds all user interactions
- * - Starts real-time comment listener
- */
-const authTimeout = setupAuthTimeout('cards-grid');
+initNav();
+
+const authTimeout = setupAuthTimeout('display-description', 'Archive connection timed out. Neural link severed.');
+
 initAuth(async (user) => {
-  const userId = user.uid;
   clearTimeout(authTimeout);
+  const userId = user.uid;
 
-  const tale = await loadTale(taleId, user);
+  // 1. Data Hydration
+  const [tale, chapters] = await Promise.all([
+    loadTale(taleId, user),
+    loadChapters(taleId)
+  ]);
+
   if (!tale) return;
 
+  // 2. Primary UI
   await renderTale(userId, tale, taleId);
-
-  const chapters = await loadChapters(taleId);
   renderChapters(userId, chapters, taleId);
 
+  // 3. Interactions
   bindChapterClicks(taleId);
   setupStartReading(taleId, chapters);
   setupResumeReading(userId, taleId);
   setupTabs();
+  initHeaderScroll();
 
+  // 4. Real-time Listeners
   listenToComments(taleId);
 
-  // Expose comment posting for HTML inline handler
+  // 5. Post-resolve hooks
   document.getElementById('post-btn')?.addEventListener('click', () => postComment(taleId));
+  
+  initIcons();
 });
 
-/* ==================== Icons ==================== */
+/* ─────────────────────────────────────────────
+   Static Initialization
+   ───────────────────────────────────────────── */
+
 initIcons();
