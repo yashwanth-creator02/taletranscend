@@ -1,6 +1,7 @@
 // src/pages/library/interactions.js
-// All interaction handlers for the library page tale cards.
-// Uses event delegation for efficient click handling across the card grid.
+// Card action handlers for the library page.
+// Scope: resume, bookmark (couple/decouple), copy link, mark finished.
+// Everything else (search, filters, sidebar toggle) lives in filters.js / ui.js.
 
 import {
   resolveResumePoint,
@@ -9,149 +10,127 @@ import {
   markTaleFinished,
 } from '@services/index.js';
 
-/* ==================== CARD INTERACTIONS (SINGLE ENTRY) ==================== */
+/* ─────────────────────────────────────────────
+   Card Interactions — single delegated handler
+   ───────────────────────────────────────────── */
 
 /**
- * Sets up ALL interactions for tale cards using ONE delegated click handler.
+ * Sets up all card interactions via a single delegated click handler on #cards-grid.
  *
- * @param {string} userId - Current user ID
+ * @param {string} userId
  */
 export function setupCardInteractions(userId) {
   const grid = document.getElementById('cards-grid');
   if (!grid) return;
 
   grid.addEventListener('click', async (e) => {
-    try {
-      const actionEl = e.target.closest('[data-action]');
-      const card = e.target.closest('.tale-card');
+    const actionEl = e.target.closest('[data-action]');
+    const card = e.target.closest('.tale-card');
 
-      // Click not related to a card
-      if (!card || !grid.contains(card)) return;
+    if (!card || !grid.contains(card)) return;
 
-      const taleId = card.dataset?.id;
-      if (!taleId) return;
+    const taleId = card.dataset.id;
+    if (!taleId) return;
 
-      /* ================= ACTION ROUTING ================= */
+    // Action button clicked
+    if (actionEl && card.contains(actionEl)) {
+      e.stopPropagation();
+      const action = actionEl.dataset.action;
 
-      if (actionEl && card.contains(actionEl)) {
-        const action = actionEl.dataset?.action;
-        if (!action) return;
+      switch (action) {
+        case 'options':
+          _toggleMenu(actionEl.dataset.menuId);
+          return;
 
-        e.stopPropagation();
+        case 'resume':
+          await _handleResume(userId, taleId);
+          return;
 
-        switch (action) {
-          case 'options':
-            handleOptionsToggle(actionEl);
-            return;
+        case 'copy-link':
+          _handleCopyLink(taleId);
+          return;
 
-          case 'resume':
-            await handleResume(userId, taleId);
-            return;
+        case 'mark-finished':
+          if (actionEl.hasAttribute('disabled')) return;
+          _confirmMarkFinished(() => _handleMarkFinished(userId, taleId));
+          return;
 
-          case 'copy-link':
-            e.stopPropagation();
-            handleCopyLink(taleId);
-            return;
+        case 'couple':
+          await _handleCouple(userId, taleId, actionEl);
+          return;
 
-          case 'mark-finished':
-            if (actionEl.hasAttribute('disabled')) return;
-            confirmMarkFinished(() => handleMarkFinished(userId, taleId));
-            return;
+        case 'decouple':
+          await _handleDecouple(userId, taleId, actionEl);
+          return;
 
-          case 'couple':
-            await handleCouple(userId, taleId, actionEl);
-            return;
-
-          case 'decouple':
-            await handleDecouple(userId, taleId, actionEl);
-            return;
-
-          default:
-            return;
-        }
+        default:
+          return;
       }
+    }
 
-      /* ================= CARD NAVIGATION ================= */
-
+    // Card body click → tale detail page
+    if (!e.target.closest('.options-menu')) {
       window.location.assign(`tale.html?id=${encodeURIComponent(taleId)}`);
-    } catch (err) {
-      console.error('Card interaction failed:', err);
     }
   });
 
-  /* ================= OUTSIDE CLICK (MENU CLOSE) ================= */
-
+  // Close menus on outside click
   document.addEventListener('click', (e) => {
-    if (e.target.closest('.options-menu') || e.target.closest('[data-action="options"]')) {
-      return;
+    if (!e.target.closest('.options-menu') && !e.target.closest('[data-action="options"]')) {
+      _closeAllMenus();
     }
+  });
 
-    closeAllMenus();
+  // Escape closes open menus
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') _closeAllMenus();
   });
 }
 
-/* ==================== HANDLERS ==================== */
+/* ─────────────────────────────────────────────
+   Handlers
+   ───────────────────────────────────────────── */
 
-function handleOptionsToggle(btn) {
-  if (!btn) return;
-
-  const menuId = btn.dataset?.menuId;
-  if (!menuId) return;
-
-  const menu = document.getElementById(menuId);
-  if (!menu) return;
-
-  document.querySelectorAll('.options-menu:not(.hidden)').forEach((m) => {
-    if (m !== menu) m.classList.add('hidden');
-  });
-
-  menu.classList.toggle('hidden');
-}
-
-async function handleResume(userId, taleId) {
-  if (!userId || !taleId) return;
-
+async function _handleResume(userId, taleId) {
   try {
     const resume = await resolveResumePoint({ userId, taleId });
-
-    const chapterId = resume?.chapterIndex != null ? resume.chapterIndex : 0;
-
+    const chapterId = resume?.chapterIndex ?? 0;
     window.location.assign(
       `reader.html?taleId=${encodeURIComponent(taleId)}&chapterId=${chapterId}`
     );
   } catch (err) {
-    console.error('Resume failed:', err);
+    console.error('[library] Resume failed:', err);
   }
 }
 
-function handleCopyLink(taleId) {
-  const url = `${window.location.origin}/pages/tale.html?id=${encodeURIComponent(taleId)}`;
-
+function _handleCopyLink(taleId) {
+  const url = `${window.location.origin}/tale.html?id=${encodeURIComponent(taleId)}`;
   const modal = document.getElementById('copy-link-modal');
   const input = document.getElementById('copy-link-input');
-
   if (!modal || !input) return;
 
   input.value = url;
   modal.classList.remove('hidden');
+  modal.classList.add('flex');
+
+  const close = () => {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  };
 
   document.getElementById('copy-link-confirm').onclick = async () => {
     await navigator.clipboard.writeText(url);
-    modal.classList.add('hidden');
+    close();
+    _showToast('Link copied.', 'success');
   };
 
-  document.getElementById('copy-link-close').onclick = () => {
-    modal.classList.add('hidden');
-  };
+  document.getElementById('copy-link-close').onclick = close;
 }
 
-function confirmMarkFinished(onConfirm) {
-  if (typeof onConfirm !== 'function') return;
-
+function _confirmMarkFinished(onConfirm) {
   const modal = document.getElementById('confirm-modal');
   const cancel = document.getElementById('confirm-cancel');
   const accept = document.getElementById('confirm-accept');
-
   if (!modal || !cancel || !accept) return;
 
   modal.classList.remove('hidden');
@@ -165,235 +144,101 @@ function confirmMarkFinished(onConfirm) {
   };
 
   cancel.onclick = cleanup;
-
   accept.onclick = async () => {
     cleanup();
     try {
       await onConfirm();
     } catch (err) {
-      console.error('Mark finished failed:', err);
+      console.error('[library] Mark finished:', err);
     }
   };
 }
 
-async function handleMarkFinished(userId, taleId) {
-  if (!userId || !taleId) return;
-
-  try {
-    await markTaleFinished({ userId, taleId });
-    closeAllMenus();
-    reinitIcons();
-  } catch (err) {
-    console.error('Mark finished service error:', err);
-  }
+async function _handleMarkFinished(userId, taleId) {
+  await markTaleFinished({ userId, taleId });
+  _closeAllMenus();
+  window.lucide?.createIcons?.();
 }
 
-async function handleCouple(userId, taleId, btn) {
-  if (!userId || !taleId || !btn) return;
-
+async function _handleCouple(userId, taleId, btn) {
   btn.setAttribute('disabled', 'true');
-
   try {
     await addToBookmarks({ userId, taleId });
-
     btn.dataset.action = 'decouple';
-    btn.innerHTML = `
-      <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-      Decouple Fragment
-    `;
+    btn.innerHTML = `<i data-lucide="bookmark-minus" class="w-3.5 h-3.5"></i> Remove from shelf`;
     btn.classList.remove('text-emerald-400', 'hover:bg-emerald-500/20');
     btn.classList.add('text-red-400', 'hover:bg-red-500/20');
-
-    reinitIcons();
-    closeAllMenus();
+    window.lucide?.createIcons?.();
+    _closeAllMenus();
   } catch (err) {
-    console.error('Couple failed:', err);
+    console.error('[library] Couple failed:', err);
   } finally {
     btn.removeAttribute('disabled');
   }
 }
 
-async function handleDecouple(userId, taleId, btn) {
-  if (!userId || !taleId || !btn) return;
-
+async function _handleDecouple(userId, taleId, btn) {
   btn.setAttribute('disabled', 'true');
-
   try {
     await removeFromBookmarks({ userId, taleId });
-
     btn.dataset.action = 'couple';
-    btn.innerHTML = `
-      <i data-lucide="link" class="w-3.5 h-3.5"></i>
-      Couple Fragment
-    `;
+    btn.innerHTML = `<i data-lucide="bookmark-plus" class="w-3.5 h-3.5"></i> Add to shelf`;
     btn.classList.remove('text-red-400', 'hover:bg-red-500/20');
     btn.classList.add('text-emerald-400', 'hover:bg-emerald-500/20');
-
-    reinitIcons();
-    closeAllMenus();
+    window.lucide?.createIcons?.();
+    _closeAllMenus();
   } catch (err) {
-    console.error('Decouple failed:', err);
+    console.error('[library] Decouple failed:', err);
   } finally {
     btn.removeAttribute('disabled');
   }
 }
 
-/* ==================== HELPERS ==================== */
+/* ─────────────────────────────────────────────
+   Helpers
+   ───────────────────────────────────────────── */
 
-function closeAllMenus() {
+function _toggleMenu(menuId) {
+  if (!menuId) return;
+  const menu = document.getElementById(menuId);
+  if (!menu) return;
+
+  // Close all others first
+  document.querySelectorAll('.options-menu:not(.hidden)').forEach((m) => {
+    if (m !== menu) m.classList.add('hidden');
+  });
+
+  menu.classList.toggle('hidden');
+}
+
+function _closeAllMenus() {
   document.querySelectorAll('.options-menu:not(.hidden)').forEach((m) => m.classList.add('hidden'));
 }
 
-function reinitIcons() {
-  if (window?.lucide?.createIcons) {
-    window.lucide.createIcons();
+function _showToast(message, type = 'success') {
+  let container = document.getElementById('lib-toast');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'lib-toast';
+    container.className = 'fixed top-6 right-6 z-[300] flex flex-col gap-2.5 pointer-events-none';
+    document.body.appendChild(container);
   }
-}
 
-/* ==================== SEARCH ==================== */
+  const toast = document.createElement('div');
+  toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl border bg-zinc-900/95 backdrop-blur-xl shadow-2xl text-sm font-medium transition-all duration-300 ${
+    type === 'success' ? 'border-indigo-500/30 text-white' : 'border-red-500/30 text-red-200'
+  }`;
+  toast.innerHTML = `
+    <i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}"
+       class="w-4 h-4 flex-shrink-0 ${type === 'success' ? 'text-indigo-400' : 'text-red-400'}"></i>
+    ${message}
+  `;
+  container.appendChild(toast);
+  window.lucide?.createIcons?.();
 
-export function setupSearch(getAllTales, onFilter, initIcons) {
-  const input = document.getElementById('search-input');
-  if (!input || typeof getAllTales !== 'function') return;
-
-  input.addEventListener('input', async (e) => {
-    try {
-      const term = (e.target.value || '').toLowerCase();
-
-      const tales = getAllTales() || [];
-      const filtered = tales.filter((t) =>
-        [t?.title, t?.description, t?.era].some((v) => v?.toLowerCase().includes(term))
-      );
-
-      if (typeof onFilter === 'function') {
-        await onFilter(filtered);
-      }
-
-      if (typeof initIcons === 'function') {
-        initIcons();
-      }
-    } catch (err) {
-      console.error('Search failed:', err);
-    }
-  });
-}
-
-/* ==================== SIDEBAR TOGGLE ==================== */
-
-export function setupSidebarToggle() {
-  const sidebar = document.getElementById('sidebar');
-  const toggleBtn = document.getElementById('toggle-sidebar');
-
-  if (!sidebar || !toggleBtn) return;
-
-  toggleBtn.addEventListener('click', () => {
-    sidebar.classList.toggle('collapsed');
-  });
-}
-
-/* ==================== ERA FILTER ==================== */
-
-/**
- * Initializes the era filter buttons in the top filter bar.
- * Filters the cards grid by era when a button is clicked.
- *
- * @param {Function} getAllTales - Returns the full tales array
- * @param {Function} onFilter - Callback to render filtered tales
- * @param {Function} initIcons - Re-initializes icons after render
- */
-export function setupEraFilter(getAllTales, onFilter, initIcons) {
-  const buttons = document.querySelectorAll('.era-filter');
-  if (!buttons.length) return;
-
-  buttons.forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      const era = btn.dataset.era;
-
-      // Update active button styles
-      buttons.forEach((b) => {
-        b.classList.remove('bg-indigo-600', 'text-white', 'shadow-xl', 'shadow-indigo-600/20');
-        b.classList.add('bg-zinc-900/50', 'border', 'border-white/5', 'text-zinc-500');
-      });
-      btn.classList.add('bg-indigo-600', 'text-white', 'shadow-xl', 'shadow-indigo-600/20');
-      btn.classList.remove('bg-zinc-900/50', 'border', 'border-white/5', 'text-zinc-500');
-
-      const tales = getAllTales();
-      const filtered =
-        era === 'all' ? tales : tales.filter((t) => t.era?.toLowerCase() === era.toLowerCase());
-
-      await onFilter(filtered);
-      if (typeof initIcons === 'function') initIcons();
-    });
-  });
-}
-
-/* ==================== SIDEBAR FILTER ==================== */
-
-/**
- * Initializes the sidebar filter buttons.
- * Handles All, Recent, Bookmarked, My Tales, and Completed filters.
- *
- * @param {string} userId - Current user ID
- * @param {Function} getAllTales - Returns the full tales array
- * @param {Function} onFilter - Callback to render filtered tales
- * @param {Function} initIcons - Re-initializes icons after render
- */
-export function setupSidebarFilter(userId, getAllTales, onFilter, initIcons) {
-  const buttons = document.querySelectorAll('.sidebar-filter');
-  if (!buttons.length) return;
-
-  buttons.forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      const filter = btn.dataset.filter;
-
-      // Update active button styles
-      buttons.forEach((b) => {
-        b.classList.remove('bg-indigo-500/10', 'text-indigo-400', 'border', 'border-indigo-500/20');
-        b.classList.add('text-zinc-500');
-      });
-      btn.classList.add('bg-indigo-500/10', 'text-indigo-400', 'border', 'border-indigo-500/20');
-      btn.classList.remove('text-zinc-500');
-
-      const tales = getAllTales();
-      let filtered = tales;
-
-      switch (filter) {
-        case 'all':
-          filtered = tales;
-          break;
-
-        case 'recent': {
-          // Sort by publishedAt descending, take top 20
-          filtered = [...tales]
-            .filter((t) => t.publishedAt)
-            .sort((a, b) => (b.publishedAt?.seconds || 0) - (a.publishedAt?.seconds || 0))
-            .slice(0, 20);
-          break;
-        }
-
-        case 'finished':
-          filtered = tales.filter((t) => t.status === 'finished');
-          break;
-
-        case 'bookmarked': {
-          // Import dynamically to avoid circular deps
-          const { getBookmarks } = await import('@services/index.js');
-          const bookmarks = await getBookmarks({ userId });
-          const ids = new Set(bookmarks.map((b) => b.id));
-          filtered = tales.filter((t) => ids.has(t.id));
-          break;
-        }
-
-        case 'my-tales':
-          filtered = tales.filter((t) => t.authorId === userId);
-          break;
-
-        default:
-          filtered = tales;
-      }
-
-      await onFilter(filtered);
-      if (typeof initIcons === 'function') initIcons();
-    });
-  });
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(10px)';
+    setTimeout(() => toast.remove(), 350);
+  }, 3000);
 }

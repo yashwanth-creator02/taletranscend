@@ -1,66 +1,44 @@
 // src/pages/library/content.js
-// Manages real-time subscription to the community tales collection in Firestore.
+// Manages real-time subscription to the community tales collection.
 
-import { onSnapshot, auth, refs } from '@fb/index.js';
+import { onSnapshot, refs } from '@fb/index.js';
+import { libraryState } from './state.js';
 
-/* ─────────────────────────────────────────────
-   Listener State
-   ───────────────────────────────────────────── */
-
-// Holds the active Firestore listener unsubscribe function
-let unsubscribe = null;
-
-/* ─────────────────────────────────────────────
-   Real-time Tales Subscription
-   ───────────────────────────────────────────── */
+let _unsubscribe = null;
 
 /**
  * Subscribes to real-time updates for the public community tales collection.
- * Calls onUpdate with the latest tales array on every change.
- * Calls onError if a permission or network error occurs.
+ * Stores the full tales array in libraryState.allTales on every update.
  *
- * @param {Function} onUpdate - Callback invoked with an array of tale objects
- * @param {Function} onError - Callback invoked with the Firestore error
+ * @param {(tales: Array<Object>) => void} onUpdate - Called with the fresh tales array
+ * @param {(err: Error) => void}           onError  - Called on Firestore error
  */
 export function subscribeToTales(onUpdate, onError) {
-  // Prevent duplicate listeners during hot reloads
-  if (unsubscribe) {
-    unsubscribe();
-    unsubscribe = null;
+  // Guard against duplicate listeners on hot reload
+  if (_unsubscribe) {
+    _unsubscribe();
+    _unsubscribe = null;
   }
 
-  // Public tales collection reference
-  const talesRef = refs.tales();
-
-  unsubscribe = onSnapshot(
-    talesRef,
-
+  _unsubscribe = onSnapshot(
+    refs.tales(),
     (snapshot) => {
-      // Normalize Firestore documents
-      const tales = snapshot.docs.map((docSnap) => ({
-        id: docSnap.id,
-        ...docSnap.data(),
-      }));
-
-      // Push latest tales into the UI
+      const tales = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      libraryState.allTales = tales;
       onUpdate(tales);
     },
-
-    (error) => {
-      console.error('subscribeToTales error:', error.code, error.message);
-
-      console.error('Auth status at failure:', auth.currentUser ? 'logged in' : 'logged out');
-
-      onError(error);
+    (err) => {
+      console.error('[library] subscribeToTales error:', err.code, err.message);
+      onError(err);
     }
   );
 }
 
 /**
- * Stops the active real-time subscription to the tales collection.
- * Should be called when the page unloads to prevent memory leaks.
+ * Stops the active Firestore subscription.
+ * Call on page unload to prevent memory leaks.
  */
 export function stopTalesSubscription() {
-  unsubscribe?.();
-  unsubscribe = null;
+  _unsubscribe?.();
+  _unsubscribe = null;
 }

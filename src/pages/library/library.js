@@ -6,91 +6,84 @@ import '@css/components.css';
 import '@css/pages/library.css';
 
 import { initNav } from '@ui/components/nav/nav.js';
+import { initAuth } from '@fb/index.js';
+import { libraryState } from './state.js';
+
+import { subscribeToTales, stopTalesSubscription } from './content.js';
+import { applyAllFilters, setupSearch, setupEraFilter, setupSidebarFilter } from './filters.js';
+import { setupCardInteractions } from './interactions.js';
 import {
-  initAuth,
-  subscribeToTales,
-  stopTalesSubscription,
-  renderCardsGrid,
-  initIcons,
-  setupSearch,
-  setupCardInteractions,
   setupSidebarToggle,
-  setupEraFilter,
-  setupSidebarFilter,
-} from './index.js';
+  updateSidebarUser,
+  showGridSkeleton,
+  showGridError,
+  setActiveSidebarBtn,
+} from './ui.js';
 
 initNav();
 
-/* ==================== URL Search Pre-fill ==================== */
+/* ─────────────────────────────────────────────
+   DOM-ready setup (before auth)
+   ───────────────────────────────────────────── */
+
 document.addEventListener('DOMContentLoaded', () => {
-  const urlSearch = new URLSearchParams(window.location.search).get('search');
-  if (urlSearch) {
-    const input = document.getElementById('search-input');
-    if (input) {
-      input.value = urlSearch;
-      input.dispatchEvent(new Event('input'));
-    }
-  }
+  setupSidebarToggle();
+  showGridSkeleton();
+  window.lucide?.createIcons?.();
 });
 
-/* ==================== Global State ==================== */
-let allTales = [];
+/* ─────────────────────────────────────────────
+   Auth timeout guard
+   ───────────────────────────────────────────── */
 
-/* ==================== UI Init ==================== */
-setupSidebarToggle();
-
-/* ==================== Auth & Subscription ==================== */
 const authTimeout = setTimeout(() => {
-  document.getElementById('cards-grid').innerHTML = `
-    <div class="col-span-full text-center py-20 text-red-500">
-      Connection timed out. Please refresh.
-    </div>
-  `;
-}, 10000);
+  showGridError();
+}, 10_000);
+
+/* ─────────────────────────────────────────────
+   Auth + Data
+   ───────────────────────────────────────────── */
 
 initAuth(async (user) => {
   clearTimeout(authTimeout);
-  const userId = user.uid;
+  libraryState.userId = user.uid;
 
+  // Update sidebar user avatar + name
+  updateSidebarUser(user);
+
+  // Submit tale button
+  document.getElementById('btn-submit-tale')?.addEventListener('click', () => {
+    window.location.href = 'contribution.html';
+  });
+
+  // Wire search (handles URL param pre-fill too)
+  setupSearch();
+
+  // Wire sidebar filter buttons
+  setupSidebarFilter();
+  setActiveSidebarBtn('all');
+
+  // Wire card interactions
+  setupCardInteractions(user.uid);
+
+  // Subscribe to real-time tales
   subscribeToTales(
     async (tales) => {
-      allTales = tales;
-      await renderCardsGrid(userId, tales);
-      initIcons();
+      // First load: build era chips from real data
+      if (libraryState.allTales.length === 0 || tales.length !== libraryState.allTales.length) {
+        setupEraFilter(tales);
+      }
+
+      // Apply all active filters against fresh data
+      await applyAllFilters();
+      window.lucide?.createIcons?.();
     },
-    (error) => {
-      console.error('Tales subscription error:', error);
-      document.getElementById('cards-grid').innerHTML = `
-        <div class="col-span-full text-center py-20 text-red-500">
-          Database connection failed.
-        </div>
-      `;
-    }
-  );
-
-  setupCardInteractions(userId);
-
-  setupSearch(
-    () => allTales,
-    (filtered) => renderCardsGrid(userId, filtered),
-    initIcons
-  );
-
-  // Era filter bar at the top
-  setupEraFilter(
-    () => allTales,
-    (filtered) => renderCardsGrid(userId, filtered),
-    initIcons
-  );
-
-  // Sidebar filter buttons
-  setupSidebarFilter(
-    userId,
-    () => allTales,
-    (filtered) => renderCardsGrid(userId, filtered),
-    initIcons
+    () => showGridError()
   );
 });
 
-/* ==================== Cleanup ==================== */
+/* ─────────────────────────────────────────────
+   Cleanup
+   ───────────────────────────────────────────── */
+
 window.addEventListener('beforeunload', stopTalesSubscription);

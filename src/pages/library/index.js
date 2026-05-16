@@ -1,16 +1,16 @@
 // src/pages/library/index.js
-// Barrel file — single entry point for all library page imports.
-// Import from here instead of reaching into individual files directly.
-
-/* -------------------- Firebase -------------------- */
-export { initAuth, db } from '@fb/index.js';
-
-/* -------------------- Tales Content -------------------- */
 export { subscribeToTales, stopTalesSubscription } from './content.js';
-
-/* -------------------- UI Components -------------------- */
-export { renderCardsGrid } from '@ui/components/taleCard.js';
-export { initIcons } from '@ui/components/icons.js';
-
-/* -------------------- Interactions -------------------- */
-export * from './interactions.js';
+export { applyAllFilters, setupSearch, setupEraFilter, setupSidebarFilter } from './filters.js';
+export { setupCardInteractions } from './interactions.js';
+export {
+  setupSidebarToggle,
+  updateSidebarUser,
+  showGridSkeleton,
+  showGridEmpty,
+  showGridError,
+  setActiveSidebarBtn,
+  setActiveEraChip,
+  buildEraChips,
+} from './ui.js';
+export { libraryState } from './state.js';
+export { initAuth } from '@fb/index.js';
