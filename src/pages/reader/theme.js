@@ -48,15 +48,15 @@ export function setTheme(theme) {
   readerState.theme = theme;
   localStorage.setItem(STORAGE_KEYS.theme, theme);
 
-  // Remove all theme classes and add the new one
+  // Use global theme classes instead of just reader-specific ones
+  document.body.classList.remove('theme-dark', 'theme-sepia', 'theme-light');
+  document.body.classList.add(`theme-${theme}`);
+  
+  // Also keep the reader-specific ones if reader.css still needs them for scoping
   document.body.classList.remove('reader-theme-dark', 'reader-theme-sepia', 'reader-theme-light');
   document.body.classList.add(`reader-theme-${theme}`);
 
-  // CSS variable overrides used by reader.css
-  const t = THEMES[theme];
-  document.documentElement.style.setProperty('--reader-bg', t.body);
-  document.documentElement.style.setProperty('--reader-text', t.text);
-
+  // We rely on CSS variables defined in base.css for these themes
   _syncThemeButtons(theme);
 }
 

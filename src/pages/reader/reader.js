@@ -3,6 +3,7 @@
 // Wires auth, content loading, progress tracking, theme, and interactions.
 
 import '@css/base.css';
+import '@css/nav.css';
 import '@css/components.css';
 import '@css/pages/reader.css';
 

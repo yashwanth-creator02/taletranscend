@@ -225,22 +225,14 @@ export function initScrollBehavior() {
   const nav = document.getElementById('app-nav');
   if (!nav) return () => {};
 
-  let ticking = false;
-
   const onScroll = () => {
-    if (ticking) return;
-    ticking = true;
+    const scrollY = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = docHeight > 0 ? (scrollY / docHeight) * 100 : 0;
 
-    window.requestAnimationFrame(() => {
-      const scrollY = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = docHeight > 0 ? (scrollY / docHeight) * 100 : 0;
-
-      nav.classList.toggle('is-scrolled', scrollY > 12);
-      nav.style.setProperty('--scroll-progress', progress.toFixed(2));
-
-      ticking = false;
-    });
+    // Use a small threshold for is-scrolled state
+    nav.classList.toggle('is-scrolled', scrollY > 20);
+    nav.style.setProperty('--scroll-progress', progress.toFixed(2));
   };
 
   window.addEventListener('scroll', onScroll, { passive: true });

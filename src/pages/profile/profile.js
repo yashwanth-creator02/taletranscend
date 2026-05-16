@@ -3,6 +3,7 @@
 // Handles auth, profile sync, continue reading, contributions, and drafts.
 
 import '@css/base.css';
+import '@css/nav.css';
 import '@css/components.css';
 import '@css/pages/profile.css';
 

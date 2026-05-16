@@ -3,6 +3,7 @@
 // Loads trending tales from Firestore and handles page interactions.
 
 import '@css/base.css';
+import '@css/nav.css';
 import '@css/components.css';
 import '@css/pages/home.css';
 

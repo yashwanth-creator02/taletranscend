@@ -3,6 +3,7 @@
 // Bootstraps auth, loads tale data, renders UI, and binds interactions.
 
 import '@css/base.css';
+import '@css/nav.css';
 import '@css/components.css';
 import '@css/pages/tale.css';
 

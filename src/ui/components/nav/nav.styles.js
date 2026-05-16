@@ -22,61 +22,26 @@ export function injectNavStyles() {
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 
 const NAV_CSS = `
-  /* ── Design tokens ───────────────────────────────────────────── */
+  /* ── Design tokens inherited from base.css where possible ─────── */
   :root {
-    --nav-height: 64px;
-    --nav-bg: rgba(8, 8, 12, 0.72);
-    --nav-bg-scrolled: rgba(8, 8, 12, 0.92);
-    --nav-border: rgba(255, 255, 255, 0.06);
-    --nav-border-scrolled: rgba(255, 255, 255, 0.09);
-    --nav-blur: 20px;
-
-    --accent: #6366f1;
-    --accent-hover: #818cf8;
-    --accent-muted: rgba(99, 102, 241, 0.15);
-    --accent-subtle: rgba(99, 102, 241, 0.08);
-
-    --text-primary: #f1f5f9;
-    --text-secondary: #64748b;
-    --text-tertiary: #334155;
-
-    --surface-overlay: rgba(10, 10, 14, 0.96);
-    --surface-raised: rgba(12, 12, 18, 0.95);
-
-    --radius-xs: 6px;
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 16px;
-    --radius-xl: 22px;
-    --radius-2xl: 28px;
-
-    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.5), 0 20px 60px -10px rgba(0,0,0,0.7);
-    --shadow-lg: 0 30px 90px rgba(0,0,0,0.5);
-
+    --nav-bg: rgba(3, 3, 5, 0.72);
+    --nav-bg-scrolled: rgba(3, 3, 5, 0.92);
+    --nav-blur: 24px;
     --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
     --transition-base: 220ms cubic-bezier(0.4, 0, 0.2, 1);
     --transition-spring: 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
-  /* Respect user motion preferences */
-  @media (prefers-reduced-motion: reduce) {
-    :root {
-      --transition-fast: 0ms;
-      --transition-base: 0ms;
-      --transition-spring: 0ms;
-    }
-  }
-
-
   /* ── Root nav element ─────────────────────────────────────────── */
   .app-nav {
     position: sticky;
     top: 0;
-    z-index: 50;
+    z-index: 100;
+    height: var(--nav-height);
     background: var(--nav-bg);
     backdrop-filter: blur(var(--nav-blur));
     -webkit-backdrop-filter: blur(var(--nav-blur));
-    border-bottom: 1px solid var(--nav-border);
+    border-bottom: 1px solid var(--border);
     transition:
       background var(--transition-base),
       border-color var(--transition-base),
@@ -85,8 +50,7 @@ const NAV_CSS = `
 
   .app-nav.is-scrolled {
     background: var(--nav-bg-scrolled);
-    border-color: var(--nav-border-scrolled);
-    box-shadow: 0 1px 24px rgba(0, 0, 0, 0.45);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
   }
 
 

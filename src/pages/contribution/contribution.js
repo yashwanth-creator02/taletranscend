@@ -3,11 +3,11 @@
 // Bootstraps nav, auth, draft loading, and all editor interactions.
 
 import '@css/base.css';
+import '@css/nav.css';
 import '@css/components.css';
 import '@css/pages/contribution.css';
 
 import {
-  initNav,
   initAuth,
   addNewChapter,
   updateSidebarTitle,
@@ -23,8 +23,12 @@ import {
   state,
   initIcons,
 } from './index.js';
+<<<<<<< HEAD
 import { debounce } from '@/utils/function.utils';
 import { setupAuthTimeout } from '@/utils/ui.utils';
+=======
+import { initNav } from '@ui/components/nav/nav.js';
+>>>>>>> 127f397 (navbar and base aesthetics changes. to be uniform all around the website.)
 
 initNav();
 
