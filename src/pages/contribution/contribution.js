@@ -23,7 +23,8 @@ import {
   state,
   initIcons,
 } from './index.js';
-import { debounce, setupAuthTimeout } from '@utils/index.js';
+import { debounce } from '@/utils/function.utils.js';
+import { setupAuthTimeout } from '@/utils/ui.utils.js';
 import { initNav } from '@ui/components/nav/nav.js';
 
 initNav();

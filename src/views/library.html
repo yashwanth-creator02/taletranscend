@@ -13,20 +13,20 @@
     rel="stylesheet" />
 </head>
 
-<body class="text-slate-300 antialiased selection:bg-indigo-500/30 page-fade-in">
+<body class="text-slate-300 antialiased selection:bg-indigo-500/30 page-fade-in flex flex-col h-screen overflow-hidden">
   
   <!-- Global Atmosphere -->
   <div class="atmosphere-base"></div>
   <div class="particle-field"></div>
 
   <!-- Main Layout -->
-  <div class="library-layout">
+  <div class="library-layout flex-1 overflow-hidden">
 
     <!-- ══════════════════════════════════════════
          SIDEBAR (Sticky)
          ══════════════════════════════════════════ -->
-    <aside id="sidebar">
-      <div class="sidebar-inner">
+    <aside id="sidebar" class="h-full overflow-hidden">
+      <div class="sidebar-inner scroll-container">
 
         <!-- Toggle button -->
         <div class="flex items-center gap-3 px-2 pb-4 border-b border-white/[0.05] mb-4">
@@ -109,7 +109,7 @@
     <!-- ══════════════════════════════════════════
          MAIN CONTENT
          ══════════════════════════════════════════ -->
-    <main id="library-main">
+    <main id="library-main" class="scroll-container">
       <div class="max-w-[1500px] mx-auto">
 
         <!-- Page header -->

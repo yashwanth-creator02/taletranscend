@@ -217,7 +217,8 @@ function handleCommandInput(event) {
  *   1. Adds `is-scrolled` class after 12px of scroll (for background opacity)
  *   2. Updates `--scroll-progress` CSS variable (powers the progress bar)
  *
- * Uses requestAnimationFrame throttling for performance.
+ * It uses event capturing to listen for scroll events from any scrollable
+ * container (supporting the independent scrolling system).
  *
  * @returns {() => void} Cleanup function to remove the listener.
  */
@@ -225,9 +226,28 @@ export function initScrollBehavior() {
   const nav = document.getElementById('app-nav');
   if (!nav) return () => {};
 
-  const onScroll = () => {
-    const scrollY = window.scrollY;
-    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const onScroll = (e) => {
+    // If we have a scroll container, use it; otherwise fallback to document
+    const target =
+      e && e.target !== document
+        ? e.target
+        : document.scrollingElement || document.documentElement;
+
+    // Only track scroll if it's the main scroll container or the document
+    // This prevents sidebar scrolls from affecting the main progress bar
+    const isMainScroll =
+      target === document.documentElement ||
+      target === document.body ||
+      target === document.scrollingElement ||
+      target.classList.contains('scroll-container');
+
+    if (!isMainScroll) return;
+
+    const scrollY = target.scrollTop ?? window.scrollY;
+    const scrollHeight = target.scrollHeight ?? document.documentElement.scrollHeight;
+    const clientHeight = target.clientHeight ?? window.innerHeight;
+
+    const docHeight = scrollHeight - clientHeight;
     const progress = docHeight > 0 ? (scrollY / docHeight) * 100 : 0;
 
     // Use a small threshold for is-scrolled state
@@ -235,10 +255,11 @@ export function initScrollBehavior() {
     nav.style.setProperty('--scroll-progress', progress.toFixed(2));
   };
 
-  window.addEventListener('scroll', onScroll, { passive: true });
+  // Listen with capture: true to catch scroll events from containers that don't bubble
+  window.addEventListener('scroll', onScroll, { passive: true, capture: true });
   onScroll(); // Set initial state
 
-  return () => window.removeEventListener('scroll', onScroll);
+  return () => window.removeEventListener('scroll', onScroll, { capture: true });
 }
 
 /* ─────────────────────────────────────────────

@@ -18,7 +18,7 @@
     rel="stylesheet" />
 </head>
 
-<body class="antialiased selection:bg-indigo-500/30 selection:text-white page-fade-in">
+<body class="antialiased selection:bg-indigo-500/30 selection:text-white page-fade-in flex flex-col h-screen overflow-hidden">
 
   <div class="atmosphere-base"></div>
   <div class="particle-field"></div>
@@ -26,7 +26,7 @@
   <div class="ambient-orb w-[400px] h-[400px] bg-indigo-500 top-[-100px] right-[-100px]"></div>
   <div class="ambient-orb w-[300px] h-[300px] bg-violet-500 bottom-[-100px] left-[-100px]"></div>
 
-  <main class="relative max-w-[1760px] mx-auto min-h-screen px-4 md:px-6 lg:px-8 xl:px-10 pt-8 pb-24">
+  <main class="app-viewport scroll-container relative max-w-[1760px] mx-auto px-4 md:px-6 lg:px-8 xl:px-10 pt-8 pb-24">
 
     <!-- Hero -->
     <section class="mb-10">
@@ -253,7 +253,7 @@
             <span class="text-[9px] font-black uppercase tracking-[0.3em]">Recent Notes</span>
           </div>
 
-          <div class="scroll-pane max-h-[18rem] overflow-y-auto pr-1 space-y-3">
+          <div class="space-y-3">
             <div class="panel-note rounded-2xl p-4">
               <p class="text-sm text-white font-semibold">Empty shelf placeholder</p>
               <p class="text-xs text-slate-500 mt-1">Use this rail for drafts, saved states, or recent activity later.

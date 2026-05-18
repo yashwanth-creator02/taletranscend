@@ -13,7 +13,7 @@
     rel="stylesheet" />
 </head>
 
-<body class="antialiased selection:bg-indigo-500/30 selection:text-white page-fade-in">
+<body class="antialiased selection:bg-indigo-500/30 selection:text-white page-fade-in flex flex-col h-screen overflow-hidden">
 
   <div class="atmosphere-base"></div>
   <div class="particle-field"></div>
@@ -61,8 +61,8 @@
     </div>
   </header>
 
-  <main class="reader-layout">
-    <div class="reader-viewport">
+  <main class="reader-layout flex-1 overflow-hidden">
+    <div class="reader-viewport h-full overflow-y-auto scroll-container">
       
       <!-- ── Content Column ── -->
       <div class="reading-article">

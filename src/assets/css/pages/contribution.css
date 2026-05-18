@@ -27,12 +27,7 @@
 
 /* ── Editor layout: fills viewport below the two sticky headers ── */
 .editor-layout {
-  /*
-        100dvh minus:
-          --nav-height  (shared nav, set by nav.styles.js)
-          --editor-header-height
-      */
-  height: calc(100dvh - var(--nav-height, 64px) - var(--editor-header-height));
+  flex: 1;
   display: flex;
   overflow: hidden;
 }

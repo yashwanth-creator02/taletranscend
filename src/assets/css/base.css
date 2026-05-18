@@ -101,31 +101,41 @@ body.theme-light,
 
 html,
 body {
-  min-height: 100%;
-  overflow-x: hidden;
+  height: 100%;
+  overflow: hidden;
   background: var(--paper-bg);
 }
 
 /* ── Base Layout ─────────────────────────────────────────── */
 
-html,
-body {
-  overflow-x: hidden;
-  min-height: 100%;
-  scroll-behavior: smooth;
-  background-color: var(--paper-bg);
-}
-
 body {
   font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;
   color: var(--text-main);
-  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   position: relative;
   transition:
     background-color 0.4s ease,
     color 0.4s ease;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Main content wrapper for pages following the independent scroll system */
+.app-viewport {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Individual scrollable areas */
+.scroll-container {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .font-cinzel {
