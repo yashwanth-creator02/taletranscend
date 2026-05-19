@@ -19,363 +19,303 @@
   <div id="toast-container" class="fixed top-6 right-6 z-[200] flex flex-col gap-3 pointer-events-none max-w-sm w-full">
   </div>
 
-  <!-- Nav injected by profile.js via initNav() -->
+  <main class="profile-main-layout">
 
-  <main class="app-viewport flex-1 flex flex-col lg:flex-row items-start overflow-hidden max-w-[1600px] mx-auto">
-
-      <!-- ══════════════════════════════════════════════
-           SIDEBAR — Identity Panel
+    <!-- ══════════════════════════════════════════════
+           LEFT PANEL: Identity Pillar
            ══════════════════════════════════════════════ -->
-      <aside class="w-full lg:w-[320px] xl:w-[360px] h-full overflow-y-auto no-scrollbar scroll-container">
-        <div class="p-6 lg:p-8 lg:pt-10">
+    <aside id="column-identity" class="pillar-left scroll-container no-scrollbar">
+      <div class="p-6 lg:p-8 space-y-8">
 
-          <!-- Identity card -->
-          <div class="glass-panel-elevated rounded-[2rem] p-6 relative overflow-hidden">
-            <!-- Corner accents -->
-            <div
-              class="absolute top-0 left-0 w-16 h-16 border-l-2 border-t-2 border-indigo-500/15 rounded-tl-[2rem] pointer-events-none">
-            </div>
-            <div
-              class="absolute bottom-0 right-0 w-16 h-16 border-r-2 border-b-2 border-violet-500/15 rounded-br-[2rem] pointer-events-none">
-            </div>
+        <!-- Identity card -->
+        <div class="identity-card p-8 relative">
+          <div class="flex flex-col items-center text-center relative z-10">
 
-            <div class="flex flex-col items-center text-center relative z-10">
-              <!-- Avatar -->
-              <div class="avatar-ring w-24 h-24 rounded-[1.5rem] flex-shrink-0">
-                <div
-                  class="relative z-10 w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-[1.3rem] flex items-center justify-center overflow-hidden">
-                  <i data-lucide="user" class="w-10 h-10 text-slate-600 avatar-placeholder"></i>
-                  <img id="profile-avatar-desktop" src="" alt="Avatar"
-                    class="avatar-img w-full h-full object-cover hidden" />
-                </div>
-              </div>
-
-              <!-- Online dot -->
+            <!-- Avatar -->
+            <div class="avatar-container w-28 h-28 mb-6">
               <div
-                class="absolute top-20 right-[calc(50%-2.75rem)] w-3.5 h-3.5 bg-emerald-500 border-[3px] border-[#030305] rounded-full shadow-lg shadow-emerald-500/40 z-20">
+                class="relative z-10 w-full h-full bg-zinc-900 rounded-[2rem] flex items-center justify-center overflow-hidden border border-white/10">
+                <i data-lucide="user" class="w-12 h-12 text-slate-700 avatar-placeholder"></i>
+                <img id="profile-avatar-desktop" src="" alt="Avatar"
+                  class="avatar-img w-full h-full object-cover hidden" />
               </div>
-
-              <!-- Rank badge -->
-              <div class="mt-5 badge-float">
-                <span
-                  class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[9px] font-bold uppercase tracking-[0.18em] rounded-full">
-                  <i data-lucide="sparkles" class="w-3 h-3"></i>
-                  Explorer
-                </span>
+              <!-- Online indicator -->
+              <div
+                class="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-4 border-[#030305] rounded-full shadow-[0_0_15px_rgba(16,185,129,0.4)] z-20">
               </div>
+            </div>
 
-              <!-- Name -->
-              <h1 id="desktop-display-name"
-                class="mt-4 text-xl xl:text-2xl font-cinzel font-bold text-white tracking-wide">
-                User_Name
-              </h1>
+            <!-- Rank badge -->
+            <div class="mythic-badge">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+              Explorer
+            </div>
 
-              <!-- Pronouns -->
-              <p id="profile-pronouns" class="mt-1 text-xs text-slate-600"></p>
-
-              <!-- Bio -->
-              <p id="desktop-display-bio" class="mt-2 text-slate-500 text-xs leading-relaxed max-w-[240px]">
+            <!-- Name & Bio -->
+            <div class="mt-6">
+              <h1 id="desktop-display-name" class="text-2xl xl:text-3xl font-cinzel font-bold text-white tracking-wide">
+                User_Name</h1>
+              <p id="profile-pronouns" class="text-[10px] text-indigo-400 font-bold uppercase tracking-[0.2em] mt-1.5">
+              </p>
+              <p id="desktop-display-bio" class="mt-4 text-slate-400 text-sm leading-relaxed font-medium">
                 Whispering stories to the stars…
               </p>
+            </div>
 
-              <!-- Meta: location, join date -->
-              <div class="mt-3 flex flex-wrap items-center justify-center gap-3 text-[10px] text-slate-600">
-                <span id="profile-location" class="flex items-center gap-1">
-                  <!-- populated by JS if set -->
-                </span>
-                <span id="profile-joined" class="flex items-center gap-1">
-                  <!-- populated by JS -->
-                </span>
+            <!-- Metadata -->
+            <div
+              class="mt-6 flex flex-wrap items-center justify-center gap-4 text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+              <span id="profile-location" class="flex items-center gap-1.5"></span>
+              <span id="profile-joined" class="flex items-center gap-1.5"></span>
+            </div>
+
+            <!-- Genres -->
+            <div id="profile-genres" class="mt-6 flex flex-wrap justify-center gap-2">
+              <span class="text-xs text-slate-600 italic">No genres set</span>
+            </div>
+
+            <!-- Socials -->
+            <div class="mt-8 flex items-center gap-4">
+              <div data-social-wrap class="hidden">
+                <a id="social-link-twitter" href="#" target="_blank" rel="noopener"
+                  class="w-10 h-10 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/[0.08] hover:border-white/20 transition-all">
+                  <i data-lucide="badge-x" class="w-4 h-4"></i>
+                </a>
               </div>
-
-              <!-- Favourite genres -->
-              <div id="profile-genres" class="mt-3 flex flex-wrap justify-center gap-1.5">
-                <span class="text-xs text-slate-600 italic">No genres set</span>
+              <div data-social-wrap class="hidden">
+                <a id="social-link-instagram" href="#" target="_blank" rel="noopener"
+                  class="w-10 h-10 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/[0.08] hover:border-white/20 transition-all">
+                  <i data-lucide="instagram" class="w-4 h-4"></i>
+                </a>
               </div>
-
-              <!-- Social links -->
-              <div class="mt-4 flex items-center gap-3">
-                <div data-social-wrap class="hidden">
-                  <a id="social-link-twitter" href="#" target="_blank" rel="noopener"
-                    class="inline-flex items-center justify-center w-8 h-8 rounded-xl border border-white/07 bg-white/03 text-slate-500 hover:text-white hover:border-white/15 transition-all">
-                    <i data-lucide="badge-x" class="w-3.5 h-3.5"></i>
-                  </a>
-                </div>
-                <div data-social-wrap class="hidden">
-                  <a id="social-link-instagram" href="#" target="_blank" rel="noopener"
-                    class="inline-flex items-center justify-center w-8 h-8 rounded-xl border border-white/07 bg-white/03 text-slate-500 hover:text-white hover:border-white/15 transition-all">
-                    <i data-lucide="instagram" class="w-3.5 h-3.5"></i>
-                  </a>
-                </div>
-                <div data-social-wrap class="hidden">
-                  <a id="social-link-website" href="#" target="_blank" rel="noopener"
-                    class="inline-flex items-center justify-center w-8 h-8 rounded-xl border border-white/07 bg-white/03 text-slate-500 hover:text-white hover:border-white/15 transition-all">
-                    <i data-lucide="globe" class="w-3.5 h-3.5"></i>
-                  </a>
-                </div>
-              </div>
-
-              <!-- Quick stats -->
-              <div class="mt-5 pt-5 border-t border-white/[0.04] w-full">
-                <div class="grid grid-cols-3 gap-3">
-                  <div class="text-center">
-                    <p class="stat-value text-lg font-bold" id="sidebar-tale-count">—</p>
-                    <p class="text-[9px] text-slate-600 uppercase tracking-wider mt-0.5">Tales</p>
-                  </div>
-                  <div class="text-center border-x border-white/[0.04]">
-                    <p class="stat-value text-lg font-bold" id="sidebar-reader-count">—</p>
-                    <p class="text-[9px] text-slate-600 uppercase tracking-wider mt-0.5">Readers</p>
-                  </div>
-                  <div class="text-center">
-                    <p class="stat-value text-lg font-bold" id="sidebar-saved-count">—</p>
-                    <p class="text-[9px] text-slate-600 uppercase tracking-wider mt-0.5">Saved</p>
-                  </div>
-                </div>
+              <div data-social-wrap class="hidden">
+                <a id="social-link-website" href="#" target="_blank" rel="noopener"
+                  class="w-10 h-10 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/[0.08] hover:border-white/20 transition-all">
+                  <i data-lucide="globe" class="w-4 h-4"></i>
+                </a>
               </div>
             </div>
 
-            <!-- Edit button -->
+            <!-- Edit Action -->
             <button id="btn-edit-desktop"
-              class="mt-6 w-full btn-ghost text-white py-3 rounded-xl flex items-center justify-center gap-2.5 group">
-              <i data-lucide="settings"
-                class="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-400 group-hover:rotate-90 transition-all duration-500"></i>
-              <span class="text-sm font-medium text-slate-400 group-hover:text-white transition-colors">Edit
-                Profile</span>
+              class="mt-8 w-full py-4 rounded-[1.25rem] bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[11px] font-black uppercase tracking-[0.25em] hover:bg-indigo-500/20 hover:text-indigo-300 transition-all group">
+              <span class="flex items-center justify-center gap-3">
+                <i data-lucide="settings"
+                  class="w-3.5 h-3.5 group-hover:rotate-90 transition-transform duration-500"></i>
+                Customise Identity
+              </span>
             </button>
           </div>
-
-          <!-- ── Reading Goal ───────────────────────── -->
-          <div class="mt-6 glass-panel rounded-2xl p-5">
-            <div class="flex items-center justify-between mb-3">
-              <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600">Reading Goal</p>
-              <span id="reading-goal-target" class="text-[10px] text-indigo-400 font-semibold">12 tales / yr</span>
-            </div>
-            <div class="progress-mythic">
-              <div id="reading-goal-bar" class="progress-mythic-fill" style="width: 25%"></div>
-            </div>
-            <p class="text-[10px] text-slate-600 mt-2">3 of 12 tales read this year</p>
-          </div>
-
-          <!-- ── Achievements ───────────────────────── -->
-          <div class="mt-6 hidden lg:block">
-            <div class="flex items-center gap-3 mb-4">
-              <h2 class="text-[10px] font-bold tracking-[0.2em] text-slate-600 uppercase">Achievements</h2>
-              <div class="flex-1 sacred-divider"></div>
-              <span class="text-[9px] text-indigo-400 font-semibold">3 / 12</span>
-            </div>
-
-            <div class="space-y-2.5">
-              <div class="glass-panel rounded-2xl p-3.5 glow-hover cursor-default group">
-                <div class="flex items-center gap-3">
-                  <div
-                    class="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center border border-amber-500/15 group-hover:scale-105 transition-transform flex-shrink-0">
-                    <i data-lucide="trophy" class="w-4 h-4 text-amber-500"></i>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <p class="text-xs font-semibold text-white">First Legend</p>
-                    <p class="text-[10px] text-slate-600 mt-0.5">Contributed your 1st tale</p>
-                  </div>
-                  <div class="w-1.5 h-1.5 bg-amber-500 rounded-full flex-shrink-0"></div>
-                </div>
-              </div>
-
-              <div class="glass-panel rounded-2xl p-3.5 glow-hover cursor-default group">
-                <div class="flex items-center gap-3">
-                  <div
-                    class="w-10 h-10 bg-indigo-500/10 rounded-xl flex items-center justify-center border border-indigo-500/15 group-hover:scale-105 transition-transform flex-shrink-0">
-                    <i data-lucide="feather" class="w-4 h-4 text-indigo-400"></i>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <p class="text-xs font-semibold text-white">Story Weaver</p>
-                    <p class="text-[10px] text-slate-600 mt-0.5">Wrote 10,000 words</p>
-                  </div>
-                  <div class="w-1.5 h-1.5 bg-indigo-500 rounded-full flex-shrink-0"></div>
-                </div>
-              </div>
-
-              <div class="glass-panel rounded-2xl p-3.5 opacity-35 cursor-default">
-                <div class="flex items-center gap-3">
-                  <div
-                    class="w-10 h-10 bg-white/[0.03] rounded-xl flex items-center justify-center border border-white/[0.05] flex-shrink-0">
-                    <i data-lucide="lock" class="w-3.5 h-3.5 text-slate-700"></i>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <p class="text-xs font-medium text-slate-600">Myth Keeper</p>
-                    <p class="text-[10px] text-slate-700 mt-0.5">Reach 1,000 readers</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- ── Quick Actions ──────────────────────── -->
-          <div class="mt-6 hidden lg:block">
-            <div class="glass-panel rounded-2xl p-1">
-              <a href="library.html"
-                class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/[0.04] transition-colors group">
-                <i data-lucide="book-open"
-                  class="w-3.5 h-3.5 text-slate-600 group-hover:text-indigo-400 transition-colors"></i>
-                <span class="text-sm text-slate-500 group-hover:text-white transition-colors">Library</span>
-              </a>
-              <a href="shelf.html"
-                class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/[0.04] transition-colors group">
-                <i data-lucide="bookmark"
-                  class="w-3.5 h-3.5 text-slate-600 group-hover:text-indigo-400 transition-colors"></i>
-                <span class="text-sm text-slate-500 group-hover:text-white transition-colors">Saved Tales</span>
-              </a>
-              <a href="contribution.html"
-                class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/[0.04] transition-colors group">
-                <i data-lucide="feather"
-                  class="w-3.5 h-3.5 text-slate-600 group-hover:text-indigo-400 transition-colors"></i>
-                <span class="text-sm text-slate-500 group-hover:text-white transition-colors">Write a Tale</span>
-              </a>
-            </div>
-          </div>
-
         </div>
-      </aside>
 
-      <!-- ══════════════════════════════════════════════
-           MAIN CONTENT
-           ══════════════════════════════════════════════ -->
-      <div class="flex-1 border-l border-white/[0.025] h-full overflow-y-auto scroll-container">
-        <div class="p-6 md:p-10 xl:p-14">
-
-          <!-- ── Continue Reading ───────────────────── -->
-          <section class="mb-16">
-            <header class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-8">
-              <div class="rune-accent pl-5">
-                <h2 class="section-title text-xl md:text-2xl font-cinzel font-bold text-white tracking-wide">
-                  Continue Reading
-                </h2>
-                <p class="text-slate-600 text-xs mt-2 max-w-sm">
-                  Resume your journey. Your bookmarks await.
-                </p>
+        <!-- Navigation Links -->
+        <div class="space-y-3">
+          <a href="library.html"
+            class="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] hover:border-white/10 transition-all group">
+            <div class="flex items-center gap-4">
+              <div
+                class="w-10 h-10 rounded-xl bg-indigo-500/5 flex items-center justify-center group-hover:bg-indigo-500/10 transition-colors">
+                <i data-lucide="book-open" class="w-4 h-4 text-indigo-400"></i>
               </div>
-              <a href="library.html"
-                class="inline-flex items-center gap-1.5 text-[10px] font-semibold text-indigo-400 hover:text-indigo-300 uppercase tracking-[0.15em] transition-colors group">
-                Browse Library
-                <i data-lucide="arrow-right" class="w-3 h-3 group-hover:translate-x-1 transition-transform"></i>
-              </a>
-            </header>
-
-            <div id="continue-reading-list"
-              class="flex gap-4 overflow-x-auto pb-4 no-scrollbar snap-x snap-mandatory -mx-1 px-1">
-              <div class="text-sm text-slate-600 italic py-6 px-2">Loading reading history…</div>
+              <span class="text-sm font-bold text-slate-300 group-hover:text-white">Great Library</span>
             </div>
-          </section>
-
-          <!-- ── Contributions ─────────────────────── -->
-          <section class="mb-16">
-            <header class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-8">
-              <div class="rune-accent pl-5">
-                <h2 class="section-title text-xl md:text-2xl font-cinzel font-bold text-white tracking-wide">
-                  Your Contributions
-                </h2>
-                <p class="text-slate-600 text-xs mt-2 max-w-sm">
-                  Tales born from your imagination. Your legacy in the archive.
-                </p>
+            <i data-lucide="chevron-right"
+              class="w-4 h-4 text-slate-600 group-hover:translate-x-1 transition-transform"></i>
+          </a>
+          <a href="shelf.html"
+            class="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] hover:border-white/10 transition-all group">
+            <div class="flex items-center gap-4">
+              <div
+                class="w-10 h-10 rounded-xl bg-violet-500/5 flex items-center justify-center group-hover:bg-violet-500/10 transition-colors">
+                <i data-lucide="bookmark" class="w-4 h-4 text-violet-400"></i>
               </div>
-
-              <!-- Published / Drafts tab switcher -->
-              <div class="flex items-center gap-2">
-                <button data-contrib-tab="published"
-                  class="contrib-tab--active px-3 py-1.5 rounded-xl border text-[10px] font-bold uppercase tracking-[0.16em] transition-all">
-                  Published
-                </button>
-                <button data-contrib-tab="drafts"
-                  class="contrib-tab--inactive px-3 py-1.5 rounded-xl border text-[10px] font-bold uppercase tracking-[0.16em] transition-all">
-                  Drafts
-                </button>
-              </div>
-            </header>
-
-            <!-- Published panel -->
-            <div id="contrib-panel-published">
-              <div id="contributions-grid" class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-5">
-                <!-- Injected by renderPublishedTales() -->
-
-                <!-- New Tale CTA -->
-                <button id="btn-new-story"
-                  class="group relative glass-panel border-2 border-dashed border-white/[0.07] hover:border-indigo-500/30 rounded-[1.75rem] flex flex-col items-center justify-center transition-all min-h-[260px] overflow-hidden">
-                  <div
-                    class="absolute inset-0 bg-gradient-to-br from-indigo-500/0 to-violet-500/0 group-hover:from-indigo-500/[0.04] group-hover:to-violet-500/[0.04] transition-all duration-500 pointer-events-none">
-                  </div>
-                  <div class="relative z-10 flex flex-col items-center gap-4">
-                    <div
-                      class="w-16 h-16 bg-indigo-500/[0.08] rounded-2xl flex items-center justify-center group-hover:bg-indigo-500/15 group-hover:scale-110 transition-all duration-300 border border-indigo-500/15">
-                      <i data-lucide="plus" class="text-indigo-400 w-7 h-7"></i>
-                    </div>
-                    <div class="text-center">
-                      <span
-                        class="block font-cinzel text-white font-bold text-base group-hover:text-indigo-200 transition-colors">Begin
-                        a New Tale</span>
-                      <span
-                        class="block text-[9px] text-slate-600 mt-1 uppercase tracking-[0.2em] group-hover:text-slate-500 transition-colors">Add
-                        to the Archive</span>
-                    </div>
-                  </div>
-                </button>
-              </div>
+              <span class="text-sm font-bold text-slate-300 group-hover:text-white">Saved Fragments</span>
             </div>
-
-            <!-- Drafts panel -->
-            <div id="contrib-panel-drafts" hidden>
-              <div id="drafts-grid" class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-5">
-                <!-- Injected by renderDrafts() -->
-              </div>
-            </div>
-          </section>
-
-          <!-- ── Chronicle Statistics ──────────────── -->
-          <section class="mb-16">
-            <header class="rune-accent pl-5 mb-8">
-              <h2 class="section-title text-xl md:text-2xl font-cinzel font-bold text-white tracking-wide">
-                Chronicle Statistics
-              </h2>
-              <p class="text-slate-600 text-xs mt-2">
-                Your journey, measured in words and wonder.
-              </p>
-            </header>
-
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div class="glass-panel rounded-2xl p-5 text-center glow-hover border border-transparent">
-                <div class="w-10 h-10 mx-auto bg-indigo-500/[0.08] rounded-xl flex items-center justify-center mb-3">
-                  <i data-lucide="file-text" class="w-4 h-4 text-indigo-400"></i>
-                </div>
-                <p id="stat-words-written" class="stat-value text-2xl font-bold">—</p>
-                <p class="text-[10px] text-slate-600 uppercase tracking-wider mt-1.5">Words Written</p>
-              </div>
-
-              <div class="glass-panel rounded-2xl p-5 text-center glow-hover border border-transparent">
-                <div class="w-10 h-10 mx-auto bg-violet-500/[0.08] rounded-xl flex items-center justify-center mb-3">
-                  <i data-lucide="users" class="w-4 h-4 text-violet-400"></i>
-                </div>
-                <p id="stat-total-readers" class="stat-value text-2xl font-bold">—</p>
-                <p class="text-[10px] text-slate-600 uppercase tracking-wider mt-1.5">Total Readers</p>
-              </div>
-
-              <div class="glass-panel rounded-2xl p-5 text-center glow-hover border border-transparent">
-                <div class="w-10 h-10 mx-auto bg-amber-500/[0.08] rounded-xl flex items-center justify-center mb-3">
-                  <i data-lucide="clock" class="w-4 h-4 text-amber-400"></i>
-                </div>
-                <p id="stat-reading-time-given" class="stat-value text-2xl font-bold">—</p>
-                <p class="text-[10px] text-slate-600 uppercase tracking-wider mt-1.5">Reading Given</p>
-              </div>
-
-              <div class="glass-panel rounded-2xl p-5 text-center glow-hover border border-transparent">
-                <div class="w-10 h-10 mx-auto bg-emerald-500/[0.08] rounded-xl flex items-center justify-center mb-3">
-                  <i data-lucide="flame" class="w-4 h-4 text-emerald-400"></i>
-                </div>
-                <p id="stat-streak" class="stat-value text-2xl font-bold">—</p>
-                <p class="text-[10px] text-slate-600 uppercase tracking-wider mt-1.5">Day Streak</p>
-              </div>
-            </div>
-          </section>
-
+            <i data-lucide="chevron-right"
+              class="w-4 h-4 text-slate-600 group-hover:translate-x-1 transition-transform"></i>
+          </a>
         </div>
+
       </div>
-    </div>
+    </aside>
+
+    <!-- ══════════════════════════════════════════════
+           RIGHT PANEL: Scrolling Sections
+           ══════════════════════════════════════════════ -->
+    <div class="pillar-right">
+
+      <!-- COLUMN 2: Chronicle Flow (Middle Scroll) -->
+      <section id="column-chronicles" class="dashboard-column scroll-container no-scrollbar border-r border-white/[0.03]">
+      <div class="p-8 md:p-12 xl:p-14 max-w-4xl mx-auto w-full">
+
+        <!-- ── Continue Reading ───────────────────── -->
+        <section class="mb-20">
+          <header class="section-header flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+              <h2 class="text-3xl md:text-4xl font-cinzel font-bold text-white tracking-wide">Continue Reading</h2>
+              <div class="rune-divider"></div>
+              <p class="text-slate-500 text-sm mt-4 max-w-md font-medium">Resume your journey through the woven memories.</p>
+            </div>
+          </header>
+
+          <div id="continue-reading-list" class="flex gap-6 overflow-x-auto pb-6 no-scrollbar -mx-4 px-4">
+            <div class="text-sm text-slate-600 italic py-10">Consulting the oracle…</div>
+          </div>
+        </section>
+
+        <!-- ── Contributions ─────────────────────── -->
+        <section class="mb-20">
+          <header class="section-header flex flex-col md:flex-row md:items-end justify-between gap-8">
+            <div>
+              <h2 class="text-3xl md:text-4xl font-cinzel font-bold text-white tracking-wide">The Archive</h2>
+              <div class="rune-divider"></div>
+              <p class="text-slate-500 text-sm mt-4 max-w-md font-medium">The legends you've preserved for eternity.</p>
+            </div>
+
+            <!-- Tab Switcher -->
+            <div class="tab-nav min-w-[240px]">
+              <button data-contrib-tab="published" class="tab-trigger tab-trigger--active">Published</button>
+              <button data-contrib-tab="drafts" class="tab-trigger">Drafts</button>
+            </div>
+          </header>
+
+          <!-- Published -->
+          <div id="contrib-panel-published">
+            <div id="contributions-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- New Tale CTA -->
+              <button id="btn-new-story"
+                class="group relative bg-white/[0.02] border-2 border-dashed border-white/10 hover:border-indigo-500/40 rounded-[2.5rem] flex flex-col items-center justify-center p-8 transition-all min-h-[280px] overflow-hidden">
+                <div
+                  class="absolute inset-0 bg-gradient-to-br from-indigo-500/0 to-violet-500/0 group-hover:from-indigo-500/[0.03] group-hover:to-violet-500/[0.03] transition-all duration-700">
+                </div>
+                <div class="relative z-10 flex flex-col items-center gap-4">
+                  <div
+                    class="w-16 h-16 bg-indigo-500/5 rounded-[1.5rem] flex items-center justify-center border border-indigo-500/10 group-hover:scale-110 group-hover:bg-indigo-500/15 transition-all duration-500">
+                    <i data-lucide="feather" class="text-indigo-400 w-7 h-7"></i>
+                  </div>
+                  <div class="text-center">
+                    <span
+                      class="block font-cinzel text-lg text-white font-bold group-hover:text-indigo-200 transition-colors">Record
+                      a New Legend</span>
+                    <span class="block text-[9px] text-slate-500 mt-2 font-black uppercase tracking-[0.3em]">Expand the
+                      Archive</span>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Drafts -->
+          <div id="contrib-panel-drafts" hidden>
+            <div id="drafts-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+          </div>
+        </section>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════
+           COLUMN 3: Runic Insights (Right Scroll)
+           ══════════════════════════════════════════════ -->
+    <aside id="column-insights" class="dashboard-column scroll-container no-scrollbar bg-white/[0.01]">
+      <div class="p-8 space-y-10">
+
+        <!-- ── Statistics ────────────────────────── -->
+        <section>
+          <header class="mb-8">
+            <h3 class="text-xs font-black text-slate-500 uppercase tracking-[0.4em]">Legacy Metrics</h3>
+            <div class="h-px w-10 bg-indigo-500/30 mt-3"></div>
+          </header>
+
+          <div class="space-y-4">
+            <div class="stat-card-mythic">
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
+                  <i data-lucide="scroll-text" class="w-5 h-5 text-indigo-400"></i>
+                </div>
+                <span id="stat-words-written" class="text-2xl font-bold text-white tracking-tight">—</span>
+              </div>
+              <span class="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] block">Words Written</span>
+            </div>
+
+            <div class="stat-card-mythic">
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center">
+                  <i data-lucide="users-2" class="w-5 h-5 text-violet-400"></i>
+                </div>
+                <span id="stat-total-readers" class="text-2xl font-bold text-white tracking-tight">—</span>
+              </div>
+              <span class="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] block">Soul Readers</span>
+            </div>
+
+            <div class="stat-card-mythic">
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-10 h-10 rounded-xl bg-fuchsia-500/10 flex items-center justify-center">
+                  <i data-lucide="clock-4" class="w-5 h-5 text-fuchsia-400"></i>
+                </div>
+                <span id="stat-reading-time-given" class="text-2xl font-bold text-white tracking-tight">—</span>
+              </div>
+              <span class="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] block">Time Preserved</span>
+            </div>
+
+            <div class="stat-card-mythic">
+              <div class="flex items-center justify-between mb-4">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                  <i data-lucide="flame" class="w-5 h-5 text-emerald-400"></i>
+                </div>
+                <span id="stat-streak" class="text-2xl font-bold text-white tracking-tight">—</span>
+              </div>
+              <span class="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] block">Active Streak</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── Reading Progress ───────────────────── -->
+        <section>
+          <header class="mb-8">
+            <h3 class="text-xs font-black text-slate-500 uppercase tracking-[0.4em]">Chronicle Goal</h3>
+            <div class="h-px w-10 bg-violet-500/30 mt-3"></div>
+          </header>
+
+          <div class="p-6 rounded-[2rem] bg-white/[0.02] border border-white/5 relative overflow-hidden group">
+            <div
+              class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-3xl pointer-events-none group-hover:bg-indigo-500/10 transition-colors">
+            </div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-[9px] font-black uppercase tracking-[0.3em] text-slate-500">Annual Path</span>
+              <span id="reading-goal-target" class="text-[9px] text-indigo-400 font-black tracking-widest">12
+                TALES</span>
+            </div>
+            <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden mb-3">
+              <div id="reading-goal-bar"
+                class="h-full bg-gradient-to-r from-indigo-500 to-violet-600 shadow-[0_0_10px_rgba(99,102,241,0.5)] transition-all duration-1000"
+                style="width: 25%"></div>
+            </div>
+            <p class="text-[10px] text-slate-500 font-medium">3 of 12 chronicles preserved this year</p>
+          </div>
+        </section>
+
+        <!-- Quick Stats (Legacy) -->
+        <div class="pt-8 border-t border-white/[0.05] grid grid-cols-3 gap-2">
+          <div class="text-center">
+            <span id="sidebar-tale-count" class="block text-xl font-bold text-white">—</span>
+            <span class="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1">Tales</span>
+          </div>
+          <div class="text-center border-x border-white/[0.05]">
+            <span id="sidebar-reader-count" class="block text-xl font-bold text-white">—</span>
+            <span class="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1">Readers</span>
+          </div>
+          <div class="text-center">
+            <span id="sidebar-saved-count" class="block text-xl font-bold text-white">—</span>
+            <span class="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1">Saved</span>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    </div> <!-- End pillar-right -->
+
   </main>
 
   <!-- ══════════════════════════════════════════════

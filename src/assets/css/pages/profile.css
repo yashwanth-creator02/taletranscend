@@ -4,209 +4,369 @@
   position: fixed;
   inset: 0;
   z-index: -1;
-  background: radial-gradient(
-      ellipse 80% 50% at 50% -20%,
-      rgba(99, 102, 241, 0.07) 0%,
-      transparent 55%
-    ),
-    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(139, 92, 246, 0.05) 0%, transparent 40%), #030305;
+  background: 
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 20% 80%, rgba(79, 70, 229, 0.08) 0%, transparent 40%),
+    #030305;
 }
 
-/* ── Avatar ring ────────────────────────────── */
-.avatar-ring {
+/* ── Dashboard Layout (The Solution) ─────────── */
+
+.profile-main-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background: var(--paper-bg);
+}
+
+.pillar-left {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  overflow-y: auto;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  z-index: 20;
+}
+
+.pillar-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .profile-main-layout {
+    flex-direction: row !important;
+  }
+
+  .pillar-left {
+    width: 320px;
+    height: 100%;
+    border-bottom: none;
+    border-right: 1px solid rgba(255, 255, 255, 0.03);
+    flex-shrink: 0;
+  }
+
+  .pillar-right {
+    display: grid !important;
+    grid-template-columns: 1fr 300px !important;
+    grid-template-rows: 100% !important;
+  }
+
+  .dashboard-column {
+    height: 100% !important;
+    min-height: 0;
+    overflow-y: auto;
+    border-right: 1px solid rgba(255, 255, 255, 0.03);
+  }
+}
+
+@media (min-width: 1280px) {
+  .pillar-left {
+    width: 380px;
+  }
+
+  .pillar-right {
+    grid-template-columns: 1fr 340px !important;
+  }
+}
+
+@media (min-width: 1536px) {
+  .pillar-left {
+    width: 420px;
+  }
+  .pillar-right {
+    grid-template-columns: 1fr 380px !important;
+  }
+}
+
+/* ── Custom Scrollbar ───────────────────────── */
+
+.scroll-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroll-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.scroll-container:hover::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.2);
+}
+
+/* ── Identity Pillar (Column 1) ─────────────── */
+
+.identity-card {
   position: relative;
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 2.5rem;
+  overflow: hidden;
+  box-shadow: 
+    0 30px 70px rgba(0, 0, 0, 0.6),
+    inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-.avatar-ring::before {
-  content: '';
-  position: absolute;
-  inset: -3px;
-  border-radius: 1.6rem;
-  background: conic-gradient(
-    from 180deg,
-    rgba(99, 102, 241, 0.5),
-    rgba(139, 92, 246, 0.7),
-    rgba(168, 85, 247, 0.5),
-    rgba(99, 102, 241, 0.2),
-    rgba(139, 92, 246, 0.5)
-  );
-  animation: ring-spin 10s linear infinite;
-  opacity: 0.6;
+.identity-card:hover {
+  border-color: rgba(99, 102, 241, 0.3);
+  box-shadow: 
+    0 40px 90px rgba(0, 0, 0, 0.7),
+    0 0 30px rgba(99, 102, 241, 0.1);
 }
 
-.avatar-ring::after {
+.identity-card::before {
   content: '';
   position: absolute;
-  inset: -1px;
-  border-radius: 1.4rem;
-  background: #030305;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(99, 102, 241, 0.08) 0%, transparent 50%);
+  animation: mesh-drift 25s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes mesh-drift {
+  0% { transform: translate(-10%, -10%) rotate(0deg); }
+  50% { transform: translate(10%, 10%) rotate(180deg); }
+  100% { transform: translate(-10%, -10%) rotate(360deg); }
+}
+
+/* ── Avatar ────────────────────────────────── */
+
+.avatar-container {
+  position: relative;
+  padding: 8px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.4), rgba(168, 85, 247, 0.4));
+  border-radius: 2.25rem;
+  box-shadow: 0 0 40px rgba(99, 102, 241, 0.3);
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.avatar-container:hover {
+  transform: scale(1.05) rotate(2deg);
+}
+
+.avatar-container::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 3px;
+  background: conic-gradient(from 180deg, #6366f1, transparent, #a855f7, transparent, #6366f1);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: ring-spin 12s linear infinite;
 }
 
 @keyframes ring-spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
-/* ── Continue reading card ──────────────────── */
-.continue-card {
-  display: block;
-  width: 17rem;
-  border-radius: 1.5rem;
-  padding: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  background: rgba(255, 255, 255, 0.02);
-  transition: all 0.3s ease;
-  text-decoration: none;
-}
+/* ── Badges ────────────────────────────────── */
 
-.continue-card:hover {
-  border-color: rgba(99, 102, 241, 0.25);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-}
-
-/* ── Contribution / draft tab buttons ───────── */
-.contrib-tab--active {
-  background: rgba(99, 102, 241, 0.12);
-  border-color: rgba(99, 102, 241, 0.3);
-  color: #a5b4fc;
-}
-
-.contrib-tab--inactive {
-  background: transparent;
-  border-color: rgba(255, 255, 255, 0.07);
-  color: #475569;
-}
-
-.contrib-tab--inactive:hover {
-  color: #94a3b8;
-}
-
-/* ── Modal tab buttons ──────────────────────── */
-.tab-btn--active {
-  background: rgba(99, 102, 241, 0.12);
-  border-color: rgba(99, 102, 241, 0.3);
-  color: #a5b4fc;
-}
-
-.tab-btn--inactive {
-  background: transparent;
-  border-color: transparent;
-  color: #475569;
-}
-
-.tab-btn--inactive:hover {
-  color: #94a3b8;
-  background: rgba(255, 255, 255, 0.03);
-}
-
-/* ── Genre chips ────────────────────────────── */
-.genre-chip {
-  padding: 5px 12px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  background: rgba(255, 255, 255, 0.03);
-  color: #64748b;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.genre-chip:hover {
-  border-color: rgba(99, 102, 241, 0.3);
-  color: #94a3b8;
-}
-
-.genre-chip--selected {
+.mythic-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.25rem;
   background: rgba(99, 102, 241, 0.15);
-  border-color: rgba(99, 102, 241, 0.4);
-  color: #a5b4fc;
-}
-
-/* ── Genre display pills ────────────────────── */
-.genre-pill {
-  display: inline-block;
-  padding: 3px 10px;
+  border: 1px solid rgba(99, 102, 241, 0.3);
   border-radius: 999px;
-  font-size: 10px;
-  font-weight: 600;
-  background: rgba(99, 102, 241, 0.1);
-  border: 1px solid rgba(99, 102, 241, 0.2);
-  color: #818cf8;
-}
-
-/* ── Rune accent ────────────────────────────── */
-.rune-accent {
-  position: relative;
-}
-
-.rune-accent::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px;
-  height: 55%;
-  background: linear-gradient(
-    180deg,
-    transparent,
-    rgba(99, 102, 241, 0.6),
-    rgba(139, 92, 246, 0.4),
-    transparent
-  );
-  border-radius: 2px;
-}
-
-/* ── Glow hover cards ───────────────────────── */
-.glow-hover {
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.glow-hover:hover {
-  box-shadow:
-    0 0 28px rgba(99, 102, 241, 0.1),
-    0 8px 28px rgba(0, 0, 0, 0.25);
-  border-color: rgba(99, 102, 241, 0.18) !important;
-}
-
-/* ── Tale cards hover ───────────────────────── */
-.contribution-card {
-  transition: all 0.3s ease;
-}
-
-/* ── Badge float ────────────────────────────── */
-.badge-float {
-  animation: badge-float 3s ease-in-out infinite;
+  color: #c7d2fe;
+  font-size: 0.65rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  box-shadow: 
+    0 4px 15px rgba(99, 102, 241, 0.2),
+    0 0 10px rgba(99, 102, 241, 0.1);
+  animation: badge-float 5s ease-in-out infinite;
 }
 
 @keyframes badge-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-5px) scale(1.03); }
+}
 
-  50% {
-    transform: translateY(-4px);
+/* ── Runic Insights (Column 3) ──────────────── */
+
+.stat-card-mythic {
+  position: relative;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 1.75rem;
+  padding: 1.75rem;
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  overflow: hidden;
+}
+
+.stat-card-mythic::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.03), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.stat-card-mythic:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(99, 102, 241, 0.3);
+  transform: translateX(-4px);
+  box-shadow: 
+    -10px 15px 40px rgba(0, 0, 0, 0.4),
+    inset 0 0 20px rgba(99, 102, 241, 0.02);
+}
+
+.stat-card-mythic:hover::after {
+  opacity: 1;
+}
+
+/* ── Content Sections ──────────────────────── */
+
+.section-header {
+  margin-bottom: 3.5rem;
+}
+
+.rune-divider {
+  position: relative;
+  height: 2px;
+  background: linear-gradient(90deg, #6366f1 0%, transparent 100%);
+  margin-top: 0.75rem;
+  width: 80px;
+}
+
+.rune-divider::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  background: #6366f1;
+  border-radius: 50%;
+  box-shadow: 0 0 15px #6366f1;
+}
+
+/* ── Cards (Hero Style) ────────────────────── */
+
+.continue-card {
+  width: 360px;
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.continue-card:hover {
+  transform: translateY(-8px) scale(1.02);
+}
+
+.card-image-wrap {
+  position: relative;
+  aspect-ratio: 16/9;
+  border-radius: 2rem;
+  overflow: hidden;
+  background: #0f172a;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+}
+
+.card-image-wrap img {
+  transition: transform 1.2s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.continue-card:hover .card-image-wrap img {
+  transform: scale(1.15);
+}
+
+.card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(3, 3, 5, 0.95) 0%, rgba(3, 3, 5, 0.4) 50%, transparent 100%);
+}
+
+/* ── Contribution Cards ────────────────────── */
+
+.contribution-card {
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.contribution-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Tabs ──────────────────────────────────── */
+
+.tab-nav {
+  display: flex;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 0.4rem;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.tab-trigger {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  border-radius: 1.1rem;
+  font-size: 0.65rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #64748b;
+  transition: all 0.3s ease;
+}
+
+.tab-trigger--active {
+  background: rgba(255, 255, 255, 0.06);
+  color: white;
+  box-shadow: 
+    0 8px 20px rgba(0, 0, 0, 0.3),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+}
+
+/* ── Mobile Polish ─────────────────────────── */
+
+@media (max-width: 767px) {
+  #column-insights {
+    display: none;
+  }
+  
+  .profile-dashboard {
+    overflow-y: auto !important;
+  }
+  
+  .dashboard-column {
+    height: auto !important;
+    overflow: visible !important;
+    border-right: none !important;
   }
 }
 
-/* ── Reduce motion ──────────────────────────── */
+/* ── Animation Overrides ────────────────────── */
+
 @media (prefers-reduced-motion: reduce) {
-  .avatar-ring::before,
-  .badge-float {
+  .identity-card::before,
+  .avatar-container::after,
+  .mythic-badge {
     animation: none;
-  }
-
-  .skeleton {
-    animation: none;
-    background: rgba(255, 255, 255, 0.04);
   }
 }
+
