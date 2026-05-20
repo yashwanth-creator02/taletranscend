@@ -1,23 +1,175 @@
+// src/ui/icons.js
 /**
  * Renders all Lucide icons found in the given scope.
- * Safe to call multiple times — skips silently if Lucide is not loaded.
+ * Uses the bundled Lucide package instead of CDN.
+ */
+
+import {
+  createIcons,
+  ChevronUp,
+  ChevronDown,
+  Trash2,
+  ArrowRight,
+  BookmarkMinus,
+  BookmarkPlus,
+  CheckCircle,
+  AlertCircle,
+  ScrollText,
+  Search,
+  AlertTriangle,
+  Layers,
+  Eye,
+  BookType,
+  Sparkles,
+  Archive,
+  Compass,
+  MoreHorizontal,
+  Link,
+  Download,
+  FileText,
+  ArrowUp,
+  ArrowDown,
+  TriangleAlert,
+  LogOut,
+  LogIn,
+  X,
+  Feather,
+  ChevronLeft,
+  ChevronRight,
+  Cloud,
+  Send,
+  Mic,
+  Plus,
+  Wand2,
+  BarChart2,
+  Circle,
+  PenTool,
+  BadgeX,
+  PanelLeftClose,
+  PanelLeftOpen,
+  LayoutGrid,
+  Clock,
+  Bookmark,
+  Share2,
+  User,
+  Globe,
+  Settings,
+  BookOpen,
+  Flame,
+  Users2,
+  Clock4,
+  Signature,
+  Scroll,
+  UserCheck,
+  MapPin,
+  Tags,
+  Target,
+  Check,
+  ArrowLeft,
+  Settings2,
+  Tag,
+  Info,
+  Clock3,
+  Filter,
+  ArrowUpDown,
+  WandSparkles,
+  MessageSquarePlus,
+  Database,
+  RotateCcw,
+  Play,
+  Heart,
+  Home,
+} from 'lucide';
+
+/**
+ * Renders all Lucide icons found in the given scope.
+ * Safe to call multiple times.
  *
  * @param {ParentNode} [scope=document] - The DOM scope to search for icons
  */
 export function initIcons(scope = document) {
-  if (!window.lucide || typeof window.lucide.createIcons !== 'function') return;
-
   try {
-    // If using the CDN version (window.lucide), it usually has icons bundled.
-    // If it's an ESM version, we might need to pass the icons object.
-    const options = {};
-    if (scope !== document) {
-      options.scope = scope;
-    }
-
-    // Attempt to call createIcons. If it fails due to missing icons object, 
-    // it will be caught by the try-catch.
-    window.lucide.createIcons(options);
+    createIcons({
+      icons: {
+        ChevronUp,
+        ChevronDown,
+        Trash2,
+        ArrowRight,
+        BookmarkMinus,
+        BookmarkPlus,
+        CheckCircle,
+        AlertCircle,
+        ScrollText,
+        Search,
+        AlertTriangle,
+        Layers,
+        Eye,
+        BookType,
+        Sparkles,
+        Archive,
+        Compass,
+        MoreHorizontal,
+        Link,
+        Download,
+        FileText,
+        ArrowUp,
+        ArrowDown,
+        TriangleAlert,
+        LogOut,
+        LogIn,
+        X,
+        Feather,
+        ChevronLeft,
+        ChevronRight,
+        Cloud,
+        Send,
+        Mic,
+        Plus,
+        Wand2,
+        BarChart2,
+        Circle,
+        PenTool,
+        BadgeX,
+        PanelLeftClose,
+        PanelLeftOpen,
+        LayoutGrid,
+        Clock,
+        Bookmark,
+        Share2,
+        User,
+        Globe,
+        Settings,
+        BookOpen,
+        Flame,
+        Users2,
+        Clock4,
+        Signature,
+        Scroll,
+        UserCheck,
+        MapPin,
+        Tags,
+        Target,
+        Check,
+        ArrowLeft,
+        Settings2,
+        Tag,
+        Info,
+        Clock3,
+        Filter,
+        ArrowUpDown,
+        WandSparkles,
+        MessageSquarePlus,
+        Database,
+        RotateCcw,
+        Play,
+        Heart,
+        Home,
+      },
+      nameAttr: 'data-lucide',
+      attrs: {
+        'stroke-width': 2,
+      },
+    });
   } catch (err) {
     console.warn('[icons] Failed to render Lucide icons:', err);
   }

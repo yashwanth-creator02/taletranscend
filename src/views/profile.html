@@ -6,7 +6,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TaleTranscend | Profile</title>
-  <script src="https://unpkg.com/lucide@latest"></script>
   <script type="module" src="../pages/profile/profile.js"></script>
 </head>
 
@@ -535,9 +534,10 @@
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    import { initIcons } from '../ui/icons.js';
     document.addEventListener('DOMContentLoaded', () => {
-      if (window.lucide) window.lucide.createIcons();
+      initIcons();
     });
   </script>
 </body>

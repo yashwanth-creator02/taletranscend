@@ -8,9 +8,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Studio | TaleTranscend</title>
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-
   <script type="module" src="../pages/shelf/shelf.js"></script>
 
   <link
@@ -274,11 +271,10 @@
 
   </main>
 
-  <script>
+  <script type="module">
+    import { initIcons } from '../ui/icons.js';
     window.addEventListener('DOMContentLoaded', () => {
-      if (window.lucide && typeof lucide.createIcons === 'function') {
-        lucide.createIcons();
-      }
+      initIcons();
     });
   </script>
 </body>

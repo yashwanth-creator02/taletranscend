@@ -7,6 +7,7 @@ import { libraryState } from './state.js';
 import { getBookmarks } from '@services/index.js';
 import { buildEraChips, setActiveEraChip, setActiveSidebarBtn } from './ui.js';
 import { renderCardsGrid } from '@ui/components/taleCard.js';
+import { initIcons } from '@/ui/icons.js';
 
 /* ─────────────────────────────────────────────
    Core: apply all active filters together
@@ -45,7 +46,7 @@ export async function applyAllFilters() {
 
   libraryState.filteredTales = result;
   await renderCardsGrid(libraryState.userId, result);
-  window.lucide?.createIcons?.();
+  initIcons();
 }
 
 /* ─────────────────────────────────────────────

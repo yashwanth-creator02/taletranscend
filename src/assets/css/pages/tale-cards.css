@@ -1,0 +1,276 @@
+/* src/assets/css/pages/tale-cards.css */
+
+/* ── Tale Card Base (Atmosphere) ───────────── */
+
+.tale-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 2.5rem;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  box-shadow:
+    0 20px 40px -12px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.03);
+}
+
+/* Ambient glow that appears on hover */
+.tale-card::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 2.6rem;
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.15) 0%,
+    transparent 40%,
+    rgba(139, 92, 246, 0.1) 100%
+  );
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.tale-card:hover::before {
+  opacity: 1;
+}
+
+/* Movable mesh background – subtle slow drift */
+.tale-card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(99, 102, 241, 0.06) 0%, transparent 60%);
+  animation: card-drift 28s linear infinite;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.tale-card:hover::after {
+  opacity: 1;
+}
+
+@keyframes card-drift {
+  0% {
+    transform: translate(-5%, -5%) rotate(0deg);
+  }
+  50% {
+    transform: translate(5%, 5%) rotate(180deg);
+  }
+  100% {
+    transform: translate(-5%, -5%) rotate(360deg);
+  }
+}
+
+/* ── Header Badges (Era & Status) ──────────── */
+
+.tale-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  border: 1px solid;
+  backdrop-filter: blur(12px);
+  transition: all 0.3s ease;
+}
+
+.tale-badge--era {
+  background: rgba(99, 102, 241, 0.12);
+  border-color: rgba(99, 102, 241, 0.3);
+  color: #c7d2fe;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+}
+
+.tale-badge--finished {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #6ee7b7;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+}
+
+/* ── Cover Image Container ────────────────── */
+
+.cover-wrapper {
+  position: relative;
+  aspect-ratio: 16/10;
+  border-radius: 2rem;
+  overflow: hidden;
+  background: #0f172a;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.tale-card:hover .cover-wrapper {
+  box-shadow:
+    0 25px 50px rgba(0, 0, 0, 0.7),
+    0 0 30px rgba(99, 102, 241, 0.15);
+}
+
+.cover-wrapper img {
+  transition: transform 1.2s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.tale-card:hover .cover-wrapper img {
+  transform: scale(1.12);
+}
+
+/* Gradient overlays for depth */
+.cover-gradient {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to top, rgba(3, 3, 5, 0.9) 0%, rgba(3, 3, 5, 0.3) 60%, transparent 100%),
+    radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.2) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+/* ── Progress Bar (Neural) ─────────────────── */
+
+.progress-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1.25rem;
+  transform: translateY(8px);
+  opacity: 0.8;
+  transition: all 0.5s ease;
+}
+
+.tale-card:hover .progress-overlay {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.progress-track {
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  border-radius: 3px;
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.6);
+  transition: width 1.2s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* ── Content Typography ───────────────────── */
+
+.card-title {
+  font-size: 1.75rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: #fff;
+  transition: color 0.3s;
+}
+
+.tale-card:hover .card-title {
+  color: #c7d2fe;
+}
+
+.card-description {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #a1a1aa;
+  transition: color 0.3s;
+}
+
+.tale-card:hover .card-description {
+  color: #d4d4d8;
+}
+
+/* ── Actions Button ────────────────────────── */
+
+.btn-resume {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: white;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.btn-resume:hover {
+  background: #4f46e5;
+  border-color: #6366f1;
+  box-shadow: 0 0 25px rgba(99, 102, 241, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-resume i {
+  transition: transform 0.3s;
+}
+
+.btn-resume:hover i {
+  transform: translateX(4px);
+}
+
+/* ── Menu & Icon Tweaks ───────────────────── */
+
+.options-menu {
+  background: rgba(15, 15, 20, 0.95);
+  backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.5rem;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+}
+
+.menu-btn {
+  transition: all 0.2s;
+}
+
+.menu-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  letter-spacing: 0.05em;
+}
+
+/* ── Responsive Finesse ────────────────────── */
+@media (max-width: 640px) {
+  .tale-card {
+    border-radius: 2rem;
+  }
+  .card-title {
+    font-size: 1.4rem;
+  }
+}
+
+@keyframes card-pulse {
+  0%,
+  100% {
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 20px 50px -10px rgba(99, 102, 241, 0.15);
+  }
+}
+
+.tale-card {
+  animation: card-pulse 6s ease-in-out infinite;
+}

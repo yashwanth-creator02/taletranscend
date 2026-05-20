@@ -64,6 +64,7 @@ initAuth(async (user) => {
   bindChapterClicks(taleId);
   setupStartReading(taleId, chapters);
   setupResumeReading(userId, taleId);
+  setupResonance(taleId);
   setupTabs();
   initHeaderScroll();
 

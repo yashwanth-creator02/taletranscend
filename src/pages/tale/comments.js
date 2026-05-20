@@ -13,6 +13,7 @@ import {
   getDocs,
   refs,
 } from '@fb/index.js';
+import { showToast } from '@ui/components/toast.js';
 import { escapeHtml } from '@/utils/string.utils.js';
 import { initIcons } from '@ui/components/icons.js';
 
@@ -110,10 +111,12 @@ export async function postComment(taleId) {
       timestamp: serverTimestamp(),
     });
     input.value = '';
+    showToast('Echo transmitted to the weave.', 'success');
     // Refresh to show new comment at top
     _fetchComments(true);
   } catch (err) {
     console.error('Transmission failed:', err);
+    showToast('Transmission failed. Neural link unstable.', 'error');
   } finally {
     btn.disabled = false;
     btn.innerText = originalText;

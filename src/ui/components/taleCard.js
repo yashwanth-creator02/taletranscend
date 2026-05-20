@@ -6,6 +6,7 @@ import { getTotalReadTime, getBookmarks, getTaleProgressData } from '@services/i
 import { getOverallProgress } from '@/utils/progress.utils';
 import { escapeHtml } from '@/utils/string.utils';
 import { renderEmptyState, renderErrorState } from './feedback.js';
+import { initIcons } from '@/ui/icons.js';
 
 /* ================= Helpers ================= */
 
@@ -196,7 +197,7 @@ export function renderTaleCards(container, tales, metadata) {
     })
     .join('');
 
-  if (window.lucide) window.lucide.createIcons();
+  initIcons(container);
 }
 
 /**

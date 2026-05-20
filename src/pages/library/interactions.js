@@ -3,6 +3,8 @@
 // Scope: resume, bookmark (couple/decouple), copy link, mark finished.
 // Everything else (search, filters, sidebar toggle) lives in filters.js / ui.js.
 
+import { showToast } from '@ui/components/toast.js';
+import { initIcons } from '@/ui/icons.js';
 import {
   resolveResumePoint,
   addToBookmarks,
@@ -157,7 +159,7 @@ function _confirmMarkFinished(onConfirm) {
 async function _handleMarkFinished(userId, taleId) {
   await markTaleFinished({ userId, taleId });
   _closeAllMenus();
-  window.lucide?.createIcons?.();
+  initIcons();
 }
 
 async function _handleCouple(userId, taleId, btn) {
@@ -168,7 +170,7 @@ async function _handleCouple(userId, taleId, btn) {
     btn.innerHTML = `<i data-lucide="bookmark-minus" class="w-3.5 h-3.5"></i> Remove from shelf`;
     btn.classList.remove('text-emerald-400', 'hover:bg-emerald-500/20');
     btn.classList.add('text-red-400', 'hover:bg-red-500/20');
-    window.lucide?.createIcons?.();
+    initIcons();
     _closeAllMenus();
   } catch (err) {
     console.error('[library] Couple failed:', err);
@@ -185,7 +187,7 @@ async function _handleDecouple(userId, taleId, btn) {
     btn.innerHTML = `<i data-lucide="bookmark-plus" class="w-3.5 h-3.5"></i> Add to shelf`;
     btn.classList.remove('text-red-400', 'hover:bg-red-500/20');
     btn.classList.add('text-emerald-400', 'hover:bg-emerald-500/20');
-    window.lucide?.createIcons?.();
+    initIcons();
     _closeAllMenus();
   } catch (err) {
     console.error('[library] Decouple failed:', err);
@@ -213,32 +215,4 @@ function _toggleMenu(menuId) {
 
 function _closeAllMenus() {
   document.querySelectorAll('.options-menu:not(.hidden)').forEach((m) => m.classList.add('hidden'));
-}
-
-function _showToast(message, type = 'success') {
-  let container = document.getElementById('lib-toast');
-  if (!container) {
-    container = document.createElement('div');
-    container.id = 'lib-toast';
-    container.className = 'fixed top-6 right-6 z-[300] flex flex-col gap-2.5 pointer-events-none';
-    document.body.appendChild(container);
-  }
-
-  const toast = document.createElement('div');
-  toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl border bg-zinc-900/95 backdrop-blur-xl shadow-2xl text-sm font-medium transition-all duration-300 ${
-    type === 'success' ? 'border-indigo-500/30 text-white' : 'border-red-500/30 text-red-200'
-  }`;
-  toast.innerHTML = `
-    <i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}"
-       class="w-4 h-4 flex-shrink-0 ${type === 'success' ? 'text-indigo-400' : 'text-red-400'}"></i>
-    ${message}
-  `;
-  container.appendChild(toast);
-  window.lucide?.createIcons?.();
-
-  setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateX(10px)';
-    setTimeout(() => toast.remove(), 350);
-  }, 3000);
 }

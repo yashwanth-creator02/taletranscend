@@ -8,6 +8,7 @@ export {
   setupTabs,
   setupStartReading,
   setupResumeReading,
+  setupResonance,
   initHeaderScroll,
 } from './interactions.js';
 export { listenToComments, postComment } from './comments.js';

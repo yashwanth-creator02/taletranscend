@@ -1,4 +1,5 @@
 import { escapeHtml } from '@/utils/string.utils';
+import { initIcons } from '@/ui/icons.js';
 
 /**
  * Renders an empty state message.
@@ -28,7 +29,7 @@ export function renderEmptyState(container, {
     </div>
   `;
 
-  if (window.lucide) window.lucide.createIcons();
+  initIcons(container);
 }
 
 /**
@@ -55,5 +56,5 @@ export function renderErrorState(container, {
     </div>
   `;
 
-  if (window.lucide) window.lucide.createIcons();
+  initIcons(container);
 }

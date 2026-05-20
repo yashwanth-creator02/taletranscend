@@ -255,27 +255,13 @@ document.addEventListener('DOMContentLoaded', () => {
   initIcons();
 });
 
+import { showToast } from '@ui/components/toast.js';
+
 /* ─────────────────────────────────────────────
-   Feedback Helpers
+   Toasts
    ───────────────────────────────────────────── */
 
-function _showToast(message) {
-  const container = document.getElementById('reader-toast-container');
-  if (!container) return;
-
-  const toast = document.createElement('div');
-  toast.className = 'glass-strong px-5 py-3.5 rounded-2xl border-indigo-500/20 text-white text-xs font-bold shadow-2xl flex items-center gap-3 transition-all duration-500 opacity-0 translate-y-4';
-  toast.innerHTML = `<i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-400"></i> ${message}`;
-  
-  container.appendChild(toast);
-  initIcons();
-
-  requestAnimationFrame(() => {
-    toast.classList.remove('opacity-0', 'translate-y-4');
-  });
-
-  setTimeout(() => {
-    toast.classList.add('opacity-0', 'scale-95');
-    setTimeout(() => toast.remove(), 500);
-  }, 3000);
+function _showToast(message, type = 'info') {
+  showToast(message, type);
 }
+

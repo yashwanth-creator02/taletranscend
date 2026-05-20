@@ -7,6 +7,7 @@
 //   - Skeleton / empty / error grid states
 
 import { libraryState } from './state.js';
+import { initIcons } from '@/ui/icons.js';
 
 /* ─────────────────────────────────────────────
    Sidebar Toggle
@@ -38,7 +39,7 @@ function _applySidebarState(sidebar, collapsed) {
   const icon = document.querySelector('#toggle-sidebar i[data-lucide]');
   if (icon) {
     icon.setAttribute('data-lucide', collapsed ? 'panel-left-open' : 'panel-left-close');
-    window.lucide?.createIcons?.();
+    initIcons(document.getElementById('toggle-sidebar'));
   }
 }
 
@@ -143,16 +144,21 @@ export function showGridSkeleton(count = 8) {
   grid.innerHTML = Array.from(
     { length: count },
     () => `
-    <div class="rounded-[2rem] overflow-hidden border border-white/[0.04]">
-      <div class="aspect-[4/3] skeleton"></div>
-      <div class="p-5 space-y-3">
-        <div class="skeleton h-4 w-1/3 rounded-lg"></div>
-        <div class="skeleton h-5 w-3/4 rounded-lg"></div>
-        <div class="skeleton h-3 w-full rounded-lg"></div>
-        <div class="skeleton h-3 w-2/3 rounded-lg"></div>
-        <div class="flex gap-3 pt-2">
-          <div class="skeleton h-3 w-20 rounded-lg"></div>
-          <div class="skeleton h-3 w-20 rounded-lg"></div>
+    <div class="rounded-[2.5rem] overflow-hidden border border-white/[0.04] bg-white/[0.01]">
+      <div class="aspect-[16/10] skeleton"></div>
+      <div class="p-6 space-y-4">
+        <div class="skeleton h-4 w-1/4 rounded-lg"></div>
+        <div class="skeleton h-6 w-3/4 rounded-lg"></div>
+        <div class="space-y-2">
+          <div class="skeleton h-3.5 w-full rounded-md"></div>
+          <div class="skeleton h-3.5 w-2/3 rounded-md"></div>
+        </div>
+        <div class="flex items-center justify-between pt-4 border-t border-white/5">
+          <div class="flex gap-3">
+             <div class="skeleton h-3 w-16 rounded-md"></div>
+             <div class="skeleton h-3 w-16 rounded-md"></div>
+          </div>
+          <div class="skeleton h-4 w-4 rounded-full"></div>
         </div>
       </div>
     </div>
@@ -170,24 +176,24 @@ export function showGridEmpty(message = 'No tales found in the archives.') {
   if (!grid) return;
 
   grid.innerHTML = `
-    <div class="col-span-full flex flex-col items-center gap-5 py-24 text-center">
-      <div class="w-14 h-14 rounded-2xl bg-indigo-500/[0.07] border border-indigo-500/15 flex items-center justify-center">
-        <i data-lucide="scroll-text" class="w-6 h-6 text-indigo-500/40"></i>
+    <div class="col-span-full flex flex-col items-center gap-6 py-32 text-center animate-fade-in">
+      <div class="w-20 h-20 rounded-[2rem] bg-indigo-500/[0.05] border border-indigo-500/10 flex items-center justify-center shadow-2xl">
+        <i data-lucide="scroll-text" class="w-8 h-8 text-indigo-500/30"></i>
       </div>
-      <div>
-        <h3 class="text-base font-bold text-white mb-2">Nothing here</h3>
-        <p class="text-sm text-zinc-600 max-w-xs leading-relaxed">${message}</p>
+      <div class="space-y-2">
+        <h3 class="text-xl font-cinzel font-bold text-white tracking-tight">The Weave is Silent</h3>
+        <p class="text-sm text-slate-500 max-w-xs mx-auto leading-relaxed font-medium italic">${message}</p>
       </div>
       <button
         onclick="document.getElementById('search-input')?.focus()"
-        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold uppercase tracking-[0.15em] hover:bg-indigo-500/20 transition-colors"
+        class="group inline-flex items-center gap-3 px-8 py-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[11px] font-black uppercase tracking-[0.25em] hover:bg-indigo-500/20 hover:text-indigo-300 transition-all shadow-xl shadow-indigo-500/10"
       >
-        <i data-lucide="search" class="w-3.5 h-3.5"></i>
-        Search library
+        <i data-lucide="search" class="w-4 h-4 group-hover:scale-110 transition-transform"></i>
+        Consult the Oracle
       </button>
     </div>
   `;
-  window.lucide?.createIcons?.();
+  initIcons(grid);
 }
 
 /**
@@ -198,13 +204,23 @@ export function showGridError() {
   if (!grid) return;
 
   grid.innerHTML = `
-    <div class="col-span-full text-center py-20">
-      <div class="inline-flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-red-500/[0.07] border border-red-500/15 text-red-400 text-sm">
-        <i data-lucide="alert-triangle" class="w-4 h-4"></i>
-        Database connection failed.
-        <button onclick="window.location.reload()" class="underline hover:no-underline ml-1">Refresh</button>
+    <div class="col-span-full text-center py-24 animate-fade-in">
+      <div class="inline-flex flex-col items-center gap-4 px-10 py-10 rounded-[2.5rem] bg-rose-500/[0.03] border border-rose-500/15">
+        <div class="w-14 h-14 rounded-2xl bg-rose-500/10 flex items-center justify-center mb-2">
+          <i data-lucide="alert-triangle" class="w-6 h-6 text-rose-500/60"></i>
+        </div>
+        <div class="space-y-1">
+          <h3 class="text-lg font-bold text-rose-400">Neural Link Severed</h3>
+          <p class="text-xs text-rose-500/70 font-medium uppercase tracking-widest">Database connection failed</p>
+        </div>
+        <button 
+          onclick="window.location.reload()" 
+          class="mt-4 px-6 py-2.5 rounded-xl bg-rose-500/10 text-rose-400 text-[10px] font-black uppercase tracking-widest border border-rose-500/20 hover:bg-rose-500/20 transition-all"
+        >
+          Re-establish Connection
+        </button>
       </div>
     </div>
   `;
-  window.lucide?.createIcons?.();
+  initIcons(grid);
 }

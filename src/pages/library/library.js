@@ -20,6 +20,7 @@ import {
   showGridError,
   setActiveSidebarBtn,
 } from './ui.js';
+import { initIcons } from '@/ui/icons.js';
 
 import { setupAuthTimeout } from '@/utils/ui.utils';
 
@@ -31,8 +32,12 @@ initNav();
 
 document.addEventListener('DOMContentLoaded', () => {
   setupSidebarToggle();
-  showGridSkeleton();
-  window.lucide?.createIcons?.();
+  const grid = document.getElementById('cards-grid');
+  if (grid) {
+    grid.classList.add('fade-in-stagger');
+    showGridSkeleton();
+  }
+  initIcons();
 });
 
 /* ─────────────────────────────────────────────
@@ -73,7 +78,7 @@ initAuth(async (user) => {
 
       // Apply all active filters against fresh data
       await applyAllFilters();
-      window.lucide?.createIcons?.();
+      initIcons();
     },
     () => showGridError()
   );

@@ -339,44 +339,16 @@ export function updateStatsUI(stats) {
    Toast Notifications
    ───────────────────────────────────────────── */
 
+import { showToast } from '@ui/components/toast.js';
+
 /**
- * Shows a toast notification. Auto-removes after 3.5s.
+ * Shows a toast notification.
  *
  * @param {string} message
  * @param {'success'|'error'|'info'} type
  */
 export function showNotification(message, type = 'success') {
-  const container = document.getElementById('toast-container');
-  if (!container) return;
-
-  const iconMap = { success: 'check-circle', error: 'alert-circle', info: 'info' };
-  const colorMap = {
-    success: 'border-indigo-500/40 text-white',
-    error: 'border-red-500/40 text-red-200',
-    info: 'border-slate-500/40 text-slate-200',
-  };
-  const iconColorMap = {
-    success: 'text-indigo-400',
-    error: 'text-red-400',
-    info: 'text-slate-400',
-  };
-
-  const toast = document.createElement('div');
-  toast.className = `flex items-center gap-3 px-5 py-4 rounded-2xl border bg-zinc-900/95 backdrop-blur-xl shadow-2xl pointer-events-auto transition-all duration-300 translate-x-0 opacity-100 ${colorMap[type]}`;
-
-  toast.innerHTML = `
-    <i data-lucide="${iconMap[type]}" class="w-4 h-4 flex-shrink-0 ${iconColorMap[type]}"></i>
-    <span class="text-sm font-medium">${message}</span>
-  `;
-
-  container.appendChild(toast);
-  initIcons();
-
-  setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateX(16px)';
-    setTimeout(() => toast.remove(), 400);
-  }, 3500);
+  showToast(message, type);
 }
 
 /* ─────────────────────────────────────────────

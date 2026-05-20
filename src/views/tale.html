@@ -7,8 +7,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tale Archive | TaleTranscend</title>
 
-  <script src="https://unpkg.com/lucide@latest"></script>
-
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Cinzel:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap"
     rel="stylesheet" />
@@ -141,7 +139,23 @@
             <div class="shine-layer"></div>
           </div>
 
-          <!-- Archive Status -->
+          <!-- Resonance Module -->
+          <div class="glass-card p-8 rounded-[2.5rem] border-white/5 group">
+             <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center gap-3">
+                  <i data-lucide="flame" class="w-5 h-5 text-orange-400"></i>
+                  <span class="text-[10px] font-black uppercase tracking-[0.4em] text-orange-300">Soul Resonance</span>
+                </div>
+                <span id="resonance-count" class="text-xs font-bold text-white tracking-wider">0</span>
+             </div>
+             <button id="resonance-btn" class="w-full py-4 rounded-2xl border border-white/10 glass hover:border-orange-500/40 transition-all flex items-center justify-center gap-3 group/btn">
+               <i data-lucide="heart" class="w-4 h-4 text-slate-500 group-hover/btn:text-orange-500 transition-colors"></i>
+               <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 group-hover/btn:text-white">Align Souls</span>
+             </button>
+          </div>
+
+          <!-- Archive Stats -->
+
           <div class="glass-card-strong p-8 rounded-[2.5rem] shadow-2xl">
              <div class="flex items-center gap-3 mb-6">
                <i data-lucide="database" class="w-4 h-4 text-indigo-400"></i>

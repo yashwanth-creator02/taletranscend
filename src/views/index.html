@@ -7,9 +7,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Home | TaleTranscend</title>
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Cinzel:wght@400;500;600;700;800&family=Merriweather:wght@300;400;700&display=swap"
     rel="stylesheet" />
@@ -270,11 +267,10 @@
     </footer>
   </main>
 
-  <script>
+  <script type="module">
+    import { initIcons } from '../ui/icons.js';
     window.addEventListener('DOMContentLoaded', () => {
-      if (window.lucide && typeof lucide.createIcons === 'function') {
-        lucide.createIcons();
-      }
+      initIcons();
     });
   </script>
 </body>

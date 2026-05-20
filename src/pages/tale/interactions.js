@@ -1,11 +1,56 @@
 // src/pages/tale/interactions.js
 // Handles user interactions for the Tale Archive page.
 
-import { resolveResumePoint } from '@services/index.js';
+import { resolveResumePoint, toggleResonance, getResonanceStatus } from '@services/index.js';
+import { showToast } from '@ui/components/toast.js';
+import { initIcons } from '@ui/components/icons.js';
 
 /**
- * Binds click events to chapter list items using event delegation.
+ * Sets up the Soul Resonance (like) interaction.
  */
+export async function setupResonance(taleId) {
+  const btn = document.getElementById('resonance-btn');
+  const countEl = document.getElementById('resonance-count');
+  if (!btn || !countEl) return;
+
+  // Initial state
+  const isActive = await getResonanceStatus(taleId);
+  _updateResonanceUI(btn, countEl, isActive);
+
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    try {
+      const { active, count } = await toggleResonance(taleId);
+      _updateResonanceUI(btn, countEl, active, count);
+      showToast(active ? 'Souls Aligned.' : 'Resonance Decoupled.', 'success');
+    } catch (err) {
+      console.error('[resonance] Failed:', err);
+      showToast('Neural resonance failed. Authentication required.', 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+}
+
+function _updateResonanceUI(btn, countEl, active, count) {
+  if (count !== undefined) countEl.textContent = count;
+  
+  const icon = btn.querySelector('i');
+  const label = btn.querySelector('span');
+
+  if (active) {
+    btn.classList.add('border-orange-500/30', 'bg-orange-500/5');
+    icon?.setAttribute('data-lucide', 'flame');
+    icon?.classList.add('text-orange-500');
+    if (label) label.textContent = 'Souls Aligned';
+  } else {
+    btn.classList.remove('border-orange-500/30', 'bg-orange-500/5');
+    icon?.setAttribute('data-lucide', 'heart');
+    icon?.classList.remove('text-orange-500');
+    if (label) label.textContent = 'Align Souls';
+  }
+  initIcons(btn);
+}
 export function bindChapterClicks(taleId) {
   const list = document.getElementById('chapter-list');
   if (!list) return;
