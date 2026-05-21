@@ -141,9 +141,35 @@
         </header>
 
         <!-- Era filter bar -->
-        <div id="era-filter-bar" class="flex gap-3 overflow-x-auto no-scrollbar pb-2 mb-12" role="group" aria-label="Filter by era">
+        <div id="era-filter-bar" class="flex gap-3 overflow-x-auto no-scrollbar pb-2 mb-8" role="group" aria-label="Filter by era">
           <!-- Chips built by ui.js buildEraChips() after tales load -->
           <button data-era="all" class="era-chip era-chip--active">All Neural Links</button>
+        </div>
+
+        <!-- Secondary Filters -->
+        <div class="flex flex-col md:flex-row gap-6 mb-12">
+          <!-- Tone -->
+          <div class="flex-1">
+             <p class="text-[9px] font-black uppercase tracking-[0.3em] text-slate-700 mb-4 ml-1">Archive Tone</p>
+             <div id="tone-filter-bar" class="flex gap-2 overflow-x-auto no-scrollbar pb-2">
+                <button data-tone="all" class="filter-pill filter-pill--active">All Echoes</button>
+                <button data-tone="Mythic" class="filter-pill">Mythic</button>
+                <button data-tone="Dark" class="filter-pill">Dark</button>
+                <button data-tone="Whimsical" class="filter-pill">Whimsical</button>
+                <button data-tone="Melancholic" class="filter-pill">Melancholic</button>
+             </div>
+          </div>
+          
+          <!-- Length -->
+          <div class="w-full md:w-[280px]">
+             <p class="text-[9px] font-black uppercase tracking-[0.3em] text-slate-700 mb-4 ml-1">Echo Depth</p>
+             <div id="length-filter-bar" class="flex gap-2">
+                <button data-length="all" class="filter-pill flex-1 filter-pill--active">All</button>
+                <button data-length="short" class="filter-pill flex-1">Short</button>
+                <button data-length="medium" class="filter-pill flex-1">Mid</button>
+                <button data-length="long" class="filter-pill flex-1">Epic</button>
+             </div>
+          </div>
         </div>
 
         <!-- Cards grid -->

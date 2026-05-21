@@ -219,6 +219,9 @@ initTheme();
 
 initAuth(async (user) => {
   readerState.userId = user.uid;
+
+  // 0. Show Skeletons
+  showReaderSkeletons();
   
   // 1. Load Data
   await loadReaderMeta(taleId);

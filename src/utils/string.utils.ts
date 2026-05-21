@@ -1,11 +1,11 @@
 /**
  * Escapes HTML special characters to prevent XSS injection.
  *
- * @param {string} value - Raw string to escape
- * @returns {string} HTML-safe string
+ * @param value - Raw string to escape
+ * @returns HTML-safe string
  */
-export function escapeHtml(value = '') {
-  return String(value)
+export function escapeHtml(value: string | number | null | undefined = ''): string {
+  return String(value ?? '')
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')

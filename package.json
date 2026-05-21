@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "check": "npm run format && npm run lint",
+    "type-check": "tsc --noEmit",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
@@ -27,6 +28,8 @@
   "homepage": "https://github.com/yashwanth-creator02/taletranscend#readme",
   "devDependencies": {
     "@eslint/js": "^9.39.2",
+    "@types/firebase": "^2.4.32",
+    "@types/node": "^25.9.1",
     "autoprefixer": "^10.4.24",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
@@ -35,6 +38,7 @@
     "prettier": "3.8.1",
     "rollup-plugin-visualizer": "^7.0.1",
     "tailwindcss": "^4.1.18",
+    "typescript": "^6.0.3",
     "vite": "^7.3.1"
   },
   "dependencies": {

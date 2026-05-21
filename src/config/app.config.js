@@ -16,3 +16,6 @@ export const PROGRESS_SYNC_DELAY_MS = 4000;
 // Minimum session duration in milliseconds before read time is recorded.
 // Prevents noise from accidental tab switches.
 export const MIN_READ_SESSION_MS = 1000;
+
+// Gemini AI API Key for mythic suggestions.
+export const AI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';

@@ -1,6 +1,13 @@
 // src/pages/library/index.js
 export { subscribeToTales, stopTalesSubscription } from './content.js';
-export { applyAllFilters, setupSearch, setupEraFilter, setupSidebarFilter } from './filters.js';
+export {
+  applyAllFilters,
+  setupSearch,
+  setupEraFilter,
+  setupToneFilter,
+  setupLengthFilter,
+  setupSidebarFilter,
+} from './filters.js';
 export { setupCardInteractions } from './interactions.js';
 export {
   setupSidebarToggle,

@@ -6,6 +6,7 @@ import { profileState, GENRE_OPTIONS } from './state.js';
 import { suggestNameFromBio } from './ai-name.js';
 import { debounce } from '@/utils/function.utils';
 import { initIcons } from '@ui/components/icons.js';
+import { showToast } from '@ui/components/toast.js';
 
 /* ─────────────────────────────────────────────
    Modal
@@ -274,6 +275,9 @@ export function updateProfileUI(data) {
   // Favourite genres pills
   _renderGenrePills(data.favouriteGenres || []);
 
+  // Update Rank
+  _renderRank(data.totalWordsWritten || 0);
+
   // Modal inputs
   setInput('input-name', data.name || '');
   setInput('input-bio', data.bio || '');
@@ -290,6 +294,37 @@ export function updateProfileUI(data) {
     profileState.favouriteGenres = [...data.favouriteGenres];
     syncGenreChips();
   }
+}
+
+function _renderRank(wordCount) {
+  const badge = document.querySelector('.mythic-badge');
+  if (!badge) return;
+
+  let rank = 'Explorer';
+  let colorCls = 'text-indigo-300';
+  let bgCls = 'bg-indigo-500/15';
+  let borderCls = 'border-indigo-500/30';
+
+  if (wordCount >= 100000) {
+    rank = 'Ancient One';
+    colorCls = 'text-amber-400';
+    bgCls = 'bg-amber-500/20';
+    borderCls = 'border-amber-500/40';
+  } else if (wordCount >= 50000) {
+    rank = 'Sage';
+    colorCls = 'text-emerald-400';
+    bgCls = 'bg-emerald-500/20';
+    borderCls = 'border-emerald-500/40';
+  } else if (wordCount >= 10000) {
+    rank = 'Chronicler';
+    colorCls = 'text-violet-300';
+    bgCls = 'bg-violet-500/20';
+    borderCls = 'border-violet-500/40';
+  }
+
+  badge.className = `mythic-badge ${bgCls} ${borderCls} ${colorCls}`;
+  badge.innerHTML = `<i data-lucide="sparkles" class="w-3.5 h-3.5"></i> ${rank}`;
+  initIcons(badge);
 }
 
 function _renderGenrePills(genres) {
@@ -338,8 +373,6 @@ export function updateStatsUI(stats) {
 /* ─────────────────────────────────────────────
    Toast Notifications
    ───────────────────────────────────────────── */
-
-import { showToast } from '@ui/components/toast.js';
 
 /**
  * Shows a toast notification.
@@ -663,4 +696,3 @@ function timeAgo(date) {
   const days = Math.floor(hrs / 24);
   return `${days}d ago`;
 }
-

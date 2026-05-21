@@ -32,7 +32,23 @@ export async function applyAllFilters() {
     result = result.filter((t) => t.era?.toLowerCase() === libraryState.activeEra.toLowerCase());
   }
 
-  // 3. Search query (across title, description, era, tags, author)
+  // 3. Tone filter
+  if (libraryState.activeTone !== 'all') {
+    result = result.filter((t) => t.tone?.toLowerCase() === libraryState.activeTone.toLowerCase());
+  }
+
+  // 4. Length filter
+  if (libraryState.activeLength !== 'all') {
+    result = result.filter((t) => {
+      const wordCount = Number(t.totalWordsWritten) || 0;
+      if (libraryState.activeLength === 'short') return wordCount < 2000;
+      if (libraryState.activeLength === 'medium') return wordCount >= 2000 && wordCount < 10000;
+      if (libraryState.activeLength === 'long') return wordCount >= 10000;
+      return true;
+    });
+  }
+
+  // 5. Search query (across title, description, era, tags, author)
   const q = libraryState.searchQuery.trim();
   if (q) {
     result = result.filter((t) => {
@@ -120,6 +136,54 @@ export function setupEraFilter(tales) {
     const era = btn.dataset.era;
     libraryState.activeEra = era;
     setActiveEraChip(era);
+    applyAllFilters();
+  });
+}
+
+/**
+ * Wires the tone filter bar.
+ */
+export function setupToneFilter() {
+  const bar = document.getElementById('tone-filter-bar');
+  if (!bar) return;
+
+  bar.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-tone]');
+    if (!btn) return;
+
+    const tone = btn.dataset.tone;
+    libraryState.activeTone = tone;
+    
+    // Update UI
+    bar.querySelectorAll('[data-tone]').forEach(b => {
+       const isActive = b.dataset.tone === tone;
+       b.classList.toggle('filter-pill--active', isActive);
+    });
+    
+    applyAllFilters();
+  });
+}
+
+/**
+ * Wires the length filter bar.
+ */
+export function setupLengthFilter() {
+  const bar = document.getElementById('length-filter-bar');
+  if (!bar) return;
+
+  bar.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-length]');
+    if (!btn) return;
+
+    const length = btn.dataset.length;
+    libraryState.activeLength = length;
+    
+    // Update UI
+    bar.querySelectorAll('[data-length]').forEach(b => {
+       const isActive = b.dataset.length === length;
+       b.classList.toggle('filter-pill--active', isActive);
+    });
+    
     applyAllFilters();
   });
 }

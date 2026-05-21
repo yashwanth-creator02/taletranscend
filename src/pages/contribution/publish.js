@@ -14,6 +14,7 @@
 // The draft is preserved after publishing so the user can edit and re-publish.
 
 import { auth, setDoc, addDoc, updateDoc, serverTimestamp, refs } from '@fb/index.js';
+import { showToast } from '@/ui/components/toast.js';
 
 import { state } from './state.js';
 import { saveAllChapters, syncMetadataFromDom } from './cloud.js';
@@ -178,6 +179,7 @@ export async function publishFullTale() {
     }
 
     // Success state
+    showToast('Legend recorded in the archives.', 'success');
     setPublishStatus('Published successfully!', 'success');
 
     // Redirect to the newly published tale
@@ -186,7 +188,7 @@ export async function publishFullTale() {
     }, 1500);
   } catch (error) {
     console.error('[publish] Pipeline failed:', error);
-
+    showToast('Neural transmission failed.', 'error');
     setPublishStatus('Publish failed. Please try again.', 'error');
   } finally {
     setPublishButtonsDisabled(false);

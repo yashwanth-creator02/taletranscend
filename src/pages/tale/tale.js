@@ -13,6 +13,7 @@ import {
   loadChapters,
   renderTale,
   renderChapters,
+  showArchiveSkeletons,
   bindChapterClicks,
   setupTabs,
   setupStartReading,
@@ -47,6 +48,9 @@ const authTimeout = setupAuthTimeout('display-description', 'Archive connection 
 initAuth(async (user) => {
   clearTimeout(authTimeout);
   const userId = user.uid;
+
+  // 0. Show Skeletons
+  showArchiveSkeletons();
 
   // 1. Data Hydration
   const [tale, chapters] = await Promise.all([

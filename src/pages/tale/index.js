@@ -2,7 +2,7 @@
 // Barrel export for the Tale Archive page.
 
 export { loadTale, loadChapters } from './content.js';
-export { renderTale, renderChapters } from './ui.js';
+export { renderTale, renderChapters, showArchiveSkeletons } from './ui.js';
 export {
   bindChapterClicks,
   setupTabs,

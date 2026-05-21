@@ -4,25 +4,47 @@
   --editor-header-height: 56px;
 }
 
+/* ── Custom Scrollbar ───────────────────────── */
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.2);
+}
+
 /* ── Studio surfaces ──────────────────────────────────────── */
 .studio-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.studio-card:focus-within {
+  border-color: rgba(99, 102, 241, 0.25);
+  box-shadow: 0 0 30px rgba(99, 102, 241, 0.05);
 }
 
 .studio-input {
-  transition:
-    border-color 180ms ease,
-    box-shadow 180ms ease;
+  transition: all 0.3s ease;
 }
 
 .studio-input:focus {
   outline: none;
-  box-shadow:
-    0 0 0 1px rgba(99, 102, 241, 0.25),
-    0 0 0 4px rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.4) !important;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.05);
 }
 
 /* ── Editor layout: fills viewport below the two sticky headers ── */
@@ -30,6 +52,7 @@
   flex: 1;
   display: flex;
   overflow: hidden;
+  background: #030305;
 }
 
 .editor-pane {
@@ -42,27 +65,27 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  border-radius: 14px;
+  border-radius: 1rem;
   border: 1px solid transparent;
-  padding: 4px 4px 4px 10px;
-  transition:
-    background 150ms ease,
-    border-color 150ms ease;
+  padding: 6px 6px 6px 12px;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  margin-bottom: 2px;
 }
 
 .chapter-item:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .chapter-item--active {
-  background: rgba(99, 102, 241, 0.08);
+  background: rgba(99, 102, 241, 0.06);
   border-color: rgba(99, 102, 241, 0.2);
+  box-shadow: inset 0 0 20px rgba(99, 102, 241, 0.02);
 }
 
 .chapter-item__select {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   flex: 1;
   min-width: 0;
   background: none;
@@ -73,79 +96,82 @@
 }
 
 .chapter-item__num {
-  font-size: 9px;
-  font-weight: 800;
+  font-size: 0.6rem;
+  font-weight: 900;
   letter-spacing: 0.1em;
-  color: #6366f1;
-  background: rgba(99, 102, 241, 0.12);
-  border-radius: 6px;
-  padding: 2px 6px;
+  color: #818cf8;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: 8px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  transition: all 0.3s ease;
 }
 
 .chapter-item--active .chapter-item__num {
-  background: rgba(99, 102, 241, 0.2);
+  background: #6366f1;
+  color: white;
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
 }
 
 .chapter-item__title {
-  font-size: 12px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.55);
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: color 0.3s ease;
 }
 
 .chapter-item--active .chapter-item__title {
-  color: rgba(255, 255, 255, 0.9);
+  color: #f8fafc;
 }
 
 .chapter-item__actions {
   display: flex;
-  gap: 1px;
+  gap: 2px;
   opacity: 0;
-  transition: opacity 150ms ease;
+  transform: translateX(4px);
+  transition: all 0.3s ease;
 }
 
 .chapter-item:hover .chapter-item__actions,
 .chapter-item--active .chapter-item__actions {
   opacity: 1;
+  transform: translateX(0);
 }
 
 .chapter-item__action {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   border-radius: 8px;
   border: none;
   background: none;
-  color: rgba(255, 255, 255, 0.3);
+  color: #475569;
   cursor: pointer;
-  transition:
-    background 120ms ease,
-    color 120ms ease;
+  transition: all 0.2s ease;
 }
 
 .chapter-item__action:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.07);
-  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.05);
+  color: #cbd5e1;
 }
 
 .chapter-item__action:disabled {
-  opacity: 0.2;
+  opacity: 0.1;
   cursor: not-allowed;
 }
 
 .chapter-item__action--danger:hover:not(:disabled) {
-  background: rgba(248, 113, 113, 0.1);
-  color: #f87171;
-}
-
-.chapter-item__action svg {
-  width: 12px;
-  height: 12px;
+  background: rgba(244, 63, 94, 0.1);
+  color: #fb7185;
 }
 
 /* ── Voice button active state ────────────────────────────── */

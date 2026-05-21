@@ -11,7 +11,14 @@ import { initAuth } from '@fb/index.js';
 import { libraryState } from './state.js';
 
 import { subscribeToTales, stopTalesSubscription } from './content.js';
-import { applyAllFilters, setupSearch, setupEraFilter, setupSidebarFilter } from './filters.js';
+import {
+  applyAllFilters,
+  setupSearch,
+  setupEraFilter,
+  setupToneFilter,
+  setupLengthFilter,
+  setupSidebarFilter,
+} from './filters.js';
 import { setupCardInteractions } from './interactions.js';
 import {
   setupSidebarToggle,
@@ -60,6 +67,10 @@ initAuth(async (user) => {
 
   // Wire search (handles URL param pre-fill too)
   setupSearch();
+
+  // Wire filters
+  setupToneFilter();
+  setupLengthFilter();
 
   // Wire sidebar filter buttons
   setupSidebarFilter();

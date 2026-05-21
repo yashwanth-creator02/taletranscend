@@ -126,6 +126,32 @@
   background: rgba(255, 255, 255, 0.06);
 }
 
+/* ── Filter Pills ───────────────────────────── */
+.filter-pill {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #475569;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.filter-pill:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #cbd5e1;
+}
+
+.filter-pill--active {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.3);
+  color: #818cf8;
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.05);
+}
+
 /* ── Tale Cards ──────────────────────────────── */
 .tale-card {
   will-change: transform;

@@ -5,11 +5,51 @@
 import { getTaleMeta, getChapter } from '@services/index.js';
 import { readerState } from './state.js';
 import { initIcons } from '@ui/components/icons.js';
-import { escapeHtml } from '@/utils/string.utils.js';
+import { escapeHtml } from '@/utils/string.utils';
 
 /* ─────────────────────────────────────────────
    Public Fetchers
    ───────────────────────────────────────────── */
+
+/**
+ * Shows high-fidelity skeleton loaders for the reader page.
+ */
+export function showReaderSkeletons() {
+  const content = document.getElementById('story-content');
+  if (content) {
+    content.innerHTML = `
+      <div class="space-y-8 animate-pulse">
+        <div class="skeleton h-5 w-full rounded-lg"></div>
+        <div class="skeleton h-5 w-5/6 rounded-lg"></div>
+        <div class="skeleton h-5 w-4/5 rounded-lg"></div>
+        <div class="skeleton h-5 w-full rounded-lg"></div>
+        <div class="skeleton h-5 w-3/4 rounded-lg"></div>
+        <div class="pt-8">
+           <div class="skeleton h-5 w-11/12 rounded-lg"></div>
+           <div class="skeleton h-5 w-5/6 rounded-lg"></div>
+        </div>
+      </div>
+    `;
+  }
+
+  const sidebar = document.querySelector('.reader-sidebar');
+  if (sidebar) {
+    const name = document.getElementById('sidebar-story-name');
+    const author = document.getElementById('sidebar-author');
+    const description = document.getElementById('sidebar-description');
+    if (name) name.innerHTML = '<div class="skeleton h-7 w-3/4 rounded-lg mb-2"></div>';
+    if (author) author.innerHTML = '<div class="skeleton h-4 w-1/2 rounded-md mb-4"></div>';
+    if (description) {
+      description.innerHTML = `
+        <div class="space-y-2">
+          <div class="skeleton h-3.5 w-full rounded-md"></div>
+          <div class="skeleton h-3.5 w-full rounded-md"></div>
+          <div class="skeleton h-3.5 w-2/3 rounded-md"></div>
+        </div>
+      `;
+    }
+  }
+}
 
 export async function loadReaderMeta(taleId) {
   try {

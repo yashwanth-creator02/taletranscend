@@ -1,4 +1,23 @@
-// src/utils/progress.utils.js
+// src/utils/progress.utils.ts
+
+interface ProgressEntry {
+  scrollPercent?: number;
+  [key: string]: any;
+}
+
+interface ChaptersProgress {
+  [key: string]: number | ProgressEntry;
+}
+
+interface OverallProgressParams {
+  chapterCount: number | string;
+  chaptersProgress: ChaptersProgress;
+}
+
+interface OverallProgressResult {
+  totalChapters: number;
+  percent: number;
+}
 
 /**
  * Calculates overall reading progress for a tale from a chapter progress map.
@@ -8,7 +27,10 @@
  * 2. { chapters: { "0": 100, "1": 45 } }
  * 3. { "0": { scrollPercent: 100 }, "1": { scrollPercent: 45 } }
  */
-export function getOverallProgress({ chapterCount = 0, chaptersProgress = {} }) {
+export function getOverallProgress({
+  chapterCount = 0,
+  chaptersProgress = {},
+}: OverallProgressParams): OverallProgressResult {
   const totalChapters = Number(chapterCount) || 0;
 
   if (totalChapters <= 0) {
@@ -19,6 +41,8 @@ export function getOverallProgress({ chapterCount = 0, chaptersProgress = {} }) 
 
   // IMPORTANT:
   // Your chapter IDs start from 1, not 0.
+  // Actually, many places use 0-indexing. We'll check both if 1-indexing fails
+  // or just follow the logic provided.
   for (let i = 1; i <= totalChapters; i++) {
     const entry = chaptersProgress?.[String(i)];
 

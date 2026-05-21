@@ -14,7 +14,7 @@ import {
   refs,
 } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
-import { escapeHtml } from '@/utils/string.utils.js';
+import { escapeHtml } from '@/utils/string.utils';
 import { initIcons } from '@ui/components/icons.js';
 
 const PAGE_SIZE = 10;

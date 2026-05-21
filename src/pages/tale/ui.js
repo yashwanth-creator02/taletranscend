@@ -7,8 +7,46 @@ import {
   getLastReadChapter,
   getTotalReadTime,
 } from '@services/index.js';
-import { escapeHtml } from '@/utils/string.utils.js';
+import { escapeHtml } from '@/utils/string.utils';
 import { initIcons } from '@ui/components/icons.js';
+
+/**
+ * Shows high-fidelity skeleton loaders for the Archive page.
+ */
+export function showArchiveSkeletons() {
+  const list = document.getElementById('chapter-list');
+  if (list) {
+    list.innerHTML = Array.from(
+      { length: 4 },
+      () => `
+      <div class="glass-card p-6 md:p-8 rounded-[2rem] flex justify-between items-center animate-pulse">
+        <div class="flex items-center gap-6">
+           <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 skeleton"></div>
+           <div>
+             <div class="skeleton h-3 w-16 rounded-md mb-2"></div>
+             <div class="skeleton h-6 w-48 rounded-lg"></div>
+           </div>
+        </div>
+        <div class="skeleton h-5 w-5 rounded-full"></div>
+      </div>
+    `
+    ).join('');
+  }
+
+  const title = document.getElementById('display-title');
+  if (title) title.innerHTML = '<div class="skeleton h-12 w-3/4 rounded-2xl mb-4"></div>';
+
+  const desc = document.getElementById('display-description');
+  if (desc) {
+    desc.innerHTML = `
+      <div class="space-y-3">
+        <div class="skeleton h-4 w-full rounded-lg"></div>
+        <div class="skeleton h-4 w-full rounded-lg"></div>
+        <div class="skeleton h-4 w-2/3 rounded-lg"></div>
+      </div>
+    `;
+  }
+}
 
 /**
  * Renders the primary tale metadata with cinematic transitions.

@@ -12,6 +12,8 @@
  * @property {Array<Object>}   filteredTales   - Currently displayed tales
  * @property {string}          searchQuery     - Current search string (lowercase)
  * @property {string}          activeEra       - Active era chip value ('all' or era name)
+ * @property {string}          activeTone      - Active tone value ('all' or tone name)
+ * @property {string}          activeLength    - Active length value ('all', 'short', 'medium', 'long')
  * @property {SidebarFilter}   sidebarFilter   - Active sidebar filter key
  * @property {boolean}         sidebarCollapsed
  * @property {boolean}         isLoading
@@ -24,6 +26,8 @@ export const libraryState = {
   filteredTales: [],
   searchQuery: '',
   activeEra: 'all',
+  activeTone: 'all',
+  activeLength: 'all',
   sidebarFilter: 'all',
   sidebarCollapsed: JSON.parse(localStorage.getItem('tt-lib-sidebar-collapsed') ?? 'false'),
   isLoading: false,

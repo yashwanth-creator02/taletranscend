@@ -3,7 +3,7 @@
 // Shared utility functions used across all nav sub-modules.
 // Pure, side-effect-free helpers — safe to import anywhere.
 
-import { escapeHtml } from '@/utils/string.utils.js';
+import { escapeHtml } from '@/utils/string.utils';
 import { initIcons as renderIcons } from '@/ui/icons.js';
 
 export { escapeHtml, renderIcons };
