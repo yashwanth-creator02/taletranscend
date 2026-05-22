@@ -1,20 +1,20 @@
 // src/services/resonance.service.js
 import { db, auth } from '@fb/index.js';
-import { 
-  doc, 
-  updateDoc, 
-  increment, 
-  setDoc, 
+import {
+  doc,
+  updateDoc,
+  increment,
+  setDoc,
   getDoc,
   deleteDoc,
-  collection
+  collection,
 } from 'firebase/firestore';
 
 /**
  * Toggles "Soul Resonance" (like) for a tale.
  * Updates both the global resonance count and user-specific status.
- * 
- * @param {string} taleId 
+ *
+ * @param {string} taleId
  * @returns {Promise<{ active: boolean, count: number }>} New state
  */
 export async function toggleResonance(taleId) {
@@ -23,7 +23,7 @@ export async function toggleResonance(taleId) {
 
   const taleRef = doc(db, 'tales', taleId);
   const resonanceRef = doc(db, 'users', user.uid, 'resonances', taleId);
-  
+
   const resonanceSnap = await getDoc(resonanceRef);
   const isActive = resonanceSnap.exists();
 
@@ -31,15 +31,15 @@ export async function toggleResonance(taleId) {
     // Decouple resonance
     await deleteDoc(resonanceRef);
     await updateDoc(taleRef, {
-      resonanceCount: increment(-1)
+      resonanceCount: increment(-1),
     });
   } else {
     // Establish resonance
     await setDoc(resonanceRef, {
-      at: new Date().toISOString()
+      at: new Date().toISOString(),
     });
     await updateDoc(taleRef, {
-      resonanceCount: increment(1)
+      resonanceCount: increment(1),
     });
   }
 
@@ -47,7 +47,7 @@ export async function toggleResonance(taleId) {
   const updatedTale = await getDoc(taleRef);
   return {
     active: !isActive,
-    count: updatedTale.data()?.resonanceCount || 0
+    count: updatedTale.data()?.resonanceCount || 0,
   };
 }
 
@@ -57,7 +57,7 @@ export async function toggleResonance(taleId) {
 export async function getResonanceStatus(taleId) {
   const user = auth.currentUser;
   if (!user) return false;
-  
+
   const resonanceRef = doc(db, 'users', user.uid, 'resonances', taleId);
   const snap = await getDoc(resonanceRef);
   return snap.exists();

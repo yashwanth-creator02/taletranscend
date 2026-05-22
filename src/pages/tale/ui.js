@@ -72,8 +72,11 @@ export async function renderTale(userId, tale, taleId) {
   _setText('display-author', tale.authorName || 'Unknown Scribe');
   _setText('display-chapters', `${tale.chapterCount || 0} Fragments`);
   _setText('sidebar-chapter-count', tale.chapterCount || 0);
-  _setText('display-description', tale.description || 'A mysterious tale waiting to be uncovered...');
-  
+  _setText(
+    'display-description',
+    tale.description || 'A mysterious tale waiting to be uncovered...'
+  );
+
   _setText('tale-era', tale.era || 'Universal Era');
   _setText('tale-genre', tale.genre || 'Mythic Fiction');
   _setText('tale-language', tale.language || 'Primordial');
@@ -90,19 +93,25 @@ export async function renderTale(userId, tale, taleId) {
 
   if (tale.coverUrl) {
     const covers = document.querySelectorAll('#display-cover');
-    covers.forEach(img => img.src = tale.coverUrl);
-    
-    document.getElementById('hero-section')?.style.setProperty('--bg-url', `url('${tale.coverUrl}')`);
+    covers.forEach((img) => (img.src = tale.coverUrl));
+
+    document
+      .getElementById('hero-section')
+      ?.style.setProperty('--bg-url', `url('${tale.coverUrl}')`);
   }
 
   // Tags
   const tagList = document.getElementById('lore-tag-list');
   if (tagList && tale.tags?.length) {
-    tagList.innerHTML = tale.tags.map(t => `
+    tagList.innerHTML = tale.tags
+      .map(
+        (t) => `
       <span class="px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 text-[9px] font-black uppercase tracking-widest text-slate-400">
         ${escapeHtml(t)}
       </span>
-    `).join('');
+    `
+      )
+      .join('');
   }
 
   // Read Time
@@ -125,16 +134,23 @@ export function renderChapters(userId, chapters, taleId) {
     return;
   }
 
-  list.innerHTML = chapters.map((ch, idx) => {
-    const progress = getChapterProgress({ userId, taleId, chapterIndex: idx });
-    const state = getChapterState(progress);
+  list.innerHTML = chapters
+    .map((ch, idx) => {
+      const progress = getChapterProgress({ userId, taleId, chapterIndex: idx });
+      const state = getChapterState(progress);
 
-    let icon = 'circle';
-    let iconCls = 'text-slate-700';
-    if (state === 'in_progress') { icon = 'clock'; iconCls = 'text-indigo-400'; }
-    if (state === 'completed') { icon = 'check-circle-2'; iconCls = 'text-emerald-500'; }
+      let icon = 'circle';
+      let iconCls = 'text-slate-700';
+      if (state === 'in_progress') {
+        icon = 'clock';
+        iconCls = 'text-indigo-400';
+      }
+      if (state === 'completed') {
+        icon = 'check-circle-2';
+        iconCls = 'text-emerald-500';
+      }
 
-    return `
+      return `
       <div data-chapter-index="${idx}" class="chapter-item ${state} glass-card p-6 md:p-8 rounded-[2rem] flex justify-between items-center group cursor-pointer">
         <div class="flex items-center gap-6">
            <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-xs font-black text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-all">
@@ -151,7 +167,8 @@ export function renderChapters(userId, chapters, taleId) {
         </div>
       </div>
     `;
-  }).join('');
+    })
+    .join('');
 
   initIcons();
 }

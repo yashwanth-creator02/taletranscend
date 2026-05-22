@@ -223,7 +223,6 @@ function bindAIEvents() {
 
 /* ── Voice Logic ──────────────────────────────────────────────────── */
 
-
 /**
  * Wires all voice dictation buttons using the Web Speech API.
  * Falls back gracefully on unsupported browsers.

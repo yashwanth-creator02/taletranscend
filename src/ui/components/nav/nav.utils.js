@@ -29,7 +29,6 @@ export function getAvatarSeed(user) {
   return user?.uid ? user.uid.slice(0, 8) : 'guest';
 }
 
-
 /**
  * Returns a cached map of the nav's key DOM elements.
  * Always queries the live DOM — safe to call after any innerHTML swap.

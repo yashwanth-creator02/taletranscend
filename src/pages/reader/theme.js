@@ -36,7 +36,14 @@ export function setTheme(theme) {
   localStorage.setItem(STORAGE_KEYS.theme, theme);
 
   // 1. Update Body Classes (Global + Scoped)
-  const allThemes = ['theme-dark', 'theme-sepia', 'theme-light', 'reader-theme-dark', 'reader-theme-sepia', 'reader-theme-light'];
+  const allThemes = [
+    'theme-dark',
+    'theme-sepia',
+    'theme-light',
+    'reader-theme-dark',
+    'reader-theme-sepia',
+    'reader-theme-light',
+  ];
   document.body.classList.remove(...allThemes);
   document.body.classList.add(`theme-${theme}`);
   document.body.classList.add(`reader-theme-${theme}`);
@@ -97,30 +104,30 @@ function _applyAll() {
  */
 function _syncUI() {
   // Sync Buttons
-  document.querySelectorAll('[data-theme]').forEach(btn => {
+  document.querySelectorAll('[data-theme]').forEach((btn) => {
     btn.classList.toggle('reader-option--active', btn.dataset.theme === readerState.theme);
   });
 
-  document.querySelectorAll('[data-font]').forEach(btn => {
+  document.querySelectorAll('[data-font]').forEach((btn) => {
     btn.classList.toggle('reader-option--active', btn.dataset.font === readerState.fontFamily);
   });
 
-  document.querySelectorAll('[data-width]').forEach(btn => {
+  document.querySelectorAll('[data-width]').forEach((btn) => {
     btn.classList.toggle('reader-option--active', btn.dataset.width === readerState.readingWidth);
   });
 
   // Sync Sliders
-  document.querySelectorAll('[data-control="font-size"]').forEach(el => {
+  document.querySelectorAll('[data-control="font-size"]').forEach((el) => {
     el.value = String(readerState.fontSize);
   });
-  document.querySelectorAll('[data-val="font-size"]').forEach(s => {
+  document.querySelectorAll('[data-val="font-size"]').forEach((s) => {
     s.textContent = `${readerState.fontSize}px`;
   });
 
-  document.querySelectorAll('[data-control="line-height"]').forEach(el => {
+  document.querySelectorAll('[data-control="line-height"]').forEach((el) => {
     el.value = String(readerState.lineHeight);
   });
-  document.querySelectorAll('[data-val="line-height"]').forEach(s => {
+  document.querySelectorAll('[data-val="line-height"]').forEach((s) => {
     s.textContent = String(readerState.lineHeight);
   });
 }

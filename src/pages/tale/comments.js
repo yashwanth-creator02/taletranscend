@@ -49,12 +49,17 @@ async function _fetchComments(isInitial = false) {
   }
 
   try {
-    const q = isInitial 
+    const q = isInitial
       ? query(refs.comments(currentTaleId), orderBy('timestamp', 'desc'), limit(PAGE_SIZE))
-      : query(refs.comments(currentTaleId), orderBy('timestamp', 'desc'), startAfter(lastVisible), limit(PAGE_SIZE));
+      : query(
+          refs.comments(currentTaleId),
+          orderBy('timestamp', 'desc'),
+          startAfter(lastVisible),
+          limit(PAGE_SIZE)
+        );
 
     const snap = await getDocs(q);
-    
+
     if (isInitial) list.innerHTML = ''; // Clear loader
 
     if (snap.empty && isInitial) {
@@ -66,8 +71,8 @@ async function _fetchComments(isInitial = false) {
     lastVisible = snap.docs[snap.docs.length - 1];
     allLoaded = snap.docs.length < PAGE_SIZE;
 
-    const comments = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    
+    const comments = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
     // Remove existing load more button before appending
     document.getElementById('load-more-btn-container')?.remove();
 
@@ -75,14 +80,19 @@ async function _fetchComments(isInitial = false) {
     list.insertAdjacentHTML('beforeend', html);
 
     if (!allLoaded) {
-      list.insertAdjacentHTML('beforeend', `
+      list.insertAdjacentHTML(
+        'beforeend',
+        `
         <div id="load-more-btn-container" class="text-center pt-10">
           <button id="load-more-btn" class="px-8 py-3.5 glass-strong rounded-xl text-[9px] font-black uppercase tracking-[0.4em] text-indigo-300 hover:text-white transition-all">
             Retrieve More Echoes
           </button>
         </div>
-      `);
-      document.getElementById('load-more-btn')?.addEventListener('click', () => _fetchComments(false));
+      `
+      );
+      document
+        .getElementById('load-more-btn')
+        ?.addEventListener('click', () => _fetchComments(false));
     }
 
     initIcons();
@@ -131,7 +141,10 @@ function _renderComment(c) {
     <div class="glass-card p-6 md:p-8 rounded-[2rem] border-l-4 border-indigo-500/40 animate-fade-in mb-6 last:mb-0">
       <div class="flex justify-between items-start mb-5">
         <div class="flex items-center gap-3">
-          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}" class="w-8 h-8 rounded-lg bg-white/5" />
+          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}" 
+            alt="${escapeHtml(c.authorName)}" 
+            class="w-8 h-8 rounded-lg bg-white/5" 
+            loading="lazy" />
           <div>
             <p class="text-[10px] font-black text-white uppercase tracking-widest">${escapeHtml(c.authorName)}</p>
             <p class="text-[8px] text-slate-500 font-bold uppercase mt-0.5">${date}</p>

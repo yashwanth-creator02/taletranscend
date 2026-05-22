@@ -123,7 +123,7 @@ function _handleCopyLink(taleId) {
   document.getElementById('copy-link-confirm').onclick = async () => {
     await navigator.clipboard.writeText(url);
     close();
-    _showToast('Link copied.', 'success');
+    showToast('Link copied.', 'success');
   };
 
   document.getElementById('copy-link-close').onclick = close;

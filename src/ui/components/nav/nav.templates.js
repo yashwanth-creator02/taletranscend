@@ -390,6 +390,6 @@ export function buildNav() {
       <div id="mobile-dock-container">
         ${buildMobileDock(current, null)}
       </div>
-    `
+    `,
   };
 }

@@ -177,8 +177,13 @@
 }
 
 /* Ensure global theme classes apply to reader specific elements */
-.reader-theme-sepia .reading-surface { background: rgba(255, 240, 210, 0.04); }
-.reader-theme-light .reading-surface { background: rgba(255, 255, 255, 0.95); border-color: rgba(0,0,0,0.1); }
+.reader-theme-sepia .reading-surface {
+  background: rgba(255, 240, 210, 0.04);
+}
+.reader-theme-light .reading-surface {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.1);
+}
 
 /* ── Sidebar (Desktop) ───────────────────────────────────────── */
 

@@ -1,42 +1,23 @@
 // src/ui/components/taleCard.js
-// Renders the tale cards grid and individual tale card templates.
-// Used by the library and shelf pages to display community tales.
+// Updated with enhanced UI and animations
 
 import { getTotalReadTime, getBookmarks, getTaleProgressData } from '@services/index.js';
 import { getOverallProgress } from '@/utils/progress.utils';
 import { escapeHtml } from '@/utils/string.utils';
 import { renderEmptyState, renderErrorState } from './feedback.js';
-import { initIcons } from '@/ui/icons.js';
-
+import '@/assets/css/pages/tale-cards.css';
 /* ================= Helpers ================= */
 
-/**
- * Returns the default cover image when a tale has no custom cover.
- *
- * @returns {string}
- */
 function getDefaultCover() {
   return 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200&auto=format&fit=crop';
 }
 
-/**
- * Formats read time in minutes.
- *
- * @param {number} totalMs
- * @returns {string}
- */
 function formatReadTime(totalMs = 0) {
   const minutes = Math.floor(Number(totalMs || 0) / 60000);
   if (minutes < 1) return '';
   return `${minutes}m read`;
 }
 
-/**
- * Returns a short status label for a tale.
- *
- * @param {string} status
- * @returns {string}
- */
 function getStatusLabel(status) {
   if (status === 'finished') return 'Completed';
   if (status === 'draft') return 'Draft';
@@ -44,28 +25,14 @@ function getStatusLabel(status) {
   return 'In Progress';
 }
 
-/**
- * Creates a small pill badge.
- *
- * @param {string} text
- * @param {string} classes
- * @returns {string}
- */
 function buildBadge(text, classes = '') {
   return `
-    <span class="inline-flex items-center rounded-lg px-3 py-1 text-[9px] font-black uppercase tracking-[0.2em] border border-white/10 ${classes}">
+    <span class="badge ${classes}">
       ${escapeHtml(text)}
     </span>
   `;
 }
 
-/**
- * Creates a metadata row item.
- *
- * @param {string} icon
- * @param {string} label
- * @returns {string}
- */
 function buildMetaItem(icon, label) {
   return `
     <div class="flex items-center gap-2 text-zinc-400 group-hover:text-indigo-300 transition-colors">
@@ -77,12 +44,6 @@ function buildMetaItem(icon, label) {
   `;
 }
 
-/**
- * Returns a progress label with fallback.
- *
- * @param {number} percent
- * @returns {string}
- */
 function getProgressLabel(percent) {
   const clamped = Math.max(0, Math.min(100, Math.round(Number(percent) || 0)));
   return `${clamped}%`;
@@ -90,12 +51,6 @@ function getProgressLabel(percent) {
 
 /* ================= Grid Renderer ================= */
 
-/**
- * Renders a skeleton loading state for the cards grid.
- *
- * @param {HTMLElement} container - The container to render into
- * @param {number} count - Number of skeleton cards to show
- */
 export function renderCardsSkeleton(container, count = 6) {
   if (!container) return;
   container.innerHTML = `
@@ -103,9 +58,9 @@ export function renderCardsSkeleton(container, count = 6) {
       ${Array.from({ length: count })
         .map(
           () => `
-            <div class="overflow-hidden rounded-[2.25rem] border border-white/8 bg-white/5 p-5 shadow-2xl shadow-black/20 backdrop-blur-xl">
-              <div class="animate-pulse">
-                <div class="mb-4 flex items-start justify-between">
+            <div class="tale-card animate-pulse">
+              <div class="p-6">
+                <div class="mb-6 flex items-start justify-between gap-3">
                   <div class="space-y-2">
                     <div class="h-4 w-20 rounded-full bg-white/6"></div>
                     <div class="h-3 w-28 rounded-full bg-white/5"></div>
@@ -131,13 +86,6 @@ export function renderCardsSkeleton(container, count = 6) {
   `;
 }
 
-/**
- * Fetches all necessary metadata for a list of tales in parallel.
- *
- * @param {string|null} userId - ID of the authenticated user
- * @param {Array<Object>} tales - Array of tale objects
- * @returns {Promise<Object>} Object containing progressSnapshots, bookmarkMap, and readTimeMap
- */
 export async function fetchTalesMetadata(userId, tales) {
   const safeUserId = userId || null;
   const safeTales = Array.isArray(tales) ? tales : [];
@@ -165,21 +113,12 @@ export async function fetchTalesMetadata(userId, tales) {
       : Promise.resolve([]),
   ]);
 
-  const bookmarkMap = Object.fromEntries(
-    (bookmarks || []).map((bookmark) => [bookmark.id, true])
-  );
+  const bookmarkMap = Object.fromEntries((bookmarks || []).map((bookmark) => [bookmark.id, true]));
   const readTimeMap = Object.fromEntries(readTimeEntries || []);
 
   return { progressSnapshots, bookmarkMap, readTimeMap };
 }
 
-/**
- * Renders the actual tale cards once metadata is available.
- *
- * @param {HTMLElement} container - Container to render into
- * @param {Array<Object>} tales - Array of tale objects
- * @param {Object} metadata - Metadata object from fetchTalesMetadata
- */
 export function renderTaleCards(container, tales, metadata) {
   if (!container) return;
   const { progressSnapshots = [], bookmarkMap = {}, readTimeMap = {} } = metadata;
@@ -197,16 +136,9 @@ export function renderTaleCards(container, tales, metadata) {
     })
     .join('');
 
-  initIcons(container);
+  if (window.lucide) window.lucide.createIcons();
 }
 
-/**
- * Renders a grid of tale cards into the #cards-grid container.
- * Convenience wrapper that handles both fetching and rendering.
- *
- * @param {string} userId - ID of the authenticated user
- * @param {Array<Object>} tales - Array of tale objects from Firestore
- */
 export async function renderCardsGrid(userId, tales) {
   const container = document.getElementById('cards-grid');
   if (!container) return;
@@ -217,12 +149,12 @@ export async function renderCardsGrid(userId, tales) {
     renderEmptyState(container, {
       message: 'No tales found in the archives.',
       subMessage: 'Try a different filter or come back later.',
-      classes: 'col-span-full rounded-[2rem] border border-white/8 bg-white/5 px-6 py-20 text-center shadow-2xl shadow-black/20 backdrop-blur-xl'
+      classes:
+        'col-span-full rounded-[2rem] border border-white/8 bg-white/5 px-6 py-20 text-center shadow-2xl shadow-black/20 backdrop-blur-xl',
     });
     return;
   }
 
-  // Show a lightweight loading state before async data resolves.
   renderCardsSkeleton(container, Math.min(6, safeTales.length));
 
   try {
@@ -232,22 +164,13 @@ export async function renderCardsGrid(userId, tales) {
     console.error('renderCardsGrid: failed to populate library:', err);
     renderErrorState(container, {
       message: 'We could not load the tales right now.',
-      subMessage: 'Please refresh and try again.'
+      subMessage: 'Please refresh and try again.',
     });
   }
 }
 
 /* ================= Card Template ================= */
 
-/**
- * Builds the HTML string for a single tale card.
- *
- * @param {Object} tale - Tale data object from Firestore
- * @param {number} progressPercent - Pre-calculated overall progress percentage
- * @param {Object} readTimeMap - Map of taleId => totalReadTimeMs
- * @param {Object} bookmarkMap - Map of taleId => true for bookmarked tales
- * @returns {string} HTML string for the tale card
- */
 function createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = {}) {
   const {
     id = '0000',
@@ -270,9 +193,7 @@ function createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = {
   const cover = coverUrl || getDefaultCover();
   const statusLabel = getStatusLabel(tale?.status);
 
-  const timeBadge = readTimeLabel
-    ? buildBadge(readTimeLabel, 'bg-white/5 text-zinc-400')
-    : '';
+  const timeBadge = readTimeLabel ? buildBadge(readTimeLabel, 'bg-white/5 text-zinc-400') : '';
 
   const statusBadgeClasses = isFinished
     ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
@@ -284,7 +205,7 @@ function createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = {
 
   return `
     <article
-      class="tale-card group relative overflow-hidden rounded-[2.5rem] border border-white/8 bg-zinc-900/40 shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:border-indigo-500/30 hover:bg-zinc-900/60"
+      class="tale-card group relative overflow-hidden"
       data-id="${escapeHtml(id)}"
       aria-label="${safeTitle}"
     >
@@ -311,7 +232,7 @@ function createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = {
 
             <div
               id="${escapeHtml(menuId)}"
-              class="options-menu hidden absolute right-0 z-[60] mt-2 w-60 overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/95 p-2 shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-2xl"
+              class="options-menu hidden absolute right-0 z-[60] mt-2 w-60 overflow-hidden rounded-2xl p-2"
               role="menu"
             >
               <div class="px-3 py-2 border-b border-white/5 mb-1">
@@ -346,27 +267,23 @@ function createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = {
         </div>
 
         <!-- Cover Image with Progress Overlay -->
-        <div class="relative mb-6 group-hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-all duration-500">
-          <div class="aspect-[16/10] w-full overflow-hidden rounded-2xl border border-white/10 bg-zinc-950 relative">
+        <div class="card-image-wrap mb-6 group-hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-all duration-500">
+          <div class="aspect-[16/10] w-full relative">
             <img
               src="${escapeHtml(cover)}"
               alt="${safeTitle}"
               class="h-full w-full object-cover opacity-60 transition duration-700 group-hover:scale-110 group-hover:opacity-100"
               loading="lazy"
             />
-            
-            <!-- Cover Overlays -->
             <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent opacity-60"></div>
-            
-            <!-- Progress Overlay -->
             <div class="absolute inset-x-0 bottom-0 p-4 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-               <div class="flex items-center justify-between mb-2">
-                 <span class="text-[9px] font-black uppercase tracking-widest text-white/50">Neural Progress</span>
-                 <span class="text-[10px] font-black text-indigo-400">${getProgressLabel(progress)}</span>
-               </div>
-               <div class="h-1 w-full bg-white/10 rounded-full overflow-hidden">
-                 <div class="h-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-1000 shadow-[0_0_10px_rgba(99,102,241,0.5)]" style="width: ${progress}%"></div>
-               </div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[9px] font-black uppercase tracking-widest text-white/50">Neural Progress</span>
+                <span class="text-[10px] font-black text-indigo-400">${getProgressLabel(progress)}</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: ${progress}%"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -374,8 +291,8 @@ function createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = {
         <!-- Content -->
         <div class="relative z-10 px-1">
           <div class="flex items-center gap-3 mb-3">
-             <span class="h-px w-8 bg-indigo-500/30"></span>
-             <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Fragment ${id.slice(-4)}</span>
+            <span class="h-px w-8 bg-indigo-500/30"></span>
+            <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Fragment ${id.slice(-4)}</span>
           </div>
 
           <h3 class="mb-3 line-clamp-1 text-2xl font-black tracking-tight text-white group-hover:text-indigo-300 transition-colors duration-300">
@@ -397,10 +314,10 @@ function createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = {
               type="button"
               data-action="resume"
               data-id="${escapeHtml(id)}"
-              class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-white hover:bg-indigo-600 hover:border-indigo-500 hover:shadow-[0_0_20px_rgba(99,102,241,0.3)] transition-all duration-300 group/btn"
+              class="card-button"
             >
               <span>${isFinished ? 'Archive' : 'Engage'}</span>
-              <i data-lucide="chevron-right" class="h-3.5 w-3.5 group-hover/btn:translate-x-1 transition-transform"></i>
+              <i data-lucide="chevron-right" class="h-3.5 w-3.5"></i>
             </button>
           </div>
         </div>

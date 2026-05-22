@@ -7,14 +7,14 @@ const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models
 
 /**
  * Generates a mythic title based on a synopsis or draft content.
- * 
+ *
  * @param {string} prompt - Synopsis or snippet
  * @param {string} apiKey - API Key
  * @returns {Promise<string|null>}
  */
 export async function suggestTitle(prompt, apiKey) {
   if (!prompt || prompt.trim().length < 10) return null;
-  
+
   return _callGemini(
     `Suggest ONE epic, mythic, or fantasy title for a story with this synopsis: "${prompt}". Return ONLY the title text, no punctuation or formatting.`,
     apiKey
@@ -23,7 +23,7 @@ export async function suggestTitle(prompt, apiKey) {
 
 /**
  * Refines text for grammar and "mythic" tone.
- * 
+ *
  * @param {string} text - Raw text to refine
  * @param {string} apiKey - API Key
  * @returns {Promise<string|null>}

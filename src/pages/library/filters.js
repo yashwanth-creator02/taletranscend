@@ -153,13 +153,13 @@ export function setupToneFilter() {
 
     const tone = btn.dataset.tone;
     libraryState.activeTone = tone;
-    
+
     // Update UI
-    bar.querySelectorAll('[data-tone]').forEach(b => {
-       const isActive = b.dataset.tone === tone;
-       b.classList.toggle('filter-pill--active', isActive);
+    bar.querySelectorAll('[data-tone]').forEach((b) => {
+      const isActive = b.dataset.tone === tone;
+      b.classList.toggle('filter-pill--active', isActive);
     });
-    
+
     applyAllFilters();
   });
 }
@@ -177,13 +177,13 @@ export function setupLengthFilter() {
 
     const length = btn.dataset.length;
     libraryState.activeLength = length;
-    
+
     // Update UI
-    bar.querySelectorAll('[data-length]').forEach(b => {
-       const isActive = b.dataset.length === length;
-       b.classList.toggle('filter-pill--active', isActive);
+    bar.querySelectorAll('[data-length]').forEach((b) => {
+      const isActive = b.dataset.length === length;
+      b.classList.toggle('filter-pill--active', isActive);
     });
-    
+
     applyAllFilters();
   });
 }

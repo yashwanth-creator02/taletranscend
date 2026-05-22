@@ -48,23 +48,31 @@ export function initSwipeNavigation({ prevUrl, nextUrl }) {
   let startX = 0;
   let startY = 0;
 
-  document.addEventListener('touchstart', (e) => {
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-  }, { passive: true });
+  document.addEventListener(
+    'touchstart',
+    (e) => {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    },
+    { passive: true }
+  );
 
-  document.addEventListener('touchend', (e) => {
-    if (readerState.settingsPanelOpen) return;
+  document.addEventListener(
+    'touchend',
+    (e) => {
+      if (readerState.settingsPanelOpen) return;
 
-    const dx = e.changedTouches[0].clientX - startX;
-    const dy = e.changedTouches[0].clientY - startY;
+      const dx = e.changedTouches[0].clientX - startX;
+      const dy = e.changedTouches[0].clientY - startY;
 
-    // Predominantly horizontal swipe > 60px
-    if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.7) return;
+      // Predominantly horizontal swipe > 60px
+      if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.7) return;
 
-    if (dx < 0 && nextUrl) _navigate(nextUrl);
-    if (dx > 0 && prevUrl) _navigate(prevUrl);
-  }, { passive: true });
+      if (dx < 0 && nextUrl) _navigate(nextUrl);
+      if (dx > 0 && prevUrl) _navigate(prevUrl);
+    },
+    { passive: true }
+  );
 }
 
 /* ─────────────────────────────────────────────
@@ -76,14 +84,18 @@ export function initToolbarAutoHide() {
   if (!toolbar) return;
 
   let lastY = window.scrollY;
-  
-  window.addEventListener('scroll', () => {
-    const currentY = window.scrollY;
-    const scrollingDown = currentY > lastY && currentY > 60;
-    
-    toolbar.style.transform = scrollingDown ? 'translateY(100%)' : 'translateY(0)';
-    lastY = currentY;
-  }, { passive: true });
+
+  window.addEventListener(
+    'scroll',
+    () => {
+      const currentY = window.scrollY;
+      const scrollingDown = currentY > lastY && currentY > 60;
+
+      toolbar.style.transform = scrollingDown ? 'translateY(100%)' : 'translateY(0)';
+      lastY = currentY;
+    },
+    { passive: true }
+  );
 }
 
 /* ─────────────────────────────────────────────

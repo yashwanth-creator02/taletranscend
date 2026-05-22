@@ -1,206 +1,272 @@
 <!-- src/views/reader.html -->
 <!doctype html>
 <html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Reader | TaleTranscend</title>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Reader | TaleTranscend</title>
-  
-  <script type="module" src="../pages/reader/reader.js"></script>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Cinzel:wght@400;600;700;800&display=swap"
-    rel="stylesheet" />
-</head>
+    <script type="module" src="../pages/reader/reader.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Cinzel:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
 
-<body class="antialiased selection:bg-indigo-500/30 selection:text-white page-fade-in flex flex-col h-screen overflow-hidden">
+  <body
+    class="antialiased selection:bg-indigo-500/30 selection:text-white page-fade-in flex flex-col h-screen overflow-hidden"
+  >
+    <div class="atmosphere-base"></div>
+    <div class="particle-field"></div>
 
-  <div class="atmosphere-base"></div>
-  <div class="particle-field"></div>
+    <!-- Top reading progress bar (Fixed at very top) -->
+    <div
+      id="reading-progress"
+      class="fixed top-0 left-0 h-0.5 bg-gradient-to-r from-indigo-500 to-violet-500 z-[110] transition-[width] duration-100 ease-linear pointer-events-none"
+      aria-hidden="true"
+      role="presentation"
+    ></div>
 
-  <!-- Top reading progress bar (Fixed at very top) -->
-  <div id="reading-progress" class="fixed top-0 left-0 h-0.5 bg-gradient-to-r from-indigo-500 to-violet-500 z-[110] transition-[width] duration-100 ease-linear pointer-events-none" aria-hidden="true" role="presentation"></div>
-
-  <!-- ── Global Header (Sticky) ── -->
-  <header id="reader-header" role="banner">
-    <div class="flex items-center gap-4 flex-1">
-      <button id="reader-back-btn" class="header-back" type="button" aria-label="Back to tale overview">
-        <i data-lucide="arrow-left" class="w-4 h-4"></i>
-      </button>
-      <div class="header-meta">
-        <p id="reader-header-title" class="header-tale-title">Loading…</p>
-        <p id="reader-chapter-label" class="header-chapter-label">Fragment 00</p>
+    <!-- ── Global Header (Sticky) ── -->
+    <header id="reader-header" role="banner">
+      <div class="flex items-center gap-4 flex-1">
+        <button
+          id="reader-back-btn"
+          class="header-back"
+          type="button"
+          aria-label="Back to tale overview"
+        >
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        </button>
+        <div class="header-meta">
+          <p id="reader-header-title" class="header-tale-title">Loading…</p>
+          <p id="reader-chapter-label" class="header-chapter-label">Fragment 00</p>
+        </div>
       </div>
-    </div>
 
-    <!-- Desktop Header Actions (Hidden on Mobile) -->
-    <div class="hidden lg:flex items-center gap-3">
-      <button id="reader-settings-toggle" type="button" class="reader-action-btn" aria-label="Reading settings">
-        <i data-lucide="settings-2" class="w-4 h-4"></i>
-        <span>Settings</span>
-      </button>
-      <button id="reader-trail-toggle" type="button" class="reader-action-btn" aria-label="Chapter list">
-        <i data-lucide="layers" class="w-4 h-4"></i>
-        <span>Chapters</span>
-      </button>
-      <div class="w-px h-5 bg-white/10 mx-1"></div>
-      <button id="reader-bookmark-btn" type="button" class="reader-action-btn" aria-label="Save to library">
-        <i data-lucide="bookmark" class="w-4 h-4"></i>
-        <span>Save</span>
-      </button>
-      <button id="reader-share-btn" type="button" class="reader-action-btn reader-action-btn--primary" aria-label="Share chapter">
-        <i data-lucide="share-2" class="w-4 h-4"></i>
-      </button>
-    </div>
+      <!-- Desktop Header Actions (Hidden on Mobile) -->
+      <div class="hidden lg:flex items-center gap-3">
+        <button
+          id="reader-settings-toggle"
+          type="button"
+          class="reader-action-btn"
+          aria-label="Reading settings"
+        >
+          <i data-lucide="settings-2" class="w-4 h-4"></i>
+          <span>Settings</span>
+        </button>
+        <button
+          id="reader-trail-toggle"
+          type="button"
+          class="reader-action-btn"
+          aria-label="Chapter list"
+        >
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          <span>Chapters</span>
+        </button>
+        <div class="w-px h-5 bg-white/10 mx-1"></div>
+        <button
+          id="reader-bookmark-btn"
+          type="button"
+          class="reader-action-btn"
+          aria-label="Save to library"
+        >
+          <i data-lucide="bookmark" class="w-4 h-4"></i>
+          <span>Save</span>
+        </button>
+        <button
+          id="reader-share-btn"
+          type="button"
+          class="reader-action-btn reader-action-btn--primary"
+          aria-label="Share chapter"
+        >
+          <i data-lucide="share-2" class="w-4 h-4"></i>
+        </button>
+      </div>
 
-    <!-- Mobile Header Actions (Minimal) -->
-    <div class="lg:hidden flex items-center gap-2">
-       <div id="nav-user-mobile">
+      <!-- Mobile Header Actions (Minimal) -->
+      <div class="lg:hidden flex items-center gap-2">
+        <div id="nav-user-mobile">
           <!-- Guest/User handled by JS -->
-       </div>
-    </div>
-  </header>
+        </div>
+      </div>
+    </header>
 
-  <main class="reader-layout flex-1 overflow-hidden">
-    <div class="reader-viewport h-full overflow-y-auto scroll-container">
-      
-      <!-- ── Content Column ── -->
-      <div class="reading-article">
-        <div class="reading-surface">
-          <!-- Chapter Identification -->
-          <div class="mb-14">
-            <div class="flex items-center gap-3 mb-6">
-              <span class="h-px w-8 bg-indigo-500/40"></span>
-              <span id="chapter-label" class="text-[10px] font-black tracking-[0.4em] text-indigo-400 uppercase font-mono">
-                Fragment 00
-              </span>
-            </div>
-            <h1 id="chapter-title" class="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-[0.95] tracking-tight mb-8">
-              Loading…
-            </h1>
-            <div id="reader-author-row" class="flex items-center gap-4">
-              <!-- Populated by JS -->
-            </div>
-          </div>
-
-          <!-- Main Story Text -->
-          <div id="story-content" class="relative prose prose-invert prose-indigo max-w-none" aria-live="polite">
-             <!-- Populated by content.js -->
-          </div>
-
-          <!-- Post-Content Metadata -->
-          <div class="mt-20 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="glass p-5 rounded-2xl">
-              <div class="flex items-center gap-2 text-indigo-400 mb-4">
-                <i data-lucide="tag" class="w-3.5 h-3.5"></i>
-                <span class="text-[9px] font-black uppercase tracking-widest">Archive Tags</span>
+    <main class="reader-layout flex-1 overflow-hidden">
+      <div class="reader-viewport h-full overflow-y-auto scroll-container">
+        <!-- ── Content Column ── -->
+        <div class="reading-article">
+          <div class="reading-surface">
+            <!-- Chapter Identification -->
+            <div class="mb-14">
+              <div class="flex items-center gap-3 mb-6">
+                <span class="h-px w-8 bg-indigo-500/40"></span>
+                <span
+                  id="chapter-label"
+                  class="text-[10px] font-black tracking-[0.4em] text-indigo-400 uppercase font-mono"
+                >
+                  Fragment 00
+                </span>
               </div>
-              <div id="lore-tag-list" class="flex flex-wrap gap-2"></div>
-            </div>
-            <div class="glass p-5 rounded-2xl">
-              <div class="flex items-center gap-2 text-indigo-400 mb-4">
-                <i data-lucide="compass" class="w-3.5 h-3.5"></i>
-                <span class="text-[9px] font-black uppercase tracking-widest">Story Compass</span>
-              </div>
-              <div id="compass-data" class="grid grid-cols-2 gap-2 text-[11px]">
+              <h1
+                id="chapter-title"
+                class="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-[0.95] tracking-tight mb-8"
+              >
+                Loading…
+              </h1>
+              <div id="reader-author-row" class="flex items-center gap-4">
                 <!-- Populated by JS -->
               </div>
             </div>
+
+            <!-- Main Story Text -->
+            <div
+              id="story-content"
+              class="relative prose prose-invert prose-indigo max-w-none"
+              aria-live="polite"
+            >
+              <!-- Populated by content.js -->
+            </div>
+
+            <!-- Post-Content Metadata -->
+            <div class="mt-20 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="glass p-5 rounded-2xl">
+                <div class="flex items-center gap-2 text-indigo-400 mb-4">
+                  <i data-lucide="tag" class="w-3.5 h-3.5"></i>
+                  <span class="text-[9px] font-black uppercase tracking-widest">Archive Tags</span>
+                </div>
+                <div id="lore-tag-list" class="flex flex-wrap gap-2"></div>
+              </div>
+              <div class="glass p-5 rounded-2xl">
+                <div class="flex items-center gap-2 text-indigo-400 mb-4">
+                  <i data-lucide="compass" class="w-3.5 h-3.5"></i>
+                  <span class="text-[9px] font-black uppercase tracking-widest">Story Compass</span>
+                </div>
+                <div id="compass-data" class="grid grid-cols-2 gap-2 text-[11px]">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Navigation Footer -->
+            <nav class="chapter-nav">
+              <a id="prev-link" href="#" class="chapter-nav__btn chapter-nav__btn--prev hidden">
+                <span class="chapter-nav__label">Previous</span>
+                <span id="prev-title" class="chapter-nav__title">Chapter</span>
+              </a>
+              <a id="next-link" href="#" class="chapter-nav__btn chapter-nav__btn--next hidden">
+                <span class="chapter-nav__label">Next</span>
+                <span id="next-title" class="chapter-nav__title">Chapter</span>
+              </a>
+            </nav>
+          </div>
+        </div>
+
+        <!-- ── Desktop Sidebar (Hidden on Mobile) ── -->
+        <aside class="reader-sidebar">
+          <!-- Tale Meta Card -->
+          <div class="sidebar-panel">
+            <div class="flex items-center gap-2 text-indigo-400 mb-5">
+              <i data-lucide="info" class="w-4 h-4"></i>
+              <span class="text-[10px] font-black uppercase tracking-widest">Tale Identity</span>
+            </div>
+            <img
+              id="sidebar-cover"
+              class="w-full aspect-video object-cover rounded-xl mb-5 opacity-80 border border-white/5"
+              src=""
+              alt=""
+              hidden
+            />
+            <h3 id="sidebar-story-name" class="text-xl font-bold text-white mb-2 leading-tight">
+              ...
+            </h3>
+            <p
+              id="sidebar-author"
+              class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-4"
+            >
+              ...
+            </p>
+            <p id="sidebar-description" class="text-sm text-slate-500 leading-relaxed italic mb-6">
+              ...
+            </p>
+
+            <div class="sacred-divider mb-6"></div>
+
+            <div class="flex items-center justify-between mb-2.5">
+              <span class="text-[10px] font-bold text-slate-600 uppercase tracking-wider"
+                >Overall Progress</span
+              >
+              <span id="progress-percent" class="text-[10px] font-black text-indigo-400">0%</span>
+            </div>
+            <div class="h-1 bg-white/5 rounded-full overflow-hidden">
+              <div
+                id="sidebar-progress-bar"
+                class="h-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)] transition-[width] duration-700"
+              ></div>
+            </div>
           </div>
 
-          <!-- Navigation Footer -->
-          <nav class="chapter-nav">
-            <a id="prev-link" href="#" class="chapter-nav__btn chapter-nav__btn--prev hidden">
-              <span class="chapter-nav__label">Previous</span>
-              <span id="prev-title" class="chapter-nav__title">Chapter</span>
-            </a>
-            <a id="next-link" href="#" class="chapter-nav__btn chapter-nav__btn--next hidden">
-              <span class="chapter-nav__label">Next</span>
-              <span id="next-title" class="chapter-nav__title">Chapter</span>
-            </a>
-          </nav>
-        </div>
+          <!-- Chapter Trail Card -->
+          <div id="chapter-trail-panel" class="sidebar-panel">
+            <div class="flex items-center gap-2 text-indigo-400 mb-5">
+              <i data-lucide="layers" class="w-4 h-4"></i>
+              <span class="text-[10px] font-black uppercase tracking-widest">Chapter Trail</span>
+            </div>
+            <div id="chapter-trail-list" class="space-y-1"></div>
+          </div>
+
+          <!-- Desktop Settings Card -->
+          <div id="reader-settings-sidebar" class="sidebar-panel">
+            <div class="flex items-center gap-2 text-indigo-400 mb-6">
+              <i data-lucide="settings-2" class="w-4 h-4"></i>
+              <span class="text-[10px] font-black uppercase tracking-widest">Visual Settings</span>
+            </div>
+
+            <!-- Shared settings template used via JS -->
+            <div class="reader-settings-group" id="desktop-settings-container"></div>
+          </div>
+        </aside>
       </div>
+    </main>
 
-      <!-- ── Desktop Sidebar (Hidden on Mobile) ── -->
-      <aside class="reader-sidebar">
-        <!-- Tale Meta Card -->
-        <div class="sidebar-panel">
-          <div class="flex items-center gap-2 text-indigo-400 mb-5">
-            <i data-lucide="info" class="w-4 h-4"></i>
-            <span class="text-[10px] font-black uppercase tracking-widest">Tale Identity</span>
-          </div>
-          <img id="sidebar-cover" class="w-full aspect-video object-cover rounded-xl mb-5 opacity-80 border border-white/5" src="" alt="" hidden />
-          <h3 id="sidebar-story-name" class="text-xl font-bold text-white mb-2 leading-tight">...</h3>
-          <p id="sidebar-author" class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-4">...</p>
-          <p id="sidebar-description" class="text-sm text-slate-500 leading-relaxed italic mb-6">...</p>
-          
-          <div class="sacred-divider mb-6"></div>
+    <!-- ── Mobile Toolbar (Hidden on Desktop) ── -->
+    <div class="mobile-toolbar flex items-center justify-between px-6">
+      <button id="go-back-mobile-btn" class="mobile-toolbar-btn" aria-label="Return to previous page">
+        <i data-lucide="chevron-left" class="w-5 h-5"></i>
+      </button>
 
-          <div class="flex items-center justify-between mb-2.5">
-            <span class="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Overall Progress</span>
-            <span id="progress-percent" class="text-[10px] font-black text-indigo-400">0%</span>
-          </div>
-          <div class="h-1 bg-white/5 rounded-full overflow-hidden">
-            <div id="sidebar-progress-bar" class="h-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)] transition-[width] duration-700"></div>
-          </div>
-        </div>
-
-        <!-- Chapter Trail Card -->
-        <div id="chapter-trail-panel" class="sidebar-panel">
-           <div class="flex items-center gap-2 text-indigo-400 mb-5">
-            <i data-lucide="layers" class="w-4 h-4"></i>
-            <span class="text-[10px] font-black uppercase tracking-widest">Chapter Trail</span>
-          </div>
-          <div id="chapter-trail-list" class="space-y-1"></div>
-        </div>
-
-        <!-- Desktop Settings Card -->
-        <div id="reader-settings-sidebar" class="sidebar-panel">
-           <div class="flex items-center gap-2 text-indigo-400 mb-6">
-            <i data-lucide="settings-2" class="w-4 h-4"></i>
-            <span class="text-[10px] font-black uppercase tracking-widest">Visual Settings</span>
-          </div>
-          
-          <!-- Shared settings template used via JS -->
-          <div class="reader-settings-group" id="desktop-settings-container"></div>
-        </div>
-      </aside>
-
+      <div class="flex items-center gap-4">
+        <button id="mobile-bookmark-btn" class="mobile-toolbar-btn" aria-label="Add to bookmarks">
+          <i data-lucide="bookmark" class="w-5 h-5"></i>
+        </button>
+        <button id="reader-settings-btn" class="mobile-settings-btn" aria-label="Open reading settings">Settings</button>
+        <button id="reader-share-mobile" class="mobile-toolbar-btn" aria-label="Share this story">
+          <i data-lucide="share-2" class="w-5 h-5"></i>
+        </button>
+      </div>
     </div>
-  </main>
 
-  <!-- ── Mobile Toolbar (Hidden on Desktop) ── -->
-  <div id="mobile-toolbar">
-    <button id="go-back-mobile-btn" class="mobile-toolbar-btn">
-      <i data-lucide="arrow-left" class="w-5 h-5"></i>
-    </button>
-    <div class="flex items-center gap-1.5">
-      <button id="mobile-bookmark-btn" class="mobile-toolbar-btn">
-        <i data-lucide="bookmark" class="w-5 h-5"></i>
-      </button>
-      <button id="reader-settings-btn" class="mobile-settings-btn">
-        Settings
-      </button>
-      <button id="reader-share-mobile" class="mobile-toolbar-btn">
-        <i data-lucide="share-2" class="w-5 h-5"></i>
-      </button>
+    <!-- ── Mobile Settings Drawer ── -->
+    <div id="reader-settings-panel">
+      <div class="settings-drawer">
+        <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-8"></div>
+        <div id="mobile-settings-container"></div>
+        <button
+          id="reader-settings-close"
+          class="w-full py-4 mt-6 rounded-2xl bg-indigo-500 text-white font-bold text-sm shadow-xl shadow-indigo-500/20"
+        >
+          Apply Settings
+        </button>
+      </div>
     </div>
-  </div>
 
-  <!-- ── Mobile Settings Drawer ── -->
-  <div id="reader-settings-panel">
-    <div class="settings-drawer">
-      <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-8"></div>
-      <div id="mobile-settings-container"></div>
-      <button id="reader-settings-close" class="w-full py-4 mt-6 rounded-2xl bg-indigo-500 text-white font-bold text-sm shadow-xl shadow-indigo-500/20">
-        Apply Settings
-      </button>
-    </div>
-  </div>
-
-  <!-- Toast system -->
-  <div id="reader-toast-container" class="fixed top-20 right-6 z-[200] flex flex-col gap-3 pointer-events-none"></div>
-
-</body>
+    <!-- Toast system -->
+    <div
+      id="reader-toast-container"
+      class="fixed top-20 right-6 z-[200] flex flex-col gap-3 pointer-events-none"
+    ></div>
+  </body>
 </html>

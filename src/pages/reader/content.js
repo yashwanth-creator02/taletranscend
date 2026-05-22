@@ -54,7 +54,7 @@ export function showReaderSkeletons() {
 export async function loadReaderMeta(taleId) {
   try {
     const meta = await getTaleMeta(taleId);
-    
+
     // 1. Sync State
     readerState.taleTitle = meta.title || 'Untitled Tale';
     readerState.authorName = meta.authorName || 'Unknown Scribe';
@@ -68,7 +68,7 @@ export async function loadReaderMeta(taleId) {
     _setText('sidebar-story-name', readerState.taleTitle);
     _setText('sidebar-author', readerState.authorName);
     _setText('sidebar-description', meta.description || 'A tale from the archives.');
-    
+
     const cover = document.getElementById('sidebar-cover');
     if (cover && readerState.coverUrl) {
       cover.src = readerState.coverUrl;
@@ -81,7 +81,6 @@ export async function loadReaderMeta(taleId) {
     // 5. Post-Content Data
     _renderLoreTags(readerState.tags);
     _renderCompass(meta);
-
   } catch (err) {
     console.error('[reader] Meta load failed:', err);
   }
@@ -90,7 +89,7 @@ export async function loadReaderMeta(taleId) {
 export async function loadReaderChapter({ taleId, chapterIndex }) {
   try {
     const { chapter, navigation } = await getChapter({ taleId, chapterIndex });
-    
+
     // 1. Update State
     readerState.chapterTitle = chapter.title || `Chapter ${chapterIndex + 1}`;
     readerState.totalChapters = navigation.totalChapters;
@@ -120,19 +119,26 @@ export async function loadReaderChapter({ taleId, chapterIndex }) {
    ───────────────────────────────────────────── */
 
 function _processContent(raw) {
-  const paragraphs = raw.split('\n').filter(l => l.trim());
+  const paragraphs = raw.split('\n').filter((l) => l.trim());
   let first = true;
 
-  return paragraphs.map(p => {
-    const text = p.trim();
-    if (text.startsWith('## ')) return `<h3 class="text-xl font-bold mt-10 mb-5 text-white/90">${escapeHtml(text.slice(3))}</h3>`;
-    if (text.startsWith('# ')) return `<h2 class="text-2xl font-black uppercase tracking-tight mt-14 mb-8 text-white">${escapeHtml(text.slice(2))}</h2>`;
-    if (text.startsWith('> ')) return `<blockquote class="border-l-2 border-indigo-500/40 pl-8 my-10 italic text-slate-400 font-serif text-lg">${escapeHtml(text.slice(2))}</blockquote>`;
+  return paragraphs
+    .map((p) => {
+      const text = p.trim();
+      if (text.startsWith('## '))
+        return `<h3 class="text-xl font-bold mt-10 mb-5 text-white/90">${escapeHtml(text.slice(3))}</h3>`;
+      if (text.startsWith('# '))
+        return `<h2 class="text-2xl font-black uppercase tracking-tight mt-14 mb-8 text-white">${escapeHtml(text.slice(2))}</h2>`;
+      if (text.startsWith('> '))
+        return `<blockquote class="border-l-2 border-indigo-500/40 pl-8 my-10 italic text-slate-400 font-serif text-lg">${escapeHtml(text.slice(2))}</blockquote>`;
 
-    const cls = first ? 'mb-6 first-letter:float-left first-letter:text-[5em] first-letter:font-black first-letter:font-cinzel first-letter:mr-3 first-letter:text-indigo-400 first-letter:leading-[0.85] first-letter:mt-2' : 'mb-6';
-    first = false;
-    return `<p class="${cls}">${escapeHtml(text)}</p>`;
-  }).join('');
+      const cls = first
+        ? 'mb-6 first-letter:float-left first-letter:text-[5em] first-letter:font-black first-letter:font-cinzel first-letter:mr-3 first-letter:text-indigo-400 first-letter:leading-[0.85] first-letter:mt-2'
+        : 'mb-6';
+      first = false;
+      return `<p class="${cls}">${escapeHtml(text)}</p>`;
+    })
+    .join('');
 }
 
 function _renderAuthorRow(meta) {
@@ -144,7 +150,10 @@ function _renderAuthorRow(meta) {
 
   container.innerHTML = `
     <div class="glass flex items-center gap-3.5 px-5 py-3 rounded-2xl border-white/5">
-      <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}" class="w-10 h-10 rounded-xl bg-indigo-500/10 object-cover" />
+      <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}" 
+        alt="${escapeHtml(meta.authorName || 'Scribe')}" 
+        class="w-10 h-10 rounded-xl bg-indigo-500/10 object-cover" 
+        loading="lazy" />
       <div>
         <p class="text-[10px] font-black text-white uppercase tracking-[0.2em]">${escapeHtml(meta.authorName || 'Scribe')}</p>
         <p class="text-[9px] text-slate-500 uppercase tracking-widest mt-0.5">${escapeHtml(meta.era || 'Unknown Era')}</p>
@@ -156,13 +165,19 @@ function _renderAuthorRow(meta) {
 function _renderLoreTags(tags) {
   const container = document.getElementById('lore-tag-list');
   if (!container) return;
-  
+
   if (!tags.length) {
-    container.innerHTML = '<span class="text-[10px] text-slate-600 italic">Unclassified Archive</span>';
+    container.innerHTML =
+      '<span class="text-[10px] text-slate-600 italic">Unclassified Archive</span>';
     return;
   }
 
-  container.innerHTML = tags.map(t => `<span class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">${escapeHtml(t)}</span>`).join('');
+  container.innerHTML = tags
+    .map(
+      (t) =>
+        `<span class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">${escapeHtml(t)}</span>`
+    )
+    .join('');
 }
 
 function _renderCompass(meta) {
@@ -173,15 +188,19 @@ function _renderCompass(meta) {
     { label: 'Setting', value: meta.worldSetting },
     { label: 'Tone', value: meta.tone },
     { label: 'Audience', value: meta.audience },
-    { label: 'Language', value: meta.language }
+    { label: 'Language', value: meta.language },
   ];
 
-  container.innerHTML = items.map(item => `
+  container.innerHTML = items
+    .map(
+      (item) => `
     <div class="glass p-3 rounded-xl border-white/5">
       <p class="text-[8px] font-black text-slate-600 uppercase mb-1 tracking-widest">${item.label}</p>
       <p class="font-bold text-white/80">${escapeHtml(item.value || '—')}</p>
     </div>
-  `).join('');
+  `
+    )
+    .join('');
 }
 
 /* ─────────────────────────────────────────────

@@ -229,9 +229,7 @@ export function initScrollBehavior() {
   const onScroll = (e) => {
     // If we have a scroll container, use it; otherwise fallback to document
     const target =
-      e && e.target !== document
-        ? e.target
-        : document.scrollingElement || document.documentElement;
+      e && e.target !== document ? e.target : document.scrollingElement || document.documentElement;
 
     // Only track scroll if it's the main scroll container or the document
     // This prevents sidebar scrolls from affecting the main progress bar

@@ -1,276 +1,207 @@
 /* src/assets/css/pages/tale-cards.css */
 
-/* ── Tale Card Base (Atmosphere) ───────────── */
+/* src/assets/css/components/taleCard.css */
 
+/* Base Container */
 .tale-card {
   position: relative;
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(24px) saturate(140%);
-  -webkit-backdrop-filter: blur(24px) saturate(140%);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 2.5rem;
   overflow: hidden;
-  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  border-radius: 2.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
   box-shadow:
-    0 20px 40px -12px rgba(0, 0, 0, 0.5),
-    inset 0 1px 1px rgba(255, 255, 255, 0.03);
+    0 20px 50px rgba(0, 0, 0, 0.3),
+    inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  transform: translateZ(0);
 }
 
-/* Ambient glow that appears on hover */
+.tale-card:hover {
+  border-color: rgba(99, 102, 241, 0.3);
+  transform: translateY(-4px) scale(1.01);
+  box-shadow:
+    0 30px 70px rgba(0, 0, 0, 0.5),
+    0 0 30px rgba(99, 102, 241, 0.1);
+}
+
+/* Background Ambient Glow */
 .tale-card::before {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  border-radius: 2.6rem;
-  background: linear-gradient(
-    135deg,
-    rgba(99, 102, 241, 0.15) 0%,
-    transparent 40%,
-    rgba(139, 92, 246, 0.1) 100%
-  );
-  z-index: -1;
-  opacity: 0;
-  transition: opacity 0.6s ease;
-}
-
-.tale-card:hover::before {
-  opacity: 1;
-}
-
-/* Movable mesh background – subtle slow drift */
-.tale-card::after {
   content: '';
   position: absolute;
   top: -50%;
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle at center, rgba(99, 102, 241, 0.06) 0%, transparent 60%);
-  animation: card-drift 28s linear infinite;
+  background: radial-gradient(circle at center, rgba(99, 102, 241, 0.08) 0%, transparent 50%);
+  animation: mesh-drift 25s linear infinite;
   pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.5s;
+  z-index: -1;
 }
 
-.tale-card:hover::after {
-  opacity: 1;
+/* Skeleton Loader */
+.animate-pulse .tale-card {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 75%
+  );
+  background-size: 200% 100%;
+  animation: pulse 2s infinite;
 }
 
-@keyframes card-drift {
-  0% {
-    transform: translate(-5%, -5%) rotate(0deg);
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
   }
   50% {
-    transform: translate(5%, 5%) rotate(180deg);
-  }
-  100% {
-    transform: translate(-5%, -5%) rotate(360deg);
+    opacity: 0.6;
   }
 }
 
-/* ── Header Badges (Era & Status) ──────────── */
-
-.tale-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 999px;
-  font-size: 0.6rem;
-  font-weight: 900;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  border: 1px solid;
-  backdrop-filter: blur(12px);
-  transition: all 0.3s ease;
-}
-
-.tale-badge--era {
-  background: rgba(99, 102, 241, 0.12);
-  border-color: rgba(99, 102, 241, 0.3);
-  color: #c7d2fe;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
-}
-
-.tale-badge--finished {
-  background: rgba(16, 185, 129, 0.1);
-  border-color: rgba(16, 185, 129, 0.3);
-  color: #6ee7b7;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
-}
-
-/* ── Cover Image Container ────────────────── */
-
-.cover-wrapper {
-  position: relative;
+/* Cover Image */
+.card-image-wrap {
   aspect-ratio: 16/10;
   border-radius: 2rem;
   overflow: hidden;
   background: #0f172a;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.tale-card:hover .cover-wrapper {
-  box-shadow:
-    0 25px 50px rgba(0, 0, 0, 0.7),
-    0 0 30px rgba(99, 102, 241, 0.15);
-}
-
-.cover-wrapper img {
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
   transition: transform 1.2s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-.tale-card:hover .cover-wrapper img {
-  transform: scale(1.12);
+.tale-card:hover .card-image-wrap {
+  transform: scale(1.05);
 }
 
-/* Gradient overlays for depth */
-.cover-gradient {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(to top, rgba(3, 3, 5, 0.9) 0%, rgba(3, 3, 5, 0.3) 60%, transparent 100%),
-    radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.2) 0%, transparent 40%);
-  pointer-events: none;
+.card-image-wrap img {
+  transition: transform 1.2s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-/* ── Progress Bar (Neural) ─────────────────── */
-
-.progress-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 1.25rem;
-  transform: translateY(8px);
-  opacity: 0.8;
-  transition: all 0.5s ease;
+.tale-card:hover .card-image-wrap img {
+  transform: scale(1.15);
 }
 
-.tale-card:hover .progress-overlay {
-  transform: translateY(0);
-  opacity: 1;
-}
-
-.progress-label {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
-}
-
-.progress-track {
-  height: 3px;
+/* Progress Bar */
+.progress-bar {
+  height: 2px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
+  border-radius: 1px;
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #6366f1, #8b5cf6);
-  border-radius: 3px;
-  box-shadow: 0 0 12px rgba(99, 102, 241, 0.6);
-  transition: width 1.2s cubic-bezier(0.23, 1, 0.32, 1);
+  background: linear-gradient(90deg, #6366f1, #a855f7);
+  transition: width 1s ease;
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
 }
 
-/* ── Content Typography ───────────────────── */
-
-.card-title {
-  font-size: 1.75rem;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  color: #fff;
-  transition: color 0.3s;
-}
-
-.tale-card:hover .card-title {
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.3rem 0.75rem;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 999px;
   color: #c7d2fe;
+  font-size: 0.55rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  box-shadow:
+    0 2px 8px rgba(99, 102, 241, 0.1),
+    0 0 5px rgba(99, 102, 241, 0.05);
+  transition: all 0.3s ease;
 }
 
-.card-description {
-  font-size: 0.875rem;
-  line-height: 1.5;
-  color: #a1a1aa;
-  transition: color 0.3s;
+.badge:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 4px 12px rgba(99, 102, 241, 0.2),
+    0 0 10px rgba(99, 102, 241, 0.1);
 }
 
-.tale-card:hover .card-description {
-  color: #d4d4d8;
-}
-
-/* ── Actions Button ────────────────────────── */
-
-.btn-resume {
+/* Buttons */
+.card-button {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  background: rgba(255, 255, 255, 0.04);
+  padding: 0.6rem 1.25rem;
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 1rem;
-  font-size: 0.7rem;
+  border-radius: 0.75rem;
+  color: white;
+  font-size: 0.65rem;
   font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: white;
-  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  letter-spacing: 0.1em;
+  transition: all 0.3s ease;
 }
 
-.btn-resume:hover {
-  background: #4f46e5;
-  border-color: #6366f1;
-  box-shadow: 0 0 25px rgba(99, 102, 241, 0.4);
-  transform: translateY(-1px);
+.card-button:hover {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: rgba(99, 102, 241, 0.4);
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 20px rgba(99, 102, 241, 0.2),
+    0 0 15px rgba(99, 102, 241, 0.1);
 }
 
-.btn-resume i {
-  transition: transform 0.3s;
-}
-
-.btn-resume:hover i {
-  transform: translateX(4px);
-}
-
-/* ── Menu & Icon Tweaks ───────────────────── */
-
+/* Menu */
 .options-menu {
-  background: rgba(15, 15, 20, 0.95);
-  backdrop-filter: blur(40px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 1.5rem;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
-}
-
-.menu-btn {
-  transition: all 0.2s;
-}
-
-.menu-btn:hover {
   background: rgba(255, 255, 255, 0.05);
-  letter-spacing: 0.05em;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.25rem;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(99, 102, 241, 0.1);
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
 }
 
-/* ── Responsive Finesse ────────────────────── */
-@media (max-width: 640px) {
-  .tale-card {
-    border-radius: 2rem;
-  }
-  .card-title {
-    font-size: 1.4rem;
-  }
+.options-menu.hidden {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
 }
 
-@keyframes card-pulse {
+/* Custom Scrollbar */
+.scroll-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroll-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.scroll-container:hover::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.3);
+}
+
+.new-tale .card-button {
+  animation: pulse-new 3s infinite;
+}
+
+@keyframes pulse-new {
   0%,
   100% {
-    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
+    transform: scale(1);
   }
   50% {
-    box-shadow: 0 20px 50px -10px rgba(99, 102, 241, 0.15);
+    transform: scale(1.05);
   }
-}
-
-.tale-card {
-  animation: card-pulse 6s ease-in-out infinite;
 }

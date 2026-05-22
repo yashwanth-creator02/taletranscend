@@ -11,12 +11,15 @@ import { initIcons } from '@/ui/icons.js';
  * @param {string} options.icon - Lucide icon name
  * @param {string} options.classes - Additional CSS classes for the container
  */
-export function renderEmptyState(container, {
-  message = 'No data found.',
-  subMessage = '',
-  icon = 'sparkles',
-  classes = 'py-20 text-center'
-} = {}) {
+export function renderEmptyState(
+  container,
+  {
+    message = 'No data found.',
+    subMessage = '',
+    icon = 'sparkles',
+    classes = 'py-20 text-center',
+  } = {}
+) {
   if (!container) return;
 
   container.innerHTML = `
@@ -40,10 +43,10 @@ export function renderEmptyState(container, {
  * @param {string} options.message - Error message
  * @param {string} options.subMessage - Secondary message
  */
-export function renderErrorState(container, {
-  message = 'Something went wrong.',
-  subMessage = 'Please try again later.'
-} = {}) {
+export function renderErrorState(
+  container,
+  { message = 'Something went wrong.', subMessage = 'Please try again later.' } = {}
+) {
   if (!container) return;
 
   container.innerHTML = `

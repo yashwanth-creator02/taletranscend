@@ -34,7 +34,7 @@ export async function setupResonance(taleId) {
 
 function _updateResonanceUI(btn, countEl, active, count) {
   if (count !== undefined) countEl.textContent = count;
-  
+
   const icon = btn.querySelector('i');
   const label = btn.querySelector('span');
 
@@ -69,16 +69,16 @@ export function bindChapterClicks(taleId) {
  */
 export function setupTabs() {
   const tabs = document.querySelectorAll('[data-tab]');
-  tabs.forEach(btn => {
+  tabs.forEach((btn) => {
     btn.addEventListener('click', () => {
       const target = btn.dataset.tab;
-      
+
       // Update buttons
-      tabs.forEach(b => b.classList.remove('active'));
+      tabs.forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
 
       // Update panes
-      document.querySelectorAll('.tab-content').forEach(pane => pane.classList.add('hidden'));
+      document.querySelectorAll('.tab-content').forEach((pane) => pane.classList.add('hidden'));
       document.getElementById(`content-${target}`)?.classList.remove('hidden');
     });
   });
@@ -117,10 +117,10 @@ export function setupResumeReading(userId, taleId) {
 export function initHeaderScroll() {
   const bar = document.getElementById('tale-action-bar');
   const hero = document.getElementById('hero-section');
-  
+
   const onScroll = () => {
     const scrollY = window.scrollY;
-    
+
     // Toggle bar visibility based on hero exit
     if (hero) {
       const heroBottom = hero.offsetTop + hero.offsetHeight - 100;

@@ -18,6 +18,7 @@ import {
   setupTabs,
   setupStartReading,
   setupResumeReading,
+  setupResonance,
   initHeaderScroll,
   listenToComments,
   postComment,
@@ -43,7 +44,10 @@ if (!taleId) {
 
 initNav();
 
-const authTimeout = setupAuthTimeout('display-description', 'Archive connection timed out. Neural link severed.');
+const authTimeout = setupAuthTimeout(
+  'display-description',
+  'Archive connection timed out. Neural link severed.'
+);
 
 initAuth(async (user) => {
   clearTimeout(authTimeout);
@@ -53,10 +57,7 @@ initAuth(async (user) => {
   showArchiveSkeletons();
 
   // 1. Data Hydration
-  const [tale, chapters] = await Promise.all([
-    loadTale(taleId, user),
-    loadChapters(taleId)
-  ]);
+  const [tale, chapters] = await Promise.all([loadTale(taleId, user), loadChapters(taleId)]);
 
   if (!tale) return;
 
@@ -77,7 +78,7 @@ initAuth(async (user) => {
 
   // 5. Post-resolve hooks
   document.getElementById('post-btn')?.addEventListener('click', () => postComment(taleId));
-  
+
   initIcons();
 });
 

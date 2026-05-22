@@ -20,19 +20,16 @@ import {
   loadReaderChapter,
   applyNavigation,
   goBackToTale,
-  updateReaderProgress,
   bindScrollProgress,
   restoreScrollProgress,
   initMobileDrawer,
   initSwipeNavigation,
   initToolbarAutoHide,
   getChapterProgress,
-  getCloudProgress,
   saveReaderProgress,
   scheduleProgressSync,
-  getLocalTotalReadTime,
-  addReadTime,
   initIcons,
+  showReaderSkeletons,
 } from './index.js';
 
 /* ─────────────────────────────────────────────
@@ -111,9 +108,13 @@ function renderSettingsTemplate() {
 function initGlobalInteractions() {
   // ── Header Scroll Logic ──────────────────────────────────────
   const header = document.getElementById('reader-header');
-  window.addEventListener('scroll', () => {
-    header?.classList.toggle('is-scrolled', window.scrollY > 15);
-  }, { passive: true });
+  window.addEventListener(
+    'scroll',
+    () => {
+      header?.classList.toggle('is-scrolled', window.scrollY > 15);
+    },
+    { passive: true }
+  );
 
   // ── Unified Settings Rendering ──────────────────────────────
   const desktopContainer = document.getElementById('desktop-settings-container');
@@ -122,39 +123,41 @@ function initGlobalInteractions() {
   if (mobileContainer) mobileContainer.innerHTML = renderSettingsTemplate();
 
   // ── Button Listeners ─────────────────────────────────────────
-  
+
   // Theme
-  document.querySelectorAll('[data-theme]').forEach(btn => {
+  document.querySelectorAll('[data-theme]').forEach((btn) => {
     btn.addEventListener('click', () => setTheme(btn.dataset.theme));
   });
 
   // Font
-  document.querySelectorAll('[data-font]').forEach(btn => {
+  document.querySelectorAll('[data-font]').forEach((btn) => {
     btn.addEventListener('click', () => setFontFamily(btn.dataset.font));
   });
 
   // Sliders
-  document.querySelectorAll('[data-control]').forEach(el => {
+  document.querySelectorAll('[data-control]').forEach((el) => {
     el.addEventListener('input', (e) => {
       const type = e.target.dataset.control;
       const val = e.target.value;
       if (type === 'font-size') {
         updateSize(val);
-        document.querySelectorAll('[data-val="font-size"]').forEach(s => s.textContent = `${val}px`);
+        document
+          .querySelectorAll('[data-val="font-size"]')
+          .forEach((s) => (s.textContent = `${val}px`));
       } else {
         setLineHeight(val);
-        document.querySelectorAll('[data-val="line-height"]').forEach(s => s.textContent = val);
+        document.querySelectorAll('[data-val="line-height"]').forEach((s) => (s.textContent = val));
       }
     });
   });
 
   // Width
-  document.querySelectorAll('[data-width]').forEach(btn => {
+  document.querySelectorAll('[data-width]').forEach((btn) => {
     btn.addEventListener('click', () => setReadingWidth(btn.dataset.width));
   });
 
   // ── Sidebars / Toggles ───────────────────────────────────────
-  
+
   // Settings toggle (desktop)
   document.getElementById('reader-settings-toggle')?.addEventListener('click', (e) => {
     const btn = e.currentTarget;
@@ -174,18 +177,18 @@ function initGlobalInteractions() {
   });
 
   // ── Generic Actions ──────────────────────────────────────────
-  
+
   // Bookmark
   const handleBookmark = async () => {
     // Shared logic for mobile/desktop buttons
     const btns = document.querySelectorAll('#reader-bookmark-btn, #mobile-bookmark-btn');
     const isActive = btns[0].classList.contains('reader-action-btn--active');
-    
-    btns.forEach(b => {
+
+    btns.forEach((b) => {
       b.classList.toggle('reader-action-btn--active', !isActive);
       b.querySelector('i')?.classList.toggle('text-indigo-400', !isActive);
     });
-    
+
     _showToast(!isActive ? 'Saved to Archive' : 'Removed from Archive');
   };
 
@@ -208,7 +211,9 @@ function initGlobalInteractions() {
 
   // Back
   document.getElementById('reader-back-btn')?.addEventListener('click', () => goBackToTale(taleId));
-  document.getElementById('go-back-mobile-btn')?.addEventListener('click', () => goBackToTale(taleId));
+  document
+    .getElementById('go-back-mobile-btn')
+    ?.addEventListener('click', () => goBackToTale(taleId));
 }
 
 /* ─────────────────────────────────────────────
@@ -222,7 +227,7 @@ initAuth(async (user) => {
 
   // 0. Show Skeletons
   showReaderSkeletons();
-  
+
   // 1. Load Data
   await loadReaderMeta(taleId);
   const navigation = await loadReaderChapter({ taleId, chapterIndex });
@@ -231,21 +236,25 @@ initAuth(async (user) => {
   // 2. Initialise Navigation
   applyNavigation(navigation, taleId);
   initSwipeNavigation({
-    prevUrl: navigation.hasPrev ? `reader.html?taleId=${taleId}&chapterId=${navigation.prevIndex}` : null,
-    nextUrl: navigation.hasNext ? `reader.html?taleId=${taleId}&chapterId=${navigation.nextIndex}` : null,
+    prevUrl: navigation.hasPrev
+      ? `reader.html?taleId=${taleId}&chapterId=${navigation.prevIndex}`
+      : null,
+    nextUrl: navigation.hasNext
+      ? `reader.html?taleId=${taleId}&chapterId=${navigation.nextIndex}`
+      : null,
   });
 
   // 3. Scroll Logic
   const localProgress = getChapterProgress({ userId: user.uid, taleId, chapterIndex });
   restoreScrollProgress({ scrollPercent: localProgress?.scrollPercent ?? 0 });
-  
+
   bindScrollProgress({
     chapterIndex,
     totalChapters: navigation.totalChapters,
     onScroll(scrollPercent) {
       saveReaderProgress({ userId: user.uid, taleId, chapterIndex, scrollPercent });
       scheduleProgressSync({ userId: user.uid, taleId, chapterIndex, scrollPercent });
-    }
+    },
   });
 
   initIcons();
@@ -267,4 +276,3 @@ import { showToast } from '@ui/components/toast.js';
 function _showToast(message, type = 'info') {
   showToast(message, type);
 }
-

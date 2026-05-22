@@ -19,7 +19,8 @@ function _getContainer() {
     container = document.createElement('div');
     container.id = TOAST_CONTAINER_ID;
     // Standard position: top-right, clear of nav but prominent
-    container.className = 'fixed top-20 right-6 z-[999] flex flex-col gap-3 pointer-events-none w-full max-w-[340px] md:max-w-[380px]';
+    container.className =
+      'fixed top-20 right-6 z-[999] flex flex-col gap-3 pointer-events-none w-full max-w-[340px] md:max-w-[380px]';
     document.body.appendChild(container);
   }
   return container;
@@ -27,7 +28,7 @@ function _getContainer() {
 
 /**
  * Displays a mythic toast notification.
- * 
+ *
  * @param {string} message - The message to display
  * @param {'success' | 'error' | 'info' | 'warning'} type - Tone of the notification
  */
@@ -79,8 +80,6 @@ export function showToast(message, type = 'success') {
   });
 
   // Auto-dismiss logic
-  let dismissTimeout;
-
   const dismiss = () => {
     toast.classList.add('opacity-0', 'translate-x-8', 'scale-95');
     setTimeout(() => {
@@ -92,7 +91,7 @@ export function showToast(message, type = 'success') {
     }, 700);
   };
 
-  dismissTimeout = setTimeout(dismiss, TOAST_DURATION);
+  const dismissTimeout = setTimeout(dismiss, TOAST_DURATION);
 
   // Manual dismiss
   toast.querySelector('button')?.addEventListener('click', () => {

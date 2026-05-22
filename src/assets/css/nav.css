@@ -426,7 +426,7 @@
   justify-content: space-around;
   padding: 0 10px;
   z-index: 200; /* Hover over everything */
-  box-shadow: 
+  box-shadow:
     0 20px 50px rgba(0, 0, 0, 0.6),
     0 0 30px rgba(99, 102, 241, 0.1);
 }
@@ -487,7 +487,7 @@
   padding: 12px;
   border-radius: 20px;
   margin-top: -42px;
-  box-shadow: 
+  box-shadow:
     0 12px 28px rgba(99, 102, 241, 0.4),
     0 0 0 4px #030305;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -505,7 +505,13 @@
   bottom: 0;
   left: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent), var(--accent-secondary), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--accent),
+    var(--accent-secondary),
+    transparent
+  );
   width: calc(var(--scroll-progress, 0) * 1%);
   transition: width 0.1s linear;
   box-shadow: 0 0 12px var(--glow-indigo);
@@ -528,8 +534,12 @@
 }
 
 @keyframes overlayIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .command-panel {
@@ -544,8 +554,14 @@
 }
 
 @keyframes panelReveal {
-  from { opacity: 0; transform: scale(0.96) translateY(-20px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .command-header {
