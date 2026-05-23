@@ -2,9 +2,9 @@
 // Optimized Content Loader for Reader
 // Renders tale metadata and semantic story content.
 
+import { refs, getDocs } from '@fb/index.js';
 import { getTaleMeta, getChapter } from '@services/index.js';
 import { readerState } from './state.js';
-import { initIcons } from '@ui/components/icons.js';
 import { escapeHtml } from '@/utils/string.utils';
 
 /* ─────────────────────────────────────────────
@@ -15,7 +15,7 @@ import { escapeHtml } from '@/utils/string.utils';
  * Shows high-fidelity skeleton loaders for the reader page.
  */
 export function showReaderSkeletons() {
-  const content = document.getElementById('story-content');
+  const content = document.getElementById('articleBody');
   if (content) {
     content.innerHTML = `
       <div class="space-y-8 animate-pulse">
@@ -31,24 +31,6 @@ export function showReaderSkeletons() {
       </div>
     `;
   }
-
-  const sidebar = document.querySelector('.reader-sidebar');
-  if (sidebar) {
-    const name = document.getElementById('sidebar-story-name');
-    const author = document.getElementById('sidebar-author');
-    const description = document.getElementById('sidebar-description');
-    if (name) name.innerHTML = '<div class="skeleton h-7 w-3/4 rounded-lg mb-2"></div>';
-    if (author) author.innerHTML = '<div class="skeleton h-4 w-1/2 rounded-md mb-4"></div>';
-    if (description) {
-      description.innerHTML = `
-        <div class="space-y-2">
-          <div class="skeleton h-3.5 w-full rounded-md"></div>
-          <div class="skeleton h-3.5 w-full rounded-md"></div>
-          <div class="skeleton h-3.5 w-2/3 rounded-md"></div>
-        </div>
-      `;
-    }
-  }
 }
 
 export async function loadReaderMeta(taleId) {
@@ -58,29 +40,39 @@ export async function loadReaderMeta(taleId) {
     // 1. Sync State
     readerState.taleTitle = meta.title || 'Untitled Tale';
     readerState.authorName = meta.authorName || 'Unknown Scribe';
+    readerState.authorBio = meta.authorBio || 'A mysterious scribe from the forgotten archives.';
+    readerState.authorHandle =
+      meta.authorHandle || `@${(meta.authorName || 'scribe').toLowerCase().replace(/\s+/g, '')}`;
     readerState.coverUrl = meta.coverUrl || '';
     readerState.tags = meta.tags || [];
+    readerState.era = meta.era || 'Mythic';
+    readerState.language = meta.language || 'High Elven';
 
-    // 2. Populate Header
-    _setText('reader-header-title', readerState.taleTitle);
+    // 2. Populate Header & Sidebar
+    _setText('articleMetaTitle', readerState.taleTitle);
+    _setText('authorName', readerState.authorName);
+    _setText('author-heading', readerState.authorName);
+    _setText('authorHandle', readerState.authorHandle);
+    _setText('authorCardBio', readerState.authorBio);
+    _setText('topBarChTitle', 'Loading...');
 
-    // 3. Populate Sidebar
-    _setText('sidebar-story-name', readerState.taleTitle);
-    _setText('sidebar-author', readerState.authorName);
-    _setText('sidebar-description', meta.description || 'A tale from the archives.');
+    // 3. Render Breadcrumbs
+    _renderBreadcrumbs(readerState.taleTitle);
 
-    const cover = document.getElementById('sidebar-cover');
-    if (cover && readerState.coverUrl) {
-      cover.src = readerState.coverUrl;
-      cover.hidden = false;
-    }
+    // 4. Render Author Avatars
+    _renderAvatars(readerState.authorName);
 
-    // 4. Author Branding
-    _renderAuthorRow(meta);
-
-    // 5. Post-Content Data
-    _renderLoreTags(readerState.tags);
-    _renderCompass(meta);
+    // 5. Fetch all chapters for TOC
+    const chaptersSnap = await getDocs(refs.chapters(taleId));
+    readerState.chapters = chaptersSnap.docs
+      .map((d) => ({
+        id: d.id,
+        number: d.data().chapterNum,
+        title: d.data().title || `Fragment ${d.data().chapterNum}`,
+        wordCount: d.data().content ? d.data().content.split(/\s+/).length : 0,
+        sections: _extractSections(d.data().content || ''),
+      }))
+      .sort((a, b) => a.number - b.number);
   } catch (err) {
     console.error('[reader] Meta load failed:', err);
   }
@@ -91,25 +83,40 @@ export async function loadReaderChapter({ taleId, chapterIndex }) {
     const { chapter, navigation } = await getChapter({ taleId, chapterIndex });
 
     // 1. Update State
-    readerState.chapterTitle = chapter.title || `Chapter ${chapterIndex + 1}`;
+    readerState.chapterTitle = chapter.title || `Fragment ${chapterIndex + 1}`;
     readerState.totalChapters = navigation.totalChapters;
+    readerState.wordCount = chapter.content ? chapter.content.split(/\s+/).length : 0;
+    readerState.estimatedReadMins = Math.ceil(readerState.wordCount / 225);
+    readerState.currentChapterId = readerState.chapters[chapterIndex]?.id || '';
 
     // 2. Render Identifiers
-    const pad = String(chapterIndex + 1).padStart(2, '0');
-    _setText('reader-chapter-label', `Fragment ${pad} of ${navigation.totalChapters}`);
-    _setText('chapter-label', `Fragment ${pad}`);
-    _setText('chapter-title', readerState.chapterTitle);
+    _setText('topBarChNum', chapterIndex + 1);
+    _setText('topBarChTotal', navigation.totalChapters);
+    _setText('topBarChTitle', readerState.chapterTitle);
+    _setText('headerChNum', chapterIndex + 1);
+    _setText('headerChTotal', navigation.totalChapters);
+    _setText('articleTitle', readerState.chapterTitle);
+    _setText('articleSubtitle', chapter.subtitle || '');
+    _setText('readMinutes', readerState.estimatedReadMins);
 
     // 3. Render Content
-    const container = document.getElementById('story-content');
+    const container = document.getElementById('articleBody');
     if (container) {
       container.innerHTML = _processContent(chapter.content || '');
+    }
+
+    // 4. Update Progress Stats
+    const topBarReadTime = document.getElementById('topBarReadTime');
+    if (topBarReadTime) {
+      _setText('topBarMin', readerState.estimatedReadMins);
+      topBarReadTime.classList.remove('hidden');
+      topBarReadTime.classList.add('flex');
     }
 
     return navigation;
   } catch (err) {
     console.error('[reader] Chapter load failed:', err);
-    _setText('chapter-title', 'Chapter load failed.');
+    _setText('articleTitle', 'Chapter load failed.');
     return null;
   }
 }
@@ -125,82 +132,105 @@ function _processContent(raw) {
   return paragraphs
     .map((p) => {
       const text = p.trim();
-      if (text.startsWith('## '))
-        return `<h3 class="text-xl font-bold mt-10 mb-5 text-white/90">${escapeHtml(text.slice(3))}</h3>`;
-      if (text.startsWith('# '))
-        return `<h2 class="text-2xl font-black uppercase tracking-tight mt-14 mb-8 text-white">${escapeHtml(text.slice(2))}</h2>`;
-      if (text.startsWith('> '))
-        return `<blockquote class="border-l-2 border-indigo-500/40 pl-8 my-10 italic text-slate-400 font-serif text-lg">${escapeHtml(text.slice(2))}</blockquote>`;
+      if (text.startsWith('## ')) {
+        const title = text.slice(3);
+        const id = title.toLowerCase().replace(/\s+/g, '-');
+        return `<h3 id="${id}">${escapeHtml(title)}</h3>`;
+      }
+      if (text.startsWith('# ')) {
+        const title = text.slice(2);
+        const id = title.toLowerCase().replace(/\s+/g, '-');
+        return `<h2 id="${id}">${escapeHtml(title)}</h2>`;
+      }
+      if (text.startsWith('> ')) return `<blockquote>${escapeHtml(text.slice(2))}</blockquote>`;
 
-      const cls = first
-        ? 'mb-6 first-letter:float-left first-letter:text-[5em] first-letter:font-black first-letter:font-cinzel first-letter:mr-3 first-letter:text-indigo-400 first-letter:leading-[0.85] first-letter:mt-2'
-        : 'mb-6';
+      // Special handling for figures
+      if (text.startsWith('![figure]')) {
+        const tint = text.includes('indigo')
+          ? 'indigo'
+          : text.includes('amber')
+            ? 'amber'
+            : text.includes('rose')
+              ? 'rose'
+              : 'emerald';
+        return _createFigure(tint);
+      }
+
+      const cls = first ? 'materialize' : '';
       first = false;
       return `<p class="${cls}">${escapeHtml(text)}</p>`;
     })
     .join('');
 }
 
-function _renderAuthorRow(meta) {
-  const container = document.getElementById('reader-author-row');
+function _extractSections(content) {
+  const lines = content.split('\n');
+  const sections = [];
+  lines.forEach((line) => {
+    const text = line.trim();
+    if (text.startsWith('# ')) {
+      const title = text.slice(2);
+      sections.push({ id: title.toLowerCase().replace(/\s+/g, '-'), level: 2, title });
+    } else if (text.startsWith('## ')) {
+      const title = text.slice(3);
+      sections.push({ id: title.toLowerCase().replace(/\s+/g, '-'), level: 3, title });
+    }
+  });
+  return sections;
+}
+
+function _renderBreadcrumbs(taleTitle) {
+  const container = document.getElementById('breadcrumbs');
   if (!container) return;
 
-  const uid = meta.authorId || 'scribe';
-  const seed = encodeURIComponent(uid.slice(0, 8));
+  const crumbs = ['Archives', 'Tales', taleTitle];
+  container.innerHTML = crumbs
+    .map(
+      (c, i) => `
+      <span class="flex items-center gap-2">
+        <span class="breadcrumb-item">${escapeHtml(c)}</span>
+        ${i < crumbs.length - 1 ? '<i data-lucide="chevron-right" style="width:12px;height:12px;opacity:0.5"></i>' : ''}
+      </span>
+    `
+    )
+    .join('');
+}
 
-  container.innerHTML = `
-    <div class="glass flex items-center gap-3.5 px-5 py-3 rounded-2xl border-white/5">
-      <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}" 
-        alt="${escapeHtml(meta.authorName || 'Scribe')}" 
-        class="w-10 h-10 rounded-xl bg-indigo-500/10 object-cover" 
-        loading="lazy" />
-      <div>
-        <p class="text-[10px] font-black text-white uppercase tracking-[0.2em]">${escapeHtml(meta.authorName || 'Scribe')}</p>
-        <p class="text-[9px] text-slate-500 uppercase tracking-widest mt-0.5">${escapeHtml(meta.era || 'Unknown Era')}</p>
+function _renderAvatars(name) {
+  const initials = name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+  const html = `<div style="display:flex;align-items:center;justify-content:center;border-radius:50%;color:#fff;width:40px;height:40px;font-size:13px;background:linear-gradient(135deg,rgba(99,102,241,0.85),rgba(168,85,247,0.85));box-shadow:0 0 18px -6px rgba(139,124,246,0.55);font-family:var(--font-serif);letter-spacing:0.08em">${initials}</div>`;
+
+  const topAvatar = document.getElementById('authorAvatar');
+  const cardAvatar = document.getElementById('authorCardAvatar');
+
+  if (topAvatar) topAvatar.innerHTML = html;
+  if (cardAvatar) cardAvatar.innerHTML = html;
+}
+
+function _createFigure(tint) {
+  const palette =
+    {
+      indigo: 'rgba(99,102,241,0.45)',
+      amber: 'rgba(245,158,11,0.45)',
+      emerald: 'rgba(16,185,129,0.45)',
+      rose: 'rgba(244,114,182,0.45)',
+    }[tint] || 'rgba(99,102,241,0.45)';
+
+  return `
+    <figure>
+      <div class="figure-placeholder" aria-hidden="true"
+        style="background:radial-gradient(600px 320px at 30% 40%,${palette},transparent 60%),
+               radial-gradient(500px 280px at 80% 70%,rgba(168,85,247,0.4),transparent 65%),
+               linear-gradient(180deg,#0b0b14,#050509)">
       </div>
-    </div>
+      <figcaption class="figure-caption">A reconstructed view of the chamber at twilight.</figcaption>
+    </figure>
   `;
-}
-
-function _renderLoreTags(tags) {
-  const container = document.getElementById('lore-tag-list');
-  if (!container) return;
-
-  if (!tags.length) {
-    container.innerHTML =
-      '<span class="text-[10px] text-slate-600 italic">Unclassified Archive</span>';
-    return;
-  }
-
-  container.innerHTML = tags
-    .map(
-      (t) =>
-        `<span class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">${escapeHtml(t)}</span>`
-    )
-    .join('');
-}
-
-function _renderCompass(meta) {
-  const container = document.getElementById('compass-data');
-  if (!container) return;
-
-  const items = [
-    { label: 'Setting', value: meta.worldSetting },
-    { label: 'Tone', value: meta.tone },
-    { label: 'Audience', value: meta.audience },
-    { label: 'Language', value: meta.language },
-  ];
-
-  container.innerHTML = items
-    .map(
-      (item) => `
-    <div class="glass p-3 rounded-xl border-white/5">
-      <p class="text-[8px] font-black text-slate-600 uppercase mb-1 tracking-widest">${item.label}</p>
-      <p class="font-bold text-white/80">${escapeHtml(item.value || '—')}</p>
-    </div>
-  `
-    )
-    .join('');
 }
 
 /* ─────────────────────────────────────────────

@@ -2,14 +2,14 @@
 // Optimized Theme Management for Reader
 // Handles Typography and Colour Themes with absolute consistency.
 
-import { readerState, THEMES, FONTS, WIDTHS } from './state.js';
+import { readerState, FONTS } from './state.js';
 
 const STORAGE_KEYS = {
   theme: 'tt-reader-theme',
   fontFamily: 'tt-reader-font',
   fontSize: 'tt-reader-size',
   lineHeight: 'tt-reader-lh',
-  readingWidth: 'tt-reader-width',
+  measure: 'tt-reader-measure',
 };
 
 /* ─────────────────────────────────────────────
@@ -17,39 +17,33 @@ const STORAGE_KEYS = {
    ───────────────────────────────────────────── */
 
 export function initTheme() {
-  readerState.theme = localStorage.getItem(STORAGE_KEYS.theme) || 'dark';
+  readerState.theme = localStorage.getItem(STORAGE_KEYS.theme) || 'noir';
   readerState.fontFamily = localStorage.getItem(STORAGE_KEYS.fontFamily) || 'serif';
   readerState.fontSize = Number(localStorage.getItem(STORAGE_KEYS.fontSize)) || 18;
-  readerState.lineHeight = Number(localStorage.getItem(STORAGE_KEYS.lineHeight)) || 1.9;
-  readerState.readingWidth = localStorage.getItem(STORAGE_KEYS.readingWidth) || 'normal';
+  readerState.lineHeight = Number(localStorage.getItem(STORAGE_KEYS.lineHeight)) || 1.75;
+  readerState.measure = Number(localStorage.getItem(STORAGE_KEYS.measure)) || 68;
 
   _applyAll();
 }
 
 /**
  * Applies a global colour theme.
- * Updates both <body> and <html> to ensure total consistency.
  */
 export function setTheme(theme) {
-  if (!THEMES[theme]) return;
   readerState.theme = theme;
   localStorage.setItem(STORAGE_KEYS.theme, theme);
 
-  // 1. Update Body Classes (Global + Scoped)
-  const allThemes = [
-    'theme-dark',
-    'theme-sepia',
-    'theme-light',
-    'reader-theme-dark',
-    'reader-theme-sepia',
-    'reader-theme-light',
-  ];
-  document.body.classList.remove(...allThemes);
-  document.body.classList.add(`theme-${theme}`);
-  document.body.classList.add(`reader-theme-${theme}`);
+  document.documentElement.dataset.theme = theme;
+  const app = document.getElementById('app');
+  if (app) app.dataset.theme = theme;
 
-  // 2. Update Data Attribute for persistent styling
-  document.documentElement.setAttribute('data-theme', theme);
+  // Atmosphere & Particles
+  const atmosphere = document.getElementById('atmosphere');
+  const particles = document.getElementById('particles');
+  const darkThemes = ["noir", "parchment", "midnight", "emerald", "rose", "ocean", "sunset", "forest"];
+  
+  if (atmosphere) atmosphere.style.display = darkThemes.includes(theme) ? "block" : "none";
+  if (particles) particles.style.display = darkThemes.includes(theme) ? "block" : "none";
 
   _syncUI();
 }
@@ -58,31 +52,36 @@ export function setFontFamily(family) {
   if (!FONTS[family]) return;
   readerState.fontFamily = family;
   localStorage.setItem(STORAGE_KEYS.fontFamily, family);
-  document.documentElement.style.setProperty('--reader-font', FONTS[family].css);
+  
+  const cssValue = family === 'serif' ? 'var(--font-serif)' : 
+                   family === 'sans' ? 'var(--font-sans)' : 
+                   'var(--font-mono)';
+                   
+  document.documentElement.style.setProperty('--reader-font-family', cssValue);
   _syncUI();
 }
 
-export function updateSize(val) {
-  const px = Math.min(26, Math.max(14, Number(val)));
+export function setFontSize(val) {
+  const px = Math.min(32, Math.max(12, Number(val)));
   readerState.fontSize = px;
   localStorage.setItem(STORAGE_KEYS.fontSize, String(px));
-  document.documentElement.style.setProperty('--reader-size', `${px}px`);
+  document.documentElement.style.setProperty('--reader-font-size', `${px}px`);
   _syncUI();
 }
 
 export function setLineHeight(val) {
-  const lh = Math.min(2.2, Math.max(1.4, Number(val)));
+  const lh = Math.min(2.5, Math.max(1.2, Number(val)));
   readerState.lineHeight = lh;
   localStorage.setItem(STORAGE_KEYS.lineHeight, String(lh));
-  document.documentElement.style.setProperty('--reader-lh', String(lh));
+  document.documentElement.style.setProperty('--reader-line-height', String(lh));
   _syncUI();
 }
 
-export function setReadingWidth(width) {
-  if (!WIDTHS[width]) return;
-  readerState.readingWidth = width;
-  localStorage.setItem(STORAGE_KEYS.readingWidth, width);
-  document.documentElement.style.setProperty('--reader-width', WIDTHS[width].value);
+export function setMeasure(val) {
+  const measure = Math.min(100, Math.max(40, Number(val)));
+  readerState.measure = measure;
+  localStorage.setItem(STORAGE_KEYS.measure, String(measure));
+  document.documentElement.style.setProperty('--reader-measure', `${measure}ch`);
   _syncUI();
 }
 
@@ -93,41 +92,46 @@ export function setReadingWidth(width) {
 function _applyAll() {
   setTheme(readerState.theme);
   setFontFamily(readerState.fontFamily);
-  updateSize(readerState.fontSize);
+  setFontSize(readerState.fontSize);
   setLineHeight(readerState.lineHeight);
-  setReadingWidth(readerState.readingWidth);
+  setMeasure(readerState.measure);
 }
 
 /**
- * Synchronizes all UI components (buttons, sliders) with current state.
- * Prevents "duplicate button" sync issues by targeting all instances.
+ * Synchronizes all UI components with current state.
  */
 function _syncUI() {
-  // Sync Buttons
-  document.querySelectorAll('[data-theme]').forEach((btn) => {
-    btn.classList.toggle('reader-option--active', btn.dataset.theme === readerState.theme);
+  // Sync Theme Buttons
+  document.querySelectorAll('[data-theme-id]').forEach((btn) => {
+    btn.dataset.active = btn.dataset.themeId === readerState.theme;
+    btn.classList.toggle('active', btn.dataset.themeId === readerState.theme);
   });
 
+  // Sync Font Buttons
   document.querySelectorAll('[data-font]').forEach((btn) => {
-    btn.classList.toggle('reader-option--active', btn.dataset.font === readerState.fontFamily);
+    btn.dataset.active = btn.dataset.font === readerState.fontFamily;
+    btn.classList.toggle('active', btn.dataset.font === readerState.fontFamily);
   });
 
-  document.querySelectorAll('[data-width]').forEach((btn) => {
-    btn.classList.toggle('reader-option--active', btn.dataset.width === readerState.readingWidth);
-  });
+  // Sync Sliders/Controls
+  const sizeInput = document.getElementById('fontSize');
+  const fsRange = document.getElementById('fsRange');
+  if (sizeInput) sizeInput.value = readerState.fontSize;
+  if (fsRange) fsRange.value = readerState.fontSize;
+  _setText('sizeVal', `${readerState.fontSize}px`);
 
-  // Sync Sliders
-  document.querySelectorAll('[data-control="font-size"]').forEach((el) => {
-    el.value = String(readerState.fontSize);
-  });
-  document.querySelectorAll('[data-val="font-size"]').forEach((s) => {
-    s.textContent = `${readerState.fontSize}px`;
-  });
+  const lhInput = document.getElementById('lineHeight');
+  if (lhInput) lhInput.value = readerState.lineHeight;
+  _setText('lhVal', readerState.lineHeight.toFixed(2));
 
-  document.querySelectorAll('[data-control="line-height"]').forEach((el) => {
-    el.value = String(readerState.lineHeight);
-  });
-  document.querySelectorAll('[data-val="line-height"]').forEach((s) => {
-    s.textContent = String(readerState.lineHeight);
-  });
+  const msInput = document.getElementById('measure');
+  const mwRange = document.getElementById('mwRange');
+  if (msInput) msInput.value = readerState.measure;
+  if (mwRange) mwRange.value = readerState.measure;
+  _setText('msVal', `${readerState.measure}ch`);
+}
+
+function _setText(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
 }
