@@ -4,23 +4,7 @@
 // Auto-save to state is debounced to avoid excessive writes on every keystroke.
 
 import { state } from './state.js';
-
-/* ── Debounce Helper ──────────────────────────────────────────────── */
-
-/**
- * Returns a debounced version of the provided function.
- *
- * @param {Function} fn
- * @param {number} delay - ms
- * @returns {Function}
- */
-function debounce(fn, delay) {
-  let timer = null;
-  return function (...args) {
-    clearTimeout(timer);
-    timer = setTimeout(() => fn.apply(this, args), delay);
-  };
-}
+import { debounce } from '@/utils/function.utils';
 
 /* ── Auto-Save ────────────────────────────────────────────────────── */
 

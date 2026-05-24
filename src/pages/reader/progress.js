@@ -1,36 +1,28 @@
 // src/pages/reader/progress.js
-// Scroll progress tracking, sidebar progress bar, scroll restoration,
+// Scroll progress tracking, top progress bar, scroll restoration,
 // and reading time tracking for the reader page.
 
 import { readerState } from './state.js';
 
 /* ─────────────────────────────────────────────
-   Sidebar Progress Bar
+   Progress Bar
    ───────────────────────────────────────────── */
 
 /**
- * Updates the sidebar overall tale progress bar.
- * Uses fractional chapter units so scroll within a chapter is reflected.
- * E.g. chapter 2 of 4 at 50% scroll → (2 + 0.5) / 4 = 62.5%
+ * Updates the reader progress indicators.
  *
- * @param {{ chapterIndex: number, totalChapters: number, scrollPercent?: number }} params
- * @returns {number} Overall progress percentage
+ * @param {{ scrollPercent: number }} params
  */
-export function updateReaderProgress({ chapterIndex, totalChapters, scrollPercent = 0 }) {
-  const progressUnits = chapterIndex + scrollPercent / 100;
-  const percent = Math.min(100, Math.round((progressUnits / Math.max(1, totalChapters)) * 100));
-
-  const bar = document.getElementById('sidebar-progress-bar');
-  const label = document.getElementById('progress-percent');
-
-  if (bar) bar.style.width = `${percent}%`;
-  if (label) label.textContent = `${percent}%`;
-
-  // Top reading progress bar
-  const topBar = document.getElementById('reading-progress');
+export function updateReaderProgress({ scrollPercent = 0 }) {
+  // 1. Top progress bar
+  const topBar = document.getElementById('progressBar');
   if (topBar) topBar.style.width = `${scrollPercent}%`;
 
-  return percent;
+  // 2. Top bar percentage text
+  const pctText = document.getElementById('topBarPct');
+  if (pctText) pctText.textContent = `${Math.round(scrollPercent)}%`;
+
+  return scrollPercent;
 }
 
 /* ─────────────────────────────────────────────
@@ -39,40 +31,38 @@ export function updateReaderProgress({ chapterIndex, totalChapters, scrollPercen
 
 /**
  * Binds a scroll listener to track reading progress.
- * Updates the top progress bar + sidebar bar on every scroll.
+ * Updates the top progress bar on every scroll.
  * Fires onScroll callback (debounced via rAF) for save/sync.
  *
- * @param {{ chapterIndex: number, totalChapters: number, onScroll: (percent: number) => void }} params
+ * @param {{ onScroll: (percent: number) => void }} params
  */
-export function bindScrollProgress({ chapterIndex, totalChapters, onScroll }) {
-  let ticking = false;
+export function bindScrollProgress({ onScroll }) {
+  const scroller = document.getElementById('scroller');
+  if (!scroller) return () => {};
 
   const handler = () => {
-    if (ticking) return;
-    ticking = true;
+    const scrollPercent = _calcScrollPercent(scroller);
 
-    requestAnimationFrame(() => {
-      const scrollPercent = _calcScrollPercent();
+    updateReaderProgress({ scrollPercent });
 
-      // Top bar
-      const topBar = document.getElementById('reading-progress');
-      if (topBar) topBar.style.width = `${scrollPercent}%`;
+    // Show/hide back to top button
+    const backToTop = document.getElementById('backToTop');
+    if (backToTop) {
+      if (scroller.scrollTop > 600) {
+        backToTop.classList.remove('hidden');
+      } else {
+        backToTop.classList.add('hidden');
+      }
+    }
 
-      // Sidebar overall bar
-      updateReaderProgress({ chapterIndex, totalChapters, scrollPercent });
-
-      onScroll(scrollPercent);
-      ticking = false;
-    });
+    onScroll(scrollPercent);
   };
 
-  window.addEventListener('scroll', handler, { passive: true });
-  document.addEventListener('scroll', handler, { passive: true });
+  scroller.addEventListener('scroll', handler, { passive: true });
 
   // Return cleanup
   return () => {
-    window.removeEventListener('scroll', handler);
-    document.removeEventListener('scroll', handler);
+    scroller.removeEventListener('scroll', handler);
   };
 }
 
@@ -82,41 +72,36 @@ export function bindScrollProgress({ chapterIndex, totalChapters, onScroll }) {
 
 /**
  * Restores the user's scroll position from a saved percentage.
- * Waits for content to finish rendering via ResizeObserver before scrolling.
  *
  * @param {{ scrollPercent: number }} params
  */
 export function restoreScrollProgress({ scrollPercent }) {
   if (typeof scrollPercent !== 'number' || scrollPercent <= 2) return;
 
-  const target = _getScrollTarget();
+  const scroller = document.getElementById('scroller');
+  if (!scroller) return;
 
   const observer = new ResizeObserver(() => {
-    const max = _getMaxScroll(target);
+    const max = _getMaxScroll(scroller);
     if (max > 50) {
-      target.scrollTop = (scrollPercent / 100) * max;
+      scroller.scrollTop = (scrollPercent / 100) * max;
       observer.disconnect();
     }
   });
 
-  observer.observe(target);
+  observer.observe(scroller);
 }
 
 /* ─────────────────────────────────────────────
    Helpers
    ───────────────────────────────────────────── */
 
-function _getScrollTarget() {
-  return document.documentElement;
-}
-
 function _getMaxScroll(target) {
   return target.scrollHeight - target.clientHeight;
 }
 
-function _calcScrollPercent() {
-  const target = _getScrollTarget();
+function _calcScrollPercent(target) {
   const max = _getMaxScroll(target);
   if (max <= 0) return 0;
-  return Math.min(100, Math.round((target.scrollTop / max) * 100));
+  return Math.min(100, Math.max(0, (target.scrollTop / max) * 100));
 }

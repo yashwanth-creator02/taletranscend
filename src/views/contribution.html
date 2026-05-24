@@ -1,731 +1,714 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contribution | TaleTranscend</title>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Contribution | TaleTranscend</title>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script type="module" src="../pages/contribution/contribution.js"></script>
+    <script type="module" src="../pages/contribution/contribution.js"></script>
+  </head>
 
-  <style>
-    :root {
-      color-scheme: dark;
-      --editor-header-height: 56px;
-    }
+  <body class="text-slate-200 antialiased page-fade-in flex flex-col h-screen overflow-hidden">
+    <div class="atmosphere-base"></div>
+    <div class="particle-field"></div>
 
-    html {
-      height: 100%;
-    }
+    <!-- Background decorations -->
+    <div
+      class="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.18),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(168,85,247,0.10),_transparent_30%)]"
+    ></div>
+    <div
+      class="pointer-events-none fixed inset-0 -z-10 opacity-[0.07] bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:44px_44px]"
+    ></div>
 
-    body {
-      /* Remove overflow:hidden so the nav's mobile dock works */
-      height: 100%;
-      background:
-        radial-gradient(circle at top, rgba(79, 70, 229, 0.18), transparent 28%),
-        radial-gradient(circle at bottom right, rgba(168, 85, 247, 0.1), transparent 30%),
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.02), transparent),
-        #040406;
-    }
+    <!-- Shared nav — injected by initNav() in contribution.js -->
 
-    /* ── Custom scrollbar ─────────────────────────────────────── */
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 4px;
-      height: 4px;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: rgba(51, 65, 85, 0.8);
-      border-radius: 999px;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: rgba(71, 85, 105, 1);
-    }
-
-    /* ── Studio surfaces ──────────────────────────────────────── */
-    .studio-card {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.07);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-    }
-
-    .studio-input {
-      transition: border-color 180ms ease, box-shadow 180ms ease;
-    }
-
-    .studio-input:focus {
-      outline: none;
-      box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.25), 0 0 0 4px rgba(99, 102, 241, 0.10);
-    }
-
-    /* ── Editor layout: fills viewport below the two sticky headers ── */
-    .editor-layout {
-      /*
-        100dvh minus:
-          --nav-height  (shared nav, set by nav.styles.js)
-          --editor-header-height
-      */
-      height: calc(100dvh - var(--nav-height, 64px) - var(--editor-header-height));
-      display: flex;
-      overflow: hidden;
-    }
-
-    .editor-pane {
-      height: 100%;
-      overflow-y: auto;
-    }
-
-    /* ── Chapter list items ───────────────────────────────────── */
-    .chapter-item {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      border-radius: 14px;
-      border: 1px solid transparent;
-      padding: 4px 4px 4px 10px;
-      transition: background 150ms ease, border-color 150ms ease;
-    }
-
-    .chapter-item:hover {
-      background: rgba(255, 255, 255, 0.04);
-    }
-
-    .chapter-item--active {
-      background: rgba(99, 102, 241, 0.08);
-      border-color: rgba(99, 102, 241, 0.2);
-    }
-
-    .chapter-item__select {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex: 1;
-      min-width: 0;
-      background: none;
-      border: none;
-      cursor: pointer;
-      text-align: left;
-      padding: 6px 0;
-    }
-
-    .chapter-item__num {
-      font-size: 9px;
-      font-weight: 800;
-      letter-spacing: 0.1em;
-      color: #6366f1;
-      background: rgba(99, 102, 241, 0.12);
-      border-radius: 6px;
-      padding: 2px 6px;
-      flex-shrink: 0;
-    }
-
-    .chapter-item--active .chapter-item__num {
-      background: rgba(99, 102, 241, 0.2);
-    }
-
-    .chapter-item__title {
-      font-size: 12px;
-      font-weight: 500;
-      color: rgba(255, 255, 255, 0.55);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .chapter-item--active .chapter-item__title {
-      color: rgba(255, 255, 255, 0.9);
-    }
-
-    .chapter-item__actions {
-      display: flex;
-      gap: 1px;
-      opacity: 0;
-      transition: opacity 150ms ease;
-    }
-
-    .chapter-item:hover .chapter-item__actions,
-    .chapter-item--active .chapter-item__actions {
-      opacity: 1;
-    }
-
-    .chapter-item__action {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 26px;
-      height: 26px;
-      border-radius: 8px;
-      border: none;
-      background: none;
-      color: rgba(255, 255, 255, 0.3);
-      cursor: pointer;
-      transition: background 120ms ease, color 120ms ease;
-    }
-
-    .chapter-item__action:hover:not(:disabled) {
-      background: rgba(255, 255, 255, 0.07);
-      color: rgba(255, 255, 255, 0.8);
-    }
-
-    .chapter-item__action:disabled {
-      opacity: 0.2;
-      cursor: not-allowed;
-    }
-
-    .chapter-item__action--danger:hover:not(:disabled) {
-      background: rgba(248, 113, 113, 0.1);
-      color: #f87171;
-    }
-
-    .chapter-item__action svg {
-      width: 12px;
-      height: 12px;
-    }
-
-    /* ── Voice button active state ────────────────────────────── */
-    .voice-btn--active {
-      background: rgba(99, 102, 241, 0.2) !important;
-      color: #818cf8 !important;
-      border-color: rgba(99, 102, 241, 0.4) !important;
-      animation: pulse-ring 1.2s ease infinite;
-    }
-
-    @keyframes pulse-ring {
-
-      0%,
-      100% {
-        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.3);
-      }
-
-      50% {
-        box-shadow: 0 0 0 6px rgba(99, 102, 241, 0);
-      }
-    }
-  </style>
-</head>
-
-<body class="text-slate-200 antialiased">
-
-  <!-- Background decorations -->
-  <div
-    class="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.18),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(168,85,247,0.10),_transparent_30%)]">
-  </div>
-  <div
-    class="pointer-events-none fixed inset-0 -z-10 opacity-[0.07] bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:44px_44px]">
-  </div>
-
-  <!-- Shared nav — injected by initNav() in contribution.js -->
-
-  <!-- ── Editor-specific sticky header ─────────────────────────── -->
-  <!--
+    <!-- ── Editor-specific sticky header ─────────────────────────── -->
+    <!--
     top: uses var(--nav-height) so it sits flush below the shared nav
     regardless of nav height changes.
   -->
-  <header class="sticky z-40 border-b border-white/[0.07] bg-[#040406]/90 backdrop-blur-xl"
-    style="top: var(--nav-height, 64px); height: var(--editor-header-height);">
-    <div class="mx-auto flex h-full max-w-[1600px] items-center justify-between px-4 sm:px-6">
+    <header
+      class="sticky z-40 border-b border-white/[0.07] bg-[#040406]/90 backdrop-blur-xl"
+      style="top: var(--nav-height, 64px); height: var(--editor-header-height)"
+    >
+      <div class="mx-auto flex h-full max-w-[1600px] items-center justify-between px-4 sm:px-6">
+        <!-- Left: back + title -->
+        <div class="flex min-w-0 items-center gap-3 sm:gap-5">
+          <a
+            href="profile.html"
+            class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.24em] text-slate-500 transition hover:bg-white/5 hover:text-white"
+          >
+            <i data-lucide="chevron-left" class="h-3.5 w-3.5"></i>
+            <span class="hidden sm:inline">Exit Studio</span>
+          </a>
 
-      <!-- Left: back + title -->
-      <div class="flex min-w-0 items-center gap-3 sm:gap-5">
-        <a href="profile.html"
-          class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.24em] text-slate-500 transition hover:bg-white/5 hover:text-white">
-          <i data-lucide="chevron-left" class="h-3.5 w-3.5"></i>
-          <span class="hidden sm:inline">Exit Studio</span>
-        </a>
+          <div class="hidden h-4 w-px bg-white/8 sm:block"></div>
 
-        <div class="hidden h-4 w-px bg-white/8 sm:block"></div>
+          <div class="min-w-0 hidden sm:block">
+            <h1 class="text-[10px] font-black uppercase tracking-[0.36em] text-indigo-400">
+              Tale Architect
+            </h1>
+            <p class="mt-0.5 text-[10px] text-slate-600">
+              Shape your folklore, chapter by chapter.
+            </p>
+          </div>
+        </div>
 
-        <div class="min-w-0 hidden sm:block">
-          <h1 class="text-[10px] font-black uppercase tracking-[0.36em] text-indigo-400">Tale Architect</h1>
-          <p class="mt-0.5 text-[10px] text-slate-600">Shape your folklore, chapter by chapter.</p>
+        <!-- Right: status + save + publish -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <span
+            id="stat-status"
+            class="hidden text-[10px] uppercase tracking-[0.24em] text-zinc-500 md:block"
+            aria-live="polite"
+          >
+            Ready
+          </span>
+
+          <button
+            id="save-draft-btn"
+            type="button"
+            class="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+          >
+            <i data-lucide="cloud" class="h-3.5 w-3.5"></i>
+            <span class="hidden sm:inline">Save Draft</span>
+            <span class="sm:hidden">Save</span>
+          </button>
+
+          <button
+            id="publish-btn"
+            type="button"
+            class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-3 py-2 text-[10px] font-black uppercase tracking-[0.22em] text-white shadow-lg shadow-indigo-900/30 transition hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+          >
+            <i data-lucide="send" class="h-3.5 w-3.5"></i>
+            <span class="hidden sm:inline" data-label="Publish">Publish</span>
+            <span class="sm:hidden" data-label="Post">Post</span>
+          </button>
         </div>
       </div>
+    </header>
 
-      <!-- Right: status + save + publish -->
-      <div class="flex items-center gap-2 sm:gap-3">
-        <span id="stat-status" class="hidden text-[10px] uppercase tracking-[0.24em] text-zinc-500 md:block"
-          aria-live="polite">
-          Ready
-        </span>
-
-        <button id="save-draft-btn" type="button"
-          class="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/40">
-          <i data-lucide="cloud" class="h-3.5 w-3.5"></i>
-          <span class="hidden sm:inline">Save Draft</span>
-          <span class="sm:hidden">Save</span>
-        </button>
-
-        <button id="publish-btn" type="button"
-          class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-3 py-2 text-[10px] font-black uppercase tracking-[0.22em] text-white shadow-lg shadow-indigo-900/30 transition hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40">
-          <i data-lucide="send" class="h-3.5 w-3.5"></i>
-          <span class="hidden sm:inline" data-label="Publish">Publish</span>
-          <span class="sm:hidden" data-label="Post">Post</span>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <!-- ── Main editor workspace ──────────────────────────────────── -->
-  <main class="editor-layout">
-
-    <!-- ════════════════════════════════════════
+    <!-- ── Main editor workspace ──────────────────────────────────── -->
+    <main class="editor-layout fade-in-stagger">
+      <!-- ════════════════════════════════════════
          LEFT PANE — Tale metadata + chapters
          ════════════════════════════════════════ -->
-    <aside
-      class="editor-pane custom-scrollbar hidden w-[17rem] shrink-0 border-r border-slate-800/70 bg-slate-900/20 lg:block">
-      <div class="space-y-5 p-4">
+      <aside
+        class="editor-pane custom-scrollbar hidden w-[17rem] shrink-0 border-r border-slate-800/70 bg-slate-900/20 lg:block"
+      >
+        <div class="space-y-5 p-4">
+          <!-- Cover -->
+          <section class="studio-card overflow-hidden rounded-[1.5rem]">
+            <div class="p-4">
+              <div class="mb-3 flex items-center justify-between gap-2">
+                <div>
+                  <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">
+                    Cover
+                  </p>
+                  <h2 class="mt-0.5 text-sm font-semibold text-white">Tale Cover</h2>
+                </div>
+                <button
+                  id="btn-generate-cover"
+                  type="button"
+                  class="inline-flex items-center gap-1.5 rounded-full border border-white/8 bg-white/5 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 transition hover:bg-white/10 hover:text-white"
+                >
+                  <i data-lucide="sparkles" class="h-3 w-3"></i>
+                  Suggest
+                </button>
+              </div>
 
-        <!-- Cover -->
-        <section class="studio-card overflow-hidden rounded-[1.5rem]">
-          <div class="p-4">
+              <!-- Cover preview -->
+              <div
+                class="relative overflow-hidden rounded-[1.2rem] border border-white/8 bg-zinc-950"
+              >
+                <div class="relative aspect-[4/3] w-full">
+                  <img
+                    id="tale-cover-preview"
+                    src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200&auto=format&fit=crop"
+                    alt="Cover preview"
+                    class="h-full w-full object-cover opacity-75 transition duration-500 hover:opacity-100"
+                  />
+                  <div
+                    class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"
+                  ></div>
+                  <span
+                    class="absolute left-3 top-3 rounded-full border border-white/10 bg-black/50 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-white/70"
+                    >Preview</span
+                  >
+
+                  <!-- Voice: cover prompt -->
+                  <button
+                    type="button"
+                    class="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-black/50 text-white transition hover:bg-white/10"
+                    aria-label="Voice input for cover prompt"
+                    data-voice-target="cover-url"
+                    data-voice-label="Voice cover"
+                  >
+                    <i data-lucide="mic" class="h-3.5 w-3.5"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Cover URL input -->
+              <div class="mt-3 space-y-1.5">
+                <label
+                  class="ml-1 text-[9px] font-bold uppercase tracking-[0.22em] text-indigo-400"
+                  for="cover-url"
+                >
+                  Cover URL
+                </label>
+                <input
+                  type="url"
+                  id="cover-url"
+                  placeholder="Paste image URL…"
+                  class="studio-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-3 text-sm text-white placeholder:text-slate-700 focus:border-indigo-500/60"
+                />
+              </div>
+            </div>
+          </section>
+
+          <!-- Story Core -->
+          <section class="studio-card rounded-[1.5rem] p-4">
+            <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">
+              Manuscript
+            </p>
+            <h3 class="mt-0.5 text-sm font-semibold text-white">Story Core</h3>
+
+            <div class="mt-3 space-y-3">
+              <div class="space-y-1.5">
+                <label
+                  class="ml-1 text-[9px] font-bold uppercase tracking-[0.22em] text-indigo-400"
+                  for="tale-title"
+                >
+                  Title
+                </label>
+                <input
+                  type="text"
+                  id="tale-title"
+                  placeholder="Enter tale title…"
+                  class="studio-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-3 text-sm text-white placeholder:text-slate-700 focus:border-indigo-500/60"
+                />
+              </div>
+
+              <div class="space-y-1.5">
+                <label
+                  class="ml-1 text-[9px] font-bold uppercase tracking-[0.22em] text-indigo-400"
+                  for="tale-synopsis"
+                >
+                  Synopsis
+                </label>
+                <textarea
+                  id="tale-synopsis"
+                  rows="3"
+                  placeholder="The threads of destiny begin to fray…"
+                  class="studio-input w-full resize-none rounded-xl border border-white/10 bg-black/30 px-3.5 py-3 text-sm leading-6 text-white placeholder:text-slate-700 focus:border-indigo-500/60"
+                ></textarea>
+              </div>
+            </div>
+          </section>
+
+          <!-- Classification -->
+          <section class="studio-card rounded-[1.5rem] p-4">
+            <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">
+              Classification
+            </p>
+            <h3 class="mt-0.5 text-sm font-semibold text-white">Story Identity</h3>
+
+            <div class="mt-3 space-y-3">
+              <div class="space-y-1.5">
+                <label
+                  class="ml-1 text-[9px] font-bold uppercase tracking-[0.22em] text-indigo-400"
+                  for="tale-era"
+                  >Era</label
+                >
+                <input
+                  type="text"
+                  id="tale-era"
+                  placeholder="Ancient, medieval, folk…"
+                  class="studio-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-3 text-sm text-white placeholder:text-slate-700 focus:border-indigo-500/60"
+                />
+              </div>
+
+              <div class="space-y-1.5">
+                <label
+                  class="ml-1 text-[9px] font-bold uppercase tracking-[0.22em] text-indigo-400"
+                  for="genre-tags"
+                  >Genre Tags</label
+                >
+                <input
+                  type="text"
+                  id="genre-tags"
+                  placeholder="Folklore, myth, romance…"
+                  class="studio-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-3 text-sm text-white placeholder:text-slate-700 focus:border-indigo-500/60"
+                />
+                <p class="ml-1 text-[10px] text-slate-600">Comma-separated.</p>
+              </div>
+
+              <div class="space-y-1.5">
+                <label
+                  class="ml-1 text-[9px] font-bold uppercase tracking-[0.22em] text-indigo-400"
+                  for="story-tone"
+                  >Tone</label
+                >
+                <select
+                  id="story-tone"
+                  class="studio-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-3 text-sm text-white focus:border-indigo-500/60"
+                >
+                  <option>Mythic</option>
+                  <option>Whimsical</option>
+                  <option>Dark</option>
+                  <option>Melancholic</option>
+                  <option>Epic</option>
+                  <option>Heartwarming</option>
+                  <option>Mysterious</option>
+                </select>
+              </div>
+
+              <div class="space-y-1.5">
+                <label
+                  class="ml-1 text-[9px] font-bold uppercase tracking-[0.22em] text-indigo-400"
+                  for="story-language"
+                  >Language</label
+                >
+                <select
+                  id="story-language"
+                  class="studio-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-3 text-sm text-white focus:border-indigo-500/60"
+                >
+                  <option>English</option>
+                  <option>Kannada</option>
+                  <option>Hindi</option>
+                  <option>Tamil</option>
+                  <option>Telugu</option>
+                  <option>Malayalam</option>
+                  <option>Other</option>
+                </select>
+              </div>
+
+              <div class="space-y-1.5">
+                <label
+                  class="ml-1 text-[9px] font-bold uppercase tracking-[0.22em] text-indigo-400"
+                  for="story-visibility"
+                  >Visibility</label
+                >
+                <select
+                  id="story-visibility"
+                  class="studio-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-3 text-sm text-white focus:border-indigo-500/60"
+                >
+                  <option>Public</option>
+                  <option>Unlisted</option>
+                  <option>Draft</option>
+                </select>
+              </div>
+
+              <div class="space-y-1.5">
+                <label
+                  class="ml-1 text-[9px] font-bold uppercase tracking-[0.22em] text-indigo-400"
+                  for="target-audience"
+                  >Audience</label
+                >
+                <select
+                  id="target-audience"
+                  class="studio-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-3 text-sm text-white focus:border-indigo-500/60"
+                >
+                  <option>General</option>
+                  <option>Young Adult</option>
+                  <option>Adult</option>
+                  <option>Children</option>
+                  <option>Folklore Enthusiasts</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <!-- Voice dictation -->
+          <section class="studio-card rounded-[1.5rem] p-4">
             <div class="mb-3 flex items-center justify-between gap-2">
               <div>
-                <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">Cover</p>
-                <h2 class="mt-0.5 text-sm font-semibold text-white">Tale Cover</h2>
+                <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">
+                  Voice Input
+                </p>
+                <h3 class="mt-0.5 text-sm font-semibold text-white">Quick Dictation</h3>
               </div>
-              <button id="btn-generate-cover" type="button"
-                class="inline-flex items-center gap-1.5 rounded-full border border-white/8 bg-white/5 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 transition hover:bg-white/10 hover:text-white">
-                <i data-lucide="sparkles" class="h-3 w-3"></i>
-                Suggest
+              <span
+                class="rounded-full border border-white/8 bg-white/5 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-slate-500"
+                >Optional</span
+              >
+            </div>
+
+            <div class="grid gap-2">
+              <button
+                id="voice-title-btn"
+                type="button"
+                data-voice-target="tale-title"
+                data-voice-label="Dictate Title"
+                class="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-[9px] font-black uppercase tracking-[0.22em] text-slate-400 transition hover:bg-white/[0.07] hover:text-white"
+              >
+                <i data-lucide="mic" class="h-3.5 w-3.5"></i>
+                Dictate Title
+              </button>
+
+              <button
+                id="voice-synopsis-btn"
+                type="button"
+                data-voice-target="tale-synopsis"
+                data-voice-label="Dictate Synopsis"
+                class="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-[9px] font-black uppercase tracking-[0.22em] text-slate-400 transition hover:bg-white/[0.07] hover:text-white"
+              >
+                <i data-lucide="mic" class="h-3.5 w-3.5"></i>
+                Dictate Synopsis
+              </button>
+
+              <button
+                id="voice-tags-btn"
+                type="button"
+                data-voice-target="genre-tags"
+                data-voice-label="Dictate Tags"
+                class="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-[9px] font-black uppercase tracking-[0.22em] text-slate-400 transition hover:bg-white/[0.07] hover:text-white"
+              >
+                <i data-lucide="mic" class="h-3.5 w-3.5"></i>
+                Dictate Tags
               </button>
             </div>
 
-            <!-- Cover preview -->
-            <div class="relative overflow-hidden rounded-[1.2rem] border border-white/8 bg-zinc-950">
-              <div class="relative aspect-[4/3] w-full">
-                <img id="tale-cover-preview"
-                  src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200&auto=format&fit=crop"
-                  alt="Cover preview"
-                  class="h-full w-full object-cover opacity-75 transition duration-500 hover:opacity-100" />
-                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                <span
-                  class="absolute left-3 top-3 rounded-full border border-white/10 bg-black/50 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-white/70">Preview</span>
-
-                <!-- Voice: cover prompt -->
-                <button type="button"
-                  class="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-black/50 text-white transition hover:bg-white/10"
-                  aria-label="Voice input for cover prompt" data-voice-target="cover-url"
-                  data-voice-label="Voice cover">
-                  <i data-lucide="mic" class="h-3.5 w-3.5"></i>
-                </button>
-              </div>
-            </div>
-
-            <!-- Cover URL input -->
-            <div class="mt-3 space-y-1.5">
-              <label class="ml-1 text-[9px] font-bold uppercase tracking-[0.22em] text-indigo-400" for="cover-url">
-                Cover URL
-              </label>
-              <input type="url" id="cover-url" placeholder="Paste image URL…"
-                class="studio-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-3 text-sm text-white placeholder:text-slate-700 focus:border-indigo-500/60" />
-            </div>
-          </div>
-        </section>
-
-        <!-- Story Core -->
-        <section class="studio-card rounded-[1.5rem] p-4">
-          <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">Manuscript</p>
-          <h3 class="mt-0.5 text-sm font-semibold text-white">Story Core</h3>
-
-          <div class="mt-3 space-y-3">
-            <div class="space-y-1.5">
-              <label class="ml-1 text-[9px] font-bold uppercase tracking-[0.22em] text-indigo-400" for="tale-title">
-                Title
-              </label>
-              <input type="text" id="tale-title" placeholder="Enter tale title…"
-                class="studio-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-3 text-sm text-white placeholder:text-slate-700 focus:border-indigo-500/60" />
-            </div>
-
-            <div class="space-y-1.5">
-              <label class="ml-1 text-[9px] font-bold uppercase tracking-[0.22em] text-indigo-400" for="tale-synopsis">
-                Synopsis
-              </label>
-              <textarea id="tale-synopsis" rows="3" placeholder="The threads of destiny begin to fray…"
-                class="studio-input w-full resize-none rounded-xl border border-white/10 bg-black/30 px-3.5 py-3 text-sm leading-6 text-white placeholder:text-slate-700 focus:border-indigo-500/60"></textarea>
-            </div>
-          </div>
-        </section>
-
-        <!-- Classification -->
-        <section class="studio-card rounded-[1.5rem] p-4">
-          <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">Classification</p>
-          <h3 class="mt-0.5 text-sm font-semibold text-white">Story Identity</h3>
-
-          <div class="mt-3 space-y-3">
-            <div class="space-y-1.5">
-              <label class="ml-1 text-[9px] font-bold uppercase tracking-[0.22em] text-indigo-400"
-                for="tale-era">Era</label>
-              <input type="text" id="tale-era" placeholder="Ancient, medieval, folk…"
-                class="studio-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-3 text-sm text-white placeholder:text-slate-700 focus:border-indigo-500/60" />
-            </div>
-
-            <div class="space-y-1.5">
-              <label class="ml-1 text-[9px] font-bold uppercase tracking-[0.22em] text-indigo-400"
-                for="genre-tags">Genre Tags</label>
-              <input type="text" id="genre-tags" placeholder="Folklore, myth, romance…"
-                class="studio-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-3 text-sm text-white placeholder:text-slate-700 focus:border-indigo-500/60" />
-              <p class="ml-1 text-[10px] text-slate-600">Comma-separated.</p>
-            </div>
-
-            <div class="space-y-1.5">
-              <label class="ml-1 text-[9px] font-bold uppercase tracking-[0.22em] text-indigo-400"
-                for="story-tone">Tone</label>
-              <select id="story-tone"
-                class="studio-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-3 text-sm text-white focus:border-indigo-500/60">
-                <option>Mythic</option>
-                <option>Whimsical</option>
-                <option>Dark</option>
-                <option>Melancholic</option>
-                <option>Epic</option>
-                <option>Heartwarming</option>
-                <option>Mysterious</option>
-              </select>
-            </div>
-
-            <div class="space-y-1.5">
-              <label class="ml-1 text-[9px] font-bold uppercase tracking-[0.22em] text-indigo-400"
-                for="story-language">Language</label>
-              <select id="story-language"
-                class="studio-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-3 text-sm text-white focus:border-indigo-500/60">
-                <option>English</option>
-                <option>Kannada</option>
-                <option>Hindi</option>
-                <option>Tamil</option>
-                <option>Telugu</option>
-                <option>Malayalam</option>
-                <option>Other</option>
-              </select>
-            </div>
-
-            <div class="space-y-1.5">
-              <label class="ml-1 text-[9px] font-bold uppercase tracking-[0.22em] text-indigo-400"
-                for="story-visibility">Visibility</label>
-              <select id="story-visibility"
-                class="studio-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-3 text-sm text-white focus:border-indigo-500/60">
-                <option>Public</option>
-                <option>Unlisted</option>
-                <option>Draft</option>
-              </select>
-            </div>
-
-            <div class="space-y-1.5">
-              <label class="ml-1 text-[9px] font-bold uppercase tracking-[0.22em] text-indigo-400"
-                for="target-audience">Audience</label>
-              <select id="target-audience"
-                class="studio-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-3 text-sm text-white focus:border-indigo-500/60">
-                <option>General</option>
-                <option>Young Adult</option>
-                <option>Adult</option>
-                <option>Children</option>
-                <option>Folklore Enthusiasts</option>
-              </select>
-            </div>
-          </div>
-        </section>
-
-        <!-- Voice dictation -->
-        <section class="studio-card rounded-[1.5rem] p-4">
-          <div class="mb-3 flex items-center justify-between gap-2">
-            <div>
-              <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">Voice Input</p>
-              <h3 class="mt-0.5 text-sm font-semibold text-white">Quick Dictation</h3>
-            </div>
-            <span
-              class="rounded-full border border-white/8 bg-white/5 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-slate-500">Optional</span>
-          </div>
-
-          <div class="grid gap-2">
-            <button id="voice-title-btn" type="button" data-voice-target="tale-title" data-voice-label="Dictate Title"
-              class="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-[9px] font-black uppercase tracking-[0.22em] text-slate-400 transition hover:bg-white/[0.07] hover:text-white">
-              <i data-lucide="mic" class="h-3.5 w-3.5"></i>
-              Dictate Title
-            </button>
-
-            <button id="voice-synopsis-btn" type="button" data-voice-target="tale-synopsis"
-              data-voice-label="Dictate Synopsis"
-              class="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-[9px] font-black uppercase tracking-[0.22em] text-slate-400 transition hover:bg-white/[0.07] hover:text-white">
-              <i data-lucide="mic" class="h-3.5 w-3.5"></i>
-              Dictate Synopsis
-            </button>
-
-            <button id="voice-tags-btn" type="button" data-voice-target="genre-tags" data-voice-label="Dictate Tags"
-              class="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-[9px] font-black uppercase tracking-[0.22em] text-slate-400 transition hover:bg-white/[0.07] hover:text-white">
-              <i data-lucide="mic" class="h-3.5 w-3.5"></i>
-              Dictate Tags
-            </button>
-          </div>
-
-          <p class="mt-3 text-[10px] leading-5 text-slate-600">
-            Great for capturing folklore names, chapter ideas, and synopsis drafts on the go.
-          </p>
-        </section>
-
-        <!-- Chapters -->
-        <section class="studio-card rounded-[1.5rem] p-4">
-          <div class="mb-3 flex items-center justify-between gap-2">
-            <div>
-              <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">Chapters</p>
-              <h3 class="mt-0.5 text-sm font-semibold text-white">Manuscript Flow</h3>
-            </div>
-            <span id="studio-chapter-count"
-              class="rounded-full border border-white/8 bg-white/5 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
-              0
-            </span>
-          </div>
-
-          <!-- Chapter list rendered by renderChapterList() -->
-          <div id="chapter-list" class="space-y-1"></div>
-
-          <button id="add-chapter-btn" type="button"
-            class="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-slate-800 px-4 py-2.5 text-[10px] font-medium text-slate-500 transition hover:border-indigo-400/40 hover:text-indigo-400">
-            <i data-lucide="plus" class="h-3.5 w-3.5"></i>
-            Add Chapter
-          </button>
-        </section>
-
-      </div>
-    </aside>
-
-    <!-- ════════════════════════════════════════
-         CENTER PANE — Chapter editor
-         ════════════════════════════════════════ -->
-    <section class="editor-pane custom-scrollbar min-w-0 flex-1 bg-slate-950/50">
-      <div class="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
-        <div class="space-y-6">
-
-          <!-- Chapter title + AI actions -->
-          <section class="studio-card rounded-[1.75rem] p-5 sm:p-6">
-            <div class="mb-5 flex items-start justify-between gap-4">
-              <div>
-                <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">Current Chapter</p>
-                <h2 class="mt-0.5 text-sm font-semibold text-white">Write the living fragment</h2>
-              </div>
-
-              <div class="flex items-center gap-2 flex-shrink-0">
-                <button id="ai-continue-btn" type="button"
-                  class="inline-flex items-center gap-2 rounded-full border border-white/8 bg-white/5 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 transition hover:bg-white/10 hover:text-white">
-                  <i data-lucide="wand-2" class="h-3 w-3"></i>
-                  <span class="hidden sm:inline">Continue</span>
-                </button>
-                <button id="ai-enhance-btn" type="button"
-                  class="inline-flex items-center gap-2 rounded-full border border-white/8 bg-white/5 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 transition hover:bg-white/10 hover:text-white">
-                  <i data-lucide="sparkles" class="h-3 w-3"></i>
-                  <span class="hidden sm:inline">Enhance</span>
-                </button>
-              </div>
-            </div>
-
-            <label class="sr-only" for="current-chapter-title">Chapter title</label>
-            <input type="text" id="current-chapter-title" placeholder="Chapter Title…"
-              class="w-full bg-transparent text-2xl font-semibold tracking-tight text-white placeholder:text-zinc-800 focus:outline-none sm:text-3xl lg:text-4xl" />
-
-            <p class="mt-2 text-sm leading-6 text-slate-600">
-              Write in a calm, distraction-free space. Build each fragment like part of a larger legend.
+            <p class="mt-3 text-[10px] leading-5 text-slate-600">
+              Great for capturing folklore names, chapter ideas, and synopsis drafts on the go.
             </p>
           </section>
 
-          <!-- Chapter body -->
-          <section class="studio-card rounded-[1.75rem] p-5 sm:p-6">
-            <div class="mb-4 flex items-center justify-between gap-3 border-b border-white/[0.06] pb-4">
+          <!-- Chapters -->
+          <section class="studio-card rounded-[1.5rem] p-4">
+            <div class="mb-3 flex items-center justify-between gap-2">
               <div>
-                <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">Chapter Body</p>
-                <h3 class="mt-0.5 text-sm font-semibold text-white">The actual tale text</h3>
+                <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">
+                  Chapters
+                </p>
+                <h3 class="mt-0.5 text-sm font-semibold text-white">Manuscript Flow</h3>
               </div>
-
-              <button id="voice-chapter-btn" type="button" data-voice-target="chapter-content"
-                data-voice-label="Voice chapter"
-                class="inline-flex items-center gap-2 rounded-full border border-white/8 bg-black/20 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 transition hover:bg-white/10 hover:text-white">
-                <i data-lucide="mic" class="h-3 w-3"></i>
-                Voice
-              </button>
+              <span
+                id="studio-chapter-count"
+                class="rounded-full border border-white/8 bg-white/5 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400"
+              >
+                0
+              </span>
             </div>
 
-            <label class="sr-only" for="chapter-content">Chapter content</label>
-            <textarea id="chapter-content" placeholder="Start writing your legend…"
-              class="w-full resize-none bg-transparent text-base leading-8 text-slate-300 placeholder:text-zinc-800 focus:outline-none sm:min-h-[calc(100vh-32rem)] sm:text-[17px]"></textarea>
+            <!-- Chapter list rendered by renderChapterList() -->
+            <div id="chapter-list" class="space-y-1"></div>
+
+            <button
+              id="add-chapter-btn"
+              type="button"
+              class="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-slate-800 px-4 py-2.5 text-[10px] font-medium text-slate-500 transition hover:border-indigo-400/40 hover:text-indigo-400"
+            >
+              <i data-lucide="plus" class="h-3.5 w-3.5"></i>
+              Add Chapter
+            </button>
           </section>
-
-          <!-- Stats bar + mobile save/publish -->
-          <section class="studio-card rounded-[1.75rem] p-5 sm:p-6">
-            <div
-              class="flex flex-col gap-3 border-b border-white/[0.06] pb-4 sm:flex-row sm:items-center sm:justify-between">
-              <div class="flex flex-wrap items-center gap-4 text-[9px] uppercase tracking-[0.22em] text-slate-600">
-                <span id="stat-words">0 Words</span>
-                <span class="hidden h-3 w-px bg-white/10 sm:block"></span>
-                <span id="stat-chars">0 Characters</span>
-              </div>
-
-              <div
-                class="flex flex-wrap items-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-slate-600">
-                <span class="rounded-full border border-white/8 bg-white/[0.03] px-2.5 py-1">Keep writing</span>
-                <span class="rounded-full border border-white/8 bg-white/[0.03] px-2.5 py-1">Auto-saved locally</span>
-              </div>
-            </div>
-
-            <!-- Mobile save + publish (hidden on md+) -->
-            <div class="mt-4 flex items-center justify-between gap-3 md:hidden">
-              <p class="text-[10px] leading-5 text-slate-600">
-                All fields save together.
-              </p>
-              <div class="flex items-center gap-2">
-                <button id="save-draft-btn-mobile" type="button"
-                  class="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 transition hover:bg-white/[0.07] hover:text-white">
-                  Save
-                </button>
-                <button id="publish-btn-mobile" type="button"
-                  class="rounded-xl bg-indigo-600 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-white transition hover:bg-indigo-500">
-                  <span data-label="Post">Post</span>
-                </button>
-              </div>
-            </div>
-          </section>
-
         </div>
-      </div>
-    </section>
+      </aside>
 
-    <!-- ════════════════════════════════════════
+      <!-- ════════════════════════════════════════
+         CENTER PANE — Chapter editor
+         ════════════════════════════════════════ -->
+      <section class="editor-pane custom-scrollbar min-w-0 flex-1 bg-slate-950/50">
+        <div class="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+          <div class="space-y-6">
+            <!-- Chapter title + AI actions -->
+            <section class="studio-card rounded-[1.75rem] p-5 sm:p-6">
+              <div class="mb-5 flex items-start justify-between gap-4">
+                <div>
+                  <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">
+                    Current Chapter
+                  </p>
+                  <h2 class="mt-0.5 text-sm font-semibold text-white">Write the living fragment</h2>
+                </div>
+
+                <div class="flex items-center gap-2 flex-shrink-0">
+                  <button
+                    id="ai-continue-btn"
+                    type="button"
+                    class="inline-flex items-center gap-2 rounded-full border border-white/8 bg-white/5 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 transition hover:bg-white/10 hover:text-white"
+                  >
+                    <i data-lucide="wand-2" class="h-3 w-3"></i>
+                    <span class="hidden sm:inline">Continue</span>
+                  </button>
+                  <button
+                    id="ai-enhance-btn"
+                    type="button"
+                    class="inline-flex items-center gap-2 rounded-full border border-white/8 bg-white/5 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 transition hover:bg-white/10 hover:text-white"
+                  >
+                    <i data-lucide="sparkles" class="h-3 w-3"></i>
+                    <span class="hidden sm:inline">Enhance</span>
+                  </button>
+                </div>
+              </div>
+
+              <label class="sr-only" for="current-chapter-title">Chapter title</label>
+              <input
+                type="text"
+                id="current-chapter-title"
+                placeholder="Chapter Title…"
+                class="w-full bg-transparent text-2xl font-semibold tracking-tight text-white placeholder:text-zinc-800 focus:outline-none sm:text-3xl lg:text-4xl"
+              />
+
+              <p class="mt-2 text-sm leading-6 text-slate-600">
+                Write in a calm, distraction-free space. Build each fragment like part of a larger
+                legend.
+              </p>
+            </section>
+
+            <!-- Chapter body -->
+            <section class="studio-card rounded-[1.75rem] p-5 sm:p-6">
+              <div
+                class="mb-4 flex items-center justify-between gap-3 border-b border-white/[0.06] pb-4"
+              >
+                <div>
+                  <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">
+                    Chapter Body
+                  </p>
+                  <h3 class="mt-0.5 text-sm font-semibold text-white">The actual tale text</h3>
+                </div>
+
+                <button
+                  id="voice-chapter-btn"
+                  type="button"
+                  data-voice-target="chapter-content"
+                  data-voice-label="Voice chapter"
+                  class="inline-flex items-center gap-2 rounded-full border border-white/8 bg-black/20 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 transition hover:bg-white/10 hover:text-white"
+                >
+                  <i data-lucide="mic" class="h-3 w-3"></i>
+                  Voice
+                </button>
+              </div>
+
+              <label class="sr-only" for="chapter-content">Chapter content</label>
+              <textarea
+                id="chapter-content"
+                placeholder="Start writing your legend…"
+                class="w-full resize-none bg-transparent text-base leading-8 text-slate-300 placeholder:text-zinc-800 focus:outline-none sm:min-h-[calc(100vh-32rem)] sm:text-[17px]"
+              ></textarea>
+            </section>
+
+            <!-- Stats bar + mobile save/publish -->
+            <section class="studio-card rounded-[1.75rem] p-5 sm:p-6">
+              <div
+                class="flex flex-col gap-3 border-b border-white/[0.06] pb-4 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div
+                  class="flex flex-wrap items-center gap-4 text-[9px] uppercase tracking-[0.22em] text-slate-600"
+                >
+                  <span id="stat-words">0 Words</span>
+                  <span class="hidden h-3 w-px bg-white/10 sm:block"></span>
+                  <span id="stat-chars">0 Characters</span>
+                </div>
+
+                <div
+                  class="flex flex-wrap items-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-slate-600"
+                >
+                  <span class="rounded-full border border-white/8 bg-white/[0.03] px-2.5 py-1"
+                    >Keep writing</span
+                  >
+                  <span class="rounded-full border border-white/8 bg-white/[0.03] px-2.5 py-1"
+                    >Auto-saved locally</span
+                  >
+                </div>
+              </div>
+
+              <!-- Mobile save + publish (hidden on md+) -->
+              <div class="mt-4 flex items-center justify-between gap-3 md:hidden">
+                <p class="text-[10px] leading-5 text-slate-600">All fields save together.</p>
+                <div class="flex items-center gap-2">
+                  <button
+                    id="save-draft-btn-mobile"
+                    type="button"
+                    class="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 transition hover:bg-white/[0.07] hover:text-white"
+                  >
+                    Save
+                  </button>
+                  <button
+                    id="publish-btn-mobile"
+                    type="button"
+                    class="rounded-xl bg-indigo-600 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-white transition hover:bg-indigo-500"
+                  >
+                    <span data-label="Post">Post</span>
+                  </button>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════
          RIGHT PANE — Analytics + settings + checklist
          ════════════════════════════════════════ -->
-    <aside
-      class="editor-pane custom-scrollbar hidden w-[19rem] shrink-0 border-l border-slate-800/70 bg-slate-900/20 xl:block">
-      <div class="space-y-5 p-4">
-
-        <!-- Writing metrics -->
-        <section class="studio-card rounded-[1.5rem] p-4">
-          <div class="mb-3 flex items-center justify-between gap-2">
-            <div>
-              <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">Analytics</p>
-              <h2 class="mt-0.5 text-sm font-semibold text-white">Writing Metrics</h2>
-            </div>
-            <i data-lucide="bar-chart-2" class="h-4 w-4 text-slate-700"></i>
-          </div>
-
-          <div class="grid grid-cols-2 gap-2.5">
-            <div class="rounded-xl border border-white/[0.06] bg-black/20 p-3">
-              <p class="text-[9px] text-slate-600">Words</p>
-              <p id="stat-words-right" class="mt-1 text-lg font-bold text-white">0</p>
-            </div>
-            <div class="rounded-xl border border-white/[0.06] bg-black/20 p-3">
-              <p class="text-[9px] text-slate-600">Reading Time</p>
-              <p id="stat-reading-time" class="mt-1 text-lg font-bold text-white">0m</p>
-            </div>
-            <div class="rounded-xl border border-white/[0.06] bg-black/20 p-3">
-              <p class="text-[9px] text-slate-600">Chapters</p>
-              <p id="studio-chapter-count" class="mt-1 text-lg font-bold text-white">0</p>
-            </div>
-            <div class="rounded-xl border border-white/[0.06] bg-black/20 p-3">
-              <p class="text-[9px] text-slate-600">Status</p>
-              <p class="mt-1 text-lg font-bold text-white">Draft</p>
-            </div>
-          </div>
-        </section>
-
-        <!-- Publishing settings -->
-        <section class="studio-card rounded-[1.5rem] p-4">
-          <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">Settings</p>
-          <h3 class="mt-0.5 text-sm font-semibold text-white">Publishing & Identity</h3>
-
-          <div class="mt-3 space-y-3">
-            <div class="space-y-1.5">
-              <label class="text-[10px] text-slate-500" for="content-warnings">Content Warnings</label>
-              <input type="text" id="content-warnings" placeholder="Violence, grief, folklore horror…"
-                class="studio-input w-full rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-2.5 text-sm text-slate-300 placeholder:text-slate-700 focus:border-indigo-500/50" />
+      <aside
+        class="editor-pane custom-scrollbar hidden w-[19rem] shrink-0 border-l border-slate-800/70 bg-slate-900/20 xl:block"
+      >
+        <div class="space-y-5 p-4">
+          <!-- Writing metrics -->
+          <section class="studio-card rounded-[1.5rem] p-4">
+            <div class="mb-3 flex items-center justify-between gap-2">
+              <div>
+                <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">
+                  Analytics
+                </p>
+                <h2 class="mt-0.5 text-sm font-semibold text-white">Writing Metrics</h2>
+              </div>
+              <i data-lucide="bar-chart-2" class="h-4 w-4 text-slate-700"></i>
             </div>
 
-            <div class="space-y-1.5">
-              <label class="text-[10px] text-slate-500" for="world-setting">World / Setting</label>
-              <textarea id="world-setting" rows="2" placeholder="The landscape, culture, or mythic world…"
-                class="studio-input w-full resize-none rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-2.5 text-sm text-slate-300 placeholder:text-slate-700 focus:border-indigo-500/50"></textarea>
-            </div>
-
-            <div class="space-y-1.5">
-              <label class="text-[10px] text-slate-500" for="story-notes">Author Notes</label>
-              <textarea id="story-notes" rows="2" placeholder="Motifs, symbolism, research references…"
-                class="studio-input w-full resize-none rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-2.5 text-sm text-slate-300 placeholder:text-slate-700 focus:border-indigo-500/50"></textarea>
-            </div>
-
-            <!-- Visibility toggle buttons — data-visibility wired by bindMetadataEvents() -->
-            <div class="space-y-1.5">
-              <label class="text-[10px] text-slate-500">Visibility</label>
-              <div class="grid grid-cols-3 gap-1.5">
-                <button data-visibility="Public"
-                  class="rounded-xl border border-indigo-500/50 bg-slate-800 px-2 py-2 text-[10px] font-semibold text-white transition">
-                  Public
-                </button>
-                <button data-visibility="Unlisted"
-                  class="rounded-xl border border-slate-800 bg-slate-900 px-2 py-2 text-[10px] font-semibold text-slate-500 transition hover:text-slate-300">
-                  Unlisted
-                </button>
-                <button data-visibility="Draft"
-                  class="rounded-xl border border-slate-800 bg-slate-900 px-2 py-2 text-[10px] font-semibold text-slate-500 transition hover:text-slate-300">
-                  Draft
-                </button>
+            <div class="grid grid-cols-2 gap-2.5">
+              <div class="rounded-xl border border-white/[0.06] bg-black/20 p-3">
+                <p class="text-[9px] text-slate-600">Words</p>
+                <p id="stat-words-right" class="mt-1 text-lg font-bold text-white">0</p>
+              </div>
+              <div class="rounded-xl border border-white/[0.06] bg-black/20 p-3">
+                <p class="text-[9px] text-slate-600">Reading Time</p>
+                <p id="stat-reading-time" class="mt-1 text-lg font-bold text-white">0m</p>
+              </div>
+              <div class="rounded-xl border border-white/[0.06] bg-black/20 p-3">
+                <p class="text-[9px] text-slate-600">Chapters</p>
+                <p id="studio-chapter-count" class="mt-1 text-lg font-bold text-white">0</p>
+              </div>
+              <div class="rounded-xl border border-white/[0.06] bg-black/20 p-3">
+                <p class="text-[9px] text-slate-600">Status</p>
+                <p class="mt-1 text-lg font-bold text-white">Draft</p>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <!-- AI Companion stub -->
-        <section class="studio-card rounded-[1.5rem] border border-indigo-500/15 bg-indigo-900/[0.08] p-4">
-          <div class="mb-2 flex items-center gap-2 text-indigo-400">
-            <i data-lucide="sparkles" class="h-3.5 w-3.5"></i>
-            <span class="text-[9px] font-black uppercase tracking-[0.22em]">AI Companion</span>
-            <span
-              class="ml-auto rounded-full border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.2em] text-indigo-400">Soon</span>
-          </div>
-          <p class="mb-3 text-[11px] leading-relaxed text-slate-500">
-            Expand world-building, refine prose, or generate stronger folklore motifs.
-          </p>
-          <button type="button" disabled
-            class="w-full cursor-not-allowed rounded-xl bg-indigo-700/50 px-4 py-2.5 text-[10px] font-bold text-indigo-300/50">
-            Generate Story Hook
-          </button>
-        </section>
+          <!-- Publishing settings -->
+          <section class="studio-card rounded-[1.5rem] p-4">
+            <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">Settings</p>
+            <h3 class="mt-0.5 text-sm font-semibold text-white">Publishing & Identity</h3>
 
-        <!-- Publish readiness checklist -->
-        <!--
+            <div class="mt-3 space-y-3">
+              <div class="space-y-1.5">
+                <label class="text-[10px] text-slate-500" for="content-warnings"
+                  >Content Warnings</label
+                >
+                <input
+                  type="text"
+                  id="content-warnings"
+                  placeholder="Violence, grief, folklore horror…"
+                  class="studio-input w-full rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-2.5 text-sm text-slate-300 placeholder:text-slate-700 focus:border-indigo-500/50"
+                />
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="text-[10px] text-slate-500" for="world-setting"
+                  >World / Setting</label
+                >
+                <textarea
+                  id="world-setting"
+                  rows="2"
+                  placeholder="The landscape, culture, or mythic world…"
+                  class="studio-input w-full resize-none rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-2.5 text-sm text-slate-300 placeholder:text-slate-700 focus:border-indigo-500/50"
+                ></textarea>
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="text-[10px] text-slate-500" for="story-notes">Author Notes</label>
+                <textarea
+                  id="story-notes"
+                  rows="2"
+                  placeholder="Motifs, symbolism, research references…"
+                  class="studio-input w-full resize-none rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-2.5 text-sm text-slate-300 placeholder:text-slate-700 focus:border-indigo-500/50"
+                ></textarea>
+              </div>
+
+              <!-- Visibility toggle buttons — data-visibility wired by bindMetadataEvents() -->
+              <div class="space-y-1.5">
+                <label class="text-[10px] text-slate-500">Visibility</label>
+                <div class="grid grid-cols-3 gap-1.5">
+                  <button
+                    data-visibility="Public"
+                    class="rounded-xl border border-indigo-500/50 bg-slate-800 px-2 py-2 text-[10px] font-semibold text-white transition"
+                  >
+                    Public
+                  </button>
+                  <button
+                    data-visibility="Unlisted"
+                    class="rounded-xl border border-slate-800 bg-slate-900 px-2 py-2 text-[10px] font-semibold text-slate-500 transition hover:text-slate-300"
+                  >
+                    Unlisted
+                  </button>
+                  <button
+                    data-visibility="Draft"
+                    class="rounded-xl border border-slate-800 bg-slate-900 px-2 py-2 text-[10px] font-semibold text-slate-500 transition hover:text-slate-300"
+                  >
+                    Draft
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- AI Companion stub -->
+          <section
+            class="studio-card rounded-[1.5rem] border border-indigo-500/15 bg-indigo-900/[0.08] p-4"
+          >
+            <div class="mb-2 flex items-center gap-2 text-indigo-400">
+              <i data-lucide="sparkles" class="h-3.5 w-3.5"></i>
+              <span class="text-[9px] font-black uppercase tracking-[0.22em]">AI Companion</span>
+              <span
+                class="ml-auto rounded-full border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.2em] text-indigo-400"
+                >Soon</span
+              >
+            </div>
+            <p class="mb-3 text-[11px] leading-relaxed text-slate-500">
+              Expand world-building, refine prose, or generate stronger folklore motifs.
+            </p>
+            <button
+              type="button"
+              disabled
+              class="w-full cursor-not-allowed rounded-xl bg-indigo-700/50 px-4 py-2.5 text-[10px] font-bold text-indigo-300/50"
+            >
+              Generate Story Hook
+            </button>
+          </section>
+
+          <!-- Publish readiness checklist -->
+          <!--
           IDs map to updateChecklist() in contribution.js:
             check-title-synopsis → title + synopsis filled
             check-cover-era      → era filled
             check-chapter        → at least one chapter has content
         -->
-        <section class="studio-card rounded-[1.5rem] p-4">
-          <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">Checklist</p>
-          <h3 class="mt-0.5 text-sm font-semibold text-white">Ready to publish?</h3>
+          <section class="studio-card rounded-[1.5rem] p-4">
+            <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">
+              Checklist
+            </p>
+            <h3 class="mt-0.5 text-sm font-semibold text-white">Ready to publish?</h3>
 
-          <div class="mt-3 space-y-2">
-            <div id="check-title-synopsis"
-              class="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-black/20 p-3 transition opacity-50">
-              <i data-lucide="circle" class="h-4 w-4 text-zinc-600"></i>
-              <p class="text-sm text-slate-400">Title and synopsis are set</p>
+            <div class="mt-3 space-y-2">
+              <div
+                id="check-title-synopsis"
+                class="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-black/20 p-3 transition opacity-50"
+              >
+                <i data-lucide="circle" class="h-4 w-4 text-zinc-600"></i>
+                <p class="text-sm text-slate-400">Title and synopsis are set</p>
+              </div>
+
+              <div
+                id="check-cover-era"
+                class="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-black/20 p-3 transition opacity-50"
+              >
+                <i data-lucide="circle" class="h-4 w-4 text-zinc-600"></i>
+                <p class="text-sm text-slate-400">Era is defined</p>
+              </div>
+
+              <div
+                id="check-chapter"
+                class="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-black/20 p-3 transition opacity-50"
+              >
+                <i data-lucide="circle" class="h-4 w-4 text-zinc-600"></i>
+                <p class="text-sm text-slate-400">At least one chapter written</p>
+              </div>
             </div>
-
-            <div id="check-cover-era"
-              class="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-black/20 p-3 transition opacity-50">
-              <i data-lucide="circle" class="h-4 w-4 text-zinc-600"></i>
-              <p class="text-sm text-slate-400">Era is defined</p>
-            </div>
-
-            <div id="check-chapter"
-              class="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-black/20 p-3 transition opacity-50">
-              <i data-lucide="circle" class="h-4 w-4 text-zinc-600"></i>
-              <p class="text-sm text-slate-400">At least one chapter written</p>
-            </div>
-          </div>
-        </section>
-
-      </div>
-    </aside>
-
-  </main>
-
-</body>
-
+          </section>
+        </div>
+      </aside>
+    </main>
+  </body>
 </html>

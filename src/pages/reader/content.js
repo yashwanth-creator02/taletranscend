@@ -1,252 +1,243 @@
 // src/pages/reader/content.js
-// Loads tale metadata and chapter content from Firestore.
-// Renders into the reader's custom header, article body, sidebar, chapter trail,
-// and lore/compass panels.
+// Optimized Content Loader for Reader
+// Renders tale metadata and semantic story content.
 
+import { refs, getDocs } from '@fb/index.js';
 import { getTaleMeta, getChapter } from '@services/index.js';
 import { readerState } from './state.js';
+import { escapeHtml } from '@/utils/string.utils';
 
 /* ─────────────────────────────────────────────
-   Tale Metadata
+   Public Fetchers
    ───────────────────────────────────────────── */
 
 /**
- * Fetches tale-level metadata and populates all static display areas.
- * Called once on load — chapter-specific data is populated by loadReaderChapter.
- *
- * @param {string} taleId
+ * Shows high-fidelity skeleton loaders for the reader page.
  */
+export function showReaderSkeletons() {
+  const content = document.getElementById('articleBody');
+  if (content) {
+    content.innerHTML = `
+      <div class="space-y-8 animate-pulse">
+        <div class="skeleton h-5 w-full rounded-lg"></div>
+        <div class="skeleton h-5 w-5/6 rounded-lg"></div>
+        <div class="skeleton h-5 w-4/5 rounded-lg"></div>
+        <div class="skeleton h-5 w-full rounded-lg"></div>
+        <div class="skeleton h-5 w-3/4 rounded-lg"></div>
+        <div class="pt-8">
+           <div class="skeleton h-5 w-11/12 rounded-lg"></div>
+           <div class="skeleton h-5 w-5/6 rounded-lg"></div>
+        </div>
+      </div>
+    `;
+  }
+}
+
 export async function loadReaderMeta(taleId) {
   try {
     const meta = await getTaleMeta(taleId);
 
-    // Mirror into state
+    // 1. Sync State
     readerState.taleTitle = meta.title || 'Untitled Tale';
     readerState.authorName = meta.authorName || 'Unknown Scribe';
+    readerState.authorBio = meta.authorBio || 'A mysterious scribe from the forgotten archives.';
+    readerState.authorHandle =
+      meta.authorHandle || `@${(meta.authorName || 'scribe').toLowerCase().replace(/\s+/g, '')}`;
     readerState.coverUrl = meta.coverUrl || '';
-    readerState.era = meta.era || '';
-    readerState.language = meta.language || '';
     readerState.tags = meta.tags || [];
+    readerState.era = meta.era || 'Mythic';
+    readerState.language = meta.language || 'High Elven';
 
-    // Header
-    setText('reader-tale-title', readerState.taleTitle);
-    setText('reader-author-name', readerState.authorName);
-    setText('reader-era-badge', readerState.era);
-    setText('reader-language-badge', readerState.language);
+    // 2. Populate Header & Sidebar
+    _setText('articleMetaTitle', readerState.taleTitle);
+    _setText('authorName', readerState.authorName);
+    _setText('author-heading', readerState.authorName);
+    _setText('authorHandle', readerState.authorHandle);
+    _setText('authorCardBio', readerState.authorBio);
+    _setText('topBarChTitle', 'Loading...');
 
-    // Sidebar
-    setText('sidebar-story-name', readerState.taleTitle);
-    setText('sidebar-description', meta.description || '');
-    setText('sidebar-author', readerState.authorName);
+    // 3. Render Breadcrumbs
+    _renderBreadcrumbs(readerState.taleTitle);
 
-    // Author avatar
-    const uid = meta.authorId || 'scribe';
-    const avatarSrc = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(uid.slice(0, 8))}`;
-    const avatarEl = document.getElementById('author-avatar');
-    if (avatarEl) avatarEl.src = avatarSrc;
+    // 4. Render Author Avatars
+    _renderAvatars(readerState.authorName);
 
-    // Lore tags
-    _renderLoreTags(readerState.tags);
-
-    // Story compass
-    _renderCompass(meta);
-
-    // Cover art in sidebar
-    if (readerState.coverUrl) {
-      const coverEl = document.getElementById('sidebar-cover');
-      if (coverEl) {
-        coverEl.src = readerState.coverUrl;
-        coverEl.closest('[data-cover-wrap]')?.classList.remove('hidden');
-      }
-    }
+    // 5. Fetch all chapters for TOC
+    const chaptersSnap = await getDocs(refs.chapters(taleId));
+    readerState.chapters = chaptersSnap.docs
+      .map((d) => ({
+        id: d.id,
+        number: d.data().chapterNum,
+        title: d.data().title || `Fragment ${d.data().chapterNum}`,
+        wordCount: d.data().content ? d.data().content.split(/\s+/).length : 0,
+        sections: _extractSections(d.data().content || ''),
+      }))
+      .sort((a, b) => a.number - b.number);
   } catch (err) {
-    console.error('[reader] loadReaderMeta failed:', err);
+    console.error('[reader] Meta load failed:', err);
   }
 }
 
-/* ─────────────────────────────────────────────
-   Chapter Content
-   ───────────────────────────────────────────── */
-
-/**
- * Fetches a chapter, renders title + body, updates header meta,
- * and returns the navigation context for prev/next wiring.
- *
- * @param {{ taleId: string, chapterIndex: number }} params
- * @returns {Promise<Object|null>} navigation context or null on failure
- */
 export async function loadReaderChapter({ taleId, chapterIndex }) {
   try {
     const { chapter, navigation } = await getChapter({ taleId, chapterIndex });
 
-    readerState.chapterTitle = chapter.title || `Chapter ${chapterIndex + 1}`;
+    // 1. Update State
+    readerState.chapterTitle = chapter.title || `Fragment ${chapterIndex + 1}`;
     readerState.totalChapters = navigation.totalChapters;
+    readerState.wordCount = chapter.content ? chapter.content.split(/\s+/).length : 0;
+    readerState.estimatedReadMins = Math.ceil(readerState.wordCount / 225);
+    readerState.currentChapterId = readerState.chapters[chapterIndex]?.id || '';
 
-    // Fragment label + chapter heading
-    const pad = String(chapter.index + 1).padStart(2, '0');
-    setText('chapter-label', `Fragment ${pad}`);
-    setText('chapter-title', readerState.chapterTitle);
+    // 2. Render Identifiers
+    _setText('topBarChNum', chapterIndex + 1);
+    _setText('topBarChTotal', navigation.totalChapters);
+    _setText('topBarChTitle', readerState.chapterTitle);
+    _setText('headerChNum', chapterIndex + 1);
+    _setText('headerChTotal', navigation.totalChapters);
+    _setText('articleTitle', readerState.chapterTitle);
+    _setText('articleSubtitle', chapter.subtitle || '');
+    _setText('readMinutes', readerState.estimatedReadMins);
 
-    // Update header chapter info
-    setText('reader-chapter-label', `Fragment ${pad} of ${navigation.totalChapters}`);
-    setText('reader-header-title', readerState.taleTitle);
-
-    // Render story content
-    const story = document.getElementById('story-content');
-    if (story) {
-      story.innerHTML = _renderContent(chapter.content || '');
+    // 3. Render Content
+    const container = document.getElementById('articleBody');
+    if (container) {
+      container.innerHTML = _processContent(chapter.content || '');
     }
 
-    // Compute and display word count / read time
-    const wordCount = _countWords(chapter.content || '');
-    const readMins = Math.max(1, Math.ceil(wordCount / 200));
-    readerState.wordCount = wordCount;
-    readerState.estimatedReadMins = readMins;
-
-    setText('reader-wordcount', `${_formatNumber(wordCount)} words`);
-    setText('reader-readtime', `${readMins} min read`);
-
-    // Chapter trail update
-    _renderChapterTrail(navigation, taleId, chapterIndex);
+    // 4. Update Progress Stats
+    const topBarReadTime = document.getElementById('topBarReadTime');
+    if (topBarReadTime) {
+      _setText('topBarMin', readerState.estimatedReadMins);
+      topBarReadTime.classList.remove('hidden');
+      topBarReadTime.classList.add('flex');
+    }
 
     return navigation;
   } catch (err) {
-    console.error('[reader] loadReaderChapter failed:', err);
-    const title = document.getElementById('chapter-title');
-    if (title) title.textContent = 'Failed to load chapter. Please refresh.';
+    console.error('[reader] Chapter load failed:', err);
+    _setText('articleTitle', 'Chapter load failed.');
     return null;
   }
 }
 
 /* ─────────────────────────────────────────────
-   Content Renderer
+   Private Renderers
    ───────────────────────────────────────────── */
 
-/**
- * Converts raw chapter text into semantic HTML.
- * - Blank lines become paragraph breaks
- * - Lines starting with # become headings
- * - Lines starting with > become blockquotes
- * - First paragraph gets a drop cap via CSS class
- *
- * @param {string} raw
- * @returns {string} HTML string
- */
-function _renderContent(raw) {
+function _processContent(raw) {
   const paragraphs = raw.split('\n').filter((l) => l.trim());
-  let isFirst = true;
+  let first = true;
 
   return paragraphs
-    .map((line) => {
-      const trimmed = line.trim();
+    .map((p) => {
+      const text = p.trim();
+      if (text.startsWith('## ')) {
+        const title = text.slice(3);
+        const id = title.toLowerCase().replace(/\s+/g, '-');
+        return `<h3 id="${id}">${escapeHtml(title)}</h3>`;
+      }
+      if (text.startsWith('# ')) {
+        const title = text.slice(2);
+        const id = title.toLowerCase().replace(/\s+/g, '-');
+        return `<h2 id="${id}">${escapeHtml(title)}</h2>`;
+      }
+      if (text.startsWith('> ')) return `<blockquote>${escapeHtml(text.slice(2))}</blockquote>`;
 
-      if (trimmed.startsWith('## ')) {
-        return `<h3 class="reader-h3">${_esc(trimmed.slice(3))}</h3>`;
-      }
-      if (trimmed.startsWith('# ')) {
-        return `<h2 class="reader-h2">${_esc(trimmed.slice(2))}</h2>`;
-      }
-      if (trimmed.startsWith('> ')) {
-        return `<blockquote class="reader-blockquote">${_esc(trimmed.slice(2))}</blockquote>`;
+      // Special handling for figures
+      if (text.startsWith('![figure]')) {
+        const tint = text.includes('indigo')
+          ? 'indigo'
+          : text.includes('amber')
+            ? 'amber'
+            : text.includes('rose')
+              ? 'rose'
+              : 'emerald';
+        return _createFigure(tint);
       }
 
-      const cls = isFirst ? 'reader-p reader-p--dropcap' : 'reader-p';
-      isFirst = false;
-      return `<p class="${cls}">${_esc(trimmed)}</p>`;
+      const cls = first ? 'materialize' : '';
+      first = false;
+      return `<p class="${cls}">${escapeHtml(text)}</p>`;
     })
     .join('');
 }
 
-/* ─────────────────────────────────────────────
-   Chapter Trail
-   ───────────────────────────────────────────── */
-
-/**
- * Renders the chapter trail list in the sidebar.
- * Shows all chapters with the current one highlighted.
- *
- * @param {Object} navigation
- * @param {string} taleId
- * @param {number} currentIndex
- */
-function _renderChapterTrail(navigation, taleId, currentIndex) {
-  const container = document.getElementById('chapter-trail-list');
-  if (!container || !navigation.allChapters?.length) return;
-
-  container.innerHTML = navigation.allChapters
-    .map((ch, i) => {
-      const isCurrent = i === currentIndex;
-      const isPast = i < currentIndex;
-
-      return `
-      <a
-        href="reader.html?taleId=${taleId}&chapterId=${i}"
-        class="chapter-trail-item${isCurrent ? ' chapter-trail-item--active' : ''}${isPast ? ' chapter-trail-item--done' : ''}"
-        ${isCurrent ? 'aria-current="true"' : ''}
-      >
-        <span class="chapter-trail-item__num">${String(i + 1).padStart(2, '0')}</span>
-        <span class="chapter-trail-item__title">${_esc(ch.title || `Chapter ${i + 1}`)}</span>
-        ${isPast ? '<i data-lucide="check" class="chapter-trail-item__check"></i>' : ''}
-        ${isCurrent ? '<span class="chapter-trail-item__dot"></span>' : ''}
-      </a>
-    `;
-    })
-    .join('');
-
-  window.lucide?.createIcons?.();
-
-  // Scroll active item into view
-  const active = container.querySelector('.chapter-trail-item--active');
-  active?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+function _extractSections(content) {
+  const lines = content.split('\n');
+  const sections = [];
+  lines.forEach((line) => {
+    const text = line.trim();
+    if (text.startsWith('# ')) {
+      const title = text.slice(2);
+      sections.push({ id: title.toLowerCase().replace(/\s+/g, '-'), level: 2, title });
+    } else if (text.startsWith('## ')) {
+      const title = text.slice(3);
+      sections.push({ id: title.toLowerCase().replace(/\s+/g, '-'), level: 3, title });
+    }
+  });
+  return sections;
 }
 
-/* ─────────────────────────────────────────────
-   Lore Tags + Compass
-   ───────────────────────────────────────────── */
-
-function _renderLoreTags(tags) {
-  const container = document.getElementById('lore-tag-list');
+function _renderBreadcrumbs(taleTitle) {
+  const container = document.getElementById('breadcrumbs');
   if (!container) return;
 
-  if (!tags.length) {
-    container.innerHTML = '<span class="text-xs text-slate-600 italic">No tags set</span>';
-    return;
-  }
-
-  container.innerHTML = tags
+  const crumbs = ['Archives', 'Tales', taleTitle];
+  container.innerHTML = crumbs
     .map(
-      (t) => `
-    <span class="lore-tag">${_esc(t)}</span>
-  `
+      (c, i) => `
+      <span class="flex items-center gap-2">
+        <span class="breadcrumb-item">${escapeHtml(c)}</span>
+        ${i < crumbs.length - 1 ? '<i data-lucide="chevron-right" style="width:12px;height:12px;opacity:0.5"></i>' : ''}
+      </span>
+    `
     )
     .join('');
 }
 
-function _renderCompass(meta) {
-  setText('compass-setting', meta.worldSetting || '—');
-  setText('compass-tone', meta.tone || '—');
-  setText('compass-audience', meta.audience || '—');
-  setText('compass-language', meta.language || '—');
+function _renderAvatars(name) {
+  const initials = name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+  const html = `<div style="display:flex;align-items:center;justify-content:center;border-radius:50%;color:#fff;width:40px;height:40px;font-size:13px;background:linear-gradient(135deg,rgba(99,102,241,0.85),rgba(168,85,247,0.85));box-shadow:0 0 18px -6px rgba(139,124,246,0.55);font-family:var(--font-serif);letter-spacing:0.08em">${initials}</div>`;
+
+  const topAvatar = document.getElementById('authorAvatar');
+  const cardAvatar = document.getElementById('authorCardAvatar');
+
+  if (topAvatar) topAvatar.innerHTML = html;
+  if (cardAvatar) cardAvatar.innerHTML = html;
+}
+
+function _createFigure(tint) {
+  const palette =
+    {
+      indigo: 'rgba(99,102,241,0.45)',
+      amber: 'rgba(245,158,11,0.45)',
+      emerald: 'rgba(16,185,129,0.45)',
+      rose: 'rgba(244,114,182,0.45)',
+    }[tint] || 'rgba(99,102,241,0.45)';
+
+  return `
+    <figure>
+      <div class="figure-placeholder" aria-hidden="true"
+        style="background:radial-gradient(600px 320px at 30% 40%,${palette},transparent 60%),
+               radial-gradient(500px 280px at 80% 70%,rgba(168,85,247,0.4),transparent 65%),
+               linear-gradient(180deg,#0b0b14,#050509)">
+      </div>
+      <figcaption class="figure-caption">A reconstructed view of the chamber at twilight.</figcaption>
+    </figure>
+  `;
 }
 
 /* ─────────────────────────────────────────────
    Helpers
    ───────────────────────────────────────────── */
 
-function setText(id, value) {
+function _setText(id, val) {
   const el = document.getElementById(id);
-  if (el) el.textContent = value ?? '';
-}
-
-function _countWords(text) {
-  const t = text.trim();
-  return t ? t.split(/\s+/).length : 0;
-}
-
-function _formatNumber(n) {
-  return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
-}
-
-function _esc(str) {
-  return String(str).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+  if (el) el.textContent = val ?? '';
 }

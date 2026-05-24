@@ -3,6 +3,7 @@
 // Loads trending tales from Firestore and handles page interactions.
 
 import '@css/base.css';
+import '@css/nav.css';
 import '@css/components.css';
 import '@css/pages/home.css';
 
@@ -69,8 +70,34 @@ function performSearch() {
  */
 async function loadTrendingTales() {
   const container = document.getElementById('trending-grid');
-
   if (!container) return;
+
+  container.classList.add('fade-in-stagger');
+
+  // Show skeletons
+  container.innerHTML = Array.from(
+    { length: 3 },
+    () => `
+    <div class="glass-card rounded-[2.5rem] bg-indigo-600/5 p-5 border border-white/[0.03]">
+      <div class="aspect-[4/3] rounded-[2rem] skeleton mb-6"></div>
+      <div class="space-y-4 px-1">
+        <div class="flex gap-3">
+          <div class="skeleton h-4 w-20 rounded-md"></div>
+          <div class="skeleton h-4 w-24 rounded-md"></div>
+        </div>
+        <div class="skeleton h-7 w-3/4 rounded-lg"></div>
+        <div class="space-y-2">
+          <div class="skeleton h-3.5 w-full rounded-md"></div>
+          <div class="skeleton h-3.5 w-5/6 rounded-md"></div>
+        </div>
+        <div class="flex items-center justify-between pt-4 border-t border-white/5 mt-2">
+          <div class="skeleton h-4 w-28 rounded-md"></div>
+          <div class="skeleton h-4 w-12 rounded-md"></div>
+        </div>
+      </div>
+    </div>
+  `
+  ).join('');
 
   try {
     // Public tales collection reference
@@ -97,7 +124,7 @@ async function loadTrendingTales() {
     container.innerHTML = tales.map(renderTrendingCard).join('');
 
     // Refresh Lucide icons
-    window.lucide?.createIcons?.();
+    initIcons();
   } catch (error) {
     console.error('[home] Failed to load trending tales:', error);
 

@@ -24,7 +24,6 @@
 import { auth, onAuthStateChanged } from '@fb/index.js';
 
 import { navState } from './nav.state.js';
-import { injectNavStyles } from './nav.styles.js';
 import { buildNav } from './nav.templates.js';
 import { renderIcons } from './nav.utils.js';
 import { attachGlobalListeners, detachGlobalListeners, updateNavUser } from './nav.interactions.js';
@@ -37,11 +36,10 @@ import { attachGlobalListeners, detachGlobalListeners, updateNavUser } from './n
  * Bootstraps the shared navigation component.
  *
  * Order of operations:
- *   1. Inject component-scoped CSS into <head> (idempotent)
- *   2. Render the full nav HTML shell at the top of <body>
- *   3. Initialise Lucide icons within the new markup
- *   4. Attach global event listeners (click, keydown, scroll)
- *   5. Subscribe to Firebase auth state — swaps user area on resolve
+ *   1. Render the full nav HTML shell at the top of <body>
+ *   2. Initialise Lucide icons within the new markup
+ *   3. Attach global event listeners (click, keydown, scroll)
+ *   4. Subscribe to Firebase auth state — swaps user area on resolve
  *
  * Safe to call multiple times — subsequent calls are no-ops if the
  * nav element already exists in the DOM.
@@ -51,10 +49,7 @@ export function initNav() {
   if (document.getElementById('app-nav') || document.getElementById('mobile-dock-container'))
     return;
 
-  // 1. Inject component-scoped CSS
-  injectNavStyles();
-
-  // 2. Build HTML and destructure parts
+  // 1. Build HTML and destructure parts
   const { headerHtml, dockHtml } = buildNav();
 
   // 3. Mount Header at the top of <body>

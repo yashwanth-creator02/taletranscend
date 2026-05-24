@@ -1,5 +1,5 @@
 // src/pages/tale/ui.js
-// Renders the tale overview and chapter list for the tale page.
+// Renders the high-fidelity tale overview and chronicles for the Archive page.
 
 import {
   getChapterState,
@@ -7,72 +7,130 @@ import {
   getLastReadChapter,
   getTotalReadTime,
 } from '@services/index.js';
+import { escapeHtml } from '@/utils/string.utils';
+import { initIcons } from '@ui/components/icons.js';
 
 /**
- * Renders the tale overview section of the tale page.
- * Populates title, author, description, cover image, resume text, and read time.
- *
- * @param {string} userId - ID of the authenticated user
- * @param {Object} tale - Tale metadata object from Firestore
- * @param {string} taleId - ID of the tale
+ * Shows high-fidelity skeleton loaders for the Archive page.
+ */
+export function showArchiveSkeletons() {
+  const list = document.getElementById('chapter-list');
+  if (list) {
+    list.innerHTML = Array.from(
+      { length: 4 },
+      () => `
+      <div class="glass-card p-6 md:p-8 rounded-[2rem] flex justify-between items-center animate-pulse">
+        <div class="flex items-center gap-6">
+           <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 skeleton"></div>
+           <div>
+             <div class="skeleton h-3 w-16 rounded-md mb-2"></div>
+             <div class="skeleton h-6 w-48 rounded-lg"></div>
+           </div>
+        </div>
+        <div class="skeleton h-5 w-5 rounded-full"></div>
+      </div>
+    `
+    ).join('');
+  }
+
+  const title = document.getElementById('display-title');
+  if (title) title.innerHTML = '<div class="skeleton h-12 w-3/4 rounded-2xl mb-4"></div>';
+
+  const desc = document.getElementById('display-description');
+  if (desc) {
+    desc.innerHTML = `
+      <div class="space-y-3">
+        <div class="skeleton h-4 w-full rounded-lg"></div>
+        <div class="skeleton h-4 w-full rounded-lg"></div>
+        <div class="skeleton h-4 w-2/3 rounded-lg"></div>
+      </div>
+    `;
+  }
+}
+
+/**
+ * Renders the primary tale metadata with cinematic transitions.
  */
 export async function renderTale(userId, tale, taleId) {
   const lastChapter = getLastReadChapter({ userId, taleId });
   const last = lastChapter != null ? lastChapter + 1 : null;
 
-  document.getElementById('loading-indicator').innerText = 'Transcription Successful';
+  _setText('loading-indicator', 'Archive Link Synchronised');
+  _setText('header-tale-title', tale.title || 'Unknown Legend');
 
   const titleEl = document.getElementById('display-title');
-  titleEl.innerText = tale.title || 'Untitled Legend';
-  titleEl.style.opacity = 1;
-  titleEl.style.transform = 'translateY(0)';
+  if (titleEl) {
+    titleEl.innerText = tale.title || 'Untitled Legend';
+    titleEl.classList.remove('opacity-0', 'translate-y-12');
+  }
 
-  document.getElementById('meta-container').style.opacity = 1;
-  document.getElementById('display-author').innerText =
-    tale.authorName || `Scribe ${taleId.slice(0, 5)}`;
-  document.getElementById('display-chapters').innerText = `${tale.chapterCount || 0} Fragments`;
-  document.getElementById('display-description').innerText =
-    tale.description || 'A mysterious tale waiting to be uncovered...';
-  document.getElementById('resume-text').innerText = last
-    ? `Resume Fragment ${last}`
-    : 'Resume Fragment';
+  const metaHero = document.getElementById('hero-meta');
+  if (metaHero) {
+    metaHero.classList.remove('opacity-0', 'translate-y-8');
+  }
+
+  _setText('display-author', tale.authorName || 'Unknown Scribe');
+  _setText('display-chapters', `${tale.chapterCount || 0} Fragments`);
+  _setText('sidebar-chapter-count', tale.chapterCount || 0);
+  _setText(
+    'display-description',
+    tale.description || 'A mysterious tale waiting to be uncovered...'
+  );
+
+  _setText('tale-era', tale.era || 'Universal Era');
+  _setText('tale-genre', tale.genre || 'Mythic Fiction');
+  _setText('tale-language', tale.language || 'Primordial');
+  _setText('sidebar-creation', tale.era || 'Neural Entry');
+
+  const resumeText = document.getElementById('resume-text');
+  if (resumeText) resumeText.innerText = last ? `Resume Fragment ${last}` : 'Resume Reading';
+
+  const authorAvatar = document.getElementById('author-avatar-hero');
+  if (authorAvatar) {
+    const seed = encodeURIComponent((tale.authorId || 'scribe').slice(0, 8));
+    authorAvatar.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
+  }
 
   if (tale.coverUrl) {
-    document.getElementById('display-cover').src = tale.coverUrl;
+    const covers = document.querySelectorAll('#display-cover');
+    covers.forEach((img) => (img.src = tale.coverUrl));
+
     document
       .getElementById('hero-section')
-      .style.setProperty('--bg-url', `url('${tale.coverUrl}')`);
+      ?.style.setProperty('--bg-url', `url('${tale.coverUrl}')`);
   }
 
-  // Await async read time before updating UI
-  const totalMs = await getTotalReadTime({ userId, taleId });
-  const readEl = document.getElementById('read-time');
-  if (totalMs > 0) {
-    const minutes = Math.floor(totalMs / 60000);
-    readEl.classList.remove('hidden');
-    readEl.innerText = `${minutes} min read`;
-  } else {
-    readEl.classList.add('hidden');
+  // Tags
+  const tagList = document.getElementById('lore-tag-list');
+  if (tagList && tale.tags?.length) {
+    tagList.innerHTML = tale.tags
+      .map(
+        (t) => `
+      <span class="px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 text-[9px] font-black uppercase tracking-widest text-slate-400">
+        ${escapeHtml(t)}
+      </span>
+    `
+      )
+      .join('');
   }
+
+  // Read Time
+  const totalMs = await getTotalReadTime({ userId, taleId });
+  const minutes = Math.max(1, Math.floor(totalMs / 60000));
+  _setText('read-time', `${minutes} min read`);
+
+  initIcons();
 }
 
 /**
- * Renders the chapter list for a tale.
- * Each chapter shows its fragment number, title, and reading state icon.
- *
- * @param {string} userId - ID of the authenticated user
- * @param {Array<Object>} chapters - Array of chapter objects sorted by chapterNum
- * @param {string} taleId - ID of the tale
+ * Renders the chronicles list with progress indicators.
  */
 export function renderChapters(userId, chapters, taleId) {
   const list = document.getElementById('chapter-list');
+  if (!list) return;
 
   if (!chapters.length) {
-    list.innerHTML = `
-      <p class="text-[10px] text-zinc-700 font-black uppercase tracking-widest italic py-10">
-        No chronicles detected.
-      </p>
-    `;
+    list.innerHTML = `<div class="glass p-12 rounded-[2rem] text-center text-slate-600 text-[10px] font-black uppercase tracking-widest">No chronicles detected in this archive.</div>`;
     return;
   }
 
@@ -81,30 +139,41 @@ export function renderChapters(userId, chapters, taleId) {
       const progress = getChapterProgress({ userId, taleId, chapterIndex: idx });
       const state = getChapterState(progress);
 
-      let icon = `<i data-lucide="circle" class="w-4 h-4 text-zinc-600"></i>`;
-      if (state === 'in_progress')
-        icon = `<i data-lucide="circle-dashed" class="w-4 h-4 text-indigo-400"></i>`;
-      if (state === 'completed')
-        icon = `<i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i>`;
+      let icon = 'circle';
+      let iconCls = 'text-slate-700';
+      if (state === 'in_progress') {
+        icon = 'clock';
+        iconCls = 'text-indigo-400';
+      }
+      if (state === 'completed') {
+        icon = 'check-circle-2';
+        iconCls = 'text-emerald-500';
+      }
 
       return `
-        <div data-chapter-index="${idx}"
-          class="chapter-item ${state} glass-card p-8 rounded-3xl flex justify-between items-center group hover:border-indigo-500/40 transition-all cursor-pointer">
-          <div>
-            <span class="text-[9px] text-indigo-500 font-black block mb-2 uppercase tracking-[0.3em]">
-              Fragment ${String(idx + 1).padStart(2, '0')}
-            </span>
-            <h3 class="text-xl font-black text-white uppercase tracking-tighter">
-              ${ch.title || 'Untitled Fragment'}
-            </h3>
-          </div>
-          <span class="chapter-icon">${icon}</span>
+      <div data-chapter-index="${idx}" class="chapter-item ${state} glass-card p-6 md:p-8 rounded-[2rem] flex justify-between items-center group cursor-pointer">
+        <div class="flex items-center gap-6">
+           <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-xs font-black text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-all">
+             ${String(idx + 1).padStart(2, '0')}
+           </div>
+           <div>
+             <span class="text-[9px] font-black text-indigo-500/60 uppercase tracking-[0.3em] block mb-1">Fragment</span>
+             <h4 class="text-base md:text-lg font-bold text-white uppercase tracking-tight">${escapeHtml(ch.title || 'Untitled')}</h4>
+           </div>
         </div>
-      `;
+        <div class="flex items-center gap-4">
+           <span class="hidden md:block text-[9px] font-black uppercase tracking-widest text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity">Access Fragment</span>
+           <i data-lucide="${icon}" class="w-5 h-5 ${iconCls}"></i>
+        </div>
+      </div>
+    `;
     })
     .join('');
 
-  if (window.lucide) {
-    window.lucide.createIcons();
-  }
+  initIcons();
+}
+
+function _setText(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.innerText = val ?? '';
 }

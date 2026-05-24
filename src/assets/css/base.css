@@ -4,68 +4,303 @@
 @import 'tailwindcss';
 
 :root {
-  --paper-bg: #0a0a0b;
-  --text-main: #e2e8f0;
-  --text-muted: #94a3b8;
-  --accent: #6366f1;
-  --glass: rgba(30, 30, 35, 0.4);
-  --border: rgba(255, 255, 255, 0.08);
+  /* Core Architect Palette */
+  --paper-bg: #030305;
+  --text-main: #cbd5e1;
+  --text-muted: #64748b;
 
-  --reader-size: 1.25rem;
-  --reader-height: 1.85;
-  --reader-font: 'Crimson Pro', serif;
+  --accent: #6366f1;
+  --accent-secondary: #8b5cf6;
+
+  --border: rgba(255, 255, 255, 0.05);
+
+  --glass: rgba(255, 255, 255, 0.025);
+  --glass-strong: rgba(255, 255, 255, 0.045);
+
+  /* Legacy compatibility */
+  --panel-bg: var(--glass);
+  --panel-bg-strong: var(--glass-strong);
+
+  /* Shared Design Tokens */
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-3xl: 2.5rem;
+
+  /* Global Navigation Constants */
+  --nav-height: 64px;
+
+  /* Atmospheric Colors */
+  --glow-indigo: rgba(99, 102, 241, 0.1);
+  --glow-violet: rgba(139, 92, 246, 0.08);
+  --glow-amber: rgba(245, 158, 11, 0.1);
+
+  /* Reader defaults */
+  --reader-bg: #030305;
+  --reader-text: #e2e8f0;
+
+  --reader-font: 'Merriweather', Georgia, serif;
+  --reader-size: 18px;
+  --reader-lh: 1.9;
+
+  --reader-width: 720px;
+  --reader-nav-height: 60px;
+
+  color-scheme: dark;
 }
 
 /* Sepia theme overrides */
-body.theme-sepia {
-  --paper-bg: #f4ecd8;
-  --text-main: #433422;
+body.theme-sepia,
+.reader-theme-sepia {
+  --paper-bg: #1a1208;
+  --text-main: #c8a97a;
   --text-muted: #8c7e6a;
-  --glass: rgba(67, 52, 34, 0.05);
-  --border: rgba(67, 52, 34, 0.12);
+
+  --glass: rgba(200, 169, 122, 0.04);
+  --border: rgba(200, 169, 122, 0.1);
+
   --accent: #936639;
+
+  --reader-bg: #1a1208;
+  --reader-text: #c8a97a;
 }
 
 /* Light theme overrides */
-body.theme-light {
-  --paper-bg: #f8fafc;
-  --text-main: #0f172a;
+body.theme-light,
+.reader-theme-light {
+  --paper-bg: #f5f3ee;
+  --text-main: #1c1812;
   --text-muted: #64748b;
-  --glass: rgba(0, 0, 0, 0.03);
-  --border: rgba(0, 0, 0, 0.08);
+
+  --glass: rgba(0, 0, 0, 0.02);
+  --border: rgba(0, 0, 0, 0.06);
+
   --accent: #4f46e5;
+
+  --reader-bg: #f5f3ee;
+  --reader-text: #1c1812;
 }
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99, 102, 241, 0.28) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.28);
+  border-radius: 999px;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--paper-bg);
+}
+
+/* ── Base Layout ─────────────────────────────────────────── */
 
 body {
-  background-color: var(--paper-bg);
-  color: var(--text-muted);
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;
+  color: var(--text-main);
+  display: flex;
+  flex-direction: column;
+  position: relative;
   transition:
-    background-color 0.6s ease,
-    color 0.6s ease;
+    background-color 0.4s ease,
+    color 0.4s ease;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Custom scrollbar styling for a premium feel */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: #050505;
-}
-::-webkit-scrollbar-thumb {
-  background: #1e1e21;
-  border-radius: 10px;
-  border: 2px solid #050505;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #4f46e5;
+/* Main content wrapper for pages following the independent scroll system */
+.app-viewport {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  min-height: 0;
 }
 
-/* Hide horizontal scrollbar for elements with no-scrollbar class */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
+/* Individual scrollable areas */
+.scroll-container {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
+
+.font-cinzel {
+  font-family: 'Cinzel', serif;
+}
+
+.font-merriweather {
+  font-family: 'Merriweather', serif;
+}
+
+/* ── Global Scrollbar ────────────────────────────────────── */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99, 102, 241, 0.25) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.25);
+  border-radius: 999px;
+  transition: background 0.2s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.45);
+}
+
+/* ── Atmospheric Components ──────────────────────────────── */
+
+.atmosphere-base {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, var(--glow-indigo) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, var(--glow-violet) 0%, transparent 40%);
+}
+
+.particle-field {
+  position: fixed;
+  inset: 0;
+  z-index: -9;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(255, 255, 255, 0.05) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 100%),
+    radial-gradient(1px 1px at 80% 60%, rgba(139, 92, 246, 0.08) 0%, transparent 100%);
+  animation: bg-drift 50s linear infinite;
+}
+
+@keyframes bg-drift {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+/* ── Shared Utilities ────────────────────────────────────── */
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Page transitions */
+.page-fade-in {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Staggered Entrance */
+.fade-in-stagger > * {
+  opacity: 0;
+  animation: fadeIn 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+.fade-in-stagger > *:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.fade-in-stagger > *:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.fade-in-stagger > *:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.fade-in-stagger > *:nth-child(4) {
+  animation-delay: 0.4s;
+}
+.fade-in-stagger > *:nth-child(5) {
+  animation-delay: 0.5s;
+}
+.fade-in-stagger > *:nth-child(6) {
+  animation-delay: 0.6s;
+}
+.fade-in-stagger > *:nth-child(7) {
+  animation-delay: 0.7s;
+}
+.fade-in-stagger > *:nth-child(8) {
+  animation-delay: 0.8s;
+}
+
+/* Mythic Interactive Elements */
+.hover-lift {
+  transition:
+    transform 0.4s cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 0.4s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-5px) scale(1.01);
+}
+
+.hover-glow {
+  transition: all 0.4s ease;
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.15);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+/* Skeleton Shine */
+.skeleton {
+  position: relative;
+  background: rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.03), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
 }

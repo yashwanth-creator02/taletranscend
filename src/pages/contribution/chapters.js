@@ -4,6 +4,7 @@
 
 import { state } from './state.js';
 import { updateStats } from './editor.js';
+import { initIcons } from '@ui/components/icons.js';
 
 /* ── Add ──────────────────────────────────────────────────────────── */
 
@@ -154,7 +155,7 @@ export function renderChapterList() {
     list.appendChild(item);
   });
 
-  window.lucide?.createIcons?.();
+  initIcons();
 
   // Update chapter count stat
   const countEl = document.getElementById('studio-chapter-count');

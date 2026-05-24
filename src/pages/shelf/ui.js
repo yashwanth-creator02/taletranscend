@@ -3,6 +3,7 @@
 // No data fetching happens here — pure presentation layer.
 
 import { shelfState } from './state.js';
+import { initIcons } from '@ui/components/icons.js';
 
 /* ─────────────────────────────────────────────
    Grid Renderers
@@ -32,7 +33,7 @@ export function renderGrid(items, type) {
     .map((item) => (type === 'drafts' ? buildDraftCard(item) : buildBookmarkCard(item)))
     .join('');
 
-  window.lucide?.createIcons?.();
+  initIcons();
 }
 
 export function setGridLoading() {
@@ -80,7 +81,7 @@ export function setGridEmpty(message) {
       </div>
     </div>
   `;
-  window.lucide?.createIcons?.();
+  initIcons();
 }
 
 export function setGridError() {
@@ -96,7 +97,7 @@ export function setGridError() {
       </div>
     </div>
   `;
-  window.lucide?.createIcons?.();
+  initIcons();
 }
 
 /* ─────────────────────────────────────────────
@@ -372,7 +373,7 @@ export function buildSortPanel() {
     </div>
   `;
 
-  window.lucide?.createIcons?.();
+  initIcons();
 }
 
 /**

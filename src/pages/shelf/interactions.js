@@ -11,6 +11,7 @@ import {
   computeAndRenderHeroStats,
 } from './content.js';
 import { setActiveTab, buildSortPanel, refreshSortPanel } from './ui.js';
+import { initIcons } from '@ui/components/icons.js';
 
 /* ─────────────────────────────────────────────
    Public Init
@@ -286,6 +287,8 @@ function _bindRightRail() {
    Toast
    ───────────────────────────────────────────── */
 
+import { showToast } from '@ui/components/toast.js';
+
 /**
  * Shows a lightweight toast notification.
  *
@@ -293,39 +296,5 @@ function _bindRightRail() {
  * @param {'success'|'error'|'info'} type
  */
 function _showToast(message, type = 'success') {
-  let container = document.getElementById('toast-container');
-  if (!container) {
-    container = document.createElement('div');
-    container.id = 'toast-container';
-    container.className = 'fixed top-6 right-6 z-[200] flex flex-col gap-3 pointer-events-none';
-    document.body.appendChild(container);
-  }
-
-  const colorMap = {
-    success: 'border-indigo-500/30 text-white',
-    error: 'border-red-500/30 text-red-200',
-    info: 'border-slate-500/30 text-slate-200',
-  };
-  const iconMap = { success: 'check-circle', error: 'alert-circle', info: 'info' };
-  const iconColorMap = {
-    success: 'text-indigo-400',
-    error: 'text-red-400',
-    info: 'text-slate-400',
-  };
-
-  const toast = document.createElement('div');
-  toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3.5 rounded-2xl border bg-zinc-900/95 backdrop-blur-xl shadow-2xl transition-all duration-300 ${colorMap[type]}`;
-  toast.innerHTML = `
-    <i data-lucide="${iconMap[type]}" class="w-4 h-4 flex-shrink-0 ${iconColorMap[type]}"></i>
-    <span class="text-sm font-medium">${message}</span>
-  `;
-
-  container.appendChild(toast);
-  window.lucide?.createIcons?.();
-
-  setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateX(12px)';
-    setTimeout(() => toast.remove(), 350);
-  }, 3200);
+  showToast(message, type);
 }

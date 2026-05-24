@@ -1,497 +1,334 @@
 <!-- src/views/index.html -->
 <!doctype html>
 <html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home | TaleTranscend</title>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Home | TaleTranscend</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Cinzel:wght@400;500;600;700;800&family=Merriweather:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
+    <script type="module" src="../pages/home/home.js"></script>
+  </head>
 
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Cinzel:wght@400;500;600;700;800&family=Merriweather:wght@300;400;700&display=swap"
-    rel="stylesheet" />
+  <body
+    class="antialiased selection:bg-[var(--glow-indigo)] selection:text-white page-fade-in flex flex-col h-screen overflow-hidden"
+  >
+    <div class="atmosphere-base"></div>
+    <div class="particle-field"></div>
 
-  <script type="module" src="../pages/home/home.js"></script>
-
-  <style>
-    :root {
-      --paper-bg: #050509;
-      --panel-bg: rgba(255, 255, 255, 0.035);
-      --panel-bg-strong: rgba(255, 255, 255, 0.055);
-      --text-main: #f5f7ff;
-      --text-muted: #94a3b8;
-      --border: rgba(255, 255, 255, 0.08);
-      --glow-indigo: rgba(99, 102, 241, 0.18);
-      --glow-violet: rgba(139, 92, 246, 0.14);
-      --glow-amber: rgba(245, 158, 11, 0.10);
-    }
-
-    * {
-      scrollbar-width: thin;
-      scrollbar-color: rgba(99, 102, 241, 0.28) transparent;
-    }
-
-    *::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-
-    *::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    *::-webkit-scrollbar-thumb {
-      background: rgba(99, 102, 241, 0.28);
-      border-radius: 999px;
-    }
-
-    html,
-    body {
-      min-height: 100%;
-      overflow-x: hidden;
-      background: #030305;
-    }
-
-    body {
-      color: var(--text-main);
-      font-family: 'Inter', sans-serif;
-      min-height: 100vh;
-      position: relative;
-    }
-
-    .font-cinzel {
-      font-family: 'Cinzel', serif;
-    }
-
-    .font-merriweather {
-      font-family: 'Merriweather', serif;
-    }
-
-    .glass-card {
-      background:
-        linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      box-shadow:
-        0 10px 30px rgba(0, 0, 0, 0.36),
-        0 0 0 1px rgba(255, 255, 255, 0.02) inset;
-      transform: translateZ(0);
-    }
-
-    .glass-card-strong {
-      background:
-        linear-gradient(145deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.025) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(30px);
-      -webkit-backdrop-filter: blur(30px);
-      box-shadow:
-        0 16px 48px rgba(0, 0, 0, 0.48),
-        0 0 0 1px rgba(255, 255, 255, 0.02) inset;
-      transform: translateZ(0);
-    }
-
-    .atmosphere-base {
-      position: fixed;
-      inset: 0;
-      z-index: -4;
-      background:
-        radial-gradient(ellipse 75% 50% at 50% -20%, rgba(99, 102, 241, 0.10) 0%, transparent 50%),
-        radial-gradient(ellipse 55% 35% at 85% 100%, rgba(139, 92, 246, 0.08) 0%, transparent 42%),
-        radial-gradient(ellipse 42% 28% at 12% 82%, rgba(245, 158, 11, 0.04) 0%, transparent 26%),
-        #030305;
-    }
-
-    .particle-field {
-      position: fixed;
-      inset: 0;
-      z-index: -3;
-      background-image:
-        radial-gradient(1px 1px at 20% 30%, rgba(255, 255, 255, 0.08) 0%, transparent 100%),
-        radial-gradient(1px 1px at 42% 72%, rgba(139, 92, 246, 0.12) 0%, transparent 100%),
-        radial-gradient(1px 1px at 65% 18%, rgba(99, 102, 241, 0.12) 0%, transparent 100%),
-        radial-gradient(1px 1px at 84% 62%, rgba(255, 255, 255, 0.06) 0%, transparent 100%),
-        radial-gradient(1px 1px at 8% 88%, rgba(139, 92, 246, 0.09) 0%, transparent 100%);
-      animation: drift 60s linear infinite;
-      pointer-events: none;
-    }
-
-    @keyframes drift {
-
-      0%,
-      100% {
-        transform: translateY(0);
-      }
-
-      50% {
-        transform: translateY(-18px);
-      }
-    }
-
-    .hero-shell {
-      position: relative;
-      overflow: hidden;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-    }
-
-    .hero-shell::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 60% 40% at 50% 20%, rgba(99, 102, 241, 0.12) 0%, transparent 60%),
-        radial-gradient(ellipse 40% 25% at 80% 25%, rgba(139, 92, 246, 0.10) 0%, transparent 55%);
-      pointer-events: none;
-    }
-
-    .hero-title {
-      text-wrap: balance;
-      letter-spacing: -0.06em;
-    }
-
-    .input-glow {
-      transition: all 0.25s ease;
-    }
-
-    .input-glow:focus-within {
-      box-shadow:
-        0 0 0 1px rgba(99, 102, 241, 0.20),
-        0 0 0 4px rgba(99, 102, 241, 0.08),
-        0 16px 40px rgba(0, 0, 0, 0.35);
-    }
-
-    .btn-mythic {
-      transition: all 0.28s ease;
-    }
-
-    .btn-mythic:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 18px 40px rgba(99, 102, 241, 0.18);
-    }
-
-    .section-title {
-      letter-spacing: -0.04em;
-    }
-
-    .panel-hover {
-      transition: all 0.3s ease;
-    }
-
-    .panel-hover:hover {
-      transform: translateY(-4px);
-      border-color: rgba(99, 102, 241, 0.2);
-      box-shadow:
-        0 0 30px rgba(99, 102, 241, 0.08),
-        0 18px 48px rgba(0, 0, 0, 0.35);
-    }
-
-    .shimmer {
-      position: relative;
-      overflow: hidden;
-    }
-
-    .shimmer::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      transform: translateX(-120%);
-      background: linear-gradient(110deg,
-          transparent 35%,
-          rgba(255, 255, 255, 0.04) 45%,
-          rgba(255, 255, 255, 0.08) 50%,
-          rgba(255, 255, 255, 0.04) 55%,
-          transparent 65%);
-      transition: transform 0.7s ease;
-      pointer-events: none;
-    }
-
-    .shimmer:hover::after {
-      transform: translateX(120%);
-    }
-
-    .section-divider {
-      background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.25), rgba(139, 92, 246, 0.2), transparent);
-    }
-
-    .home-link {
-      transition: all 0.25s ease;
-    }
-
-    .home-link:hover {
-      color: white;
-      transform: translateX(2px);
-    }
-
-    .footer-link {
-      transition: color 0.2s ease;
-    }
-
-    .footer-link:hover {
-      color: #c4b5fd;
-    }
-  </style>
-</head>
-
-<body class="antialiased selection:bg-[var(--glow-indigo)] selection:text-white">
-  <div class="atmosphere-base"></div>
-  <div class="particle-field"></div>
-
-  <main class="relative">
-    <!-- Hero -->
-    <section class="hero-shell pt-10 md:pt-14 pb-16 md:pb-20 px-4 md:px-6 lg:px-8">
-      <div class="max-w-[1700px] mx-auto">
-        <div class="glass-card-strong rounded-[2.5rem] p-6 md:p-8 lg:p-10 overflow-hidden relative">
+    <main class="app-viewport scroll-container">
+      <!-- Hero Section -->
+      <section
+        class="hero-shell relative min-h-[90vh] flex items-center justify-center px-4 md:px-6 lg:px-8"
+      >
+        <!-- Background cinematic effects -->
+        <div class="absolute inset-0 pointer-events-none">
           <div
-            class="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.03] via-transparent to-violet-500/[0.03] pointer-events-none">
-          </div>
+            class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[1400px] h-full bg-[radial-gradient(circle_at_50%_0%,rgba(99,102,241,0.12),transparent_70%)]"
+          ></div>
+          <div
+            class="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-[#030305] to-transparent"
+          ></div>
+        </div>
 
-          <div class="relative z-10 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-10">
-            <div class="max-w-4xl">
-              <div
-                class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 text-indigo-300 text-[10px] uppercase tracking-[0.28em] font-bold">
-                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-                Archive of Tales
-              </div>
+        <div class="max-w-[1700px] mx-auto relative z-10 w-full">
+          <div class="flex flex-col items-center text-center">
+            <div
+              class="inline-flex items-center gap-2.5 px-6 py-2 rounded-full border border-indigo-500/15 bg-indigo-500/5 text-indigo-400 text-[10px] uppercase tracking-[0.4em] font-black mb-12 animate-fade-in shadow-[0_0_20px_rgba(99,102,241,0.1)]"
+            >
+              <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
+              The Eternal Archive
+            </div>
 
-              <h1 class="hero-title mt-8 text-5xl md:text-7xl xl:text-8xl font-black text-white leading-[0.92]">
-                Welcome to TaleTranscend
-                <span
-                  class="block mt-4 text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400">
-                  Myth, memory, and manuscript.
-                </span>
-              </h1>
+            <h1
+              class="hero-title text-7xl md:text-9xl xl:text-[11rem] font-black text-white leading-[0.8] tracking-tighter mb-8"
+            >
+              MYTH &
+              <span
+                class="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 pb-4"
+              >
+                MEMORY.
+              </span>
+            </h1>
 
-              <p class="mt-8 max-w-2xl text-slate-400 text-base md:text-lg leading-relaxed font-merriweather">
-                A cinematic archive where folklore breathes, legends return, and sacred stories are carried into the
-                future.
+            <div class="flex items-center gap-4 mb-12 opacity-60">
+              <span class="h-px w-12 bg-gradient-to-r from-transparent to-white/20"></span>
+              <p class="text-slate-400 text-sm md:text-base font-medium tracking-[0.1em] uppercase">
+                Cinematic Lore Preservation
               </p>
+              <span class="h-px w-12 bg-gradient-to-l from-transparent to-white/20"></span>
             </div>
 
-            <div class="grid grid-cols-3 gap-4 lg:min-w-[340px]">
-              <div class="glass-card rounded-[1.5rem] p-5">
-                <p class="text-2xl font-bold text-white">12k+</p>
-                <p class="text-[10px] uppercase tracking-[0.22em] text-slate-500 mt-2">Fragments</p>
-              </div>
-              <div class="glass-card rounded-[1.5rem] p-5">
-                <p class="text-2xl font-bold text-white">847</p>
-                <p class="text-[10px] uppercase tracking-[0.22em] text-slate-500 mt-2">Readers</p>
-              </div>
-              <div class="glass-card rounded-[1.5rem] p-5">
-                <p class="text-2xl font-bold text-white">23</p>
-                <p class="text-[10px] uppercase tracking-[0.22em] text-slate-500 mt-2">Chronicles</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="relative z-10 mt-10 md:mt-12 max-w-3xl">
-            <div class="max-w-2xl relative group">
-              <div
-                class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-violet-600 rounded-2xl blur opacity-20 group-focus-within:opacity-40 transition duration-500">
-              </div>
-
-              <div class="relative flex items-center input-glow">
-                <i data-lucide="search"
-                  class="absolute left-5 text-zinc-500 group-focus-within:text-indigo-400 w-5 h-5 transition-colors"></i>
-
-                <input id="home-search-input" type="text" placeholder="Search for 'Ragnarok' or 'Greek Gods'..."
-                  class="w-full py-5 pl-14 pr-32 bg-zinc-900/80 border border-zinc-800 rounded-2xl text-white placeholder:text-zinc-600 focus:outline-none focus:ring-0 transition-all" />
-
-                <button id="home-search-btn"
-                  class="btn-mythic absolute right-3 bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/20">
-                  Search
-                </button>
-              </div>
-            </div>
-
-            <div class="mt-6 flex flex-wrap gap-3 text-[10px] uppercase tracking-[0.22em] text-slate-500">
-              <span class="meta-pill rounded-full px-3 py-1">Folklore</span>
-              <span class="meta-pill rounded-full px-3 py-1">Mythic Fiction</span>
-              <span class="meta-pill rounded-full px-3 py-1">Sacred Archives</span>
-              <span class="meta-pill rounded-full px-3 py-1">Oral Tradition</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Trending -->
-    <section id="trending-section" class="max-w-[1700px] mx-auto px-4 md:px-6 lg:px-8 py-8 md:py-14">
-      <div class="flex flex-col md:flex-row justify-between items-start gap-4 mb-12">
-        <div>
-          <div class="flex items-center gap-3 mb-4">
-            <span class="h-px w-10 section-divider"></span>
-            <span class="text-[10px] uppercase tracking-[0.28em] text-indigo-400 font-bold">Featured</span>
-          </div>
-          <h2 class="section-title text-3xl md:text-4xl font-black text-white tracking-tight">Trending Tales</h2>
-          <p class="text-slate-500 mt-3 max-w-xl">
-            The most read chronicles this week, rising from the archive’s living memory.
-          </p>
-        </div>
-
-        <a href="library.html" class="home-link group flex items-center gap-2 text-indigo-400 font-bold">
-          Explore Library
-          <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
-        </a>
-      </div>
-
-      <div id="trending-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-        <div class="glass-card-strong rounded-[2.5rem] p-5 animate-pulse">
-          <div class="aspect-[4/3] rounded-[2rem] bg-zinc-800 mb-6"></div>
-          <div class="h-4 bg-zinc-800 rounded mb-3 w-1/3"></div>
-          <div class="h-6 bg-zinc-800 rounded mb-3"></div>
-          <div class="h-4 bg-zinc-800 rounded w-2/3"></div>
-        </div>
-        <div class="glass-card-strong rounded-[2.5rem] p-5 animate-pulse hidden md:block">
-          <div class="aspect-[4/3] rounded-[2rem] bg-zinc-800 mb-6"></div>
-          <div class="h-4 bg-zinc-800 rounded mb-3 w-1/3"></div>
-          <div class="h-6 bg-zinc-800 rounded mb-3"></div>
-          <div class="h-4 bg-zinc-800 rounded w-2/3"></div>
-        </div>
-        <div class="glass-card-strong rounded-[2.5rem] p-5 animate-pulse hidden xl:block">
-          <div class="aspect-[4/3] rounded-[2rem] bg-zinc-800 mb-6"></div>
-          <div class="h-4 bg-zinc-800 rounded mb-3 w-1/3"></div>
-          <div class="h-6 bg-zinc-800 rounded mb-3"></div>
-          <div class="h-4 bg-zinc-800 rounded w-2/3"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Newsletter / CTA -->
-    <section class="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-8 py-8 md:py-16">
-      <div class="glass-card-strong rounded-[3rem] p-6 md:p-10 lg:p-14 relative overflow-hidden">
-        <div
-          class="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.06] via-transparent to-violet-500/[0.06] pointer-events-none">
-        </div>
-
-        <div class="relative z-10 grid grid-cols-1 xl:grid-cols-2 gap-10 items-center">
-          <div>
-            <div class="flex items-center gap-3 mb-4">
-              <span class="h-px w-10 section-divider"></span>
-              <span class="text-[10px] uppercase tracking-[0.28em] text-indigo-300 font-bold">Join the circle</span>
-            </div>
-            <h2 class="section-title text-4xl md:text-5xl font-black text-white leading-tight">
-              Receive the latest myths in your scroll.
-            </h2>
-            <p class="mt-6 text-slate-400 max-w-2xl leading-relaxed">
-              Subscribe to follow new stories, archive updates, and sacred releases from the TaleTranscend library.
+            <p
+              class="max-w-3xl text-slate-400 text-xl md:text-2xl leading-relaxed font-merriweather italic mb-16 px-4"
+            >
+              "Where folklore breathes and sacred legends are preserved for the dreamers of the
+              future."
             </p>
 
-            <form id="newsletter-form" class="mt-8 flex flex-col sm:flex-row gap-3 max-w-2xl">
-              <input id="newsletter-email" type="email" placeholder="Your ancient email address"
-                class="flex-1 px-6 py-4 rounded-2xl bg-black/35 border border-white/10 text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/40 transition-all" />
-              <button type="submit"
-                class="btn-mythic bg-white text-indigo-700 font-black px-8 py-4 rounded-2xl hover:bg-indigo-50 transition-all shadow-xl">
-                Subscribe
-              </button>
-            </form>
+            <!-- Search Interface -->
+            <div class="w-full max-w-4xl relative group px-4">
+              <div
+                class="absolute -inset-2 bg-gradient-to-r from-indigo-500 via-violet-600 to-fuchsia-600 rounded-[3rem] blur-2xl opacity-10 group-focus-within:opacity-40 transition duration-1000"
+              ></div>
+
+              <div
+                class="relative flex items-center p-2.5 bg-zinc-950/40 backdrop-blur-3xl border border-white/5 rounded-[2.75rem] shadow-2xl transition-all duration-500 group-focus-within:border-indigo-500/30"
+              >
+                <i
+                  data-lucide="search"
+                  class="absolute left-10 text-zinc-600 group-focus-within:text-indigo-400 w-7 h-7 transition-colors"
+                ></i>
+
+                <input
+                  id="home-search-input"
+                  type="text"
+                  placeholder="Decode the neural weave..."
+                  class="w-full py-7 pl-20 pr-48 bg-transparent border-none text-white text-xl placeholder:text-zinc-700 focus:outline-none focus:ring-0 transition-all font-medium"
+                />
+
+                <button
+                  id="home-search-btn"
+                  class="absolute right-4 bg-indigo-600 hover:bg-indigo-500 text-white px-12 py-5 rounded-[2rem] text-[11px] font-black uppercase tracking-[0.2em] shadow-xl shadow-indigo-600/20 transition-all active:scale-95 group/btn overflow-hidden"
+                >
+                  <span class="relative z-10">Initiate Search</span>
+                  <div
+                    class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/btn:animate-[shimmer_2s_infinite]"
+                  ></div>
+                </button>
+              </div>
+
+              <!-- Discovery Tags -->
+              <div class="mt-10 flex flex-wrap justify-center gap-5">
+                <span class="discover-tag">Folklore</span>
+                <span class="discover-tag">Mythic Fiction</span>
+                <span class="discover-tag">Sacred Archives</span>
+                <span class="discover-tag">Oral Tradition</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Trending Section -->
+      <section
+        id="trending-section"
+        class="max-w-[1700px] mx-auto px-4 md:px-8 lg:px-12 py-32 border-t border-white/[0.03]"
+      >
+        <div class="flex flex-col md:flex-row justify-between items-end gap-8 mb-20">
+          <div class="max-w-2xl">
+            <div class="flex items-center gap-4 mb-6">
+              <span class="h-px w-16 bg-gradient-to-r from-indigo-500 to-transparent"></span>
+              <span class="text-[11px] uppercase tracking-[0.4em] text-indigo-400 font-black"
+                >Featured Chronicles</span
+              >
+            </div>
+            <h2 class="text-5xl md:text-6xl font-black text-white tracking-tight leading-none mb-6">
+              Trending Tales
+            </h2>
+            <p class="text-slate-500 text-lg leading-relaxed">
+              Fragments of living memory currently surfacing from the deeper archive.
+            </p>
           </div>
 
-          <div class="grid gap-4">
-            <div class="glass-card rounded-[2rem] p-6 md:p-8">
-              <div class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mb-6">
-                <i data-lucide="pen-tool" class="w-8 h-8 text-white"></i>
+          <a
+            href="library.html"
+            class="group flex items-center gap-4 text-indigo-400 font-black text-[11px] uppercase tracking-[0.3em] bg-indigo-500/5 px-8 py-4 rounded-2xl border border-indigo-500/10 hover:bg-indigo-500/10 transition-all"
+          >
+            Browse All Chronicles
+            <i
+              data-lucide="arrow-right"
+              class="w-4 h-4 group-hover:translate-x-2 transition-transform"
+            ></i>
+          </a>
+        </div>
+
+        <div id="trending-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
+          <!-- Rendered by JS -->
+          <div class="glass-card-strong rounded-[2.5rem] p-5 animate-pulse">
+            <div class="aspect-[4/3] rounded-[2rem] bg-zinc-800 mb-6"></div>
+            <div class="h-4 bg-zinc-800 rounded mb-3 w-1/3"></div>
+            <div class="h-6 bg-zinc-800 rounded mb-3"></div>
+            <div class="h-4 bg-zinc-800 rounded w-2/3"></div>
+          </div>
+
+          <div class="glass-card-strong rounded-[2.5rem] p-5 animate-pulse hidden md:block">
+            <div class="aspect-[4/3] rounded-[2rem] bg-zinc-800 mb-6"></div>
+            <div class="h-4 bg-zinc-800 rounded mb-3 w-1/3"></div>
+            <div class="h-6 bg-zinc-800 rounded mb-3"></div>
+            <div class="h-4 bg-zinc-800 rounded w-2/3"></div>
+          </div>
+
+          <div class="glass-card-strong rounded-[2.5rem] p-5 animate-pulse hidden xl:block">
+            <div class="aspect-[4/3] rounded-[2rem] bg-zinc-800 mb-6"></div>
+            <div class="h-4 bg-zinc-800 rounded mb-3 w-1/3"></div>
+            <div class="h-6 bg-zinc-800 rounded mb-3"></div>
+            <div class="h-4 bg-zinc-800 rounded w-2/3"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Newsletter / CTA -->
+      <section class="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-8 py-8 md:py-16">
+        <div class="glass-card-strong rounded-[3rem] p-6 md:p-10 lg:p-14 relative overflow-hidden">
+          <div
+            class="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.06] via-transparent to-violet-500/[0.06] pointer-events-none"
+          ></div>
+
+          <div class="relative z-10 grid grid-cols-1 xl:grid-cols-2 gap-10 items-center">
+            <div>
+              <div class="flex items-center gap-3 mb-4">
+                <span class="h-px w-10 section-divider"></span>
+                <span class="text-[10px] uppercase tracking-[0.28em] text-indigo-300 font-bold"
+                  >Join the circle</span
+                >
               </div>
-              <h3 class="text-2xl font-bold text-white mb-3">Become a Chronicler</h3>
-              <p class="text-indigo-200 text-sm mb-8 max-w-lg">
-                Got a legend to share? The archive is always open for new storytellers.
+              <h2 class="section-title text-4xl md:text-5xl font-black text-white leading-tight">
+                Receive the latest myths in your scroll.
+              </h2>
+              <p class="mt-6 text-slate-400 max-w-2xl leading-relaxed">
+                Subscribe to follow new stories, archive updates, and sacred releases from the
+                TaleTranscend library.
               </p>
-              <button id="home-start-writing-btn"
-                class="btn-mythic inline-flex items-center gap-3 bg-gradient-to-r from-indigo-500 to-violet-600 text-white px-10 py-4 rounded-2xl font-extrabold">
-                Start Writing
-                <i data-lucide="chevron-right" class="w-5 h-5"></i>
-              </button>
+
+              <form id="newsletter-form" class="mt-8 flex flex-col sm:flex-row gap-3 max-w-2xl">
+                <input
+                  id="newsletter-email"
+                  type="email"
+                  placeholder="Your ancient email address"
+                  class="flex-1 px-6 py-4 rounded-2xl bg-black/35 border border-white/10 text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/40 transition-all"
+                />
+                <button
+                  type="submit"
+                  class="btn-mythic bg-white text-indigo-700 font-black px-8 py-4 rounded-2xl hover:bg-indigo-50 transition-all shadow-xl"
+                >
+                  Subscribe
+                </button>
+              </form>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
-              <div class="glass-card rounded-[1.5rem] p-5">
-                <p class="text-[9px] uppercase tracking-[0.24em] text-slate-500 font-bold mb-2">Daily Ritual</p>
-                <p class="text-sm text-white font-semibold">Fresh stories every day</p>
+            <div class="grid gap-4">
+              <div class="glass-card rounded-[2rem] p-6 md:p-8">
+                <div
+                  class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mb-6"
+                >
+                  <i data-lucide="pen-tool" class="w-8 h-8 text-white"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-white mb-3">Become a Chronicler</h3>
+                <p class="text-indigo-200 text-sm mb-8 max-w-lg">
+                  Got a legend to share? The archive is always open for new storytellers.
+                </p>
+                <button
+                  id="home-start-writing-btn"
+                  class="btn-mythic inline-flex items-center gap-3 bg-gradient-to-r from-indigo-500 to-violet-600 text-white px-10 py-4 rounded-2xl font-extrabold"
+                >
+                  Start Writing
+                  <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                </button>
               </div>
-              <div class="glass-card rounded-[1.5rem] p-5">
-                <p class="text-[9px] uppercase tracking-[0.24em] text-slate-500 font-bold mb-2">Creator Path</p>
-                <p class="text-sm text-white font-semibold">Write, publish, preserve</p>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div class="glass-card rounded-[1.5rem] p-5">
+                  <p class="text-[9px] uppercase tracking-[0.24em] text-slate-500 font-bold mb-2">
+                    Daily Ritual
+                  </p>
+                  <p class="text-sm text-white font-semibold">Fresh stories every day</p>
+                </div>
+                <div class="glass-card rounded-[1.5rem] p-5">
+                  <p class="text-[9px] uppercase tracking-[0.24em] text-slate-500 font-bold mb-2">
+                    Creator Path
+                  </p>
+                  <p class="text-sm text-white font-semibold">Write, publish, preserve</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Footer -->
-    <footer class="border-t border-white/6 pt-16 pb-10 px-4 md:px-6 lg:px-8">
-      <div class="max-w-[1700px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-14">
-        <div>
-          <div class="flex items-center gap-2 mb-6">
-            <div class="w-7 h-7 bg-indigo-600/90 rounded-xl flex items-center justify-center">
-              <i data-lucide="sparkles" class="text-white w-4 h-4"></i>
+      <!-- Footer -->
+      <footer class="border-t border-white/6 pt-16 pb-10 px-4 md:px-6 lg:px-8">
+        <div class="max-w-[1700px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-14">
+          <div>
+            <div class="flex items-center gap-2 mb-6">
+              <div class="w-7 h-7 bg-indigo-600/90 rounded-xl flex items-center justify-center">
+                <i data-lucide="sparkles" class="text-white w-4 h-4"></i>
+              </div>
+              <span class="font-bold text-white tracking-tight">TaleTranscend</span>
             </div>
-            <span class="font-bold text-white tracking-tight">TaleTranscend</span>
+            <p class="text-zinc-500 text-sm leading-relaxed">
+              Preserving the myths of the past for the dreamers of the future.
+            </p>
           </div>
-          <p class="text-zinc-500 text-sm leading-relaxed">
-            Preserving the myths of the past for the dreamers of the future.
+
+          <div>
+            <h4 class="text-white font-bold mb-6">Explore</h4>
+            <ul class="space-y-4 text-sm text-zinc-500">
+              <li><a href="#" class="footer-link">Greek Mythology</a></li>
+              <li><a href="#" class="footer-link">Norse Legends</a></li>
+              <li><a href="#" class="footer-link">Egyptian Lore</a></li>
+              <li><a href="#" class="footer-link">Urban Myths</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 class="text-white font-bold mb-6">Community</h4>
+            <ul class="space-y-4 text-sm text-zinc-500">
+              <li><a href="#" class="footer-link">Join Our Discord</a></li>
+              <li><a href="#" class="footer-link">Submit a Story</a></li>
+              <li><a href="#" class="footer-link">Contribute to Archives</a></li>
+              <li><a href="#" class="footer-link">Report an Issue</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 class="text-white font-bold mb-6">Connect</h4>
+            <div class="flex gap-4">
+              <a
+                href="#"
+                class="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center hover:text-indigo-400 transition-all"
+              >
+                <i data-lucide="badge-x" class="w-5 h-5"></i>
+              </a>
+              <a
+                href="#"
+                class="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center hover:text-indigo-400 transition-all"
+              >
+                <i data-lucide="instagram" class="w-5 h-5"></i>
+              </a>
+              <a
+                href="#"
+                class="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center hover:text-indigo-400 transition-all"
+              >
+                <i data-lucide="github" class="w-5 h-5"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="max-w-[1700px] mx-auto border-t border-white/6 pt-8 flex flex-col md:flex-row justify-between items-center gap-4"
+        >
+          <p class="text-zinc-600 text-xs">
+            &copy; 2024 TaleTranscend. Built for the lovers of lore.
           </p>
-        </div>
-
-        <div>
-          <h4 class="text-white font-bold mb-6">Explore</h4>
-          <ul class="space-y-4 text-sm text-zinc-500">
-            <li><a href="#" class="footer-link">Greek Mythology</a></li>
-            <li><a href="#" class="footer-link">Norse Legends</a></li>
-            <li><a href="#" class="footer-link">Egyptian Lore</a></li>
-            <li><a href="#" class="footer-link">Urban Myths</a></li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 class="text-white font-bold mb-6">Community</h4>
-          <ul class="space-y-4 text-sm text-zinc-500">
-            <li><a href="#" class="footer-link">Join Our Discord</a></li>
-            <li><a href="#" class="footer-link">Submit a Story</a></li>
-            <li><a href="#" class="footer-link">Contribute to Archives</a></li>
-            <li><a href="#" class="footer-link">Report an Issue</a></li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 class="text-white font-bold mb-6">Connect</h4>
-          <div class="flex gap-4">
-            <a href="#"
-              class="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center hover:text-indigo-400 transition-all">
-              <i data-lucide="badge-x" class="w-5 h-5"></i>
-            </a>
-            <a href="#"
-              class="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center hover:text-indigo-400 transition-all">
-              <i data-lucide="instagram" class="w-5 h-5"></i>
-            </a>
-            <a href="#"
-              class="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center hover:text-indigo-400 transition-all">
-              <i data-lucide="github" class="w-5 h-5"></i>
-            </a>
+          <div class="flex gap-6 text-zinc-600 text-xs">
+            <a href="#" class="footer-link">Privacy Policy</a>
+            <a href="#" class="footer-link">Terms of Service</a>
           </div>
         </div>
-      </div>
+      </footer>
+    </main>
 
-      <div
-        class="max-w-[1700px] mx-auto border-t border-white/6 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-        <p class="text-zinc-600 text-xs">&copy; 2024 TaleTranscend. Built for the lovers of lore.</p>
-        <div class="flex gap-6 text-zinc-600 text-xs">
-          <a href="#" class="footer-link">Privacy Policy</a>
-          <a href="#" class="footer-link">Terms of Service</a>
-        </div>
-      </div>
-    </footer>
-  </main>
-
-  <script>
-    window.addEventListener('DOMContentLoaded', () => {
-      if (window.lucide && typeof lucide.createIcons === 'function') {
-        lucide.createIcons();
-      }
-    });
-  </script>
-</body>
-
+    <script type="module">
+      import { initIcons } from '../ui/icons.js';
+      window.addEventListener('DOMContentLoaded', () => {
+        initIcons();
+      });
+    </script>
+  </body>
 </html>

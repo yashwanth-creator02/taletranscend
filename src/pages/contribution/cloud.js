@@ -13,6 +13,7 @@
 // accurate word counts without extra sub-collection reads.
 
 import { auth, getDoc, getDocs, addDoc, setDoc, serverTimestamp, refs } from '@fb/index.js';
+import { showToast } from '@/ui/components/toast.js';
 
 import { state } from './state.js';
 
@@ -102,6 +103,8 @@ export async function saveToCloud() {
 
   // Draft is now synced
   state.isDirty = false;
+
+  showToast('Draft preserved in the cloud.', 'success');
 
   // Update save status UI
   const status = document.getElementById('stat-status');

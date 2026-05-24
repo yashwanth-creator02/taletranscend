@@ -35,3 +35,5 @@ export * from './markFinish.service.js';
 export * from './progress.utils.service.js';
 
 export * from './profile.service.js';
+export * from './resonance.service.js';
+export * from './ai.service.js';

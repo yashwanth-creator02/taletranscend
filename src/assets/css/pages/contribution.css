@@ -1,48 +1,194 @@
-/* ---------- CONTRIBUTION EDITOR ---------- */
+/* src/assets/css/pages/contribution.css */
 
-#story-editor {
-  backdrop-filter: blur(28px);
+:root {
+  --editor-header-height: 56px;
 }
 
-/* ---------- INPUTS ---------- */
+/* ── Custom Scrollbar ───────────────────────── */
 
-#story-editor input,
-#story-editor textarea {
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
-  color: var(--text-main);
-  border: 1px solid var(--border);
 }
 
-#story-editor input::placeholder,
-#story-editor textarea::placeholder {
-  color: var(--text-muted);
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
 }
 
-/* ---------- FOCUS ---------- */
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.2);
+}
 
-#story-editor input:focus,
-#story-editor textarea:focus {
+/* ── Studio surfaces ──────────────────────────────────────── */
+.studio-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.studio-card:focus-within {
+  border-color: rgba(99, 102, 241, 0.25);
+  box-shadow: 0 0 30px rgba(99, 102, 241, 0.05);
+}
+
+.studio-input {
+  transition: all 0.3s ease;
+}
+
+.studio-input:focus {
   outline: none;
-  border-color: var(--accent);
+  border-color: rgba(99, 102, 241, 0.4) !important;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.05);
 }
 
-/* ---------- SUBMIT BUTTON ---------- */
+/* ── Editor layout: fills viewport below the two sticky headers ── */
+.editor-layout {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  background: #030305;
+}
 
-.contribute-btn {
-  background: var(--accent);
+.editor-pane {
+  height: 100%;
+  overflow-y: auto;
+}
+
+/* ── Chapter list items ───────────────────────────────────── */
+.chapter-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 1rem;
+  border: 1px solid transparent;
+  padding: 6px 6px 6px 12px;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  margin-bottom: 2px;
+}
+
+.chapter-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.chapter-item--active {
+  background: rgba(99, 102, 241, 0.06);
+  border-color: rgba(99, 102, 241, 0.2);
+  box-shadow: inset 0 0 20px rgba(99, 102, 241, 0.02);
+}
+
+.chapter-item__select {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  padding: 6px 0;
+}
+
+.chapter-item__num {
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  color: #818cf8;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: 8px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.chapter-item--active .chapter-item__num {
+  background: #6366f1;
   color: white;
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
 }
 
-.contribute-btn:hover {
-  filter: brightness(1.1);
-}
-#story-editor {
-  background: var(--glass);
-  border: 1px solid var(--border);
-  border-radius: 2rem;
+.chapter-item__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.3s ease;
 }
 
-#story-editor textarea {
-  font-family: var(--reader-font);
-  line-height: 1.75;
+.chapter-item--active .chapter-item__title {
+  color: #f8fafc;
+}
+
+.chapter-item__actions {
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transform: translateX(4px);
+  transition: all 0.3s ease;
+}
+
+.chapter-item:hover .chapter-item__actions,
+.chapter-item--active .chapter-item__actions {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.chapter-item__action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: none;
+  background: none;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chapter-item__action:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05);
+  color: #cbd5e1;
+}
+
+.chapter-item__action:disabled {
+  opacity: 0.1;
+  cursor: not-allowed;
+}
+
+.chapter-item__action--danger:hover:not(:disabled) {
+  background: rgba(244, 63, 94, 0.1);
+  color: #fb7185;
+}
+
+/* ── Voice button active state ────────────────────────────── */
+.voice-btn--active {
+  background: rgba(99, 102, 241, 0.2) !important;
+  color: #818cf8 !important;
+  border-color: rgba(99, 102, 241, 0.4) !important;
+  animation: pulse-ring 1.2s ease infinite;
+}
+
+@keyframes pulse-ring {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 0 6px rgba(99, 102, 241, 0);
+  }
 }

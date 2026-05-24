@@ -1,15 +1,56 @@
 // src/pages/tale/interactions.js
-// Handles user interactions on the tale page:
-// chapter navigation, tab switching, and reading start/resume.
+// Handles user interactions for the Tale Archive page.
 
-import { resolveResumePoint } from '@services/index.js';
+import { resolveResumePoint, toggleResonance, getResonanceStatus } from '@services/index.js';
+import { showToast } from '@ui/components/toast.js';
+import { initIcons } from '@ui/components/icons.js';
 
 /**
- * Binds click events to chapter list items using event delegation.
- * Navigates to the reader page for the clicked chapter.
- *
- * @param {string} taleId - ID of the tale
+ * Sets up the Soul Resonance (like) interaction.
  */
+export async function setupResonance(taleId) {
+  const btn = document.getElementById('resonance-btn');
+  const countEl = document.getElementById('resonance-count');
+  if (!btn || !countEl) return;
+
+  // Initial state
+  const isActive = await getResonanceStatus(taleId);
+  _updateResonanceUI(btn, countEl, isActive);
+
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    try {
+      const { active, count } = await toggleResonance(taleId);
+      _updateResonanceUI(btn, countEl, active, count);
+      showToast(active ? 'Souls Aligned.' : 'Resonance Decoupled.', 'success');
+    } catch (err) {
+      console.error('[resonance] Failed:', err);
+      showToast('Neural resonance failed. Authentication required.', 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+}
+
+function _updateResonanceUI(btn, countEl, active, count) {
+  if (count !== undefined) countEl.textContent = count;
+
+  const icon = btn.querySelector('i');
+  const label = btn.querySelector('span');
+
+  if (active) {
+    btn.classList.add('border-orange-500/30', 'bg-orange-500/5');
+    icon?.setAttribute('data-lucide', 'flame');
+    icon?.classList.add('text-orange-500');
+    if (label) label.textContent = 'Souls Aligned';
+  } else {
+    btn.classList.remove('border-orange-500/30', 'bg-orange-500/5');
+    icon?.setAttribute('data-lucide', 'heart');
+    icon?.classList.remove('text-orange-500');
+    if (label) label.textContent = 'Align Souls';
+  }
+  initIcons(btn);
+}
 export function bindChapterClicks(taleId) {
   const list = document.getElementById('chapter-list');
   if (!list) return;
@@ -19,33 +60,32 @@ export function bindChapterClicks(taleId) {
     if (!item) return;
 
     const chapterId = item.dataset.chapterIndex;
-    window.location.href = `reader.html?taleId=${taleId}&chapterId=${chapterId}`;
+    _fadeAndGo(`reader.html?taleId=${taleId}&chapterId=${chapterId}`);
   });
 }
 
 /**
- * Sets up tab switching for the tale page sections.
- * Uses event delegation on data-tab buttons instead of window.switchTab.
+ * Sets up the tab system for Synopsis, Chronicles, and Echoes.
  */
 export function setupTabs() {
-  document.querySelectorAll('.tab-btn').forEach((btn) => {
+  const tabs = document.querySelectorAll('[data-tab]');
+  tabs.forEach((btn) => {
     btn.addEventListener('click', () => {
-      const tabKey = btn.dataset.tab;
+      const target = btn.dataset.tab;
 
-      document.querySelectorAll('.tab-btn').forEach((b) => b.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach((p) => p.classList.add('hidden'));
-
+      // Update buttons
+      tabs.forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
-      document.getElementById(`content-${tabKey}`)?.classList.remove('hidden');
+
+      // Update panes
+      document.querySelectorAll('.tab-content').forEach((pane) => pane.classList.add('hidden'));
+      document.getElementById(`content-${target}`)?.classList.remove('hidden');
     });
   });
 }
 
 /**
- * Sets up the Start Reading button to navigate to the first chapter.
- *
- * @param {string} taleId - ID of the tale
- * @param {Array<Object>} chapters - Array of chapter objects
+ * Starts the reading experience from fragment 0.
  */
 export function setupStartReading(taleId, chapters) {
   const btn = document.getElementById('start-btn');
@@ -53,16 +93,12 @@ export function setupStartReading(taleId, chapters) {
 
   btn.addEventListener('click', () => {
     if (!chapters?.length) return;
-    window.location.href = `reader.html?taleId=${taleId}&chapterId=${chapters[0].id}`;
+    _fadeAndGo(`reader.html?taleId=${taleId}&chapterId=0`);
   });
 }
 
 /**
- * Sets up the Resume Reading button to navigate to the last unfinished chapter.
- * Falls back to chapter 0 if no saved progress is found.
- *
- * @param {string} userId - ID of the authenticated user
- * @param {string} taleId - ID of the tale
+ * Resumes reading from the last recorded neural fragment.
  */
 export function setupResumeReading(userId, taleId) {
   const btn = document.getElementById('resume-btn');
@@ -70,8 +106,36 @@ export function setupResumeReading(userId, taleId) {
 
   btn.addEventListener('click', async () => {
     const resume = await resolveResumePoint({ userId, taleId });
-
     const chapterId = resume?.chapterIndex ?? 0;
-    window.location.href = `reader.html?taleId=${taleId}&chapterId=${chapterId}`;
+    _fadeAndGo(`reader.html?taleId=${taleId}&chapterId=${chapterId}`);
   });
+}
+
+/**
+ * Handles the sticky header scroll effect and floating action bar visibility.
+ */
+export function initHeaderScroll() {
+  const bar = document.getElementById('tale-action-bar');
+  const hero = document.getElementById('hero-section');
+
+  const onScroll = () => {
+    const scrollY = window.scrollY;
+
+    // Toggle bar visibility based on hero exit
+    if (hero) {
+      const heroBottom = hero.offsetTop + hero.offsetHeight - 100;
+      bar?.classList.toggle('is-hidden', scrollY < heroBottom);
+    }
+  };
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll(); // Set initial state
+}
+
+function _fadeAndGo(url) {
+  document.body.style.transition = 'opacity 0.25s ease';
+  document.body.style.opacity = '0';
+  setTimeout(() => {
+    window.location.href = url;
+  }, 250);
 }

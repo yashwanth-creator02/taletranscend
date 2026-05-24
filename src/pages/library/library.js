@@ -2,6 +2,7 @@
 // Entry point for the library page.
 
 import '@css/base.css';
+import '@css/nav.css';
 import '@css/components.css';
 import '@css/pages/library.css';
 
@@ -10,7 +11,14 @@ import { initAuth } from '@fb/index.js';
 import { libraryState } from './state.js';
 
 import { subscribeToTales, stopTalesSubscription } from './content.js';
-import { applyAllFilters, setupSearch, setupEraFilter, setupSidebarFilter } from './filters.js';
+import {
+  applyAllFilters,
+  setupSearch,
+  setupEraFilter,
+  setupToneFilter,
+  setupLengthFilter,
+  setupSidebarFilter,
+} from './filters.js';
 import { setupCardInteractions } from './interactions.js';
 import {
   setupSidebarToggle,
@@ -19,6 +27,9 @@ import {
   showGridError,
   setActiveSidebarBtn,
 } from './ui.js';
+import { initIcons } from '@/ui/icons.js';
+
+import { setupAuthTimeout } from '@/utils/ui.utils';
 
 initNav();
 
@@ -28,21 +39,19 @@ initNav();
 
 document.addEventListener('DOMContentLoaded', () => {
   setupSidebarToggle();
-  showGridSkeleton();
-  window.lucide?.createIcons?.();
+  const grid = document.getElementById('cards-grid');
+  if (grid) {
+    grid.classList.add('fade-in-stagger');
+    showGridSkeleton();
+  }
+  initIcons();
 });
 
 /* ─────────────────────────────────────────────
-   Auth timeout guard
+   Auth + Subscription
    ───────────────────────────────────────────── */
 
-const authTimeout = setTimeout(() => {
-  showGridError();
-}, 10_000);
-
-/* ─────────────────────────────────────────────
-   Auth + Data
-   ───────────────────────────────────────────── */
+const authTimeout = setupAuthTimeout('cards-grid');
 
 initAuth(async (user) => {
   clearTimeout(authTimeout);
@@ -58,6 +67,10 @@ initAuth(async (user) => {
 
   // Wire search (handles URL param pre-fill too)
   setupSearch();
+
+  // Wire filters
+  setupToneFilter();
+  setupLengthFilter();
 
   // Wire sidebar filter buttons
   setupSidebarFilter();
@@ -76,7 +89,7 @@ initAuth(async (user) => {
 
       // Apply all active filters against fresh data
       await applyAllFilters();
-      window.lucide?.createIcons?.();
+      initIcons();
     },
     () => showGridError()
   );

@@ -1,54 +1,23 @@
 // src/ui/components/taleCard.js
-// Renders the tale cards grid and individual tale card templates.
-// Used by the library and shelf pages to display community tales.
+// Updated with enhanced UI and animations
 
 import { getTotalReadTime, getBookmarks, getTaleProgressData } from '@services/index.js';
 import { getOverallProgress } from '@/utils/progress.utils';
-
+import { escapeHtml } from '@/utils/string.utils';
+import { renderEmptyState, renderErrorState } from './feedback.js';
+import '@/assets/css/pages/tale-cards.css';
 /* ================= Helpers ================= */
 
-/**
- * Escapes a string for safe HTML insertion.
- *
- * @param {string} value
- * @returns {string}
- */
-function escapeHtml(value = '') {
-  return String(value)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
-}
-
-/**
- * Returns the default cover image when a tale has no custom cover.
- *
- * @returns {string}
- */
 function getDefaultCover() {
   return 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200&auto=format&fit=crop';
 }
 
-/**
- * Formats read time in minutes.
- *
- * @param {number} totalMs
- * @returns {string}
- */
 function formatReadTime(totalMs = 0) {
   const minutes = Math.floor(Number(totalMs || 0) / 60000);
   if (minutes < 1) return '';
   return `${minutes}m read`;
 }
 
-/**
- * Returns a short status label for a tale.
- *
- * @param {string} status
- * @returns {string}
- */
 function getStatusLabel(status) {
   if (status === 'finished') return 'Completed';
   if (status === 'draft') return 'Draft';
@@ -56,45 +25,25 @@ function getStatusLabel(status) {
   return 'In Progress';
 }
 
-/**
- * Creates a small pill badge.
- *
- * @param {string} text
- * @param {string} classes
- * @returns {string}
- */
 function buildBadge(text, classes = '') {
   return `
-    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.22em] ${classes}">
+    <span class="badge ${classes}">
       ${escapeHtml(text)}
     </span>
   `;
 }
 
-/**
- * Creates a metadata row item.
- *
- * @param {string} icon
- * @param {string} label
- * @returns {string}
- */
 function buildMetaItem(icon, label) {
   return `
-    <div class="flex items-center gap-2 text-zinc-500">
-      <i data-lucide="${icon}" class="h-3.5 w-3.5 shrink-0"></i>
-      <span class="text-[9px] font-bold uppercase tracking-[0.22em]">
+    <div class="flex items-center gap-2 text-zinc-400 group-hover:text-indigo-300 transition-colors">
+      <i data-lucide="${icon}" class="h-3.5 w-3.5 shrink-0 opacity-60"></i>
+      <span class="text-[9px] font-bold uppercase tracking-[0.18em]">
         ${escapeHtml(label)}
       </span>
     </div>
   `;
 }
 
-/**
- * Returns a progress label with fallback.
- *
- * @param {number} percent
- * @returns {string}
- */
 function getProgressLabel(percent) {
   const clamped = Math.max(0, Math.min(100, Math.round(Number(percent) || 0)));
   return `${clamped}%`;
@@ -102,42 +51,16 @@ function getProgressLabel(percent) {
 
 /* ================= Grid Renderer ================= */
 
-/**
- * Renders a grid of tale cards into the #cards-grid container.
- * Fetches progress, bookmarks, and read times in parallel for performance.
- *
- * @param {string} userId - ID of the authenticated user
- * @param {Array<Object>} tales - Array of tale objects from Firestore
- */
-export async function renderCardsGrid(userId, tales) {
-  const container = document.getElementById('cards-grid');
+export function renderCardsSkeleton(container, count = 6) {
   if (!container) return;
-
-  const safeTales = Array.isArray(tales) ? tales : [];
-
-  if (!safeTales.length) {
-    container.innerHTML = `
-      <div class="col-span-full rounded-[2rem] border border-white/8 bg-white/5 px-6 py-20 text-center shadow-2xl shadow-black/20 backdrop-blur-xl">
-        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-white/5">
-          <i data-lucide="sparkles" class="h-6 w-6 text-zinc-500"></i>
-        </div>
-        <p class="text-sm font-medium text-zinc-400">No tales found in the archives.</p>
-        <p class="mt-2 text-xs text-zinc-600">Try a different filter or come back later.</p>
-      </div>
-    `;
-    if (window.lucide) window.lucide.createIcons();
-    return;
-  }
-
-  // Show a lightweight loading state before async data resolves.
   container.innerHTML = `
     <div class="col-span-full grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-      ${Array.from({ length: Math.min(6, safeTales.length) })
+      ${Array.from({ length: count })
         .map(
           () => `
-            <div class="overflow-hidden rounded-[2.25rem] border border-white/8 bg-white/5 p-5 shadow-2xl shadow-black/20 backdrop-blur-xl">
-              <div class="animate-pulse">
-                <div class="mb-4 flex items-start justify-between">
+            <div class="tale-card animate-pulse">
+              <div class="p-6">
+                <div class="mb-6 flex items-start justify-between gap-3">
                   <div class="space-y-2">
                     <div class="h-4 w-20 rounded-full bg-white/6"></div>
                     <div class="h-3 w-28 rounded-full bg-white/5"></div>
@@ -161,74 +84,93 @@ export async function renderCardsGrid(userId, tales) {
         .join('')}
     </div>
   `;
+}
+
+export async function fetchTalesMetadata(userId, tales) {
+  const safeUserId = userId || null;
+  const safeTales = Array.isArray(tales) ? tales : [];
+
+  if (!safeTales.length) {
+    return {
+      progressSnapshots: [],
+      bookmarkMap: {},
+      readTimeMap: {},
+    };
+  }
+
+  const [progressSnapshots, bookmarks, readTimeEntries] = await Promise.all([
+    safeUserId
+      ? Promise.all(safeTales.map((tale) => getTaleProgressData(safeUserId, tale.id)))
+      : Promise.resolve(safeTales.map(() => ({}))),
+    safeUserId ? getBookmarks({ userId: safeUserId }) : Promise.resolve([]),
+    safeUserId
+      ? Promise.all(
+          safeTales.map(async (tale) => {
+            const ms = await getTotalReadTime({ userId: safeUserId, taleId: tale.id });
+            return [tale.id, ms];
+          })
+        )
+      : Promise.resolve([]),
+  ]);
+
+  const bookmarkMap = Object.fromEntries((bookmarks || []).map((bookmark) => [bookmark.id, true]));
+  const readTimeMap = Object.fromEntries(readTimeEntries || []);
+
+  return { progressSnapshots, bookmarkMap, readTimeMap };
+}
+
+export function renderTaleCards(container, tales, metadata) {
+  if (!container) return;
+  const { progressSnapshots = [], bookmarkMap = {}, readTimeMap = {} } = metadata;
+
+  container.innerHTML = tales
+    .map((tale, index) => {
+      const chaptersProgress = progressSnapshots[index] || {};
+      const progressStats = getOverallProgress({
+        chapterCount: Number(tale.chapterCount) || 0,
+        chaptersProgress,
+      });
+
+      const displayPercent = tale.status === 'finished' ? 100 : progressStats.percent || 0;
+      return createTaleCard(tale, displayPercent, readTimeMap, bookmarkMap);
+    })
+    .join('');
+
+  if (window.lucide) window.lucide.createIcons();
+}
+
+export async function renderCardsGrid(userId, tales) {
+  const container = document.getElementById('cards-grid');
+  if (!container) return;
+
+  const safeTales = Array.isArray(tales) ? tales : [];
+
+  if (!safeTales.length) {
+    renderEmptyState(container, {
+      message: 'No tales found in the archives.',
+      subMessage: 'Try a different filter or come back later.',
+      classes:
+        'col-span-full rounded-[2rem] border border-white/8 bg-white/5 px-6 py-20 text-center shadow-2xl shadow-black/20 backdrop-blur-xl',
+    });
+    return;
+  }
+
+  renderCardsSkeleton(container, Math.min(6, safeTales.length));
 
   try {
-    const safeUserId = userId || null;
-
-    const [progressSnapshots, bookmarks, readTimeEntries] = await Promise.all([
-      safeUserId
-        ? Promise.all(safeTales.map((tale) => getTaleProgressData(safeUserId, tale.id)))
-        : Promise.resolve(safeTales.map(() => ({}))),
-      safeUserId ? getBookmarks({ userId: safeUserId }) : Promise.resolve([]),
-      safeUserId
-        ? Promise.all(
-            safeTales.map(async (tale) => {
-              const ms = await getTotalReadTime({ userId: safeUserId, taleId: tale.id });
-              return [tale.id, ms];
-            })
-          )
-        : Promise.resolve([]),
-    ]);
-
-    const bookmarkMap = Object.fromEntries(
-      (bookmarks || []).map((bookmark) => [bookmark.id, true])
-    );
-    const readTimeMap = Object.fromEntries(readTimeEntries || []);
-
-    container.innerHTML = safeTales
-      .map((tale, index) => {
-        const chaptersProgress = progressSnapshots[index] || {};
-
-        const progressStats = getOverallProgress({
-          chapterCount: Number(tale.chapterCount) || 0,
-          chaptersProgress,
-        });
-
-        const displayPercent = tale.status === 'finished' ? 100 : progressStats.percent || 0;
-
-        return createTaleCard(tale, displayPercent, readTimeMap, bookmarkMap);
-      })
-      .join('');
-
-    if (window.lucide) {
-      window.lucide.createIcons();
-    }
+    const metadata = await fetchTalesMetadata(userId, safeTales);
+    renderTaleCards(container, safeTales, metadata);
   } catch (err) {
     console.error('renderCardsGrid: failed to populate library:', err);
-    container.innerHTML = `
-      <div class="col-span-full rounded-[2rem] border border-red-500/10 bg-red-500/5 px-6 py-16 text-center shadow-2xl shadow-black/20 backdrop-blur-xl">
-        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-500/10">
-          <i data-lucide="triangle-alert" class="h-6 w-6 text-red-400"></i>
-        </div>
-        <p class="text-sm font-medium text-red-200">We could not load the tales right now.</p>
-        <p class="mt-2 text-xs text-red-300/70">Please refresh and try again.</p>
-      </div>
-    `;
-    if (window.lucide) window.lucide.createIcons();
+    renderErrorState(container, {
+      message: 'We could not load the tales right now.',
+      subMessage: 'Please refresh and try again.',
+    });
   }
 }
 
 /* ================= Card Template ================= */
 
-/**
- * Builds the HTML string for a single tale card.
- *
- * @param {Object} tale - Tale data object from Firestore
- * @param {number} progressPercent - Pre-calculated overall progress percentage
- * @param {Object} readTimeMap - Map of taleId => totalReadTimeMs
- * @param {Object} bookmarkMap - Map of taleId => true for bookmarked tales
- * @returns {string} HTML string for the tale card
- */
 function createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = {}) {
   const {
     id = '0000',
@@ -251,13 +193,11 @@ function createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = {
   const cover = coverUrl || getDefaultCover();
   const statusLabel = getStatusLabel(tale?.status);
 
-  const timeBadge = readTimeLabel
-    ? buildBadge(readTimeLabel, 'bg-zinc-900/80 text-zinc-300 border border-white/8')
-    : '';
+  const timeBadge = readTimeLabel ? buildBadge(readTimeLabel, 'bg-white/5 text-zinc-400') : '';
 
   const statusBadgeClasses = isFinished
-    ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/15'
-    : 'bg-indigo-500/10 text-indigo-300 border border-indigo-500/15';
+    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+    : 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20';
 
   const bookmarkedAction = isBookmarked ? 'decouple' : 'couple';
   const bookmarkedLabel = isBookmarked ? 'Remove Bookmark' : 'Save to Shelf';
@@ -265,22 +205,19 @@ function createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = {
 
   return `
     <article
-      class="tale-card group relative overflow-hidden rounded-[2.25rem] border border-white/8 bg-white/5 shadow-2xl shadow-black/20 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-indigo-500/20 hover:bg-white/[0.055]"
+      class="tale-card group relative overflow-hidden"
       data-id="${escapeHtml(id)}"
       aria-label="${safeTitle}"
     >
-      <div class="absolute inset-0 bg-gradient-to-b from-white/[0.03] via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+      <!-- Background Ambient Glow -->
+      <div class="absolute -inset-px bg-gradient-to-b from-indigo-500/0 via-indigo-500/0 to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
 
-      <div class="p-5">
-        <div class="mb-4 flex items-start justify-between gap-3">
-          <div class="min-w-0">
-            <div class="mb-2 flex flex-wrap items-center gap-2">
-              ${buildBadge(safeEra, 'border border-indigo-500/15 bg-indigo-500/10 text-indigo-300')}
-              ${buildBadge(statusLabel, statusBadgeClasses)}
-            </div>
-            <p class="text-[10px] font-bold uppercase tracking-[0.28em] text-zinc-500">
-              Tale Archive
-            </p>
+      <div class="p-6">
+        <!-- Header: Badges & Actions -->
+        <div class="mb-6 flex items-start justify-between gap-3 relative z-10">
+          <div class="flex flex-wrap items-center gap-2">
+            ${buildBadge(safeEra, 'bg-indigo-500/5 text-indigo-300')}
+            ${isFinished ? buildBadge('Finished', statusBadgeClasses) : ''}
           </div>
 
           <div class="relative shrink-0">
@@ -288,154 +225,99 @@ function createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = {
               type="button"
               data-action="options"
               data-menu-id="${escapeHtml(menuId)}"
-              aria-label="Open tale actions"
-              aria-haspopup="menu"
-              aria-expanded="false"
-              class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/8 bg-black/20 text-zinc-500 transition-all hover:border-white/12 hover:bg-white/5 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+              class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-zinc-500 transition-all hover:bg-indigo-500/10 hover:border-indigo-500/30 hover:text-white"
             >
-              <i data-lucide="more-vertical" class="h-4 w-4"></i>
+              <i data-lucide="more-horizontal" class="h-4 w-4"></i>
             </button>
 
             <div
               id="${escapeHtml(menuId)}"
-              class="options-menu hidden absolute right-0 z-[60] mt-2 w-56 overflow-hidden rounded-[1.25rem] border border-white/10 bg-zinc-950/95 p-2 shadow-2xl shadow-black/40 backdrop-blur-2xl"
+              class="options-menu hidden absolute right-0 z-[60] mt-2 w-60 overflow-hidden rounded-2xl p-2"
               role="menu"
-              aria-label="Tale quick actions"
             >
-              <div class="px-3 py-2">
-                <span class="text-[7px] font-black uppercase tracking-[0.32em] text-zinc-600">Quick Actions</span>
+              <div class="px-3 py-2 border-b border-white/5 mb-1">
+                <span class="text-[8px] font-black uppercase tracking-widest text-zinc-600">Archive Operations</span>
               </div>
 
-              <button
-                type="button"
-                data-action="copy-link"
-                data-id="${escapeHtml(id)}"
-                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400 transition-colors hover:bg-white/5 hover:text-white"
-              >
+              <button type="button" data-action="copy-link" data-id="${escapeHtml(id)}" class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400 transition-colors hover:bg-white/5 hover:text-white">
                 <i data-lucide="link" class="h-3.5 w-3.5"></i>
-                Copy Link
+                <span>Copy Access Link</span>
               </button>
 
-              <button
-                type="button"
-                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400 transition-colors hover:bg-white/5 hover:text-white"
-              >
+              <button type="button" class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400 transition-colors hover:bg-white/5 hover:text-white">
                 <i data-lucide="download" class="h-3.5 w-3.5"></i>
-                Enable Offline Read
+                <span>Neural Download</span>
               </button>
 
-              <div class="my-2 h-px bg-white/5"></div>
+              <div class="h-px bg-white/5 my-1"></div>
 
-              <div class="px-3 py-2">
-                <span class="text-[7px] font-black uppercase tracking-[0.32em] text-zinc-600">Management</span>
-              </div>
-
-              <button
-                type="button"
-                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] transition-colors ${isFinished ? 'cursor-not-allowed text-zinc-600' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
-                ${isFinished ? 'disabled' : ''}
-                data-action="${isFinished ? '' : 'mark-finished'}"
-                data-id="${escapeHtml(id)}"
-              >
+              <button type="button" class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] transition-colors ${isFinished ? 'opacity-40 text-zinc-600' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}" data-action="${isFinished ? '' : 'mark-finished'}" data-id="${escapeHtml(id)}">
                 <i data-lucide="check-circle" class="h-3.5 w-3.5"></i>
-                ${isFinished ? 'Finished' : 'Mark Finished'}
+                <span>${isFinished ? 'Already Sealed' : 'Seal Chronicle'}</span>
               </button>
 
-              <button
-                type="button"
-                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] text-orange-300/80 transition-colors hover:bg-orange-500/10 hover:text-orange-200"
-              >
-                <i data-lucide="triangle-alert" class="h-3.5 w-3.5"></i>
-                Report
-              </button>
+              <div class="h-px bg-white/5 my-1"></div>
 
-              <div class="my-2 h-px bg-white/5"></div>
-
-              <button
-                type="button"
-                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] transition-colors ${isBookmarked ? 'text-red-300 hover:bg-red-500/10 hover:text-red-200' : 'text-emerald-300 hover:bg-emerald-500/10 hover:text-emerald-200'}"
-                data-action="${bookmarkedAction}"
-                data-id="${escapeHtml(id)}"
-              >
+              <button type="button" class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] transition-colors ${isBookmarked ? 'text-rose-400 hover:bg-rose-500/10' : 'text-emerald-400 hover:bg-emerald-500/10'}" data-action="${bookmarkedAction}" data-id="${escapeHtml(id)}">
                 <i data-lucide="${bookmarkedIcon}" class="h-3.5 w-3.5"></i>
-                ${bookmarkedLabel}
+                <span>${bookmarkedLabel}</span>
               </button>
             </div>
           </div>
         </div>
 
-        <div class="relative mb-5 overflow-hidden rounded-[1.75rem] border border-white/8 bg-zinc-900">
-          <div class="aspect-[16/10] w-full overflow-hidden">
+        <!-- Cover Image with Progress Overlay -->
+        <div class="card-image-wrap mb-6 group-hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-all duration-500">
+          <div class="aspect-[16/10] w-full relative">
             <img
               src="${escapeHtml(cover)}"
-              alt="${safeTitle} cover"
-              class="h-full w-full object-cover opacity-70 transition duration-700 group-hover:scale-105 group-hover:opacity-100"
+              alt="${safeTitle}"
+              class="h-full w-full object-cover opacity-60 transition duration-700 group-hover:scale-110 group-hover:opacity-100"
               loading="lazy"
             />
-          </div>
-
-          <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent p-4">
-            <div class="mb-2 flex items-center justify-between gap-3">
-              <span class="text-[8px] font-bold uppercase tracking-[0.28em] text-zinc-400">
-                Reading Progress
-              </span>
-              <span class="text-[10px] font-black uppercase tracking-[0.22em] text-indigo-300">
-                ${getProgressLabel(progress)}
-              </span>
-            </div>
-
-            <div class="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
-              <div
-                class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-500"
-                style="width:${Math.max(2, progress)}%"
-              ></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent opacity-60"></div>
+            <div class="absolute inset-x-0 bottom-0 p-4 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[9px] font-black uppercase tracking-widest text-white/50">Neural Progress</span>
+                <span class="text-[10px] font-black text-indigo-400">${getProgressLabel(progress)}</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: ${progress}%"></div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="px-1">
-          <h3 class="mb-2 line-clamp-2 text-xl font-semibold tracking-tight text-white transition-colors group-hover:text-indigo-300">
+        <!-- Content -->
+        <div class="relative z-10 px-1">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="h-px w-8 bg-indigo-500/30"></span>
+            <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Fragment ${id.slice(-4)}</span>
+          </div>
+
+          <h3 class="mb-3 line-clamp-1 text-2xl font-black tracking-tight text-white group-hover:text-indigo-300 transition-colors duration-300">
             ${safeTitle}
           </h3>
 
-          <p class="mb-4 line-clamp-3 text-sm leading-6 text-zinc-400">
+          <p class="mb-6 line-clamp-2 text-sm leading-relaxed text-zinc-400 group-hover:text-zinc-300 transition-colors duration-300">
             ${safeDescription}
           </p>
 
-          <div class="grid grid-cols-2 gap-3 border-t border-white/6 pt-4">
-            ${buildMetaItem('layers', `${chapterCount} fragments`)}
-            ${timeBadge}
-          </div>
-
-          <div class="mt-5 flex items-center justify-between gap-3">
-            <div class="flex items-center gap-2">
-              ${
-                isFinished
-                  ? buildBadge(
-                      'Complete',
-                      'bg-emerald-500/10 text-emerald-300 border border-emerald-500/15'
-                    )
-                  : ''
-              }
-
-              ${
-                !isFinished && progress > 0
-                  ? buildBadge(
-                      'Continue',
-                      'bg-indigo-500/10 text-indigo-300 border border-indigo-500/15'
-                    )
-                  : ''
-              }
+          <!-- Footer Metadata -->
+          <div class="flex items-center justify-between pt-5 border-t border-white/5">
+            <div class="flex items-center gap-5">
+              ${buildMetaItem('layers', `${chapterCount} Frags`)}
+              ${timeBadge}
             </div>
 
             <button
               type="button"
               data-action="resume"
               data-id="${escapeHtml(id)}"
-              class="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.22em] text-white transition-colors hover:text-indigo-300"
+              class="card-button"
             >
-              ${isFinished ? 'Read Again' : 'Resume Tale'}
-              <i data-lucide="arrow-right-circle" class="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"></i>
+              <span>${isFinished ? 'Archive' : 'Engage'}</span>
+              <i data-lucide="chevron-right" class="h-3.5 w-3.5"></i>
             </button>
           </div>
         </div>

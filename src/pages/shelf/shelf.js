@@ -4,6 +4,7 @@
 // then hands off to interactions and renderers.
 
 import '@css/base.css';
+import '@css/nav.css';
 import '@css/components.css';
 import '@css/pages/shelf.css';
 import {
@@ -16,7 +17,9 @@ import {
   initShelfInteractions,
   initNav,
   initAuth,
+  initIcons,
 } from './index.js';
+import { setupAuthTimeout } from '@/utils/ui.utils';
 
 initNav();
 
@@ -24,16 +27,7 @@ initNav();
    Auth timeout guard
    ───────────────────────────────────────────── */
 
-const authTimeout = setTimeout(() => {
-  const grid = document.getElementById('studio-grid');
-  if (grid) {
-    grid.innerHTML = `
-      <div class="col-span-full text-center py-20 text-red-500/80 text-sm">
-        Connection timed out. Please refresh.
-      </div>
-    `;
-  }
-}, 10_000);
+const authTimeout = setupAuthTimeout('studio-grid');
 
 /* ─────────────────────────────────────────────
    Auth + Data
@@ -61,7 +55,7 @@ initAuth(async (user) => {
   // Compute hero stats from both cached data sets
   computeAndRenderHeroStats();
 
-  window.lucide?.createIcons?.();
+  initIcons();
 });
 
 /* ─────────────────────────────────────────────
@@ -70,5 +64,5 @@ initAuth(async (user) => {
 
 document.addEventListener('DOMContentLoaded', () => {
   initShelfInteractions();
-  window.lucide?.createIcons?.();
+  initIcons();
 });

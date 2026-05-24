@@ -4,6 +4,9 @@
 
 import { profileState, GENRE_OPTIONS } from './state.js';
 import { suggestNameFromBio } from './ai-name.js';
+import { debounce } from '@/utils/function.utils';
+import { initIcons } from '@ui/components/icons.js';
+import { showToast } from '@ui/components/toast.js';
 
 /* ─────────────────────────────────────────────
    Modal
@@ -262,7 +265,7 @@ export function updateProfileUI(data) {
   // Stats
   setEl('stat-words-written', formatNumber(data.totalWordsWritten || 0));
   setEl('stat-total-readers', formatNumber(data.totalReaders || 0));
-  setEl('stat-reading-streak', String(data.writingStreak || 0));
+  setEl('stat-streak', String(data.writingStreak || 0));
 
   // Reading goal progress
   if (data.readingGoal) {
@@ -271,6 +274,9 @@ export function updateProfileUI(data) {
 
   // Favourite genres pills
   _renderGenrePills(data.favouriteGenres || []);
+
+  // Update Rank
+  _renderRank(data.totalWordsWritten || 0);
 
   // Modal inputs
   setInput('input-name', data.name || '');
@@ -288,6 +294,37 @@ export function updateProfileUI(data) {
     profileState.favouriteGenres = [...data.favouriteGenres];
     syncGenreChips();
   }
+}
+
+function _renderRank(wordCount) {
+  const badge = document.querySelector('.mythic-badge');
+  if (!badge) return;
+
+  let rank = 'Explorer';
+  let colorCls = 'text-indigo-300';
+  let bgCls = 'bg-indigo-500/15';
+  let borderCls = 'border-indigo-500/30';
+
+  if (wordCount >= 100000) {
+    rank = 'Ancient One';
+    colorCls = 'text-amber-400';
+    bgCls = 'bg-amber-500/20';
+    borderCls = 'border-amber-500/40';
+  } else if (wordCount >= 50000) {
+    rank = 'Sage';
+    colorCls = 'text-emerald-400';
+    bgCls = 'bg-emerald-500/20';
+    borderCls = 'border-emerald-500/40';
+  } else if (wordCount >= 10000) {
+    rank = 'Chronicler';
+    colorCls = 'text-violet-300';
+    bgCls = 'bg-violet-500/20';
+    borderCls = 'border-violet-500/40';
+  }
+
+  badge.className = `mythic-badge ${bgCls} ${borderCls} ${colorCls}`;
+  badge.innerHTML = `<i data-lucide="sparkles" class="w-3.5 h-3.5"></i> ${rank}`;
+  initIcons(badge);
 }
 
 function _renderGenrePills(genres) {
@@ -338,43 +375,13 @@ export function updateStatsUI(stats) {
    ───────────────────────────────────────────── */
 
 /**
- * Shows a toast notification. Auto-removes after 3.5s.
+ * Shows a toast notification.
  *
  * @param {string} message
  * @param {'success'|'error'|'info'} type
  */
 export function showNotification(message, type = 'success') {
-  const container = document.getElementById('toast-container');
-  if (!container) return;
-
-  const iconMap = { success: 'check-circle', error: 'alert-circle', info: 'info' };
-  const colorMap = {
-    success: 'border-indigo-500/40 text-white',
-    error: 'border-red-500/40 text-red-200',
-    info: 'border-slate-500/40 text-slate-200',
-  };
-  const iconColorMap = {
-    success: 'text-indigo-400',
-    error: 'text-red-400',
-    info: 'text-slate-400',
-  };
-
-  const toast = document.createElement('div');
-  toast.className = `flex items-center gap-3 px-5 py-4 rounded-2xl border bg-zinc-900/95 backdrop-blur-xl shadow-2xl pointer-events-auto transition-all duration-300 translate-x-0 opacity-100 ${colorMap[type]}`;
-
-  toast.innerHTML = `
-    <i data-lucide="${iconMap[type]}" class="w-4 h-4 flex-shrink-0 ${iconColorMap[type]}"></i>
-    <span class="text-sm font-medium">${message}</span>
-  `;
-
-  container.appendChild(toast);
-  window.lucide?.createIcons?.();
-
-  setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateX(16px)';
-    setTimeout(() => toast.remove(), 400);
-  }, 3500);
+  showToast(message, type);
 }
 
 /* ─────────────────────────────────────────────
@@ -401,7 +408,7 @@ export function renderContinueReading(tales) {
   }
 
   container.innerHTML = tales.map(_buildContinueReadingCard).join('');
-  window.lucide?.createIcons?.();
+  initIcons();
 }
 
 function _buildContinueReadingCard(tale) {
@@ -412,40 +419,40 @@ function _buildContinueReadingCard(tale) {
   return `
     <a
       href="reader.html?taleId=${tale.id}&chapterId=${tale.lastChapterIndex}"
-      class="continue-card snap-start flex-shrink-0"
+      class="continue-card group snap-start flex-shrink-0"
     >
-      <div class="relative aspect-[16/10] rounded-2xl overflow-hidden mb-4 bg-zinc-900">
+      <div class="card-image-wrap mb-4">
         <img
           src="${cover}"
           alt="${tale.title}"
-          class="w-full h-full object-cover opacity-70 group-hover:opacity-90 group-hover:scale-105 transition-all duration-700"
+          class="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-all duration-700"
           loading="lazy"
         />
-        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
-        <div class="absolute bottom-3 left-3">
-          <span class="px-2 py-1 bg-black/60 backdrop-blur-md rounded-md text-[9px] font-bold text-white/80 uppercase tracking-wider">
-            ${tale.era || 'Unknown Era'}
+        <div class="card-overlay"></div>
+        <div class="absolute bottom-4 left-4">
+          <span class="px-2.5 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-lg text-[9px] font-black text-white/90 uppercase tracking-widest">
+            ${tale.era || 'Mythic Era'}
           </span>
         </div>
       </div>
 
-      <div class="space-y-2">
-        <h3 class="text-base font-bold text-white group-hover:text-indigo-300 transition-colors truncate">
+      <div class="px-1">
+        <h3 class="text-base font-bold text-white group-hover:text-indigo-400 transition-colors truncate">
           ${tale.title || 'Untitled Tale'}
         </h3>
-        <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+        <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed mt-1 font-medium">
           ${tale.description || ''}
         </p>
 
-        <div class="pt-3 space-y-1.5">
-          <div class="flex items-center justify-between text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+        <div class="mt-4 space-y-2">
+          <div class="flex items-center justify-between text-[9px] font-black text-slate-600 uppercase tracking-[0.2em]">
             <span>Progress</span>
-            <span class="text-indigo-400">${tale.percent}%</span>
+            <span class="text-indigo-500">${tale.percent}%</span>
           </div>
-          <div class="h-1 w-full bg-white/[0.06] rounded-full overflow-hidden">
+          <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
             <div
-              class="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-700"
-              style="width: ${Math.max(2, tale.percent)}%"
+              class="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-1000"
+              style="width: ${Math.max(3, tale.percent)}%"
             ></div>
           </div>
         </div>
@@ -474,7 +481,7 @@ export function renderPublishedTales(tales) {
 
   const cards = tales.map(_buildPublishedCard).join('');
   container.insertAdjacentHTML('afterbegin', cards);
-  window.lucide?.createIcons?.();
+  initIcons();
 }
 
 function _buildPublishedCard(tale) {
@@ -486,40 +493,39 @@ function _buildPublishedCard(tale) {
     .slice(0, 2)
     .map(
       (t) => `
-    <span class="px-2 py-0.5 bg-indigo-500/10 text-indigo-400 text-[9px] font-medium rounded-md">${t}</span>
+    <span class="px-2 py-1 bg-indigo-500/5 text-indigo-400/80 text-[9px] font-black uppercase tracking-wider rounded-md border border-indigo-500/10">${t}</span>
   `
     )
     .join('');
 
   return `
-    <a href="tale.html?id=${tale.id}" class="contribution-card group block glass-panel-elevated rounded-[1.75rem] overflow-hidden hover:-translate-y-1 transition-all duration-400">
-      <div class="relative aspect-[16/10] bg-zinc-900 overflow-hidden">
+    <a href="tale.html?id=${tale.id}" class="contribution-card group block bg-white/[0.01] border border-white/5 rounded-[2rem] overflow-hidden hover:bg-white/[0.03] hover:border-white/10 hover:-translate-y-1.5 transition-all duration-500">
+      <div class="relative aspect-[16/9] bg-zinc-950 overflow-hidden">
         <img src="${cover}" alt="${tale.title}"
-          class="w-full h-full object-cover opacity-60 group-hover:opacity-80 group-hover:scale-103 transition-all duration-600" loading="lazy" />
-        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-        <div class="absolute top-3 left-3">
-          <span class="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 text-[9px] font-bold uppercase tracking-wider rounded-full border border-emerald-500/25">
+          class="w-full h-full object-cover opacity-50 group-hover:opacity-70 group-hover:scale-105 transition-all duration-700" loading="lazy" />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+        <div class="absolute top-4 left-4">
+          <span class="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-[9px] font-black uppercase tracking-widest rounded-full border border-emerald-500/20 backdrop-blur-md">
             Published
           </span>
         </div>
-        <div class="absolute bottom-3 left-4 right-4">
-          <h3 class="font-bold text-white text-base leading-snug group-hover:text-indigo-300 transition-colors line-clamp-2">
+        <div class="absolute bottom-4 left-5 right-5">
+          <h3 class="font-cinzel font-bold text-white text-lg leading-snug group-hover:text-indigo-300 transition-colors line-clamp-2">
             ${tale.title || 'Untitled Tale'}
           </h3>
         </div>
       </div>
-      <div class="p-4 space-y-3">
-        <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed">${tale.description || ''}</p>
-        ${tags ? `<div class="flex items-center gap-1.5 flex-wrap">${tags}</div>` : ''}
-        <div class="pt-2 border-t border-white/[0.04] flex items-center justify-between">
-          <div class="flex items-center gap-3 text-[10px] text-slate-600">
-            <span class="flex items-center gap-1">
-              <i data-lucide="layers" class="w-3 h-3"></i>
-              ${tale.chapterCount || 0} ch
+      <div class="p-6 space-y-4">
+        <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed font-medium">${tale.description || ''}</p>
+        <div class="flex items-center justify-between pt-2 border-t border-white/5">
+          <div class="flex items-center gap-4 text-[10px] font-bold text-slate-600 uppercase tracking-widest">
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="layers" class="w-3.5 h-3.5 text-slate-700"></i>
+              ${tale.chapterCount || 0}
             </span>
-            ${tale.readCount ? `<span class="flex items-center gap-1"><i data-lucide="eye" class="w-3 h-3"></i>${formatNumber(tale.readCount)}</span>` : ''}
+            ${tale.readCount ? `<span class="flex items-center gap-1.5"><i data-lucide="eye" class="w-3.5 h-3.5 text-slate-700"></i>${formatNumber(tale.readCount)}</span>` : ''}
           </div>
-          <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-indigo-500 group-hover:translate-x-1 transition-transform"></i>
+          <i data-lucide="arrow-right" class="w-4 h-4 text-indigo-500 group-hover:translate-x-1.5 transition-transform"></i>
         </div>
       </div>
     </a>
@@ -537,13 +543,13 @@ export function renderDrafts(drafts) {
 
   if (!drafts.length) {
     container.innerHTML = `
-      <div class="col-span-full text-sm text-slate-600 italic py-8">No drafts yet.</div>
+      <div class="col-span-full text-sm text-slate-600 italic py-8 font-medium">No drafts awaiting preservation.</div>
     `;
     return;
   }
 
   container.innerHTML = drafts.map(_buildDraftCard).join('');
-  window.lucide?.createIcons?.();
+  initIcons();
 }
 
 function _buildDraftCard(draft) {
@@ -554,24 +560,27 @@ function _buildDraftCard(draft) {
   return `
     <a
       href="contribution.html?draft=${draft.id}"
-      class="group block glass-panel rounded-[1.5rem] p-4 hover:border-indigo-500/25 transition-all duration-300 border border-transparent"
+      class="group block bg-white/[0.02] border border-white/5 rounded-[1.75rem] p-6 hover:bg-white/[0.04] hover:border-indigo-500/20 transition-all duration-400"
     >
-      <div class="flex items-start justify-between gap-3 mb-3">
-        <span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 text-[9px] font-bold uppercase tracking-wider rounded-full border border-amber-500/20">
+      <div class="flex items-start justify-between gap-3 mb-4">
+        <span class="px-2.5 py-1 bg-amber-500/10 text-amber-500 text-[9px] font-black uppercase tracking-widest rounded-full border border-amber-500/10">
           Draft
         </span>
-        <span class="text-[10px] text-slate-600">${updated}</span>
+        <span class="text-[10px] font-bold text-slate-600 uppercase tracking-wider">${updated}</span>
       </div>
-      <h3 class="font-semibold text-white text-sm group-hover:text-indigo-300 transition-colors truncate mb-1">
+      <h3 class="font-cinzel font-bold text-white text-base group-hover:text-indigo-400 transition-colors truncate mb-2">
         ${draft.title || 'Untitled Draft'}
       </h3>
-      <p class="text-[11px] text-slate-600 line-clamp-2 leading-relaxed mb-3">
-        ${draft.synopsis || 'No synopsis yet.'}
+      <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed mb-6 font-medium">
+        ${draft.synopsis || 'No synopsis recorded yet.'}
       </p>
-      <div class="flex items-center justify-between text-[10px] text-slate-600">
-        <span>${draft.chapterCount || 0} chapters</span>
-        <span class="flex items-center gap-1 text-indigo-500 group-hover:gap-2 transition-all">
-          Continue <i data-lucide="arrow-right" class="w-3 h-3"></i>
+      <div class="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-600">
+        <span class="flex items-center gap-2">
+          <i data-lucide="book-type" class="w-3.5 h-3.5"></i>
+          ${draft.chapterCount || 0} Chapters
+        </span>
+        <span class="flex items-center gap-2 text-indigo-500 group-hover:gap-3 transition-all">
+          Resume <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
         </span>
       </div>
     </a>
@@ -610,12 +619,12 @@ export function showContinueReadingSkeleton() {
   container.innerHTML = Array.from(
     { length: 3 },
     () => `
-    <div class="flex-shrink-0 w-72 rounded-[1.75rem] overflow-hidden">
-      <div class="aspect-[16/10] skeleton rounded-2xl mb-4"></div>
-      <div class="space-y-2 px-1">
-        <div class="skeleton h-4 w-3/4 rounded"></div>
-        <div class="skeleton h-3 w-full rounded"></div>
-        <div class="skeleton h-3 w-2/3 rounded"></div>
+    <div class="flex-shrink-0 w-80 rounded-[2rem] overflow-hidden">
+      <div class="aspect-[16/9] skeleton rounded-2xl mb-4"></div>
+      <div class="space-y-3 px-1">
+        <div class="skeleton h-5 w-3/4 rounded-lg"></div>
+        <div class="skeleton h-3.5 w-full rounded-md"></div>
+        <div class="skeleton h-3.5 w-2/3 rounded-md"></div>
       </div>
     </div>
   `
@@ -630,11 +639,11 @@ export function showContributionsSkeleton() {
   const skeletons = Array.from(
     { length: 2 },
     () => `
-    <div class="skeleton-card rounded-[1.75rem] overflow-hidden">
-      <div class="aspect-[16/10] skeleton"></div>
-      <div class="p-4 space-y-2">
-        <div class="skeleton h-4 w-2/3 rounded"></div>
-        <div class="skeleton h-3 w-full rounded"></div>
+    <div class="skeleton-card rounded-[2rem] overflow-hidden">
+      <div class="aspect-[16/9] skeleton"></div>
+      <div class="p-6 space-y-3">
+        <div class="skeleton h-5 w-2/3 rounded-lg"></div>
+        <div class="skeleton h-3.5 w-full rounded-md"></div>
       </div>
     </div>
   `
@@ -686,12 +695,4 @@ function timeAgo(date) {
   if (hrs < 24) return `${hrs}h ago`;
   const days = Math.floor(hrs / 24);
   return `${days}d ago`;
-}
-
-function debounce(fn, delay) {
-  let t;
-  return (...args) => {
-    clearTimeout(t);
-    t = setTimeout(() => fn(...args), delay);
-  };
 }

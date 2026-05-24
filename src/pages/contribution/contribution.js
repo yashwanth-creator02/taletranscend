@@ -3,11 +3,11 @@
 // Bootstraps nav, auth, draft loading, and all editor interactions.
 
 import '@css/base.css';
+import '@css/nav.css';
 import '@css/components.css';
 import '@css/pages/contribution.css';
 
 import {
-  initNav,
   initAuth,
   addNewChapter,
   updateSidebarTitle,
@@ -21,7 +21,14 @@ import {
   syncMetadataFromDom,
   publishFullTale,
   state,
+  initIcons,
 } from './index.js';
+import { debounce } from '@/utils/function.utils';
+import { setupAuthTimeout } from '@/utils/ui.utils';
+import { initNav } from '@ui/components/nav/nav.js';
+import { suggestTitle, refineMythicText } from '@services/index.js';
+import { AI_API_KEY } from '@config/app.config.js';
+import { showToast } from '@ui/components/toast.js';
 
 initNav();
 
@@ -31,9 +38,7 @@ initDraftId();
 
 /* ── Auth + Init ──────────────────────────────────────────────────── */
 
-const authTimeout = setTimeout(() => {
-  setStatus('Connection timed out. Please refresh.', 'error');
-}, 10_000);
+const authTimeout = setupAuthTimeout('stat-status', 'Connection timed out. Please refresh.');
 
 initAuth(async (user) => {
   clearTimeout(authTimeout);
@@ -51,6 +56,7 @@ async function init(_userId) {
   bindMetadataEvents();
   bindVoiceEvents();
   bindCoverEvents();
+  bindAIEvents();
 
   const hasDraft = await loadDraft();
 
@@ -64,7 +70,7 @@ async function init(_userId) {
     setStatus('New tale started.', 'neutral');
   }
 
-  window.lucide?.createIcons?.();
+  initIcons();
 }
 
 /* ── Editor Events ────────────────────────────────────────────────── */
@@ -171,7 +177,51 @@ function bindMetadataEvents() {
   });
 }
 
-/* ── Voice Events ─────────────────────────────────────────────────── */
+/* ── AI Assisted Storytelling ────────────────────────────────────── */
+
+function bindAIEvents() {
+  const enhanceBtn = document.getElementById('ai-enhance-btn');
+  const continueBtn = document.getElementById('ai-continue-btn');
+  const contentArea = document.getElementById('chapter-content');
+
+  if (!enhanceBtn || !continueBtn || !contentArea) return;
+
+  enhanceBtn.addEventListener('click', async () => {
+    const text = contentArea.value.trim();
+    if (!text || text.length < 20) {
+      showToast('Neural link requires more data to refine.', 'info');
+      return;
+    }
+
+    enhanceBtn.disabled = true;
+    enhanceBtn.classList.add('animate-pulse');
+    showToast('Consulting the Oracle...', 'info');
+
+    try {
+      const refined = await refineMythicText(text, AI_API_KEY);
+      if (refined) {
+        contentArea.value = refined;
+        contentArea.dispatchEvent(new Event('input', { bubbles: true }));
+        showToast('The weave has been refined.', 'success');
+      } else {
+        showToast('The oracle remains silent.', 'warning');
+      }
+    } catch (err) {
+      console.error('[ai] Enhancement failed:', err);
+      showToast('Neural link severed during refinement.', 'error');
+    } finally {
+      enhanceBtn.disabled = false;
+      enhanceBtn.classList.remove('animate-pulse');
+    }
+  });
+
+  // Stub for continue
+  continueBtn.addEventListener('click', () => {
+    showToast('AI Continuation coming soon in the next era.', 'info');
+  });
+}
+
+/* ── Voice Logic ──────────────────────────────────────────────────── */
 
 /**
  * Wires all voice dictation buttons using the Web Speech API.
@@ -305,7 +355,7 @@ export function updateChecklist() {
     item.classList.toggle('opacity-50', !passed);
   });
 
-  window.lucide?.createIcons?.();
+  initIcons();
 }
 
 /* ── Status Helper ────────────────────────────────────────────────── */
@@ -331,14 +381,4 @@ export function setStatus(message, type) {
 
   status.classList.add(colors[type] ?? 'text-zinc-500');
   status.textContent = message;
-}
-
-/* ── Debounce (local) ─────────────────────────────────────────────── */
-
-function debounce(fn, delay) {
-  let t;
-  return (...args) => {
-    clearTimeout(t);
-    t = setTimeout(() => fn(...args), delay);
-  };
 }

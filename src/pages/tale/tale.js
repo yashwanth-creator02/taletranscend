@@ -1,8 +1,9 @@
 // src/pages/tale/tale.js
-// Entry point for the tale overview page.
-// Bootstraps auth, loads tale data, renders UI, and binds interactions.
+// Modern Archive Entry Point
+// Orchestrates neural link, data hydration, and interactive states.
 
 import '@css/base.css';
+import '@css/nav.css';
 import '@css/components.css';
 import '@css/pages/tale.css';
 
@@ -12,65 +13,77 @@ import {
   loadChapters,
   renderTale,
   renderChapters,
+  showArchiveSkeletons,
   bindChapterClicks,
   setupTabs,
   setupStartReading,
   setupResumeReading,
+  setupResonance,
+  initHeaderScroll,
   listenToComments,
   postComment,
   initIcons,
 } from './index.js';
-import { createIcons, icons } from 'lucide';
 import { initNav } from '@ui/components/nav/nav.js';
-initNav();
-/* ==================== URL Parameters ==================== */
+import { setupAuthTimeout } from '@/utils/ui.utils';
+
+/* ─────────────────────────────────────────────
+   URL Parameters
+   ───────────────────────────────────────────── */
+
 const taleId = new URLSearchParams(window.location.search).get('id');
 
-// Redirect to library if no tale ID is present in the URL
 if (!taleId) {
   location.replace('library.html');
-  throw new Error('No taleId');
+  throw new Error('No taleId detected');
 }
 
-/* ==================== Initialization ==================== */
+/* ─────────────────────────────────────────────
+   Bootstrap Component
+   ───────────────────────────────────────────── */
 
-/**
- * Bootstraps the tale page after authentication:
- * - Loads and renders tale metadata
- * - Loads and renders chapter list
- * - Binds all user interactions
- * - Starts real-time comment listener
- */
-const authTimeout = setTimeout(() => {
-  document.getElementById('cards-grid').innerHTML = `
-    <div class="col-span-full text-center py-20 text-red-500">
-      Connection timed out. Please refresh.
-    </div>
-  `;
-}, 10000);
+initNav();
+
+const authTimeout = setupAuthTimeout(
+  'display-description',
+  'Archive connection timed out. Neural link severed.'
+);
+
 initAuth(async (user) => {
-  const userId = user.uid;
   clearTimeout(authTimeout);
+  const userId = user.uid;
 
-  const tale = await loadTale(taleId, user);
+  // 0. Show Skeletons
+  showArchiveSkeletons();
+
+  // 1. Data Hydration
+  const [tale, chapters] = await Promise.all([loadTale(taleId, user), loadChapters(taleId)]);
+
   if (!tale) return;
 
+  // 2. Primary UI
   await renderTale(userId, tale, taleId);
-
-  const chapters = await loadChapters(taleId);
   renderChapters(userId, chapters, taleId);
 
+  // 3. Interactions
   bindChapterClicks(taleId);
   setupStartReading(taleId, chapters);
   setupResumeReading(userId, taleId);
+  setupResonance(taleId);
   setupTabs();
+  initHeaderScroll();
 
+  // 4. Real-time Listeners
   listenToComments(taleId);
 
-  // Expose comment posting for HTML inline handler
+  // 5. Post-resolve hooks
   document.getElementById('post-btn')?.addEventListener('click', () => postComment(taleId));
+
+  initIcons();
 });
 
-/* ==================== Icons ==================== */
+/* ─────────────────────────────────────────────
+   Static Initialization
+   ───────────────────────────────────────────── */
+
 initIcons();
-createIcons({ icons });

@@ -345,77 +345,51 @@ export function buildCommandPalette() {
  */
 
 export function buildNav() {
-  const current = getCurrentPage(); // Assuming this is imported or global
+  const current = getCurrentPage();
   const primaryLinks = PRIMARY_LINKS.map((link) => buildPrimaryLink(link, current)).join('');
 
-  // Part A: The Top Navigation (Desktop + Mobile Topbar)
-  const headerHtml = `
-    <header id="app-nav" class="app-nav" role="banner">
-      <!-- ── Desktop header ── -->
-      <div class="desktop-shell">
+  return {
+    headerHtml: `
+      <header id="app-nav" class="app-nav">
         <div class="nav-inner">
-          <a href="index.html" class="nav-logo" aria-label="TaleTranscend — Home">
-            <div class="nav-logo__mark" aria-hidden="true">
-              <i data-lucide="sparkles" class="nav-logo__icon"></i>
-            </div>
-            <span class="nav-logo__wordmark">TaleTranscend</span>
-          </a>
+          <div class="flex items-center gap-10">
+            <a href="index.html" class="nav-logo">
+              <div class="nav-logo__mark">
+                <i data-lucide="sparkles" class="nav-logo__icon"></i>
+              </div>
+              <span class="nav-logo__wordmark">TaleTranscend</span>
+            </a>
 
-          <nav class="nav-primary" id="nav-links" aria-label="Main navigation">
-            ${primaryLinks}
-          </nav>
+            <nav class="nav-primary desktop-shell">
+              ${primaryLinks}
+            </nav>
+          </div>
 
           <div class="nav-actions">
-            <button
-              type="button"
-              class="command-trigger"
-              id="nav-command-button"
-              aria-label="Open command palette (Ctrl K)"
-            >
-              <i data-lucide="search" class="command-trigger__icon" aria-hidden="true"></i>
-              <span class="command-trigger__text">Search</span>
-              <kbd class="command-trigger__hint" aria-hidden="true">Ctrl K</kbd>
+            <button type="button" class="command-trigger desktop-shell" id="nav-command-button">
+              <i data-lucide="search" class="w-4 h-4"></i>
+              <span class="text-xs font-bold uppercase tracking-widest">Search</span>
+              <kbd class="command-trigger__hint">⌘K</kbd>
             </button>
-            ${buildUserSkeleton()}
+
+            <button type="button" class="command-trigger mobile-shell p-3 rounded-xl bg-white/5 border border-white/10" id="nav-command-button-mobile">
+              <i data-lucide="search" class="w-4 h-4"></i>
+            </button>
+
+            <div id="nav-user" class="flex items-center">
+              ${buildUserSkeleton()}
+            </div>
           </div>
         </div>
+
+        <div class="nav-progress"></div>
+        ${buildCommandPalette()}
+      </header>
+    `,
+    dockHtml: `
+      <div id="mobile-dock-container">
+        ${buildMobileDock(current, null)}
       </div>
-
-      <!-- ── Mobile shell (topbar) ── -->
-      <div class="mobile-shell">
-        <div class="mobile-topbar">
-          <a href="index.html" class="mobile-brand" aria-label="TaleTranscend — Home">
-            <div class="mobile-brand__mark" aria-hidden="true">
-              <i data-lucide="sparkles" class="mobile-brand__icon"></i>
-            </div>
-            <span class="mobile-brand__text">TaleTranscend</span>
-          </a>
-
-          <button
-            type="button"
-            class="command-trigger command-trigger--mobile"
-            id="nav-command-button-mobile"
-            aria-label="Open command palette"
-          >
-            <i data-lucide="search" class="command-trigger__icon" aria-hidden="true"></i>
-          </button>
-        </div>
-      </div>
-
-      <!-- Scroll progress indicator -->
-      <div class="nav-progress" aria-hidden="true" role="presentation"></div>
-
-      <!-- Command palette (shared) -->
-      ${buildCommandPalette()}
-    </header>
-  `;
-
-  // Part B: The Bottom Dock (Floating fixed container)
-  const dockHtml = `
-    <div id="mobile-dock-container">
-      ${buildMobileDock(current, null)}
-    </div>
-  `;
-
-  return { headerHtml, dockHtml };
+    `,
+  };
 }
