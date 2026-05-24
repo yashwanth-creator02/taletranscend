@@ -92,23 +92,14 @@ function initSidebar() {
 
   // Sidebar Collapse
   document.getElementById('collapseBtn')?.addEventListener('click', () => {
-    const sidebar = document.getElementById('sidebar');
-    const collapseIcon = document.getElementById('collapseIcon');
-    readerState.isCollapsed = !readerState.isCollapsed;
-    sidebar?.classList.toggle('collapsed', readerState.isCollapsed);
-
-    if (collapseIcon) {
-      collapseIcon.setAttribute(
-        'data-lucide',
-        readerState.isCollapsed ? 'chevron-right' : 'chevron-left'
-      );
-      initIcons();
-    }
-
-    if (readerState.isCollapsed) {
+    if (_isPanelVisible()) {
       closePanel();
+    } else {
+      openPanel('toc');
     }
   });
+
+  _updateCollapseIcon();
 
   // Tool Opening
   document.querySelectorAll('[data-tool]').forEach((btn) => {
@@ -129,6 +120,7 @@ function initSidebar() {
 
 function openPanel(toolId) {
   readerState.openTool = toolId;
+  readerState.isCollapsed = false;
   const panel = document.getElementById('toolPanel');
   const title = document.getElementById('panelTitle');
   const content = document.getElementById('panelContent');
@@ -147,6 +139,7 @@ function openPanel(toolId) {
     btn.dataset.active = btn.dataset.tool === toolId;
   });
 
+  _updateCollapseIcon();
   initIcons();
 }
 
@@ -196,7 +189,10 @@ function closePanel() {
     panel.style.display = 'none';
   }
   readerState.openTool = null;
+  readerState.isCollapsed = true;
   document.querySelectorAll('[data-tool]').forEach((btn) => (btn.dataset.active = 'false'));
+  _updateCollapseIcon();
+  initIcons();
 }
 
 function toggleFocusMode() {
@@ -219,6 +215,18 @@ function toggleFocusMode() {
 
 function _isPanelVisible() {
   return document.getElementById('toolPanel')?.classList.contains('visible');
+}
+
+function _updateCollapseIcon() {
+  const sidebar = document.getElementById('sidebar');
+  const collapseIcon = document.getElementById('collapseIcon');
+  const isVisible = _isPanelVisible();
+
+  sidebar?.classList.toggle('collapsed', !isVisible);
+
+  if (collapseIcon) {
+    collapseIcon.setAttribute('data-lucide', isVisible ? 'chevron-left' : 'chevron-right');
+  }
 }
 
 /* ─────────────────────────────────────────────
