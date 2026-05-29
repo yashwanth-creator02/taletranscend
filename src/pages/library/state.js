@@ -1,34 +1,32 @@
 // src/pages/library/state.js
 // Centralised mutable state for the library page.
-// All filter, search, and data state lives here so every module
-// reads from the same source — no function-argument state passing.
 
 /**
  * @typedef {'all'|'recent'|'finished'|'bookmarked'|'my-tales'} SidebarFilter
  *
  * @typedef {Object} LibraryState
- * @property {string|null}     userId          - Authenticated Firebase user ID
- * @property {Array<Object>}   allTales        - Full unfiltered tales from Firestore
- * @property {Array<Object>}   filteredTales   - Currently displayed tales
- * @property {string}          searchQuery     - Current search string (lowercase)
- * @property {string}          activeEra       - Active era chip value ('all' or era name)
- * @property {string}          activeTone      - Active tone value ('all' or tone name)
- * @property {string}          activeLength    - Active length value ('all', 'short', 'medium', 'long')
- * @property {SidebarFilter}   sidebarFilter   - Active sidebar filter key
+ * @property {string|null}     userId
+ * @property {import('@state/schemas/tale.schema.js').Tale[]} allTales
+ * @property {import('@state/schemas/tale.schema.js').Tale[]} filteredTales
+ * @property {string}          searchQuery
+ * @property {string}          activeEra
+ * @property {string}          activeTone
+ * @property {string}          activeLength
+ * @property {SidebarFilter}   sidebarFilter
  * @property {boolean}         sidebarCollapsed
- * @property {boolean}         isLoading
+ * @property {boolean}         eraChipsBuilt      - True after first tales batch loads chips
  */
 
 /** @type {LibraryState} */
 export const libraryState = {
-  userId: null,
-  allTales: [],
-  filteredTales: [],
-  searchQuery: '',
-  activeEra: 'all',
-  activeTone: 'all',
-  activeLength: 'all',
-  sidebarFilter: 'all',
+  userId:          null,
+  allTales:        [],
+  filteredTales:   [],
+  searchQuery:     '',
+  activeEra:       'all',
+  activeTone:      'all',
+  activeLength:    'all',
+  sidebarFilter:   'all',
   sidebarCollapsed: JSON.parse(localStorage.getItem('tt-lib-sidebar-collapsed') ?? 'false'),
-  isLoading: false,
+  eraChipsBuilt:   false,
 };

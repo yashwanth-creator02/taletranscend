@@ -1,6 +1,6 @@
 // src/pages/tale/tale.js
-// Modern Archive Entry Point
-// Orchestrates neural link, data hydration, and interactive states.
+// Tale Archive page entry point.
+// Orchestrates data hydration and all user interactions.
 
 import '@css/base.css';
 import '@css/nav.css';
@@ -18,12 +18,15 @@ import {
   setupTabs,
   setupStartReading,
   setupResumeReading,
+  setupShelfButton,
+  setupShareButton,
   setupResonance,
   initHeaderScroll,
   listenToComments,
   postComment,
   initIcons,
 } from './index.js';
+import { addToBookmarks, removeFromBookmarks, isBookmarked } from '@services/index.js';
 import { initNav } from '@ui/components/nav/nav.js';
 import { setupAuthTimeout } from '@/utils/ui.utils';
 
@@ -35,11 +38,11 @@ const taleId = new URLSearchParams(window.location.search).get('id');
 
 if (!taleId) {
   location.replace('library.html');
-  throw new Error('No taleId detected');
+  throw new Error('No taleId in URL');
 }
 
 /* ─────────────────────────────────────────────
-   Bootstrap Component
+   Bootstrap
    ───────────────────────────────────────────── */
 
 initNav();
@@ -53,10 +56,10 @@ initAuth(async (user) => {
   clearTimeout(authTimeout);
   const userId = user.uid;
 
-  // 0. Show Skeletons
+  // 0. Skeleton loaders
   showArchiveSkeletons();
 
-  // 1. Data Hydration
+  // 1. Data hydration
   const [tale, chapters] = await Promise.all([loadTale(taleId, user), loadChapters(taleId)]);
 
   if (!tale) return;
@@ -73,17 +76,23 @@ initAuth(async (user) => {
   setupTabs();
   initHeaderScroll();
 
-  // 4. Real-time Listeners
+  // 4. Shelf and share buttons
+  await setupShelfButton(userId, taleId, tale, { addToBookmarks, removeFromBookmarks, isBookmarked });
+  setupShareButton(taleId);
+
+  // 5. Real-time listeners
   listenToComments(taleId);
 
-  // 5. Post-resolve hooks
+  // 6. Post-resolve hooks
   document.getElementById('post-btn')?.addEventListener('click', () => postComment(taleId));
 
   initIcons();
 });
 
 /* ─────────────────────────────────────────────
-   Static Initialization
+   Static Init
+   lucide icons are loaded via CDN window.lucide — initIcons wraps window.lucide.createIcons()
+   No 'lucide' npm package import needed or permitted.
    ───────────────────────────────────────────── */
 
 initIcons();

@@ -1,7 +1,7 @@
 // src/pages/profile/sync.js
 // Manages real-time Firestore sync and save operations for the user profile.
-// Handles all fields: name, bio, pronouns, avatar, location, website,
-// social handles, reading goal, favourite genres.
+// All incoming Firestore data is normalized through createUserProfile before
+// being stored in profileState. computeAndSyncStats delegates to profile.service.js.
 
 import {
   auth,
@@ -9,15 +9,14 @@ import {
   setDoc,
   serverTimestamp,
   getDoc,
-  getDocs,
-  query,
-  where,
   refs,
 } from '@fb/index.js';
 
+import { createUserProfile } from '@state/index.js';
 import { updateProfileUI, showNotification } from './ui.js';
 import { profileState } from './state.js';
 
+// Re-export UI utilities so profile/index.js barrel works without changing
 export * from './ui.js';
 
 /* ─────────────────────────────────────────────
@@ -26,8 +25,9 @@ export * from './ui.js';
 
 /**
  * Starts real-time synchronisation of the user profile from Firestore.
+ * Normalizes the incoming document through createUserProfile so profileState
+ * always has a consistent shape with safe defaults for every field.
  * Cleans up any existing listener before creating a new one.
- * Updates the entire profile UI whenever the document changes.
  *
  * @param {string} uid
  */
@@ -38,45 +38,40 @@ export function startProfileSync(uid) {
     profileState.unsubscribeProfile = null;
   }
 
-  // Persist active user ID into local state
   profileState.uid = uid;
 
-  // User document reference
-  const userRef = refs.user(uid);
-
   profileState.unsubscribeProfile = onSnapshot(
-    userRef,
-
+    refs.user(uid),
     (snapshot) => {
       if (!snapshot.exists()) return;
 
-      const data = snapshot.data();
+      // Normalize through schema — guarantees every field is present with safe defaults
+      const normalized = createUserProfile(uid, snapshot.data());
 
-      // Mirror Firestore data into local state
+      // Mirror all schema fields into profileState
       Object.assign(profileState, {
-        name: data.name || '',
-        bio: data.bio || '',
-        pronouns: data.pronouns || '',
-        avatarUrl: data.avatarUrl || '',
-        location: data.location || '',
-        website: data.website || '',
-        twitterHandle: data.twitterHandle || '',
-        instagramHandle: data.instagramHandle || '',
-        readingGoal: data.readingGoal ?? 12,
-        favouriteGenres: data.favouriteGenres || [],
-        joinedAt: data.joinedAt || '',
-        totalWordsWritten: data.totalWordsWritten || 0,
-        totalReaders: data.totalReaders || 0,
-        writingStreak: data.writingStreak || 0,
+        name:             normalized.name,
+        bio:              normalized.bio,
+        pronouns:         normalized.pronouns,
+        avatarUrl:        normalized.avatarUrl,
+        location:         normalized.location,
+        website:          normalized.website,
+        twitterHandle:    normalized.twitterHandle,
+        instagramHandle:  normalized.instagramHandle,
+        readingGoal:      normalized.readingGoal,
+        favouriteGenres:  normalized.favouriteGenres,
+        joinedAt:         normalized.joinedAt
+          ? new Date(normalized.joinedAt.seconds * 1000).toISOString()
+          : '',
+        totalWordsWritten: normalized.totalWordsWritten,
+        totalReaders:      normalized.totalReaders,
+        writingStreak:     normalized.writingStreak,
       });
 
-      // Refresh UI
       updateProfileUI(profileState);
     },
-
     (error) => {
       console.error('[profile] Sync error:', error);
-
       showNotification('Failed to sync profile. Check your connection.', 'error');
     }
   );
@@ -84,7 +79,7 @@ export function startProfileSync(uid) {
 
 /**
  * Stops the active Firestore profile listener.
- * Call this on page teardown or sign-out.
+ * Call on page teardown or sign-out.
  */
 export function stopProfileSync() {
   profileState.unsubscribeProfile?.();
@@ -97,56 +92,45 @@ export function stopProfileSync() {
 
 /**
  * Reads all modal input fields and persists the full profile to Firestore.
- * Uses merge:true to preserve any fields not in this form.
+ * Uses merge:true to preserve any fields not in this form (stats, counts etc.).
  * Creates a createdAt timestamp on first save.
  */
 export async function saveProfile() {
   if (!auth.currentUser) {
     showNotification('You must be signed in to save.', 'error');
-
     return;
   }
 
-  // User document reference
-  const userRef = refs.user(auth.currentUser.uid);
-
-  // Detect first-time profile creation
+  const userRef  = refs.user(auth.currentUser.uid);
   const snapshot = await getDoc(userRef);
 
-  // Build profile payload from modal inputs
   const data = {
-    name: getVal('input-name'),
-    bio: getVal('input-bio'),
-    pronouns: getVal('input-pronouns'),
-    avatarUrl: getVal('input-avatar-url'),
-    location: getVal('input-location'),
-    website: getVal('input-website'),
-    twitterHandle: getVal('input-twitter'),
-    instagramHandle: getVal('input-instagram'),
-    readingGoal: Number(getVal('input-reading-goal')) || 12,
-
-    // Genre picker state is managed elsewhere
+    name:            _getVal('input-name'),
+    bio:             _getVal('input-bio'),
+    pronouns:        _getVal('input-pronouns'),
+    avatarUrl:       _getVal('input-avatar-url'),
+    location:        _getVal('input-location'),
+    website:         _getVal('input-website'),
+    twitterHandle:   _getVal('input-twitter'),
+    instagramHandle: _getVal('input-instagram'),
+    readingGoal:     Number(_getVal('input-reading-goal')) || 30,
     favouriteGenres: [...profileState.favouriteGenres],
-
-    updatedAt: serverTimestamp(),
+    updatedAt:       serverTimestamp(),
   };
 
-  // First profile creation metadata
+  // Stamp createdAt and joinedAt on first save only
   if (!snapshot.exists()) {
     data.createdAt = serverTimestamp();
-    data.joinedAt = new Date().toISOString();
+    data.joinedAt  = serverTimestamp();
+    data.role      = 'reader';
+    data.isBanned  = false;
   }
 
   try {
-    // Merge profile updates into existing document
-    await setDoc(userRef, data, {
-      merge: true,
-    });
-
+    await setDoc(userRef, data, { merge: true });
     showNotification('Profile saved.', 'success');
   } catch (error) {
     console.error('[profile] Save error:', error);
-
     showNotification('Failed to save profile. Please try again.', 'error');
   }
 }
@@ -156,122 +140,34 @@ export async function saveProfile() {
    ───────────────────────────────────────────── */
 
 /**
- * Computes aggregate writing stats from the user's drafts and published tales.
- * Writes totalWordsWritten and totalReaders back to Firestore.
+ * Delegates to profile.service.js to avoid duplicating the word-count
+ * logic that already lives there. The service handles Firestore writes.
  *
  * @param {string} uid
  * @returns {Promise<{ wordsWritten: number, readers: number, readingTime: number, streak: number }>}
  */
 export async function computeAndSyncStats(uid) {
+  // Lazy import to avoid circular dependency: profile.js -> sync.js -> profile.service.js
+  const { computeAndSyncStats: _compute, getUserPublishedTales } =
+    await import('@services/index.js');
+
   try {
-    // Compute stats in parallel
-    const [draftStats, publishedStats] = await Promise.all([
-      _sumDraftWords(uid),
-      _sumPublishedReaders(uid),
+    const [totalWords, tales] = await Promise.all([
+      _compute(uid),
+      getUserPublishedTales(uid),
     ]);
 
-    const stats = {
-      wordsWritten: draftStats.words,
-      readers: publishedStats.readers,
-
-      // Rough estimate: ~0.3 seconds per word
-      readingTime: draftStats.words * 0.3,
-
-      // Managed elsewhere
-      streak: profileState.writingStreak,
-    };
-
-    // Persist computed stats into the user profile
-    const userRef = refs.user(uid);
-
-    await setDoc(
-      userRef,
-      {
-        totalWordsWritten: stats.wordsWritten,
-        totalReaders: stats.readers,
-        updatedAt: serverTimestamp(),
-      },
-      { merge: true }
-    );
-
-    return stats;
-  } catch (error) {
-    console.error('[profile] computeAndSyncStats error:', error);
+    const readers = tales.reduce((acc, t) => acc + (t.readCount || 0), 0);
 
     return {
-      wordsWritten: 0,
-      readers: 0,
-      readingTime: 0,
-      streak: 0,
+      wordsWritten: totalWords,
+      readers,
+      readingTime:  totalWords * 0.3,
+      streak:       profileState.writingStreak,
     };
-  }
-}
-
-/**
- * Sums word counts across all draft chapters for a user.
- *
- * @param {string} uid
- * @returns {Promise<{ words: number }>}
- */
-async function _sumDraftWords(uid) {
-  try {
-    // All drafts for this user
-    const draftsSnap = await getDocs(refs.drafts(uid));
-
-    if (draftsSnap.empty) {
-      return { words: 0 };
-    }
-
-    let totalWords = 0;
-
-    // Fetch all chapter collections in parallel
-    await Promise.all(
-      draftsSnap.docs.map(async (draftDoc) => {
-        const chaptersSnap = await getDocs(refs.draftChapters(uid, draftDoc.id));
-
-        chaptersSnap.forEach((chapterDoc) => {
-          const content = chapterDoc.data().content || '';
-
-          const words = content.trim() ? content.trim().split(/\s+/).length : 0;
-
-          totalWords += words;
-        });
-      })
-    );
-
-    return { words: totalWords };
-  } catch {
-    return { words: 0 };
-  }
-}
-
-/**
- * Sums reader counts across all published tales by the user.
- *
- * @param {string} uid
- * @returns {Promise<{ readers: number }>}
- */
-async function _sumPublishedReaders(uid) {
-  try {
-    // Query published tales by author ID
-    const publishedQuery = query(refs.tales(), where('authorId', '==', uid));
-
-    const snapshot = await getDocs(publishedQuery);
-
-    if (snapshot.empty) {
-      return { readers: 0 };
-    }
-
-    // Aggregate total read counts
-    const totalReaders = snapshot.docs.reduce((accumulator, docSnap) => {
-      return accumulator + (docSnap.data().readCount || 0);
-    }, 0);
-
-    return {
-      readers: totalReaders,
-    };
-  } catch {
-    return { readers: 0 };
+  } catch (err) {
+    console.error('[profile] computeAndSyncStats error:', err);
+    return { wordsWritten: 0, readers: 0, readingTime: 0, streak: 0 };
   }
 }
 
@@ -279,12 +175,6 @@ async function _sumPublishedReaders(uid) {
    Helpers
    ───────────────────────────────────────────── */
 
-/**
- * Safely reads and trims an input value.
- *
- * @param {string} id
- * @returns {string}
- */
-function getVal(id) {
+function _getVal(id) {
   return document.getElementById(id)?.value.trim() ?? '';
 }

@@ -1,9 +1,9 @@
 // src/services/markFinish.service.js
 // Marks a tale as fully finished in Firestore.
-// Sets scrollPercent to 100 on all chapter documents and updates the tale status.
+// Sets scrollPercent to 100 on all chapter progress documents and
+// updates the tale-level progress document with status and timestamps.
 
 import {
-  db,
   getDoc,
   setDoc,
   updateDoc,
@@ -11,57 +11,76 @@ import {
   writeBatch,
   serverTimestamp,
   refs,
+  db,
 } from '@fb/index.js';
 
 /**
  * Marks a tale as finished for a given user.
- * Creates the tale progress document if it does not exist,
- * then sets all chapter scroll positions to 100 and updates the status.
+ *
+ * Flow:
+ *   1. Creates the tale progress document if it does not exist.
+ *   2. Sets scrollPercent to 100 on all saved chapter progress documents.
+ *   3. Updates tale-level progress: status='finished', finishedAt, lastReadAt.
  *
  * @param {Object} params
- * @param {string} params.userId - ID of the authenticated user
- * @param {string} params.taleId - ID of the tale to mark as finished
+ * @param {string} params.userId
+ * @param {string} params.taleId
  */
 export async function markTaleFinished({ userId, taleId }) {
-  // Guard against invalid calls
   if (!userId || !taleId) return;
 
-  // Main progress document reference
   const progressRef = refs.progress(userId, taleId);
-
-  // Check whether the progress document already exists
   const progressSnap = await getDoc(progressRef);
 
-  // First completion: create the document
+  // Optionally fetch tale metadata to cache taleTitle on the progress doc
+  let taleTitle = '';
+  let coverUrl  = '';
+  try {
+    const taleSnap = await getDoc(refs.tale(taleId));
+    if (taleSnap.exists()) {
+      taleTitle = taleSnap.data().title   || '';
+      coverUrl  = taleSnap.data().coverUrl || '';
+    }
+  } catch {
+    // Non-critical — proceed without cached fields
+  }
+
+  // Create progress document if it does not exist yet
   if (!progressSnap.exists()) {
     await setDoc(progressRef, {
-      status: 'finished',
-      finishedAt: serverTimestamp(),
-      createdAt: serverTimestamp(),
+      status:          'finished',
+      finishedAt:      serverTimestamp(),
+      lastReadAt:      serverTimestamp(),
+      totalReadTimeMs: 0,
+      taleTitle,
+      coverUrl,
+      createdAt:       serverTimestamp(),
+      updatedAt:       serverTimestamp(),
     });
   }
 
-  // Fetch all saved chapter progress docs
-  const chaptersRef = refs.progressChapters(userId, taleId);
+  // Mark all saved chapter progress documents as fully read
+  const chaptersSnap = await getDocs(refs.progressChapters(userId, taleId));
 
-  const chaptersSnap = await getDocs(chaptersRef);
-
-  // Mark every chapter as fully read
   if (!chaptersSnap.empty) {
     const batch = writeBatch(db);
-
     chaptersSnap.forEach((chapterDoc) => {
       batch.update(chapterDoc.ref, {
-        scrollPercent: 100,
+        scrollPercent:       100,
+        lastCharacterOffset: 0,
+        updatedAt:           serverTimestamp(),
       });
     });
-
     await batch.commit();
   }
 
-  // Ensure the parent progress doc is marked finished
+  // Ensure tale-level progress is marked finished
   await updateDoc(progressRef, {
-    status: 'finished',
+    status:     'finished',
     finishedAt: serverTimestamp(),
+    lastReadAt: serverTimestamp(),
+    taleTitle,
+    coverUrl,
+    updatedAt:  serverTimestamp(),
   });
 }

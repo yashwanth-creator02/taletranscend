@@ -1,38 +1,45 @@
 // src/services/bookmark.service.js
 // Manages user bookmarks stored in Firestore.
-// Bookmarks are private to each user and scoped under their user document.
+// Bookmarks are private to each user under users/{uid}/bookmarks/{taleId}.
+// Key tale fields are cached on the bookmark document to avoid extra reads on the shelf page.
 
 import { getDocs, deleteDoc, setDoc, serverTimestamp, refs } from '@fb/index.js';
-
-/* ================= Firestore Structure Reference =================
-artifacts (collection)
- └─ {appId} (document)
-     └─ users (collection)
-         └─ {userId} (document)
-             └─ bookmarks (collection)
-                 └─ {taleId} (document)
-                     └─ bookmarkedAt
-==================================================================== */
+import { createBookmark } from '@state/index.js';
 
 /**
- * Adds a tale to a user's private bookmark collection in Firestore.
- * Uses taleId as the document ID for easy lookup and deduplication.
+ * Adds a tale to a user's bookmark collection.
+ * Caches title, cover, author, chapterCount, and era so the shelf page
+ * can render without fetching the full tale document.
  *
  * @param {Object} params
- * @param {string} params.userId - ID of the authenticated user
- * @param {string} params.taleId - ID of the tale to bookmark
+ * @param {string} params.userId
+ * @param {string} params.taleId
+ * @param {import('@state/schemas/tale.schema.js').Tale} [params.tale] - Optional tale object for caching fields
  */
-export async function addToBookmarks({ userId, taleId }) {
+export async function addToBookmarks({ userId, taleId, tale = {} }) {
   if (!userId || !taleId) return;
-  await setDoc(refs.bookmark(userId, taleId), { bookmarkedAt: serverTimestamp() }, { merge: true });
+
+  await setDoc(
+    refs.bookmark(userId, taleId),
+    {
+      taleId,
+      taleTitle:    tale.title        ?? '',
+      coverUrl:     tale.coverUrl     ?? '',
+      authorName:   tale.authorName   ?? '',
+      chapterCount: tale.chapterCount ?? 0,
+      era:          tale.era          ?? '',
+      bookmarkedAt: serverTimestamp(),
+    },
+    { merge: true }
+  );
 }
 
 /**
- * Removes a tale from a user's private bookmark collection.
+ * Removes a tale from a user's bookmark collection.
  *
  * @param {Object} params
- * @param {string} params.userId - ID of the authenticated user
- * @param {string} params.taleId - ID of the tale to remove
+ * @param {string} params.userId
+ * @param {string} params.taleId
  */
 export async function removeFromBookmarks({ userId, taleId }) {
   if (!userId || !taleId) return;
@@ -40,14 +47,35 @@ export async function removeFromBookmarks({ userId, taleId }) {
 }
 
 /**
- * Retrieves all bookmarked tales for a specific user.
+ * Retrieves all bookmarked tales for a user.
+ * Returns normalized Bookmark objects via the schema factory.
  *
  * @param {Object} params
- * @param {string} params.userId - ID of the authenticated user
- * @returns {Promise<Array<Object>>} Array of bookmark objects each containing id and metadata
+ * @param {string} params.userId
+ * @returns {Promise<import('@state/schemas/bookmark.schema.js').Bookmark[]>}
  */
 export async function getBookmarks({ userId }) {
   if (!userId) return [];
+
   const snap = await getDocs(refs.bookmarks(userId));
-  return snap.empty ? [] : snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+  if (snap.empty) return [];
+
+  return snap.docs.map((d) => createBookmark(d.id, d.data()));
+}
+
+/**
+ * Checks if a specific tale is bookmarked by the user.
+ *
+ * @param {Object} params
+ * @param {string} params.userId
+ * @param {string} params.taleId
+ * @returns {Promise<boolean>}
+ */
+export async function isBookmarked({ userId, taleId }) {
+  if (!userId || !taleId) return false;
+
+  const { getDoc } = await import('@fb/index.js');
+  const snap = await getDoc(refs.bookmark(userId, taleId));
+  return snap.exists();
 }

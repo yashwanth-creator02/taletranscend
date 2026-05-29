@@ -1,6 +1,6 @@
 // src/pages/shelf/ui.js
 // All HTML string builders and DOM renderers for the shelf page.
-// No data fetching happens here — pure presentation layer.
+// Pure presentation layer — no data fetching here.
 
 import { shelfState } from './state.js';
 import { initIcons } from '@ui/components/icons.js';
@@ -10,8 +10,7 @@ import { initIcons } from '@ui/components/icons.js';
    ───────────────────────────────────────────── */
 
 /**
- * Renders an array of items into #studio-grid.
- * Dispatches to the correct card builder based on tab type.
+ * Renders items into #studio-grid using the correct card type.
  *
  * @param {Array<Object>} items
  * @param {'bookmarked' | 'drafts'} type
@@ -93,10 +92,16 @@ export function setGridError() {
       <div class="inline-flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-red-500/[0.07] border border-red-500/15 text-red-400 text-sm">
         <i data-lucide="alert-triangle" class="w-4 h-4"></i>
         Failed to load. Check your connection and
-        <button onclick="window.location.reload()" class="underline hover:no-underline ml-1">refresh</button>.
+        <button id="shelf-error-reload-btn" class="underline hover:no-underline ml-1">refresh</button>.
       </div>
     </div>
   `;
+
+  // Wire via event listener — no onclick attribute
+  document.getElementById('shelf-error-reload-btn')?.addEventListener('click', () => {
+    window.location.reload();
+  });
+
   initIcons();
 }
 
@@ -105,34 +110,30 @@ export function setGridError() {
    ───────────────────────────────────────────── */
 
 /**
- * Builds the HTML for a single bookmarked tale card.
- *
- * @param {Object} tale
+ * @param {import('@state/schemas/tale.schema.js').Tale & { progress?: number }} tale
  * @returns {string}
  */
 export function buildBookmarkCard(tale) {
   const {
-    id = '0000',
-    title = 'Untitled Echo',
+    id           = '0000',
+    title        = 'Untitled Echo',
     coverUrl,
-    description = '',
-    era = 'Unknown Era',
+    description  = '',
+    era          = 'Unknown Era',
     chapterCount = 0,
-    progress = 0,
+    progress     = 0,
   } = tale;
 
-  const cover =
-    coverUrl || 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=800';
+  const cover           = coverUrl || 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=800';
   const progressPercent = Math.min(100, Math.max(0, Math.round(progress)));
-  const menuId = `menu-${id}`;
-  const isFinished = progress >= 100;
+  const menuId          = `menu-${id}`;
+  const isFinished      = progress >= 100;
 
   return `
     <article
       class="shelf-card group relative rounded-[2rem] overflow-hidden border border-white/[0.05] bg-white/[0.025] hover:border-indigo-500/25 transition-all duration-400 cursor-pointer"
       data-id="${id}"
     >
-      <!-- Cover -->
       <div class="relative aspect-[16/10] bg-zinc-900 overflow-hidden">
         <img
           src="${cover}"
@@ -142,12 +143,10 @@ export function buildBookmarkCard(tale) {
         />
         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
 
-        <!-- Era badge -->
         <div class="absolute top-3 left-3">
           <span class="shelf-era-badge">${era}</span>
         </div>
 
-        <!-- Options button -->
         <div class="absolute top-3 right-3">
           <button
             type="button"
@@ -161,13 +160,7 @@ export function buildBookmarkCard(tale) {
             <i data-lucide="more-horizontal" class="w-3.5 h-3.5"></i>
           </button>
 
-          <!-- Options dropdown -->
-          <div
-            id="${menuId}"
-            class="shelf-menu"
-            role="menu"
-            hidden
-          >
+          <div id="${menuId}" class="shelf-menu" role="menu" hidden>
             <p class="shelf-menu-label">Actions</p>
             <button class="shelf-menu-item" role="menuitem" type="button" data-action="copy-link" data-id="${id}">
               <i data-lucide="link" class="w-3.5 h-3.5"></i> Copy link
@@ -190,11 +183,10 @@ export function buildBookmarkCard(tale) {
           </div>
         </div>
 
-        <!-- Progress overlay -->
         <div class="absolute bottom-0 left-0 right-0 px-4 pb-4 pt-6 bg-gradient-to-t from-black/70 to-transparent">
           <div class="flex items-center justify-between mb-1.5">
             <span class="text-[9px] font-bold uppercase tracking-wider text-white/40">Progress</span>
-            <span class="text-[9px] font-bold text-indigo-400">${isFinished ? '✓ Done' : `${progressPercent}%`}</span>
+            <span class="text-[9px] font-bold text-indigo-400">${isFinished ? 'Done' : `${progressPercent}%`}</span>
           </div>
           <div class="h-1 w-full bg-white/10 rounded-full overflow-hidden">
             <div
@@ -205,7 +197,6 @@ export function buildBookmarkCard(tale) {
         </div>
       </div>
 
-      <!-- Body -->
       <div class="p-4">
         <h3 class="font-bold text-white text-sm leading-snug mb-1.5 group-hover:text-indigo-300 transition-colors line-clamp-2">
           ${title}
@@ -241,38 +232,30 @@ export function buildBookmarkCard(tale) {
    ───────────────────────────────────────────── */
 
 /**
- * Builds the HTML for a single draft card.
- * Word count comes from the denormalized `totalWordsWritten` field on the draft doc.
- *
- * @param {Object} draft
+ * @param {import('@state/schemas/draft.schema.js').Draft} draft
  * @returns {string}
  */
 export function buildDraftCard(draft) {
   const {
     id,
-    title = 'Untitled Draft',
-    synopsis = '',
-    era = '',
-    chapterCount = 0,
-    totalWordsWritten = 0,
+    title             = 'Untitled Draft',
+    synopsis          = '',
+    era               = '',
+    chapterCount      = 0,
+    wordCount         = 0,
     updatedAt,
   } = draft;
 
-  const updated = updatedAt?.seconds ? timeAgo(new Date(updatedAt.seconds * 1000)) : 'Recently';
-
-  const wordLabel =
-    totalWordsWritten > 0
-      ? totalWordsWritten >= 1000
-        ? `${(totalWordsWritten / 1000).toFixed(1)}k words`
-        : `${totalWordsWritten} words`
-      : 'No content yet';
+  const updated   = updatedAt?.seconds ? _timeAgo(new Date(updatedAt.seconds * 1000)) : 'Recently';
+  const wordLabel = wordCount > 0
+    ? wordCount >= 1000 ? `${(wordCount / 1000).toFixed(1)}k words` : `${wordCount} words`
+    : 'No content yet';
 
   return `
     <article
       class="shelf-card group relative rounded-[2rem] border border-white/[0.05] bg-white/[0.025] hover:border-indigo-500/25 transition-all duration-400 overflow-hidden"
       data-id="${id}"
     >
-      <!-- Draft header band -->
       <div class="flex items-center justify-between px-5 pt-4 pb-3 border-b border-white/[0.04]">
         <span class="shelf-draft-badge">
           <i data-lucide="feather" class="w-2.5 h-2.5"></i>
@@ -320,32 +303,26 @@ export function buildDraftCard(draft) {
    ───────────────────────────────────────────── */
 
 /**
- * Updates the three hero stat cards with real values.
- *
  * @param {{ draftCount: number, bookmarkCount: number, wordsPreserved: number }} stats
  */
 export function renderHeroStats({ draftCount, bookmarkCount, wordsPreserved }) {
-  setEl('hero-stat-drafts', String(draftCount));
-  setEl('hero-stat-bookmarks', String(bookmarkCount));
-  setEl('hero-stat-words', formatNumber(wordsPreserved));
+  _setEl('hero-stat-drafts',    String(draftCount));
+  _setEl('hero-stat-bookmarks', String(bookmarkCount));
+  _setEl('hero-stat-words',     _formatNumber(wordsPreserved));
 }
 
 /* ─────────────────────────────────────────────
    Sort Panel
    ───────────────────────────────────────────── */
 
-/**
- * Renders the sort dropdown panel into #sort-panel.
- * Called once on init; panel visibility is toggled by interactions.js.
- */
 export function buildSortPanel() {
   const panel = document.getElementById('sort-panel');
   if (!panel) return;
 
   const options = [
-    { key: 'date', label: 'Date updated', icon: 'calendar' },
-    { key: 'title', label: 'Title A–Z', icon: 'type' },
-    { key: 'progress', label: 'Progress', icon: 'bar-chart-2' },
+    { key: 'date',     label: 'Date updated', icon: 'calendar'    },
+    { key: 'title',    label: 'Title A–Z',    icon: 'type'        },
+    { key: 'progress', label: 'Progress',     icon: 'bar-chart-2' },
   ];
 
   panel.innerHTML = `
@@ -361,11 +338,9 @@ export function buildSortPanel() {
         >
           <i data-lucide="${opt.icon}" class="w-3.5 h-3.5"></i>
           ${opt.label}
-          ${
-            shelfState.sortBy === opt.key
-              ? `<i data-lucide="${shelfState.sortDir === 'asc' ? 'arrow-up' : 'arrow-down'}" class="w-3 h-3 ml-auto opacity-60"></i>`
-              : ''
-          }
+          ${shelfState.sortBy === opt.key
+            ? `<i data-lucide="${shelfState.sortDir === 'asc' ? 'arrow-up' : 'arrow-down'}" class="w-3 h-3 ml-auto opacity-60"></i>`
+            : ''}
         </button>
       `
         )
@@ -376,10 +351,6 @@ export function buildSortPanel() {
   initIcons();
 }
 
-/**
- * Re-renders the sort panel to reflect updated state.
- * Called after every sort change.
- */
 export function refreshSortPanel() {
   buildSortPanel();
 }
@@ -389,8 +360,6 @@ export function refreshSortPanel() {
    ───────────────────────────────────────────── */
 
 /**
- * Updates tab button active/inactive visual state.
- *
  * @param {'bookmarked' | 'drafts'} activeTab
  */
 export function setActiveTab(activeTab) {
@@ -406,24 +375,24 @@ export function setActiveTab(activeTab) {
    Helpers
    ───────────────────────────────────────────── */
 
-function setEl(id, value) {
+function _setEl(id, value) {
   const el = document.getElementById(id);
   if (el) el.textContent = value;
 }
 
-function formatNumber(n) {
+function _formatNumber(n) {
   if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
   return String(n);
 }
 
-function timeAgo(date) {
+function _timeAgo(date) {
   const diff = Date.now() - date.getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 2) return 'Just now';
+  if (mins < 2)  return 'Just now';
   if (mins < 60) return `${mins}m ago`;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
+  if (hrs < 24)  return `${hrs}h ago`;
   const days = Math.floor(hrs / 24);
-  if (days < 7) return `${days}d ago`;
+  if (days < 7)  return `${days}d ago`;
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }

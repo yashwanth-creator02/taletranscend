@@ -5,6 +5,7 @@
 
 import { state } from './state.js';
 import { debounce } from '@/utils/function.utils';
+import { setEl } from '@/utils/ui.utils';
 
 /* ── Auto-Save ────────────────────────────────────────────────────── */
 
@@ -58,14 +59,3 @@ export function updateStats() {
 }
 
 /* ── Helpers ──────────────────────────────────────────────────────── */
-
-/**
- * Safely sets the textContent of an element by id.
- *
- * @param {string} id
- * @param {string} text
- */
-function setEl(id, text) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = text;
-}

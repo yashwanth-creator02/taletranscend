@@ -2,6 +2,8 @@
 // Manages reader progress in localStorage for offline-first persistence.
 // All cloud syncing is handled separately in cloudProgress.service.js.
 
+import { timeAgo } from '@/utils/ui.utils';
+
 const STORAGE_KEY = 'taletranscend:reader-progress';
 
 /* ================= Storage Helpers ================= */

@@ -4,7 +4,7 @@
 // Everything else (search, filters, sidebar toggle) lives in filters.js / ui.js.
 
 import { showToast } from '@ui/components/toast.js';
-import { initIcons } from '@/ui/icons.js';
+import { initIcons } from '@ui/components/icons.js';
 import {
   resolveResumePoint,
   addToBookmarks,
@@ -27,19 +27,17 @@ export function setupCardInteractions(userId) {
 
   grid.addEventListener('click', async (e) => {
     const actionEl = e.target.closest('[data-action]');
-    const card = e.target.closest('.tale-card');
+    const card     = e.target.closest('.tale-card');
 
     if (!card || !grid.contains(card)) return;
 
     const taleId = card.dataset.id;
     if (!taleId) return;
 
-    // Action button clicked
     if (actionEl && card.contains(actionEl)) {
       e.stopPropagation();
-      const action = actionEl.dataset.action;
 
-      switch (action) {
+      switch (actionEl.dataset.action) {
         case 'options':
           _toggleMenu(actionEl.dataset.menuId);
           return;
@@ -83,7 +81,6 @@ export function setupCardInteractions(userId) {
     }
   });
 
-  // Escape closes open menus
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') _closeAllMenus();
   });
@@ -95,7 +92,7 @@ export function setupCardInteractions(userId) {
 
 async function _handleResume(userId, taleId) {
   try {
-    const resume = await resolveResumePoint({ userId, taleId });
+    const resume    = await resolveResumePoint({ userId, taleId });
     const chapterId = resume?.chapterIndex ?? 0;
     window.location.assign(
       `reader.html?taleId=${encodeURIComponent(taleId)}&chapterId=${chapterId}`
@@ -106,7 +103,8 @@ async function _handleResume(userId, taleId) {
 }
 
 function _handleCopyLink(taleId) {
-  const url = `${window.location.origin}/tale.html?id=${encodeURIComponent(taleId)}`;
+  // Bug fix: was building URL with wrong path after refactor
+  const url   = `${window.location.origin}/src/views/tale.html?id=${encodeURIComponent(taleId)}`;
   const modal = document.getElementById('copy-link-modal');
   const input = document.getElementById('copy-link-input');
   if (!modal || !input) return;
@@ -120,17 +118,27 @@ function _handleCopyLink(taleId) {
     modal.classList.remove('flex');
   };
 
-  document.getElementById('copy-link-confirm').onclick = async () => {
+  // Wire modal buttons via event listeners — no onclick attributes
+  const confirmBtn = document.getElementById('copy-link-confirm');
+  const closeBtn   = document.getElementById('copy-link-close');
+
+  const onConfirm = async () => {
     await navigator.clipboard.writeText(url);
     close();
     showToast('Link copied.', 'success');
+    confirmBtn?.removeEventListener('click', onConfirm);
+    closeBtn?.removeEventListener('click', close);
   };
 
-  document.getElementById('copy-link-close').onclick = close;
+  confirmBtn?.addEventListener('click', onConfirm);
+  closeBtn?.addEventListener('click', () => {
+    close();
+    confirmBtn?.removeEventListener('click', onConfirm);
+  });
 }
 
 function _confirmMarkFinished(onConfirm) {
-  const modal = document.getElementById('confirm-modal');
+  const modal  = document.getElementById('confirm-modal');
   const cancel = document.getElementById('confirm-cancel');
   const accept = document.getElementById('confirm-accept');
   if (!modal || !cancel || !accept) return;
@@ -141,12 +149,12 @@ function _confirmMarkFinished(onConfirm) {
   const cleanup = () => {
     modal.classList.add('hidden');
     modal.classList.remove('flex');
-    cancel.onclick = null;
-    accept.onclick = null;
+    cancel.removeEventListener('click', onCancel);
+    accept.removeEventListener('click', onAccept);
   };
 
-  cancel.onclick = cleanup;
-  accept.onclick = async () => {
+  const onCancel = () => cleanup();
+  const onAccept = async () => {
     cleanup();
     try {
       await onConfirm();
@@ -154,6 +162,9 @@ function _confirmMarkFinished(onConfirm) {
       console.error('[library] Mark finished:', err);
     }
   };
+
+  cancel.addEventListener('click', onCancel);
+  accept.addEventListener('click', onAccept);
 }
 
 async function _handleMarkFinished(userId, taleId) {
@@ -172,8 +183,10 @@ async function _handleCouple(userId, taleId, btn) {
     btn.classList.add('text-red-400', 'hover:bg-red-500/20');
     initIcons();
     _closeAllMenus();
+    showToast('Added to shelf.', 'success');
   } catch (err) {
     console.error('[library] Couple failed:', err);
+    showToast('Could not add to shelf.', 'error');
   } finally {
     btn.removeAttribute('disabled');
   }
@@ -189,8 +202,10 @@ async function _handleDecouple(userId, taleId, btn) {
     btn.classList.add('text-emerald-400', 'hover:bg-emerald-500/20');
     initIcons();
     _closeAllMenus();
+    showToast('Removed from shelf.', 'info');
   } catch (err) {
     console.error('[library] Decouple failed:', err);
+    showToast('Could not remove from shelf.', 'error');
   } finally {
     btn.removeAttribute('disabled');
   }
@@ -205,7 +220,6 @@ function _toggleMenu(menuId) {
   const menu = document.getElementById(menuId);
   if (!menu) return;
 
-  // Close all others first
   document.querySelectorAll('.options-menu:not(.hidden)').forEach((m) => {
     if (m !== menu) m.classList.add('hidden');
   });

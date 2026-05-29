@@ -8,6 +8,8 @@ export {
   setupTabs,
   setupStartReading,
   setupResumeReading,
+  setupShelfButton,
+  setupShareButton,
   setupResonance,
   initHeaderScroll,
 } from './interactions.js';

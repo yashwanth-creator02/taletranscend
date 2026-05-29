@@ -23,6 +23,7 @@ import {
   limit,
   startAfter,
   where,
+  increment,
 } from 'firebase/firestore';
 
 // Single shared Firestore instance bound to the initialized Firebase app.
@@ -47,4 +48,5 @@ export {
   limit,
   startAfter,
   where,
+  increment,
 };

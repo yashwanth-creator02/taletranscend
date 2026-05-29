@@ -1,0 +1,123 @@
+/* src/assets/css/reader-themes.css */
+/* Reader-specific theme overrides.                                    */
+/* These ONLY affect the reading surface — never bleed to other pages.*/
+/*                                                                     */
+/* How it works:                                                       */
+/*   - reader/theme.js sets data-reader-theme="<id>" on               */
+/*     the .reader-surface element (NOT on <html>).                   */
+/*   - Every rule here is scoped inside .reader-surface[data-reader-theme].*/
+/*   - The app design tokens in tokens.css remain completely untouched.*/
+/*                                                                     */
+/* To add a new reader theme: add one block below following the same   */
+/* four-variable pattern. No other file needs to change.               */
+
+/* ── Noir (default) ─────────────────────────────────────────────── */
+.reader-surface[data-reader-theme='noir'] {
+  --reader-bg:     #030305;
+  --reader-fg:     #e6e7ee;
+  --reader-muted:  #8a8aa3;
+  --reader-accent: #8b7cf6;
+}
+
+/* ── Parchment ───────────────────────────────────────────────────── */
+.reader-surface[data-reader-theme='parchment'] {
+  --reader-bg:     #1a1410;
+  --reader-fg:     #f0e6d2;
+  --reader-muted:  #b8a78a;
+  --reader-accent: #f59e0b;
+}
+
+/* ── Sepia ───────────────────────────────────────────────────────── */
+.reader-surface[data-reader-theme='sepia'] {
+  --reader-bg:     #f4ecd8;
+  --reader-fg:     #3b2f1e;
+  --reader-muted:  #7a6a4a;
+  --reader-accent: #a0522d;
+}
+
+/* ── Light ───────────────────────────────────────────────────────── */
+.reader-surface[data-reader-theme='light'] {
+  --reader-bg:     #fafafa;
+  --reader-fg:     #1a1a22;
+  --reader-muted:  #4b4b5a;
+  --reader-accent: #6366f1;
+}
+
+/* ── Midnight Indigo ─────────────────────────────────────────────── */
+.reader-surface[data-reader-theme='midnight'] {
+  --reader-bg:     #0a0f1f;
+  --reader-fg:     #dbe4ff;
+  --reader-muted:  #7a89b3;
+  --reader-accent: #60a5fa;
+}
+
+/* ── Emerald Glade ───────────────────────────────────────────────── */
+.reader-surface[data-reader-theme='emerald'] {
+  --reader-bg:     #04140e;
+  --reader-fg:     #d4f1e3;
+  --reader-muted:  #7ba896;
+  --reader-accent: #34d399;
+}
+
+/* ── Rose Quartz ─────────────────────────────────────────────────── */
+.reader-surface[data-reader-theme='rose'] {
+  --reader-bg:     #1a0a14;
+  --reader-fg:     #ffe4ef;
+  --reader-muted:  #c08a9e;
+  --reader-accent: #f472b6;
+}
+
+/* ── Solarized ───────────────────────────────────────────────────── */
+.reader-surface[data-reader-theme='solar'] {
+  --reader-bg:     #fdf6e3;
+  --reader-fg:     #073642;
+  --reader-muted:  #657b83;
+  --reader-accent: #b58900;
+}
+
+/* ── Ocean Deep ──────────────────────────────────────────────────── */
+.reader-surface[data-reader-theme='ocean'] {
+  --reader-bg:     #021018;
+  --reader-fg:     #d7eff8;
+  --reader-muted:  #6e9fb4;
+  --reader-accent: #22d3ee;
+}
+
+/* ── Sunset Ember ────────────────────────────────────────────────── */
+.reader-surface[data-reader-theme='sunset'] {
+  --reader-bg:     #1a0a05;
+  --reader-fg:     #ffe7d1;
+  --reader-muted:  #c89878;
+  --reader-accent: #fb923c;
+}
+
+/* ── Forest Mist ─────────────────────────────────────────────────── */
+.reader-surface[data-reader-theme='forest'] {
+  --reader-bg:     #0a140c;
+  --reader-fg:     #e0f0d5;
+  --reader-muted:  #88a888;
+  --reader-accent: #a3e635;
+}
+
+/* ── Ink on Paper ────────────────────────────────────────────────── */
+.reader-surface[data-reader-theme='ink'] {
+  --reader-bg:     #f5f5f0;
+  --reader-fg:     #0a0a0a;
+  --reader-muted:  #5a5a5a;
+  --reader-accent: #111111;
+}
+
+/* ── Atmosphere visibility by theme ─────────────────────────────── */
+/* Dark themes show the atmospheric particle effects.                 */
+/* Light themes hide them — they don't read well on bright surfaces.  */
+
+.reader-surface[data-reader-theme='sepia']    .reader-atmosphere,
+.reader-surface[data-reader-theme='sepia']    .reader-particles,
+.reader-surface[data-reader-theme='light']    .reader-atmosphere,
+.reader-surface[data-reader-theme='light']    .reader-particles,
+.reader-surface[data-reader-theme='solar']    .reader-atmosphere,
+.reader-surface[data-reader-theme='solar']    .reader-particles,
+.reader-surface[data-reader-theme='ink']      .reader-atmosphere,
+.reader-surface[data-reader-theme='ink']      .reader-particles {
+  display: none;
+}

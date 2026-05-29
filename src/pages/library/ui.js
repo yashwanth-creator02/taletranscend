@@ -1,13 +1,13 @@
 // src/pages/library/ui.js
 // UI helpers for the library page:
-//   - Sidebar toggle (collapsed/expanded) with localStorage persistence
-//   - Era chip builder (dynamic from real data)
-//   - Active state management for sidebar + era buttons
-//   - Sidebar auth user display
+//   - Sidebar toggle with localStorage persistence
+//   - Era chip builder
+//   - Active state management for sidebar and era buttons
+//   - Auth user display in sidebar
 //   - Skeleton / empty / error grid states
 
 import { libraryState } from './state.js';
-import { initIcons } from '@/ui/icons.js';
+import { initIcons } from '@ui/components/icons.js';
 
 /* ─────────────────────────────────────────────
    Sidebar Toggle
@@ -19,11 +19,10 @@ import { initIcons } from '@/ui/icons.js';
  * Applies initial state from libraryState.sidebarCollapsed.
  */
 export function setupSidebarToggle() {
-  const sidebar = document.getElementById('sidebar');
+  const sidebar   = document.getElementById('sidebar');
   const toggleBtn = document.getElementById('toggle-sidebar');
   if (!sidebar || !toggleBtn) return;
 
-  // Apply saved state immediately
   _applySidebarState(sidebar, libraryState.sidebarCollapsed);
 
   toggleBtn.addEventListener('click', () => {
@@ -35,7 +34,6 @@ export function setupSidebarToggle() {
 
 function _applySidebarState(sidebar, collapsed) {
   sidebar.classList.toggle('sidebar--collapsed', collapsed);
-  // Update chevron/menu icon direction
   const icon = document.querySelector('#toggle-sidebar i[data-lucide]');
   if (icon) {
     icon.setAttribute('data-lucide', collapsed ? 'panel-left-open' : 'panel-left-close');
@@ -48,8 +46,6 @@ function _applySidebarState(sidebar, collapsed) {
    ───────────────────────────────────────────── */
 
 /**
- * Updates sidebar filter button active styles.
- *
  * @param {string} activeFilter
  */
 export function setActiveSidebarBtn(activeFilter) {
@@ -66,9 +62,8 @@ export function setActiveSidebarBtn(activeFilter) {
 
 /**
  * Renders era filter chips into #era-filter-bar from real tale data.
- * Preserves the "All Scrolls" chip as the first item.
  *
- * @param {string[]} eras - Unique era strings derived from tales
+ * @param {string[]} eras
  */
 export function buildEraChips(eras) {
   const bar = document.getElementById('era-filter-bar');
@@ -91,8 +86,6 @@ export function buildEraChips(eras) {
 }
 
 /**
- * Updates era chip active styles after a selection change.
- *
  * @param {string} activeEra
  */
 export function setActiveEraChip(activeEra) {
@@ -108,24 +101,21 @@ export function setActiveEraChip(activeEra) {
    ───────────────────────────────────────────── */
 
 /**
- * Updates the sidebar user section with real auth user data.
- * Called after auth resolves + after Firestore profile sync.
- *
  * @param {import('firebase/auth').User} user
  * @param {{ name?: string }} [profile]
  */
 export function updateSidebarUser(user, profile = {}) {
   const avatarEl = document.getElementById('sidebar-user-avatar');
-  const nameEl = document.getElementById('sidebar-user-name');
-  const subEl = document.getElementById('sidebar-user-sub');
+  const nameEl   = document.getElementById('sidebar-user-name');
+  const subEl    = document.getElementById('sidebar-user-sub');
 
-  const seed = user.uid.slice(0, 8);
+  const seed      = user.uid.slice(0, 8);
   const avatarSrc = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
-  const name = profile.name || user.displayName || `Scribe ${seed.slice(0, 4)}`;
+  const name      = profile.name || user.displayName || `Scribe ${seed.slice(0, 4)}`;
 
-  if (avatarEl) avatarEl.src = avatarSrc;
-  if (nameEl) nameEl.textContent = name;
-  if (subEl) subEl.textContent = 'Archive Member';
+  if (avatarEl) avatarEl.src         = avatarSrc;
+  if (nameEl)   nameEl.textContent   = name;
+  if (subEl)    subEl.textContent    = 'Archive Member';
 }
 
 /* ─────────────────────────────────────────────
@@ -133,8 +123,6 @@ export function updateSidebarUser(user, profile = {}) {
    ───────────────────────────────────────────── */
 
 /**
- * Renders skeleton loading cards into #cards-grid.
- *
  * @param {number} [count=8]
  */
 export function showGridSkeleton(count = 8) {
@@ -155,8 +143,8 @@ export function showGridSkeleton(count = 8) {
         </div>
         <div class="flex items-center justify-between pt-4 border-t border-white/5">
           <div class="flex gap-3">
-             <div class="skeleton h-3 w-16 rounded-md"></div>
-             <div class="skeleton h-3 w-16 rounded-md"></div>
+            <div class="skeleton h-3 w-16 rounded-md"></div>
+            <div class="skeleton h-3 w-16 rounded-md"></div>
           </div>
           <div class="skeleton h-4 w-4 rounded-full"></div>
         </div>
@@ -167,8 +155,6 @@ export function showGridSkeleton(count = 8) {
 }
 
 /**
- * Renders an empty state into #cards-grid.
- *
  * @param {string} [message]
  */
 export function showGridEmpty(message = 'No tales found in the archives.') {
@@ -185,7 +171,7 @@ export function showGridEmpty(message = 'No tales found in the archives.') {
         <p class="text-sm text-slate-500 max-w-xs mx-auto leading-relaxed font-medium italic">${message}</p>
       </div>
       <button
-        onclick="document.getElementById('search-input')?.focus()"
+        id="empty-search-focus-btn"
         class="group inline-flex items-center gap-3 px-8 py-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[11px] font-black uppercase tracking-[0.25em] hover:bg-indigo-500/20 hover:text-indigo-300 transition-all shadow-xl shadow-indigo-500/10"
       >
         <i data-lucide="search" class="w-4 h-4 group-hover:scale-110 transition-transform"></i>
@@ -193,12 +179,15 @@ export function showGridEmpty(message = 'No tales found in the archives.') {
       </button>
     </div>
   `;
+
+  // Wire button via event listener — no onclick attribute
+  document.getElementById('empty-search-focus-btn')?.addEventListener('click', () => {
+    document.getElementById('search-input')?.focus();
+  });
+
   initIcons(grid);
 }
 
-/**
- * Renders an error state into #cards-grid.
- */
 export function showGridError() {
   const grid = document.getElementById('cards-grid');
   if (!grid) return;
@@ -213,8 +202,8 @@ export function showGridError() {
           <h3 class="text-lg font-bold text-rose-400">Neural Link Severed</h3>
           <p class="text-xs text-rose-500/70 font-medium uppercase tracking-widest">Database connection failed</p>
         </div>
-        <button 
-          onclick="window.location.reload()" 
+        <button
+          id="grid-error-reload-btn"
           class="mt-4 px-6 py-2.5 rounded-xl bg-rose-500/10 text-rose-400 text-[10px] font-black uppercase tracking-widest border border-rose-500/20 hover:bg-rose-500/20 transition-all"
         >
           Re-establish Connection
@@ -222,5 +211,11 @@ export function showGridError() {
       </div>
     </div>
   `;
+
+  // Wire button via event listener — no onclick attribute
+  document.getElementById('grid-error-reload-btn')?.addEventListener('click', () => {
+    window.location.reload();
+  });
+
   initIcons(grid);
 }

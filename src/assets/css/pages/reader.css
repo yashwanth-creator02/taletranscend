@@ -1,123 +1,13 @@
 /* src/assets/css/pages/reader.css */
-
-:root {
-  --radius: 0.75rem;
-  --font-serif: 'Cinzel', 'Cormorant Garamond', Georgia, serif;
-  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --background: #030305;
-  --foreground: #e6e7ee;
-  --card: rgba(255, 255, 255, 0.04);
-  --card-foreground: #e6e7ee;
-  --popover: rgba(10, 10, 18, 0.85);
-  --popover-foreground: #e6e7ee;
-  --primary: #8b7cf6;
-  --primary-foreground: #0b0b14;
-  --secondary: rgba(255, 255, 255, 0.06);
-  --secondary-foreground: #e6e7ee;
-  --muted: rgba(255, 255, 255, 0.04);
-  --muted-foreground: #8a8aa3;
-  --accent: rgba(139, 124, 246, 0.15);
-  --accent-foreground: #e6e7ee;
-  --destructive: #ef4444;
-  --border: rgba(255, 255, 255, 0.08);
-  --input: rgba(255, 255, 255, 0.08);
-  --ring: #8b7cf6;
-  --indigo-glow: #6366f1;
-  --violet-glow: #a855f7;
-  --rune: #f59e0b;
-  --reader-font-family: var(--font-serif);
-  --reader-font-size: 18px;
-  --reader-line-height: 1.75;
-  --reader-measure: 68ch;
-  --reader-bg: #030305;
-  --reader-fg: #e6e7ee;
-  --reader-muted: #8a8aa3;
-  --reader-accent: #8b7cf6;
-}
-
-[data-theme='noir'] {
-  --reader-bg: #030305;
-  --reader-fg: #e6e7ee;
-  --reader-muted: #8a8aa3;
-  --reader-accent: #8b7cf6;
-}
-
-[data-theme='parchment'] {
-  --reader-bg: #1a1410;
-  --reader-fg: #f0e6d2;
-  --reader-muted: #b8a78a;
-  --reader-accent: #f59e0b;
-}
-
-[data-theme='sepia'] {
-  --reader-bg: #f4ecd8;
-  --reader-fg: #3b2f1e;
-  --reader-muted: #7a6a4a;
-  --reader-accent: #a0522d;
-}
-
-[data-theme='light'] {
-  --reader-bg: #fafafa;
-  --reader-fg: #1a1a22;
-  --reader-muted: #4b4b5a;
-  --reader-accent: #6366f1;
-}
-
-[data-theme='midnight'] {
-  --reader-bg: #0a0f1f;
-  --reader-fg: #dbe4ff;
-  --reader-muted: #7a89b3;
-  --reader-accent: #60a5fa;
-}
-
-[data-theme='emerald'] {
-  --reader-bg: #04140e;
-  --reader-fg: #d4f1e3;
-  --reader-muted: #7ba896;
-  --reader-accent: #34d399;
-}
-
-[data-theme='rose'] {
-  --reader-bg: #1a0a14;
-  --reader-fg: #ffe4ef;
-  --reader-muted: #c08a9e;
-  --reader-accent: #f472b6;
-}
-
-[data-theme='solar'] {
-  --reader-bg: #fdf6e3;
-  --reader-fg: #073642;
-  --reader-muted: #657b83;
-  --reader-accent: #b58900;
-}
-
-[data-theme='ocean'] {
-  --reader-bg: #021018;
-  --reader-fg: #d7eff8;
-  --reader-muted: #6e9fb4;
-  --reader-accent: #22d3ee;
-}
-
-[data-theme='sunset'] {
-  --reader-bg: #1a0a05;
-  --reader-fg: #ffe7d1;
-  --reader-muted: #c89878;
-  --reader-accent: #fb923c;
-}
-
-[data-theme='forest'] {
-  --reader-bg: #0a140c;
-  --reader-fg: #e0f0d5;
-  --reader-muted: #88a888;
-  --reader-accent: #a3e635;
-}
-
-[data-theme='ink'] {
-  --reader-bg: #f5f5f0;
-  --reader-fg: #0a0a0a;
-  --reader-muted: #5a5a5a;
-  --reader-accent: #111111;
-}
+/* Reader page layout, typography, panels, and animations.            */
+/*                                                                     */
+/* Token source of truth: ../../tokens.css (imported via base.css)    */
+/* Reader colour themes:  ../../reader-themes.css                     */
+/*                                                                     */
+/* This file does NOT define any :root tokens or [data-theme] blocks. */
+/* All design variables come from tokens.css.                         */
+/* All reader theme overrides come from reader-themes.css, scoped     */
+/* to .reader-surface[data-reader-theme] — never on <html>.           */
 
 /* ──────────────────────────────────────────────────────────────────────────
    Base Styles
@@ -125,8 +15,8 @@
 
 html,
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg-base);
+  color: var(--text-primary);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;

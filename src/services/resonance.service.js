@@ -1,64 +1,60 @@
 // src/services/resonance.service.js
-import { db, auth } from '@fb/index.js';
-import {
-  doc,
-  updateDoc,
-  increment,
-  setDoc,
-  getDoc,
-  deleteDoc,
-  collection,
-} from 'firebase/firestore';
+// Manages tale reactions (Soul Resonance) stored in Firestore.
+// Reactions live at tales/{taleId}/reactions/{userId} per the finalized schema.
+// Reaction count on the tale document is synced by the onReactionCreate/Delete Cloud Function.
+
+import { auth, getDoc, setDoc, deleteDoc, updateDoc, increment, serverTimestamp, refs } from '@fb/index.js';
 
 /**
- * Toggles "Soul Resonance" (like) for a tale.
- * Updates both the global resonance count and user-specific status.
+ * Toggles a user's Soul Resonance (reaction) on a tale.
+ * Creates or deletes the reaction document and optimistically updates
+ * the tale's reactionCount via increment.
  *
  * @param {string} taleId
- * @returns {Promise<{ active: boolean, count: number }>} New state
+ * @returns {Promise<{ active: boolean, count: number }>}
  */
 export async function toggleResonance(taleId) {
   const user = auth.currentUser;
   if (!user) throw new Error('Authentication required');
 
-  const taleRef = doc(db, 'tales', taleId);
-  const resonanceRef = doc(db, 'users', user.uid, 'resonances', taleId);
+  const reactionRef = refs.taleReaction(taleId, user.uid);
+  const taleRef     = refs.tale(taleId);
 
-  const resonanceSnap = await getDoc(resonanceRef);
-  const isActive = resonanceSnap.exists();
+  const reactionSnap = await getDoc(reactionRef);
+  const wasActive    = reactionSnap.exists();
 
-  if (isActive) {
-    // Decouple resonance
-    await deleteDoc(resonanceRef);
-    await updateDoc(taleRef, {
-      resonanceCount: increment(-1),
-    });
+  if (wasActive) {
+    // Remove reaction
+    await deleteDoc(reactionRef);
+    await updateDoc(taleRef, { reactionCount: increment(-1) });
   } else {
-    // Establish resonance
-    await setDoc(resonanceRef, {
-      at: new Date().toISOString(),
+    // Add reaction
+    await setDoc(reactionRef, {
+      userId:    user.uid,
+      type:      'like',
+      reactedAt: serverTimestamp(),
     });
-    await updateDoc(taleRef, {
-      resonanceCount: increment(1),
-    });
+    await updateDoc(taleRef, { reactionCount: increment(1) });
   }
 
-  // Get fresh count
-  const updatedTale = await getDoc(taleRef);
+  // Return the fresh count from the tale document
+  const updatedSnap = await getDoc(taleRef);
   return {
-    active: !isActive,
-    count: updatedTale.data()?.resonanceCount || 0,
+    active: !wasActive,
+    count:  updatedSnap.data()?.reactionCount ?? 0,
   };
 }
 
 /**
- * Checks if the current user has resonance with a tale.
+ * Checks whether the current user has reacted to a tale.
+ *
+ * @param {string} taleId
+ * @returns {Promise<boolean>}
  */
 export async function getResonanceStatus(taleId) {
   const user = auth.currentUser;
   if (!user) return false;
 
-  const resonanceRef = doc(db, 'users', user.uid, 'resonances', taleId);
-  const snap = await getDoc(resonanceRef);
+  const snap = await getDoc(refs.taleReaction(taleId, user.uid));
   return snap.exists();
 }

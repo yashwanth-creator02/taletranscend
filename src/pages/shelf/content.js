@@ -1,8 +1,14 @@
 // src/pages/shelf/content.js
 // Data fetching, filtering, sorting, and grid rendering for the shelf page.
 // Pure data layer — no direct DOM manipulation except delegating to ui.js renderers.
+//
+// Key fix: loadBookmarkedTales no longer calls getTales() + filters — that caused
+// two Firestore round-trips and used b.id (wrong) instead of b.taleId.
+// Bookmarks already cache taleTitle, coverUrl, era, chapterCount — enough to render.
+// The bookmark objects are cast to the Tale-compatible shape needed by buildBookmarkCard.
 
-import { getBookmarks, getTales, getUserDrafts } from '@services/index.js';
+import { getBookmarks, getUserDrafts } from '@services/index.js';
+import { createBookmark } from '@state/index.js';
 import { shelfState } from './state.js';
 import { renderGrid, renderHeroStats, setGridLoading, setGridEmpty, setGridError } from './ui.js';
 
@@ -11,8 +17,9 @@ import { renderGrid, renderHeroStats, setGridLoading, setGridEmpty, setGridError
    ───────────────────────────────────────────── */
 
 /**
- * Fetches bookmarked tales, stores them in state, and renders the grid.
- * On subsequent calls (tab switch) uses cached state to avoid re-fetching.
+ * Fetches bookmarked tales directly from the bookmarks subcollection.
+ * Bookmarks cache all fields needed for card rendering — no getTales() needed.
+ * Uses shelfState.bookmarkedTales as a cache to avoid re-fetching on tab switch.
  *
  * @param {string} userId
  * @param {boolean} [force=false] - Force re-fetch even if cache exists
@@ -30,10 +37,24 @@ export async function loadBookmarkedTales(userId, force = false) {
   setGridLoading();
 
   try {
-    const [allTales, bookmarks] = await Promise.all([getTales(), getBookmarks({ userId })]);
+    const bookmarks = await getBookmarks({ userId });
 
-    const bookmarkedIds = new Set(bookmarks.map((b) => b.id));
-    const tales = allTales.filter((t) => bookmarkedIds.has(t.id));
+    // Normalize through schema — ensures every field has a safe default
+    // Build a card-compatible shape from the cached bookmark fields.
+    // Bug fix: was using b.id (Firestore doc auto-ID) instead of b.taleId.
+    const tales = bookmarks.map((b) => {
+      const bm = createBookmark(b.taleId, b);
+      return {
+        id:           bm.taleId,
+        title:        bm.taleTitle,
+        coverUrl:     bm.coverUrl,
+        authorName:   bm.authorName,
+        chapterCount: bm.chapterCount,
+        era:          bm.era,
+        description:  '',
+        progress:     0,
+      };
+    });
 
     shelfState.bookmarkedTales = tales;
 
@@ -95,15 +116,13 @@ export async function loadDrafts(userId, force = false) {
    ───────────────────────────────────────────── */
 
 /**
- * Computes and renders real hero stat values from cached state.
+ * Computes and renders hero stat values from cached state.
  * Call after both bookmarkedTales and drafts have been loaded.
  */
 export function computeAndRenderHeroStats() {
-  const bookmarkCount = shelfState.bookmarkedTales.length;
-  const draftCount = shelfState.drafts.length;
-
-  // totalWordsWritten is a denormalized field written by cloud.js on every save
-  const wordsPreserved = shelfState.drafts.reduce((acc, d) => acc + (d.totalWordsWritten || 0), 0);
+  const bookmarkCount  = shelfState.bookmarkedTales.length;
+  const draftCount     = shelfState.drafts.length;
+  const wordsPreserved = shelfState.drafts.reduce((acc, d) => acc + (d.wordCount || 0), 0);
 
   shelfState.heroStats = { draftCount, bookmarkCount, wordsPreserved };
   renderHeroStats(shelfState.heroStats);
@@ -127,7 +146,7 @@ export function applyAndRender() {
 }
 
 /**
- * Filters and sorts an array of tale/draft objects using current state.
+ * Filters and sorts an array of tale/draft objects using current shelfState.
  *
  * @param {Array<Object>} items
  * @returns {Array<Object>}
@@ -136,16 +155,10 @@ export function applyFilterSort(items) {
   let result = [...items];
 
   // Filter by query across title, description, era, tags
-  const q = shelfState.filterQuery.trim().toLowerCase();
+  const q = (shelfState.filterQuery || '').trim().toLowerCase();
   if (q) {
     result = result.filter((item) => {
-      const searchable = [
-        item.title,
-        item.description,
-        item.synopsis,
-        item.era,
-        ...(item.tags || []),
-      ]
+      const searchable = [item.title, item.description, item.synopsis, item.era, ...(item.tags || [])]
         .filter(Boolean)
         .join(' ')
         .toLowerCase();
@@ -166,8 +179,8 @@ export function applyFilterSort(items) {
 
       case 'date':
       default: {
-        const aTime = a.updatedAt?.seconds ?? a.lastUpdatedAt ?? 0;
-        const bTime = b.updatedAt?.seconds ?? b.lastUpdatedAt ?? 0;
+        const aTime = a.updatedAt?.seconds ?? a.bookmarkedAt?.seconds ?? a.lastUpdatedAt ?? 0;
+        const bTime = b.updatedAt?.seconds ?? b.bookmarkedAt?.seconds ?? b.lastUpdatedAt ?? 0;
         return dir * (aTime - bTime);
       }
     }

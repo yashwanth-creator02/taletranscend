@@ -1,5 +1,5 @@
 // src/pages/home/home.js
-// Entry point for the home page.
+// Home page entry point.
 // Loads trending tales from Firestore and handles page interactions.
 
 import '@css/base.css';
@@ -9,72 +9,81 @@ import '@css/pages/home.css';
 
 import { initNav } from '@ui/components/nav/nav.js';
 import { initIcons } from '@ui/components/icons.js';
-
-import { getDocs, query, orderBy, limit } from 'firebase/firestore';
-
-import { refs } from '@fb/refs.js';
+import { getTales } from '@services/index.js';
 
 initNav();
 
 document.addEventListener('DOMContentLoaded', () => {
   initIcons();
-  initHomeInteractions();
-  loadTrendingTales();
+  _initInteractions();
+  _loadTrendingTales();
 });
 
-/* ==================== Interactions ==================== */
+/* ─────────────────────────────────────────────
+   Interactions
+   ───────────────────────────────────────────── */
 
-function initHomeInteractions() {
-  // Hero CTA → contribution page
+function _initInteractions() {
+  // Hero CTA navigates to the contribution editor
   document.getElementById('home-start-writing-btn')?.addEventListener('click', () => {
     window.location.href = 'contribution.html';
   });
 
-  // Newsletter form (placeholder)
-  document.getElementById('newsletter-form')?.addEventListener('submit', (event) => {
-    event.preventDefault();
+  // Newsletter form — placeholder, no backend yet
+  document.getElementById('newsletter-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
   });
 
   // Search button
-  document.getElementById('home-search-btn')?.addEventListener('click', () => {
-    performSearch();
-  });
+  document.getElementById('home-search-btn')?.addEventListener('click', _performSearch);
 
   // Enter key inside search input
-  document.getElementById('home-search-input')?.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') {
-      performSearch();
-    }
+  document.getElementById('home-search-input')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') _performSearch();
   });
 }
 
 /**
- * Reads the home search input and redirects to library search.
+ * Reads the home search input and redirects to library with the search param.
  */
-function performSearch() {
-  const searchInput = document.getElementById('home-search-input');
-
-  const term = searchInput?.value.trim();
-
+function _performSearch() {
+  const term = document.getElementById('home-search-input')?.value.trim();
   if (!term) return;
-
   window.location.href = `library.html?search=${encodeURIComponent(term)}`;
 }
 
-/* ==================== Trending Tales ==================== */
+/* ─────────────────────────────────────────────
+   Trending Tales
+   ───────────────────────────────────────────── */
 
 /**
- * Fetches the 3 most recently published tales from Firestore
- * and renders them in the trending section.
- * Falls back to hiding the section if none exist yet.
+ * Fetches the 3 most recently published tales and renders them in the trending grid.
+ * Falls back to hiding the section entirely if no tales exist.
  */
-async function loadTrendingTales() {
+async function _loadTrendingTales() {
   const container = document.getElementById('trending-grid');
   if (!container) return;
 
   container.classList.add('fade-in-stagger');
+  _showSkeletons(container);
 
-  // Show skeletons
+  try {
+    const tales = await getTales({ status: 'published', count: 3 });
+
+    if (!tales.length) {
+      _hideTrendingSection();
+      return;
+    }
+
+    container.innerHTML = tales.map(_renderTrendingCard).join('');
+    initIcons();
+  } catch (err) {
+    console.error('[home] Failed to load trending tales:', err);
+    _hideTrendingSection();
+  }
+}
+
+function _showSkeletons(container) {
   container.innerHTML = Array.from(
     { length: 3 },
     () => `
@@ -98,63 +107,24 @@ async function loadTrendingTales() {
     </div>
   `
   ).join('');
-
-  try {
-    // Public tales collection reference
-    const talesRef = refs.tales();
-
-    // Query newest published tales
-    const trendingQuery = query(talesRef, orderBy('publishedAt', 'desc'), limit(3));
-
-    const snapshot = await getDocs(trendingQuery);
-
-    // Hide the entire section if no tales exist yet
-    if (snapshot.empty) {
-      hideTrendingSection();
-      return;
-    }
-
-    // Normalize Firestore docs
-    const tales = snapshot.docs.map((docSnap) => ({
-      id: docSnap.id,
-      ...docSnap.data(),
-    }));
-
-    // Render cards
-    container.innerHTML = tales.map(renderTrendingCard).join('');
-
-    // Refresh Lucide icons
-    initIcons();
-  } catch (error) {
-    console.error('[home] Failed to load trending tales:', error);
-
-    hideTrendingSection();
-  }
 }
 
-/**
- * Hides the trending section entirely.
- */
-function hideTrendingSection() {
+function _hideTrendingSection() {
   document.getElementById('trending-section')?.classList.add('hidden');
 }
 
 /**
  * Renders a single trending tale card.
  *
- * @param {Object} tale - Tale object from Firestore
- * @returns {string} HTML string for the card
+ * @param {import('@state/schemas/tale.schema.js').Tale} tale
+ * @returns {string}
  */
-function renderTrendingCard(tale) {
+function _renderTrendingCard(tale) {
   const cover =
     tale.coverUrl ||
     'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1000&auto=format&fit=crop';
 
-  const era = tale.era || 'Unknown Era';
-
-  const chapterCount = tale.chapterCount || 0;
-
-  const description = tale.description || 'A mysterious tale waiting to be uncovered...';
+  const count = tale.chapterCount || 0;
 
   return `
     <a
@@ -166,17 +136,16 @@ function renderTrendingCard(tale) {
           src="${cover}"
           alt="${tale.title}"
           class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+          loading="lazy"
         />
       </div>
 
       <div class="flex items-center gap-2 mb-3">
         <span class="bg-indigo-500/10 text-indigo-400 text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md">
-          ${era}
+          ${tale.era || 'Unknown Era'}
         </span>
-
         <span class="text-zinc-600 text-[10px] font-bold">
-          ${chapterCount}
-          ${chapterCount === 1 ? 'Fragment' : 'Fragments'}
+          ${count} ${count === 1 ? 'Fragment' : 'Fragments'}
         </span>
       </div>
 
@@ -185,14 +154,13 @@ function renderTrendingCard(tale) {
       </h3>
 
       <p class="text-slate-500 text-sm leading-relaxed mb-6 line-clamp-3">
-        ${description}
+        ${tale.description || 'A mysterious tale waiting to be uncovered...'}
       </p>
 
       <div class="flex items-center justify-between pt-4 border-t border-zinc-800/50">
         <span class="text-zinc-500 text-xs font-bold">
           ${tale.authorName || 'Unknown Scribe'}
         </span>
-
         <span class="flex items-center gap-1 text-indigo-400 text-xs font-bold group-hover:gap-2 transition-all">
           Read
           <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>

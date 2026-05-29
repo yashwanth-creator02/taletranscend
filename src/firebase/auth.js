@@ -1,54 +1,40 @@
 // src/firebase/auth.js
 // Firebase Authentication setup and initialization helper.
-// Supports custom token, anonymous auth, and auth state listening.
+// Uses anonymous authentication only — custom token dead code has been removed.
 
 import {
-  signOut,
   getAuth,
+  signOut,
   signInAnonymously,
-  signInWithCustomToken,
   onAuthStateChanged,
 } from 'firebase/auth';
 import app from './app.js';
+
 // Single shared Auth instance used across the entire application.
 export const auth = getAuth(app);
 
 /**
  * Initializes authentication for the application.
+ * Signs in anonymously if no session exists, then fires onReady once a
+ * valid user session is confirmed via the onAuthStateChanged listener.
  *
- * Authentication priority:
- *  1. Custom token (injected by server-side bootstrapping if available)
- *  2. Anonymous authentication (fallback for all other cases)
- *
- * The onReady callback fires once a valid user session exists,
- * either from a restored session or a fresh sign-in.
- *
- * @param {Function} onReady - Callback invoked with the authenticated user object
+ * @param {(user: import('firebase/auth').User) => void} onReady
  */
 export function initAuth(onReady) {
-  // Register a state listener that fires on load and on every auth change.
+  // Register a state listener — fires on load and on every auth change.
   // This is the primary mechanism for notifying pages that auth is ready.
   onAuthStateChanged(auth, (user) => {
-    if (user) {
-      onReady(user);
-    }
+    if (user) onReady(user);
   });
 
-  // Immediately attempt sign-in if no session exists.
-  // Runs in parallel with the state listener to minimize auth latency.
+  // Immediately attempt anonymous sign-in if no session exists.
+  // Runs in parallel with the state listener to minimise auth latency.
   (async () => {
     if (auth.currentUser) return;
-
     try {
-      if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-        // Use server-provided token when available
-        await signInWithCustomToken(auth, __initial_auth_token);
-      } else {
-        // Fall back to anonymous auth for unauthenticated visitors
-        await signInAnonymously(auth);
-      }
+      await signInAnonymously(auth);
     } catch (err) {
-      console.error('Auth initialization failed:', err);
+      console.error('[auth] Anonymous sign-in failed:', err);
     }
   })();
 }

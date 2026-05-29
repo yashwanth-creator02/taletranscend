@@ -1,94 +1,169 @@
 // src/pages/reader/theme.js
-// Optimized Theme Management for Reader
-// Handles Typography and Colour Themes with absolute consistency.
+// Reader theme and typography management.
+//
+// Responsibilities:
+//   - Read stored preferences from localStorage on init (cloud sync handled separately)
+//   - Apply theme by setting data-reader-theme on .reader-surface (NOT on <html>)
+//   - Apply font/size/lh/measure by setting CSS custom properties on .reader-surface
+//   - Sync all picker UI elements to current state after every change
+//
+// The actual theme color tokens live in reader-themes.css, scoped to
+// .reader-surface[data-reader-theme="<id>"]. This module only manages the attribute.
 
-import { readerState, FONTS } from './state.js';
-
-const STORAGE_KEYS = {
-  theme: 'tt-reader-theme',
-  fontFamily: 'tt-reader-font',
-  fontSize: 'tt-reader-size',
-  lineHeight: 'tt-reader-lh',
-  measure: 'tt-reader-measure',
-};
+import { readerState } from './state.js';
+import {
+  FONTS,
+  DARK_THEMES,
+  DEFAULT_THEME,
+  DEFAULT_FONT,
+  TYPOGRAPHY_BOUNDS,
+  READER_STORAGE_KEYS,
+} from '@config/theme.config.js';
 
 /* ─────────────────────────────────────────────
-   Core Logic
+   Surface Element
+   The element that receives data-reader-theme and CSS var overrides.
+   All reader theme CSS rules are scoped inside this element.
    ───────────────────────────────────────────── */
 
+function _getSurface() {
+  return document.querySelector('.reader-surface');
+}
+
+/* ─────────────────────────────────────────────
+   Init
+   ───────────────────────────────────────────── */
+
+/**
+ * Reads all stored preferences and applies them.
+ * Called once on reader page load, before content renders.
+ * If cloud prefs are available (appState.prefsLoaded), call applyCloudPrefs()
+ * afterwards — it will override the localStorage values.
+ */
 export function initTheme() {
-  readerState.theme = localStorage.getItem(STORAGE_KEYS.theme) || 'noir';
-  readerState.fontFamily = localStorage.getItem(STORAGE_KEYS.fontFamily) || 'serif';
-  readerState.fontSize = Number(localStorage.getItem(STORAGE_KEYS.fontSize)) || 18;
-  readerState.lineHeight = Number(localStorage.getItem(STORAGE_KEYS.lineHeight)) || 1.75;
-  readerState.measure = Number(localStorage.getItem(STORAGE_KEYS.measure)) || 68;
+  readerState.theme      = localStorage.getItem(READER_STORAGE_KEYS.theme)      || DEFAULT_THEME;
+  readerState.fontFamily = localStorage.getItem(READER_STORAGE_KEYS.fontFamily) || DEFAULT_FONT;
+  readerState.fontSize   = Number(localStorage.getItem(READER_STORAGE_KEYS.fontSize))   || TYPOGRAPHY_BOUNDS.fontSize.default;
+  readerState.lineHeight = Number(localStorage.getItem(READER_STORAGE_KEYS.lineHeight)) || TYPOGRAPHY_BOUNDS.lineHeight.default;
+  readerState.measure    = Number(localStorage.getItem(READER_STORAGE_KEYS.measure))    || TYPOGRAPHY_BOUNDS.measure.default;
 
   _applyAll();
 }
 
 /**
- * Applies a global colour theme.
+ * Applies reader preferences loaded from Firestore (users/{uid}/preferences/reader).
+ * Call this after initTheme() once the cloud prefs are available.
+ * Overwrites localStorage-sourced values with the cloud-synced ones.
+ *
+ * @param {import('@state/schemas/user.schema.js').ReaderPreferences} prefs
+ */
+export function applyCloudPrefs(prefs) {
+  readerState.theme      = prefs.theme      || readerState.theme;
+  readerState.fontFamily = prefs.fontFamily || readerState.fontFamily;
+  readerState.fontSize   = prefs.fontSize   || readerState.fontSize;
+  readerState.lineHeight = prefs.lineHeight || readerState.lineHeight;
+  readerState.measure    = prefs.measure    || readerState.measure;
+
+  _applyAll();
+}
+
+/* ─────────────────────────────────────────────
+   Public Setters
+   Each setter: clamps value -> updates readerState -> persists to localStorage
+   -> applies CSS -> syncs UI.
+   ───────────────────────────────────────────── */
+
+/**
+ * Sets the reader colour theme.
+ * Applies data-reader-theme to .reader-surface only — never touches <html>.
+ *
+ * @param {string} theme - Must match an id in READER_THEMES and a block in reader-themes.css
  */
 export function setTheme(theme) {
   readerState.theme = theme;
-  localStorage.setItem(STORAGE_KEYS.theme, theme);
+  localStorage.setItem(READER_STORAGE_KEYS.theme, theme);
 
-  document.documentElement.dataset.theme = theme;
-  const app = document.getElementById('app');
-  if (app) app.dataset.theme = theme;
+  const surface = _getSurface();
+  if (surface) surface.dataset.readerTheme = theme;
 
-  // Atmosphere & Particles
+  // Toggle atmosphere and particle effects for dark vs light themes
   const atmosphere = document.getElementById('atmosphere');
-  const particles = document.getElementById('particles');
-  const darkThemes = ["noir", "parchment", "midnight", "emerald", "rose", "ocean", "sunset", "forest"];
-  
-  if (atmosphere) atmosphere.style.display = darkThemes.includes(theme) ? "block" : "none";
-  if (particles) particles.style.display = darkThemes.includes(theme) ? "block" : "none";
+  const particles  = document.getElementById('particles');
+  const isDark     = DARK_THEMES.has(theme);
+
+  if (atmosphere) atmosphere.style.display = isDark ? 'block' : 'none';
+  if (particles)  particles.style.display  = isDark ? 'block' : 'none';
 
   _syncUI();
 }
 
+/**
+ * @param {string} family - Key from FONTS object in theme.config.js
+ */
 export function setFontFamily(family) {
   if (!FONTS[family]) return;
   readerState.fontFamily = family;
-  localStorage.setItem(STORAGE_KEYS.fontFamily, family);
-  
-  const cssValue = family === 'serif' ? 'var(--font-serif)' : 
-                   family === 'sans' ? 'var(--font-sans)' : 
-                   'var(--font-mono)';
-                   
-  document.documentElement.style.setProperty('--reader-font-family', cssValue);
+  localStorage.setItem(READER_STORAGE_KEYS.fontFamily, family);
+
+  const surface = _getSurface();
+  if (surface) surface.style.setProperty('--reader-font-family', FONTS[family].css);
+
   _syncUI();
 }
 
+/**
+ * @param {number|string} val - Font size in px, clamped to TYPOGRAPHY_BOUNDS.fontSize
+ */
 export function setFontSize(val) {
-  const px = Math.min(32, Math.max(12, Number(val)));
+  const { min, max } = TYPOGRAPHY_BOUNDS.fontSize;
+  const px = Math.min(max, Math.max(min, Number(val)));
   readerState.fontSize = px;
-  localStorage.setItem(STORAGE_KEYS.fontSize, String(px));
-  document.documentElement.style.setProperty('--reader-font-size', `${px}px`);
+  localStorage.setItem(READER_STORAGE_KEYS.fontSize, String(px));
+
+  const surface = _getSurface();
+  if (surface) surface.style.setProperty('--reader-font-size', `${px}px`);
+
   _syncUI();
 }
 
+/**
+ * @param {number|string} val - Line height multiplier, clamped to TYPOGRAPHY_BOUNDS.lineHeight
+ */
 export function setLineHeight(val) {
-  const lh = Math.min(2.5, Math.max(1.2, Number(val)));
+  const { min, max } = TYPOGRAPHY_BOUNDS.lineHeight;
+  const lh = Math.min(max, Math.max(min, Number(val)));
   readerState.lineHeight = lh;
-  localStorage.setItem(STORAGE_KEYS.lineHeight, String(lh));
-  document.documentElement.style.setProperty('--reader-line-height', String(lh));
+  localStorage.setItem(READER_STORAGE_KEYS.lineHeight, String(lh));
+
+  const surface = _getSurface();
+  if (surface) surface.style.setProperty('--reader-line-height', String(lh));
+
   _syncUI();
 }
 
+/**
+ * @param {number|string} val - Characters per line, clamped to TYPOGRAPHY_BOUNDS.measure
+ */
 export function setMeasure(val) {
-  const measure = Math.min(100, Math.max(40, Number(val)));
-  readerState.measure = measure;
-  localStorage.setItem(STORAGE_KEYS.measure, String(measure));
-  document.documentElement.style.setProperty('--reader-measure', `${measure}ch`);
+  const { min, max } = TYPOGRAPHY_BOUNDS.measure;
+  const ch = Math.min(max, Math.max(min, Number(val)));
+  readerState.measure = ch;
+  localStorage.setItem(READER_STORAGE_KEYS.measure, String(ch));
+
+  const surface = _getSurface();
+  if (surface) surface.style.setProperty('--reader-measure', `${ch}ch`);
+
   _syncUI();
 }
 
 /* ─────────────────────────────────────────────
-   Internal Sync
+   Internal
    ───────────────────────────────────────────── */
 
+/**
+ * Applies all current readerState preference values.
+ * Called on init and after applyCloudPrefs.
+ */
 function _applyAll() {
   setTheme(readerState.theme);
   setFontFamily(readerState.fontFamily);
@@ -98,40 +173,45 @@ function _applyAll() {
 }
 
 /**
- * Synchronizes all UI components with current state.
+ * Synchronises all picker UI controls with the current readerState.
+ * Safe to call at any time — all queries are defensive.
  */
 function _syncUI() {
-  // Sync Theme Buttons
+  // Theme picker buttons
   document.querySelectorAll('[data-theme-id]').forEach((btn) => {
-    btn.dataset.active = btn.dataset.themeId === readerState.theme;
-    btn.classList.toggle('active', btn.dataset.themeId === readerState.theme);
+    const active = btn.dataset.themeId === readerState.theme;
+    btn.dataset.active = active;
+    btn.classList.toggle('active', active);
   });
 
-  // Sync Font Buttons
+  // Font picker buttons
   document.querySelectorAll('[data-font]').forEach((btn) => {
-    btn.dataset.active = btn.dataset.font === readerState.fontFamily;
-    btn.classList.toggle('active', btn.dataset.font === readerState.fontFamily);
+    const active = btn.dataset.font === readerState.fontFamily;
+    btn.dataset.active = active;
+    btn.classList.toggle('active', active);
   });
 
-  // Sync Sliders/Controls
-  const sizeInput = document.getElementById('fontSize');
-  const fsRange = document.getElementById('fsRange');
-  if (sizeInput) sizeInput.value = readerState.fontSize;
-  if (fsRange) fsRange.value = readerState.fontSize;
-  _setText('sizeVal', `${readerState.fontSize}px`);
+  // Font size controls
+  _setInputValue('fontSize', readerState.fontSize);
+  _setInputValue('fsRange',  readerState.fontSize);
+  _setTextContent('sizeVal', `${readerState.fontSize}px`);
 
-  const lhInput = document.getElementById('lineHeight');
-  if (lhInput) lhInput.value = readerState.lineHeight;
-  _setText('lhVal', readerState.lineHeight.toFixed(2));
+  // Line height controls
+  _setInputValue('lineHeight', readerState.lineHeight);
+  _setTextContent('lhVal', readerState.lineHeight.toFixed(2));
 
-  const msInput = document.getElementById('measure');
-  const mwRange = document.getElementById('mwRange');
-  if (msInput) msInput.value = readerState.measure;
-  if (mwRange) mwRange.value = readerState.measure;
-  _setText('msVal', `${readerState.measure}ch`);
+  // Measure (reading width) controls
+  _setInputValue('measure', readerState.measure);
+  _setInputValue('mwRange', readerState.measure);
+  _setTextContent('msVal', `${readerState.measure}ch`);
 }
 
-function _setText(id, val) {
+function _setInputValue(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = val;
+}
+
+function _setTextContent(id, val) {
   const el = document.getElementById(id);
   if (el) el.textContent = val;
 }

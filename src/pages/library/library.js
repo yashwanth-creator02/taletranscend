@@ -1,16 +1,20 @@
 // src/pages/library/library.js
-// Entry point for the library page.
+// Library page entry point.
+// Wires auth, real-time tales subscription, filters, interactions, and UI state.
 
 import '@css/base.css';
 import '@css/nav.css';
 import '@css/components.css';
 import '@css/pages/library.css';
 
-import { initNav } from '@ui/components/nav/nav.js';
 import { initAuth } from '@fb/index.js';
-import { libraryState } from './state.js';
+import { initNav } from '@ui/components/nav/nav.js';
+import { initIcons } from '@ui/components/icons.js';
 
-import { subscribeToTales, stopTalesSubscription } from './content.js';
+import {
+  subscribeToTales,
+  stopTalesSubscription,
+} from './content.js';
 import {
   applyAllFilters,
   setupSearch,
@@ -19,75 +23,53 @@ import {
   setupLengthFilter,
   setupSidebarFilter,
 } from './filters.js';
-import { setupCardInteractions } from './interactions.js';
 import {
   setupSidebarToggle,
   updateSidebarUser,
   showGridSkeleton,
   showGridError,
-  setActiveSidebarBtn,
 } from './ui.js';
-import { initIcons } from '@/ui/icons.js';
-
-import { setupAuthTimeout } from '@/utils/ui.utils';
+import { setupCardInteractions } from './interactions.js';
+import { libraryState } from './state.js';
 
 initNav();
 
 /* ─────────────────────────────────────────────
-   DOM-ready setup (before auth)
+   DOM-ready — wire static UI before auth resolves
    ───────────────────────────────────────────── */
 
 document.addEventListener('DOMContentLoaded', () => {
   setupSidebarToggle();
-  const grid = document.getElementById('cards-grid');
-  if (grid) {
-    grid.classList.add('fade-in-stagger');
-    showGridSkeleton();
-  }
+  setupSearch();
+  setupToneFilter();
+  setupLengthFilter();
+  setupSidebarFilter();
+  showGridSkeleton();
   initIcons();
 });
 
 /* ─────────────────────────────────────────────
-   Auth + Subscription
+   Auth + Data
    ───────────────────────────────────────────── */
 
-const authTimeout = setupAuthTimeout('cards-grid');
-
 initAuth(async (user) => {
-  clearTimeout(authTimeout);
   libraryState.userId = user.uid;
 
-  // Update sidebar user avatar + name
+  // Update sidebar with user identity
   updateSidebarUser(user);
 
-  // Submit tale button
-  document.getElementById('btn-submit-tale')?.addEventListener('click', () => {
-    window.location.href = 'contribution.html';
-  });
-
-  // Wire search (handles URL param pre-fill too)
-  setupSearch();
-
-  // Wire filters
-  setupToneFilter();
-  setupLengthFilter();
-
-  // Wire sidebar filter buttons
-  setupSidebarFilter();
-  setActiveSidebarBtn('all');
-
-  // Wire card interactions
+  // Wire card interactions now that userId is available
   setupCardInteractions(user.uid);
 
-  // Subscribe to real-time tales
+  // Start real-time subscription
   subscribeToTales(
     async (tales) => {
-      // First load: build era chips from real data
-      if (libraryState.allTales.length === 0 || tales.length !== libraryState.allTales.length) {
+      // First batch — set up era chips (derived from actual data)
+      if (!libraryState.eraChipsBuilt) {
         setupEraFilter(tales);
+        libraryState.eraChipsBuilt = true;
       }
 
-      // Apply all active filters against fresh data
       await applyAllFilters();
       initIcons();
     },
@@ -96,7 +78,8 @@ initAuth(async (user) => {
 });
 
 /* ─────────────────────────────────────────────
-   Cleanup
+   Teardown
    ───────────────────────────────────────────── */
 
-window.addEventListener('beforeunload', stopTalesSubscription);
+// Stop Firestore listener on page unload to prevent memory leaks
+window.addEventListener('pagehide', () => stopTalesSubscription());

@@ -12,6 +12,8 @@ import {
 } from './content.js';
 import { setActiveTab, buildSortPanel, refreshSortPanel } from './ui.js';
 import { initIcons } from '@ui/components/icons.js';
+import { showToast } from '@ui/components/toast.js';
+import { removeFromBookmarks } from '@services/index.js';
 
 /* ─────────────────────────────────────────────
    Public Init
@@ -73,10 +75,9 @@ function _bindFilter() {
     }, 220);
   });
 
-  // Clear filter on Escape
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      input.value = '';
+      input.value            = '';
       shelfState.filterQuery = '';
       applyAndRender();
       input.blur();
@@ -89,11 +90,10 @@ function _bindFilter() {
    ───────────────────────────────────────────── */
 
 function _bindSort() {
-  const btn = document.getElementById('sort-btn');
+  const btn   = document.getElementById('sort-btn');
   const panel = document.getElementById('sort-panel');
   if (!btn || !panel) return;
 
-  // Toggle panel
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
     const isOpen = !panel.hidden;
@@ -101,7 +101,6 @@ function _bindSort() {
     btn.setAttribute('aria-expanded', String(!isOpen));
   });
 
-  // Close on outside click
   document.addEventListener('click', (e) => {
     if (!panel.hidden && !panel.contains(e.target) && e.target !== btn) {
       panel.hidden = true;
@@ -109,18 +108,16 @@ function _bindSort() {
     }
   });
 
-  // Sort option click (delegated)
   panel.addEventListener('click', (e) => {
     const option = e.target.closest('[data-sort]');
     if (!option) return;
 
     const key = option.dataset.sort;
 
-    // Toggle direction if same key selected again
     if (shelfState.sortBy === key) {
       shelfState.sortDir = shelfState.sortDir === 'desc' ? 'asc' : 'desc';
     } else {
-      shelfState.sortBy = key;
+      shelfState.sortBy  = key;
       shelfState.sortDir = 'desc';
     }
 
@@ -133,60 +130,49 @@ function _bindSort() {
 }
 
 /* ─────────────────────────────────────────────
-   Card Actions (click delegation)
+   Card Actions (delegated)
    ───────────────────────────────────────────── */
 
 function _bindCardActions() {
   const grid = document.getElementById('studio-grid');
   if (!grid) return;
 
-  // Use a MutationObserver so newly rendered cards are always covered
-  // without re-binding on every render.
-  const observer = new MutationObserver(() => {
-    // Re-attach is not needed — delegation on grid covers new children.
-  });
-  observer.observe(grid, { childList: true });
-
-  grid.addEventListener('click', (e) => {
+  grid.addEventListener('click', async (e) => {
     const target = e.target;
 
     // Options button — toggle menu
     const optionsBtn = target.closest('[data-action="options"]');
     if (optionsBtn) {
       e.stopPropagation();
-      const menuId = optionsBtn.dataset.menuId;
-      _toggleMenu(menuId, optionsBtn);
+      _toggleMenu(optionsBtn.dataset.menuId, optionsBtn);
       return;
     }
 
-    // Close any open menu on outside click handled by document listener
+    // Menu item action
     const menuItem = target.closest('[data-action]');
     if (menuItem) {
       const action = menuItem.dataset.action;
-      const id = menuItem.dataset.id;
-      _handleCardAction(action, id, e);
+      const id     = menuItem.dataset.id;
+      await _handleCardAction(action, id, e);
       return;
     }
 
-    // Click on card body → resume/open
+    // Card body click → navigate to tale
     const card = target.closest('[data-id]');
     if (card && !target.closest('.shelf-menu') && !target.closest('.shelf-options-btn')) {
       const id = card.dataset.id;
-      if (id) _navigateToTale(id);
+      if (id) window.location.href = `tale.html?id=${id}`;
     }
   });
 
-  // Close all menus on document click
   document.addEventListener('click', _closeAllMenus);
 
-  // Escape closes open menu
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') _closeAllMenus();
   });
 }
 
 function _toggleMenu(menuId, triggerBtn) {
-  // Close all other menus first
   document.querySelectorAll('.shelf-menu:not([hidden])').forEach((m) => {
     if (m.id !== menuId) {
       m.hidden = true;
@@ -198,7 +184,7 @@ function _toggleMenu(menuId, triggerBtn) {
   if (!menu) return;
 
   const isOpen = !menu.hidden;
-  menu.hidden = isOpen;
+  menu.hidden  = isOpen;
   triggerBtn?.setAttribute('aria-expanded', String(!isOpen));
 }
 
@@ -211,35 +197,42 @@ function _closeAllMenus() {
   });
 }
 
-function _handleCardAction(action, id, e) {
+async function _handleCardAction(action, id, e) {
   e.stopPropagation();
 
   switch (action) {
     case 'resume':
-      _navigateToTale(id);
+      window.location.href = `tale.html?id=${id}`;
       break;
 
     case 'copy-link': {
-      const url = `${window.location.origin}/tale.html?id=${id}`;
-      navigator.clipboard?.writeText(url).then(() => {
-        _showToast('Link copied to clipboard.', 'success');
-      });
+      const url = `${window.location.origin}/src/views/tale.html?id=${id}`;
+      await navigator.clipboard?.writeText(url);
+      showToast('Link copied to clipboard.', 'success');
       break;
     }
 
     case 'mark-finished':
-      // markFinish.service.js is already in services — wire when ready
-      _showToast('Marked as finished.', 'success');
+      // markFinish.service.js handles this — stub until UI is wired
+      showToast('Marked as finished.', 'success');
       break;
 
-    case 'decouple':
-      _showToast('Removed from shelf.', 'success');
-      // Optimistic UI: remove card immediately
-      document.querySelector(`[data-id="${id}"]`)?.remove();
-      // Remove from cached state
-      shelfState.bookmarkedTales = shelfState.bookmarkedTales.filter((t) => t.id !== id);
-      computeAndRenderHeroStats();
+    case 'decouple': {
+      // Bug fix: was only doing optimistic UI without calling the service
+      if (!shelfState.userId || !id) break;
+      try {
+        await removeFromBookmarks({ userId: shelfState.userId, taleId: id });
+        // Optimistic UI: remove card from DOM and cached state
+        document.querySelector(`[data-id="${id}"]`)?.remove();
+        shelfState.bookmarkedTales = shelfState.bookmarkedTales.filter((t) => t.id !== id);
+        computeAndRenderHeroStats();
+        showToast('Removed from shelf.', 'info');
+      } catch (err) {
+        console.error('[shelf] Decouple failed:', err);
+        showToast('Could not remove from shelf.', 'error');
+      }
       break;
+    }
 
     default:
       break;
@@ -248,53 +241,28 @@ function _handleCardAction(action, id, e) {
   _closeAllMenus();
 }
 
-function _navigateToTale(id) {
-  window.location.href = `tale.html?id=${id}`;
-}
-
 /* ─────────────────────────────────────────────
    Right Rail — Studio Rituals
    ───────────────────────────────────────────── */
 
 function _bindRightRail() {
-  // New Draft → contribution.html
   document.getElementById('ritual-new-draft')?.addEventListener('click', () => {
     window.location.href = 'contribution.html';
   });
 
-  // Begin New Tale (hero CTA) → contribution.html
   document.getElementById('hero-new-tale-btn')?.addEventListener('click', () => {
     window.location.href = 'contribution.html';
   });
 
-  // Voice Chronicle → stub with toast
   document.getElementById('ritual-voice-note')?.addEventListener('click', () => {
-    _showToast('Voice Chronicle — coming soon.', 'info');
+    showToast('Voice Chronicle — coming soon.', 'info');
   });
 
-  // Publishing flow → contribution.html (user picks draft there)
   document.getElementById('ritual-publish')?.addEventListener('click', () => {
     window.location.href = 'contribution.html';
   });
 
-  // Hero Voice Chronicle button
   document.getElementById('hero-voice-btn')?.addEventListener('click', () => {
-    _showToast('Voice Chronicle — coming soon.', 'info');
+    showToast('Voice Chronicle — coming soon.', 'info');
   });
-}
-
-/* ─────────────────────────────────────────────
-   Toast
-   ───────────────────────────────────────────── */
-
-import { showToast } from '@ui/components/toast.js';
-
-/**
- * Shows a lightweight toast notification.
- *
- * @param {string} message
- * @param {'success'|'error'|'info'} type
- */
-function _showToast(message, type = 'success') {
-  showToast(message, type);
 }

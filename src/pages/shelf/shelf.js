@@ -7,6 +7,7 @@ import '@css/base.css';
 import '@css/nav.css';
 import '@css/components.css';
 import '@css/pages/shelf.css';
+
 import {
   shelfState,
   setGridLoading,
@@ -37,22 +38,22 @@ initAuth(async (user) => {
   clearTimeout(authTimeout);
   shelfState.userId = user.uid;
 
-  // Show skeleton immediately
   setGridLoading();
 
-  // Load both data sets in parallel so hero stats can be computed
-  // once both resolve — no sequential waterfall.
-  const [,] = await Promise.all([loadBookmarkedTales(user.uid), loadDrafts(user.uid)]);
+  // Load both data sets in parallel — bookmarks for the default tab view,
+  // drafts in the background so hero stats can be computed immediately.
+  // Bug fix: was calling loadBookmarkedTales twice (once in parallel, once after)
+  // which caused two Firestore reads for no reason.
+  await Promise.all([
+    loadBookmarkedTales(user.uid),
+    loadDrafts(user.uid),
+  ]);
 
-  // Default view: bookmarked tab
-  // loadBookmarkedTales already rendered the grid — just sync tab UI
+  // Default view — bookmarks tab
   setActiveTab('bookmarked');
   shelfState.activeTab = 'bookmarked';
 
-  // Re-render bookmarked tab (drafts loaded in background for stats)
-  await loadBookmarkedTales(user.uid);
-
-  // Compute hero stats from both cached data sets
+  // Compute hero stats now that both data sets are cached
   computeAndRenderHeroStats();
 
   initIcons();

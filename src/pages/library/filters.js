@@ -1,22 +1,21 @@
 // src/pages/library/filters.js
 // All filtering logic for the library page.
-// Search, era, and sidebar filters are composable — they all run together
-// against libraryState.allTales so they never conflict with each other.
+// Search, era, tone, length, and sidebar filters are composable — they all
+// run together against libraryState.allTales so they never conflict.
 
 import { libraryState } from './state.js';
 import { getBookmarks } from '@services/index.js';
 import { buildEraChips, setActiveEraChip, setActiveSidebarBtn } from './ui.js';
 import { renderCardsGrid } from '@ui/components/taleCard.js';
-import { initIcons } from '@/ui/icons.js';
+import { initIcons } from '@ui/components/icons.js';
 
 /* ─────────────────────────────────────────────
-   Core: apply all active filters together
+   Core — apply all active filters together
    ───────────────────────────────────────────── */
 
 /**
- * Applies the current search query, era filter, and sidebar filter
+ * Applies the current search query, era, tone, length, and sidebar filters
  * together against libraryState.allTales and renders the result.
- *
  * Called by every individual filter change — single source of render truth.
  *
  * @returns {Promise<void>}
@@ -24,26 +23,30 @@ import { initIcons } from '@/ui/icons.js';
 export async function applyAllFilters() {
   let result = [...libraryState.allTales];
 
-  // 1. Sidebar filter (scope reduction)
+  // 1. Sidebar filter (scope reduction — may hit Firestore for bookmarks)
   result = await _applySidebarFilter(result, libraryState.sidebarFilter, libraryState.userId);
 
   // 2. Era filter
   if (libraryState.activeEra !== 'all') {
-    result = result.filter((t) => t.era?.toLowerCase() === libraryState.activeEra.toLowerCase());
+    result = result.filter(
+      (t) => t.era?.toLowerCase() === libraryState.activeEra.toLowerCase()
+    );
   }
 
   // 3. Tone filter
   if (libraryState.activeTone !== 'all') {
-    result = result.filter((t) => t.tone?.toLowerCase() === libraryState.activeTone.toLowerCase());
+    result = result.filter(
+      (t) => t.tone?.toLowerCase() === libraryState.activeTone.toLowerCase()
+    );
   }
 
-  // 4. Length filter
+  // 4. Length filter — based on tale wordCount field
   if (libraryState.activeLength !== 'all') {
     result = result.filter((t) => {
-      const wordCount = Number(t.totalWordsWritten) || 0;
-      if (libraryState.activeLength === 'short') return wordCount < 2000;
-      if (libraryState.activeLength === 'medium') return wordCount >= 2000 && wordCount < 10000;
-      if (libraryState.activeLength === 'long') return wordCount >= 10000;
+      const wc = Number(t.wordCount) || 0;
+      if (libraryState.activeLength === 'short')  return wc < 2000;
+      if (libraryState.activeLength === 'medium') return wc >= 2000 && wc < 10000;
+      if (libraryState.activeLength === 'long')   return wc >= 10000;
       return true;
     });
   }
@@ -71,13 +74,12 @@ export async function applyAllFilters() {
 
 /**
  * Initialises the search input with debounced filtering.
- * Pre-fills the input from ?search= URL param on first call.
+ * Pre-fills from ?search= URL param on first call.
  */
 export function setupSearch() {
   const input = document.getElementById('search-input');
   if (!input) return;
 
-  // Pre-fill from URL param
   const urlSearch = new URLSearchParams(window.location.search).get('search');
   if (urlSearch) {
     input.value = urlSearch;
@@ -94,7 +96,6 @@ export function setupSearch() {
     }, 220);
   });
 
-  // CMD/Ctrl+K focuses the search input
   document.addEventListener('keydown', (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
       e.preventDefault();
@@ -118,31 +119,28 @@ export function setupSearch() {
  * Builds era chips from actual tale data and wires click handlers.
  * Must be called after the first tales batch loads.
  *
- * @param {Array<Object>} tales - Full tales array to derive eras from
+ * @param {import('@state/schemas/tale.schema.js').Tale[]} tales
  */
 export function setupEraFilter(tales) {
-  // Derive unique eras from real data, sorted alphabetically
   const eras = [...new Set(tales.map((t) => t.era).filter(Boolean))].sort();
   buildEraChips(eras);
 
-  // Wire clicks via delegation on the era bar
   const bar = document.getElementById('era-filter-bar');
   if (!bar) return;
 
   bar.addEventListener('click', (e) => {
     const btn = e.target.closest('[data-era]');
     if (!btn) return;
-
-    const era = btn.dataset.era;
-    libraryState.activeEra = era;
-    setActiveEraChip(era);
+    libraryState.activeEra = btn.dataset.era;
+    setActiveEraChip(btn.dataset.era);
     applyAllFilters();
   });
 }
 
-/**
- * Wires the tone filter bar.
- */
+/* ─────────────────────────────────────────────
+   Tone Filter
+   ───────────────────────────────────────────── */
+
 export function setupToneFilter() {
   const bar = document.getElementById('tone-filter-bar');
   if (!bar) return;
@@ -151,22 +149,18 @@ export function setupToneFilter() {
     const btn = e.target.closest('[data-tone]');
     if (!btn) return;
 
-    const tone = btn.dataset.tone;
-    libraryState.activeTone = tone;
-
-    // Update UI
+    libraryState.activeTone = btn.dataset.tone;
     bar.querySelectorAll('[data-tone]').forEach((b) => {
-      const isActive = b.dataset.tone === tone;
-      b.classList.toggle('filter-pill--active', isActive);
+      b.classList.toggle('filter-pill--active', b.dataset.tone === btn.dataset.tone);
     });
-
     applyAllFilters();
   });
 }
 
-/**
- * Wires the length filter bar.
- */
+/* ─────────────────────────────────────────────
+   Length Filter
+   ───────────────────────────────────────────── */
+
 export function setupLengthFilter() {
   const bar = document.getElementById('length-filter-bar');
   if (!bar) return;
@@ -175,15 +169,10 @@ export function setupLengthFilter() {
     const btn = e.target.closest('[data-length]');
     if (!btn) return;
 
-    const length = btn.dataset.length;
-    libraryState.activeLength = length;
-
-    // Update UI
+    libraryState.activeLength = btn.dataset.length;
     bar.querySelectorAll('[data-length]').forEach((b) => {
-      const isActive = b.dataset.length === length;
-      b.classList.toggle('filter-pill--active', isActive);
+      b.classList.toggle('filter-pill--active', b.dataset.length === btn.dataset.length);
     });
-
     applyAllFilters();
   });
 }
@@ -192,14 +181,8 @@ export function setupLengthFilter() {
    Sidebar Filter
    ───────────────────────────────────────────── */
 
-/**
- * Wires the sidebar filter buttons.
- */
 export function setupSidebarFilter() {
-  const buttons = document.querySelectorAll('.sidebar-filter');
-  if (!buttons.length) return;
-
-  buttons.forEach((btn) => {
+  document.querySelectorAll('.sidebar-filter').forEach((btn) => {
     btn.addEventListener('click', async () => {
       const filter = /** @type {import('./state.js').SidebarFilter} */ (btn.dataset.filter);
       libraryState.sidebarFilter = filter;
@@ -210,17 +193,14 @@ export function setupSidebarFilter() {
 }
 
 /* ─────────────────────────────────────────────
-   Internal: sidebar filter logic
+   Internal — sidebar filter logic
    ───────────────────────────────────────────── */
 
 /**
- * Applies a named sidebar filter to a tales array.
- * Async because the bookmarked filter fetches from Firestore.
- *
- * @param {Array<Object>}                          tales
- * @param {import('./state.js').SidebarFilter}     filter
- * @param {string}                                 userId
- * @returns {Promise<Array<Object>>}
+ * @param {import('@state/schemas/tale.schema.js').Tale[]} tales
+ * @param {import('./state.js').SidebarFilter} filter
+ * @param {string} userId
+ * @returns {Promise<import('@state/schemas/tale.schema.js').Tale[]>}
  */
 async function _applySidebarFilter(tales, filter, userId) {
   switch (filter) {
@@ -235,7 +215,8 @@ async function _applySidebarFilter(tales, filter, userId) {
 
     case 'bookmarked': {
       const bookmarks = await getBookmarks({ userId });
-      const ids = new Set(bookmarks.map((b) => b.id));
+      // Bookmarks are keyed by taleId — use taleId field, not id
+      const ids = new Set(bookmarks.map((b) => b.taleId));
       return tales.filter((t) => ids.has(t.id));
     }
 

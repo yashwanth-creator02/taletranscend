@@ -99,11 +99,11 @@
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease;
-  color: #f1f5f9;
+  color: var(--text-primary);
 }
 
 .input-mythic::placeholder {
-  color: #334155;
+  color: var(--text-disabled);
 }
 
 .input-mythic:focus {
@@ -202,7 +202,7 @@
 }
 
 .stat-value {
-  background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+  background: linear-gradient(135deg, var(--text-primary) 0%, rgba(165, 180, 252, 1) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -217,7 +217,7 @@
 
 .progress-mythic-fill {
   height: 100%;
-  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
   border-radius: 2px;
   box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
 }
@@ -237,7 +237,7 @@
 }
 
 .footer-link:hover {
-  color: #c4b5fd;
+  color: var(--accent-secondary);
 }
 
 .glass {
@@ -261,7 +261,7 @@
   position: relative;
   width: 56px;
   height: 56px;
-  background: #000;
+  background: var(--bg-base);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -277,7 +277,7 @@
   inset: -4px;
   border-radius: 50%;
   padding: 2px;
-  background: conic-gradient(from 0deg, transparent, #4f46e5, transparent, #4f46e5, transparent);
+  background: conic-gradient(from 0deg, transparent, var(--accent), transparent, var(--accent), transparent);
   -webkit-mask:
     linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);

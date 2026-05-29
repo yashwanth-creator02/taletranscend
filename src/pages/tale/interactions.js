@@ -1,19 +1,24 @@
 // src/pages/tale/interactions.js
-// Handles user interactions for the Tale Archive page.
+// User interactions for the Tale Archive page.
 
 import { resolveResumePoint, toggleResonance, getResonanceStatus } from '@services/index.js';
 import { showToast } from '@ui/components/toast.js';
 import { initIcons } from '@ui/components/icons.js';
 
+/* ─────────────────────────────────────────────
+   Soul Resonance
+   ───────────────────────────────────────────── */
+
 /**
- * Sets up the Soul Resonance (like) interaction.
+ * Sets up the Soul Resonance (reaction) interaction.
+ *
+ * @param {string} taleId
  */
 export async function setupResonance(taleId) {
-  const btn = document.getElementById('resonance-btn');
+  const btn     = document.getElementById('resonance-btn');
   const countEl = document.getElementById('resonance-count');
   if (!btn || !countEl) return;
 
-  // Initial state
   const isActive = await getResonanceStatus(taleId);
   _updateResonanceUI(btn, countEl, isActive);
 
@@ -35,7 +40,7 @@ export async function setupResonance(taleId) {
 function _updateResonanceUI(btn, countEl, active, count) {
   if (count !== undefined) countEl.textContent = count;
 
-  const icon = btn.querySelector('i');
+  const icon  = btn.querySelector('i');
   const label = btn.querySelector('span');
 
   if (active) {
@@ -49,8 +54,19 @@ function _updateResonanceUI(btn, countEl, active, count) {
     icon?.classList.remove('text-orange-500');
     if (label) label.textContent = 'Align Souls';
   }
+
   initIcons(btn);
 }
+
+/* ─────────────────────────────────────────────
+   Chapter List
+   ───────────────────────────────────────────── */
+
+/**
+ * Wires chapter item clicks to navigate to the reader page.
+ *
+ * @param {string} taleId
+ */
 export function bindChapterClicks(taleId) {
   const list = document.getElementById('chapter-list');
   if (!list) return;
@@ -59,33 +75,45 @@ export function bindChapterClicks(taleId) {
     const item = e.target.closest('.chapter-item');
     if (!item) return;
 
-    const chapterId = item.dataset.chapterIndex;
+    // chapterIndex is the zero-based index stored on the element — use it directly
+    const chapterId = item.dataset.chapterIndex ?? '0';
     _fadeAndGo(`reader.html?taleId=${taleId}&chapterId=${chapterId}`);
   });
 }
+
+/* ─────────────────────────────────────────────
+   Tabs
+   ───────────────────────────────────────────── */
 
 /**
  * Sets up the tab system for Synopsis, Chronicles, and Echoes.
  */
 export function setupTabs() {
   const tabs = document.querySelectorAll('[data-tab]');
+
   tabs.forEach((btn) => {
     btn.addEventListener('click', () => {
       const target = btn.dataset.tab;
 
-      // Update buttons
       tabs.forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
 
-      // Update panes
       document.querySelectorAll('.tab-content').forEach((pane) => pane.classList.add('hidden'));
       document.getElementById(`content-${target}`)?.classList.remove('hidden');
     });
   });
 }
 
+/* ─────────────────────────────────────────────
+   Start Reading
+   ───────────────────────────────────────────── */
+
 /**
- * Starts the reading experience from fragment 0.
+ * Starts reading from chapter 0.
+ * Bug fix: was using chapters[0].id which could be any string — always use chapterId=0.
+ *
+ * @param {string} taleId
+ * @param {import('@state/schemas/tale.schema.js').Chapter[]} chapters
  */
 export function setupStartReading(taleId, chapters) {
   const btn = document.getElementById('start-btn');
@@ -93,48 +121,154 @@ export function setupStartReading(taleId, chapters) {
 
   btn.addEventListener('click', () => {
     if (!chapters?.length) return;
+    // chapterId=0 is always the first chapter by convention — never use chapters[0].id
     _fadeAndGo(`reader.html?taleId=${taleId}&chapterId=0`);
   });
 }
 
+/* ─────────────────────────────────────────────
+   Resume Reading
+   ───────────────────────────────────────────── */
+
 /**
- * Resumes reading from the last recorded neural fragment.
+ * Resumes reading from the last recorded chapter.
+ *
+ * @param {string} userId
+ * @param {string} taleId
  */
 export function setupResumeReading(userId, taleId) {
   const btn = document.getElementById('resume-btn');
   if (!btn) return;
 
   btn.addEventListener('click', async () => {
-    const resume = await resolveResumePoint({ userId, taleId });
+    const resume    = await resolveResumePoint({ userId, taleId });
     const chapterId = resume?.chapterIndex ?? 0;
     _fadeAndGo(`reader.html?taleId=${taleId}&chapterId=${chapterId}`);
   });
 }
 
+/* ─────────────────────────────────────────────
+   Add to Shelf (Bookmark)
+   ───────────────────────────────────────────── */
+
 /**
- * Handles the sticky header scroll effect and floating action bar visibility.
+ * Wires the Add to Shelf button.
+ * Bug fix: button had no id="shelf-btn" in tale.html — this targets it by id once the HTML is updated.
+ *
+ * @param {string} userId
+ * @param {string} taleId
+ * @param {import('@state/schemas/tale.schema.js').Tale} tale
+ * @param {{ addToBookmarks: Function, removeFromBookmarks: Function, isBookmarked: Function }} bookmarkService
+ */
+export async function setupShelfButton(userId, taleId, tale, bookmarkService) {
+  const btn = document.getElementById('shelf-btn');
+  if (!btn) return;
+
+  // Set initial state
+  const alreadyShelved = await bookmarkService.isBookmarked({ userId, taleId });
+  _updateShelfUI(btn, alreadyShelved);
+
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    try {
+      const current = btn.dataset.shelved === 'true';
+      if (current) {
+        await bookmarkService.removeFromBookmarks({ userId, taleId });
+        _updateShelfUI(btn, false);
+        showToast('Removed from your shelf.', 'info');
+      } else {
+        await bookmarkService.addToBookmarks({ userId, taleId, tale });
+        _updateShelfUI(btn, true);
+        showToast('Added to your shelf.', 'success');
+      }
+    } catch (err) {
+      console.error('[shelf] Failed:', err);
+      showToast('Could not update shelf.', 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+}
+
+function _updateShelfUI(btn, shelved) {
+  btn.dataset.shelved = String(shelved);
+  const label = btn.querySelector('span');
+  const icon  = btn.querySelector('i');
+  if (label) label.textContent = shelved ? 'On Your Shelf' : 'Add to Shelf';
+  if (icon) icon.setAttribute('data-lucide', shelved ? 'bookmark-check' : 'bookmark-plus');
+  btn.classList.toggle('active', shelved);
+  initIcons(btn);
+}
+
+/* ─────────────────────────────────────────────
+   Share
+   ───────────────────────────────────────────── */
+
+/**
+ * Wires the Share button.
+ * Bug fix: button had no id="share-btn" in tale.html — targets it by id once HTML is updated.
+ * Bug fix: copy link was using a wrong URL path after the refactor.
+ *
+ * @param {string} taleId
+ */
+export function setupShareButton(taleId) {
+  const btn = document.getElementById('share-btn');
+  if (!btn) return;
+
+  btn.addEventListener('click', async () => {
+    // Build the canonical tale URL using the current origin
+    const url = `${window.location.origin}/src/views/tale.html?id=${taleId}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: document.title, url });
+      } catch {
+        // User cancelled or share failed — fall back to clipboard
+        _copyToClipboard(url);
+      }
+    } else {
+      _copyToClipboard(url);
+    }
+  });
+}
+
+async function _copyToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast('Link copied to clipboard.', 'success');
+  } catch {
+    showToast('Could not copy link.', 'error');
+  }
+}
+
+/* ─────────────────────────────────────────────
+   Header Scroll
+   ───────────────────────────────────────────── */
+
+/**
+ * Handles sticky header scroll effect and floating action bar visibility.
  */
 export function initHeaderScroll() {
-  const bar = document.getElementById('tale-action-bar');
+  const bar  = document.getElementById('tale-action-bar');
   const hero = document.getElementById('hero-section');
 
   const onScroll = () => {
-    const scrollY = window.scrollY;
-
-    // Toggle bar visibility based on hero exit
-    if (hero) {
-      const heroBottom = hero.offsetTop + hero.offsetHeight - 100;
-      bar?.classList.toggle('is-hidden', scrollY < heroBottom);
-    }
+    if (!hero) return;
+    const heroBottom = hero.offsetTop + hero.offsetHeight - 100;
+    bar?.classList.toggle('is-hidden', window.scrollY < heroBottom);
   };
 
   window.addEventListener('scroll', onScroll, { passive: true });
-  onScroll(); // Set initial state
+  onScroll();
 }
+
+/* ─────────────────────────────────────────────
+   Internal
+   ───────────────────────────────────────────── */
 
 function _fadeAndGo(url) {
   document.body.style.transition = 'opacity 0.25s ease';
-  document.body.style.opacity = '0';
+  document.body.style.opacity    = '0';
   setTimeout(() => {
     window.location.href = url;
   }, 250);

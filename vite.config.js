@@ -15,6 +15,7 @@ export default defineConfig({
     alias: {
       '@fb': path.resolve(__dirname, './src/firebase'),
       '@services': path.resolve(__dirname, './src/services'),
+      '@state': path.resolve(__dirname, './src/state'),
       '@ui': path.resolve(__dirname, './src/ui'),
       '@pages': path.resolve(__dirname, './src/pages'),
       '@config': path.resolve(__dirname, './src/config'),
@@ -56,12 +57,11 @@ export default defineConfig({
             src: 'icon.svg',
             sizes: '512x512',
             type: 'image/svg+xml',
-            purpose: 'any maskable'
-          }
-        ]
+            purpose: 'any maskable',
+          },
+        ],
       },
       workbox: {
-        // Cache external assets for offline reliability
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -70,12 +70,10 @@ export default defineConfig({
               cacheName: 'google-fonts-cache',
               expiration: {
                 maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365
+                maxAgeSeconds: 60 * 60 * 24 * 365,
               },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
+              cacheableResponse: { statuses: [0, 200] },
+            },
           },
           {
             urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
@@ -84,12 +82,10 @@ export default defineConfig({
               cacheName: 'gstatic-fonts-cache',
               expiration: {
                 maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365
+                maxAgeSeconds: 60 * 60 * 24 * 365,
               },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
+              cacheableResponse: { statuses: [0, 200] },
+            },
           },
           {
             // Cache DiceBear avatars
@@ -99,16 +95,16 @@ export default defineConfig({
               cacheName: 'avatars-cache',
               expiration: {
                 maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24 * 30
-              }
-            }
-          }
-        ]
-      }
+                maxAgeSeconds: 60 * 60 * 24 * 30,
+              },
+            },
+          },
+        ],
+      },
     }),
     visualizer({
       filename: 'stats.html',
-      open: true,
+      open: false,
       gzipSize: true,
       template: 'treemap',
     }),

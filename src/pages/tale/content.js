@@ -3,76 +3,48 @@
 // Falls back to the user's draft if the public tale is not found.
 
 import { getDoc, getDocs, refs } from '@fb/index.js';
+import { createTale, createChapter } from '@state/index.js';
 
 /**
  * Loads a tale from Firestore.
- * First checks the public community tales collection.
- * Falls back to the user's personal drafts if not found publicly.
+ * First checks the public tales collection.
+ * Falls back to the user's private drafts if not found publicly.
  *
- * @param {string} taleId - ID of the tale to fetch
+ * @param {string} taleId
  * @param {Object} user - Authenticated Firebase user object
- * @returns {Promise<Object|null>} Tale data or null if not found in either location
+ * @returns {Promise<import('@state/schemas/tale.schema.js').Tale|null>}
  */
 export async function loadTale(taleId, user) {
   if (!taleId) return null;
 
-  // Attempt to load from the public tales collection first
-  const publicRef = refs.tale(taleId);
-
-  const publicSnap = await getDoc(publicRef);
+  const publicSnap = await getDoc(refs.tale(taleId));
 
   if (publicSnap.exists()) {
-    return {
-      id: publicSnap.id,
-      ...publicSnap.data(),
-    };
+    return createTale(publicSnap.id, publicSnap.data());
   }
 
-  // No authenticated user means draft fallback is impossible
-  if (!user?.uid) {
-    return null;
-  }
+  if (!user?.uid) return null;
 
   // Fall back to the user's private draft
-  const draftRef = refs.draft(user.uid, taleId);
+  const draftSnap = await getDoc(refs.draft(user.uid, taleId));
 
-  const draftSnap = await getDoc(draftRef);
+  if (!draftSnap.exists()) return null;
 
-  if (!draftSnap.exists()) {
-    return null;
-  }
-
-  return {
-    id: draftSnap.id,
-    ...draftSnap.data(),
-  };
+  return createTale(draftSnap.id, draftSnap.data());
 }
 
 /**
- * Loads all chapters for a tale from the public collection.
- * Chapters are sorted by chapterNum field ascending.
+ * Loads all chapters for a tale, sorted by chapterNum ascending.
  *
- * @param {string} taleId - ID of the tale whose chapters to fetch
- * @returns {Promise<Array<Object>>} Sorted array of chapter objects
+ * @param {string} taleId
+ * @returns {Promise<import('@state/schemas/tale.schema.js').Chapter[]>}
  */
 export async function loadChapters(taleId) {
   if (!taleId) return [];
 
-  // Public chapters collection reference
-  const chaptersRef = refs.chapters(taleId);
+  const snapshot = await getDocs(refs.chapters(taleId));
 
-  const snapshot = await getDocs(chaptersRef);
-
-  // Normalize and sort chapters
   return snapshot.docs
-    .map((docSnap) => ({
-      id: docSnap.id,
-      ...docSnap.data(),
-    }))
-    .sort((a, b) => {
-      const aNum = a.chapterNum || 0;
-      const bNum = b.chapterNum || 0;
-
-      return aNum - bNum;
-    });
+    .map((snap) => createChapter(snap.id, snap.data()))
+    .sort((a, b) => a.chapterNum - b.chapterNum);
 }

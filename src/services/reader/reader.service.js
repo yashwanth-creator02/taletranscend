@@ -1,16 +1,16 @@
 // src/services/reader/reader.service.js
 // Fetches tale metadata and chapter content from Firestore.
-// This is the primary data access layer for the reader page.
+// Primary data access layer for the reader page.
 
 import { refs, getDoc, getDocs } from '@fb/index.js';
+import { createTale, createChapter } from '@state/index.js';
 
 /**
  * Fetches metadata for a specific tale.
- * Returns sanitized fields with fallback values for missing data.
  *
- * @param {string} taleId - ID of the tale to fetch
- * @returns {Promise<Object>} { title, description, authorName }
- * @throws {Error} If taleId is missing or the tale document does not exist
+ * @param {string} taleId
+ * @returns {Promise<import('@state/schemas/tale.schema.js').Tale>}
+ * @throws {Error} If the tale does not exist
  */
 export async function getTaleMeta(taleId) {
   if (!taleId) throw new Error('getTaleMeta: taleId is required');
@@ -18,51 +18,43 @@ export async function getTaleMeta(taleId) {
   const snap = await getDoc(refs.tale(taleId));
   if (!snap.exists()) throw new Error(`Tale not found: ${taleId}`);
 
-  const data = snap.data();
-  return {
-    title: data.title || 'Untitled Tale',
-    description: data.description || '',
-    authorName: data.authorName || 'Unknown Scribe',
-  };
+  return createTale(snap.id, snap.data());
 }
 
 /**
- * Fetches a single chapter and returns it alongside navigation context.
+ * Fetches a single chapter and returns it alongside full navigation context.
  * Sorts all chapters by chapterNum before resolving the requested index.
  *
  * @param {Object} params
- * @param {string} params.taleId - ID of the tale
- * @param {number} params.chapterIndex - Zero-based index of the chapter to fetch
- * @returns {Promise<Object>} { chapter: { index, title, content }, navigation: { ... } }
- * @throws {Error} If taleId is missing, chapterIndex is not a number, or chapter is not found
+ * @param {string} params.taleId
+ * @param {number} params.chapterIndex - Zero-based index
+ * @returns {Promise<{ chapter: import('@state/schemas/tale.schema.js').Chapter, navigation: Object }>}
+ * @throws {Error} If the chapter does not exist at the given index
  */
 export async function getChapter({ taleId, chapterIndex }) {
   if (!taleId) throw new Error('getChapter: taleId is required');
-  if (typeof chapterIndex !== 'number')
-    throw new Error('getChapter: chapterIndex must be a number');
+  if (typeof chapterIndex !== 'number') throw new Error('getChapter: chapterIndex must be a number');
 
   const snap = await getDocs(refs.chapters(taleId));
-  const chapters = snap.docs
-    .map((d) => ({ id: d.id, ...d.data() }))
-    .sort((a, b) => (a.chapterNum || 0) - (b.chapterNum || 0));
 
-  const total = chapters.length;
+  const chapters = snap.docs
+    .map((d) => createChapter(d.id, d.data()))
+    .sort((a, b) => a.chapterNum - b.chapterNum);
+
+  const total   = chapters.length;
   const chapter = chapters[chapterIndex];
+
   if (!chapter) throw new Error(`Chapter not found at index ${chapterIndex}`);
 
   return {
-    chapter: {
-      index: chapterIndex,
-      title: chapter.title || 'Untitled Chapter',
-      content: chapter.content || '',
-    },
+    chapter,
     navigation: {
-      hasPrev: chapterIndex > 0,
-      hasNext: chapterIndex < total - 1,
-      prevTitle: chapterIndex > 0 ? chapters[chapterIndex - 1].title : null,
-      prevIndex: chapterIndex > 0 ? chapterIndex - 1 : null,
-      nextTitle: chapterIndex < total - 1 ? chapters[chapterIndex + 1].title : null,
-      nextIndex: chapterIndex < total - 1 ? chapterIndex + 1 : null,
+      hasPrev:       chapterIndex > 0,
+      hasNext:       chapterIndex < total - 1,
+      prevTitle:     chapterIndex > 0           ? chapters[chapterIndex - 1].title : null,
+      prevIndex:     chapterIndex > 0           ? chapterIndex - 1                : null,
+      nextTitle:     chapterIndex < total - 1   ? chapters[chapterIndex + 1].title : null,
+      nextIndex:     chapterIndex < total - 1   ? chapterIndex + 1                : null,
       totalChapters: total,
     },
   };

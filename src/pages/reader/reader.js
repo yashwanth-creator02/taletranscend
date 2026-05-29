@@ -1,8 +1,9 @@
 // src/pages/reader/reader.js
-// Modernized Reader Entry Point
-// Immersive UI/UX adopted from the Cinder Archive demo.
+// Reader page entry point.
+// Orchestrates auth, content loading, theme init, progress tracking, and all panel interactions.
 
 import '@css/base.css';
+import '@css/pages/reader-themes.css';
 import '@css/nav.css';
 import '@css/components.css';
 import '@css/pages/reader.css';
@@ -11,6 +12,7 @@ import {
   initAuth,
   readerState,
   initTheme,
+  applyCloudPrefs,
   setTheme,
   setFontFamily,
   setFontSize,
@@ -36,10 +38,19 @@ import {
   renderCommentsPanel,
   renderTTSPanel,
   renderInfoPanel,
+  appState,
+  setAppUser,
+  setAppReaderPrefs,
+  addToBookmarks,
+  removeFromBookmarks,
+  isBookmarked,
 } from './index.js';
 
+import { getDoc, setDoc, serverTimestamp, refs } from '@fb/index.js';
+import { showToast } from '@ui/components/toast.js';
+
 /* ─────────────────────────────────────────────
-   State & Params
+   URL Params
    ───────────────────────────────────────────── */
 
 const params = new URLSearchParams(window.location.search);
@@ -48,6 +59,10 @@ const chapterIndex = parseInt(params.get('chapterId')) || 0;
 
 readerState.taleId = taleId;
 readerState.chapterIndex = chapterIndex;
+
+/* ─────────────────────────────────────────────
+   Panel Config
+   ───────────────────────────────────────────── */
 
 const PANEL_TITLES = {
   toc: 'Table of Contents',
@@ -72,7 +87,7 @@ const SIDEBAR_TOOLS = [
 ];
 
 /* ─────────────────────────────────────────────
-   UI Initialization
+   Sidebar
    ───────────────────────────────────────────── */
 
 function initSidebar() {
@@ -90,18 +105,12 @@ function initSidebar() {
   `
   ).join('');
 
-  // Sidebar Collapse
   document.getElementById('collapseBtn')?.addEventListener('click', () => {
-    if (_isPanelVisible()) {
-      closePanel();
-    } else {
-      openPanel('toc');
-    }
+    _isPanelVisible() ? closePanel() : openPanel('toc');
   });
 
   _updateCollapseIcon();
 
-  // Tool Opening
   document.querySelectorAll('[data-tool]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const toolId = btn.dataset.tool;
@@ -113,7 +122,6 @@ function initSidebar() {
     });
   });
 
-  // Focus Mode
   document.getElementById('sidebarFocus')?.addEventListener('click', toggleFocusMode);
   document.getElementById('focusExit')?.addEventListener('click', toggleFocusMode);
 }
@@ -121,6 +129,7 @@ function initSidebar() {
 function openPanel(toolId) {
   readerState.openTool = toolId;
   readerState.isCollapsed = false;
+
   const panel = document.getElementById('toolPanel');
   const title = document.getElementById('panelTitle');
   const content = document.getElementById('panelContent');
@@ -128,13 +137,11 @@ function openPanel(toolId) {
   if (!panel || !title || !content) return;
 
   title.textContent = PANEL_TITLES[toolId] || 'Panel';
-
   _refreshPanelContent();
 
   panel.classList.add('visible');
   panel.style.display = 'flex';
 
-  // Paint active states
   document.querySelectorAll('[data-tool]').forEach((btn) => {
     btn.dataset.active = btn.dataset.tool === toolId;
   });
@@ -188,8 +195,10 @@ function closePanel() {
     panel.classList.remove('visible');
     panel.style.display = 'none';
   }
+
   readerState.openTool = null;
   readerState.isCollapsed = true;
+
   document.querySelectorAll('[data-tool]').forEach((btn) => (btn.dataset.active = 'false'));
   _updateCollapseIcon();
   initIcons();
@@ -197,17 +206,12 @@ function closePanel() {
 
 function toggleFocusMode() {
   readerState.focusMode = !readerState.focusMode;
-  const sidebar = document.getElementById('sidebar');
-  const topBar = document.getElementById('topBar');
-  const exitBtn = document.getElementById('focusExit');
 
-  sidebar?.classList.toggle('hidden', readerState.focusMode);
-  topBar?.classList.toggle('hidden', readerState.focusMode);
-  exitBtn?.classList.toggle('hidden', !readerState.focusMode);
+  document.getElementById('sidebar')?.classList.toggle('hidden', readerState.focusMode);
+  document.getElementById('topBar')?.classList.toggle('hidden', readerState.focusMode);
+  document.getElementById('focusExit')?.classList.toggle('hidden', !readerState.focusMode);
 
-  if (readerState.focusMode) {
-    closePanel();
-  }
+  if (readerState.focusMode) closePanel();
 
   const focusBtn = document.getElementById('sidebarFocus');
   if (focusBtn) focusBtn.dataset.active = String(readerState.focusMode);
@@ -218,11 +222,10 @@ function _isPanelVisible() {
 }
 
 function _updateCollapseIcon() {
-  const sidebar = document.getElementById('sidebar');
-  const collapseIcon = document.getElementById('collapseIcon');
   const isVisible = _isPanelVisible();
+  const collapseIcon = document.getElementById('collapseIcon');
 
-  sidebar?.classList.toggle('collapsed', !isVisible);
+  document.getElementById('sidebar')?.classList.toggle('collapsed', !isVisible);
 
   if (collapseIcon) {
     collapseIcon.setAttribute('data-lucide', isVisible ? 'chevron-left' : 'chevron-right');
@@ -230,7 +233,7 @@ function _updateCollapseIcon() {
 }
 
 /* ─────────────────────────────────────────────
-   Event Binding for Panels
+   Panel Event Binders
    ───────────────────────────────────────────── */
 
 function _bindTocEvents() {
@@ -245,8 +248,7 @@ function _bindTocEvents() {
 
   document.querySelectorAll('[data-section-id]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const id = btn.dataset.sectionId;
-      const target = document.getElementById(id);
+      const target = document.getElementById(btn.dataset.sectionId);
       const scroller = document.getElementById('scroller');
       if (target && scroller) {
         const top =
@@ -271,11 +273,11 @@ function _bindTypographyEvents() {
     _refreshPanelContent();
   });
   document.getElementById('fsMinus')?.addEventListener('click', () => {
-    setFontSize(Math.max(13, readerState.fontSize - 1));
+    setFontSize(readerState.fontSize - 1);
     _refreshPanelContent();
   });
   document.getElementById('fsPlus')?.addEventListener('click', () => {
-    setFontSize(Math.min(26, readerState.fontSize + 1));
+    setFontSize(readerState.fontSize + 1);
     _refreshPanelContent();
   });
 
@@ -350,13 +352,13 @@ function _bindCommentEvents() {
 }
 
 function _bindShareEvents() {
-  document.getElementById('copyLinkBtn')?.addEventListener('click', _copyUrl);
-  document.getElementById('copyLink')?.addEventListener('click', _copyUrl);
-}
+  const handler = () =>
+    navigator.clipboard
+      .writeText(window.location.href)
+      .then(() => showToast('Link copied to clipboard.', 'success'));
 
-function _copyUrl() {
-  navigator.clipboard.writeText(window.location.href);
-  import('@ui/components/toast.js').then((m) => m.showToast('Link copied to clipboard'));
+  document.getElementById('copyLinkBtn')?.addEventListener('click', handler);
+  document.getElementById('copyLink')?.addEventListener('click', handler);
 }
 
 function _bindTTSEvents() {
@@ -366,8 +368,7 @@ function _bindTTSEvents() {
       window.speechSynthesis.cancel();
       readerState.tts.playing = false;
     } else {
-      const article = document.getElementById('articleBody');
-      const text = article?.innerText.slice(0, 6000) || '';
+      const text = document.getElementById('articleBody')?.innerText.slice(0, 6000) || '';
       const u = new SpeechSynthesisUtterance(text);
       u.rate = readerState.tts.rate;
       u.onend = () => {
@@ -392,12 +393,11 @@ function _bindTTSEvents() {
 }
 
 /* ─────────────────────────────────────────────
-   Engagement Logic
+   Engagement
    ───────────────────────────────────────────── */
 
 function initEngagement() {
-  const clapBtn = document.getElementById('clapBtn');
-  clapBtn?.addEventListener('click', () => {
+  document.getElementById('clapBtn')?.addEventListener('click', () => {
     if (!readerState.hasClapped) {
       readerState.claps++;
       readerState.hasClapped = true;
@@ -418,9 +418,7 @@ function _renderEngagement() {
   if (clapLabel) clapLabel.textContent = readerState.hasClapped ? 'Thank you' : 'Tap to applaud';
   if (clapIconWrap) {
     clapIconWrap.classList.toggle('clapped', readerState.hasClapped);
-    if (readerState.hasClapped) {
-      clapIconWrap.style.boxShadow = '0 0 30px -4px rgba(245, 158, 11, 0.6)';
-    }
+    if (readerState.hasClapped) clapIconWrap.style.boxShadow = '0 0 30px -4px rgba(245,158,11,0.6)';
   }
 }
 
@@ -442,20 +440,18 @@ function initSelectionToolbar() {
     }
 
     const range = sel.getRangeAt(0);
-    const rect = range.getBoundingClientRect();
-
     if (!article.contains(range.commonAncestorContainer)) {
       readerState.selection = null;
       toolbar.classList.add('hidden');
       return;
     }
 
+    const rect = range.getBoundingClientRect();
     readerState.selection = { text: sel.toString(), x: rect.left + rect.width / 2, y: rect.top };
-    const left = Math.max(20, Math.min(window.innerWidth - 240, readerState.selection.x - 120));
-    const top = Math.max(12, readerState.selection.y - 56);
 
-    toolbar.style.left = left + 'px';
-    toolbar.style.top = top + 'px';
+    toolbar.style.left =
+      Math.max(20, Math.min(window.innerWidth - 240, readerState.selection.x - 120)) + 'px';
+    toolbar.style.top = Math.max(12, readerState.selection.y - 56) + 'px';
     toolbar.classList.remove('hidden');
   });
 
@@ -470,8 +466,9 @@ function initSelectionToolbar() {
 
   document.getElementById('selCopy')?.addEventListener('click', () => {
     if (readerState.selection) {
-      navigator.clipboard.writeText(readerState.selection.text);
-      import('@ui/components/toast.js').then((m) => m.showToast('Copied to clipboard'));
+      navigator.clipboard
+        .writeText(readerState.selection.text)
+        .then(() => showToast('Copied to clipboard.', 'success'));
     }
     readerState.selection = null;
     toolbar.classList.add('hidden');
@@ -490,34 +487,129 @@ function _addHighlight(color, note = '') {
   readerState.selection = null;
   window.getSelection()?.removeAllRanges();
   document.getElementById('selectionToolbar')?.classList.add('hidden');
-
   if (readerState.openTool === 'highlights') _refreshPanelContent();
-  import('@ui/components/toast.js').then((m) => m.showToast('Highlight added'));
+  showToast('Highlight saved.', 'success');
+}
+
+/* ─────────────────────────────────────────────
+   Bookmark
+   ───────────────────────────────────────────── */
+
+async function _handleBookmark() {
+  const userId = readerState.userId;
+  const taleId_ = readerState.taleId;
+  if (!userId || !taleId_) return;
+
+  readerState.bookmarked = !readerState.bookmarked;
+
+  document
+    .querySelectorAll('#sidebarBookmark, #engBookmark')
+    .forEach((b) => (b.dataset.active = String(readerState.bookmarked)));
+
+  try {
+    if (readerState.bookmarked) {
+      await addToBookmarks({
+        userId,
+        taleId: taleId_,
+        tale: {
+          title: readerState.taleTitle,
+          coverUrl: readerState.coverUrl,
+          authorName: readerState.authorName,
+        },
+      });
+      showToast('Saved to Library.', 'success');
+    } else {
+      await removeFromBookmarks({ userId, taleId: taleId_ });
+      showToast('Removed from Library.', 'info');
+    }
+  } catch (err) {
+    console.error('[reader] Bookmark failed:', err);
+    readerState.bookmarked = !readerState.bookmarked;
+    showToast('Could not update bookmark.', 'error');
+  }
+}
+
+/* ─────────────────────────────────────────────
+   Reader Prefs — Firestore Sync
+   ───────────────────────────────────────────── */
+
+/**
+ * Loads reader preferences from Firestore and applies them.
+ * Falls back to localStorage values already applied by initTheme() if none exist.
+ *
+ * @param {string} userId
+ */
+async function _loadAndApplyCloudPrefs(userId) {
+  try {
+    const snap = await getDoc(refs.readerPrefs(userId));
+    if (!snap.exists()) return;
+
+    const prefs = snap.data();
+    setAppReaderPrefs(prefs);
+    applyCloudPrefs(appState.readerPrefs);
+  } catch (err) {
+    console.warn('[reader] Could not load cloud prefs, using local defaults:', err);
+  }
+}
+
+/**
+ * Persists current reader preferences to Firestore.
+ * Called after any theme or typography change if the user is authenticated.
+ *
+ * @param {string} userId
+ */
+export async function saveReaderPrefs(userId) {
+  if (!userId) return;
+  try {
+    await setDoc(
+      refs.readerPrefs(userId),
+      {
+        theme: readerState.theme,
+        fontFamily: readerState.fontFamily,
+        fontSize: readerState.fontSize,
+        lineHeight: readerState.lineHeight,
+        measure: readerState.measure,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+  } catch (err) {
+    console.warn('[reader] Could not save prefs to cloud:', err);
+  }
 }
 
 /* ─────────────────────────────────────────────
    Lifecycle
    ───────────────────────────────────────────── */
 
+// Apply localStorage prefs immediately — before auth resolves — to avoid a flash
 initTheme();
 
 initAuth(async (user) => {
+  setAppUser(user.uid);
   readerState.userId = user.uid;
   readerState.userName = user.displayName || 'You';
 
   showReaderSkeletons();
 
+  // Load cloud prefs (non-blocking — will override localStorage defaults when ready)
+  _loadAndApplyCloudPrefs(user.uid);
+
+  // Check bookmark status
+  readerState.bookmarked = await isBookmarked({ userId: user.uid, taleId });
+
+  // Load content
   await loadReaderMeta(taleId);
   const navigation = await loadReaderChapter({ taleId, chapterIndex });
   if (!navigation) return;
 
   applyNavigation(navigation);
 
-  // Scroll Restoration
+  // Scroll restore from localStorage
   const localProgress = getChapterProgress({ userId: user.uid, taleId, chapterIndex });
   restoreScrollProgress({ scrollPercent: localProgress?.scrollPercent ?? 0 });
 
-  // Scroll Tracking
+  // Scroll tracking
   bindScrollProgress({
     onScroll(scrollPercent) {
       readerState.progress = scrollPercent;
@@ -535,43 +627,28 @@ initAuth(async (user) => {
     },
   });
 
-  // Sidebar Init
   initSidebar();
   initEngagement();
   initSelectionToolbar();
-
   _renderEngagement();
 
   // Open TOC by default on desktop
-  if (window.innerWidth >= 1024) {
-    openPanel('toc');
-  }
+  if (window.innerWidth >= 1024) openPanel('toc');
 
-  // Global Actions
+  // Global action bindings
   document.getElementById('sidebarBookmark')?.addEventListener('click', _handleBookmark);
   document.getElementById('engBookmark')?.addEventListener('click', _handleBookmark);
+  document.getElementById('engBookmarkMobile')?.addEventListener('click', _handleBookmark);
   document.getElementById('closePanel')?.addEventListener('click', closePanel);
   document.getElementById('backToTop')?.addEventListener('click', () => {
     document.getElementById('scroller')?.scrollTo({ top: 0, behavior: 'smooth' });
   });
   document.getElementById('backBtn')?.addEventListener('click', () => goBackToTale());
+
   initIcons();
 });
 
-async function _handleBookmark() {
-  const btns = document.querySelectorAll('#sidebarBookmark, #engBookmark');
-  readerState.bookmarked = !readerState.bookmarked;
-
-  btns.forEach((b) => (b.dataset.active = String(readerState.bookmarked)));
-
-  import('@ui/components/toast.js').then((m) =>
-    m.showToast(readerState.bookmarked ? 'Saved to Library' : 'Removed from Library')
-  );
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  initIcons();
-});
+document.addEventListener('DOMContentLoaded', () => initIcons());
 
 window.addEventListener('beforeunload', () => {
   if ('speechSynthesis' in window) window.speechSynthesis.cancel();

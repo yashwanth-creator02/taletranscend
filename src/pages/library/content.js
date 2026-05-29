@@ -1,31 +1,36 @@
 // src/pages/library/content.js
-// Manages real-time subscription to the community tales collection.
+// Manages real-time subscription to the public tales collection.
+// Normalizes every incoming document through createTale before storing.
 
-import { onSnapshot, refs } from '@fb/index.js';
+import { onSnapshot, query, where, refs } from '@fb/index.js';
+import { createTale } from '@state/index.js';
 import { libraryState } from './state.js';
 
 let _unsubscribe = null;
 
 /**
- * Subscribes to real-time updates for the public community tales collection.
- * Stores the full tales array in libraryState.allTales on every update.
+ * Subscribes to real-time updates for published community tales.
+ * Normalizes all documents through createTale before storing in libraryState.
+ * Guards against duplicate listeners on hot reload.
  *
- * @param {(tales: Array<Object>) => void} onUpdate - Called with the fresh tales array
- * @param {(err: Error) => void}           onError  - Called on Firestore error
+ * @param {(tales: import('@state/schemas/tale.schema.js').Tale[]) => void} onUpdate
+ * @param {(err: Error) => void} onError
  */
 export function subscribeToTales(onUpdate, onError) {
-  // Guard against duplicate listeners on hot reload
   if (_unsubscribe) {
     _unsubscribe();
     _unsubscribe = null;
   }
+  console.log('called subscibe');
+  const q = query(refs.tales(), where('status', '==', 'published'));
 
   _unsubscribe = onSnapshot(
-    refs.tales(),
+    q,
     (snapshot) => {
-      const tales = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      const tales = snapshot.docs.map((d) => createTale(d.id, d.data()));
       libraryState.allTales = tales;
       onUpdate(tales);
+      console.log(tales);
     },
     (err) => {
       console.error('[library] subscribeToTales error:', err.code, err.message);

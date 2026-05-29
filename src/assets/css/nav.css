@@ -1,13 +1,7 @@
 /* src/assets/css/nav.css */
 /* Modern Architect Navigation System — High Fidelity, Modular, Scalable */
-
-:root {
-  --nav-bg: rgba(3, 3, 5, 0.75);
-  --nav-bg-scrolled: rgba(3, 3, 5, 0.96);
-  --nav-border: rgba(255, 255, 255, 0.05);
-  --nav-blur: 32px;
-  --nav-transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
+/* Nav token variables (--nav-bg, --nav-border etc.) are defined in    */
+/* tokens.css and must not be redefined here.                           */
 
 /* ── Root Navigation Shell ───────────────────────────────────────── */
 

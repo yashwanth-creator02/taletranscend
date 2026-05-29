@@ -7,6 +7,15 @@ import { suggestNameFromBio } from './ai-name.js';
 import { debounce } from '@/utils/function.utils';
 import { initIcons } from '@ui/components/icons.js';
 import { showToast } from '@ui/components/toast.js';
+import {
+  setText,
+  setEl,
+  setInput,
+  formatNumber,
+  formatJoinDate,
+  timeAgo,
+} from '@/utils/ui.utils';
+import { escapeHtml } from '@/utils/string.utils';
 
 /* ─────────────────────────────────────────────
    Modal
@@ -412,6 +421,9 @@ export function renderContinueReading(tales) {
 }
 
 function _buildContinueReadingCard(tale) {
+  const safeTitle = escapeHtml(tale.title || 'Untitled Tale');
+  const safeDescription = escapeHtml(tale.description || '');
+
   const cover =
     tale.coverUrl ||
     'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=400';
@@ -424,24 +436,24 @@ function _buildContinueReadingCard(tale) {
       <div class="card-image-wrap mb-4">
         <img
           src="${cover}"
-          alt="${tale.title}"
+          alt="${safeTitle}"
           class="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-all duration-700"
           loading="lazy"
         />
         <div class="card-overlay"></div>
         <div class="absolute bottom-4 left-4">
           <span class="px-2.5 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-lg text-[9px] font-black text-white/90 uppercase tracking-widest">
-            ${tale.era || 'Mythic Era'}
+            ${escapeHtml(tale.era || 'Mythic Era')}
           </span>
         </div>
       </div>
 
       <div class="px-1">
         <h3 class="text-base font-bold text-white group-hover:text-indigo-400 transition-colors truncate">
-          ${tale.title || 'Untitled Tale'}
+          ${safeTitle}
         </h3>
         <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed mt-1 font-medium">
-          ${tale.description || ''}
+          ${safeDescription}
         </p>
 
         <div class="mt-4 space-y-2">
@@ -485,23 +497,17 @@ export function renderPublishedTales(tales) {
 }
 
 function _buildPublishedCard(tale) {
+  const safeTitle = escapeHtml(tale.title || 'Untitled Tale');
+  const safeDescription = escapeHtml(tale.description || '');
+
   const cover =
     tale.coverUrl ||
     'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=400';
 
-  const tags = (tale.tags || [])
-    .slice(0, 2)
-    .map(
-      (t) => `
-    <span class="px-2 py-1 bg-indigo-500/5 text-indigo-400/80 text-[9px] font-black uppercase tracking-wider rounded-md border border-indigo-500/10">${t}</span>
-  `
-    )
-    .join('');
-
   return `
     <a href="tale.html?id=${tale.id}" class="contribution-card group block bg-white/[0.01] border border-white/5 rounded-[2rem] overflow-hidden hover:bg-white/[0.03] hover:border-white/10 hover:-translate-y-1.5 transition-all duration-500">
       <div class="relative aspect-[16/9] bg-zinc-950 overflow-hidden">
-        <img src="${cover}" alt="${tale.title}"
+        <img src="${cover}" alt="${safeTitle}"
           class="w-full h-full object-cover opacity-50 group-hover:opacity-70 group-hover:scale-105 transition-all duration-700" loading="lazy" />
         <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
         <div class="absolute top-4 left-4">
@@ -511,12 +517,12 @@ function _buildPublishedCard(tale) {
         </div>
         <div class="absolute bottom-4 left-5 right-5">
           <h3 class="font-cinzel font-bold text-white text-lg leading-snug group-hover:text-indigo-300 transition-colors line-clamp-2">
-            ${tale.title || 'Untitled Tale'}
+            ${safeTitle}
           </h3>
         </div>
       </div>
       <div class="p-6 space-y-4">
-        <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed font-medium">${tale.description || ''}</p>
+        <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed font-medium">${safeDescription}</p>
         <div class="flex items-center justify-between pt-2 border-t border-white/5">
           <div class="flex items-center gap-4 text-[10px] font-bold text-slate-600 uppercase tracking-widest">
             <span class="flex items-center gap-1.5">
@@ -553,6 +559,9 @@ export function renderDrafts(drafts) {
 }
 
 function _buildDraftCard(draft) {
+  const safeTitle = escapeHtml(draft.title || 'Untitled Draft');
+  const safeSynopsis = escapeHtml(draft.synopsis || 'No synopsis recorded yet.');
+
   const updated = draft.updatedAt?.seconds
     ? timeAgo(new Date(draft.updatedAt.seconds * 1000))
     : 'Recently';
@@ -569,10 +578,10 @@ function _buildDraftCard(draft) {
         <span class="text-[10px] font-bold text-slate-600 uppercase tracking-wider">${updated}</span>
       </div>
       <h3 class="font-cinzel font-bold text-white text-base group-hover:text-indigo-400 transition-colors truncate mb-2">
-        ${draft.title || 'Untitled Draft'}
+        ${safeTitle}
       </h3>
       <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed mb-6 font-medium">
-        ${draft.synopsis || 'No synopsis recorded yet.'}
+        ${safeSynopsis}
       </p>
       <div class="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-600">
         <span class="flex items-center gap-2">
@@ -653,46 +662,4 @@ export function showContributionsSkeleton() {
   } else {
     container.insertAdjacentHTML('afterbegin', skeletons);
   }
-}
-
-/* ─────────────────────────────────────────────
-   Helpers
-   ───────────────────────────────────────────── */
-
-function setText(id, value) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = value;
-}
-
-function setEl(id, value) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = value;
-}
-
-function setInput(id, value) {
-  const el = document.getElementById(id);
-  if (el) el.value = value ?? '';
-}
-
-function formatNumber(n) {
-  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
-  return String(n);
-}
-
-function formatJoinDate(iso) {
-  try {
-    return new Date(iso).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  } catch {
-    return '';
-  }
-}
-
-function timeAgo(date) {
-  const diff = Date.now() - date.getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  return `${days}d ago`;
 }
