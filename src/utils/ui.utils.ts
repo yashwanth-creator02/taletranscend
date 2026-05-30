@@ -1,10 +1,18 @@
+// src/utils/ui.utils.ts
+// Shared UI utilities used across all pages.
+
+/* ─────────────────────────────────────────────
+   Auth Timeout Guard
+   ───────────────────────────────────────────── */
+
 /**
  * Sets up a timeout guard for authentication.
+ * Shows an error message inside containerId if auth does not resolve in time.
  *
  * @param containerId - The ID of the DOM element to show the error in
  * @param message - The error message to display
  * @param timeoutMs - Timeout duration in milliseconds
- * @returns The timeout ID
+ * @returns The timeout ID so the caller can clearTimeout on auth success
  */
 export function setupAuthTimeout(
   containerId: string,
@@ -23,65 +31,84 @@ export function setupAuthTimeout(
   }, timeoutMs);
 }
 
+/* ─────────────────────────────────────────────
+   Page Transition System
+   ───────────────────────────────────────────── */
+
+const TRANSITION_DURATION_MS = 220;
+
 /**
- * Safely sets the textContent of an element by ID.
+ * Navigates to a URL with a smooth fade-out transition.
+ * Use this instead of `window.location.href = url` or
+ * `window.location.assign(url)` anywhere a page change happens.
+ *
+ * The body fades to opacity 0 over TRANSITION_DURATION_MS milliseconds,
+ * then navigation fires. The destination page fades back in via the
+ * .page-fade-in class applied to <body> in each HTML file.
+ *
+ * @param url - Destination URL (relative or absolute)
+ * @param delay - Optional extra delay before navigation (ms)
  */
-export function setEl(id: string, value: string | number): void {
-  const el = document.getElementById(id);
-  if (el) el.textContent = String(value ?? '');
+export function navigateTo(url: string, delay = 0): void {
+  const body = document.body;
+
+  body.style.transition = `opacity ${TRANSITION_DURATION_MS}ms cubic-bezier(0.4,0,0.2,1)`;
+  body.style.opacity    = '0';
+  body.style.pointerEvents = 'none';
+
+  setTimeout(() => {
+    window.location.href = url;
+  }, TRANSITION_DURATION_MS + delay);
 }
 
 /**
- * Safely sets the textContent of an element by ID (alias for setEl).
+ * Makes the page body invisible immediately on script load,
+ * then reveals it smoothly once the page is ready.
+ *
+ * Call readyReveal() once auth resolves and the first render is done.
+ * This prevents the flash of unstyled content (FOUC) that appears
+ * when the browser paints the raw HTML before JS has hydrated it.
+ *
+ * Usage in every page entry file:
+ *   import { initPageReveal, readyReveal } from '@/utils/ui.utils';
+ *   initPageReveal(); // call at top of entry file
+ *   initAuth((user) => { ... render content ...; readyReveal(); });
  */
-export function setText(id: string, value: string | number): void {
-  setEl(id, value);
+export function initPageReveal(): void {
+  const body = document.body;
+  // Hide immediately — before the first paint if possible
+  body.style.opacity    = '0';
+  body.style.transition = `opacity ${TRANSITION_DURATION_MS}ms cubic-bezier(0.4,0,0.2,1)`;
 }
 
 /**
- * Safely sets the value of an input element by ID.
+ * Fades the page body in smoothly.
+ * Call once the page content is ready to be seen.
  */
-export function setInput(id: string, value: string | number | null | undefined): void {
-  const el = document.getElementById(id) as HTMLInputElement | HTMLTextAreaElement | null;
-  if (el) el.value = String(value ?? '');
+export function readyReveal(): void {
+  requestAnimationFrame(() => {
+    document.body.style.opacity = '1';
+  });
 }
 
-/**
- * Formats a number into a compact string (e.g., 1500 -> 1.5k).
- */
-export function formatNumber(n: number): string {
-  if (n >= 1000000) return `${(n / 1000000).toFixed(1)}m`;
-  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
-  return String(n || 0);
-}
+/* ─────────────────────────────────────────────
+   Debounce
+   ───────────────────────────────────────────── */
 
 /**
- * Formats a date or ISO string into a "time ago" string.
+ * Returns a debounced version of a function that delays invoking it
+ * until after `wait` milliseconds have elapsed since the last call.
+ *
+ * @param fn - Function to debounce
+ * @param wait - Delay in milliseconds
  */
-export function timeAgo(date: Date | string | number): string {
-  const d = new Date(date);
-  const diff = Date.now() - d.getTime();
-  const mins = Math.floor(diff / 60000);
-  
-  if (mins < 1) return 'Just now';
-  if (mins < 60) return `${mins}m ago`;
-  
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  
-  const days = Math.floor(hrs / 24);
-  if (days < 7) return `${days}d ago`;
-  
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
-
-/**
- * Formats an ISO string into a "Month Year" join date.
- */
-export function formatJoinDate(iso: string): string {
-  try {
-    return new Date(iso).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  } catch {
-    return '';
-  }
+export function debounce<T extends (...args: unknown[]) => unknown>(
+  fn: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timer: ReturnType<typeof setTimeout>;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), wait);
+  };
 }

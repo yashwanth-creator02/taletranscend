@@ -3,7 +3,7 @@
 // Orchestrates auth, content loading, theme init, progress tracking, and all panel interactions.
 
 import '@css/base.css';
-import '@css/pages/reader-themes.css';
+import '@css/reader-themes.css';
 import '@css/nav.css';
 import '@css/components.css';
 import '@css/pages/reader.css';
@@ -48,16 +48,20 @@ import {
 
 import { getDoc, setDoc, serverTimestamp, refs } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
+import { navigateTo, initPageReveal, readyReveal } from '@/utils/ui.utils';
+
+// Hide body immediately to prevent flash of unstyled content
+initPageReveal();
 
 /* ─────────────────────────────────────────────
    URL Params
    ───────────────────────────────────────────── */
 
-const params = new URLSearchParams(window.location.search);
-const taleId = params.get('taleId') || '';
+const params       = new URLSearchParams(window.location.search);
+const taleId       = params.get('taleId') || '';
 const chapterIndex = parseInt(params.get('chapterId')) || 0;
 
-readerState.taleId = taleId;
+readerState.taleId       = taleId;
 readerState.chapterIndex = chapterIndex;
 
 /* ─────────────────────────────────────────────
@@ -65,25 +69,25 @@ readerState.chapterIndex = chapterIndex;
    ───────────────────────────────────────────── */
 
 const PANEL_TITLES = {
-  toc: 'Table of Contents',
-  type: 'Typography',
-  theme: 'Theme',
+  toc:        'Table of Contents',
+  type:       'Typography',
+  theme:      'Theme',
   highlights: 'Your Highlights',
-  comments: 'Discussion',
-  share: 'Share This Piece',
-  tts: 'Listen',
-  info: 'About this piece',
+  comments:   'Discussion',
+  share:      'Share This Piece',
+  tts:        'Listen',
+  info:       'About this piece',
 };
 
 const SIDEBAR_TOOLS = [
-  { id: 'toc', icon: 'list', label: 'Contents' },
-  { id: 'type', icon: 'type', label: 'Typography' },
-  { id: 'theme', icon: 'palette', label: 'Themes' },
-  { id: 'highlights', icon: 'highlighter', label: 'Highlights' },
-  { id: 'comments', icon: 'message-square', label: 'Discussion' },
-  { id: 'share', icon: 'share-2', label: 'Share' },
-  { id: 'tts', icon: 'volume-2', label: 'Listen' },
-  { id: 'info', icon: 'info', label: 'About' },
+  { id: 'toc',        icon: 'list',          label: 'Contents'   },
+  { id: 'type',       icon: 'type',          label: 'Typography' },
+  { id: 'theme',      icon: 'palette',       label: 'Themes'     },
+  { id: 'highlights', icon: 'highlighter',   label: 'Highlights' },
+  { id: 'comments',   icon: 'message-square', label: 'Discussion' },
+  { id: 'share',      icon: 'share-2',       label: 'Share'      },
+  { id: 'tts',        icon: 'volume-2',      label: 'Listen'     },
+  { id: 'info',       icon: 'info',          label: 'About'      },
 ];
 
 /* ─────────────────────────────────────────────
@@ -127,11 +131,11 @@ function initSidebar() {
 }
 
 function openPanel(toolId) {
-  readerState.openTool = toolId;
+  readerState.openTool   = toolId;
   readerState.isCollapsed = false;
 
-  const panel = document.getElementById('toolPanel');
-  const title = document.getElementById('panelTitle');
+  const panel   = document.getElementById('toolPanel');
+  const title   = document.getElementById('panelTitle');
   const content = document.getElementById('panelContent');
 
   if (!panel || !title || !content) return;
@@ -151,40 +155,18 @@ function openPanel(toolId) {
 }
 
 function _refreshPanelContent() {
-  const toolId = readerState.openTool;
+  const toolId  = readerState.openTool;
   const content = document.getElementById('panelContent');
   if (!content || !toolId) return;
 
-  if (toolId === 'toc') {
-    content.innerHTML = renderTocPanel(
-      readerState.chapters,
-      readerState.currentChapterId,
-      readerState.progress,
-      readerState.activeSection,
-      readerState.taleTitle
-    );
-    _bindTocEvents();
-  } else if (toolId === 'type') {
-    content.innerHTML = renderTypographyPanel(readerState);
-    _bindTypographyEvents();
-  } else if (toolId === 'theme') {
-    content.innerHTML = renderThemePanel(readerState.theme);
-    _bindThemeEvents();
-  } else if (toolId === 'highlights') {
-    content.innerHTML = renderHighlightsPanel(readerState.highlights);
-    _bindHighlightEvents();
-  } else if (toolId === 'comments') {
-    content.innerHTML = renderCommentsPanel(readerState.comments, readerState.newComment);
-    _bindCommentEvents();
-  } else if (toolId === 'share') {
-    content.innerHTML = renderSharePanel();
-    _bindShareEvents();
-  } else if (toolId === 'tts') {
-    content.innerHTML = renderTTSPanel(readerState.tts.playing, readerState.tts.rate);
-    _bindTTSEvents();
-  } else if (toolId === 'info') {
-    content.innerHTML = renderInfoPanel(readerState);
-  }
+  if      (toolId === 'toc')        { content.innerHTML = renderTocPanel(readerState.chapters, readerState.currentChapterId, readerState.progress, readerState.activeSection, readerState.taleTitle); _bindTocEvents(); }
+  else if (toolId === 'type')       { content.innerHTML = renderTypographyPanel(readerState); _bindTypographyEvents(); }
+  else if (toolId === 'theme')      { content.innerHTML = renderThemePanel(readerState.theme); _bindThemeEvents(); }
+  else if (toolId === 'highlights') { content.innerHTML = renderHighlightsPanel(readerState.highlights); _bindHighlightEvents(); }
+  else if (toolId === 'comments')   { content.innerHTML = renderCommentsPanel(readerState.comments, readerState.newComment); _bindCommentEvents(); }
+  else if (toolId === 'share')      { content.innerHTML = renderSharePanel(); _bindShareEvents(); }
+  else if (toolId === 'tts')        { content.innerHTML = renderTTSPanel(readerState.tts.playing, readerState.tts.rate); _bindTTSEvents(); }
+  else if (toolId === 'info')       { content.innerHTML = renderInfoPanel(readerState); }
 
   initIcons();
 }
@@ -196,7 +178,7 @@ function closePanel() {
     panel.style.display = 'none';
   }
 
-  readerState.openTool = null;
+  readerState.openTool    = null;
   readerState.isCollapsed = true;
 
   document.querySelectorAll('[data-tool]').forEach((btn) => (btn.dataset.active = 'false'));
@@ -222,7 +204,7 @@ function _isPanelVisible() {
 }
 
 function _updateCollapseIcon() {
-  const isVisible = _isPanelVisible();
+  const isVisible    = _isPanelVisible();
   const collapseIcon = document.getElementById('collapseIcon');
 
   document.getElementById('sidebar')?.classList.toggle('collapsed', !isVisible);
@@ -242,20 +224,19 @@ function _bindTocEvents() {
       const idx = readerState.chapters.findIndex((c) => c.id === btn.dataset.chapterId);
       const url = new URL(window.location.href);
       url.searchParams.set('chapterId', idx);
-      window.location.href = url.toString();
+      navigateTo(url.toString());
     });
   });
 
   document.querySelectorAll('[data-section-id]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const target = document.getElementById(btn.dataset.sectionId);
+      const target  = document.getElementById(btn.dataset.sectionId);
       const scroller = document.getElementById('scroller');
       if (target && scroller) {
         const top =
           target.getBoundingClientRect().top -
           scroller.getBoundingClientRect().top +
-          scroller.scrollTop -
-          32;
+          scroller.scrollTop - 32;
         scroller.scrollTo({ top, behavior: 'smooth' });
         if (window.innerWidth < 1024) closePanel();
       }
@@ -264,57 +245,27 @@ function _bindTocEvents() {
 }
 
 function _bindTypographyEvents() {
-  document.getElementById('fontSize')?.addEventListener('input', (e) => {
-    setFontSize(e.target.value);
-    _refreshPanelContent();
-  });
-  document.getElementById('fsRange')?.addEventListener('input', (e) => {
-    setFontSize(e.target.value);
-    _refreshPanelContent();
-  });
-  document.getElementById('fsMinus')?.addEventListener('click', () => {
-    setFontSize(readerState.fontSize - 1);
-    _refreshPanelContent();
-  });
-  document.getElementById('fsPlus')?.addEventListener('click', () => {
-    setFontSize(readerState.fontSize + 1);
-    _refreshPanelContent();
-  });
+  document.getElementById('fontSize')?.addEventListener('input', (e) => { setFontSize(e.target.value); _refreshPanelContent(); });
+  document.getElementById('fsRange')?.addEventListener('input',  (e) => { setFontSize(e.target.value); _refreshPanelContent(); });
+  document.getElementById('fsMinus')?.addEventListener('click',  () => { setFontSize(readerState.fontSize - 1); _refreshPanelContent(); });
+  document.getElementById('fsPlus')?.addEventListener('click',   () => { setFontSize(readerState.fontSize + 1); _refreshPanelContent(); });
 
-  document.getElementById('lineHeight')?.addEventListener('input', (e) => {
-    setLineHeight(e.target.value);
-    _refreshPanelContent();
-  });
+  document.getElementById('lineHeight')?.addEventListener('input', (e) => { setLineHeight(e.target.value); _refreshPanelContent(); });
   document.querySelectorAll('[data-lh]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      setLineHeight(parseFloat(btn.dataset.lh));
-      _refreshPanelContent();
-    });
+    btn.addEventListener('click', () => { setLineHeight(parseFloat(btn.dataset.lh)); _refreshPanelContent(); });
   });
 
-  document.getElementById('measure')?.addEventListener('input', (e) => {
-    setMeasure(e.target.value);
-    _refreshPanelContent();
-  });
-  document.getElementById('mwRange')?.addEventListener('input', (e) => {
-    setMeasure(e.target.value);
-    _refreshPanelContent();
-  });
+  document.getElementById('measure')?.addEventListener('input',  (e) => { setMeasure(e.target.value); _refreshPanelContent(); });
+  document.getElementById('mwRange')?.addEventListener('input',  (e) => { setMeasure(e.target.value); _refreshPanelContent(); });
 
   document.querySelectorAll('[data-font]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      setFontFamily(btn.dataset.font);
-      _refreshPanelContent();
-    });
+    btn.addEventListener('click', () => { setFontFamily(btn.dataset.font); _refreshPanelContent(); });
   });
 }
 
 function _bindThemeEvents() {
   document.querySelectorAll('[data-theme-id]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      setTheme(btn.dataset.themeId);
-      _refreshPanelContent();
-    });
+    btn.addEventListener('click', () => { setTheme(btn.dataset.themeId); _refreshPanelContent(); });
   });
 }
 
@@ -339,12 +290,12 @@ function _bindCommentEvents() {
     const body = readerState.newComment.trim();
     if (!body) return;
     readerState.comments.unshift({
-      id: Math.random().toString(36).slice(2, 9),
-      author: readerState.userName || 'You',
+      id:       Math.random().toString(36).slice(2, 9),
+      author:   readerState.userName || 'You',
       initials: (readerState.userName || 'Y').slice(0, 2).toUpperCase(),
       body,
-      at: Date.now(),
-      likes: 0,
+      at:       Date.now(),
+      likes:    0,
     });
     readerState.newComment = '';
     _refreshPanelContent();
@@ -352,10 +303,9 @@ function _bindCommentEvents() {
 }
 
 function _bindShareEvents() {
-  const handler = () =>
-    navigator.clipboard
-      .writeText(window.location.href)
-      .then(() => showToast('Link copied to clipboard.', 'success'));
+  const handler = () => navigator.clipboard
+    .writeText(window.location.href)
+    .then(() => showToast('Link copied to clipboard.', 'success'));
 
   document.getElementById('copyLinkBtn')?.addEventListener('click', handler);
   document.getElementById('copyLink')?.addEventListener('click', handler);
@@ -369,12 +319,9 @@ function _bindTTSEvents() {
       readerState.tts.playing = false;
     } else {
       const text = document.getElementById('articleBody')?.innerText.slice(0, 6000) || '';
-      const u = new SpeechSynthesisUtterance(text);
-      u.rate = readerState.tts.rate;
-      u.onend = () => {
-        readerState.tts.playing = false;
-        _refreshPanelContent();
-      };
+      const u    = new SpeechSynthesisUtterance(text);
+      u.rate      = readerState.tts.rate;
+      u.onend     = () => { readerState.tts.playing = false; _refreshPanelContent(); };
       window.speechSynthesis.speak(u);
       readerState.tts.playing = true;
     }
@@ -405,17 +352,17 @@ function initEngagement() {
     }
   });
 
-  document.getElementById('engShare')?.addEventListener('click', () => openPanel('share'));
+  document.getElementById('engShare')?.addEventListener('click',   () => openPanel('share'));
   document.getElementById('engComment')?.addEventListener('click', () => openPanel('comments'));
 }
 
 function _renderEngagement() {
-  const clapCount = document.getElementById('clapCount');
-  const clapLabel = document.getElementById('clapLabel');
+  const clapCount    = document.getElementById('clapCount');
+  const clapLabel    = document.getElementById('clapLabel');
   const clapIconWrap = document.getElementById('clapIconWrap');
 
-  if (clapCount) clapCount.textContent = readerState.claps;
-  if (clapLabel) clapLabel.textContent = readerState.hasClapped ? 'Thank you' : 'Tap to applaud';
+  if (clapCount)    clapCount.textContent    = readerState.claps;
+  if (clapLabel)    clapLabel.textContent    = readerState.hasClapped ? 'Thank you' : 'Tap to applaud';
   if (clapIconWrap) {
     clapIconWrap.classList.toggle('clapped', readerState.hasClapped);
     if (readerState.hasClapped) clapIconWrap.style.boxShadow = '0 0 30px -4px rgba(245,158,11,0.6)';
@@ -449,9 +396,8 @@ function initSelectionToolbar() {
     const rect = range.getBoundingClientRect();
     readerState.selection = { text: sel.toString(), x: rect.left + rect.width / 2, y: rect.top };
 
-    toolbar.style.left =
-      Math.max(20, Math.min(window.innerWidth - 240, readerState.selection.x - 120)) + 'px';
-    toolbar.style.top = Math.max(12, readerState.selection.y - 56) + 'px';
+    toolbar.style.left = Math.max(20, Math.min(window.innerWidth - 240, readerState.selection.x - 120)) + 'px';
+    toolbar.style.top  = Math.max(12, readerState.selection.y - 56) + 'px';
     toolbar.classList.remove('hidden');
   });
 
@@ -466,8 +412,7 @@ function initSelectionToolbar() {
 
   document.getElementById('selCopy')?.addEventListener('click', () => {
     if (readerState.selection) {
-      navigator.clipboard
-        .writeText(readerState.selection.text)
+      navigator.clipboard.writeText(readerState.selection.text)
         .then(() => showToast('Copied to clipboard.', 'success'));
     }
     readerState.selection = null;
@@ -478,11 +423,11 @@ function initSelectionToolbar() {
 function _addHighlight(color, note = '') {
   if (!readerState.selection) return;
   readerState.highlights.unshift({
-    id: Math.random().toString(36).slice(2, 9),
-    text: readerState.selection.text,
+    id:    Math.random().toString(36).slice(2, 9),
+    text:  readerState.selection.text,
     color,
     note,
-    at: Date.now(),
+    at:    Date.now(),
   });
   readerState.selection = null;
   window.getSelection()?.removeAllRanges();
@@ -496,7 +441,7 @@ function _addHighlight(color, note = '') {
    ───────────────────────────────────────────── */
 
 async function _handleBookmark() {
-  const userId = readerState.userId;
+  const userId  = readerState.userId;
   const taleId_ = readerState.taleId;
   if (!userId || !taleId_) return;
 
@@ -508,15 +453,7 @@ async function _handleBookmark() {
 
   try {
     if (readerState.bookmarked) {
-      await addToBookmarks({
-        userId,
-        taleId: taleId_,
-        tale: {
-          title: readerState.taleTitle,
-          coverUrl: readerState.coverUrl,
-          authorName: readerState.authorName,
-        },
-      });
+      await addToBookmarks({ userId, taleId: taleId_, tale: { title: readerState.taleTitle, coverUrl: readerState.coverUrl, authorName: readerState.authorName } });
       showToast('Saved to Library.', 'success');
     } else {
       await removeFromBookmarks({ userId, taleId: taleId_ });
@@ -564,12 +501,12 @@ export async function saveReaderPrefs(userId) {
     await setDoc(
       refs.readerPrefs(userId),
       {
-        theme: readerState.theme,
+        theme:      readerState.theme,
         fontFamily: readerState.fontFamily,
-        fontSize: readerState.fontSize,
+        fontSize:   readerState.fontSize,
         lineHeight: readerState.lineHeight,
-        measure: readerState.measure,
-        updatedAt: serverTimestamp(),
+        measure:    readerState.measure,
+        updatedAt:  serverTimestamp(),
       },
       { merge: true }
     );
@@ -587,7 +524,7 @@ initTheme();
 
 initAuth(async (user) => {
   setAppUser(user.uid);
-  readerState.userId = user.uid;
+  readerState.userId   = user.uid;
   readerState.userName = user.displayName || 'You';
 
   showReaderSkeletons();
@@ -604,8 +541,7 @@ initAuth(async (user) => {
   if (!navigation) return;
 
   applyNavigation(navigation);
-
-  // Scroll restore from localStorage
+  readyReveal();
   const localProgress = getChapterProgress({ userId: user.uid, taleId, chapterIndex });
   restoreScrollProgress({ scrollPercent: localProgress?.scrollPercent ?? 0 });
 
@@ -636,10 +572,10 @@ initAuth(async (user) => {
   if (window.innerWidth >= 1024) openPanel('toc');
 
   // Global action bindings
-  document.getElementById('sidebarBookmark')?.addEventListener('click', _handleBookmark);
-  document.getElementById('engBookmark')?.addEventListener('click', _handleBookmark);
-  document.getElementById('engBookmarkMobile')?.addEventListener('click', _handleBookmark);
-  document.getElementById('closePanel')?.addEventListener('click', closePanel);
+  document.getElementById('sidebarBookmark')?.addEventListener('click',     _handleBookmark);
+  document.getElementById('engBookmark')?.addEventListener('click',         _handleBookmark);
+  document.getElementById('engBookmarkMobile')?.addEventListener('click',   _handleBookmark);
+  document.getElementById('closePanel')?.addEventListener('click',      closePanel);
   document.getElementById('backToTop')?.addEventListener('click', () => {
     document.getElementById('scroller')?.scrollTo({ top: 0, behavior: 'smooth' });
   });

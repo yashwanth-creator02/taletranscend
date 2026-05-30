@@ -1,20 +1,23 @@
 // src/pages/reader/mobile.js
-// Specialized Mobile Behaviours for High-Fidelity Reader
+// Specialized mobile behaviours for the reader page.
+// Uses navigateTo() for all page changes so transitions are smooth.
 
 import { readerState } from './state.js';
+import { navigateTo } from '@/utils/ui.utils';
 
 /* ─────────────────────────────────────────────
    Settings Drawer (Mobile)
    ───────────────────────────────────────────── */
 
 export function initMobileDrawer() {
-  const panel = document.getElementById('reader-settings-panel');
+  const panel   = document.getElementById('reader-settings-panel');
   const openBtn = document.getElementById('reader-settings-btn');
   const closeBtn = document.getElementById('reader-settings-close');
 
   if (!panel) return;
 
   const openPanel = () => {
+    panel.classList.remove('hidden');
     panel.classList.add('is-open');
     document.body.style.overflow = 'hidden';
     readerState.settingsPanelOpen = true;
@@ -24,6 +27,8 @@ export function initMobileDrawer() {
     panel.classList.remove('is-open');
     document.body.style.overflow = '';
     readerState.settingsPanelOpen = false;
+    // Small delay before hiding so the close animation plays
+    setTimeout(() => panel.classList.add('hidden'), 300);
   };
 
   openBtn?.addEventListener('click', openPanel);
@@ -34,7 +39,7 @@ export function initMobileDrawer() {
     if (e.target === panel) closePanel();
   });
 
-  // Close on escape
+  // Close on Escape
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && readerState.settingsPanelOpen) closePanel();
   });
@@ -68,8 +73,8 @@ export function initSwipeNavigation({ prevUrl, nextUrl }) {
       // Predominantly horizontal swipe > 60px
       if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.7) return;
 
-      if (dx < 0 && nextUrl) _navigate(nextUrl);
-      if (dx > 0 && prevUrl) _navigate(prevUrl);
+      if (dx < 0 && nextUrl) navigateTo(nextUrl);
+      if (dx > 0 && prevUrl) navigateTo(prevUrl);
     },
     { passive: true }
   );
@@ -88,24 +93,11 @@ export function initToolbarAutoHide() {
   window.addEventListener(
     'scroll',
     () => {
-      const currentY = window.scrollY;
+      const currentY    = window.scrollY;
       const scrollingDown = currentY > lastY && currentY > 60;
-
       toolbar.style.transform = scrollingDown ? 'translateY(100%)' : 'translateY(0)';
       lastY = currentY;
     },
     { passive: true }
   );
-}
-
-/* ─────────────────────────────────────────────
-   Private Helpers
-   ───────────────────────────────────────────── */
-
-function _navigate(url) {
-  document.body.style.transition = 'opacity 0.25s ease';
-  document.body.style.opacity = '0';
-  setTimeout(() => {
-    window.location.href = url;
-  }, 250);
 }

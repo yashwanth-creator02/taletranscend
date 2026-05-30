@@ -16,6 +16,7 @@
 import { auth, setDoc, updateDoc, serverTimestamp, refs } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
 import { createTale } from '@state/index.js';
+import { navigateTo } from '@/utils/ui.utils';
 
 import { state } from './state.js';
 import { saveAllChapters, syncMetadataFromDom } from './cloud.js';
@@ -169,7 +170,7 @@ export async function publishFullTale() {
     _setPublishStatus('Published successfully!', 'success');
 
     setTimeout(() => {
-      window.location.href = `tale.html?id=${taleId}`;
+      navigateTo(`tale.html?id=${taleId}`);
     }, 1500);
   } catch (error) {
     console.error('[publish] Pipeline failed:', error);

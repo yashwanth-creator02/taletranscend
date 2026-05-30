@@ -10,6 +10,7 @@ import '@css/pages/library.css';
 import { initAuth } from '@fb/index.js';
 import { initNav } from '@ui/components/nav/nav.js';
 import { initIcons } from '@ui/components/icons.js';
+import { initPageReveal, readyReveal } from '@/utils/ui.utils';
 
 import {
   subscribeToTales,
@@ -33,6 +34,7 @@ import { setupCardInteractions } from './interactions.js';
 import { libraryState } from './state.js';
 
 initNav();
+initPageReveal();
 
 /* ─────────────────────────────────────────────
    DOM-ready — wire static UI before auth resolves
@@ -71,6 +73,7 @@ initAuth(async (user) => {
       }
 
       await applyAllFilters();
+      readyReveal();
       initIcons();
     },
     () => showGridError()

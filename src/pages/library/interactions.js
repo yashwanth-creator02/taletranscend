@@ -5,6 +5,7 @@
 
 import { showToast } from '@ui/components/toast.js';
 import { initIcons } from '@ui/components/icons.js';
+import { navigateTo } from '@/utils/ui.utils';
 import {
   resolveResumePoint,
   addToBookmarks,
@@ -70,7 +71,10 @@ export function setupCardInteractions(userId) {
 
     // Card body click → tale detail page
     if (!e.target.closest('.options-menu')) {
-      window.location.assign(`tale.html?id=${encodeURIComponent(taleId)}`);
+      // Card body click → navigate to tale detail page
+    if (!e.target.closest('.options-menu')) {
+      navigateTo(`tale.html?id=${encodeURIComponent(taleId)}`);
+    }
     }
   });
 
@@ -94,7 +98,7 @@ async function _handleResume(userId, taleId) {
   try {
     const resume    = await resolveResumePoint({ userId, taleId });
     const chapterId = resume?.chapterIndex ?? 0;
-    window.location.assign(
+    navigateTo(
       `reader.html?taleId=${encodeURIComponent(taleId)}&chapterId=${chapterId}`
     );
   } catch (err) {

@@ -1,6 +1,7 @@
 // src/pages/tale/interactions.js
 // User interactions for the Tale Archive page.
 
+import { navigateTo } from '@/utils/ui.utils';
 import { resolveResumePoint, toggleResonance, getResonanceStatus } from '@services/index.js';
 import { showToast } from '@ui/components/toast.js';
 import { initIcons } from '@ui/components/icons.js';
@@ -267,9 +268,5 @@ export function initHeaderScroll() {
    ───────────────────────────────────────────── */
 
 function _fadeAndGo(url) {
-  document.body.style.transition = 'opacity 0.25s ease';
-  document.body.style.opacity    = '0';
-  setTimeout(() => {
-    window.location.href = url;
-  }, 250);
+  navigateTo(url);
 }

@@ -1,4 +1,5 @@
 // src/pages/tale/tale.js
+import { initPageReveal, readyReveal } from '@/utils/ui.utils';
 // Tale Archive page entry point.
 // Orchestrates data hydration and all user interactions.
 
@@ -29,6 +30,9 @@ import {
 import { addToBookmarks, removeFromBookmarks, isBookmarked } from '@services/index.js';
 import { initNav } from '@ui/components/nav/nav.js';
 import { setupAuthTimeout } from '@/utils/ui.utils';
+import { initPageReveal, readyReveal } from '@/utils/ui.utils';
+
+initPageReveal();
 
 /* ─────────────────────────────────────────────
    URL Parameters
@@ -67,6 +71,7 @@ initAuth(async (user) => {
   // 2. Primary UI
   await renderTale(userId, tale, taleId);
   renderChapters(userId, chapters, taleId);
+  readyReveal();
 
   // 3. Interactions
   bindChapterClicks(taleId);

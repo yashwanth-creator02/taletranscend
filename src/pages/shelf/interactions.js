@@ -14,6 +14,7 @@ import { setActiveTab, buildSortPanel, refreshSortPanel } from './ui.js';
 import { initIcons } from '@ui/components/icons.js';
 import { showToast } from '@ui/components/toast.js';
 import { removeFromBookmarks } from '@services/index.js';
+import { navigateTo } from '@/utils/ui.utils';
 
 /* ─────────────────────────────────────────────
    Public Init
@@ -161,7 +162,7 @@ function _bindCardActions() {
     const card = target.closest('[data-id]');
     if (card && !target.closest('.shelf-menu') && !target.closest('.shelf-options-btn')) {
       const id = card.dataset.id;
-      if (id) window.location.href = `tale.html?id=${id}`;
+      if (id) navigateTo(`tale.html?id=${id}`);
     }
   });
 
@@ -202,7 +203,7 @@ async function _handleCardAction(action, id, e) {
 
   switch (action) {
     case 'resume':
-      window.location.href = `tale.html?id=${id}`;
+      navigateTo(`tale.html?id=${id}`);
       break;
 
     case 'copy-link': {
@@ -247,11 +248,11 @@ async function _handleCardAction(action, id, e) {
 
 function _bindRightRail() {
   document.getElementById('ritual-new-draft')?.addEventListener('click', () => {
-    window.location.href = 'contribution.html';
+    navigateTo('contribution.html');
   });
 
   document.getElementById('hero-new-tale-btn')?.addEventListener('click', () => {
-    window.location.href = 'contribution.html';
+    navigateTo('contribution.html');
   });
 
   document.getElementById('ritual-voice-note')?.addEventListener('click', () => {
@@ -259,7 +260,7 @@ function _bindRightRail() {
   });
 
   document.getElementById('ritual-publish')?.addEventListener('click', () => {
-    window.location.href = 'contribution.html';
+    navigateTo('contribution.html');
   });
 
   document.getElementById('hero-voice-btn')?.addEventListener('click', () => {

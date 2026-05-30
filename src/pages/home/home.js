@@ -8,14 +8,17 @@ import '@css/components.css';
 import '@css/pages/home.css';
 
 import { initNav } from '@ui/components/nav/nav.js';
+import { navigateTo, initPageReveal, readyReveal } from '@/utils/ui.utils';
 import { initIcons } from '@ui/components/icons.js';
 import { getTales } from '@services/index.js';
 
+initPageReveal();
 initNav();
 
 document.addEventListener('DOMContentLoaded', () => {
   initIcons();
   _initInteractions();
+  readyReveal();
   _loadTrendingTales();
 });
 
@@ -26,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function _initInteractions() {
   // Hero CTA navigates to the contribution editor
   document.getElementById('home-start-writing-btn')?.addEventListener('click', () => {
-    window.location.href = 'contribution.html';
+    navigateTo('contribution.html');
   });
 
   // Newsletter form — placeholder, no backend yet
@@ -49,7 +52,7 @@ function _initInteractions() {
 function _performSearch() {
   const term = document.getElementById('home-search-input')?.value.trim();
   if (!term) return;
-  window.location.href = `library.html?search=${encodeURIComponent(term)}`;
+  navigateTo(`library.html?search=${encodeURIComponent(term)}`);
 }
 
 /* ─────────────────────────────────────────────

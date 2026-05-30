@@ -3,6 +3,7 @@
 
 import { readerState } from './state.js';
 import { initIcons } from '@ui/components/icons.js';
+import { navigateTo } from '@/utils/ui.utils';
 
 /**
  * Renders the previous/next chapter navigation buttons and wires their click handlers.
@@ -61,8 +62,8 @@ export function applyNavigation(nav) {
  */
 export function goBackToTale() {
   if (readerState.taleId) {
-    window.location.href = `tale.html?id=${readerState.taleId}`;
+    navigateTo(`tale.html?id=${readerState.taleId}`);
   } else {
-    window.location.href = 'library.html';
+    navigateTo('library.html');
   }
 }

@@ -1,4 +1,5 @@
 // src/pages/shelf/shelf.js
+import { initPageReveal, readyReveal } from '@/utils/ui.utils';
 // Entry point for the shelf page.
 // Authenticates the user, loads both data sets in parallel,
 // then hands off to interactions and renderers.
@@ -22,6 +23,7 @@ import {
 } from './index.js';
 import { setupAuthTimeout } from '@/utils/ui.utils';
 
+initPageReveal();
 initNav();
 
 /* ─────────────────────────────────────────────
@@ -55,7 +57,7 @@ initAuth(async (user) => {
 
   // Compute hero stats now that both data sets are cached
   computeAndRenderHeroStats();
-
+  readyReveal();
   initIcons();
 });
 

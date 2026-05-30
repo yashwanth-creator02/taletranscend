@@ -10,6 +10,7 @@ import '@css/pages/profile.css';
 import { initNav } from '@ui/components/nav/nav.js';
 import { initAuth, auth } from '@fb/index.js';
 import { signOut } from 'firebase/auth';
+import { navigateTo, initPageReveal, readyReveal } from '@/utils/ui.utils';
 import { initIcons } from '@ui/components/icons.js';
 import { showToast } from '@ui/components/toast.js';
 
@@ -32,6 +33,7 @@ import {
 
 import { getContinueReading, getUserPublishedTales, getUserDrafts } from '@services/index.js';
 
+initPageReveal();
 initNav();
 
 /* ─────────────────────────────────────────────
@@ -68,7 +70,7 @@ initAuth(async (user) => {
   renderPublishedTales(publishedTales);
   renderDrafts(drafts);
   updateStatsUI(stats);
-
+  readyReveal();
   initIcons();
 });
 
@@ -88,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // New story CTA
   document.getElementById('btn-new-story')?.addEventListener('click', () => {
-    window.location.href = 'contribution.html';
+    navigateTo('contribution.html');
   });
 
   // Contributions tab switcher
@@ -110,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         await signOut(auth);
         showToast('Signed out. Neural link severed.', 'success');
         setTimeout(() => {
-          window.location.href = 'index.html';
+          navigateTo('index.html');
         }, 800);
       } catch (err) {
         console.error('[profile] Sign-out failed:', err);
