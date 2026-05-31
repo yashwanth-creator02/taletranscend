@@ -17,7 +17,7 @@ import { navigateTo } from '@/utils/ui.utils';
  * @param {string|null} nav.nextTitle
  */
 export function applyNavigation(nav) {
-  const container = document.getElementById('chapterNav');
+  const container = document.getElementById('chapter-nav');
   if (!container) return;
 
   const prev = nav.hasPrev

@@ -10,7 +10,7 @@ import { initIcons } from '@ui/components/icons.js';
  * Note: Now largely handled by templates.js, this builds the section list.
  */
 export function buildTOC() {
-  const article = document.getElementById('articleBody');
+  const article = document.getElementById('article-body');
   if (!article) return;
 
   const currentChapter = readerState.chapters.find((c) => c.id === readerState.currentChapterId);
@@ -24,7 +24,7 @@ export function buildTOC() {
  */
 export function updateTOCScrollSpy() {
   const scroller = document.getElementById('scroller');
-  const article = document.getElementById('articleBody');
+  const article = document.getElementById('article-body');
   if (!scroller || !article) return;
 
   const headers = Array.from(article.querySelectorAll('h2, h3'));
@@ -49,7 +49,7 @@ export function updateTOCScrollSpy() {
 }
 
 function _refreshToc() {
-  const content = document.getElementById('panelContent');
+  const content = document.getElementById('panel-content');
   if (!content) return;
 
   content.innerHTML = renderTocPanel(
@@ -83,7 +83,7 @@ function _refreshToc() {
           32;
         scroller.scrollTo({ top, behavior: 'smooth' });
         if (window.innerWidth < 1024) {
-          const closeBtn = document.getElementById('closePanel');
+          const closeBtn = document.getElementById('close-panel');
           closeBtn?.click();
         }
       }

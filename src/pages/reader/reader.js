@@ -95,7 +95,7 @@ const SIDEBAR_TOOLS = [
    ───────────────────────────────────────────── */
 
 function initSidebar() {
-  const container = document.getElementById('sidebarTools');
+  const container = document.getElementById('sidebar-tools');
   if (!container) return;
 
   container.innerHTML = SIDEBAR_TOOLS.map(
@@ -109,7 +109,7 @@ function initSidebar() {
   `
   ).join('');
 
-  document.getElementById('collapseBtn')?.addEventListener('click', () => {
+  document.getElementById('collapse-btn')?.addEventListener('click', () => {
     _isPanelVisible() ? closePanel() : openPanel('toc');
   });
 
@@ -126,17 +126,17 @@ function initSidebar() {
     });
   });
 
-  document.getElementById('sidebarFocus')?.addEventListener('click', toggleFocusMode);
-  document.getElementById('focusExit')?.addEventListener('click', toggleFocusMode);
+  document.getElementById('sidebar-focus')?.addEventListener('click', toggleFocusMode);
+  document.getElementById('focus-exit')?.addEventListener('click', toggleFocusMode);
 }
 
 function openPanel(toolId) {
   readerState.openTool = toolId;
   readerState.isCollapsed = false;
 
-  const panel = document.getElementById('toolPanel');
-  const title = document.getElementById('panelTitle');
-  const content = document.getElementById('panelContent');
+  const panel = document.getElementById('tool-panel');
+  const title = document.getElementById('panel-title');
+  const content = document.getElementById('panel-content');
 
   if (!panel || !title || !content) return;
 
@@ -156,7 +156,7 @@ function openPanel(toolId) {
 
 function _refreshPanelContent() {
   const toolId = readerState.openTool;
-  const content = document.getElementById('panelContent');
+  const content = document.getElementById('panel-content');
   if (!content || !toolId) return;
 
   if (toolId === 'toc') {
@@ -194,7 +194,7 @@ function _refreshPanelContent() {
 }
 
 function closePanel() {
-  const panel = document.getElementById('toolPanel');
+  const panel = document.getElementById('tool-panel');
   if (panel) {
     panel.classList.remove('visible');
     panel.style.display = 'none';
@@ -212,22 +212,22 @@ function toggleFocusMode() {
   readerState.focusMode = !readerState.focusMode;
 
   document.getElementById('sidebar')?.classList.toggle('hidden', readerState.focusMode);
-  document.getElementById('topBar')?.classList.toggle('hidden', readerState.focusMode);
-  document.getElementById('focusExit')?.classList.toggle('hidden', !readerState.focusMode);
+  document.getElementById('top-bar')?.classList.toggle('hidden', readerState.focusMode);
+  document.getElementById('focus-exit')?.classList.toggle('hidden', !readerState.focusMode);
 
   if (readerState.focusMode) closePanel();
 
-  const focusBtn = document.getElementById('sidebarFocus');
+  const focusBtn = document.getElementById('sidebar-focus');
   if (focusBtn) focusBtn.dataset.active = String(readerState.focusMode);
 }
 
 function _isPanelVisible() {
-  return document.getElementById('toolPanel')?.classList.contains('visible');
+  return document.getElementById('tool-panel')?.classList.contains('visible');
 }
 
 function _updateCollapseIcon() {
   const isVisible = _isPanelVisible();
-  const collapseIcon = document.getElementById('collapseIcon');
+  const collapseIcon = document.getElementById('collapse-icon');
 
   document.getElementById('sidebar')?.classList.toggle('collapsed', !isVisible);
 
@@ -268,24 +268,24 @@ function _bindTocEvents() {
 }
 
 function _bindTypographyEvents() {
-  document.getElementById('fontSize')?.addEventListener('input', (e) => {
+  document.getElementById('font-size')?.addEventListener('input', (e) => {
     setFontSize(e.target.value);
     _refreshPanelContent();
   });
-  document.getElementById('fsRange')?.addEventListener('input', (e) => {
+  document.getElementById('fs-range')?.addEventListener('input', (e) => {
     setFontSize(e.target.value);
     _refreshPanelContent();
   });
-  document.getElementById('fsMinus')?.addEventListener('click', () => {
+  document.getElementById('fs-minus')?.addEventListener('click', () => {
     setFontSize(readerState.fontSize - 1);
     _refreshPanelContent();
   });
-  document.getElementById('fsPlus')?.addEventListener('click', () => {
+  document.getElementById('fs-plus')?.addEventListener('click', () => {
     setFontSize(readerState.fontSize + 1);
     _refreshPanelContent();
   });
 
-  document.getElementById('lineHeight')?.addEventListener('input', (e) => {
+  document.getElementById('line-height-input')?.addEventListener('input', (e) => {
     setLineHeight(e.target.value);
     _refreshPanelContent();
   });
@@ -300,7 +300,7 @@ function _bindTypographyEvents() {
     setMeasure(e.target.value);
     _refreshPanelContent();
   });
-  document.getElementById('mwRange')?.addEventListener('input', (e) => {
+  document.getElementById('mw-range')?.addEventListener('input', (e) => {
     setMeasure(e.target.value);
     _refreshPanelContent();
   });
@@ -332,14 +332,14 @@ function _bindHighlightEvents() {
 }
 
 function _bindCommentEvents() {
-  const input = document.getElementById('commentInput');
+  const input = document.getElementById('comment-input');
   input?.addEventListener('input', (e) => {
     readerState.newComment = e.target.value;
-    const postBtn = document.getElementById('postComment');
+    const postBtn = document.getElementById('post-comment');
     if (postBtn) postBtn.disabled = !readerState.newComment.trim();
   });
 
-  document.getElementById('postComment')?.addEventListener('click', () => {
+  document.getElementById('post-comment')?.addEventListener('click', () => {
     const body = readerState.newComment.trim();
     if (!body) return;
     readerState.comments.unshift({
@@ -361,18 +361,18 @@ function _bindShareEvents() {
       .writeText(window.location.href)
       .then(() => showToast('Link copied to clipboard.', 'success'));
 
-  document.getElementById('copyLinkBtn')?.addEventListener('click', handler);
-  document.getElementById('copyLink')?.addEventListener('click', handler);
+  document.getElementById('copy-link-btn')?.addEventListener('click', handler);
+  document.getElementById('copy-link')?.addEventListener('click', handler);
 }
 
 function _bindTTSEvents() {
-  document.getElementById('ttsToggle')?.addEventListener('click', () => {
+  document.getElementById('tts-toggle')?.addEventListener('click', () => {
     if (!('speechSynthesis' in window)) return;
     if (readerState.tts.playing) {
       window.speechSynthesis.cancel();
       readerState.tts.playing = false;
     } else {
-      const text = document.getElementById('articleBody')?.innerText.slice(0, 6000) || '';
+      const text = document.getElementById('article-body')?.innerText.slice(0, 6000) || '';
       const u = new SpeechSynthesisUtterance(text);
       u.rate = readerState.tts.rate;
       u.onend = () => {
@@ -385,12 +385,12 @@ function _bindTTSEvents() {
     _refreshPanelContent();
   });
 
-  document.getElementById('ttsRate')?.addEventListener('input', (e) => {
+  document.getElementById('tts-rate')?.addEventListener('input', (e) => {
     readerState.tts.rate = parseFloat(e.target.value);
     if (readerState.tts.playing) {
       window.speechSynthesis.cancel();
       readerState.tts.playing = false;
-      document.getElementById('ttsToggle')?.click();
+      document.getElementById('tts-toggle')?.click();
     }
     _refreshPanelContent();
   });
@@ -401,7 +401,7 @@ function _bindTTSEvents() {
    ───────────────────────────────────────────── */
 
 function initEngagement() {
-  document.getElementById('clapBtn')?.addEventListener('click', () => {
+  document.getElementById('clap-btn')?.addEventListener('click', () => {
     if (!readerState.hasClapped) {
       readerState.claps++;
       readerState.hasClapped = true;
@@ -409,14 +409,14 @@ function initEngagement() {
     }
   });
 
-  document.getElementById('engShare')?.addEventListener('click', () => openPanel('share'));
-  document.getElementById('engComment')?.addEventListener('click', () => openPanel('comments'));
+  document.getElementById('eng-share')?.addEventListener('click', () => openPanel('share'));
+  document.getElementById('eng-comment')?.addEventListener('click', () => openPanel('comments'));
 }
 
 function _renderEngagement() {
-  const clapCount = document.getElementById('clapCount');
-  const clapLabel = document.getElementById('clapLabel');
-  const clapIconWrap = document.getElementById('clapIconWrap');
+  const clapCount = document.getElementById('clap-count');
+  const clapLabel = document.getElementById('clap-label');
+  const clapIconWrap = document.getElementById('clap-icon-wrap');
 
   if (clapCount) clapCount.textContent = readerState.claps;
   if (clapLabel) clapLabel.textContent = readerState.hasClapped ? 'Thank you' : 'Tap to applaud';
@@ -431,8 +431,8 @@ function _renderEngagement() {
    ───────────────────────────────────────────── */
 
 function initSelectionToolbar() {
-  const toolbar = document.getElementById('selectionToolbar');
-  const article = document.getElementById('articleBody');
+  const toolbar = document.getElementById('selection-toolbar');
+  const article = document.getElementById('article-body');
   if (!toolbar || !article) return;
 
   document.addEventListener('selectionchange', () => {
@@ -463,12 +463,12 @@ function initSelectionToolbar() {
     btn.addEventListener('click', () => _addHighlight(btn.dataset.color));
   });
 
-  document.getElementById('selNote')?.addEventListener('click', () => {
+  document.getElementById('sel-note')?.addEventListener('click', () => {
     const note = window.prompt('Private note:');
     if (note) _addHighlight('violet', note);
   });
 
-  document.getElementById('selCopy')?.addEventListener('click', () => {
+  document.getElementById('sel-copy')?.addEventListener('click', () => {
     if (readerState.selection) {
       navigator.clipboard
         .writeText(readerState.selection.text)
@@ -490,7 +490,7 @@ function _addHighlight(color, note = '') {
   });
   readerState.selection = null;
   window.getSelection()?.removeAllRanges();
-  document.getElementById('selectionToolbar')?.classList.add('hidden');
+  document.getElementById('selection-toolbar')?.classList.add('hidden');
   if (readerState.openTool === 'highlights') _refreshPanelContent();
   showToast('Highlight saved.', 'success');
 }
@@ -620,10 +620,10 @@ initAuth(async (user) => {
       scheduleProgressSync({ userId: user.uid, taleId, chapterIndex, scrollPercent });
       updateTOCScrollSpy();
 
-      const pctEl = document.getElementById('topBarPct');
+      const pctEl = document.getElementById('top-bar-pct');
       if (pctEl) pctEl.textContent = Math.round(scrollPercent) + '%';
 
-      const progressBar = document.getElementById('progressBar');
+      const progressBar = document.getElementById('progress-bar');
       if (progressBar) progressBar.style.width = scrollPercent + '%';
 
       if (readerState.openTool === 'toc') _refreshPanelContent();
@@ -639,14 +639,14 @@ initAuth(async (user) => {
   if (window.innerWidth >= 1024) openPanel('toc');
 
   // Global action bindings
-  document.getElementById('sidebarBookmark')?.addEventListener('click', _handleBookmark);
-  document.getElementById('engBookmark')?.addEventListener('click', _handleBookmark);
-  document.getElementById('engBookmarkMobile')?.addEventListener('click', _handleBookmark);
-  document.getElementById('closePanel')?.addEventListener('click', closePanel);
-  document.getElementById('backToTop')?.addEventListener('click', () => {
+  document.getElementById('sidebar-bookmark')?.addEventListener('click', _handleBookmark);
+  document.getElementById('eng-bookmark')?.addEventListener('click', _handleBookmark);
+  document.getElementById('eng-bookmark-mobile')?.addEventListener('click', _handleBookmark);
+  document.getElementById('close-panel')?.addEventListener('click', closePanel);
+  document.getElementById('back-to-top')?.addEventListener('click', () => {
     document.getElementById('scroller')?.scrollTo({ top: 0, behavior: 'smooth' });
   });
-  document.getElementById('backBtn')?.addEventListener('click', () => goBackToTale());
+  document.getElementById('back-btn')?.addEventListener('click', () => goBackToTale());
 
   initIcons();
 });

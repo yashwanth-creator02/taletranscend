@@ -2,6 +2,8 @@
 // Scroll progress tracking, top progress bar, scroll restoration,
 // and reading time tracking for the reader page.
 
+import { readerState } from './state.js';
+
 /* ─────────────────────────────────────────────
    Progress Bar
    ───────────────────────────────────────────── */
@@ -13,11 +15,11 @@
  */
 export function updateReaderProgress({ scrollPercent = 0 }) {
   // 1. Top progress bar
-  const topBar = document.getElementById('progressBar');
+  const topBar = document.getElementById('progress-bar');
   if (topBar) topBar.style.width = `${scrollPercent}%`;
 
   // 2. Top bar percentage text
-  const pctText = document.getElementById('topBarPct');
+  const pctText = document.getElementById('top-bar-pct');
   if (pctText) pctText.textContent = `${Math.round(scrollPercent)}%`;
 
   return scrollPercent;
@@ -44,7 +46,7 @@ export function bindScrollProgress({ onScroll }) {
     updateReaderProgress({ scrollPercent });
 
     // Show/hide back to top button
-    const backToTop = document.getElementById('backToTop');
+    const backToTop = document.getElementById('back-to-top');
     if (backToTop) {
       if (scroller.scrollTop > 600) {
         backToTop.classList.remove('hidden');

@@ -17,7 +17,7 @@ import { escapeHtml } from '@/utils/string.utils';
  * Shows skeleton loaders in the article body while content is loading.
  */
 export function showReaderSkeletons() {
-  const content = document.getElementById('articleBody');
+  const content = document.getElementById('article-body');
   if (!content) return;
 
   content.innerHTML = `
@@ -62,12 +62,12 @@ export async function loadReaderMeta(taleId) {
     readerState.language = meta.language || 'High Elven';
 
     // Populate UI elements
-    _setText('articleMetaTitle', readerState.taleTitle);
-    _setText('authorName', readerState.authorName);
+    _setText('article-meta-title', readerState.taleTitle);
+    _setText('author-name', readerState.authorName);
     _setText('author-heading', readerState.authorName);
-    _setText('authorHandle', readerState.authorHandle);
-    _setText('authorCardBio', readerState.authorBio);
-    _setText('topBarChTitle', 'Loading...');
+    _setText('author-handle', readerState.authorHandle);
+    _setText('author-card-bio', readerState.authorBio);
+    _setText('top-bar-ch-title', 'Loading...');
 
     _renderBreadcrumbs(readerState.taleTitle);
     _renderAvatars(readerState.authorName);
@@ -119,25 +119,25 @@ export async function loadReaderChapter({ taleId, chapterIndex }) {
     readerState.currentChapterId = readerState.chapters[chapterIndex]?.id || '';
 
     // Populate UI elements
-    _setText('topBarChNum', chapterIndex + 1);
-    _setText('topBarChTotal', navigation.totalChapters);
-    _setText('topBarChTitle', readerState.chapterTitle);
-    _setText('headerChNum', chapterIndex + 1);
-    _setText('headerChTotal', navigation.totalChapters);
-    _setText('articleTitle', readerState.chapterTitle);
-    _setText('articleSubtitle', chapter.subtitle || '');
-    _setText('readMinutes', readerState.estimatedReadMins);
+    _setText('top-bar-ch-num', chapterIndex + 1);
+    _setText('top-bar-ch-total', navigation.totalChapters);
+    _setText('top-bar-ch-title', readerState.chapterTitle);
+    _setText('header-ch-num', chapterIndex + 1);
+    _setText('header-ch-total', navigation.totalChapters);
+    _setText('article-title', readerState.chapterTitle);
+    _setText('article-subtitle', chapter.subtitle || '');
+    _setText('read-minutes', readerState.estimatedReadMins);
 
     // Render article body
-    const container = document.getElementById('articleBody');
+    const container = document.getElementById('article-body');
     if (container) {
       container.innerHTML = _processContent(chapter.content || '');
     }
 
     // Show read time in top bar
-    const topBarReadTime = document.getElementById('topBarReadTime');
+    const topBarReadTime = document.getElementById('top-bar-read-time');
     if (topBarReadTime) {
-      _setText('topBarMin', readerState.estimatedReadMins);
+      _setText('top-bar-min', readerState.estimatedReadMins);
       topBarReadTime.classList.remove('hidden');
       topBarReadTime.classList.add('flex');
     }
@@ -145,7 +145,7 @@ export async function loadReaderChapter({ taleId, chapterIndex }) {
     return navigation;
   } catch (err) {
     console.error('[reader] Chapter load failed:', err);
-    _setText('articleTitle', 'Chapter load failed.');
+    _setText('article-title', 'Chapter load failed.');
     return null;
   }
 }
@@ -250,8 +250,8 @@ function _renderAvatars(name) {
 
   const html = `<div style="display:flex;align-items:center;justify-content:center;border-radius:50%;color:#fff;width:40px;height:40px;font-size:13px;background:linear-gradient(135deg,rgba(99,102,241,0.85),rgba(168,85,247,0.85));box-shadow:0 0 18px -6px rgba(139,124,246,0.55);font-family:var(--font-serif);letter-spacing:0.08em">${initials}</div>`;
 
-  const topAvatar = document.getElementById('authorAvatar');
-  const cardAvatar = document.getElementById('authorCardAvatar');
+  const topAvatar = document.getElementById('author-avatar');
+  const cardAvatar = document.getElementById('author-card-avatar');
   if (topAvatar) topAvatar.innerHTML = html;
   if (cardAvatar) cardAvatar.innerHTML = html;
 }

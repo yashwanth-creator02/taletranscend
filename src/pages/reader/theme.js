@@ -197,18 +197,18 @@ function _syncUI() {
   });
 
   // Font size controls
-  _setInputValue('fontSize', readerState.fontSize);
-  _setInputValue('fsRange', readerState.fontSize);
-  _setTextContent('sizeVal', `${readerState.fontSize}px`);
+  _setInputValue('font-size', readerState.fontSize);
+  _setInputValue('fs-range', readerState.fontSize);
+  _setTextContent('size-val', `${readerState.fontSize}px`);
 
   // Line height controls
-  _setInputValue('lineHeight', readerState.lineHeight);
-  _setTextContent('lhVal', readerState.lineHeight.toFixed(2));
+  _setInputValue('line-height-input', readerState.lineHeight);
+  _setTextContent('lh-val', readerState.lineHeight.toFixed(2));
 
   // Measure (reading width) controls
   _setInputValue('measure', readerState.measure);
-  _setInputValue('mwRange', readerState.measure);
-  _setTextContent('msVal', `${readerState.measure}ch`);
+  _setInputValue('mw-range', readerState.measure);
+  _setTextContent('ms-val', `${readerState.measure}ch`);
 }
 
 function _setInputValue(id, val) {
