@@ -1,6 +1,6 @@
 // src/pages/reader/templates.js
 // UI Templates for the Reader Panels
-import { THEMES, readerState } from './state.js';
+import { THEMES } from './state.js';
 import { escapeHtml } from '@/utils/string.utils';
 
 export function renderTocPanel(chapters, currentChapterId, progress, activeSection, articleTitle) {

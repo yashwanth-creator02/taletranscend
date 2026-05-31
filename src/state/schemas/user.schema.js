@@ -136,6 +136,7 @@ export function createReaderPreferences(data = {}) {
  * @returns {Object}
  */
 export function profileToFirestore(profile) {
-  const { uid: _uid, ...rest } = profile;
-  return rest;
+  const result = { ...profile };
+  delete result.uid;
+  return result;
 }

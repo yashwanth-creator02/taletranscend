@@ -189,8 +189,7 @@ function handleDocumentKeydown(event) {
     }
     if (event.key === 'Enter') {
       event.preventDefault();
-      const { commandInput } = getNavElements();
-      executeActiveFocusedItem(commandInput?.value ?? '');
+      executeActiveFocusedItem();
       return;
     }
   }

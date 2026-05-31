@@ -243,10 +243,8 @@ export async function executeCommand(element) {
 /**
  * Executes the currently keyboard-focused command item (on Enter keypress).
  * Falls back to the first visible item if nothing is focused.
- *
- * @param {string} [query='']
  */
-export function executeActiveFocusedItem(_query = '') {
+export function executeActiveFocusedItem() {
   const idx = navState.commandFocusedIndex;
   const items = document.querySelectorAll('.command-item');
   const target = idx >= 0 ? items[idx] : items[0];

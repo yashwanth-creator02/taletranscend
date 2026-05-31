@@ -112,3 +112,32 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
     timer = setTimeout(() => fn(...args), wait);
   };
 }
+
+/**
+ * Sets the textContent of an element by ID.
+ * Shared helper used by editor.js and profile/ui.js.
+ * @param id - Element ID
+ * @param value - Text value to set
+ */
+export function setEl(id: string, value: string): void {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
+}
+
+/**
+ * Formats a Firestore Timestamp or ISO string into a human-readable join date.
+ * @param joinedAt - Firestore Timestamp object with .seconds property
+ * @returns Formatted string e.g. "March 2024"
+ */
+export function formatJoinDate(joinedAt: { seconds: number } | null): string {
+  if (!joinedAt?.seconds) return '';
+  return new Date(joinedAt.seconds * 1000).toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric',
+  });
+}
+
+export function formatNumber(n: number): string {
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
+  return String(n);
+}

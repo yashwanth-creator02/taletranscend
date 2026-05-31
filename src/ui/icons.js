@@ -176,7 +176,7 @@ async function _bootstrap(attempt = 0) {
       _render(scope);
       resolve();
     }
-  } catch (_err) {
+  } catch {
     _loading = false;
 
     if (attempt < RETRY_MAX) {
@@ -217,7 +217,7 @@ function _render(scope) {
       nameAttr: 'data-lucide',
       attrs: { 'stroke-width': 2 },
     });
-  } catch (_err) {
+  } catch (err) {
     // Never let icon rendering crash the page — just log and move on
     console.warn('[icons] createIcons() threw:', err?.message ?? err);
   }
