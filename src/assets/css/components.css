@@ -277,7 +277,14 @@
   inset: -4px;
   border-radius: 50%;
   padding: 2px;
-  background: conic-gradient(from 0deg, transparent, var(--accent), transparent, var(--accent), transparent);
+  background: conic-gradient(
+    from 0deg,
+    transparent,
+    var(--accent),
+    transparent,
+    var(--accent),
+    transparent
+  );
   -webkit-mask:
     linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);

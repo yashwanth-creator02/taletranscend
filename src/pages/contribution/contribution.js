@@ -24,13 +24,12 @@ import {
   initIcons,
 } from './index.js';
 import { debounce } from '@/utils/function.utils';
-import { setupAuthTimeout, initPageReveal, readyReveal, navigateTo } from '@/utils/ui.utils';
+import { setupAuthTimeout } from '@/utils/ui.utils';
 import { initNav } from '@ui/components/nav/nav.js';
-import { suggestTitle, refineMythicText } from '@services/index.js';
+import { refineMythicText } from '@services/index.js';
 import { AI_API_KEY } from '@config/app.config.js';
 import { showToast } from '@ui/components/toast.js';
 
-initPageReveal();
 initNav();
 
 /* ── Draft ID ─────────────────────────────────────────────────────── */
@@ -71,7 +70,6 @@ async function init(_userId) {
     setStatus('New tale started.', 'neutral');
   }
 
-  readyReveal();
   initIcons();
 }
 

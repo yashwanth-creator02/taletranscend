@@ -37,23 +37,23 @@
 export function createDraft(id, data = {}) {
   return {
     id,
-    title:           data.title           ?? '',
-    synopsis:        data.synopsis        ?? '',
-    coverUrl:        data.coverUrl        ?? '',
-    era:             data.era             ?? '',
-    tags:            data.tags            ?? [],
-    tone:            data.tone            ?? 'Mythic',
-    language:        data.language        ?? 'English',
-    visibility:      data.visibility      ?? 'public',
-    audience:        data.audience        ?? 'General',
+    title: data.title ?? '',
+    synopsis: data.synopsis ?? '',
+    coverUrl: data.coverUrl ?? '',
+    era: data.era ?? '',
+    tags: data.tags ?? [],
+    tone: data.tone ?? 'Mythic',
+    language: data.language ?? 'English',
+    visibility: data.visibility ?? 'public',
+    audience: data.audience ?? 'General',
     contentWarnings: data.contentWarnings ?? [],
-    worldSetting:    data.worldSetting    ?? '',
-    authorNotes:     data.authorNotes     ?? '',
-    chapterCount:    data.chapterCount    ?? 0,
-    wordCount:       data.wordCount       ?? 0,
-    isDirty:         data.isDirty         ?? false,
-    updatedAt:       data.updatedAt       ?? null,
-    createdAt:       data.createdAt       ?? null,
+    worldSetting: data.worldSetting ?? '',
+    authorNotes: data.authorNotes ?? '',
+    chapterCount: data.chapterCount ?? 0,
+    wordCount: data.wordCount ?? 0,
+    isDirty: data.isDirty ?? false,
+    updatedAt: data.updatedAt ?? null,
+    createdAt: data.createdAt ?? null,
   };
 }
 
@@ -79,11 +79,11 @@ export function createDraft(id, data = {}) {
 export function createDraftChapter(id, data = {}) {
   return {
     id,
-    chapterNum: data.chapterNum ?? (Number(id) + 1),
-    title:      data.title      ?? '',
-    content:    data.content    ?? '',
-    wordCount:  data.wordCount  ?? 0,
-    updatedAt:  data.updatedAt  ?? null,
+    chapterNum: data.chapterNum ?? Number(id) + 1,
+    title: data.title ?? '',
+    content: data.content ?? '',
+    wordCount: data.wordCount ?? 0,
+    updatedAt: data.updatedAt ?? null,
   };
 }
 
@@ -98,7 +98,7 @@ export function createDraftChapter(id, data = {}) {
  * @returns {Object}
  */
 export function draftToFirestore(draft) {
-  const { id, isDirty, ...rest } = draft;
+  const { id: _id, isDirty: _isDirty, ...rest } = draft;
   return rest;
 }
 
@@ -109,6 +109,6 @@ export function draftToFirestore(draft) {
  * @returns {Object}
  */
 export function draftChapterToFirestore(chapter) {
-  const { id, ...rest } = chapter;
+  const { id: _chapterId, ...rest } = chapter;
   return rest;
 }

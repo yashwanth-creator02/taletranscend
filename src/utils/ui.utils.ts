@@ -53,7 +53,7 @@ export function navigateTo(url: string, delay = 0): void {
   const body = document.body;
 
   body.style.transition = `opacity ${TRANSITION_DURATION_MS}ms cubic-bezier(0.4,0,0.2,1)`;
-  body.style.opacity    = '0';
+  body.style.opacity = '0';
   body.style.pointerEvents = 'none';
 
   setTimeout(() => {
@@ -77,7 +77,7 @@ export function navigateTo(url: string, delay = 0): void {
 export function initPageReveal(): void {
   const body = document.body;
   // Hide immediately — before the first paint if possible
-  body.style.opacity    = '0';
+  body.style.opacity = '0';
   body.style.transition = `opacity ${TRANSITION_DURATION_MS}ms cubic-bezier(0.4,0,0.2,1)`;
 }
 

@@ -45,14 +45,14 @@ export async function loadBookmarkedTales(userId, force = false) {
     const tales = bookmarks.map((b) => {
       const bm = createBookmark(b.taleId, b);
       return {
-        id:           bm.taleId,
-        title:        bm.taleTitle,
-        coverUrl:     bm.coverUrl,
-        authorName:   bm.authorName,
+        id: bm.taleId,
+        title: bm.taleTitle,
+        coverUrl: bm.coverUrl,
+        authorName: bm.authorName,
         chapterCount: bm.chapterCount,
-        era:          bm.era,
-        description:  '',
-        progress:     0,
+        era: bm.era,
+        description: '',
+        progress: 0,
       };
     });
 
@@ -120,8 +120,8 @@ export async function loadDrafts(userId, force = false) {
  * Call after both bookmarkedTales and drafts have been loaded.
  */
 export function computeAndRenderHeroStats() {
-  const bookmarkCount  = shelfState.bookmarkedTales.length;
-  const draftCount     = shelfState.drafts.length;
+  const bookmarkCount = shelfState.bookmarkedTales.length;
+  const draftCount = shelfState.drafts.length;
   const wordsPreserved = shelfState.drafts.reduce((acc, d) => acc + (d.wordCount || 0), 0);
 
   shelfState.heroStats = { draftCount, bookmarkCount, wordsPreserved };
@@ -158,7 +158,13 @@ export function applyFilterSort(items) {
   const q = (shelfState.filterQuery || '').trim().toLowerCase();
   if (q) {
     result = result.filter((item) => {
-      const searchable = [item.title, item.description, item.synopsis, item.era, ...(item.tags || [])]
+      const searchable = [
+        item.title,
+        item.description,
+        item.synopsis,
+        item.era,
+        ...(item.tags || []),
+      ]
         .filter(Boolean)
         .join(' ')
         .toLowerCase();

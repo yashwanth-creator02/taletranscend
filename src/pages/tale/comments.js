@@ -23,10 +23,10 @@ import { PATHS } from '@fb/paths.js';
 
 const PAGE_SIZE = 10;
 
-let _lastVisible   = null;
-let _allLoaded     = false;
+let _lastVisible = null;
+let _allLoaded = false;
 let _currentTaleId = null;
-let _isFetching    = false;
+let _isFetching = false;
 
 /* ─────────────────────────────────────────────
    Init
@@ -57,33 +57,36 @@ export async function listenToComments(taleId) {
  */
 export async function postComment(taleId) {
   const input = document.getElementById('comment-text');
-  const text  = input?.value.trim();
+  const text = input?.value.trim();
   if (!text || !auth.currentUser) return;
 
-  const btn          = document.getElementById('post-btn');
+  const btn = document.getElementById('post-btn');
   const originalText = btn?.textContent;
-  if (btn) { btn.disabled = true; btn.textContent = 'Transmitting...'; }
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Transmitting...';
+  }
 
   try {
     await addDoc(refs.comments(taleId), {
       taleId,
       text,
-      type:           'general',
-      chapterIndex:   null,
-      authorId:       auth.currentUser.uid,
-      authorName:     auth.currentUser.displayName || 'Anonymous Scribe',
+      type: 'general',
+      chapterIndex: null,
+      authorId: auth.currentUser.uid,
+      authorName: auth.currentUser.displayName || 'Anonymous Scribe',
       authorAvatarUrl: '',
-      parentId:       null,
-      replyCount:     0,
-      depth:          0,
-      likeCount:      0,
-      isEdited:       false,
-      editedAt:       null,
-      isPinned:       false,
-      isHidden:       false,
-      reportCount:    0,
-      createdAt:      serverTimestamp(),
-      updatedAt:      serverTimestamp(),
+      parentId: null,
+      replyCount: 0,
+      depth: 0,
+      likeCount: 0,
+      isEdited: false,
+      editedAt: null,
+      isPinned: false,
+      isHidden: false,
+      reportCount: 0,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
     });
 
     if (input) input.value = '';
@@ -93,7 +96,10 @@ export async function postComment(taleId) {
     console.error('[comments] Post failed:', err);
     showToast('Transmission failed. Neural link unstable.', 'error');
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = originalText; }
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
   }
 }
 
@@ -106,12 +112,15 @@ async function _fetchComments(isInitial = false) {
   _isFetching = true;
 
   const list = document.getElementById('comments-list');
-  if (!list) { _isFetching = false; return; }
+  if (!list) {
+    _isFetching = false;
+    return;
+  }
 
   if (isInitial) {
     list.innerHTML = `<div class="py-10 text-center animate-pulse text-[10px] font-black uppercase tracking-widest text-slate-700">Synchronising Echoes...</div>`;
     _lastVisible = null;
-    _allLoaded   = false;
+    _allLoaded = false;
   }
 
   try {
@@ -136,7 +145,7 @@ async function _fetchComments(isInitial = false) {
     }
 
     _lastVisible = snap.docs[snap.docs.length - 1];
-    _allLoaded   = snap.docs.length < PAGE_SIZE;
+    _allLoaded = snap.docs.length < PAGE_SIZE;
 
     // Normalize through schema
     const comments = snap.docs.map((d) => createComment(d.id, d.data()));
@@ -157,7 +166,9 @@ async function _fetchComments(isInitial = false) {
           </button>
         </div>`
       );
-      document.getElementById('load-more-btn')?.addEventListener('click', () => _fetchComments(false));
+      document
+        .getElementById('load-more-btn')
+        ?.addEventListener('click', () => _fetchComments(false));
     }
 
     initIcons(list);
@@ -182,11 +193,9 @@ async function _fetchReplies(commentId) {
     // DocumentReference, so you cannot call collection() on it with extra segments.
     // Correct: build path via PATHS then use collection(db, path).
     const repliesPath = `${PATHS.publicTaleComment(_currentTaleId, commentId)}/replies`;
-    const repliesRef  = collection(db, repliesPath);
+    const repliesRef = collection(db, repliesPath);
 
-    const snap = await getDocs(
-      query(repliesRef, orderBy('createdAt', 'asc'), limit(20))
-    );
+    const snap = await getDocs(query(repliesRef, orderBy('createdAt', 'asc'), limit(20)));
 
     if (snap.empty) return;
 
@@ -199,24 +208,24 @@ async function _fetchReplies(commentId) {
 
 async function _handlePostReply(commentId, btn) {
   const input = document.getElementById(`reply-text-${commentId}`);
-  const text  = input?.value.trim();
+  const text = input?.value.trim();
   if (!text || !auth.currentUser) return;
 
-  btn.disabled        = true;
-  const originalText  = btn.textContent;
-  btn.textContent     = '...';
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = '...';
 
   try {
     const repliesPath = `${PATHS.publicTaleComment(_currentTaleId, commentId)}/replies`;
-    const repliesRef  = collection(db, repliesPath);
+    const repliesRef = collection(db, repliesPath);
 
     await addDoc(repliesRef, {
       text,
-      authorId:       auth.currentUser.uid,
-      authorName:     auth.currentUser.displayName || 'Anonymous Scribe',
+      authorId: auth.currentUser.uid,
+      authorName: auth.currentUser.displayName || 'Anonymous Scribe',
       authorAvatarUrl: '',
-      createdAt:      serverTimestamp(),
-      updatedAt:      serverTimestamp(),
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
     });
 
     if (input) input.value = '';
@@ -227,7 +236,7 @@ async function _handlePostReply(commentId, btn) {
     console.error('[replies] Post failed:', err);
     showToast('Failed to echo back.', 'error');
   } finally {
-    btn.disabled    = false;
+    btn.disabled = false;
     btn.textContent = originalText;
   }
 }
@@ -241,13 +250,11 @@ async function _handlePostReply(commentId, btn) {
  * @returns {string}
  */
 function _renderComment(c) {
-  const date = c.createdAt
-    ? new Date(c.createdAt.seconds * 1000).toLocaleDateString()
-    : 'Just now';
+  const date = c.createdAt ? new Date(c.createdAt.seconds * 1000).toLocaleDateString() : 'Just now';
   const seed = encodeURIComponent((c.authorId || 'scribe').slice(0, 8));
 
   return `
-    <div class="glass-card p-6 md:p-8 rounded-[2rem] border-l-4 border-indigo-500/40 animate-fade-in mb-6 last:mb-0" id="comment-${c.id}">
+    <div class="glass-card p-6 md:p-8 rounded-4xl border-l-4 border-indigo-500/40 animate-fade-in mb-6 last:mb-0" id="comment-${c.id}">
       <div class="flex justify-between items-start mb-5">
         <div class="flex items-center gap-3">
           <img
@@ -275,12 +282,12 @@ function _renderComment(c) {
 
       <div id="replies-${c.id}" class="mt-8 space-y-4 border-l border-white/5 pl-6 empty:hidden"></div>
 
-      <div id="reply-form-${c.id}" class="hidden mt-8 pt-6 border-t border-white/[0.03]">
+      <div id="reply-form-${c.id}" class="hidden mt-8 pt-6 border-t border-white/3">
         <div class="relative">
           <textarea
             id="reply-text-${c.id}"
             placeholder="Respond to the echo…"
-            class="w-full bg-black/20 border border-white/5 rounded-xl p-4 text-xs text-white placeholder:text-slate-800 focus:outline-none focus:border-indigo-500/30 resize-none min-h-[80px]"
+            class="w-full bg-black/20 border border-white/5 rounded-xl p-4 text-xs text-white placeholder:text-slate-800 focus:outline-none focus:border-indigo-500/30 resize-none min-h-20"
           ></textarea>
           <div class="flex justify-end gap-3 mt-3">
             <button
@@ -301,9 +308,7 @@ function _renderComment(c) {
 }
 
 function _renderReply(r) {
-  const date = r.createdAt
-    ? new Date(r.createdAt.seconds * 1000).toLocaleDateString()
-    : 'Just now';
+  const date = r.createdAt ? new Date(r.createdAt.seconds * 1000).toLocaleDateString() : 'Just now';
   const seed = encodeURIComponent((r.authorId || 'scribe').slice(0, 8));
 
   return `
@@ -326,9 +331,9 @@ function _renderReply(r) {
 
 function _bindDelegatedEvents(list) {
   list.addEventListener('click', async (e) => {
-    const target     = e.target.closest('button');
+    const target = e.target.closest('button');
     if (!target) return;
-    const commentId  = target.dataset.commentId;
+    const commentId = target.dataset.commentId;
     if (!commentId) return;
 
     if (target.classList.contains('reply-trigger')) {

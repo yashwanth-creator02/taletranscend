@@ -42,8 +42,8 @@ export function setGridLoading() {
   grid.innerHTML = Array.from(
     { length: 6 },
     () => `
-    <div class="rounded-[2rem] overflow-hidden border border-white/[0.04]">
-      <div class="aspect-[4/3] skeleton"></div>
+    <div class="rounded-4xl overflow-hidden border border-white/4">
+      <div class="aspect-4/3 skeleton"></div>
       <div class="p-5 space-y-3">
         <div class="skeleton h-4 w-2/3 rounded-lg"></div>
         <div class="skeleton h-3 w-full rounded-lg"></div>
@@ -64,7 +64,7 @@ export function setGridEmpty(message) {
 
   grid.innerHTML = `
     <div class="col-span-full">
-      <div class="glass-panel-elevated rounded-[2rem] py-20 px-8 text-center border border-white/[0.04] flex flex-col items-center gap-5">
+      <div class="glass-panel-elevated rounded-4xl py-20 px-8 text-center border border-white/4 flex flex-col items-center gap-5">
         <div class="w-14 h-14 rounded-2xl bg-indigo-500/[0.07] border border-indigo-500/15 flex items-center justify-center">
           <i data-lucide="archive" class="w-6 h-6 text-indigo-500/50"></i>
         </div>
@@ -115,33 +115,34 @@ export function setGridError() {
  */
 export function buildBookmarkCard(tale) {
   const {
-    id           = '0000',
-    title        = 'Untitled Echo',
+    id = '0000',
+    title = 'Untitled Echo',
     coverUrl,
-    description  = '',
-    era          = 'Unknown Era',
+    description = '',
+    era = 'Unknown Era',
     chapterCount = 0,
-    progress     = 0,
+    progress = 0,
   } = tale;
 
-  const cover           = coverUrl || 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=800';
+  const cover =
+    coverUrl || 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=800';
   const progressPercent = Math.min(100, Math.max(0, Math.round(progress)));
-  const menuId          = `menu-${id}`;
-  const isFinished      = progress >= 100;
+  const menuId = `menu-${id}`;
+  const isFinished = progress >= 100;
 
   return `
     <article
-      class="shelf-card group relative rounded-[2rem] overflow-hidden border border-white/[0.05] bg-white/[0.025] hover:border-indigo-500/25 transition-all duration-400 cursor-pointer"
+      class="shelf-card group relative rounded-4xl overflow-hidden border border-white/5 bg-white/2.5 hover:border-indigo-500/25 transition-all duration-400 cursor-pointer"
       data-id="${id}"
     >
-      <div class="relative aspect-[16/10] bg-zinc-900 overflow-hidden">
+      <div class="relative aspect-16/10 bg-zinc-900 overflow-hidden">
         <img
           src="${cover}"
           alt="${title}"
           class="w-full h-full object-cover opacity-55 group-hover:opacity-80 group-hover:scale-105 transition-all duration-700"
           loading="lazy"
         />
-        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+        <div class="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent"></div>
 
         <div class="absolute top-3 left-3">
           <span class="shelf-era-badge">${era}</span>
@@ -183,14 +184,14 @@ export function buildBookmarkCard(tale) {
           </div>
         </div>
 
-        <div class="absolute bottom-0 left-0 right-0 px-4 pb-4 pt-6 bg-gradient-to-t from-black/70 to-transparent">
+        <div class="absolute bottom-0 left-0 right-0 px-4 pb-4 pt-6 bg-linear-to-t from-black/70 to-transparent">
           <div class="flex items-center justify-between mb-1.5">
             <span class="text-[9px] font-bold uppercase tracking-wider text-white/40">Progress</span>
             <span class="text-[9px] font-bold text-indigo-400">${isFinished ? 'Done' : `${progressPercent}%`}</span>
           </div>
           <div class="h-1 w-full bg-white/10 rounded-full overflow-hidden">
             <div
-              class="h-full rounded-full transition-all duration-700 ${isFinished ? 'bg-indigo-400 shadow-[0_0_8px_rgba(99,102,241,0.6)]' : 'bg-gradient-to-r from-indigo-500 to-violet-500'}"
+              class="h-full rounded-full transition-all duration-700 ${isFinished ? 'bg-indigo-400 shadow-[0_0_8px_rgba(99,102,241,0.6)]' : 'bg-linear-to-r from-indigo-500 to-violet-500'}"
               style="width: ${Math.max(isFinished ? 100 : 2, progressPercent)}%"
             ></div>
           </div>
@@ -205,7 +206,7 @@ export function buildBookmarkCard(tale) {
           ${description}
         </p>
 
-        <div class="flex items-center justify-between pt-3 border-t border-white/[0.04]">
+        <div class="flex items-center justify-between pt-3 border-t border-white/4">
           <div class="flex items-center gap-3 text-[10px] text-slate-600">
             <span class="flex items-center gap-1.5">
               <i data-lucide="layers" class="w-3 h-3"></i>
@@ -238,25 +239,28 @@ export function buildBookmarkCard(tale) {
 export function buildDraftCard(draft) {
   const {
     id,
-    title             = 'Untitled Draft',
-    synopsis          = '',
-    era               = '',
-    chapterCount      = 0,
-    wordCount         = 0,
+    title = 'Untitled Draft',
+    synopsis = '',
+    era = '',
+    chapterCount = 0,
+    wordCount = 0,
     updatedAt,
   } = draft;
 
-  const updated   = updatedAt?.seconds ? _timeAgo(new Date(updatedAt.seconds * 1000)) : 'Recently';
-  const wordLabel = wordCount > 0
-    ? wordCount >= 1000 ? `${(wordCount / 1000).toFixed(1)}k words` : `${wordCount} words`
-    : 'No content yet';
+  const updated = updatedAt?.seconds ? _timeAgo(new Date(updatedAt.seconds * 1000)) : 'Recently';
+  const wordLabel =
+    wordCount > 0
+      ? wordCount >= 1000
+        ? `${(wordCount / 1000).toFixed(1)}k words`
+        : `${wordCount} words`
+      : 'No content yet';
 
   return `
     <article
-      class="shelf-card group relative rounded-[2rem] border border-white/[0.05] bg-white/[0.025] hover:border-indigo-500/25 transition-all duration-400 overflow-hidden"
+      class="shelf-card group relative rounded-4xl border border-white/5 bg-white/2.5 hover:border-indigo-500/25 transition-all duration-400 overflow-hidden"
       data-id="${id}"
     >
-      <div class="flex items-center justify-between px-5 pt-4 pb-3 border-b border-white/[0.04]">
+      <div class="flex items-center justify-between px-5 pt-4 pb-3 border-b border-white/4">
         <span class="shelf-draft-badge">
           <i data-lucide="feather" class="w-2.5 h-2.5"></i>
           Draft
@@ -275,7 +279,7 @@ export function buildDraftCard(draft) {
           ${synopsis || 'No synopsis yet. Open the editor to add one.'}
         </p>
 
-        <div class="grid grid-cols-2 gap-3 py-3 border-t border-white/[0.04] mb-4">
+        <div class="grid grid-cols-2 gap-3 py-3 border-t border-white/4 mb-4">
           <div class="flex items-center gap-2 text-[10px] text-slate-600">
             <i data-lucide="layers" class="w-3 h-3 text-slate-700"></i>
             ${chapterCount} ${chapterCount === 1 ? 'chapter' : 'chapters'}
@@ -306,9 +310,9 @@ export function buildDraftCard(draft) {
  * @param {{ draftCount: number, bookmarkCount: number, wordsPreserved: number }} stats
  */
 export function renderHeroStats({ draftCount, bookmarkCount, wordsPreserved }) {
-  _setEl('hero-stat-drafts',    String(draftCount));
+  _setEl('hero-stat-drafts', String(draftCount));
   _setEl('hero-stat-bookmarks', String(bookmarkCount));
-  _setEl('hero-stat-words',     _formatNumber(wordsPreserved));
+  _setEl('hero-stat-words', _formatNumber(wordsPreserved));
 }
 
 /* ─────────────────────────────────────────────
@@ -320,9 +324,9 @@ export function buildSortPanel() {
   if (!panel) return;
 
   const options = [
-    { key: 'date',     label: 'Date updated', icon: 'calendar'    },
-    { key: 'title',    label: 'Title A–Z',    icon: 'type'        },
-    { key: 'progress', label: 'Progress',     icon: 'bar-chart-2' },
+    { key: 'date', label: 'Date updated', icon: 'calendar' },
+    { key: 'title', label: 'Title A–Z', icon: 'type' },
+    { key: 'progress', label: 'Progress', icon: 'bar-chart-2' },
   ];
 
   panel.innerHTML = `
@@ -338,9 +342,11 @@ export function buildSortPanel() {
         >
           <i data-lucide="${opt.icon}" class="w-3.5 h-3.5"></i>
           ${opt.label}
-          ${shelfState.sortBy === opt.key
-            ? `<i data-lucide="${shelfState.sortDir === 'asc' ? 'arrow-up' : 'arrow-down'}" class="w-3 h-3 ml-auto opacity-60"></i>`
-            : ''}
+          ${
+            shelfState.sortBy === opt.key
+              ? `<i data-lucide="${shelfState.sortDir === 'asc' ? 'arrow-up' : 'arrow-down'}" class="w-3 h-3 ml-auto opacity-60"></i>`
+              : ''
+          }
         </button>
       `
         )
@@ -388,11 +394,11 @@ function _formatNumber(n) {
 function _timeAgo(date) {
   const diff = Date.now() - date.getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 2)  return 'Just now';
+  if (mins < 2) return 'Just now';
   if (mins < 60) return `${mins}m ago`;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24)  return `${hrs}h ago`;
+  if (hrs < 24) return `${hrs}h ago`;
   const days = Math.floor(hrs / 24);
-  if (days < 7)  return `${days}d ago`;
+  if (days < 7) return `${days}d ago`;
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }

@@ -6,7 +6,7 @@
 // Single collection 'tales' replaces the old community_tales / pending_tales split.
 // Status field on the tale document handles the moderation pipeline.
 
-const APP_ROOT = 'v1/taletranscend/projects/pro-version';
+const APP_ROOT = 'v1/taletranscend/projects/v1';
 
 export { APP_ROOT };
 

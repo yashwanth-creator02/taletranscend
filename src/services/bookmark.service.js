@@ -23,11 +23,11 @@ export async function addToBookmarks({ userId, taleId, tale = {} }) {
     refs.bookmark(userId, taleId),
     {
       taleId,
-      taleTitle:    tale.title        ?? '',
-      coverUrl:     tale.coverUrl     ?? '',
-      authorName:   tale.authorName   ?? '',
+      taleTitle: tale.title ?? '',
+      coverUrl: tale.coverUrl ?? '',
+      authorName: tale.authorName ?? '',
       chapterCount: tale.chapterCount ?? 0,
-      era:          tale.era          ?? '',
+      era: tale.era ?? '',
       bookmarkedAt: serverTimestamp(),
     },
     { merge: true }

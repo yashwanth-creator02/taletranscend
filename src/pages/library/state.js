@@ -19,14 +19,14 @@
 
 /** @type {LibraryState} */
 export const libraryState = {
-  userId:          null,
-  allTales:        [],
-  filteredTales:   [],
-  searchQuery:     '',
-  activeEra:       'all',
-  activeTone:      'all',
-  activeLength:    'all',
-  sidebarFilter:   'all',
+  userId: null,
+  allTales: [],
+  filteredTales: [],
+  searchQuery: '',
+  activeEra: 'all',
+  activeTone: 'all',
+  activeLength: 'all',
+  sidebarFilter: 'all',
   sidebarCollapsed: JSON.parse(localStorage.getItem('tt-lib-sidebar-collapsed') ?? 'false'),
-  eraChipsBuilt:   false,
+  eraChipsBuilt: false,
 };

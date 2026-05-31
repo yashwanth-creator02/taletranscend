@@ -2,12 +2,7 @@
 // Firebase Authentication setup and initialization helper.
 // Uses anonymous authentication only — custom token dead code has been removed.
 
-import {
-  getAuth,
-  signOut,
-  signInAnonymously,
-  onAuthStateChanged,
-} from 'firebase/auth';
+import { getAuth, signOut, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import app from './app.js';
 
 // Single shared Auth instance used across the entire application.

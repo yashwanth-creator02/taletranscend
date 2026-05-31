@@ -10,7 +10,7 @@ import { navigateTo } from '@/utils/ui.utils';
    ───────────────────────────────────────────── */
 
 export function initMobileDrawer() {
-  const panel   = document.getElementById('reader-settings-panel');
+  const panel = document.getElementById('reader-settings-panel');
   const openBtn = document.getElementById('reader-settings-btn');
   const closeBtn = document.getElementById('reader-settings-close');
 
@@ -93,7 +93,7 @@ export function initToolbarAutoHide() {
   window.addEventListener(
     'scroll',
     () => {
-      const currentY    = window.scrollY;
+      const currentY = window.scrollY;
       const scrollingDown = currentY > lastY && currentY > 60;
       toolbar.style.transform = scrollingDown ? 'translateY(100%)' : 'translateY(0)';
       lastY = currentY;

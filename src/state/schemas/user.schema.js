@@ -51,33 +51,33 @@
 export function createUserProfile(uid, data = {}) {
   return {
     uid,
-    name:               data.name              ?? '',
-    bio:                data.bio               ?? '',
-    pronouns:           data.pronouns          ?? '',
-    avatarUrl:          data.avatarUrl         ?? '',
-    location:           data.location          ?? '',
-    website:            data.website           ?? '',
-    twitterHandle:      data.twitterHandle     ?? '',
-    instagramHandle:    data.instagramHandle   ?? '',
-    followingCount:     data.followingCount    ?? 0,
-    followerCount:      data.followerCount     ?? 0,
-    totalReadTimeMs:    data.totalReadTimeMs   ?? 0,
+    name: data.name ?? '',
+    bio: data.bio ?? '',
+    pronouns: data.pronouns ?? '',
+    avatarUrl: data.avatarUrl ?? '',
+    location: data.location ?? '',
+    website: data.website ?? '',
+    twitterHandle: data.twitterHandle ?? '',
+    instagramHandle: data.instagramHandle ?? '',
+    followingCount: data.followingCount ?? 0,
+    followerCount: data.followerCount ?? 0,
+    totalReadTimeMs: data.totalReadTimeMs ?? 0,
     totalTalesCompleted: data.totalTalesCompleted ?? 0,
-    totalChaptersRead:  data.totalChaptersRead ?? 0,
-    readingGoal:        data.readingGoal       ?? 30,
-    favouriteGenres:    data.favouriteGenres   ?? [],
-    totalWordsWritten:  data.totalWordsWritten ?? 0,
+    totalChaptersRead: data.totalChaptersRead ?? 0,
+    readingGoal: data.readingGoal ?? 30,
+    favouriteGenres: data.favouriteGenres ?? [],
+    totalWordsWritten: data.totalWordsWritten ?? 0,
     totalTalesPublished: data.totalTalesPublished ?? 0,
-    totalReaders:       data.totalReaders      ?? 0,
-    writingStreak:      data.writingStreak     ?? 0,
-    lastWrittenAt:      data.lastWrittenAt     ?? null,
-    role:               data.role              ?? 'reader',
-    isBanned:           data.isBanned          ?? false,
-    isVerifiedWriter:   data.isVerifiedWriter  ?? false,
-    joinedAt:           data.joinedAt          ?? null,
-    lastActiveAt:       data.lastActiveAt      ?? null,
-    createdAt:          data.createdAt         ?? null,
-    updatedAt:          data.updatedAt         ?? null,
+    totalReaders: data.totalReaders ?? 0,
+    writingStreak: data.writingStreak ?? 0,
+    lastWrittenAt: data.lastWrittenAt ?? null,
+    role: data.role ?? 'reader',
+    isBanned: data.isBanned ?? false,
+    isVerifiedWriter: data.isVerifiedWriter ?? false,
+    joinedAt: data.joinedAt ?? null,
+    lastActiveAt: data.lastActiveAt ?? null,
+    createdAt: data.createdAt ?? null,
+    updatedAt: data.updatedAt ?? null,
   };
 }
 
@@ -109,18 +109,18 @@ export function createUserProfile(uid, data = {}) {
  */
 export function createReaderPreferences(data = {}) {
   return {
-    theme:              data.theme             ?? 'noir',
-    fontFamily:         data.fontFamily        ?? 'serif',
-    fontSize:           data.fontSize          ?? 18,
-    lineHeight:         data.lineHeight        ?? 1.75,
-    measure:            data.measure           ?? 68,
-    readingWidth:       data.readingWidth      ?? 'normal',
-    contentFilters:     data.contentFilters    ?? [],
-    preferredLanguage:  data.preferredLanguage ?? 'English',
+    theme: data.theme ?? 'noir',
+    fontFamily: data.fontFamily ?? 'serif',
+    fontSize: data.fontSize ?? 18,
+    lineHeight: data.lineHeight ?? 1.75,
+    measure: data.measure ?? 68,
+    readingWidth: data.readingWidth ?? 'normal',
+    contentFilters: data.contentFilters ?? [],
+    preferredLanguage: data.preferredLanguage ?? 'English',
     notifyOnNewChapter: data.notifyOnNewChapter ?? true,
-    notifyOnComment:    data.notifyOnComment   ?? true,
-    notifyOnFollow:     data.notifyOnFollow    ?? true,
-    updatedAt:          data.updatedAt         ?? null,
+    notifyOnComment: data.notifyOnComment ?? true,
+    notifyOnFollow: data.notifyOnFollow ?? true,
+    updatedAt: data.updatedAt ?? null,
   };
 }
 
@@ -136,6 +136,6 @@ export function createReaderPreferences(data = {}) {
  * @returns {Object}
  */
 export function profileToFirestore(profile) {
-  const { uid, ...rest } = profile;
+  const { uid: _uid, ...rest } = profile;
   return rest;
 }

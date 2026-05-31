@@ -2,8 +2,6 @@
 // Scroll progress tracking, top progress bar, scroll restoration,
 // and reading time tracking for the reader page.
 
-import { readerState } from './state.js';
-
 /* ─────────────────────────────────────────────
    Progress Bar
    ───────────────────────────────────────────── */

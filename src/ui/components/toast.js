@@ -59,13 +59,13 @@ export function showToast(message, type = 'success') {
   `;
 
   toast.innerHTML = `
-    <div class="flex-shrink-0">
+    <div class="shrink-0">
       <i data-lucide="${iconMap[type]}" class="w-5 h-5"></i>
     </div>
     <div class="flex-1 min-w-0">
       <p class="text-[13px] font-bold tracking-wide leading-tight">${message}</p>
     </div>
-    <button class="flex-shrink-0 opacity-40 hover:opacity-100 transition-opacity" aria-label="Dismiss">
+    <button class="shrink-0 opacity-40 hover:opacity-100 transition-opacity" aria-label="Dismiss">
       <i data-lucide="x" class="w-3.5 h-3.5"></i>
     </button>
   `;

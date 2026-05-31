@@ -3,14 +3,7 @@
 // All incoming Firestore data is normalized through createUserProfile before
 // being stored in profileState. computeAndSyncStats delegates to profile.service.js.
 
-import {
-  auth,
-  onSnapshot,
-  setDoc,
-  serverTimestamp,
-  getDoc,
-  refs,
-} from '@fb/index.js';
+import { auth, onSnapshot, setDoc, serverTimestamp, getDoc, refs } from '@fb/index.js';
 
 import { createUserProfile } from '@state/index.js';
 import { updateProfileUI, showNotification } from './ui.js';
@@ -50,22 +43,22 @@ export function startProfileSync(uid) {
 
       // Mirror all schema fields into profileState
       Object.assign(profileState, {
-        name:             normalized.name,
-        bio:              normalized.bio,
-        pronouns:         normalized.pronouns,
-        avatarUrl:        normalized.avatarUrl,
-        location:         normalized.location,
-        website:          normalized.website,
-        twitterHandle:    normalized.twitterHandle,
-        instagramHandle:  normalized.instagramHandle,
-        readingGoal:      normalized.readingGoal,
-        favouriteGenres:  normalized.favouriteGenres,
-        joinedAt:         normalized.joinedAt
+        name: normalized.name,
+        bio: normalized.bio,
+        pronouns: normalized.pronouns,
+        avatarUrl: normalized.avatarUrl,
+        location: normalized.location,
+        website: normalized.website,
+        twitterHandle: normalized.twitterHandle,
+        instagramHandle: normalized.instagramHandle,
+        readingGoal: normalized.readingGoal,
+        favouriteGenres: normalized.favouriteGenres,
+        joinedAt: normalized.joinedAt
           ? new Date(normalized.joinedAt.seconds * 1000).toISOString()
           : '',
         totalWordsWritten: normalized.totalWordsWritten,
-        totalReaders:      normalized.totalReaders,
-        writingStreak:     normalized.writingStreak,
+        totalReaders: normalized.totalReaders,
+        writingStreak: normalized.writingStreak,
       });
 
       updateProfileUI(profileState);
@@ -101,29 +94,29 @@ export async function saveProfile() {
     return;
   }
 
-  const userRef  = refs.user(auth.currentUser.uid);
+  const userRef = refs.user(auth.currentUser.uid);
   const snapshot = await getDoc(userRef);
 
   const data = {
-    name:            _getVal('input-name'),
-    bio:             _getVal('input-bio'),
-    pronouns:        _getVal('input-pronouns'),
-    avatarUrl:       _getVal('input-avatar-url'),
-    location:        _getVal('input-location'),
-    website:         _getVal('input-website'),
-    twitterHandle:   _getVal('input-twitter'),
+    name: _getVal('input-name'),
+    bio: _getVal('input-bio'),
+    pronouns: _getVal('input-pronouns'),
+    avatarUrl: _getVal('input-avatar-url'),
+    location: _getVal('input-location'),
+    website: _getVal('input-website'),
+    twitterHandle: _getVal('input-twitter'),
     instagramHandle: _getVal('input-instagram'),
-    readingGoal:     Number(_getVal('input-reading-goal')) || 30,
+    readingGoal: Number(_getVal('input-reading-goal')) || 30,
     favouriteGenres: [...profileState.favouriteGenres],
-    updatedAt:       serverTimestamp(),
+    updatedAt: serverTimestamp(),
   };
 
   // Stamp createdAt and joinedAt on first save only
   if (!snapshot.exists()) {
     data.createdAt = serverTimestamp();
-    data.joinedAt  = serverTimestamp();
-    data.role      = 'reader';
-    data.isBanned  = false;
+    data.joinedAt = serverTimestamp();
+    data.role = 'reader';
+    data.isBanned = false;
   }
 
   try {
@@ -152,18 +145,15 @@ export async function computeAndSyncStats(uid) {
     await import('@services/index.js');
 
   try {
-    const [totalWords, tales] = await Promise.all([
-      _compute(uid),
-      getUserPublishedTales(uid),
-    ]);
+    const [totalWords, tales] = await Promise.all([_compute(uid), getUserPublishedTales(uid)]);
 
     const readers = tales.reduce((acc, t) => acc + (t.readCount || 0), 0);
 
     return {
       wordsWritten: totalWords,
       readers,
-      readingTime:  totalWords * 0.3,
-      streak:       profileState.writingStreak,
+      readingTime: totalWords * 0.3,
+      streak: profileState.writingStreak,
     };
   } catch (err) {
     console.error('[profile] computeAndSyncStats error:', err);

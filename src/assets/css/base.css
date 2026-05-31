@@ -174,12 +174,7 @@ body {
   position: absolute;
   inset: 0;
   transform: translateX(-100%);
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.03),
-    transparent
-  );
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.03), transparent);
   animation: shimmer 2s infinite;
 }
 
@@ -211,11 +206,27 @@ body {
   animation: fadeIn 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 
-.fade-in-stagger > *:nth-child(1) { animation-delay: 0.10s; }
-.fade-in-stagger > *:nth-child(2) { animation-delay: 0.20s; }
-.fade-in-stagger > *:nth-child(3) { animation-delay: 0.30s; }
-.fade-in-stagger > *:nth-child(4) { animation-delay: 0.40s; }
-.fade-in-stagger > *:nth-child(5) { animation-delay: 0.50s; }
-.fade-in-stagger > *:nth-child(6) { animation-delay: 0.60s; }
-.fade-in-stagger > *:nth-child(7) { animation-delay: 0.70s; }
-.fade-in-stagger > *:nth-child(8) { animation-delay: 0.80s; }
+.fade-in-stagger > *:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.fade-in-stagger > *:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.fade-in-stagger > *:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.fade-in-stagger > *:nth-child(4) {
+  animation-delay: 0.4s;
+}
+.fade-in-stagger > *:nth-child(5) {
+  animation-delay: 0.5s;
+}
+.fade-in-stagger > *:nth-child(6) {
+  animation-delay: 0.6s;
+}
+.fade-in-stagger > *:nth-child(7) {
+  animation-delay: 0.7s;
+}
+.fade-in-stagger > *:nth-child(8) {
+  animation-delay: 0.8s;
+}

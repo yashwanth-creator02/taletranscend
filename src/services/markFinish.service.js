@@ -34,12 +34,12 @@ export async function markTaleFinished({ userId, taleId }) {
 
   // Optionally fetch tale metadata to cache taleTitle on the progress doc
   let taleTitle = '';
-  let coverUrl  = '';
+  let coverUrl = '';
   try {
     const taleSnap = await getDoc(refs.tale(taleId));
     if (taleSnap.exists()) {
-      taleTitle = taleSnap.data().title   || '';
-      coverUrl  = taleSnap.data().coverUrl || '';
+      taleTitle = taleSnap.data().title || '';
+      coverUrl = taleSnap.data().coverUrl || '';
     }
   } catch {
     // Non-critical — proceed without cached fields
@@ -48,14 +48,14 @@ export async function markTaleFinished({ userId, taleId }) {
   // Create progress document if it does not exist yet
   if (!progressSnap.exists()) {
     await setDoc(progressRef, {
-      status:          'finished',
-      finishedAt:      serverTimestamp(),
-      lastReadAt:      serverTimestamp(),
+      status: 'finished',
+      finishedAt: serverTimestamp(),
+      lastReadAt: serverTimestamp(),
       totalReadTimeMs: 0,
       taleTitle,
       coverUrl,
-      createdAt:       serverTimestamp(),
-      updatedAt:       serverTimestamp(),
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
     });
   }
 
@@ -66,9 +66,9 @@ export async function markTaleFinished({ userId, taleId }) {
     const batch = writeBatch(db);
     chaptersSnap.forEach((chapterDoc) => {
       batch.update(chapterDoc.ref, {
-        scrollPercent:       100,
+        scrollPercent: 100,
         lastCharacterOffset: 0,
-        updatedAt:           serverTimestamp(),
+        updatedAt: serverTimestamp(),
       });
     });
     await batch.commit();
@@ -76,11 +76,11 @@ export async function markTaleFinished({ userId, taleId }) {
 
   // Ensure tale-level progress is marked finished
   await updateDoc(progressRef, {
-    status:     'finished',
+    status: 'finished',
     finishedAt: serverTimestamp(),
     lastReadAt: serverTimestamp(),
     taleTitle,
     coverUrl,
-    updatedAt:  serverTimestamp(),
+    updatedAt: serverTimestamp(),
   });
 }

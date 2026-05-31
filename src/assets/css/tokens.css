@@ -18,108 +18,108 @@
 :root {
   /* ── 1. Typography ──────────────────────────────────────────────── */
 
-  --font-serif:      'Cinzel', 'Cormorant Garamond', Georgia, serif;
-  --font-sans:       'Inter', 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
-  --font-mono:       'JetBrains Mono', ui-monospace, monospace;
-  --font-display:    'Cinzel', serif;
+  --font-serif: 'Cinzel', 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Inter', 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-display: 'Cinzel', serif;
 
   /* Type scale — fluid step sizes */
-  --text-xs:    0.75rem;    /* 12px */
-  --text-sm:    0.875rem;   /* 14px */
-  --text-base:  1rem;       /* 16px */
-  --text-lg:    1.125rem;   /* 18px */
-  --text-xl:    1.25rem;    /* 20px */
-  --text-2xl:   1.5rem;     /* 24px */
-  --text-3xl:   1.875rem;   /* 30px */
-  --text-4xl:   2.25rem;    /* 36px */
-  --text-5xl:   3rem;       /* 48px */
-  --text-6xl:   3.75rem;    /* 60px */
+  --text-xs: 0.75rem; /* 12px */
+  --text-sm: 0.875rem; /* 14px */
+  --text-base: 1rem; /* 16px */
+  --text-lg: 1.125rem; /* 18px */
+  --text-xl: 1.25rem; /* 20px */
+  --text-2xl: 1.5rem; /* 24px */
+  --text-3xl: 1.875rem; /* 30px */
+  --text-4xl: 2.25rem; /* 36px */
+  --text-5xl: 3rem; /* 48px */
+  --text-6xl: 3.75rem; /* 60px */
 
   /* ── 2. Core Palette — base "room" layer ───────────────────────── */
   /* Change these to re-skin the entire app.                          */
 
-  --bg-base:          #030305;   /* Page background. Deepest layer.         */
-  --bg-elevated:      #07070b;   /* Slightly lifted surface (cards, panels) */
-  --bg-overlay:       #0d0d14;   /* Modals, dropdowns, floating layers       */
+  --bg-base: #030305; /* Page background. Deepest layer.         */
+  --bg-elevated: #07070b; /* Slightly lifted surface (cards, panels) */
+  --bg-overlay: #0d0d14; /* Modals, dropdowns, floating layers       */
 
   /* ── 3. Semantic Surface Tokens ────────────────────────────────── */
   /* Built on top of the core palette.                                */
   /* Components reference these, never the raw hex above.            */
 
-  --surface-1:        rgba(255, 255, 255, 0.025);   /* Lowest surface (base glass) */
-  --surface-2:        rgba(255, 255, 255, 0.040);   /* Raised cards                */
-  --surface-3:        rgba(255, 255, 255, 0.060);   /* Elevated panels             */
-  --surface-overlay:  rgba(13, 13, 20, 0.85);       /* Backdrop for modals/drawers */
-  --surface-raised:   rgba(255, 255, 255, 0.045);   /* Hover/active state lift     */
+  --surface-1: rgba(255, 255, 255, 0.025); /* Lowest surface (base glass) */
+  --surface-2: rgba(255, 255, 255, 0.04); /* Raised cards                */
+  --surface-3: rgba(255, 255, 255, 0.06); /* Elevated panels             */
+  --surface-overlay: rgba(13, 13, 20, 0.85); /* Backdrop for modals/drawers */
+  --surface-raised: rgba(255, 255, 255, 0.045); /* Hover/active state lift     */
 
   /* Text hierarchy */
-  --text-primary:     #e2e8f0;
-  --text-secondary:   #94a3b8;
-  --text-muted:       #64748b;
-  --text-disabled:    #334155;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-disabled: #334155;
 
   /* Legacy aliases — used by existing page CSS, kept for compatibility */
-  --text-main:        var(--text-primary);
-  --paper-bg:         var(--bg-base);
-  --glass:            var(--surface-1);
-  --glass-strong:     var(--surface-2);
-  --panel-bg:         var(--surface-1);
-  --panel-bg-strong:  var(--surface-2);
+  --text-main: var(--text-primary);
+  --paper-bg: var(--bg-base);
+  --glass: var(--surface-1);
+  --glass-strong: var(--surface-2);
+  --panel-bg: var(--surface-1);
+  --panel-bg-strong: var(--surface-2);
 
   /* Borders */
-  --border:           rgba(255, 255, 255, 0.06);
-  --border-strong:    rgba(255, 255, 255, 0.10);
-  --border-subtle:    rgba(255, 255, 255, 0.03);
+  --border: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.1);
+  --border-subtle: rgba(255, 255, 255, 0.03);
 
   /* ── 4. Accent & Glow Palette ───────────────────────────────────── */
 
-  --accent:           #6366f1;   /* Indigo — primary interactive color */
-  --accent-hover:     #7c7ff5;
-  --accent-muted:     rgba(99, 102, 241, 0.15);
-  --accent-subtle:    rgba(99, 102, 241, 0.08);
-  --accent-secondary: #8b5cf6;   /* Violet — secondary accent          */
+  --accent: #6366f1; /* Indigo — primary interactive color */
+  --accent-hover: #7c7ff5;
+  --accent-muted: rgba(99, 102, 241, 0.15);
+  --accent-subtle: rgba(99, 102, 241, 0.08);
+  --accent-secondary: #8b5cf6; /* Violet — secondary accent          */
 
-  --rune:             #f59e0b;   /* Amber — highlights, achievements   */
+  --rune: #f59e0b; /* Amber — highlights, achievements   */
 
   /* Atmospheric glow backgrounds */
-  --glow-indigo:      rgba(99,  102, 241, 0.10);
-  --glow-violet:      rgba(139, 92,  246, 0.08);
-  --glow-amber:       rgba(245, 158, 11,  0.10);
+  --glow-indigo: rgba(99, 102, 241, 0.1);
+  --glow-violet: rgba(139, 92, 246, 0.08);
+  --glow-amber: rgba(245, 158, 11, 0.1);
 
   /* ── 5. Spacing & Shape ─────────────────────────────────────────── */
 
-  --radius-sm:    0.375rem;   /* 6px  — tight chips, badges           */
-  --radius-md:    0.5rem;     /* 8px  — buttons, inputs               */
-  --radius-lg:    0.75rem;    /* 12px — cards, panels                 */
-  --radius-xl:    1.5rem;     /* 24px — large cards                   */
-  --radius-2xl:   2rem;       /* 32px — hero sections                 */
-  --radius-3xl:   2.5rem;     /* 40px — full-rounded containers       */
-  --radius-full:  9999px;     /* Pills, avatars                       */
+  --radius-sm: 0.375rem; /* 6px  — tight chips, badges           */
+  --radius-md: 0.5rem; /* 8px  — buttons, inputs               */
+  --radius-lg: 0.75rem; /* 12px — cards, panels                 */
+  --radius-xl: 1.5rem; /* 24px — large cards                   */
+  --radius-2xl: 2rem; /* 32px — hero sections                 */
+  --radius-3xl: 2.5rem; /* 40px — full-rounded containers       */
+  --radius-full: 9999px; /* Pills, avatars                       */
 
   /* ── 6. Motion ──────────────────────────────────────────────────── */
 
-  --transition-fast:    0.15s ease;
-  --transition-base:    0.25s ease;
-  --transition-slow:    0.4s ease;
-  --transition-spring:  0.4s cubic-bezier(0.23, 1, 0.32, 1);
-  --transition-bounce:  0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.25s ease;
+  --transition-slow: 0.4s ease;
+  --transition-spring: 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  --transition-bounce: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* ── 7. Navigation Constants ────────────────────────────────────── */
 
-  --nav-height:       64px;
-  --nav-bg:           rgba(3, 3, 5, 0.75);
-  --nav-bg-scrolled:  rgba(3, 3, 5, 0.96);
-  --nav-border:       rgba(255, 255, 255, 0.05);
-  --nav-blur:         32px;
-  --nav-transition:   0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  --nav-height: 64px;
+  --nav-bg: rgba(3, 3, 5, 0.75);
+  --nav-bg-scrolled: rgba(3, 3, 5, 0.96);
+  --nav-border: rgba(255, 255, 255, 0.05);
+  --nav-blur: 32px;
+  --nav-transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
   /* ── 8. Shadow Scale ────────────────────────────────────────────── */
 
-  --shadow-sm:    0 2px 8px  rgba(0, 0, 0, 0.24);
-  --shadow-md:    0 8px 24px rgba(0, 0, 0, 0.36);
-  --shadow-lg:    0 16px 48px rgba(0, 0, 0, 0.48);
-  --shadow-xl:    0 24px 64px rgba(0, 0, 0, 0.56);
-  --shadow-glow:  0 0 20px   rgba(99, 102, 241, 0.15);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.24);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.36);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.48);
+  --shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.56);
+  --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
 
   /* ── 9. Reader-scoped Tokens ────────────────────────────────────── */
   /* These are the DEFAULTS for the reader surface.                   */
@@ -127,17 +127,17 @@
   /* on the .reader-surface element — never on <html>.                */
   /* Other pages are completely unaffected.                            */
 
-  --reader-bg:          #030305;
-  --reader-fg:          #e6e7ee;
-  --reader-muted:       #8a8aa3;
-  --reader-accent:      #8b7cf6;
+  --reader-bg: #030305;
+  --reader-fg: #e6e7ee;
+  --reader-muted: #8a8aa3;
+  --reader-accent: #8b7cf6;
 
   --reader-font-family: var(--font-serif);
-  --reader-font-size:   18px;
+  --reader-font-size: 18px;
   --reader-line-height: 1.75;
-  --reader-measure:     68ch;
+  --reader-measure: 68ch;
 
-  --reader-nav-height:  60px;
+  --reader-nav-height: 60px;
 
   color-scheme: dark;
 }

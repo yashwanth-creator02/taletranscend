@@ -7,14 +7,7 @@ import { suggestNameFromBio } from './ai-name.js';
 import { debounce } from '@/utils/function.utils';
 import { initIcons } from '@ui/components/icons.js';
 import { showToast } from '@ui/components/toast.js';
-import {
-  setText,
-  setEl,
-  setInput,
-  formatNumber,
-  formatJoinDate,
-  timeAgo,
-} from '@/utils/ui.utils';
+import { setText, setEl, setInput, formatNumber, formatJoinDate, timeAgo } from '@/utils/ui.utils';
 import { escapeHtml } from '@/utils/string.utils';
 
 /* ─────────────────────────────────────────────
@@ -431,7 +424,7 @@ function _buildContinueReadingCard(tale) {
   return `
     <a
       href="reader.html?taleId=${tale.id}&chapterId=${tale.lastChapterIndex}"
-      class="continue-card group snap-start flex-shrink-0"
+      class="continue-card group snap-start shrink-0"
     >
       <div class="card-image-wrap mb-4">
         <img
@@ -463,7 +456,7 @@ function _buildContinueReadingCard(tale) {
           </div>
           <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
             <div
-              class="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-1000"
+              class="h-full bg-linear-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-1000"
               style="width: ${Math.max(3, tale.percent)}%"
             ></div>
           </div>
@@ -505,11 +498,11 @@ function _buildPublishedCard(tale) {
     'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=400';
 
   return `
-    <a href="tale.html?id=${tale.id}" class="contribution-card group block bg-white/[0.01] border border-white/5 rounded-[2rem] overflow-hidden hover:bg-white/[0.03] hover:border-white/10 hover:-translate-y-1.5 transition-all duration-500">
-      <div class="relative aspect-[16/9] bg-zinc-950 overflow-hidden">
+    <a href="tale.html?id=${tale.id}" class="contribution-card group block bg-white/1 border border-white/5 rounded-4xl overflow-hidden hover:bg-white/3 hover:border-white/10 hover:-translate-y-1.5 transition-all duration-500">
+      <div class="relative aspect-video bg-zinc-950 overflow-hidden">
         <img src="${cover}" alt="${safeTitle}"
           class="w-full h-full object-cover opacity-50 group-hover:opacity-70 group-hover:scale-105 transition-all duration-700" loading="lazy" />
-        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+        <div class="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent"></div>
         <div class="absolute top-4 left-4">
           <span class="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-[9px] font-black uppercase tracking-widest rounded-full border border-emerald-500/20 backdrop-blur-md">
             Published
@@ -569,7 +562,7 @@ function _buildDraftCard(draft) {
   return `
     <a
       href="contribution.html?draft=${draft.id}"
-      class="group block bg-white/[0.02] border border-white/5 rounded-[1.75rem] p-6 hover:bg-white/[0.04] hover:border-indigo-500/20 transition-all duration-400"
+      class="group block bg-white/2 border border-white/5 rounded-[1.75rem] p-6 hover:bg-white/4 hover:border-indigo-500/20 transition-all duration-400"
     >
       <div class="flex items-start justify-between gap-3 mb-4">
         <span class="px-2.5 py-1 bg-amber-500/10 text-amber-500 text-[9px] font-black uppercase tracking-widest rounded-full border border-amber-500/10">
@@ -628,8 +621,8 @@ export function showContinueReadingSkeleton() {
   container.innerHTML = Array.from(
     { length: 3 },
     () => `
-    <div class="flex-shrink-0 w-80 rounded-[2rem] overflow-hidden">
-      <div class="aspect-[16/9] skeleton rounded-2xl mb-4"></div>
+    <div class="shrink-0 w-80 rounded-4xl overflow-hidden">
+      <div class="aspect-video skeleton rounded-2xl mb-4"></div>
       <div class="space-y-3 px-1">
         <div class="skeleton h-5 w-3/4 rounded-lg"></div>
         <div class="skeleton h-3.5 w-full rounded-md"></div>
@@ -648,8 +641,8 @@ export function showContributionsSkeleton() {
   const skeletons = Array.from(
     { length: 2 },
     () => `
-    <div class="skeleton-card rounded-[2rem] overflow-hidden">
-      <div class="aspect-[16/9] skeleton"></div>
+    <div class="skeleton-card rounded-4xl overflow-hidden">
+      <div class="aspect-video skeleton"></div>
       <div class="p-6 space-y-3">
         <div class="skeleton h-5 w-2/3 rounded-lg"></div>
         <div class="skeleton h-3.5 w-full rounded-md"></div>

@@ -28,7 +28,7 @@ export function setupCardInteractions(userId) {
 
   grid.addEventListener('click', async (e) => {
     const actionEl = e.target.closest('[data-action]');
-    const card     = e.target.closest('.tale-card');
+    const card = e.target.closest('.tale-card');
 
     if (!card || !grid.contains(card)) return;
 
@@ -72,9 +72,9 @@ export function setupCardInteractions(userId) {
     // Card body click → tale detail page
     if (!e.target.closest('.options-menu')) {
       // Card body click → navigate to tale detail page
-    if (!e.target.closest('.options-menu')) {
-      navigateTo(`tale.html?id=${encodeURIComponent(taleId)}`);
-    }
+      if (!e.target.closest('.options-menu')) {
+        navigateTo(`tale.html?id=${encodeURIComponent(taleId)}`);
+      }
     }
   });
 
@@ -96,11 +96,9 @@ export function setupCardInteractions(userId) {
 
 async function _handleResume(userId, taleId) {
   try {
-    const resume    = await resolveResumePoint({ userId, taleId });
+    const resume = await resolveResumePoint({ userId, taleId });
     const chapterId = resume?.chapterIndex ?? 0;
-    navigateTo(
-      `reader.html?taleId=${encodeURIComponent(taleId)}&chapterId=${chapterId}`
-    );
+    navigateTo(`reader.html?taleId=${encodeURIComponent(taleId)}&chapterId=${chapterId}`);
   } catch (err) {
     console.error('[library] Resume failed:', err);
   }
@@ -108,7 +106,7 @@ async function _handleResume(userId, taleId) {
 
 function _handleCopyLink(taleId) {
   // Bug fix: was building URL with wrong path after refactor
-  const url   = `${window.location.origin}/src/views/tale.html?id=${encodeURIComponent(taleId)}`;
+  const url = `${window.location.origin}/src/views/tale.html?id=${encodeURIComponent(taleId)}`;
   const modal = document.getElementById('copy-link-modal');
   const input = document.getElementById('copy-link-input');
   if (!modal || !input) return;
@@ -124,7 +122,7 @@ function _handleCopyLink(taleId) {
 
   // Wire modal buttons via event listeners — no onclick attributes
   const confirmBtn = document.getElementById('copy-link-confirm');
-  const closeBtn   = document.getElementById('copy-link-close');
+  const closeBtn = document.getElementById('copy-link-close');
 
   const onConfirm = async () => {
     await navigator.clipboard.writeText(url);
@@ -142,7 +140,7 @@ function _handleCopyLink(taleId) {
 }
 
 function _confirmMarkFinished(onConfirm) {
-  const modal  = document.getElementById('confirm-modal');
+  const modal = document.getElementById('confirm-modal');
   const cancel = document.getElementById('confirm-cancel');
   const accept = document.getElementById('confirm-accept');
   if (!modal || !cancel || !accept) return;

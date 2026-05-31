@@ -33,7 +33,8 @@ export async function getTaleMeta(taleId) {
  */
 export async function getChapter({ taleId, chapterIndex }) {
   if (!taleId) throw new Error('getChapter: taleId is required');
-  if (typeof chapterIndex !== 'number') throw new Error('getChapter: chapterIndex must be a number');
+  if (typeof chapterIndex !== 'number')
+    throw new Error('getChapter: chapterIndex must be a number');
 
   const snap = await getDocs(refs.chapters(taleId));
 
@@ -41,7 +42,7 @@ export async function getChapter({ taleId, chapterIndex }) {
     .map((d) => createChapter(d.id, d.data()))
     .sort((a, b) => a.chapterNum - b.chapterNum);
 
-  const total   = chapters.length;
+  const total = chapters.length;
   const chapter = chapters[chapterIndex];
 
   if (!chapter) throw new Error(`Chapter not found at index ${chapterIndex}`);
@@ -49,12 +50,12 @@ export async function getChapter({ taleId, chapterIndex }) {
   return {
     chapter,
     navigation: {
-      hasPrev:       chapterIndex > 0,
-      hasNext:       chapterIndex < total - 1,
-      prevTitle:     chapterIndex > 0           ? chapters[chapterIndex - 1].title : null,
-      prevIndex:     chapterIndex > 0           ? chapterIndex - 1                : null,
-      nextTitle:     chapterIndex < total - 1   ? chapters[chapterIndex + 1].title : null,
-      nextIndex:     chapterIndex < total - 1   ? chapterIndex + 1                : null,
+      hasPrev: chapterIndex > 0,
+      hasNext: chapterIndex < total - 1,
+      prevTitle: chapterIndex > 0 ? chapters[chapterIndex - 1].title : null,
+      prevIndex: chapterIndex > 0 ? chapterIndex - 1 : null,
+      nextTitle: chapterIndex < total - 1 ? chapters[chapterIndex + 1].title : null,
+      nextIndex: chapterIndex < total - 1 ? chapterIndex + 1 : null,
       totalChapters: total,
     },
   };

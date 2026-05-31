@@ -12,10 +12,7 @@ import { initNav } from '@ui/components/nav/nav.js';
 import { initIcons } from '@ui/components/icons.js';
 import { initPageReveal, readyReveal } from '@/utils/ui.utils';
 
-import {
-  subscribeToTales,
-  stopTalesSubscription,
-} from './content.js';
+import { subscribeToTales, stopTalesSubscription } from './content.js';
 import {
   applyAllFilters,
   setupSearch,
@@ -24,12 +21,7 @@ import {
   setupLengthFilter,
   setupSidebarFilter,
 } from './filters.js';
-import {
-  setupSidebarToggle,
-  updateSidebarUser,
-  showGridSkeleton,
-  showGridError,
-} from './ui.js';
+import { setupSidebarToggle, updateSidebarUser, showGridSkeleton, showGridError } from './ui.js';
 import { setupCardInteractions } from './interactions.js';
 import { libraryState } from './state.js';
 

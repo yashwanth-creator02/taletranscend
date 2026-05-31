@@ -246,7 +246,7 @@ export async function executeCommand(element) {
  *
  * @param {string} [query='']
  */
-export function executeActiveFocusedItem(query = '') {
+export function executeActiveFocusedItem(_query = '') {
   const idx = navState.commandFocusedIndex;
   const items = document.querySelectorAll('.command-item');
   const target = idx >= 0 ? items[idx] : items[0];

@@ -13,11 +13,7 @@ export {
   profileToFirestore,
 } from './schemas/user.schema.js';
 
-export {
-  createTale,
-  createChapter,
-  createComment,
-} from './schemas/tale.schema.js';
+export { createTale, createChapter, createComment } from './schemas/tale.schema.js';
 
 export {
   createTaleProgress,
@@ -34,19 +30,11 @@ export {
   draftChapterToFirestore,
 } from './schemas/draft.schema.js';
 
-export {
-  createBookmark,
-  bookmarkToFirestore,
-} from './schemas/bookmark.schema.js';
+export { createBookmark, bookmarkToFirestore } from './schemas/bookmark.schema.js';
 
-export {
-  createNotification,
-} from './schemas/notification.schema.js';
+export { createNotification } from './schemas/notification.schema.js';
 
-export {
-  createAchievement,
-  ACHIEVEMENT_REGISTRY,
-} from './schemas/achievement.schema.js';
+export { createAchievement, ACHIEVEMENT_REGISTRY } from './schemas/achievement.schema.js';
 
 // ── App Runtime State ────────────────────────────────────────────────
 

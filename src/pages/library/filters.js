@@ -28,25 +28,21 @@ export async function applyAllFilters() {
 
   // 2. Era filter
   if (libraryState.activeEra !== 'all') {
-    result = result.filter(
-      (t) => t.era?.toLowerCase() === libraryState.activeEra.toLowerCase()
-    );
+    result = result.filter((t) => t.era?.toLowerCase() === libraryState.activeEra.toLowerCase());
   }
 
   // 3. Tone filter
   if (libraryState.activeTone !== 'all') {
-    result = result.filter(
-      (t) => t.tone?.toLowerCase() === libraryState.activeTone.toLowerCase()
-    );
+    result = result.filter((t) => t.tone?.toLowerCase() === libraryState.activeTone.toLowerCase());
   }
 
   // 4. Length filter — based on tale wordCount field
   if (libraryState.activeLength !== 'all') {
     result = result.filter((t) => {
       const wc = Number(t.wordCount) || 0;
-      if (libraryState.activeLength === 'short')  return wc < 2000;
+      if (libraryState.activeLength === 'short') return wc < 2000;
       if (libraryState.activeLength === 'medium') return wc >= 2000 && wc < 10000;
-      if (libraryState.activeLength === 'long')   return wc >= 10000;
+      if (libraryState.activeLength === 'long') return wc >= 10000;
       return true;
     });
   }

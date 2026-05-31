@@ -30,15 +30,15 @@ export function createTaleProgress(taleId, data = {}) {
   return {
     taleId,
     totalReadTimeMs: data.totalReadTimeMs ?? 0,
-    status:          data.status          ?? 'in_progress',
-    finishedAt:      data.finishedAt      ?? null,
-    lastReadAt:      data.lastReadAt      ?? null,
-    taleTitle:       data.taleTitle       ?? '',
-    coverUrl:        data.coverUrl        ?? '',
-    chapterCount:    data.chapterCount    ?? 0,
-    createdAt:       data.createdAt       ?? null,
-    updatedAt:       data.updatedAt       ?? null,
-    chapters:        data.chapters        ?? {},
+    status: data.status ?? 'in_progress',
+    finishedAt: data.finishedAt ?? null,
+    lastReadAt: data.lastReadAt ?? null,
+    taleTitle: data.taleTitle ?? '',
+    coverUrl: data.coverUrl ?? '',
+    chapterCount: data.chapterCount ?? 0,
+    createdAt: data.createdAt ?? null,
+    updatedAt: data.updatedAt ?? null,
+    chapters: data.chapters ?? {},
   };
 }
 
@@ -59,9 +59,9 @@ export function createTaleProgress(taleId, data = {}) {
  */
 export function createChapterProgress(data = {}) {
   return {
-    scrollPercent:       data.scrollPercent       ?? 0,
+    scrollPercent: data.scrollPercent ?? 0,
     lastCharacterOffset: data.lastCharacterOffset ?? 0,
-    updatedAt:           data.updatedAt           ?? null,
+    updatedAt: data.updatedAt ?? null,
   };
 }
 
@@ -96,7 +96,7 @@ export function createChapterProgress(data = {}) {
 export function createLocalChapterProgress(data = {}) {
   return {
     scrollPercent: data.scrollPercent ?? 0,
-    updatedAt:     data.updatedAt     ?? Date.now(),
+    updatedAt: data.updatedAt ?? Date.now(),
   };
 }
 
@@ -108,9 +108,9 @@ export function createLocalChapterProgress(data = {}) {
  */
 export function createLocalTaleProgress(data = {}) {
   return {
-    chapters:        data.chapters        ?? {},
+    chapters: data.chapters ?? {},
     totalReadTimeMs: data.totalReadTimeMs ?? 0,
-    updatedAt:       data.updatedAt       ?? Date.now(),
+    updatedAt: data.updatedAt ?? Date.now(),
   };
 }
 
@@ -137,11 +137,11 @@ export function createLocalTaleProgress(data = {}) {
 export function createReadingHistoryEntry(taleId, data = {}) {
   return {
     taleId,
-    taleTitle:   data.taleTitle   ?? '',
-    coverUrl:    data.coverUrl    ?? '',
-    authorName:  data.authorName  ?? '',
+    taleTitle: data.taleTitle ?? '',
+    coverUrl: data.coverUrl ?? '',
+    authorName: data.authorName ?? '',
     firstReadAt: data.firstReadAt ?? null,
-    lastReadAt:  data.lastReadAt  ?? null,
-    visitCount:  data.visitCount  ?? 1,
+    lastReadAt: data.lastReadAt ?? null,
+    visitCount: data.visitCount ?? 1,
   };
 }

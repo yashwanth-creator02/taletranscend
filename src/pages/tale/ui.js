@@ -19,7 +19,7 @@ export function showArchiveSkeletons() {
     list.innerHTML = Array.from(
       { length: 4 },
       () => `
-      <div class="glass-card p-6 md:p-8 rounded-[2rem] flex justify-between items-center animate-pulse">
+      <div class="glass-card p-6 md:p-8 rounded-4xl flex justify-between items-center animate-pulse">
         <div class="flex items-center gap-6">
            <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 skeleton"></div>
            <div>
@@ -130,7 +130,7 @@ export function renderChapters(userId, chapters, taleId) {
   if (!list) return;
 
   if (!chapters.length) {
-    list.innerHTML = `<div class="glass p-12 rounded-[2rem] text-center text-slate-600 text-[10px] font-black uppercase tracking-widest">No chronicles detected in this archive.</div>`;
+    list.innerHTML = `<div class="glass p-12 rounded-4xl text-center text-slate-600 text-[10px] font-black uppercase tracking-widest">No chronicles detected in this archive.</div>`;
     return;
   }
 
@@ -151,7 +151,7 @@ export function renderChapters(userId, chapters, taleId) {
       }
 
       return `
-      <div data-chapter-index="${idx}" class="chapter-item ${state} glass-card p-6 md:p-8 rounded-[2rem] flex justify-between items-center group cursor-pointer">
+      <div data-chapter-index="${idx}" class="chapter-item ${state} glass-card p-6 md:p-8 rounded-4xl flex justify-between items-center group cursor-pointer">
         <div class="flex items-center gap-6">
            <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-xs font-black text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-all">
              ${String(idx + 1).padStart(2, '0')}

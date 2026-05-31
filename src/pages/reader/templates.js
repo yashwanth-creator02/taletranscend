@@ -20,10 +20,11 @@ export function renderTocPanel(chapters, currentChapterId, progress, activeSecti
         <span>${safeArticleTitle}</span>
       </div>
       <div class="space-y-1">
-        ${chapters.map(c => {
-          const isCurrent = c.id === currentChapterId;
-          const safeTitle = escapeHtml(c.title);
-          return `
+        ${chapters
+          .map((c) => {
+            const isCurrent = c.id === currentChapterId;
+            const safeTitle = escapeHtml(c.title);
+            return `
           <div class="toc-chapter ${isCurrent ? 'current' : ''}">
             <button class="toc-chapter-btn" data-chapter-id="${c.id}">
               <span class="toc-number ${isCurrent ? 'current' : ''}" style="${isCurrent ? 'box-shadow:0 0 14px -2px rgba(168,85,247,0.6)' : ''}">${c.number}</span>
@@ -33,20 +34,27 @@ export function renderTocPanel(chapters, currentChapterId, progress, activeSecti
               </span>
               <i data-lucide="chevron-down" class="shrink-0" style="width:14px;height:14px;color:rgba(255,255,255,0.4);transition:transform 200ms;${isCurrent ? 'transform:rotate(180deg)' : ''}"></i>
             </button>
-            ${isCurrent && c.sections ? `
+            ${
+              isCurrent && c.sections
+                ? `
               <div class="toc-sections">
-                ${c.sections.map(s => {
-                  const active = activeSection === s.id;
-                  const safeSectionTitle = escapeHtml(s.title);
-                  return `
+                ${c.sections
+                  .map((s) => {
+                    const active = activeSection === s.id;
+                    const safeSectionTitle = escapeHtml(s.title);
+                    return `
                   <button class="toc-section-btn ${active ? 'active' : ''} ${s.level === 3 ? 'pl-7' : ''}" data-section-id="${s.id}">
                     <span class="toc-dot ${active ? 'active' : ''}" style="${active ? 'box-shadow:0 0 10px 1px rgba(168,85,247,0.7)' : ''}"></span>
                     <span class="flex-1 text-xs leading-snug ${active ? 'text-white' : ''} ${s.level === 2 ? 'tracking-wide' : ''}" style="${active ? '' : 'color:rgba(255,255,255,0.65)'}">${safeSectionTitle}</span>
                   </button>`;
-                }).join("")}
-              </div>` : ""}
+                  })
+                  .join('')}
+              </div>`
+                : ''
+            }
           </div>`;
-        }).join("")}
+          })
+          .join('')}
       </div>
     </div>`;
 }
@@ -78,9 +86,13 @@ export function renderTypographyPanel(state) {
       <div>
         <div class="field-label">Line height &mdash; ${state.lineHeight.toFixed(2)}</div>
         <div class="lh-grid">
-          ${[1.4, 1.6, 1.75, 2.0].map(v => `
+          ${[1.4, 1.6, 1.75, 2.0]
+            .map(
+              (v) => `
             <button class="lh-btn ${Math.abs(state.lineHeight - v) < 0.01 ? 'active' : ''}" data-lh="${v}">${v}</button>
-          `).join("")}
+          `
+            )
+            .join('')}
         </div>
       </div>
       <div>
@@ -98,14 +110,16 @@ export function renderTypographyPanel(state) {
 export function renderThemePanel(currentTheme) {
   return `
     <div class="theme-grid">
-      ${THEMES.map(t => `
+      ${THEMES.map(
+        (t) => `
         <button class="theme-btn hover-lift ${currentTheme === t.id ? 'active' : ''}" data-theme-id="${t.id}">
           <div class="theme-preview" style="background:${t.tint || '#8b7cf6'}; opacity: 0.8;"></div>
           <div class="rune-text text-sm" style="color:rgba(255,255,255,0.9)">${t.label}</div>
           <div class="text-xs" style="color:rgba(255,255,255,0.4)">${t.sub || 'Theme'}</div>
           ${currentTheme === t.id ? '<span class="theme-check">&#10003;</span>' : ''}
         </button>
-      `).join("")}
+      `
+      ).join('')}
     </div>
   `;
 }
@@ -116,30 +130,36 @@ export function renderHighlightsPanel(highlights) {
       <div class="empty-state">
         <div class="empty-icon"><i data-lucide="highlighter" style="width:20px;height:20px"></i></div>
         <div class="rune-text text-sm" style="color:rgba(255,255,255,0.85)">No highlights yet</div>
-        <p class="mt-1 max-w-[240px] text-xs leading-relaxed" style="color:rgba(255,255,255,0.45)">
+        <p class="mt-1 max-w-60 text-xs leading-relaxed" style="color:rgba(255,255,255,0.45)">
           Select any text in the article and a small menu will appear. Pick a color or attach a private note.
         </p>
       </div>`;
   }
   return `
     <div class="space-y-3">
-      ${highlights.map(h => {
-        const safeText = escapeHtml(h.text.length > 160 ? h.text.slice(0, 160) + "…" : h.text);
-        const safeNote = h.note ? escapeHtml(h.note) : '';
-        return `
+      ${highlights
+        .map((h) => {
+          const safeText = escapeHtml(h.text.length > 160 ? h.text.slice(0, 160) + '…' : h.text);
+          const safeNote = h.note ? escapeHtml(h.note) : '';
+          return `
         <div class="highlight-card group">
           <div class="highlight-text highlight-${h.color}">"${safeText}"</div>
-          ${h.note ? `
+          ${
+            h.note
+              ? `
             <div class="mb-2 flex items-start gap-2 text-xs" style="color:rgba(255,255,255,0.7)">
               <i data-lucide="edit-3" class="mt-0.5 shrink-0" style="width:14px;height:14px;color:#c4b5fd"></i>
               <span>${safeNote}</span>
-            </div>` : ""}
+            </div>`
+              : ''
+          }
           <div class="flex items-center justify-between text-xs" style="color:rgba(255,255,255,0.4)">
             <span>${h.at ? new Date(h.at).toLocaleDateString() : 'Just now'}</span>
             <button class="opacity-0 transition-opacity hover-text-red group-hover-opacity-100" data-rm-hl="${h.id}">Remove</button>
           </div>
         </div>`;
-      }).join("")}
+        })
+        .join('')}
     </div>`;
 }
 
@@ -155,11 +175,14 @@ export function renderCommentsPanel(comments, newComment) {
         </div>
       </div>
       <div class="space-y-3">
-        ${comments && comments.length > 0 ? comments.map(c => {
-          const safeAuthor = escapeHtml(c.author || 'Anonymous');
-          const safeBody = escapeHtml(c.body);
-          const safeInitials = escapeHtml(c.initials || '??');
-          return `
+        ${
+          comments && comments.length > 0
+            ? comments
+                .map((c) => {
+                  const safeAuthor = escapeHtml(c.author || 'Anonymous');
+                  const safeBody = escapeHtml(c.body);
+                  const safeInitials = escapeHtml(c.initials || '??');
+                  return `
           <div class="comment-card">
             <div class="mb-2 flex items-center gap-2">
               <div style="display:flex;align-items:center;justify-content:center;border-radius:50%;color:#fff;width:28px;height:28px;font-size:11px;background:linear-gradient(135deg,rgba(99,102,241,0.85),rgba(168,85,247,0.85));shadow:0 0 18px -6px rgba(139,124,246,0.55);font-family:var(--font-serif);letter-spacing:0.08em">${safeInitials}</div>
@@ -174,7 +197,10 @@ export function renderCommentsPanel(comments, newComment) {
               <button class="flex items-center gap-1 hover-text-orange"><i data-lucide="heart" style="width:12px;height:12px"></i> ${c.likes || 0}</button>
             </div>
           </div>`;
-        }).join("") : '<div class="text-center text-xs opacity-40 py-8">No comments yet</div>'}
+                })
+                .join('')
+            : '<div class="text-center text-xs opacity-40 py-8">No comments yet</div>'
+        }
       </div>
     </div>`;
 }
@@ -206,7 +232,7 @@ export function renderSharePanel() {
 }
 
 export function renderTTSPanel(isPlaying, rate) {
-  const supported = "speechSynthesis" in window;
+  const supported = 'speechSynthesis' in window;
   return `
     <div class="space-y-4">
       <div class="glass rounded-xl p-4">
@@ -215,8 +241,8 @@ export function renderTTSPanel(isPlaying, rate) {
             <i data-lucide="${isPlaying ? 'pause' : 'play'}" style="width:20px;height:20px"></i>
           </button>
           <div class="leading-tight">
-            <div class="text-sm" style="color:rgba(255,255,255,0.9)">${isPlaying ? "Reading aloud…" : "Listen to this piece"}</div>
-            <div class="text-xs" style="color:rgba(255,255,255,0.4)">${supported ? "Using your browser voice" : "Not supported in this browser"}</div>
+            <div class="text-sm" style="color:rgba(255,255,255,0.9)">${isPlaying ? 'Reading aloud…' : 'Listen to this piece'}</div>
+            <div class="text-xs" style="color:rgba(255,255,255,0.4)">${supported ? 'Using your browser voice' : 'Not supported in this browser'}</div>
           </div>
         </div>
         <div><div class="field-label">Speed &mdash; ${rate.toFixed(2)}&times;</div><input type="range" min="0.6" max="1.8" step="0.05" value="${rate}" id="ttsRate"></div>

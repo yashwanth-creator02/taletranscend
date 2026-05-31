@@ -21,13 +21,6 @@ function _formatReadTime(totalMs = 0) {
   return minutes < 1 ? '' : `${minutes}m read`;
 }
 
-function _statusLabel(status) {
-  if (status === 'finished')  return 'Completed';
-  if (status === 'draft')     return 'Draft';
-  if (status === 'published') return 'Live';
-  return 'In Progress';
-}
-
 function _badge(text, classes = '') {
   return `<span class="badge ${classes}">${escapeHtml(text)}</span>`;
 }
@@ -53,7 +46,9 @@ export function renderCardsSkeleton(container, count = 6) {
   if (!container) return;
   container.innerHTML = `
     <div class="col-span-full grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-      ${Array.from({ length: count }).map(() => `
+      ${Array.from({ length: count })
+        .map(
+          () => `
         <div class="tale-card animate-pulse">
           <div class="p-6">
             <div class="mb-6 flex items-start justify-between gap-3">
@@ -75,7 +70,9 @@ export function renderCardsSkeleton(container, count = 6) {
             </div>
           </div>
         </div>
-      `).join('')}
+      `
+        )
+        .join('')}
     </div>
   `;
 }
@@ -96,7 +93,7 @@ export function renderCardsSkeleton(container, count = 6) {
  */
 export async function fetchTalesMetadata(userId, tales) {
   const safeUserId = userId || null;
-  const safeTales  = Array.isArray(tales) ? tales : [];
+  const safeTales = Array.isArray(tales) ? tales : [];
 
   if (!safeTales.length) {
     return { progressSnapshots: [], bookmarkMap: {}, readTimeMap: {} };
@@ -107,9 +104,7 @@ export async function fetchTalesMetadata(userId, tales) {
       ? Promise.all(safeTales.map((t) => getTaleProgressData(safeUserId, t.id)))
       : Promise.resolve(safeTales.map(() => ({}))),
 
-    safeUserId
-      ? getBookmarks({ userId: safeUserId })
-      : Promise.resolve([]),
+    safeUserId ? getBookmarks({ userId: safeUserId }) : Promise.resolve([]),
 
     safeUserId
       ? Promise.all(
@@ -123,9 +118,7 @@ export async function fetchTalesMetadata(userId, tales) {
 
   // Bug fix: was [bookmark.id, true] — bookmark.id is the Firestore auto-ID,
   // not the taleId. Fixed to bookmark.taleId which is the canonical identifier.
-  const bookmarkMap = Object.fromEntries(
-    (bookmarks || []).map((b) => [b.taleId, true])
-  );
+  const bookmarkMap = Object.fromEntries((bookmarks || []).map((b) => [b.taleId, true]));
   const readTimeMap = Object.fromEntries(readTimeEntries || []);
 
   return { progressSnapshots, bookmarkMap, readTimeMap };
@@ -142,7 +135,7 @@ export function renderTaleCards(container, tales, metadata) {
   container.innerHTML = tales
     .map((tale, index) => {
       const chaptersProgress = progressSnapshots[index] || {};
-      const progressStats    = getOverallProgress({
+      const progressStats = getOverallProgress({
         chapterCount: Number(tale.chapterCount) || 0,
         chaptersProgress,
       });
@@ -164,7 +157,8 @@ export async function renderCardsGrid(userId, tales) {
     renderEmptyState(container, {
       message: 'No tales found in the archives.',
       subMessage: 'Try a different filter or come back later.',
-      classes: 'col-span-full rounded-[2rem] border border-white/8 bg-white/5 px-6 py-20 text-center shadow-2xl shadow-black/20 backdrop-blur-xl',
+      classes:
+        'col-span-full rounded-4xl border border-white/8 bg-white/5 px-6 py-20 text-center shadow-2xl shadow-black/20 backdrop-blur-xl',
     });
     return;
   }
@@ -189,32 +183,32 @@ export async function renderCardsGrid(userId, tales) {
 
 function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = {}) {
   const {
-    id           = '0000',
-    title        = 'Untitled Echo',
+    id = '0000',
+    title = 'Untitled Echo',
     coverUrl,
-    description  = 'No description provided.',
-    era          = 'Unknown Era',
+    description = 'No description provided.',
+    era = 'Unknown Era',
     chapterCount = 0,
   } = tale || {};
 
-  const safeTitle       = escapeHtml(title);
+  const safeTitle = escapeHtml(title);
   const safeDescription = escapeHtml(description);
-  const safeEra         = escapeHtml(era);
-  const isBookmarked    = !!bookmarkMap[id];
-  const isFinished      = tale?.status === 'finished';
-  const totalMs         = readTimeMap[id] || 0;
-  const readTimeLabel   = _formatReadTime(totalMs);
-  const menuId          = `menu-${id}`;
-  const progress        = Math.max(0, Math.min(100, Number(progressPercent) || 0));
-  const cover           = coverUrl || _defaultCover();
+  const safeEra = escapeHtml(era);
+  const isBookmarked = !!bookmarkMap[id];
+  const isFinished = tale?.status === 'finished';
+  const totalMs = readTimeMap[id] || 0;
+  const readTimeLabel = _formatReadTime(totalMs);
+  const menuId = `menu-${id}`;
+  const progress = Math.max(0, Math.min(100, Number(progressPercent) || 0));
+  const cover = coverUrl || _defaultCover();
 
-  const timeBadge          = readTimeLabel ? _badge(readTimeLabel, 'bg-white/5 text-zinc-400') : '';
+  const timeBadge = readTimeLabel ? _badge(readTimeLabel, 'bg-white/5 text-zinc-400') : '';
   const statusBadgeClasses = isFinished
     ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
     : 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20';
-  const bookmarkedAction   = isBookmarked ? 'decouple' : 'couple';
-  const bookmarkedLabel    = isBookmarked ? 'Remove Bookmark' : 'Save to Shelf';
-  const bookmarkedIcon     = isBookmarked ? 'bookmark-minus' : 'bookmark-plus';
+  const bookmarkedAction = isBookmarked ? 'decouple' : 'couple';
+  const bookmarkedLabel = isBookmarked ? 'Remove Bookmark' : 'Save to Shelf';
+  const bookmarkedIcon = isBookmarked ? 'bookmark-minus' : 'bookmark-plus';
 
   return `
     <article
@@ -222,7 +216,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
       data-id="${escapeHtml(id)}"
       aria-label="${safeTitle}"
     >
-      <div class="absolute -inset-px bg-gradient-to-b from-indigo-500/0 via-indigo-500/0 to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+      <div class="absolute -inset-px bg-linear-to-b from-indigo-500/0 via-indigo-500/0 to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
 
       <div class="p-6">
         <!-- Header: Badges & Actions -->
@@ -244,7 +238,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
 
             <div
               id="${escapeHtml(menuId)}"
-              class="options-menu hidden absolute right-0 z-[60] mt-2 w-60 overflow-hidden rounded-2xl p-2"
+              class="options-menu hidden absolute right-0 z-60 mt-2 w-60 overflow-hidden rounded-2xl p-2"
               role="menu"
             >
               <div class="px-3 py-2 border-b border-white/5 mb-1">
@@ -286,14 +280,14 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
 
         <!-- Cover Image with Progress Overlay -->
         <div class="card-image-wrap mb-6 group-hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-all duration-500">
-          <div class="aspect-[16/10] w-full relative">
+          <div class="aspect-16/10 w-full relative">
             <img
               src="${escapeHtml(cover)}"
               alt="${safeTitle}"
               class="h-full w-full object-cover opacity-60 transition duration-700 group-hover:scale-110 group-hover:opacity-100"
               loading="lazy"
             />
-            <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent opacity-60"></div>
+            <div class="absolute inset-0 bg-linear-to-t from-zinc-950 via-transparent to-transparent opacity-60"></div>
             <div class="absolute inset-x-0 bottom-0 p-4 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
               <div class="flex items-center justify-between mb-2">
                 <span class="text-[9px] font-black uppercase tracking-widest text-white/50">Neural Progress</span>

@@ -15,7 +15,6 @@
 
 import { auth, setDoc, updateDoc, serverTimestamp, refs } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
-import { createTale } from '@state/index.js';
 import { navigateTo } from '@/utils/ui.utils';
 
 import { state } from './state.js';
@@ -58,7 +57,7 @@ export async function publishFullTale() {
   _setPublishButtonsDisabled(true);
 
   try {
-    const userId     = auth.currentUser.uid;
+    const userId = auth.currentUser.uid;
     const authorName = auth.currentUser.displayName || `Scribe ${userId.slice(0, 5)}`;
 
     /* ── Step 1: Save all chapters to draft ─────────────────── */
@@ -75,52 +74,54 @@ export async function publishFullTale() {
     /* ── Step 3: Write tale with status=pending ─────────────── */
 
     const description = state.synopsis?.trim() || _extractDescription(state.chapters);
-    const wordCount   = state.chapters.reduce((acc, ch) => {
+    const wordCount = state.chapters.reduce((acc, ch) => {
       const words = ch.content?.trim() ? ch.content.trim().split(/\s+/).length : 0;
       return acc + words;
     }, 0);
     const estimatedReadMins = Math.ceil(wordCount / 225);
 
     await setDoc(taleRef, {
-      title:              state.title,
-      authorId:           userId,
+      title: state.title,
+      authorId: userId,
       authorName,
-      authorAvatarUrl:    '',
+      authorAvatarUrl: '',
       description,
-      synopsis:           state.synopsis || '',
-      coverUrl:           state.coverUrl || '',
-      era:                state.era || '',
-      tags:               state.tags || [],
-      tone:               state.tone || '',
-      language:           state.language || 'English',
-      visibility:         (state.visibility || 'public').toLowerCase(),
-      audience:           state.audience || 'General',
-      contentWarnings:    Array.isArray(state.contentWarnings)
+      synopsis: state.synopsis || '',
+      coverUrl: state.coverUrl || '',
+      era: state.era || '',
+      tags: state.tags || [],
+      tone: state.tone || '',
+      language: state.language || 'English',
+      visibility: (state.visibility || 'public').toLowerCase(),
+      audience: state.audience || 'General',
+      contentWarnings: Array.isArray(state.contentWarnings)
         ? state.contentWarnings
-        : (state.contentWarnings ? [state.contentWarnings] : []),
-      worldSetting:       state.worldSetting || '',
-      authorNotes:        state.authorNotes || '',
-      chapterCount:       state.chapters.length,
+        : state.contentWarnings
+          ? [state.contentWarnings]
+          : [],
+      worldSetting: state.worldSetting || '',
+      authorNotes: state.authorNotes || '',
+      chapterCount: state.chapters.length,
       wordCount,
       estimatedReadMins,
-      readCount:          0,
-      commentCount:       0,
-      reactionCount:      0,
-      bookmarkCount:      0,
-      status:             'pending',
-      submittedAt:        serverTimestamp(),
-      reviewedAt:         null,
-      reviewedBy:         null,
-      rejectionReason:    null,
-      moderationNotes:    null,
-      isFeatured:         false,
-      isEditorsPick:      false,
-      featuredAt:         null,
-      searchKeywords:     _buildSearchKeywords(state.title, state.tags),
-      publishedAt:        null,
+      readCount: 0,
+      commentCount: 0,
+      reactionCount: 0,
+      bookmarkCount: 0,
+      status: 'pending',
+      submittedAt: serverTimestamp(),
+      reviewedAt: null,
+      reviewedBy: null,
+      rejectionReason: null,
+      moderationNotes: null,
+      isFeatured: false,
+      isEditorsPick: false,
+      featuredAt: null,
+      searchKeywords: _buildSearchKeywords(state.title, state.tags),
+      publishedAt: null,
       lastChapterAddedAt: serverTimestamp(),
-      updatedAt:          serverTimestamp(),
-      createdAt:          serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      createdAt: serverTimestamp(),
     });
 
     /* ── Step 4: Auto-approve (moderation hook) ─────────────── */
@@ -128,30 +129,30 @@ export async function publishFullTale() {
     // In a future version this step will be gated behind a moderation queue.
     // For now, auto-approve immediately after submission.
     await updateDoc(taleRef, {
-      status:     'published',
+      status: 'published',
       publishedAt: serverTimestamp(),
-      reviewedAt:  serverTimestamp(),
-      reviewedBy:  'auto-approve',
+      reviewedAt: serverTimestamp(),
+      reviewedBy: 'auto-approve',
     });
 
     /* ── Step 5: Write chapters subcollection ───────────────── */
 
     await Promise.all(
       state.chapters.map(async (chapter, index) => {
-        const chapterWordCount   = chapter.content?.trim()
+        const chapterWordCount = chapter.content?.trim()
           ? chapter.content.trim().split(/\s+/).length
           : 0;
-        const chapterReadMins    = Math.ceil(chapterWordCount / 225);
+        const chapterReadMins = Math.ceil(chapterWordCount / 225);
 
         await setDoc(refs.chapter(taleId, index), {
           // chapterNum is 1-based for display — bug fix: was using index (0-based)
-          chapterNum:        index + 1,
-          title:             chapter.title?.trim() || `Fragment ${index + 1}`,
-          content:           chapter.content || '',
-          wordCount:         chapterWordCount,
+          chapterNum: index + 1,
+          title: chapter.title?.trim() || `Fragment ${index + 1}`,
+          content: chapter.content || '',
+          wordCount: chapterWordCount,
           estimatedReadMins: chapterReadMins,
-          publishedAt:       serverTimestamp(),
-          updatedAt:         serverTimestamp(),
+          publishedAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
         });
       })
     );
@@ -162,7 +163,7 @@ export async function publishFullTale() {
       await updateDoc(refs.draft(userId, state.draftId), {
         publishedTaleId: taleId,
         lastPublishedAt: serverTimestamp(),
-        updatedAt:       serverTimestamp(),
+        updatedAt: serverTimestamp(),
       });
     }
 
@@ -206,7 +207,7 @@ function _extractDescription(chapters) {
  */
 function _buildSearchKeywords(title, tags) {
   const titleWords = (title || '').toLowerCase().split(/\s+/).filter(Boolean);
-  const tagWords   = (tags || []).map((t) => t.toLowerCase());
+  const tagWords = (tags || []).map((t) => t.toLowerCase());
   return [...new Set([...titleWords, ...tagWords])];
 }
 
@@ -236,7 +237,7 @@ export function setPublishStatus(message, type) {
   const colors = {
     loading: 'text-indigo-400',
     success: 'text-emerald-400',
-    error:   'text-red-400',
+    error: 'text-red-400',
   };
 
   status.classList.add(colors[type] ?? 'text-zinc-500');
@@ -264,9 +265,7 @@ function _setPublishButtonsDisabled(disabled) {
     if (spans.length) {
       spans.forEach((span) => {
         if (!span.classList.contains('hidden')) {
-          span.textContent = disabled
-            ? 'Publishing…'
-            : (span.dataset.label ?? span.textContent);
+          span.textContent = disabled ? 'Publishing…' : (span.dataset.label ?? span.textContent);
         }
       });
     } else {

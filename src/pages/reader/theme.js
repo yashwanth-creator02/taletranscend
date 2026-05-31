@@ -41,11 +41,16 @@ function _getSurface() {
  * afterwards — it will override the localStorage values.
  */
 export function initTheme() {
-  readerState.theme      = localStorage.getItem(READER_STORAGE_KEYS.theme)      || DEFAULT_THEME;
+  readerState.theme = localStorage.getItem(READER_STORAGE_KEYS.theme) || DEFAULT_THEME;
   readerState.fontFamily = localStorage.getItem(READER_STORAGE_KEYS.fontFamily) || DEFAULT_FONT;
-  readerState.fontSize   = Number(localStorage.getItem(READER_STORAGE_KEYS.fontSize))   || TYPOGRAPHY_BOUNDS.fontSize.default;
-  readerState.lineHeight = Number(localStorage.getItem(READER_STORAGE_KEYS.lineHeight)) || TYPOGRAPHY_BOUNDS.lineHeight.default;
-  readerState.measure    = Number(localStorage.getItem(READER_STORAGE_KEYS.measure))    || TYPOGRAPHY_BOUNDS.measure.default;
+  readerState.fontSize =
+    Number(localStorage.getItem(READER_STORAGE_KEYS.fontSize)) ||
+    TYPOGRAPHY_BOUNDS.fontSize.default;
+  readerState.lineHeight =
+    Number(localStorage.getItem(READER_STORAGE_KEYS.lineHeight)) ||
+    TYPOGRAPHY_BOUNDS.lineHeight.default;
+  readerState.measure =
+    Number(localStorage.getItem(READER_STORAGE_KEYS.measure)) || TYPOGRAPHY_BOUNDS.measure.default;
 
   _applyAll();
 }
@@ -58,11 +63,11 @@ export function initTheme() {
  * @param {import('@state/schemas/user.schema.js').ReaderPreferences} prefs
  */
 export function applyCloudPrefs(prefs) {
-  readerState.theme      = prefs.theme      || readerState.theme;
+  readerState.theme = prefs.theme || readerState.theme;
   readerState.fontFamily = prefs.fontFamily || readerState.fontFamily;
-  readerState.fontSize   = prefs.fontSize   || readerState.fontSize;
+  readerState.fontSize = prefs.fontSize || readerState.fontSize;
   readerState.lineHeight = prefs.lineHeight || readerState.lineHeight;
-  readerState.measure    = prefs.measure    || readerState.measure;
+  readerState.measure = prefs.measure || readerState.measure;
 
   _applyAll();
 }
@@ -88,11 +93,11 @@ export function setTheme(theme) {
 
   // Toggle atmosphere and particle effects for dark vs light themes
   const atmosphere = document.getElementById('atmosphere');
-  const particles  = document.getElementById('particles');
-  const isDark     = DARK_THEMES.has(theme);
+  const particles = document.getElementById('particles');
+  const isDark = DARK_THEMES.has(theme);
 
   if (atmosphere) atmosphere.style.display = isDark ? 'block' : 'none';
-  if (particles)  particles.style.display  = isDark ? 'block' : 'none';
+  if (particles) particles.style.display = isDark ? 'block' : 'none';
 
   _syncUI();
 }
@@ -193,7 +198,7 @@ function _syncUI() {
 
   // Font size controls
   _setInputValue('fontSize', readerState.fontSize);
-  _setInputValue('fsRange',  readerState.fontSize);
+  _setInputValue('fsRange', readerState.fontSize);
   _setTextContent('sizeVal', `${readerState.fontSize}px`);
 
   // Line height controls

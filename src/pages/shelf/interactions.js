@@ -11,7 +11,6 @@ import {
   computeAndRenderHeroStats,
 } from './content.js';
 import { setActiveTab, buildSortPanel, refreshSortPanel } from './ui.js';
-import { initIcons } from '@ui/components/icons.js';
 import { showToast } from '@ui/components/toast.js';
 import { removeFromBookmarks } from '@services/index.js';
 import { navigateTo } from '@/utils/ui.utils';
@@ -78,7 +77,7 @@ function _bindFilter() {
 
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      input.value            = '';
+      input.value = '';
       shelfState.filterQuery = '';
       applyAndRender();
       input.blur();
@@ -91,7 +90,7 @@ function _bindFilter() {
    ───────────────────────────────────────────── */
 
 function _bindSort() {
-  const btn   = document.getElementById('sort-btn');
+  const btn = document.getElementById('sort-btn');
   const panel = document.getElementById('sort-panel');
   if (!btn || !panel) return;
 
@@ -118,7 +117,7 @@ function _bindSort() {
     if (shelfState.sortBy === key) {
       shelfState.sortDir = shelfState.sortDir === 'desc' ? 'asc' : 'desc';
     } else {
-      shelfState.sortBy  = key;
+      shelfState.sortBy = key;
       shelfState.sortDir = 'desc';
     }
 
@@ -153,7 +152,7 @@ function _bindCardActions() {
     const menuItem = target.closest('[data-action]');
     if (menuItem) {
       const action = menuItem.dataset.action;
-      const id     = menuItem.dataset.id;
+      const id = menuItem.dataset.id;
       await _handleCardAction(action, id, e);
       return;
     }
@@ -185,7 +184,7 @@ function _toggleMenu(menuId, triggerBtn) {
   if (!menu) return;
 
   const isOpen = !menu.hidden;
-  menu.hidden  = isOpen;
+  menu.hidden = isOpen;
   triggerBtn?.setAttribute('aria-expanded', String(!isOpen));
 }
 

@@ -1,353 +1,477 @@
 <!-- src/views/reader.html -->
 <!doctype html>
 <html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Reader | TaleTranscend</title>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Reader | TaleTranscend</title>
+    <script type="module" src="../pages/reader/reader.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
 
-  <script type="module" src="../pages/reader/reader.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600;700;800&display=swap"
-    rel="stylesheet" />
-</head>
+  <body class="antialiased">
+    <div id="app" class="app-container" data-theme="noir">
+      <div class="atmosphere" id="atmosphere"></div>
+      <div class="particles" id="particles"></div>
 
-<body class="antialiased">
-  <div id="app" class="app-container" data-theme="noir">
-    <div class="atmosphere" id="atmosphere"></div>
-    <div class="particles" id="particles"></div>
-
-    <!-- Top Reading Progress -->
-    <div class="top-progress">
-      <div class="top-progress-bar progress-bar" id="progressBar" style="width: 0%"></div>
-    </div>
-
-    <!-- Header / Top Bar -->
-    <header class="top-bar glass-strong" id="topBar">
-      <div class="transition-all duration-200 hover:scale-105 hover:shadow-xl" id="backBtn" style="
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 32px;
-          height: 32px;
-          border-radius: 6px;
-          background: linear-gradient(
-            135deg,
-            rgba(99, 102, 241, 0.45),
-            rgba(168, 85, 247, 0.45)
-          );
-          box-shadow: 0 0 24px -6px rgba(139, 124, 246, 0.6);
-          cursor: pointer;
-        ">
-        <i data-lucide="arrow-left" style="width: 16px; height: 16px; color: #fff"></i>
+      <!-- Top Reading Progress -->
+      <div class="top-progress">
+        <div class="top-progress-bar progress-bar" id="progressBar" style="width: 0%"></div>
       </div>
 
-      <!-- Desktop Navigation Meta -->
-      <div class="md:flex" id="topBarCenter"
-        style="min-width: 0; flex: 1; align-items: center; justify-content: center; gap: 0.5rem">
-        <i data-lucide="book-open" style="width: 14px; height: 14px; color: rgba(196, 181, 253, 0.7)"></i>
-        <span style="
+      <!-- Header / Top Bar -->
+      <header class="top-bar glass-strong" id="topBar">
+        <div
+          class="transition-all duration-200 hover:scale-105 hover:shadow-xl"
+          id="backBtn"
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.45), rgba(168, 85, 247, 0.45));
+            box-shadow: 0 0 24px -6px rgba(139, 124, 246, 0.6);
+            cursor: pointer;
+          "
+        >
+          <i data-lucide="arrow-left" style="width: 16px; height: 16px; color: #fff"></i>
+        </div>
+
+        <!-- Desktop Navigation Meta -->
+        <div
+          class="md:flex"
+          id="topBarCenter"
+          style="min-width: 0; flex: 1; align-items: center; justify-content: center; gap: 0.5rem"
+        >
+          <i
+            data-lucide="book-open"
+            style="width: 14px; height: 14px; color: rgba(196, 181, 253, 0.7)"
+          ></i>
+          <span
+            style="
               font-size: 10px;
               text-transform: uppercase;
               letter-spacing: 0.22em;
               color: rgba(255, 255, 255, 0.4);
-            ">
-          Ch. <span id="topBarChNum">1</span>/<span id="topBarChTotal">5</span>
-        </span>
-        <span style="height: 12px; width: 1px; background: rgba(255, 255, 255, 0.15)"></span>
-        <span class="rune-text truncate" style="font-size: 13px; color: rgba(255, 255, 255, 0.85)" id="topBarChTitle">
-          Loading...
-        </span>
-      </div>
-
-      <!-- Right Side Stats -->
-      <div class="flex items-center gap-5" style="flex-shrink: 0; font-size: 0.75rem; color: rgba(255, 255, 255, 0.6)">
-        <span id="topBarReadTime" class="hidden" style="align-items: center; gap: 0.375rem">
-          <i data-lucide="clock" style="width: 14px; height: 14px"></i>
-          <span id="topBarMin">0</span> min
-        </span>
-        <span class="tabular-nums" id="topBarPct">0%</span>
-      </div>
-    </header>
-
-    <div class="main-layout">
-      <!-- Sidebar Navigation -->
-      <aside class="sidebar glass-strong" id="sidebar">
-        <button class="glyph-btn" id="collapseBtn" aria-label="Collapse sidebar">
-          <i data-lucide="chevron-left" style="width: 16px; height: 16px" id="collapseIcon"></i>
-        </button>
-        <div style="margin: 0.5rem 0; height: 1px; width: 32px; background: rgba(255, 255, 255, 0.1)"></div>
-
-        <div class="sidebar-tools" id="sidebarTools">
-          <!-- Populated by JS -->
+            "
+          >
+            Ch. <span id="topBarChNum">1</span>/<span id="topBarChTotal">5</span>
+          </span>
+          <span style="height: 12px; width: 1px; background: rgba(255, 255, 255, 0.15)"></span>
+          <span
+            class="rune-text truncate"
+            style="font-size: 13px; color: rgba(255, 255, 255, 0.85)"
+            id="topBarChTitle"
+          >
+            Loading...
+          </span>
         </div>
 
-        <div class="sidebar-bottom">
-          <div style="margin: 0.25rem 0; height: 1px; width: 32px; background: rgba(255, 255, 255, 0.1)"></div>
-          <button class="glyph-btn" id="sidebarBookmark" data-active="false" aria-label="Bookmark">
-            <i data-lucide="bookmark" style="width: 20px; height: 20px"></i>
-          </button>
-          <button class="glyph-btn" id="sidebarFocus" data-active="false" aria-label="Focus mode">
-            <i data-lucide="maximize-2" style="width: 20px; height: 20px"></i>
-          </button>
+        <!-- Right Side Stats -->
+        <div
+          class="flex items-center gap-5"
+          style="flex-shrink: 0; font-size: 0.75rem; color: rgba(255, 255, 255, 0.6)"
+        >
+          <span id="topBarReadTime" class="hidden" style="align-items: center; gap: 0.375rem">
+            <i data-lucide="clock" style="width: 14px; height: 14px"></i>
+            <span id="topBarMin">0</span> min
+          </span>
+          <span class="tabular-nums" id="topBarPct">0%</span>
         </div>
-      </aside>
+      </header>
 
-      <!-- Tool Panel -->
-      <div class="tool-panel glass-strong" id="toolPanel">
-        <div class="tool-panel-header">
-          <div>
-            <div style="
+      <div class="main-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar glass-strong" id="sidebar">
+          <button class="glyph-btn" id="collapseBtn" aria-label="Collapse sidebar">
+            <i data-lucide="chevron-left" style="width: 16px; height: 16px" id="collapseIcon"></i>
+          </button>
+          <div
+            style="margin: 0.5rem 0; height: 1px; width: 32px; background: rgba(255, 255, 255, 0.1)"
+          ></div>
+
+          <div class="sidebar-tools" id="sidebarTools">
+            <!-- Populated by JS -->
+          </div>
+
+          <div class="sidebar-bottom">
+            <div
+              style="
+                margin: 0.25rem 0;
+                height: 1px;
+                width: 32px;
+                background: rgba(255, 255, 255, 0.1);
+              "
+            ></div>
+            <button
+              class="glyph-btn"
+              id="sidebarBookmark"
+              data-active="false"
+              aria-label="Bookmark"
+            >
+              <i data-lucide="bookmark" style="width: 20px; height: 20px"></i>
+            </button>
+            <button class="glyph-btn" id="sidebarFocus" data-active="false" aria-label="Focus mode">
+              <i data-lucide="maximize-2" style="width: 20px; height: 20px"></i>
+            </button>
+          </div>
+        </aside>
+
+        <!-- Tool Panel -->
+        <div class="tool-panel glass-strong" id="toolPanel">
+          <div class="tool-panel-header">
+            <div>
+              <div
+                style="
                   font-size: 10px;
                   text-transform: uppercase;
                   letter-spacing: 0.22em;
                   color: rgba(255, 255, 255, 0.4);
-                ">
-              Panel
+                "
+              >
+                Panel
+              </div>
+              <div
+                class="rune-text"
+                style="font-size: 15px; color: rgba(255, 255, 255, 0.9)"
+                id="panelTitle"
+              >
+                Table of Contents
+              </div>
             </div>
-            <div class="rune-text" style="font-size: 15px; color: rgba(255, 255, 255, 0.9)" id="panelTitle">
-              Table of Contents
-            </div>
+            <button
+              class="glyph-btn"
+              style="width: 36px; height: 36px"
+              id="closePanel"
+              aria-label="Close panel"
+            >
+              <i data-lucide="x" style="width: 16px; height: 16px"></i>
+            </button>
           </div>
-          <button class="glyph-btn" style="width: 36px; height: 36px" id="closePanel" aria-label="Close panel">
-            <i data-lucide="x" style="width: 16px; height: 16px"></i>
-          </button>
+          <div class="tool-panel-content ghost-scroll" id="panelContent">
+            <!-- Populated by JS -->
+          </div>
         </div>
-        <div class="tool-panel-content ghost-scroll" id="panelContent">
-          <!-- Populated by JS -->
-        </div>
-      </div>
 
-      <!-- Main Content Scroller -->
-      <main class="main-scroll ghost-scroll" id="scroller">
-        <div class="content-wrapper" id="readerVars">
-          <header class="article-header">
-            <nav class="breadcrumbs materialize" id="breadcrumbs"></nav>
-            <div class="chapter-meta materialize materialize-delay-1">
-              <i data-lucide="book-open" style="width: 14px; height: 14px"></i>
-              <span>Chapter <span id="headerChNum">1</span> of <span id="headerChTotal">5</span></span>
-            </div>
-            <h1 class="article-title rune-text text-glow materialize materialize-delay-1" id="articleTitle"></h1>
-            <p class="article-subtitle materialize materialize-delay-1" id="articleSubtitle"></p>
+        <!-- Main Content Scroller -->
+        <main class="main-scroll ghost-scroll" id="scroller">
+          <div class="content-wrapper" id="readerVars">
+            <header class="article-header">
+              <nav class="breadcrumbs materialize" id="breadcrumbs"></nav>
+              <div class="chapter-meta materialize materialize-delay-1">
+                <i data-lucide="book-open" style="width: 14px; height: 14px"></i>
+                <span
+                  >Chapter <span id="headerChNum">1</span> of
+                  <span id="headerChTotal">5</span></span
+                >
+              </div>
+              <h1
+                class="article-title rune-text text-glow materialize materialize-delay-1"
+                id="articleTitle"
+              ></h1>
+              <p class="article-subtitle materialize materialize-delay-1" id="articleSubtitle"></p>
 
-            <div class="author-row materialize materialize-delay-2">
-              <div id="authorAvatar"></div>
-              <div class="flex-col">
-                <span class="font-medium" id="authorName"></span>
-                <span style="color: var(--reader-muted)">
-                  From <em id="articleMetaTitle"></em> &middot;
-                  <span id="readMinutes">0</span> min read
+              <div class="author-row materialize materialize-delay-2">
+                <div id="authorAvatar"></div>
+                <div class="flex-col">
+                  <span class="font-medium" id="authorName"></span>
+                  <span style="color: var(--reader-muted)">
+                    From <em id="articleMetaTitle"></em> &middot;
+                    <span id="readMinutes">0</span> min read
+                  </span>
+                </div>
+                <span class="update-badge glass">
+                  <i
+                    data-lucide="sparkles"
+                    style="width: 14px; height: 14px; margin-right: 6px"
+                  ></i>
+                  Updated <span id="updatedAt"></span>
                 </span>
               </div>
-              <span class="update-badge glass">
-                <i data-lucide="sparkles" style="width: 14px; height: 14px; margin-right: 6px"></i>
-                Updated <span id="updatedAt"></span>
-              </span>
-            </div>
-            <hr style="margin-top: 2.5rem; border: none; border-top: 1px solid rgba(255, 255, 255, 0.1)" />
-          </header>
+              <hr
+                style="
+                  margin-top: 2.5rem;
+                  border: none;
+                  border-top: 1px solid rgba(255, 255, 255, 0.1);
+                "
+              />
+            </header>
 
-          <article class="reader-article materialize materialize-delay-3" id="articleBody">
-            <!-- Content populated by content.js -->
-          </article>
+            <article class="reader-article materialize materialize-delay-3" id="articleBody">
+              <!-- Content populated by content.js -->
+            </article>
 
-          <!-- Navigation between chapters -->
-          <div class="chapter-nav" id="chapterNav"></div>
+            <!-- Navigation between chapters -->
+            <div class="chapter-nav" id="chapterNav"></div>
 
-          <!-- Engagement & Social -->
-          <div class="engagement-bar glass" id="engagement">
-            <button class="clap-btn" id="clapBtn">
-              <span class="clap-icon-wrap" id="clapIconWrap">
-                <i data-lucide="heart" style="width: 20px; height: 20px"></i>
-              </span>
-              <div class="text-left">
-                <div class="text-sm font-medium"><span id="clapCount">128</span> claps</div>
-                <div class="text-xs" style="color: var(--reader-muted)" id="clapLabel">
-                  Tap to applaud
+            <!-- Engagement & Social -->
+            <div class="engagement-bar glass" id="engagement">
+              <button class="clap-btn" id="clapBtn">
+                <span class="clap-icon-wrap" id="clapIconWrap">
+                  <i data-lucide="heart" style="width: 20px; height: 20px"></i>
+                </span>
+                <div class="text-left">
+                  <div class="text-sm font-medium"><span id="clapCount">128</span> claps</div>
+                  <div class="text-xs" style="color: var(--reader-muted)" id="clapLabel">
+                    Tap to applaud
+                  </div>
                 </div>
+              </button>
+              <div class="action-btns flex gap-2">
+                <button
+                  class="glyph-btn"
+                  id="engBookmark"
+                  data-active="false"
+                  aria-label="Bookmark"
+                >
+                  <i data-lucide="bookmark" style="width: 20px; height: 20px"></i>
+                </button>
+                <button class="glyph-btn" id="engShare" aria-label="Share">
+                  <i data-lucide="share-2" style="width: 20px; height: 20px"></i>
+                </button>
+                <button class="glyph-btn" id="engComment" aria-label="Comments">
+                  <i data-lucide="message-square" style="width: 20px; height: 20px"></i>
+                </button>
               </div>
-            </button>
-            <div class="action-btns flex gap-2">
-              <button class="glyph-btn" id="engBookmark" data-active="false" aria-label="Bookmark">
-                <i data-lucide="bookmark" style="width: 20px; height: 20px"></i>
-              </button>
-              <button class="glyph-btn" id="engShare" aria-label="Share">
-                <i data-lucide="share-2" style="width: 20px; height: 20px"></i>
-              </button>
-              <button class="glyph-btn" id="engComment" aria-label="Comments">
-                <i data-lucide="message-square" style="width: 20px; height: 20px"></i>
-              </button>
             </div>
-          </div>
 
-          <!-- Author Bio Card -->
-          <section class="author-card glass" id="authorCard" aria-labelledby="author-heading">
-            <div class="author-card-inner">
-              <div id="authorCardAvatar"></div>
-              <div class="author-info">
-                <div class="author-name-row">
-                  <h3 id="author-heading" class="rune-text text-lg" style="color: rgba(255, 255, 255, 0.95)"></h3>
-                  <span class="text-xs" style="color: rgba(255, 255, 255, 0.4)" id="authorHandle"></span>
+            <!-- Author Bio Card -->
+            <section class="author-card glass" id="authorCard" aria-labelledby="author-heading">
+              <div class="author-card-inner">
+                <div id="authorCardAvatar"></div>
+                <div class="author-info">
+                  <div class="author-name-row">
+                    <h3
+                      id="author-heading"
+                      class="rune-text text-lg"
+                      style="color: rgba(255, 255, 255, 0.95)"
+                    ></h3>
+                    <span
+                      class="text-xs"
+                      style="color: rgba(255, 255, 255, 0.4)"
+                      id="authorHandle"
+                    ></span>
+                  </div>
+                  <p class="author-bio" id="authorCardBio"></p>
                 </div>
-                <p class="author-bio" id="authorCardBio"></p>
+                <button class="follow-btn">Follow</button>
               </div>
-              <button class="follow-btn">Follow</button>
-            </div>
-          </section>
+            </section>
 
-          <!-- Newsletter -->
-          <section class="newsletter-card" id="newsletter">
-            <div class="rune-text"
-              style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.22em; color: #ddd6fe">
-              The Chronicler's Letter
-            </div>
-            <h3 class="mt-2" style="
+            <!-- Newsletter -->
+            <section class="newsletter-card" id="newsletter">
+              <div
+                class="rune-text"
+                style="
+                  font-size: 11px;
+                  text-transform: uppercase;
+                  letter-spacing: 0.22em;
+                  color: #ddd6fe;
+                "
+              >
+                The Chronicler's Letter
+              </div>
+              <h3
+                class="mt-2"
+                style="
                   font-family: var(--font-serif);
                   font-size: 1.5rem;
                   color: rgba(255, 255, 255, 0.95);
-                ">
-              Receive a new fragment each Sunday.
-            </h3>
-            <p class="mt-2 text-sm" style="color: rgba(255, 255, 255, 0.55)">
-              One essay. No tracking. Unsubscribe with a single click.
-            </p>
-            <form class="newsletter-form" id="newsletterForm">
-              <input type="email" required class="newsletter-input" id="newsletterEmail"
-                placeholder="you@quietroom.com" />
-              <button type="submit" class="newsletter-submit" id="newsletterSubmit">
-                Subscribe
-              </button>
-            </form>
-          </section>
-        </div>
-      </main>
-    </div>
-
-    <!-- Scroll Helpers -->
-    <button class="back-to-top glass hover-lift hidden" id="backToTop" aria-label="Back to top">
-      <i data-lucide="arrow-up" style="width: 20px; height: 20px"></i>
-    </button>
-
-    <button class="focus-exit glass hidden" id="focusExit">
-      <i data-lucide="minimize-2" style="width: 14px; height: 14px"></i>
-      Exit Focus
-    </button>
-
-    <!-- Selection Toolbar -->
-    <div class="selection-toolbar glass-strong hidden" id="selectionToolbar">
-      <button class="highlight-btn" style="background:rgba(250,204,21,0.6)" data-color="yellow"
-        aria-label="Highlight yellow"></button>
-      <button class="highlight-btn" style="background:rgba(168,85,247,0.6)" data-color="violet"
-        aria-label="Highlight violet"></button>
-      <button class="highlight-btn" style="background:rgba(52,211,153,0.6)" data-color="mint"
-        aria-label="Highlight mint"></button>
-      <div class="toolbar-divider"></div>
-      <button class="glyph-btn" style="width:32px;height:32px" id="selNote" aria-label="Add note">
-        <i data-lucide="edit-3" style="width:16px;height:16px"></i>
-      </button>
-      <button class="glyph-btn" style="width:32px;height:32px" id="selCopy" aria-label="Copy">
-        <i data-lucide="copy" style="width:16px;height:16px"></i>
-      </button>
-    </div>
-  </div>
-
-  <!-- Mobile Bottom Toolbar -->
-  <!-- id="mobile-toolbar" used by reader/mobile.js initToolbarAutoHide() -->
-  <div
-    id="mobile-toolbar"
-    class="fixed bottom-0 inset-x-0 z-40 flex lg:hidden items-center justify-around px-4 py-3 border-t border-white/[0.06] transition-transform duration-300"
-    style="background: rgba(3,3,5,0.92); backdrop-filter: blur(24px);"
-  >
-    <button
-      id="reader-settings-btn"
-      type="button"
-      class="flex flex-col items-center gap-1 text-slate-500 hover:text-indigo-400 transition-colors"
-      aria-label="Open reader settings"
-    >
-      <i data-lucide="settings" style="width:20px;height:20px"></i>
-      <span class="text-[8px] font-bold uppercase tracking-widest">Settings</span>
-    </button>
-    <button
-      type="button"
-      class="flex flex-col items-center gap-1 text-slate-500 hover:text-indigo-400 transition-colors"
-      data-tool="toc"
-      aria-label="Table of contents"
-    >
-      <i data-lucide="list" style="width:20px;height:20px"></i>
-      <span class="text-[8px] font-bold uppercase tracking-widest">Contents</span>
-    </button>
-    <button
-      type="button"
-      class="flex flex-col items-center gap-1 text-slate-500 hover:text-indigo-400 transition-colors"
-      data-tool="theme"
-      aria-label="Change theme"
-    >
-      <i data-lucide="palette" style="width:20px;height:20px"></i>
-      <span class="text-[8px] font-bold uppercase tracking-widest">Theme</span>
-    </button>
-    <button
-      id="engBookmarkMobile"
-      type="button"
-      class="flex flex-col items-center gap-1 text-slate-500 hover:text-indigo-400 transition-colors"
-      aria-label="Bookmark"
-    >
-      <i data-lucide="bookmark" style="width:20px;height:20px"></i>
-      <span class="text-[8px] font-bold uppercase tracking-widest">Save</span>
-    </button>
-  </div>
-
-  <!-- Mobile Settings Drawer -->
-  <!-- id="reader-settings-panel" used by reader/mobile.js initMobileDrawer() -->
-  <div
-    id="reader-settings-panel"
-    class="fixed inset-0 z-50 hidden lg:hidden"
-    role="dialog"
-    aria-modal="true"
-    aria-label="Reader settings"
-  >
-    <!-- Backdrop -->
-    <div class="absolute inset-0" style="background: rgba(0,0,0,0.7); backdrop-filter: blur(4px)"></div>
-
-    <!-- Drawer panel -->
-    <div
-      class="absolute bottom-0 inset-x-0 rounded-t-[2rem] border-t border-white/[0.08] p-6"
-      style="background: rgba(7,7,11,0.98); max-height: 80vh; overflow-y: auto;"
-    >
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-300">Reader Settings</h2>
-        <!-- id="reader-settings-close" used by reader/mobile.js initMobileDrawer() -->
-        <button
-          id="reader-settings-close"
-          type="button"
-          class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-white hover:bg-white/[0.06] transition-all"
-          aria-label="Close settings"
-        >
-          <i data-lucide="x" style="width:16px;height:16px"></i>
-        </button>
+                "
+              >
+                Receive a new fragment each Sunday.
+              </h3>
+              <p class="mt-2 text-sm" style="color: rgba(255, 255, 255, 0.55)">
+                One essay. No tracking. Unsubscribe with a single click.
+              </p>
+              <form class="newsletter-form" id="newsletterForm">
+                <input
+                  type="email"
+                  required
+                  class="newsletter-input"
+                  id="newsletterEmail"
+                  placeholder="you@quietroom.com"
+                />
+                <button type="submit" class="newsletter-submit" id="newsletterSubmit">
+                  Subscribe
+                </button>
+              </form>
+            </section>
+          </div>
+        </main>
       </div>
 
-      <!-- Typography quick controls -->
-      <div class="space-y-4">
-        <div class="flex items-center justify-between">
-          <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Font Size</span>
-          <div class="flex items-center gap-3">
-            <button id="fsMinus" type="button" class="glyph-btn" style="width:32px;height:32px" aria-label="Decrease font size">
-              <i data-lucide="minus" style="width:14px;height:14px"></i>
-            </button>
-            <span id="sizeVal" class="text-sm font-bold text-white w-12 text-center">18px</span>
-            <button id="fsPlus" type="button" class="glyph-btn" style="width:32px;height:32px" aria-label="Increase font size">
-              <i data-lucide="plus" style="width:14px;height:14px"></i>
-            </button>
+      <!-- Scroll Helpers -->
+      <button class="back-to-top glass hover-lift hidden" id="backToTop" aria-label="Back to top">
+        <i data-lucide="arrow-up" style="width: 20px; height: 20px"></i>
+      </button>
+
+      <button class="focus-exit glass hidden" id="focusExit">
+        <i data-lucide="minimize-2" style="width: 14px; height: 14px"></i>
+        Exit Focus
+      </button>
+
+      <!-- Selection Toolbar -->
+      <div class="selection-toolbar glass-strong hidden" id="selectionToolbar">
+        <button
+          class="highlight-btn"
+          style="background: rgba(250, 204, 21, 0.6)"
+          data-color="yellow"
+          aria-label="Highlight yellow"
+        ></button>
+        <button
+          class="highlight-btn"
+          style="background: rgba(168, 85, 247, 0.6)"
+          data-color="violet"
+          aria-label="Highlight violet"
+        ></button>
+        <button
+          class="highlight-btn"
+          style="background: rgba(52, 211, 153, 0.6)"
+          data-color="mint"
+          aria-label="Highlight mint"
+        ></button>
+        <div class="toolbar-divider"></div>
+        <button
+          class="glyph-btn"
+          style="width: 32px; height: 32px"
+          id="selNote"
+          aria-label="Add note"
+        >
+          <i data-lucide="edit-3" style="width: 16px; height: 16px"></i>
+        </button>
+        <button class="glyph-btn" style="width: 32px; height: 32px" id="selCopy" aria-label="Copy">
+          <i data-lucide="copy" style="width: 16px; height: 16px"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Bottom Toolbar -->
+    <!-- id="mobile-toolbar" used by reader/mobile.js initToolbarAutoHide() -->
+    <div
+      id="mobile-toolbar"
+      class="fixed bottom-0 inset-x-0 z-40 flex lg:hidden items-center justify-around px-4 py-3 border-t border-white/6 transition-transform duration-300"
+      style="background: rgba(3, 3, 5, 0.92); backdrop-filter: blur(24px)"
+    >
+      <button
+        id="reader-settings-btn"
+        type="button"
+        class="flex flex-col items-center gap-1 text-slate-500 hover:text-indigo-400 transition-colors"
+        aria-label="Open reader settings"
+      >
+        <i data-lucide="settings" style="width: 20px; height: 20px"></i>
+        <span class="text-[8px] font-bold uppercase tracking-widest">Settings</span>
+      </button>
+      <button
+        type="button"
+        class="flex flex-col items-center gap-1 text-slate-500 hover:text-indigo-400 transition-colors"
+        data-tool="toc"
+        aria-label="Table of contents"
+      >
+        <i data-lucide="list" style="width: 20px; height: 20px"></i>
+        <span class="text-[8px] font-bold uppercase tracking-widest">Contents</span>
+      </button>
+      <button
+        type="button"
+        class="flex flex-col items-center gap-1 text-slate-500 hover:text-indigo-400 transition-colors"
+        data-tool="theme"
+        aria-label="Change theme"
+      >
+        <i data-lucide="palette" style="width: 20px; height: 20px"></i>
+        <span class="text-[8px] font-bold uppercase tracking-widest">Theme</span>
+      </button>
+      <button
+        id="engBookmarkMobile"
+        type="button"
+        class="flex flex-col items-center gap-1 text-slate-500 hover:text-indigo-400 transition-colors"
+        aria-label="Bookmark"
+      >
+        <i data-lucide="bookmark" style="width: 20px; height: 20px"></i>
+        <span class="text-[8px] font-bold uppercase tracking-widest">Save</span>
+      </button>
+    </div>
+
+    <!-- Mobile Settings Drawer -->
+    <!-- id="reader-settings-panel" used by reader/mobile.js initMobileDrawer() -->
+    <div
+      id="reader-settings-panel"
+      class="fixed inset-0 z-50 hidden lg:hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Reader settings"
+    >
+      <!-- Backdrop -->
+      <div
+        class="absolute inset-0"
+        style="background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px)"
+      ></div>
+
+      <!-- Drawer panel -->
+      <div
+        class="absolute bottom-0 inset-x-0 rounded-t-4xl border-t border-white/8 p-6"
+        style="background: rgba(7, 7, 11, 0.98); max-height: 80vh; overflow-y: auto"
+      >
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-300">
+            Reader Settings
+          </h2>
+          <!-- id="reader-settings-close" used by reader/mobile.js initMobileDrawer() -->
+          <button
+            id="reader-settings-close"
+            type="button"
+            class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-white hover:bg-white/6 transition-all"
+            aria-label="Close settings"
+          >
+            <i data-lucide="x" style="width: 16px; height: 16px"></i>
+          </button>
+        </div>
+
+        <!-- Typography quick controls -->
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500"
+              >Font Size</span
+            >
+            <div class="flex items-center gap-3">
+              <button
+                id="fsMinus"
+                type="button"
+                class="glyph-btn"
+                style="width: 32px; height: 32px"
+                aria-label="Decrease font size"
+              >
+                <i data-lucide="minus" style="width: 14px; height: 14px"></i>
+              </button>
+              <span id="sizeVal" class="text-sm font-bold text-white w-12 text-center">18px</span>
+              <button
+                id="fsPlus"
+                type="button"
+                class="glyph-btn"
+                style="width: 32px; height: 32px"
+                aria-label="Increase font size"
+              >
+                <i data-lucide="plus" style="width: 14px; height: 14px"></i>
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Toast system -->
-  <div id="reader-toast-container" class="fixed top-20 right-6 z-[200] flex flex-col gap-3 pointer-events-none"></div>
-</body>
-
+    <!-- Toast system -->
+    <div
+      id="reader-toast-container"
+      class="fixed top-20 right-6 z-200 flex flex-col gap-3 pointer-events-none"
+    ></div>
+  </body>
 </html>

@@ -28,11 +28,11 @@
 export function createBookmark(taleId, data = {}) {
   return {
     taleId,
-    taleTitle:    data.taleTitle    ?? '',
-    coverUrl:     data.coverUrl     ?? '',
-    authorName:   data.authorName   ?? '',
+    taleTitle: data.taleTitle ?? '',
+    coverUrl: data.coverUrl ?? '',
+    authorName: data.authorName ?? '',
     chapterCount: data.chapterCount ?? 0,
-    era:          data.era          ?? '',
+    era: data.era ?? '',
     bookmarkedAt: data.bookmarkedAt ?? null,
   };
 }
@@ -49,11 +49,11 @@ export function createBookmark(taleId, data = {}) {
 export function bookmarkToFirestore(taleId, tale, serverTimestamp) {
   return {
     taleId,
-    taleTitle:    tale.title        ?? '',
-    coverUrl:     tale.coverUrl     ?? '',
-    authorName:   tale.authorName   ?? '',
+    taleTitle: tale.title ?? '',
+    coverUrl: tale.coverUrl ?? '',
+    authorName: tale.authorName ?? '',
     chapterCount: tale.chapterCount ?? 0,
-    era:          tale.era          ?? '',
+    era: tale.era ?? '',
     bookmarkedAt: serverTimestamp,
   };
 }

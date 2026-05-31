@@ -90,8 +90,8 @@ function _showSkeletons(container) {
   container.innerHTML = Array.from(
     { length: 3 },
     () => `
-    <div class="glass-card rounded-[2.5rem] bg-indigo-600/5 p-5 border border-white/[0.03]">
-      <div class="aspect-[4/3] rounded-[2rem] skeleton mb-6"></div>
+    <div class="glass-card rounded-[2.5rem] bg-indigo-600/5 p-5 border border-white/3">
+      <div class="aspect-4/3 rounded-4xl skeleton mb-6"></div>
       <div class="space-y-4 px-1">
         <div class="flex gap-3">
           <div class="skeleton h-4 w-20 rounded-md"></div>
@@ -134,7 +134,7 @@ function _renderTrendingCard(tale) {
       href="tale.html?id=${tale.id}"
       class="glass-card rounded-[2.5rem] bg-indigo-600/10 p-5 group hover:border-indigo-500/50 transition-all duration-500 block"
     >
-      <div class="aspect-[4/3] rounded-[2rem] overflow-hidden mb-6 border border-zinc-800">
+      <div class="aspect-4/3 rounded-4xl overflow-hidden mb-6 border border-zinc-800">
         <img
           src="${cover}"
           alt="${tale.title}"

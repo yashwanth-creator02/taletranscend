@@ -50,7 +50,7 @@ export function renderErrorState(
   if (!container) return;
 
   container.innerHTML = `
-    <div class="col-span-full rounded-[2rem] border border-red-500/10 bg-red-500/5 px-6 py-16 text-center shadow-2xl shadow-black/20 backdrop-blur-xl">
+    <div class="col-span-full rounded-4xl border border-red-500/10 bg-red-500/5 px-6 py-16 text-center shadow-2xl shadow-black/20 backdrop-blur-xl">
       <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-500/10">
         <i data-lucide="triangle-alert" class="h-6 w-6 text-red-400"></i>
       </div>

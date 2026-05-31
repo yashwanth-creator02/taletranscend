@@ -13,9 +13,9 @@ export function buildTOC() {
   const article = document.getElementById('articleBody');
   if (!article) return;
 
-  const currentChapter = readerState.chapters.find(c => c.id === readerState.currentChapterId);
+  const currentChapter = readerState.chapters.find((c) => c.id === readerState.currentChapterId);
   if (currentChapter) {
-      currentChapter.sections = _extractSectionsFromDOM(article);
+    currentChapter.sections = _extractSectionsFromDOM(article);
   }
 }
 
@@ -40,60 +40,64 @@ export function updateTOCScrollSpy() {
   }
 
   if (currentId !== readerState.activeSection) {
-      readerState.activeSection = currentId;
-      // If TOC is open, refresh it to show active section
-      if (readerState.openTool === 'toc') {
-          _refreshToc();
-      }
+    readerState.activeSection = currentId;
+    // If TOC is open, refresh it to show active section
+    if (readerState.openTool === 'toc') {
+      _refreshToc();
+    }
   }
 }
 
 function _refreshToc() {
-    const content = document.getElementById('panelContent');
-    if (!content) return;
-    
-    content.innerHTML = renderTocPanel(
-        readerState.chapters,
-        readerState.currentChapterId,
-        readerState.progress,
-        readerState.activeSection,
-        readerState.taleTitle
-    );
-    
-    // Re-bind events (same as in reader.js but encapsulated here for spy updates)
-    document.querySelectorAll('[data-chapter-id]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const idx = readerState.chapters.findIndex(c => c.id === btn.dataset.chapterId);
-            const url = new URL(window.location.href);
-            url.searchParams.set('chapterId', idx);
-            window.location.href = url.toString();
-        });
+  const content = document.getElementById('panelContent');
+  if (!content) return;
+
+  content.innerHTML = renderTocPanel(
+    readerState.chapters,
+    readerState.currentChapterId,
+    readerState.progress,
+    readerState.activeSection,
+    readerState.taleTitle
+  );
+
+  // Re-bind events (same as in reader.js but encapsulated here for spy updates)
+  document.querySelectorAll('[data-chapter-id]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const idx = readerState.chapters.findIndex((c) => c.id === btn.dataset.chapterId);
+      const url = new URL(window.location.href);
+      url.searchParams.set('chapterId', idx);
+      window.location.href = url.toString();
     });
-    
-    document.querySelectorAll('[data-section-id]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const id = btn.dataset.sectionId;
-            const target = document.getElementById(id);
-            const scroller = document.getElementById('scroller');
-            if (target && scroller) {
-                const top = target.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 32;
-                scroller.scrollTo({ top, behavior: 'smooth' });
-                if (window.innerWidth < 1024) {
-                    const closeBtn = document.getElementById('closePanel');
-                    closeBtn?.click();
-                }
-            }
-        });
+  });
+
+  document.querySelectorAll('[data-section-id]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.sectionId;
+      const target = document.getElementById(id);
+      const scroller = document.getElementById('scroller');
+      if (target && scroller) {
+        const top =
+          target.getBoundingClientRect().top -
+          scroller.getBoundingClientRect().top +
+          scroller.scrollTop -
+          32;
+        scroller.scrollTo({ top, behavior: 'smooth' });
+        if (window.innerWidth < 1024) {
+          const closeBtn = document.getElementById('closePanel');
+          closeBtn?.click();
+        }
+      }
     });
-    
-    initIcons();
+  });
+
+  initIcons();
 }
 
 function _extractSectionsFromDOM(container) {
-    const headers = Array.from(container.querySelectorAll('h2, h3'));
-    return headers.map(h => ({
-        id: h.id,
-        level: h.tagName === 'H2' ? 2 : 3,
-        title: h.textContent
-    }));
+  const headers = Array.from(container.querySelectorAll('h2, h3'));
+  return headers.map((h) => ({
+    id: h.id,
+    level: h.tagName === 'H2' ? 2 : 3,
+    title: h.textContent,
+  }));
 }

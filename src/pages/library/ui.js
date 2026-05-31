@@ -19,7 +19,7 @@ import { initIcons } from '@ui/components/icons.js';
  * Applies initial state from libraryState.sidebarCollapsed.
  */
 export function setupSidebarToggle() {
-  const sidebar   = document.getElementById('sidebar');
+  const sidebar = document.getElementById('sidebar');
   const toggleBtn = document.getElementById('toggle-sidebar');
   if (!sidebar || !toggleBtn) return;
 
@@ -106,16 +106,16 @@ export function setActiveEraChip(activeEra) {
  */
 export function updateSidebarUser(user, profile = {}) {
   const avatarEl = document.getElementById('sidebar-user-avatar');
-  const nameEl   = document.getElementById('sidebar-user-name');
-  const subEl    = document.getElementById('sidebar-user-sub');
+  const nameEl = document.getElementById('sidebar-user-name');
+  const subEl = document.getElementById('sidebar-user-sub');
 
-  const seed      = user.uid.slice(0, 8);
+  const seed = user.uid.slice(0, 8);
   const avatarSrc = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
-  const name      = profile.name || user.displayName || `Scribe ${seed.slice(0, 4)}`;
+  const name = profile.name || user.displayName || `Scribe ${seed.slice(0, 4)}`;
 
-  if (avatarEl) avatarEl.src         = avatarSrc;
-  if (nameEl)   nameEl.textContent   = name;
-  if (subEl)    subEl.textContent    = 'Archive Member';
+  if (avatarEl) avatarEl.src = avatarSrc;
+  if (nameEl) nameEl.textContent = name;
+  if (subEl) subEl.textContent = 'Archive Member';
 }
 
 /* ─────────────────────────────────────────────
@@ -132,8 +132,8 @@ export function showGridSkeleton(count = 8) {
   grid.innerHTML = Array.from(
     { length: count },
     () => `
-    <div class="rounded-[2.5rem] overflow-hidden border border-white/[0.04] bg-white/[0.01]">
-      <div class="aspect-[16/10] skeleton"></div>
+    <div class="rounded-[2.5rem] overflow-hidden border border-white/4 bg-white/1">
+      <div class="aspect-16/10 skeleton"></div>
       <div class="p-6 space-y-4">
         <div class="skeleton h-4 w-1/4 rounded-lg"></div>
         <div class="skeleton h-6 w-3/4 rounded-lg"></div>
@@ -163,7 +163,7 @@ export function showGridEmpty(message = 'No tales found in the archives.') {
 
   grid.innerHTML = `
     <div class="col-span-full flex flex-col items-center gap-6 py-32 text-center animate-fade-in">
-      <div class="w-20 h-20 rounded-[2rem] bg-indigo-500/[0.05] border border-indigo-500/10 flex items-center justify-center shadow-2xl">
+      <div class="w-20 h-20 rounded-4xl bg-indigo-500/5 border border-indigo-500/10 flex items-center justify-center shadow-2xl">
         <i data-lucide="scroll-text" class="w-8 h-8 text-indigo-500/30"></i>
       </div>
       <div class="space-y-2">
@@ -194,7 +194,7 @@ export function showGridError() {
 
   grid.innerHTML = `
     <div class="col-span-full text-center py-24 animate-fade-in">
-      <div class="inline-flex flex-col items-center gap-4 px-10 py-10 rounded-[2.5rem] bg-rose-500/[0.03] border border-rose-500/15">
+      <div class="inline-flex flex-col items-center gap-4 px-10 py-10 rounded-[2.5rem] bg-rose-500/3 border border-rose-500/15">
         <div class="w-14 h-14 rounded-2xl bg-rose-500/10 flex items-center justify-center mb-2">
           <i data-lucide="alert-triangle" class="w-6 h-6 text-rose-500/60"></i>
         </div>

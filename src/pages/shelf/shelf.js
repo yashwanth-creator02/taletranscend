@@ -46,10 +46,7 @@ initAuth(async (user) => {
   // drafts in the background so hero stats can be computed immediately.
   // Bug fix: was calling loadBookmarkedTales twice (once in parallel, once after)
   // which caused two Firestore reads for no reason.
-  await Promise.all([
-    loadBookmarkedTales(user.uid),
-    loadDrafts(user.uid),
-  ]);
+  await Promise.all([loadBookmarkedTales(user.uid), loadDrafts(user.uid)]);
 
   // Default view — bookmarks tab
   setActiveTab('bookmarked');

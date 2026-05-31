@@ -53,49 +53,49 @@ export { READER_THEMES as THEMES, _FONTS as FONTS };
 
 /** @type {ReaderState} */
 export const readerState = {
-  taleId:            null,
-  chapterIndex:      0,
-  totalChapters:     1,
-  taleTitle:         '',
-  chapterTitle:      '',
-  authorName:        '',
-  authorBio:         '',
-  authorHandle:      '',
-  coverUrl:          '',
-  era:               '',
-  language:          '',
-  tags:              [],
-  wordCount:         0,
+  taleId: null,
+  chapterIndex: 0,
+  totalChapters: 1,
+  taleTitle: '',
+  chapterTitle: '',
+  authorName: '',
+  authorBio: '',
+  authorHandle: '',
+  coverUrl: '',
+  era: '',
+  language: '',
+  tags: [],
+  wordCount: 0,
   estimatedReadMins: 0,
 
   // Typography — defaults are authoritative here; theme.config.js holds bounds
-  theme:      'noir',
+  theme: 'noir',
   fontFamily: 'serif',
-  fontSize:   18,
+  fontSize: 18,
   lineHeight: 1.75,
-  measure:    68,
+  measure: 68,
 
   // Panel / UI state
-  openTool:    'toc',
+  openTool: 'toc',
   isCollapsed: false,
-  focusMode:   false,
+  focusMode: false,
 
   // User-specific state
-  userId:     null,
+  userId: null,
   bookmarked: false,
-  claps:      0,
+  claps: 0,
   hasClapped: false,
 
   // Reading position
-  progress:      0,
+  progress: 0,
   activeSection: '',
 
   // Content interactions
   highlights: [],
-  comments:   [],
+  comments: [],
   newComment: '',
-  tts:        { playing: false, rate: 1.0 },
-  selection:  null,
+  tts: { playing: false, rate: 1.0 },
+  selection: null,
 
   // Chapter list for TOC (populated by content.js on load)
   chapters: [],

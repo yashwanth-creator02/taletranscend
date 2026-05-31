@@ -3,7 +3,16 @@
 // Reactions live at tales/{taleId}/reactions/{userId} per the finalized schema.
 // Reaction count on the tale document is synced by the onReactionCreate/Delete Cloud Function.
 
-import { auth, getDoc, setDoc, deleteDoc, updateDoc, increment, serverTimestamp, refs } from '@fb/index.js';
+import {
+  auth,
+  getDoc,
+  setDoc,
+  deleteDoc,
+  updateDoc,
+  increment,
+  serverTimestamp,
+  refs,
+} from '@fb/index.js';
 
 /**
  * Toggles a user's Soul Resonance (reaction) on a tale.
@@ -18,10 +27,10 @@ export async function toggleResonance(taleId) {
   if (!user) throw new Error('Authentication required');
 
   const reactionRef = refs.taleReaction(taleId, user.uid);
-  const taleRef     = refs.tale(taleId);
+  const taleRef = refs.tale(taleId);
 
   const reactionSnap = await getDoc(reactionRef);
-  const wasActive    = reactionSnap.exists();
+  const wasActive = reactionSnap.exists();
 
   if (wasActive) {
     // Remove reaction
@@ -30,8 +39,8 @@ export async function toggleResonance(taleId) {
   } else {
     // Add reaction
     await setDoc(reactionRef, {
-      userId:    user.uid,
-      type:      'like',
+      userId: user.uid,
+      type: 'like',
       reactedAt: serverTimestamp(),
     });
     await updateDoc(taleRef, { reactionCount: increment(1) });
@@ -41,7 +50,7 @@ export async function toggleResonance(taleId) {
   const updatedSnap = await getDoc(taleRef);
   return {
     active: !wasActive,
-    count:  updatedSnap.data()?.reactionCount ?? 0,
+    count: updatedSnap.data()?.reactionCount ?? 0,
   };
 }
 

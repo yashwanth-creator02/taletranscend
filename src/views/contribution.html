@@ -17,7 +17,7 @@
       class="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(79,70,229,0.18),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(168,85,247,0.10),_transparent_30%)]"
     ></div>
     <div
-      class="pointer-events-none fixed inset-0 -z-10 opacity-[0.07] bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:44px_44px]"
+      class="pointer-events-none fixed inset-0 -z-10 opacity-[0.07] bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-size-[44px_44px]"
     ></div>
 
     <!-- Shared nav — injected by initNav() in contribution.js -->
@@ -28,10 +28,10 @@
     regardless of nav height changes.
   -->
     <header
-      class="sticky z-40 border-b border-white/[0.07] bg-[#040406]/90 backdrop-blur-xl"
+      class="sticky z-40 border-b border-white/7 bg-[#040406]/90 backdrop-blur-xl"
       style="top: var(--nav-height, 64px); height: var(--editor-header-height)"
     >
-      <div class="mx-auto flex h-full max-w-[1600px] items-center justify-between px-4 sm:px-6">
+      <div class="mx-auto flex h-full max-w-400 items-center justify-between px-4 sm:px-6">
         <!-- Left: back + title -->
         <div class="flex min-w-0 items-center gap-3 sm:gap-5">
           <a
@@ -67,7 +67,7 @@
           <button
             id="save-draft-btn"
             type="button"
-            class="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400 transition hover:border-white/20 hover:bg-white/[0.07] hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+            class="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/4 px-3 py-2 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400 transition hover:border-white/20 hover:bg-white/7 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
           >
             <i data-lucide="cloud" class="h-3.5 w-3.5"></i>
             <span class="hidden sm:inline">Save Draft</span>
@@ -93,11 +93,11 @@
          LEFT PANE — Tale metadata + chapters
          ════════════════════════════════════════ -->
       <aside
-        class="editor-pane custom-scrollbar hidden w-[17rem] shrink-0 border-r border-slate-800/70 bg-slate-900/20 lg:block"
+        class="editor-pane custom-scrollbar hidden w-68 shrink-0 border-r border-slate-800/70 bg-slate-900/20 lg:block"
       >
         <div class="space-y-5 p-4">
           <!-- Cover -->
-          <section class="studio-card overflow-hidden rounded-[1.5rem]">
+          <section class="studio-card overflow-hidden rounded-3xl">
             <div class="p-4">
               <div class="mb-3 flex items-center justify-between gap-2">
                 <div>
@@ -120,7 +120,7 @@
               <div
                 class="relative overflow-hidden rounded-[1.2rem] border border-white/8 bg-zinc-950"
               >
-                <div class="relative aspect-[4/3] w-full">
+                <div class="relative aspect-4/3 w-full">
                   <img
                     id="tale-cover-preview"
                     src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200&auto=format&fit=crop"
@@ -128,7 +128,7 @@
                     class="h-full w-full object-cover opacity-75 transition duration-500 hover:opacity-100"
                   />
                   <div
-                    class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"
+                    class="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent"
                   ></div>
                   <span
                     class="absolute left-3 top-3 rounded-full border border-white/10 bg-black/50 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-white/70"
@@ -167,7 +167,7 @@
           </section>
 
           <!-- Story Core -->
-          <section class="studio-card rounded-[1.5rem] p-4">
+          <section class="studio-card rounded-3xl p-4">
             <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">
               Manuscript
             </p>
@@ -207,7 +207,7 @@
           </section>
 
           <!-- Classification -->
-          <section class="studio-card rounded-[1.5rem] p-4">
+          <section class="studio-card rounded-3xl p-4">
             <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">
               Classification
             </p>
@@ -320,7 +320,7 @@
           </section>
 
           <!-- Voice dictation -->
-          <section class="studio-card rounded-[1.5rem] p-4">
+          <section class="studio-card rounded-3xl p-4">
             <div class="mb-3 flex items-center justify-between gap-2">
               <div>
                 <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">
@@ -340,7 +340,7 @@
                 type="button"
                 data-voice-target="tale-title"
                 data-voice-label="Dictate Title"
-                class="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-[9px] font-black uppercase tracking-[0.22em] text-slate-400 transition hover:bg-white/[0.07] hover:text-white"
+                class="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/3 px-4 py-2.5 text-[9px] font-black uppercase tracking-[0.22em] text-slate-400 transition hover:bg-white/7 hover:text-white"
               >
                 <i data-lucide="mic" class="h-3.5 w-3.5"></i>
                 Dictate Title
@@ -351,7 +351,7 @@
                 type="button"
                 data-voice-target="tale-synopsis"
                 data-voice-label="Dictate Synopsis"
-                class="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-[9px] font-black uppercase tracking-[0.22em] text-slate-400 transition hover:bg-white/[0.07] hover:text-white"
+                class="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/3 px-4 py-2.5 text-[9px] font-black uppercase tracking-[0.22em] text-slate-400 transition hover:bg-white/7 hover:text-white"
               >
                 <i data-lucide="mic" class="h-3.5 w-3.5"></i>
                 Dictate Synopsis
@@ -362,7 +362,7 @@
                 type="button"
                 data-voice-target="genre-tags"
                 data-voice-label="Dictate Tags"
-                class="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-[9px] font-black uppercase tracking-[0.22em] text-slate-400 transition hover:bg-white/[0.07] hover:text-white"
+                class="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/3 px-4 py-2.5 text-[9px] font-black uppercase tracking-[0.22em] text-slate-400 transition hover:bg-white/7 hover:text-white"
               >
                 <i data-lucide="mic" class="h-3.5 w-3.5"></i>
                 Dictate Tags
@@ -375,7 +375,7 @@
           </section>
 
           <!-- Chapters -->
-          <section class="studio-card rounded-[1.5rem] p-4">
+          <section class="studio-card rounded-3xl p-4">
             <div class="mb-3 flex items-center justify-between gap-2">
               <div>
                 <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">
@@ -422,7 +422,7 @@
                   <h2 class="mt-0.5 text-sm font-semibold text-white">Write the living fragment</h2>
                 </div>
 
-                <div class="flex items-center gap-2 flex-shrink-0">
+                <div class="flex items-center gap-2 shrink-0">
                   <button
                     id="ai-continue-btn"
                     type="button"
@@ -459,7 +459,7 @@
             <!-- Chapter body -->
             <section class="studio-card rounded-[1.75rem] p-5 sm:p-6">
               <div
-                class="mb-4 flex items-center justify-between gap-3 border-b border-white/[0.06] pb-4"
+                class="mb-4 flex items-center justify-between gap-3 border-b border-white/6 pb-4"
               >
                 <div>
                   <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">
@@ -491,7 +491,7 @@
             <!-- Stats bar + mobile save/publish -->
             <section class="studio-card rounded-[1.75rem] p-5 sm:p-6">
               <div
-                class="flex flex-col gap-3 border-b border-white/[0.06] pb-4 sm:flex-row sm:items-center sm:justify-between"
+                class="flex flex-col gap-3 border-b border-white/6 pb-4 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div
                   class="flex flex-wrap items-center gap-4 text-[9px] uppercase tracking-[0.22em] text-slate-600"
@@ -504,10 +504,10 @@
                 <div
                   class="flex flex-wrap items-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-slate-600"
                 >
-                  <span class="rounded-full border border-white/8 bg-white/[0.03] px-2.5 py-1"
+                  <span class="rounded-full border border-white/8 bg-white/3 px-2.5 py-1"
                     >Keep writing</span
                   >
-                  <span class="rounded-full border border-white/8 bg-white/[0.03] px-2.5 py-1"
+                  <span class="rounded-full border border-white/8 bg-white/3 px-2.5 py-1"
                     >Auto-saved locally</span
                   >
                 </div>
@@ -520,7 +520,7 @@
                   <button
                     id="save-draft-btn-mobile"
                     type="button"
-                    class="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 transition hover:bg-white/[0.07] hover:text-white"
+                    class="rounded-xl border border-white/10 bg-white/4 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 transition hover:bg-white/7 hover:text-white"
                   >
                     Save
                   </button>
@@ -542,11 +542,11 @@
          RIGHT PANE — Analytics + settings + checklist
          ════════════════════════════════════════ -->
       <aside
-        class="editor-pane custom-scrollbar hidden w-[19rem] shrink-0 border-l border-slate-800/70 bg-slate-900/20 xl:block"
+        class="editor-pane custom-scrollbar hidden w-76 shrink-0 border-l border-slate-800/70 bg-slate-900/20 xl:block"
       >
         <div class="space-y-5 p-4">
           <!-- Writing metrics -->
-          <section class="studio-card rounded-[1.5rem] p-4">
+          <section class="studio-card rounded-3xl p-4">
             <div class="mb-3 flex items-center justify-between gap-2">
               <div>
                 <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">
@@ -558,19 +558,19 @@
             </div>
 
             <div class="grid grid-cols-2 gap-2.5">
-              <div class="rounded-xl border border-white/[0.06] bg-black/20 p-3">
+              <div class="rounded-xl border border-white/6 bg-black/20 p-3">
                 <p class="text-[9px] text-slate-600">Words</p>
                 <p id="stat-words-right" class="mt-1 text-lg font-bold text-white">0</p>
               </div>
-              <div class="rounded-xl border border-white/[0.06] bg-black/20 p-3">
+              <div class="rounded-xl border border-white/6 bg-black/20 p-3">
                 <p class="text-[9px] text-slate-600">Reading Time</p>
                 <p id="stat-reading-time" class="mt-1 text-lg font-bold text-white">0m</p>
               </div>
-              <div class="rounded-xl border border-white/[0.06] bg-black/20 p-3">
+              <div class="rounded-xl border border-white/6 bg-black/20 p-3">
                 <p class="text-[9px] text-slate-600">Chapters</p>
                 <p id="studio-chapter-count" class="mt-1 text-lg font-bold text-white">0</p>
               </div>
-              <div class="rounded-xl border border-white/[0.06] bg-black/20 p-3">
+              <div class="rounded-xl border border-white/6 bg-black/20 p-3">
                 <p class="text-[9px] text-slate-600">Status</p>
                 <p class="mt-1 text-lg font-bold text-white">Draft</p>
               </div>
@@ -578,7 +578,7 @@
           </section>
 
           <!-- Publishing settings -->
-          <section class="studio-card rounded-[1.5rem] p-4">
+          <section class="studio-card rounded-3xl p-4">
             <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">Settings</p>
             <h3 class="mt-0.5 text-sm font-semibold text-white">Publishing & Identity</h3>
 
@@ -645,9 +645,7 @@
           </section>
 
           <!-- AI Companion stub -->
-          <section
-            class="studio-card rounded-[1.5rem] border border-indigo-500/15 bg-indigo-900/[0.08] p-4"
-          >
+          <section class="studio-card rounded-3xl border border-indigo-500/15 bg-indigo-900/8 p-4">
             <div class="mb-2 flex items-center gap-2 text-indigo-400">
               <i data-lucide="sparkles" class="h-3.5 w-3.5"></i>
               <span class="text-[9px] font-black uppercase tracking-[0.22em]">AI Companion</span>
@@ -675,7 +673,7 @@
             check-cover-era      → era filled
             check-chapter        → at least one chapter has content
         -->
-          <section class="studio-card rounded-[1.5rem] p-4">
+          <section class="studio-card rounded-3xl p-4">
             <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">
               Checklist
             </p>
@@ -684,7 +682,7 @@
             <div class="mt-3 space-y-2">
               <div
                 id="check-title-synopsis"
-                class="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-black/20 p-3 transition opacity-50"
+                class="flex items-center gap-3 rounded-xl border border-white/6 bg-black/20 p-3 transition opacity-50"
               >
                 <i data-lucide="circle" class="h-4 w-4 text-zinc-600"></i>
                 <p class="text-sm text-slate-400">Title and synopsis are set</p>
@@ -692,7 +690,7 @@
 
               <div
                 id="check-cover-era"
-                class="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-black/20 p-3 transition opacity-50"
+                class="flex items-center gap-3 rounded-xl border border-white/6 bg-black/20 p-3 transition opacity-50"
               >
                 <i data-lucide="circle" class="h-4 w-4 text-zinc-600"></i>
                 <p class="text-sm text-slate-400">Era is defined</p>
@@ -700,7 +698,7 @@
 
               <div
                 id="check-chapter"
-                class="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-black/20 p-3 transition opacity-50"
+                class="flex items-center gap-3 rounded-xl border border-white/6 bg-black/20 p-3 transition opacity-50"
               >
                 <i data-lucide="circle" class="h-4 w-4 text-zinc-600"></i>
                 <p class="text-sm text-slate-400">At least one chapter written</p>

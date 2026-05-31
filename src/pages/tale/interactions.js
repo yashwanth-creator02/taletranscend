@@ -16,7 +16,7 @@ import { initIcons } from '@ui/components/icons.js';
  * @param {string} taleId
  */
 export async function setupResonance(taleId) {
-  const btn     = document.getElementById('resonance-btn');
+  const btn = document.getElementById('resonance-btn');
   const countEl = document.getElementById('resonance-count');
   if (!btn || !countEl) return;
 
@@ -41,7 +41,7 @@ export async function setupResonance(taleId) {
 function _updateResonanceUI(btn, countEl, active, count) {
   if (count !== undefined) countEl.textContent = count;
 
-  const icon  = btn.querySelector('i');
+  const icon = btn.querySelector('i');
   const label = btn.querySelector('span');
 
   if (active) {
@@ -142,7 +142,7 @@ export function setupResumeReading(userId, taleId) {
   if (!btn) return;
 
   btn.addEventListener('click', async () => {
-    const resume    = await resolveResumePoint({ userId, taleId });
+    const resume = await resolveResumePoint({ userId, taleId });
     const chapterId = resume?.chapterIndex ?? 0;
     _fadeAndGo(`reader.html?taleId=${taleId}&chapterId=${chapterId}`);
   });
@@ -194,7 +194,7 @@ export async function setupShelfButton(userId, taleId, tale, bookmarkService) {
 function _updateShelfUI(btn, shelved) {
   btn.dataset.shelved = String(shelved);
   const label = btn.querySelector('span');
-  const icon  = btn.querySelector('i');
+  const icon = btn.querySelector('i');
   if (label) label.textContent = shelved ? 'On Your Shelf' : 'Add to Shelf';
   if (icon) icon.setAttribute('data-lucide', shelved ? 'bookmark-check' : 'bookmark-plus');
   btn.classList.toggle('active', shelved);
@@ -250,7 +250,7 @@ async function _copyToClipboard(text) {
  * Handles sticky header scroll effect and floating action bar visibility.
  */
 export function initHeaderScroll() {
-  const bar  = document.getElementById('tale-action-bar');
+  const bar = document.getElementById('tale-action-bar');
   const hero = document.getElementById('hero-section');
 
   const onScroll = () => {

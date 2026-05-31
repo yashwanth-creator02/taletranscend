@@ -28,16 +28,16 @@
 export function createNotification(id, data = {}) {
   return {
     id,
-    type:               data.type               ?? 'new_comment',
-    isRead:             data.isRead             ?? false,
-    title:              data.title              ?? '',
-    body:               data.body               ?? '',
-    actionUrl:          data.actionUrl          ?? '',
-    taleId:             data.taleId             ?? null,
-    commentId:          data.commentId          ?? null,
-    fromUserId:         data.fromUserId         ?? null,
-    fromUserName:       data.fromUserName       ?? null,
-    fromUserAvatarUrl:  data.fromUserAvatarUrl  ?? null,
-    createdAt:          data.createdAt          ?? null,
+    type: data.type ?? 'new_comment',
+    isRead: data.isRead ?? false,
+    title: data.title ?? '',
+    body: data.body ?? '',
+    actionUrl: data.actionUrl ?? '',
+    taleId: data.taleId ?? null,
+    commentId: data.commentId ?? null,
+    fromUserId: data.fromUserId ?? null,
+    fromUserName: data.fromUserName ?? null,
+    fromUserAvatarUrl: data.fromUserAvatarUrl ?? null,
+    createdAt: data.createdAt ?? null,
   };
 }
