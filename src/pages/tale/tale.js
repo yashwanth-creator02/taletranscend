@@ -30,7 +30,6 @@ import {
 import { addToBookmarks, removeFromBookmarks, isBookmarked } from '@services/index.js';
 import { initNav } from '@ui/components/nav/nav.js';
 import { setupAuthTimeout } from '@/utils/ui.utils';
-import { initPageReveal, readyReveal } from '@/utils/ui.utils';
 
 initPageReveal();
 
@@ -82,7 +81,11 @@ initAuth(async (user) => {
   initHeaderScroll();
 
   // 4. Shelf and share buttons
-  await setupShelfButton(userId, taleId, tale, { addToBookmarks, removeFromBookmarks, isBookmarked });
+  await setupShelfButton(userId, taleId, tale, {
+    addToBookmarks,
+    removeFromBookmarks,
+    isBookmarked,
+  });
   setupShareButton(taleId);
 
   // 5. Real-time listeners

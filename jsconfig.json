@@ -5,6 +5,7 @@
     "paths": {
       "@fb/*": ["src/firebase/*"],
       "@services/*": ["src/services/*"],
+      "@state/*": ["src/state/*"],
       "@ui/*": ["src/ui/*"],
       "@pages/*": ["src/pages/*"],
       "@config/*": ["src/config/*"],
