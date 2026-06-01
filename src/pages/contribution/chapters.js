@@ -5,7 +5,7 @@
 import { state } from './state.js';
 import { updateStats } from './editor.js';
 import { initIcons } from '@ui/components/icons.js';
-
+import { sanitizeHtml } from '@/utils';
 /* ── Add ──────────────────────────────────────────────────────────── */
 
 /**

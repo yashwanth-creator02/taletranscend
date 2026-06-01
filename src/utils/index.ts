@@ -6,3 +6,4 @@ export * from './function.utils.ts';
 export * from './progress.utils.ts';
 export * from './ui.utils.ts';
 export * from './dom.utils.ts';
+export * from './sanitize.utils.ts';

@@ -1,7 +1,7 @@
 // src/pages/contribution/contribution.js
 // Entry point for the tale editor page.
 // Bootstraps nav, auth, draft loading, and all editor interactions.
-
+import { initPageReveal, readyReveal } from '@/utils';
 import '@css/base.css';
 import '@css/nav.css';
 import '@css/components.css';
@@ -30,6 +30,7 @@ import { refineMythicText } from '@services/index.js';
 import { AI_API_KEY } from '@config/app.config.js';
 import { showToast } from '@ui/components/toast.js';
 
+initPageReveal();
 initNav();
 
 /* ── Draft ID ─────────────────────────────────────────────────────── */
@@ -43,6 +44,7 @@ const authTimeout = setupAuthTimeout('stat-status', 'Connection timed out. Pleas
 initAuth(async (user) => {
   clearTimeout(authTimeout);
   await init();
+  readyReveal();
 });
 
 /**

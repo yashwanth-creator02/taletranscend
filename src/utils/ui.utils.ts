@@ -62,9 +62,8 @@ export function navigateTo(url: string, delay = 0): void {
  * Then call readyReveal() once auth resolves and the first render is done.
  */
 export function initPageReveal(): void {
-  const body = document.body;
-  body.style.opacity = '0';
-  body.style.transition = `opacity ${TRANSITION_DURATION_MS}ms cubic-bezier(0.4,0,0.2,1)`;
+  // Ensure transition is set on <html> (opacity is already 0 via inline head style)
+  document.documentElement.style.transition = `opacity ${TRANSITION_DURATION_MS}ms cubic-bezier(0.4,0,0.2,1)`;
 }
 
 /**
@@ -73,6 +72,6 @@ export function initPageReveal(): void {
  */
 export function readyReveal(): void {
   requestAnimationFrame(() => {
-    document.body.style.opacity = '1';
+    document.documentElement.style.opacity = '1';
   });
 }
