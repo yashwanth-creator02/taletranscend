@@ -1,10 +1,8 @@
 // src/utils/ui.utils.ts
 // Shared UI utilities used across all pages.
 //
-// setEl and formatJoinDate are re-exported from string.utils.ts here
-// so existing imports from '@/utils/ui.utils' continue to work.
-
-export { setText, setEl, formatJoinDate } from './string.utils.js';
+export { setText, setEl } from './string.utils.ts';
+export { formatJoinDate } from './format.utils.ts';
 
 /* ─────────────────────────────────────────────
    Auth Timeout Guard
@@ -78,25 +76,4 @@ export function readyReveal(): void {
   requestAnimationFrame(() => {
     document.body.style.opacity = '1';
   });
-}
-
-/* ─────────────────────────────────────────────
-   Debounce
-   ───────────────────────────────────────────── */
-
-/**
- * Returns a debounced version of a function.
- *
- * @param fn - Function to debounce
- * @param wait - Delay in milliseconds
- */
-export function debounce<T extends (...args: unknown[]) => unknown>(
-  fn: T,
-  wait: number
-): (...args: Parameters<T>) => void {
-  let timer: ReturnType<typeof setTimeout>;
-  return (...args: Parameters<T>) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => fn(...args), wait);
-  };
 }

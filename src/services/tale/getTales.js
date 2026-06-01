@@ -35,7 +35,6 @@ export async function getTales({ status = 'published', count = 50, after = null 
   }
 
   const snap = await getDocs(q);
-  console.log(snap);
   if (snap.empty) return [];
 
   return snap.docs.map((d) => createTale(d.id, d.data()));

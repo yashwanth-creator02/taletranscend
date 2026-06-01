@@ -21,7 +21,6 @@ export function subscribeToTales(onUpdate, onError) {
     _unsubscribe();
     _unsubscribe = null;
   }
-  console.log('called subscibe');
   const q = query(refs.tales(), where('status', '==', 'published'));
 
   _unsubscribe = onSnapshot(
@@ -30,7 +29,6 @@ export function subscribeToTales(onUpdate, onError) {
       const tales = snapshot.docs.map((d) => createTale(d.id, d.data()));
       libraryState.allTales = tales;
       onUpdate(tales);
-      console.log(tales);
     },
     (err) => {
       console.error('[library] subscribeToTales error:', err.code, err.message);

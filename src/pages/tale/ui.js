@@ -8,6 +8,7 @@ import {
   getTotalReadTime,
 } from '@services/index.js';
 import { escapeHtml, setText, formatMs } from '@/utils/string.utils';
+import { MS_PER_MINUTE } from '@config/app.config.js';
 import { initIcons } from '@ui/components/icons.js';
 
 /**
@@ -116,7 +117,7 @@ export async function renderTale(userId, tale, taleId) {
 
   // Read Time
   const totalMs = await getTotalReadTime({ userId, taleId });
-  const minutes = Math.max(1, Math.floor(totalMs / 60000));
+  const minutes = Math.max(1, Math.floor(totalMs / MS_PER_MINUTE));
   setText('read-time', `${minutes} min read`);
 
   initIcons();
