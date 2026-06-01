@@ -7,7 +7,7 @@ import { refs, getDocs } from '@fb/index.js';
 import { getTaleMeta, getChapter } from '@services/index.js';
 import { createChapter } from '@state/index.js';
 import { readerState } from './state.js';
-import { escapeHtml } from '@/utils/string.utils';
+import { escapeHtml, countWords, estimateReadMins, setText } from '@/utils/string.utils';
 
 /* ─────────────────────────────────────────────
    Skeletons
@@ -17,7 +17,7 @@ import { escapeHtml } from '@/utils/string.utils';
  * Shows skeleton loaders in the article body while content is loading.
  */
 export function showReaderSkeletons() {
-  const content = document.getElementById('article-body');
+  const content = document.getElementById('articleBody');
   if (!content) return;
 
   content.innerHTML = `
@@ -62,12 +62,12 @@ export async function loadReaderMeta(taleId) {
     readerState.language = meta.language || 'High Elven';
 
     // Populate UI elements
-    _setText('article-meta-title', readerState.taleTitle);
-    _setText('author-name', readerState.authorName);
-    _setText('author-heading', readerState.authorName);
-    _setText('author-handle', readerState.authorHandle);
-    _setText('author-card-bio', readerState.authorBio);
-    _setText('top-bar-ch-title', 'Loading...');
+    setText('articleMetaTitle', readerState.taleTitle);
+    setText('authorName', readerState.authorName);
+    setText('author-heading', readerState.authorName);
+    setText('authorHandle', readerState.authorHandle);
+    setText('authorCardBio', readerState.authorBio);
+    setText('topBarChTitle', 'Loading...');
 
     _renderBreadcrumbs(readerState.taleTitle);
     _renderAvatars(readerState.authorName);
@@ -82,7 +82,7 @@ export async function loadReaderMeta(taleId) {
           id: ch.id,
           number: ch.chapterNum,
           title: ch.title || `Fragment ${ch.chapterNum}`,
-          wordCount: ch.wordCount || (ch.content ? ch.content.split(/\s+/).length : 0),
+          wordCount: ch.wordCount || countWords(ch.content),
           sections: _extractSections(ch.content || ''),
         };
       })
@@ -112,32 +112,31 @@ export async function loadReaderChapter({ taleId, chapterIndex }) {
     // Sync chapter fields into readerState
     readerState.chapterTitle = chapter.title || `Fragment ${chapterIndex + 1}`;
     readerState.totalChapters = navigation.totalChapters;
-    readerState.wordCount =
-      chapter.wordCount || (chapter.content ? chapter.content.split(/\s+/).length : 0);
+    readerState.wordCount = chapter.wordCount || countWords(chapter.content);
     readerState.estimatedReadMins =
-      chapter.estimatedReadMins || Math.ceil(readerState.wordCount / 225);
+      chapter.estimatedReadMins || estimateReadMins(readerState.wordCount);
     readerState.currentChapterId = readerState.chapters[chapterIndex]?.id || '';
 
     // Populate UI elements
-    _setText('top-bar-ch-num', chapterIndex + 1);
-    _setText('top-bar-ch-total', navigation.totalChapters);
-    _setText('top-bar-ch-title', readerState.chapterTitle);
-    _setText('header-ch-num', chapterIndex + 1);
-    _setText('header-ch-total', navigation.totalChapters);
-    _setText('article-title', readerState.chapterTitle);
-    _setText('article-subtitle', chapter.subtitle || '');
-    _setText('read-minutes', readerState.estimatedReadMins);
+    setText('topBarChNum', chapterIndex + 1);
+    setText('topBarChTotal', navigation.totalChapters);
+    setText('topBarChTitle', readerState.chapterTitle);
+    setText('headerChNum', chapterIndex + 1);
+    setText('headerChTotal', navigation.totalChapters);
+    setText('articleTitle', readerState.chapterTitle);
+    setText('articleSubtitle', chapter.subtitle || '');
+    setText('readMinutes', readerState.estimatedReadMins);
 
     // Render article body
-    const container = document.getElementById('article-body');
+    const container = document.getElementById('articleBody');
     if (container) {
       container.innerHTML = _processContent(chapter.content || '');
     }
 
     // Show read time in top bar
-    const topBarReadTime = document.getElementById('top-bar-read-time');
+    const topBarReadTime = document.getElementById('topBarReadTime');
     if (topBarReadTime) {
-      _setText('top-bar-min', readerState.estimatedReadMins);
+      setText('topBarMin', readerState.estimatedReadMins);
       topBarReadTime.classList.remove('hidden');
       topBarReadTime.classList.add('flex');
     }
@@ -145,7 +144,7 @@ export async function loadReaderChapter({ taleId, chapterIndex }) {
     return navigation;
   } catch (err) {
     console.error('[reader] Chapter load failed:', err);
-    _setText('article-title', 'Chapter load failed.');
+    setText('articleTitle', 'Chapter load failed.');
     return null;
   }
 }
@@ -250,8 +249,8 @@ function _renderAvatars(name) {
 
   const html = `<div style="display:flex;align-items:center;justify-content:center;border-radius:50%;color:#fff;width:40px;height:40px;font-size:13px;background:linear-gradient(135deg,rgba(99,102,241,0.85),rgba(168,85,247,0.85));box-shadow:0 0 18px -6px rgba(139,124,246,0.55);font-family:var(--font-serif);letter-spacing:0.08em">${initials}</div>`;
 
-  const topAvatar = document.getElementById('author-avatar');
-  const cardAvatar = document.getElementById('author-card-avatar');
+  const topAvatar = document.getElementById('authorAvatar');
+  const cardAvatar = document.getElementById('authorCardAvatar');
   if (topAvatar) topAvatar.innerHTML = html;
   if (cardAvatar) cardAvatar.innerHTML = html;
 }
@@ -281,7 +280,7 @@ function _createFigure(tint) {
    Helpers
    ───────────────────────────────────────────── */
 
-function _setText(id, val) {
+function setText(id, val) {
   const el = document.getElementById(id);
   if (el) el.textContent = val ?? '';
 }

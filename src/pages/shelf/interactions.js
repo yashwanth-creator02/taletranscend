@@ -11,8 +11,10 @@ import {
   computeAndRenderHeroStats,
 } from './content.js';
 import { setActiveTab, buildSortPanel, refreshSortPanel } from './ui.js';
+import { initIcons } from '@ui/components/icons.js';
 import { showToast } from '@ui/components/toast.js';
 import { removeFromBookmarks } from '@services/index.js';
+import { debounce } from '@/utils/function.utils';
 import { navigateTo } from '@/utils/ui.utils';
 
 /* ─────────────────────────────────────────────
@@ -65,15 +67,12 @@ function _bindFilter() {
   const input = document.getElementById('shelf-filter-input');
   if (!input) return;
 
-  let debounceTimer;
+  const onFilter = debounce((e) => {
+    shelfState.filterQuery = e.target.value.toLowerCase();
+    applyAndRender();
+  }, 220);
 
-  input.addEventListener('input', (e) => {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      shelfState.filterQuery = e.target.value.toLowerCase();
-      applyAndRender();
-    }, 220);
-  });
+  input.addEventListener('input', onFilter);
 
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {

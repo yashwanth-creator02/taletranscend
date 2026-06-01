@@ -4,6 +4,7 @@
 // run together against libraryState.allTales so they never conflict.
 
 import { libraryState } from './state.js';
+import { debounce } from '@/utils/function.utils';
 import { getBookmarks } from '@services/index.js';
 import { buildEraChips, setActiveEraChip, setActiveSidebarBtn } from './ui.js';
 import { renderCardsGrid } from '@ui/components/taleCard.js';
@@ -82,15 +83,12 @@ export function setupSearch() {
     libraryState.searchQuery = urlSearch.toLowerCase();
   }
 
-  let debounceTimer;
+  const onSearch = debounce((e) => {
+    libraryState.searchQuery = e.target.value.toLowerCase();
+    applyAllFilters();
+  }, 220);
 
-  input.addEventListener('input', (e) => {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      libraryState.searchQuery = e.target.value.toLowerCase();
-      applyAllFilters();
-    }, 220);
-  });
+  input.addEventListener('input', onSearch);
 
   document.addEventListener('keydown', (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {

@@ -4,6 +4,8 @@
 
 import { getTotalReadTime, getBookmarks, getTaleProgressData } from '@services/index.js';
 import { getOverallProgress } from '@/utils/progress.utils';
+import { formatMs } from '@/utils/string.utils';
+import { DEFAULT_COVER_URL, MS_PER_MINUTE } from '@config/app.config.js';
 import { escapeHtml } from '@/utils/string.utils';
 import { renderEmptyState, renderErrorState } from './feedback.js';
 import '@css/pages/tale-cards.css';
@@ -13,12 +15,18 @@ import '@css/pages/tale-cards.css';
    ───────────────────────────────────────────── */
 
 function _defaultCover() {
-  return 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200&auto=format&fit=crop';
+  return DEFAULT_COVER_URL;
 }
 
 function _formatReadTime(totalMs = 0) {
-  const minutes = Math.floor(Number(totalMs || 0) / 60000);
-  return minutes < 1 ? '' : `${minutes}m read`;
+  return formatMs(Number(totalMs || 0));
+}
+
+function _statusLabel(status) {
+  if (status === 'finished') return 'Completed';
+  if (status === 'draft') return 'Draft';
+  if (status === 'published') return 'Live';
+  return 'In Progress';
 }
 
 function _badge(text, classes = '') {
@@ -158,7 +166,7 @@ export async function renderCardsGrid(userId, tales) {
       message: 'No tales found in the archives.',
       subMessage: 'Try a different filter or come back later.',
       classes:
-        'col-span-full rounded-4xl border border-white/8 bg-white/5 px-6 py-20 text-center shadow-2xl shadow-black/20 backdrop-blur-xl',
+        'col-span-full rounded-[2rem] border border-white/8 bg-white/5 px-6 py-20 text-center shadow-2xl shadow-black/20 backdrop-blur-xl',
     });
     return;
   }
@@ -216,7 +224,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
       data-id="${escapeHtml(id)}"
       aria-label="${safeTitle}"
     >
-      <div class="absolute -inset-px bg-linear-to-b from-indigo-500/0 via-indigo-500/0 to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+      <div class="absolute -inset-px bg-gradient-to-b from-indigo-500/0 via-indigo-500/0 to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
 
       <div class="p-6">
         <!-- Header: Badges & Actions -->
@@ -238,7 +246,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
 
             <div
               id="${escapeHtml(menuId)}"
-              class="options-menu hidden absolute right-0 z-60 mt-2 w-60 overflow-hidden rounded-2xl p-2"
+              class="options-menu hidden absolute right-0 z-[60] mt-2 w-60 overflow-hidden rounded-2xl p-2"
               role="menu"
             >
               <div class="px-3 py-2 border-b border-white/5 mb-1">
@@ -280,14 +288,14 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
 
         <!-- Cover Image with Progress Overlay -->
         <div class="card-image-wrap mb-6 group-hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-all duration-500">
-          <div class="aspect-16/10 w-full relative">
+          <div class="aspect-[16/10] w-full relative">
             <img
               src="${escapeHtml(cover)}"
               alt="${safeTitle}"
               class="h-full w-full object-cover opacity-60 transition duration-700 group-hover:scale-110 group-hover:opacity-100"
               loading="lazy"
             />
-            <div class="absolute inset-0 bg-linear-to-t from-zinc-950 via-transparent to-transparent opacity-60"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent opacity-60"></div>
             <div class="absolute inset-x-0 bottom-0 p-4 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
               <div class="flex items-center justify-between mb-2">
                 <span class="text-[9px] font-black uppercase tracking-widest text-white/50">Neural Progress</span>

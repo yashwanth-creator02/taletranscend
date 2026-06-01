@@ -11,6 +11,7 @@ import { initNav } from '@ui/components/nav/nav.js';
 import { navigateTo, initPageReveal, readyReveal } from '@/utils/ui.utils';
 import { initIcons } from '@ui/components/icons.js';
 import { getTales } from '@services/index.js';
+import { DEFAULT_COVER_URL } from '@config/app.config.js';
 
 initPageReveal();
 initNav();
@@ -90,8 +91,8 @@ function _showSkeletons(container) {
   container.innerHTML = Array.from(
     { length: 3 },
     () => `
-    <div class="glass-card rounded-[2.5rem] bg-indigo-600/5 p-5 border border-white/3">
-      <div class="aspect-4/3 rounded-4xl skeleton mb-6"></div>
+    <div class="glass-card rounded-[2.5rem] bg-indigo-600/5 p-5 border border-white/[0.03]">
+      <div class="aspect-[4/3] rounded-[2rem] skeleton mb-6"></div>
       <div class="space-y-4 px-1">
         <div class="flex gap-3">
           <div class="skeleton h-4 w-20 rounded-md"></div>
@@ -123,9 +124,7 @@ function _hideTrendingSection() {
  * @returns {string}
  */
 function _renderTrendingCard(tale) {
-  const cover =
-    tale.coverUrl ||
-    'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1000&auto=format&fit=crop';
+  const cover = tale.coverUrl || DEFAULT_COVER_URL;
 
   const count = tale.chapterCount || 0;
 
@@ -134,7 +133,7 @@ function _renderTrendingCard(tale) {
       href="tale.html?id=${tale.id}"
       class="glass-card rounded-[2.5rem] bg-indigo-600/10 p-5 group hover:border-indigo-500/50 transition-all duration-500 block"
     >
-      <div class="aspect-4/3 rounded-4xl overflow-hidden mb-6 border border-zinc-800">
+      <div class="aspect-[4/3] rounded-[2rem] overflow-hidden mb-6 border border-zinc-800">
         <img
           src="${cover}"
           alt="${tale.title}"

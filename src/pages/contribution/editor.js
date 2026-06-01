@@ -6,6 +6,7 @@
 import { state } from './state.js';
 import { debounce } from '@/utils/function.utils';
 import { setEl } from '@/utils/ui.utils';
+import { countWords, estimateReadMins } from '@/utils/string.utils';
 
 /* ── Auto-Save ────────────────────────────────────────────────────── */
 
@@ -45,7 +46,7 @@ export const autoSaveLocal = debounce(function () {
 export function updateStats() {
   const content = document.getElementById('chapter-content')?.value ?? '';
   const trimmed = content.trim();
-  const words = trimmed ? trimmed.split(/\s+/).length : 0;
+  const words = countWords(content);
   const chars = content.length;
 
   // Average reading speed: 200 wpm

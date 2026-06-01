@@ -15,7 +15,9 @@
 
 import { auth, setDoc, updateDoc, serverTimestamp, refs } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
+import { createTale } from '@state/index.js';
 import { navigateTo } from '@/utils/ui.utils';
+import { countWords, estimateReadMins } from '@/utils/string.utils';
 
 import { state } from './state.js';
 import { saveAllChapters, syncMetadataFromDom } from './cloud.js';
@@ -75,10 +77,9 @@ export async function publishFullTale() {
 
     const description = state.synopsis?.trim() || _extractDescription(state.chapters);
     const wordCount = state.chapters.reduce((acc, ch) => {
-      const words = ch.content?.trim() ? ch.content.trim().split(/\s+/).length : 0;
-      return acc + words;
+      return acc + countWords(ch.content);
     }, 0);
-    const estimatedReadMins = Math.ceil(wordCount / 225);
+    const estimatedReadMins = estimateReadMins(wordCount);
 
     await setDoc(taleRef, {
       title: state.title,
@@ -139,10 +140,8 @@ export async function publishFullTale() {
 
     await Promise.all(
       state.chapters.map(async (chapter, index) => {
-        const chapterWordCount = chapter.content?.trim()
-          ? chapter.content.trim().split(/\s+/).length
-          : 0;
-        const chapterReadMins = Math.ceil(chapterWordCount / 225);
+        const chapterWordCount = countWords(chapter.content);
+        const chapterReadMins = estimateReadMins(chapterWordCount);
 
         await setDoc(refs.chapter(taleId, index), {
           // chapterNum is 1-based for display — bug fix: was using index (0-based)

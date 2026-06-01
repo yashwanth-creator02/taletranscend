@@ -10,6 +10,7 @@
 
 import { auth, getDoc, getDocs, addDoc, setDoc, serverTimestamp, refs } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
+import { countWords } from '@/utils/string.utils';
 import { state } from './state.js';
 
 /* ─────────────────────────────────────────────
@@ -107,7 +108,7 @@ export async function saveAllChapters(userId) {
  */
 async function _saveChapter(userId, index, chapter) {
   const text = (chapter.content || '').trim();
-  const wordCount = text ? text.split(/\s+/).length : 0;
+  const wordCount = countWords(text);
 
   await setDoc(refs.draftChapter(userId, state.draftId, String(index)), {
     // chapterNum is 1-based for display — bug fix: was index (0-based)
@@ -240,8 +241,7 @@ export function syncMetadataToDom() {
  */
 function _buildMetadataPayload() {
   const wordCount = state.chapters.reduce((acc, ch) => {
-    const text = (ch.content || '').trim();
-    return acc + (text ? text.split(/\s+/).length : 0);
+    return acc + countWords(ch.content);
   }, 0);
 
   return {

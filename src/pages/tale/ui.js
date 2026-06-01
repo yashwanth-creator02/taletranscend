@@ -7,7 +7,7 @@ import {
   getLastReadChapter,
   getTotalReadTime,
 } from '@services/index.js';
-import { escapeHtml } from '@/utils/string.utils';
+import { escapeHtml, setText, formatMs } from '@/utils/string.utils';
 import { initIcons } from '@ui/components/icons.js';
 
 /**
@@ -19,7 +19,7 @@ export function showArchiveSkeletons() {
     list.innerHTML = Array.from(
       { length: 4 },
       () => `
-      <div class="glass-card p-6 md:p-8 rounded-4xl flex justify-between items-center animate-pulse">
+      <div class="glass-card p-6 md:p-8 rounded-[2rem] flex justify-between items-center animate-pulse">
         <div class="flex items-center gap-6">
            <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 skeleton"></div>
            <div>
@@ -55,8 +55,8 @@ export async function renderTale(userId, tale, taleId) {
   const lastChapter = getLastReadChapter({ userId, taleId });
   const last = lastChapter != null ? lastChapter + 1 : null;
 
-  _setText('loading-indicator', 'Archive Link Synchronised');
-  _setText('header-tale-title', tale.title || 'Unknown Legend');
+  setText('loading-indicator', 'Archive Link Synchronised');
+  setText('header-tale-title', tale.title || 'Unknown Legend');
 
   const titleEl = document.getElementById('display-title');
   if (titleEl) {
@@ -69,18 +69,18 @@ export async function renderTale(userId, tale, taleId) {
     metaHero.classList.remove('opacity-0', 'translate-y-8');
   }
 
-  _setText('display-author', tale.authorName || 'Unknown Scribe');
-  _setText('display-chapters', `${tale.chapterCount || 0} Fragments`);
-  _setText('sidebar-chapter-count', tale.chapterCount || 0);
-  _setText(
+  setText('display-author', tale.authorName || 'Unknown Scribe');
+  setText('display-chapters', `${tale.chapterCount || 0} Fragments`);
+  setText('sidebar-chapter-count', tale.chapterCount || 0);
+  setText(
     'display-description',
     tale.description || 'A mysterious tale waiting to be uncovered...'
   );
 
-  _setText('tale-era', tale.era || 'Universal Era');
-  _setText('tale-genre', tale.genre || 'Mythic Fiction');
-  _setText('tale-language', tale.language || 'Primordial');
-  _setText('sidebar-creation', tale.era || 'Neural Entry');
+  setText('tale-era', tale.era || 'Universal Era');
+  setText('tale-genre', tale.genre || 'Mythic Fiction');
+  setText('tale-language', tale.language || 'Primordial');
+  setText('sidebar-creation', tale.era || 'Neural Entry');
 
   const resumeText = document.getElementById('resume-text');
   if (resumeText) resumeText.innerText = last ? `Resume Fragment ${last}` : 'Resume Reading';
@@ -117,7 +117,7 @@ export async function renderTale(userId, tale, taleId) {
   // Read Time
   const totalMs = await getTotalReadTime({ userId, taleId });
   const minutes = Math.max(1, Math.floor(totalMs / 60000));
-  _setText('read-time', `${minutes} min read`);
+  setText('read-time', `${minutes} min read`);
 
   initIcons();
 }
@@ -130,7 +130,7 @@ export function renderChapters(userId, chapters, taleId) {
   if (!list) return;
 
   if (!chapters.length) {
-    list.innerHTML = `<div class="glass p-12 rounded-4xl text-center text-slate-600 text-[10px] font-black uppercase tracking-widest">No chronicles detected in this archive.</div>`;
+    list.innerHTML = `<div class="glass p-12 rounded-[2rem] text-center text-slate-600 text-[10px] font-black uppercase tracking-widest">No chronicles detected in this archive.</div>`;
     return;
   }
 
@@ -151,7 +151,7 @@ export function renderChapters(userId, chapters, taleId) {
       }
 
       return `
-      <div data-chapter-index="${idx}" class="chapter-item ${state} glass-card p-6 md:p-8 rounded-4xl flex justify-between items-center group cursor-pointer">
+      <div data-chapter-index="${idx}" class="chapter-item ${state} glass-card p-6 md:p-8 rounded-[2rem] flex justify-between items-center group cursor-pointer">
         <div class="flex items-center gap-6">
            <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-xs font-black text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-all">
              ${String(idx + 1).padStart(2, '0')}
@@ -173,7 +173,7 @@ export function renderChapters(userId, chapters, taleId) {
   initIcons();
 }
 
-function _setText(id, val) {
+function setText(id, val) {
   const el = document.getElementById(id);
   if (el) el.innerText = val ?? '';
 }
