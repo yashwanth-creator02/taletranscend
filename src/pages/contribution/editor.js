@@ -4,9 +4,9 @@
 // Auto-save to state is debounced to avoid excessive writes on every keystroke.
 
 import { state } from './state.js';
-import { debounce } from '@/utils/function.utils';
-import { setEl } from '@/utils/ui.utils';
-import { countWords, estimateReadMins } from '@/utils/string.utils';
+import { debounce } from '@/utils';
+import { setText } from '@/utils';
+import { countWords, estimateReadMins } from '@/utils';
 
 /* ── Auto-Save ────────────────────────────────────────────────────── */
 
@@ -53,10 +53,8 @@ export function updateStats() {
   const readingMinutes = Math.ceil(words / 200);
   const readingLabel = readingMinutes < 1 ? '< 1m' : `${readingMinutes}m`;
 
-  setEl('stat-words', `${words} Words`);
-  setEl('stat-words-right', String(words));
-  setEl('stat-chars', `${chars} Characters`);
-  setEl('stat-reading-time', readingLabel);
+  setText('stat-words', `${words} Words`);
+  setText('stat-words-right', String(words));
+  setText('stat-chars', `${chars} Characters`);
+  setText('stat-reading-time', readingLabel);
 }
-
-/* ── Helpers ──────────────────────────────────────────────────────── */

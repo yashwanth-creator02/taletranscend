@@ -3,7 +3,7 @@
 
 import { readerState } from './state.js';
 import { initIcons } from '@ui/components/icons.js';
-import { navigateTo } from '@/utils/ui.utils';
+import { navigateTo } from '@/utils';
 
 /**
  * Renders the previous/next chapter navigation buttons and wires their click handlers.

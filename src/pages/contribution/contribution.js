@@ -23,8 +23,8 @@ import {
   state,
   initIcons,
 } from './index.js';
-import { debounce } from '@/utils/function.utils';
-import { setupAuthTimeout } from '@/utils/ui.utils';
+import { debounce } from '@/utils';
+import { setupAuthTimeout } from '@/utils';
 import { initNav } from '@ui/components/nav/nav.js';
 import { refineMythicText } from '@services/index.js';
 import { AI_API_KEY } from '@config/app.config.js';

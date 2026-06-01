@@ -1,7 +1,7 @@
 // src/pages/tale/interactions.js
 // User interactions for the Tale Archive page.
 
-import { navigateTo } from '@/utils/ui.utils';
+import { navigateTo } from '@/utils';
 import { resolveResumePoint, toggleResonance, getResonanceStatus } from '@services/index.js';
 import { showToast } from '@ui/components/toast.js';
 import { initIcons } from '@ui/components/icons.js';

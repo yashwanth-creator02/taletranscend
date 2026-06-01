@@ -10,7 +10,7 @@
 
 import { auth, getDoc, getDocs, addDoc, setDoc, serverTimestamp, refs } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
-import { countWords } from '@/utils/string.utils';
+import { countWords, setInput, getInput, setSelect } from '@/utils';
 import { state } from './state.js';
 
 /* ─────────────────────────────────────────────
@@ -183,16 +183,16 @@ export async function loadDraft() {
  * Called before every cloud save and before publish validation.
  */
 export function syncMetadataFromDom() {
-  state.title = _getInput('tale-title');
-  state.synopsis = _getInput('tale-synopsis');
-  state.coverUrl = _getInput('cover-url');
-  state.era = _getInput('tale-era');
-  state.contentWarnings = _getInput('content-warnings');
-  state.worldSetting = _getInput('world-setting');
-  state.authorNotes = _getInput('story-notes');
+  state.title = getInput('tale-title');
+  state.synopsis = getInput('tale-synopsis');
+  state.coverUrl = getInput('cover-url');
+  state.era = getInput('tale-era');
+  state.contentWarnings = getInput('content-warnings');
+  state.worldSetting = getInput('world-setting');
+  state.authorNotes = getInput('story-notes');
 
   // Tags: comma-separated string -> string[]
-  state.tags = _getInput('genre-tags')
+  state.tags = getInput('genre-tags')
     .split(',')
     .map((t) => t.trim())
     .filter(Boolean);
@@ -208,19 +208,19 @@ export function syncMetadataFromDom() {
  * Called after a draft is loaded from Firestore.
  */
 export function syncMetadataToDom() {
-  _setInput('tale-title', state.title);
-  _setInput('tale-synopsis', state.synopsis);
-  _setInput('cover-url', state.coverUrl);
-  _setInput('tale-era', state.era);
-  _setInput('genre-tags', state.tags.join(', '));
-  _setInput('content-warnings', state.contentWarnings);
-  _setInput('world-setting', state.worldSetting);
-  _setInput('story-notes', state.authorNotes);
+  setInput('tale-title', state.title);
+  setInput('tale-synopsis', state.synopsis);
+  setInput('cover-url', state.coverUrl);
+  setInput('tale-era', state.era);
+  setInput('genre-tags', state.tags.join(', '));
+  setInput('content-warnings', state.contentWarnings);
+  setInput('world-setting', state.worldSetting);
+  setInput('story-notes', state.authorNotes);
 
-  _setSelect('story-tone', state.tone);
-  _setSelect('story-language', state.language);
-  _setSelect('story-visibility', state.visibility);
-  _setSelect('target-audience', state.audience);
+  setSelect('story-tone', state.tone);
+  setSelect('story-language', state.language);
+  setSelect('story-visibility', state.visibility);
+  setSelect('target-audience', state.audience);
 
   if (state.coverUrl) {
     const preview = document.getElementById('tale-cover-preview');
@@ -260,23 +260,4 @@ function _buildMetadataPayload() {
     chapterCount: state.chapters.length,
     wordCount,
   };
-}
-
-/* ─────────────────────────────────────────────
-   DOM Helpers
-   ───────────────────────────────────────────── */
-
-function _getInput(id) {
-  return document.getElementById(id)?.value.trim() ?? '';
-}
-
-function _setInput(id, value) {
-  const el = document.getElementById(id);
-  if (el) el.value = value ?? '';
-}
-
-function _setSelect(id, value) {
-  const el = document.getElementById(id);
-  if (!el || !value) return;
-  if ([...el.options].some((o) => o.value === value)) el.value = value;
 }

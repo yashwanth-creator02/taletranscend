@@ -1,7 +1,7 @@
 // src/pages/reader/templates.js
 // UI Templates for the Reader Panels
 import { THEMES } from './state.js';
-import { escapeHtml } from '@/utils/string.utils';
+import { escapeHtml } from '@/utils';
 
 export function renderTocPanel(chapters, currentChapterId, progress, activeSection, articleTitle) {
   const safeArticleTitle = escapeHtml(articleTitle);

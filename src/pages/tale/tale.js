@@ -1,5 +1,5 @@
 // src/pages/tale/tale.js
-import { initPageReveal, readyReveal } from '@/utils/ui.utils';
+import { initPageReveal, readyReveal } from '@/utils';
 // Tale Archive page entry point.
 // Orchestrates data hydration and all user interactions.
 
@@ -29,7 +29,7 @@ import {
 } from './index.js';
 import { addToBookmarks, removeFromBookmarks, isBookmarked } from '@services/index.js';
 import { initNav } from '@ui/components/nav/nav.js';
-import { setupAuthTimeout } from '@/utils/ui.utils';
+import { setupAuthTimeout } from '@/utils';
 
 initPageReveal();
 

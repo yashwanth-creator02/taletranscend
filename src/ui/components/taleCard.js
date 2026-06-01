@@ -3,10 +3,10 @@
 // Renders a grid of tale cards with progress, bookmarks, and read time overlays.
 
 import { getTotalReadTime, getBookmarks, getTaleProgressData } from '@services/index.js';
-import { getOverallProgress } from '@/utils/progress.utils';
-import { formatMs } from '@/utils/string.utils';
+import { getOverallProgress } from '@/utils';
+import { formatMs } from '@/utils';
 import { DEFAULT_COVER_URL, MS_PER_MINUTE } from '@config/app.config.js';
-import { escapeHtml } from '@/utils/string.utils';
+import { escapeHtml } from '@/utils';
 import { renderEmptyState, renderErrorState } from './feedback.js';
 import '@css/pages/tale-cards.css';
 

@@ -1,7 +1,6 @@
 // src/utils/ui.utils.ts
 // Shared UI utilities used across all pages.
-//
-export { setText, setEl } from './string.utils.ts';
+
 export { formatJoinDate } from './format.utils.ts';
 
 /* ─────────────────────────────────────────────

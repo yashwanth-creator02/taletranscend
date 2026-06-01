@@ -4,11 +4,7 @@
 
 import { shelfState } from './state.js';
 import { initIcons } from '@ui/components/icons.js';
-import {
-  setText as _setEl,
-  formatCount as _formatNumber,
-  timeAgo as _timeAgoUtil,
-} from '@/utils/string.utils';
+import { setText, formatNumber, timeAgo } from '@/utils';
 
 /* ─────────────────────────────────────────────
    Grid Renderers
@@ -252,9 +248,7 @@ export function buildDraftCard(draft) {
     updatedAt,
   } = draft;
 
-  const updated = updatedAt?.seconds
-    ? _timeAgoUtil(new Date(updatedAt.seconds * 1000))
-    : 'Recently';
+  const updated = updatedAt?.seconds ? timeAgo(new Date(updatedAt.seconds * 1000)) : 'Recently';
   const wordLabel =
     wordCount > 0
       ? wordCount >= 1000
@@ -317,9 +311,9 @@ export function buildDraftCard(draft) {
  * @param {{ draftCount: number, bookmarkCount: number, wordsPreserved: number }} stats
  */
 export function renderHeroStats({ draftCount, bookmarkCount, wordsPreserved }) {
-  _setEl('hero-stat-drafts', String(draftCount));
-  _setEl('hero-stat-bookmarks', String(bookmarkCount));
-  _setEl('hero-stat-words', _formatNumber(wordsPreserved));
+  setText('hero-stat-drafts', String(draftCount));
+  setText('hero-stat-bookmarks', String(bookmarkCount));
+  setText('hero-stat-words', formatNumber(wordsPreserved));
 }
 
 /* ─────────────────────────────────────────────
@@ -382,13 +376,4 @@ export function setActiveTab(activeTab) {
     btn.classList.toggle('text-zinc-500', !isActive);
     btn.classList.remove(isActive ? 'text-zinc-500' : 'studio-tab-active');
   });
-}
-
-/* ─────────────────────────────────────────────
-   Helpers
-   ───────────────────────────────────────────── */
-
-function _formatNumber(n) {
-  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
-  return String(n);
 }

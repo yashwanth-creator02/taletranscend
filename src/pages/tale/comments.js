@@ -17,7 +17,7 @@ import {
 } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
 import { createComment } from '@state/index.js';
-import { escapeHtml } from '@/utils/string.utils';
+import { escapeHtml } from '@/utils';
 import { initIcons } from '@ui/components/icons.js';
 import { PATHS } from '@fb/paths.js';
 

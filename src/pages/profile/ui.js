@@ -4,11 +4,11 @@
 
 import { profileState, GENRE_OPTIONS } from './state.js';
 import { suggestNameFromBio } from './ai-name.js';
-import { debounce } from '@/utils/function.utils';
+import { debounce } from '@/utils';
 import { initIcons } from '@ui/components/icons.js';
 import { showToast } from '@ui/components/toast.js';
-import { setText, setEl, setInput, formatNumber, formatJoinDate, timeAgo } from '@/utils/ui.utils';
-import { escapeHtml } from '@/utils/string.utils';
+import { setText, setInput, formatNumber, formatJoinDate, timeAgo } from '@/utils';
+import { escapeHtml } from '@/utils';
 
 /* ─────────────────────────────────────────────
    Modal
@@ -265,9 +265,9 @@ export function updateProfileUI(data) {
   _setSocialLink('social-link-website', data.website || null);
 
   // Stats
-  setEl('stat-words-written', formatNumber(data.totalWordsWritten || 0));
-  setEl('stat-total-readers', formatNumber(data.totalReaders || 0));
-  setEl('stat-streak', String(data.writingStreak || 0));
+  setText('stat-words-written', formatNumber(data.totalWordsWritten || 0));
+  setText('stat-total-readers', formatNumber(data.totalReaders || 0));
+  setText('stat-streak', String(data.writingStreak || 0));
 
   // Reading goal progress
   if (data.readingGoal) {
@@ -366,10 +366,10 @@ function _setSocialLink(id, href) {
  * @param {{ wordsWritten: number, readers: number, readingTime: number, streak: number }} stats
  */
 export function updateStatsUI(stats) {
-  setEl('stat-words-written', formatNumber(stats.wordsWritten ?? 0));
-  setEl('stat-total-readers', formatNumber(stats.readers ?? 0));
-  setEl('stat-reading-time-given', `${Math.round((stats.readingTime ?? 0) / 60)}h`);
-  setEl('stat-streak', String(stats.streak ?? 0));
+  setText('stat-words-written', formatNumber(stats.wordsWritten ?? 0));
+  setText('stat-total-readers', formatNumber(stats.readers ?? 0));
+  setText('stat-reading-time-given', `${Math.round((stats.readingTime ?? 0) / 60)}h`);
+  setText('stat-streak', String(stats.streak ?? 0));
 }
 
 /* ─────────────────────────────────────────────

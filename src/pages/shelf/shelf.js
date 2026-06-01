@@ -1,5 +1,5 @@
 // src/pages/shelf/shelf.js
-import { initPageReveal, readyReveal } from '@/utils/ui.utils';
+import { initPageReveal, readyReveal } from '@/utils';
 // Entry point for the shelf page.
 // Authenticates the user, loads both data sets in parallel,
 // then hands off to interactions and renderers.
@@ -21,7 +21,7 @@ import {
   initAuth,
   initIcons,
 } from './index.js';
-import { setupAuthTimeout } from '@/utils/ui.utils';
+import { setupAuthTimeout } from '@/utils';
 
 initPageReveal();
 initNav();

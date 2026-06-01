@@ -10,7 +10,7 @@ import '@css/pages/profile.css';
 import { initNav } from '@ui/components/nav/nav.js';
 import { initAuth, auth } from '@fb/index.js';
 import { signOut } from 'firebase/auth';
-import { navigateTo, initPageReveal, readyReveal } from '@/utils/ui.utils';
+import { navigateTo, initPageReveal, readyReveal } from '@/utils';
 import { initIcons } from '@ui/components/icons.js';
 import { showToast } from '@ui/components/toast.js';
 

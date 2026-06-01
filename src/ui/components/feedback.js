@@ -1,4 +1,4 @@
-import { escapeHtml } from '@/utils/string.utils';
+import { escapeHtml } from '@/utils';
 import { initIcons } from '@/ui/icons.js';
 
 /**

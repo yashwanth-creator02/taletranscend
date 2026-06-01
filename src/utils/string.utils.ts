@@ -84,26 +84,3 @@ export function getAvatarUrl(uid: string): string {
   const seed = encodeURIComponent((uid ?? 'anon').slice(0, 8));
   return `${DICEBEAR_BASE_URL}?seed=${seed}`;
 }
-
-/* ─────────────────────────────────────────────
-   DOM Helpers
-   ───────────────────────────────────────────── */
-
-/**
- * Sets the textContent of a DOM element by ID.
- * Safe to call with missing elements — silently no-ops.
- * Replaces the _setText / _setEl / setEl pattern duplicated across pages.
- *
- * @param id - Element ID
- * @param value - Text value to set
- */
-export function setText(id: string, value: string | number | null | undefined): void {
-  const el = document.getElementById(id);
-  if (el) el.textContent = String(value ?? '');
-}
-
-/**
- * Alias of setText — kept for compatibility with profile/ui.js and editor.js
- * which import setEl from this module.
- */
-export const setEl = setText;

@@ -3,7 +3,7 @@
 // Uses navigateTo() for all page changes so transitions are smooth.
 
 import { readerState } from './state.js';
-import { navigateTo } from '@/utils/ui.utils';
+import { navigateTo } from '@/utils';
 
 /* ─────────────────────────────────────────────
    Settings Drawer (Mobile)

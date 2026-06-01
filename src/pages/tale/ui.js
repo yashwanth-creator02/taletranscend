@@ -7,7 +7,7 @@ import {
   getLastReadChapter,
   getTotalReadTime,
 } from '@services/index.js';
-import { escapeHtml, setText, formatMs } from '@/utils/string.utils';
+import { escapeHtml, setText, formatMs } from '@/utils';
 import { MS_PER_MINUTE } from '@config/app.config.js';
 import { initIcons } from '@ui/components/icons.js';
 
@@ -172,9 +172,4 @@ export function renderChapters(userId, chapters, taleId) {
     .join('');
 
   initIcons();
-}
-
-function setText(id, val) {
-  const el = document.getElementById(id);
-  if (el) el.innerText = val ?? '';
 }

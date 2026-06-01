@@ -43,9 +43,7 @@ export function timeAgo(date: Date): string {
  * @param timestamp - Firestore Timestamp with .seconds property, or null
  * @returns e.g. "March 2024" or ""
  */
-export function formatJoinDate(
-  timestamp: { seconds: number } | null | undefined
-): string {
+export function formatJoinDate(timestamp: { seconds: number } | null | undefined): string {
   if (!timestamp?.seconds) return '';
 
   return new Date(timestamp.seconds * 1000).toLocaleDateString('en-US', {

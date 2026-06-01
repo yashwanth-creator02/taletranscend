@@ -48,7 +48,7 @@ import {
 
 import { getDoc, setDoc, serverTimestamp, refs } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
-import { navigateTo, initPageReveal, readyReveal } from '@/utils/ui.utils';
+import { navigateTo, initPageReveal, readyReveal } from '@/utils';
 import { TTS_CHAR_LIMIT } from '@config/app.config.js';
 
 // Hide body immediately to prevent flash of unstyled content

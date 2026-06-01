@@ -10,7 +10,7 @@ import '@css/pages/library.css';
 import { initAuth } from '@fb/index.js';
 import { initNav } from '@ui/components/nav/nav.js';
 import { initIcons } from '@ui/components/icons.js';
-import { initPageReveal, readyReveal } from '@/utils/ui.utils';
+import { initPageReveal, readyReveal } from '@/utils';
 
 import { subscribeToTales, stopTalesSubscription } from './content.js';
 import {

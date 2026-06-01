@@ -13,8 +13,8 @@ import {
 import { setActiveTab, buildSortPanel, refreshSortPanel } from './ui.js';
 import { showToast } from '@ui/components/toast.js';
 import { removeFromBookmarks } from '@services/index.js';
-import { debounce } from '@/utils/function.utils';
-import { navigateTo } from '@/utils/ui.utils';
+import { debounce } from '@/utils';
+import { navigateTo } from '@/utils';
 
 /* ─────────────────────────────────────────────
    Public Init

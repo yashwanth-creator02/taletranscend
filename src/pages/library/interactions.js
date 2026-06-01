@@ -5,7 +5,7 @@
 
 import { showToast } from '@ui/components/toast.js';
 import { initIcons } from '@ui/components/icons.js';
-import { navigateTo } from '@/utils/ui.utils';
+import { navigateTo } from '@/utils';
 import {
   resolveResumePoint,
   addToBookmarks,

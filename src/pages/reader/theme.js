@@ -19,6 +19,7 @@ import {
   TYPOGRAPHY_BOUNDS,
   READER_STORAGE_KEYS,
 } from '@config/theme.config.js';
+import { setInput, setText } from '@/utils';
 
 /* ─────────────────────────────────────────────
    Surface Element
@@ -197,26 +198,16 @@ function _syncUI() {
   });
 
   // Font size controls
-  _setInputValue('font-size', readerState.fontSize);
-  _setInputValue('fs-range', readerState.fontSize);
-  _setTextContent('size-val', `${readerState.fontSize}px`);
+  setInput('font-size', readerState.fontSize);
+  setInput('fs-range', readerState.fontSize);
+  setText('size-val', `${readerState.fontSize}px`);
 
   // Line height controls
-  _setInputValue('line-height-input', readerState.lineHeight);
-  _setTextContent('lh-val', readerState.lineHeight.toFixed(2));
+  setInput('line-height-input', readerState.lineHeight);
+  setText('lh-val', readerState.lineHeight.toFixed(2));
 
   // Measure (reading width) controls
-  _setInputValue('measure', readerState.measure);
-  _setInputValue('mw-range', readerState.measure);
-  _setTextContent('ms-val', `${readerState.measure}ch`);
-}
-
-function _setInputValue(id, val) {
-  const el = document.getElementById(id);
-  if (el) el.value = val;
-}
-
-function _setTextContent(id, val) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = val;
+  setInput('measure', readerState.measure);
+  setInput('mw-range', readerState.measure);
+  setText('ms-val', `${readerState.measure}ch`);
 }

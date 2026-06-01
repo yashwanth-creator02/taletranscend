@@ -4,7 +4,7 @@
 // run together against libraryState.allTales so they never conflict.
 
 import { libraryState } from './state.js';
-import { debounce } from '@/utils/function.utils';
+import { debounce } from '@/utils';
 import { getBookmarks } from '@services/index.js';
 import { buildEraChips, setActiveEraChip, setActiveSidebarBtn } from './ui.js';
 import { renderCardsGrid } from '@ui/components/taleCard.js';

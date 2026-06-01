@@ -15,8 +15,8 @@
 
 import { auth, setDoc, updateDoc, serverTimestamp, refs } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
-import { navigateTo } from '@/utils/ui.utils';
-import { countWords, estimateReadMins } from '@/utils/string.utils';
+import { navigateTo } from '@/utils';
+import { countWords, estimateReadMins } from '@/utils';
 
 import { state } from './state.js';
 import { saveAllChapters, syncMetadataFromDom } from './cloud.js';
