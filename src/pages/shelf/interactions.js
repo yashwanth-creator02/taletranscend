@@ -11,7 +11,6 @@ import {
   computeAndRenderHeroStats,
 } from './content.js';
 import { setActiveTab, buildSortPanel, refreshSortPanel } from './ui.js';
-import { initIcons } from '@ui/components/icons.js';
 import { showToast } from '@ui/components/toast.js';
 import { removeFromBookmarks } from '@services/index.js';
 import { debounce } from '@/utils/function.utils';

@@ -49,6 +49,7 @@ import {
 import { getDoc, setDoc, serverTimestamp, refs } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
 import { navigateTo, initPageReveal, readyReveal } from '@/utils/ui.utils';
+import { TTS_CHAR_LIMIT } from '@config/app.config.js';
 
 // Hide body immediately to prevent flash of unstyled content
 initPageReveal();
@@ -372,7 +373,8 @@ function _bindTTSEvents() {
       window.speechSynthesis.cancel();
       readerState.tts.playing = false;
     } else {
-      const text = document.getElementById('article-body')?.innerText.slice(0, 6000) || '';
+      const text =
+        document.getElementById('article-body')?.innerText.slice(0, TTS_CHAR_LIMIT) || '';
       const u = new SpeechSynthesisUtterance(text);
       u.rate = readerState.tts.rate;
       u.onend = () => {

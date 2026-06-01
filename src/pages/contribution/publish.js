@@ -15,7 +15,6 @@
 
 import { auth, setDoc, updateDoc, serverTimestamp, refs } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
-import { createTale } from '@state/index.js';
 import { navigateTo } from '@/utils/ui.utils';
 import { countWords, estimateReadMins } from '@/utils/string.utils';
 

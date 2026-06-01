@@ -40,7 +40,7 @@ initDraftId();
 
 const authTimeout = setupAuthTimeout('stat-status', 'Connection timed out. Please refresh.');
 
-initAuth(async () => {
+initAuth(async (user) => {
   clearTimeout(authTimeout);
   await init();
 });
@@ -49,6 +49,7 @@ initAuth(async () => {
  * Initialises the editor after auth resolves.
  * Loads existing draft or starts fresh.
  *
+ * @param {string} _userId - Authenticated user ID (unused directly — auth state used internally)
  */
 async function init() {
   bindEditorEvents();
