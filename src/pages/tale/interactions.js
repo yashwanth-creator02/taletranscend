@@ -111,7 +111,6 @@ export function setupTabs() {
 
 /**
  * Starts reading from chapter 0.
- * Bug fix: was using chapters[0].id which could be any string — always use chapterId=0.
  *
  * @param {string} taleId
  * @param {import('@state/schemas/tale.schema.js').Chapter[]} chapters

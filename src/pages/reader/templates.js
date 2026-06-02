@@ -1,10 +1,10 @@
 // src/pages/reader/templates.js
 // UI Templates for the Reader Panels
 import { THEMES } from './state.js';
-import { escapeText } from '@/utils';
+import { escapeText as escapeHtml } from '@/utils';
 
 export function renderTocPanel(chapters, currentChapterId, progress, activeSection, articleTitle) {
-  const safeArticleTitle = escapeText(articleTitle);
+  const safeArticleTitle = escapeHtml(articleTitle);
   return `
     <div class="space-y-2">
       <div class="glass mb-3 rounded-xl p-3">
@@ -23,7 +23,7 @@ export function renderTocPanel(chapters, currentChapterId, progress, activeSecti
         ${chapters
           .map((c) => {
             const isCurrent = c.id === currentChapterId;
-            const safeTitle = escapeText(c.title);
+            const safeTitle = escapeHtml(c.title);
             return `
           <div class="toc-chapter ${isCurrent ? 'current' : ''}">
             <button class="toc-chapter-btn" data-chapter-id="${c.id}">
@@ -41,7 +41,7 @@ export function renderTocPanel(chapters, currentChapterId, progress, activeSecti
                 ${c.sections
                   .map((s) => {
                     const active = activeSection === s.id;
-                    const safeSectionTitle = escapeText(s.title);
+                    const safeSectionTitle = escapeHtml(s.title);
                     return `
                   <button class="toc-section-btn ${active ? 'active' : ''} ${s.level === 3 ? 'pl-7' : ''}" data-section-id="${s.id}">
                     <span class="toc-dot ${active ? 'active' : ''}" style="${active ? 'box-shadow:0 0 10px 1px rgba(168,85,247,0.7)' : ''}"></span>
@@ -78,9 +78,9 @@ export function renderTypographyPanel(state) {
       <div>
         <div class="field-label">Font size &mdash; ${state.fontSize}px</div>
         <div class="range-row">
-          <button class="range-btn" id="fsMinus"><i data-lucide="minus" style="width:16px;height:16px"></i></button>
-          <input type="range" min="13" max="26" value="${state.fontSize}" id="fsRange">
-          <button class="range-btn" id="fsPlus"><i data-lucide="plus" style="width:16px;height:16px"></i></button>
+          <button class="range-btn" id="fs-minus"><i data-lucide="minus" style="width:16px;height:16px"></i></button>
+          <input type="range" min="13" max="26" value="${state.fontSize}" id="fs-range">
+          <button class="range-btn" id="fs-plus"><i data-lucide="plus" style="width:16px;height:16px"></i></button>
         </div>
       </div>
       <div>
@@ -97,7 +97,7 @@ export function renderTypographyPanel(state) {
       </div>
       <div>
         <div class="field-label">Line width &mdash; ${state.measure}ch</div>
-        <input type="range" min="48" max="92" value="${state.measure}" id="mwRange">
+        <input type="range" min="48" max="92" value="${state.measure}" id="mw-range">
         <div class="mt-1 flex justify-between text-xs" style="color:rgba(255,255,255,0.4)">
           <span>Narrow</span>
           <span>Wide</span>
@@ -139,8 +139,8 @@ export function renderHighlightsPanel(highlights) {
     <div class="space-y-3">
       ${highlights
         .map((h) => {
-          const safeText = escapeText(h.text.length > 160 ? h.text.slice(0, 160) + '…' : h.text);
-          const safeNote = h.note ? escapeText(h.note) : '';
+          const safeText = escapeHtml(h.text.length > 160 ? h.text.slice(0, 160) + '…' : h.text);
+          const safeNote = h.note ? escapeHtml(h.note) : '';
           return `
         <div class="highlight-card group">
           <div class="highlight-text highlight-${h.color}">"${safeText}"</div>
@@ -164,14 +164,14 @@ export function renderHighlightsPanel(highlights) {
 }
 
 export function renderCommentsPanel(comments, newComment) {
-  const safeNewComment = escapeText(newComment || '');
+  const safeNewComment = escapeHtml(newComment || '');
   return `
     <div class="space-y-5">
       <div class="comment-input-area">
-        <textarea class="comment-textarea" id="commentInput" rows="3" placeholder="Add to the discussion…">${safeNewComment}</textarea>
+        <textarea class="comment-textarea" id="comment-input" rows="3" placeholder="Add to the discussion…">${safeNewComment}</textarea>
         <div class="mt-2 flex items-center justify-between text-xs" style="color:rgba(255,255,255,0.4)">
           <span>Markdown supported</span>
-          <button class="post-btn" id="postComment" ${!newComment?.trim() ? 'disabled' : ''}>Post</button>
+          <button class="post-btn" id="post-comment" ${!newComment?.trim() ? 'disabled' : ''}>Post</button>
         </div>
       </div>
       <div class="space-y-3">
@@ -179,9 +179,9 @@ export function renderCommentsPanel(comments, newComment) {
           comments && comments.length > 0
             ? comments
                 .map((c) => {
-                  const safeAuthor = escapeText(c.author || 'Anonymous');
-                  const safeBody = escapeText(c.body);
-                  const safeInitials = escapeText(c.initials || '??');
+                  const safeAuthor = escapeHtml(c.author || 'Anonymous');
+                  const safeBody = escapeHtml(c.body);
+                  const safeInitials = escapeHtml(c.initials || '??');
                   return `
           <div class="comment-card">
             <div class="mb-2 flex items-center gap-2">
@@ -214,7 +214,7 @@ export function renderSharePanel() {
         <div class="share-link-box">
           <i data-lucide="link" style="width:16px;height:16px;color:rgba(255,255,255,0.4)"></i>
           <span class="share-link-text">${url}</span>
-          <button class="copy-btn" id="copyLink">Copy</button>
+          <button class="copy-btn" id="copy-link">Copy</button>
         </div>
       </div>
       <div class="space-y-2">
@@ -237,7 +237,7 @@ export function renderTTSPanel(isPlaying, rate) {
     <div class="space-y-4">
       <div class="glass rounded-xl p-4">
         <div class="mb-3 flex items-center gap-3">
-          <button class="tts-play-btn" id="ttsToggle" ${!supported ? 'disabled' : ''}>
+          <button class="tts-play-btn" id="tts-toggle" ${!supported ? 'disabled' : ''}>
             <i data-lucide="${isPlaying ? 'pause' : 'play'}" style="width:20px;height:20px"></i>
           </button>
           <div class="leading-tight">
@@ -245,7 +245,7 @@ export function renderTTSPanel(isPlaying, rate) {
             <div class="text-xs" style="color:rgba(255,255,255,0.4)">${supported ? 'Using your browser voice' : 'Not supported in this browser'}</div>
           </div>
         </div>
-        <div><div class="field-label">Speed &mdash; ${rate.toFixed(2)}&times;</div><input type="range" min="0.6" max="1.8" step="0.05" value="${rate}" id="ttsRate"></div>
+        <div><div class="field-label">Speed &mdash; ${rate.toFixed(2)}&times;</div><input type="range" min="0.6" max="1.8" step="0.05" value="${rate}" id="tts-rate"></div>
       </div>
       <p class="text-xs leading-relaxed" style="color:rgba(255,255,255,0.5)">The audio is generated locally by your browser's voice engine — no servers, no recordings.</p>
     </div>`;

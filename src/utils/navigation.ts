@@ -17,9 +17,5 @@ export const VIEWS_PATH = '/src/views/';
 export function navigateTo(view: string): void {
   if (!view) return;
 
-  const file = view.endsWith('.html')
-    ? view
-    : `${view}.html`;
-
-  window.location.href = `${VIEWS_PATH}${file}`;
+  window.location.href = `${VIEWS_PATH}${view}`;
 }

@@ -17,7 +17,7 @@ import {
 } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
 import { createComment } from '@state/index.js';
-import { escapeText } from '@/utils';
+import { escapeHtml as escapeHtml } from '@/utils';
 import { initIcons } from '@ui/components/icons.js';
 import { PATHS } from '@fb/paths.js';
 
@@ -259,12 +259,12 @@ function _renderComment(c) {
         <div class="flex items-center gap-3">
           <img
             src="https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}"
-            alt="${escapeText(c.authorName)}"
+            alt="${escapeHtml(c.authorName)}"
             class="w-8 h-8 rounded-lg bg-white/5"
             loading="lazy"
           />
           <div>
-            <p class="text-[10px] font-black text-white uppercase tracking-widest">${escapeText(c.authorName)}</p>
+            <p class="text-[10px] font-black text-white uppercase tracking-widest">${escapeHtml(c.authorName)}</p>
             <p class="text-[8px] text-slate-500 font-bold uppercase mt-0.5">${date}</p>
           </div>
         </div>
@@ -278,7 +278,7 @@ function _renderComment(c) {
         </button>
       </div>
 
-      <p class="text-sm md:text-base text-slate-400 leading-relaxed font-medium">${escapeText(c.text)}</p>
+      <p class="text-sm md:text-base text-slate-400 leading-relaxed font-medium">${escapeHtml(c.text)}</p>
 
       <div id="replies-${c.id}" class="mt-8 space-y-4 border-l border-white/5 pl-6 empty:hidden"></div>
 
@@ -316,10 +316,10 @@ function _renderReply(r) {
       <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}" alt="Scribe" class="w-6 h-6 rounded-md bg-white/5 opacity-60" />
       <div class="flex-1">
         <div class="flex items-center gap-2 mb-1.5">
-          <span class="text-[9px] font-black text-slate-300 uppercase tracking-widest">${escapeText(r.authorName || 'Scribe')}</span>
+          <span class="text-[9px] font-black text-slate-300 uppercase tracking-widest">${escapeHtml(r.authorName || 'Scribe')}</span>
           <span class="text-[7px] text-slate-600 font-bold uppercase">${date}</span>
         </div>
-        <p class="text-xs text-slate-500 leading-relaxed font-medium">${escapeText(r.text || '')}</p>
+        <p class="text-xs text-slate-500 leading-relaxed font-medium">${escapeHtml(r.text || '')}</p>
       </div>
     </div>
   `;

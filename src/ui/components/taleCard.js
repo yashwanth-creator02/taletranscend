@@ -3,7 +3,7 @@
 // Renders a grid of tale cards with progress, bookmarks, and read time overlays.
 
 import { getTotalReadTime, getBookmarks, getTaleProgressData } from '@services/index.js';
-import { getOverallProgress, formatMs, escapeText } from '@/utils';
+import { getOverallProgress, formatMs, escapeHtml as escapeHtml } from '@/utils';
 import { DEFAULT_COVER_URL, MS_PER_MINUTE } from '@config/app.config.js';
 import { renderEmptyState, renderErrorState } from './feedback.js';
 import '@css/pages/tale-cards.css';
@@ -28,14 +28,14 @@ function _statusLabel(status) {
 }
 
 function _badge(text, classes = '') {
-  return `<span class="badge ${classes}">${escapeText(text)}</span>`;
+  return `<span class="badge ${classes}">${escapeHtml(text)}</span>`;
 }
 
 function _metaItem(icon, label) {
   return `
     <div class="flex items-center gap-2 text-zinc-400 group-hover:text-indigo-300 transition-colors">
       <i data-lucide="${icon}" class="h-3.5 w-3.5 shrink-0 opacity-60"></i>
-      <span class="text-[9px] font-bold uppercase tracking-[0.18em]">${escapeText(label)}</span>
+      <span class="text-[9px] font-bold uppercase tracking-[0.18em]">${escapeHtml(label)}</span>
     </div>
   `;
 }
@@ -197,9 +197,9 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
     chapterCount = 0,
   } = tale || {};
 
-  const safeTitle = escapeText(title);
-  const safeDescription = escapeText(description);
-  const safeEra = escapeText(era);
+  const safeTitle = escapeHtml(title);
+  const safeDescription = escapeHtml(description);
+  const safeEra = escapeHtml(era);
   const isBookmarked = !!bookmarkMap[id];
   const isFinished = tale?.status === 'finished';
   const totalMs = readTimeMap[id] || 0;
@@ -219,7 +219,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
   return `
     <article
       class="tale-card group relative overflow-hidden"
-      data-id="${escapeText(id)}"
+      data-id="${escapeHtml(id)}"
       aria-label="${safeTitle}"
     >
       <div class="absolute -inset-px bg-gradient-to-b from-indigo-500/0 via-indigo-500/0 to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
@@ -236,14 +236,14 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
             <button
               type="button"
               data-action="options"
-              data-menu-id="${escapeText(menuId)}"
+              data-menu-id="${escapeHtml(menuId)}"
               class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-zinc-500 transition-all hover:bg-indigo-500/10 hover:border-indigo-500/30 hover:text-white"
             >
               <i data-lucide="more-horizontal" class="h-4 w-4"></i>
             </button>
 
             <div
-              id="${escapeText(menuId)}"
+              id="${escapeHtml(menuId)}"
               class="options-menu hidden absolute right-0 z-[60] mt-2 w-60 overflow-hidden rounded-2xl p-2"
               role="menu"
             >
@@ -251,7 +251,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
                 <span class="text-[8px] font-black uppercase tracking-widest text-zinc-600">Archive Operations</span>
               </div>
 
-              <button type="button" data-action="copy-link" data-id="${escapeText(id)}"
+              <button type="button" data-action="copy-link" data-id="${escapeHtml(id)}"
                 class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400 transition-colors hover:bg-white/5 hover:text-white">
                 <i data-lucide="link" class="h-3.5 w-3.5"></i>
                 <span>Copy Access Link</span>
@@ -267,7 +267,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
 
               <button type="button"
                 class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] transition-colors ${isFinished ? 'opacity-40 text-zinc-600' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
-                data-action="${isFinished ? '' : 'mark-finished'}" data-id="${escapeText(id)}">
+                data-action="${isFinished ? '' : 'mark-finished'}" data-id="${escapeHtml(id)}">
                 <i data-lucide="check-circle" class="h-3.5 w-3.5"></i>
                 <span>${isFinished ? 'Already Sealed' : 'Seal Chronicle'}</span>
               </button>
@@ -276,7 +276,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
 
               <button type="button"
                 class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] transition-colors ${isBookmarked ? 'text-rose-400 hover:bg-rose-500/10' : 'text-emerald-400 hover:bg-emerald-500/10'}"
-                data-action="${bookmarkedAction}" data-id="${escapeText(id)}">
+                data-action="${bookmarkedAction}" data-id="${escapeHtml(id)}">
                 <i data-lucide="${bookmarkedIcon}" class="h-3.5 w-3.5"></i>
                 <span>${bookmarkedLabel}</span>
               </button>
@@ -288,7 +288,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
         <div class="card-image-wrap mb-6 group-hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-all duration-500">
           <div class="aspect-[16/10] w-full relative">
             <img
-              src="${escapeText(cover)}"
+              src="${escapeHtml(cover)}"
               alt="${safeTitle}"
               class="h-full w-full object-cover opacity-60 transition duration-700 group-hover:scale-110 group-hover:opacity-100"
               loading="lazy"
@@ -330,7 +330,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
             <button
               type="button"
               data-action="resume"
-              data-id="${escapeText(id)}"
+              data-id="${escapeHtml(id)}"
               class="card-button"
             >
               <span>${isFinished ? 'Archive' : 'Engage'}</span>

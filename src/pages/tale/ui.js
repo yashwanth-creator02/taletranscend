@@ -3,7 +3,7 @@
 // Handles tale metadata rendering, chapter lists, and skeleton states.
 
 import { initIcons } from '@ui/components/icons.js';
-import { setText, formatNumber, escapeText } from '@/utils';
+import { setText, formatNumber, escapeHtml as escapeHtml } from '@/utils';
 import { getTotalReadTime } from '@services/index.js';
 import { getChapterProgress } from '@services/reader/localProgress.service.js';
 import { MS_PER_MINUTE } from '@config/app.config.js';
@@ -22,7 +22,10 @@ function getChapterState(progress) {
    Skeletons
    ───────────────────────────────────────────── */
 
-export function renderTaleSkeleton() {
+/**
+ * Shows skeleton loaders for the entire page.
+ */
+export function showArchiveSkeletons() {
   const list = document.getElementById('chapter-list');
   if (list) {
     list.innerHTML = Array.from(
@@ -52,11 +55,11 @@ export function renderTaleSkeleton() {
 /**
  * Populates the tale metadata into the UI.
  *
- * @param {import('@state/schemas/tale.schema.js').Tale} tale
  * @param {string} userId
+ * @param {import('@state/schemas/tale.schema.js').Tale} tale
  * @param {string} taleId
  */
-export async function renderTaleMeta(tale, userId, taleId) {
+export async function renderTale(userId, tale, taleId) {
   const title = document.getElementById('tale-title');
   const desc = document.getElementById('tale-description');
   const chCount = document.getElementById('tale-chapters');
@@ -93,7 +96,7 @@ export async function renderTaleMeta(tale, userId, taleId) {
       .map(
         (t) => `
       <span class="px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 text-[9px] font-black uppercase tracking-widest text-slate-400">
-        ${escapeText(t)}
+        ${escapeHtml(t)}
       </span>
     `
       )
@@ -110,6 +113,10 @@ export async function renderTaleMeta(tale, userId, taleId) {
 
 /**
  * Renders the chronicles list with progress indicators.
+ *
+ * @param {string} userId
+ * @param {Array<Object>} chapters
+ * @param {string} taleId
  */
 export function renderChapters(userId, chapters, taleId) {
   const list = document.getElementById('chapter-list');
@@ -144,7 +151,7 @@ export function renderChapters(userId, chapters, taleId) {
            </div>
            <div>
              <span class="text-[9px] font-black text-indigo-500/60 uppercase tracking-[0.3em] block mb-1">Fragment</span>
-             <h4 class="text-base md:text-lg font-bold text-white uppercase tracking-tight">${escapeText(ch.title || 'Untitled')}</h4>
+             <h4 class="text-base md:text-lg font-bold text-white uppercase tracking-tight">${escapeHtml(ch.title || 'Untitled')}</h4>
            </div>
         </div>
         <div class="flex items-center gap-4">

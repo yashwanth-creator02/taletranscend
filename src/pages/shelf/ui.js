@@ -4,7 +4,7 @@
 
 import { shelfState } from './state.js';
 import { initIcons } from '@ui/components/icons.js';
-import { setText, formatNumber, timeAgo, escapeText } from '@/utils';
+import { setText, formatNumber, timeAgo, escapeHtml as escapeHtml } from '@/utils';
 
 /* ─────────────────────────────────────────────
    Grid Renderers
@@ -71,7 +71,7 @@ export function setGridEmpty(message) {
         </div>
         <div>
           <h3 class="text-base font-cinzel font-bold text-white mb-2">Nothing here yet</h3>
-          <p class="text-sm text-slate-600 max-w-sm leading-relaxed">${escapeText(message)}</p>
+          <p class="text-sm text-slate-600 max-w-sm leading-relaxed">${escapeHtml(message)}</p>
         </div>
         <a href="library.html"
           class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold uppercase tracking-[0.15em] hover:bg-indigo-500/20 transition-colors">
@@ -125,9 +125,9 @@ export function buildBookmarkCard(tale) {
     progress = 0,
   } = tale;
 
-  const safeTitle = escapeText(title);
-  const safeDescription = escapeText(description);
-  const safeEra = escapeText(era);
+  const safeTitle = escapeHtml(title);
+  const safeDescription = escapeHtml(description);
+  const safeEra = escapeHtml(era);
 
   const cover =
     coverUrl || 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=800';
@@ -252,9 +252,9 @@ export function buildDraftCard(draft) {
     updatedAt,
   } = draft;
 
-  const safeTitle = escapeText(title);
-  const safeSynopsis = escapeText(synopsis);
-  const safeEra = escapeText(era);
+  const safeTitle = escapeHtml(title);
+  const safeSynopsis = escapeHtml(synopsis);
+  const safeEra = escapeHtml(era);
 
   const updated = updatedAt?.seconds ? timeAgo(new Date(updatedAt.seconds * 1000)) : 'Recently';
   const wordLabel =

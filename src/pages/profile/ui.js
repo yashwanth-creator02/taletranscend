@@ -7,8 +7,7 @@ import { suggestNameFromBio } from './ai-name.js';
 import { debounce } from '@/utils';
 import { initIcons } from '@ui/components/icons.js';
 import { showToast } from '@ui/components/toast.js';
-import { setText, setInput, formatNumber, formatJoinDate, timeAgo } from '@/utils';
-import { escapeText } from '@/utils';
+import { setText, setInput, formatNumber, formatJoinDate, timeAgo, escapeHtml as escapeHtml } from '@/utils';
 
 /* ─────────────────────────────────────────────
    Modal
@@ -414,8 +413,8 @@ export function renderContinueReading(tales) {
 }
 
 function _buildContinueReadingCard(tale) {
-  const safeTitle = escapeText(tale.title || 'Untitled Tale');
-  const safeDescription = escapeText(tale.description || '');
+  const safeTitle = escapeHtml(tale.title || 'Untitled Tale');
+  const safeDescription = escapeHtml(tale.description || '');
 
   const cover =
     tale.coverUrl ||
@@ -436,7 +435,7 @@ function _buildContinueReadingCard(tale) {
         <div class="card-overlay"></div>
         <div class="absolute bottom-4 left-4">
           <span class="px-2.5 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-lg text-[9px] font-black text-white/90 uppercase tracking-widest">
-            ${escapeText(tale.era || 'Mythic Era')}
+            ${escapeHtml(tale.era || 'Mythic Era')}
           </span>
         </div>
       </div>
@@ -490,8 +489,8 @@ export function renderPublishedTales(tales) {
 }
 
 function _buildPublishedCard(tale) {
-  const safeTitle = escapeText(tale.title || 'Untitled Tale');
-  const safeDescription = escapeText(tale.description || '');
+  const safeTitle = escapeHtml(tale.title || 'Untitled Tale');
+  const safeDescription = escapeHtml(tale.description || '');
 
   const cover =
     tale.coverUrl ||
@@ -552,8 +551,8 @@ export function renderDrafts(drafts) {
 }
 
 function _buildDraftCard(draft) {
-  const safeTitle = escapeText(draft.title || 'Untitled Draft');
-  const safeSynopsis = escapeText(draft.synopsis || 'No synopsis recorded yet.');
+  const safeTitle = escapeHtml(draft.title || 'Untitled Draft');
+  const safeSynopsis = escapeHtml(draft.synopsis || 'No synopsis recorded yet.');
 
   const updated = draft.updatedAt?.seconds
     ? timeAgo(new Date(draft.updatedAt.seconds * 1000))

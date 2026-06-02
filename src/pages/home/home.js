@@ -8,7 +8,7 @@ import '@css/components.css';
 import '@css/pages/home.css';
 
 import { initNav } from '@ui/components/nav/nav.js';
-import { navigateTo, initPageReveal, readyReveal, escapeText } from '@/utils';
+import { navigateTo, initPageReveal, readyReveal, escapeHtml as escapeHtml } from '@/utils';
 import { initIcons } from '@ui/components/icons.js';
 import { getTales } from '@services/index.js';
 import { DEFAULT_COVER_URL } from '@config/app.config.js';
@@ -127,10 +127,10 @@ function _renderTrendingCard(tale) {
   const cover = tale.coverUrl || DEFAULT_COVER_URL;
   const count = tale.chapterCount || 0;
 
-  const safeTitle = escapeText(tale.title || 'Untitled Tale');
-  const safeDescription = escapeText(tale.description || 'A mysterious tale waiting to be uncovered...');
-  const safeEra = escapeText(tale.era || 'Unknown Era');
-  const safeAuthor = escapeText(tale.authorName || 'Unknown Scribe');
+  const safeTitle = escapeHtml(tale.title || 'Untitled Tale');
+  const safeDescription = escapeHtml(tale.description || 'A mysterious tale waiting to be uncovered...');
+  const safeEra = escapeHtml(tale.era || 'Unknown Era');
+  const safeAuthor = escapeHtml(tale.authorName || 'Unknown Scribe');
 
   return `
     <a
