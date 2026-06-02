@@ -13,6 +13,7 @@ import { auth, signOut } from '@fb/index.js';
 import { BASE_COMMANDS } from './nav.config.js';
 import { getNavElements, getCurrentPage, renderIcons } from './nav.utils.js';
 import { navState } from './nav.state.js';
+import { escapeText } from '@/utils';
 
 /* ─────────────────────────────────────────────
    Command Item Builders
@@ -76,7 +77,7 @@ function buildCommandItem(item, current, isFocused = false) {
       <span class="command-item__icon-wrap" aria-hidden="true">
         <i data-lucide="${item.icon}" class="command-item__icon"></i>
       </span>
-      <span class="command-item__label">${item.label}</span>
+      <span class="command-item__label">${escapeText(item.label)}</span>
       ${item.shortcut ? `<span class="command-item__shortcut" aria-label="Shortcut: ${item.shortcut}">${item.shortcut}</span>` : ''}
       ${isActive ? '<span class="command-item__badge">Current</span>' : ''}
     </button>
@@ -112,7 +113,7 @@ export function renderCommandList(query = '') {
   if (!filtered.length) {
     commandList.innerHTML = `
       <div class="command-empty" role="status" aria-live="polite">
-        No results for "<strong>${query}</strong>"
+        No results for "<strong>${escapeText(query)}</strong>"
       </div>
     `;
     renderIcons(commandList);

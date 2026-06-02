@@ -5,6 +5,7 @@
  */
 
 import { initIcons } from '@/ui/icons.js';
+import { escapeText } from '@/utils';
 
 const TOAST_DURATION = 4000;
 const TOAST_CONTAINER_ID = 'mythic-toast-hub';
@@ -63,7 +64,7 @@ export function showToast(message, type = 'success') {
       <i data-lucide="${iconMap[type]}" class="w-5 h-5"></i>
     </div>
     <div class="flex-1 min-w-0">
-      <p class="text-[13px] font-bold tracking-wide leading-tight">${message}</p>
+      <p class="text-[13px] font-bold tracking-wide leading-tight">${escapeText(message)}</p>
     </div>
     <button class="shrink-0 opacity-40 hover:opacity-100 transition-opacity" aria-label="Dismiss">
       <i data-lucide="x" class="w-3.5 h-3.5"></i>

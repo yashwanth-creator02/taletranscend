@@ -3,7 +3,7 @@
 
 import { readerState } from './state.js';
 import { initIcons } from '@ui/components/icons.js';
-import { navigateTo } from '@/utils';
+import { navigateTo, escapeText } from '@/utils';
 
 /**
  * Renders the previous/next chapter navigation buttons and wires their click handlers.
@@ -26,7 +26,7 @@ export function applyNavigation(nav) {
       <i data-lucide="chevron-left" class="shrink-0" style="width:20px;height:20px;color:#c4b5fd;transition:transform 200ms"></i>
       <div class="min-w-0">
         <div class="chapter-nav-label">Previous &middot; Fragment ${nav.prevIndex + 1}</div>
-        <div class="chapter-nav-title">${nav.prevTitle || 'Untitled'}</div>
+        <div class="chapter-nav-title">${escapeText(nav.prevTitle || 'Untitled')}</div>
       </div>
     </button>`
     : '<div></div>';
@@ -36,11 +36,11 @@ export function applyNavigation(nav) {
     <button class="chapter-nav-btn chapter-nav-btn--right glass hover-lift group" data-nav-index="${nav.nextIndex}" type="button">
       <div class="min-w-0">
         <div class="chapter-nav-label">Next &middot; Fragment ${nav.nextIndex + 1}</div>
-        <div class="chapter-nav-title">${nav.nextTitle || 'Untitled'}</div>
+        <div class="chapter-nav-title">${escapeText(nav.nextTitle || 'Untitled')}</div>
       </div>
       <i data-lucide="chevron-right" class="shrink-0" style="width:20px;height:20px;color:#c4b5fd;transition:transform 200ms"></i>
     </button>`
-    : `<div class="glass flex items-center justify-center rounded-2xl p-4 text-xs" style="color:rgba(255,255,255,0.4)">End of ${readerState.taleTitle}</div>`;
+    : `<div class="glass flex items-center justify-center rounded-2xl p-4 text-xs" style="color:rgba(255,255,255,0.4)">End of ${escapeText(readerState.taleTitle)}</div>`;
 
   container.innerHTML = prev + next;
 

@@ -95,7 +95,7 @@ export function renderChapterList() {
     item.innerHTML = `
       <button class="chapter-item__select" type="button" aria-label="Select chapter ${index + 1}">
         <span class="chapter-item__num">${index + 1}</span>
-        <span class="chapter-item__title">${ch.title || 'Untitled Chapter'}</span>
+        <span class="chapter-item__title">${escapeText(ch.title || 'Untitled Chapter')}</span>
       </button>
       <div class="chapter-item__actions">
         <button

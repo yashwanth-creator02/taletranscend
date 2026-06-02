@@ -1,10 +1,10 @@
 // src/pages/reader/templates.js
 // UI Templates for the Reader Panels
 import { THEMES } from './state.js';
-import { escapeHtml } from '@/utils';
+import { escapeText } from '@/utils';
 
 export function renderTocPanel(chapters, currentChapterId, progress, activeSection, articleTitle) {
-  const safeArticleTitle = escapeHtml(articleTitle);
+  const safeArticleTitle = escapeText(articleTitle);
   return `
     <div class="space-y-2">
       <div class="glass mb-3 rounded-xl p-3">
@@ -23,7 +23,7 @@ export function renderTocPanel(chapters, currentChapterId, progress, activeSecti
         ${chapters
           .map((c) => {
             const isCurrent = c.id === currentChapterId;
-            const safeTitle = escapeHtml(c.title);
+            const safeTitle = escapeText(c.title);
             return `
           <div class="toc-chapter ${isCurrent ? 'current' : ''}">
             <button class="toc-chapter-btn" data-chapter-id="${c.id}">
@@ -41,7 +41,7 @@ export function renderTocPanel(chapters, currentChapterId, progress, activeSecti
                 ${c.sections
                   .map((s) => {
                     const active = activeSection === s.id;
-                    const safeSectionTitle = escapeHtml(s.title);
+                    const safeSectionTitle = escapeText(s.title);
                     return `
                   <button class="toc-section-btn ${active ? 'active' : ''} ${s.level === 3 ? 'pl-7' : ''}" data-section-id="${s.id}">
                     <span class="toc-dot ${active ? 'active' : ''}" style="${active ? 'box-shadow:0 0 10px 1px rgba(168,85,247,0.7)' : ''}"></span>
@@ -139,8 +139,8 @@ export function renderHighlightsPanel(highlights) {
     <div class="space-y-3">
       ${highlights
         .map((h) => {
-          const safeText = escapeHtml(h.text.length > 160 ? h.text.slice(0, 160) + '…' : h.text);
-          const safeNote = h.note ? escapeHtml(h.note) : '';
+          const safeText = escapeText(h.text.length > 160 ? h.text.slice(0, 160) + '…' : h.text);
+          const safeNote = h.note ? escapeText(h.note) : '';
           return `
         <div class="highlight-card group">
           <div class="highlight-text highlight-${h.color}">"${safeText}"</div>
@@ -164,7 +164,7 @@ export function renderHighlightsPanel(highlights) {
 }
 
 export function renderCommentsPanel(comments, newComment) {
-  const safeNewComment = escapeHtml(newComment || '');
+  const safeNewComment = escapeText(newComment || '');
   return `
     <div class="space-y-5">
       <div class="comment-input-area">
@@ -179,9 +179,9 @@ export function renderCommentsPanel(comments, newComment) {
           comments && comments.length > 0
             ? comments
                 .map((c) => {
-                  const safeAuthor = escapeHtml(c.author || 'Anonymous');
-                  const safeBody = escapeHtml(c.body);
-                  const safeInitials = escapeHtml(c.initials || '??');
+                  const safeAuthor = escapeText(c.author || 'Anonymous');
+                  const safeBody = escapeText(c.body);
+                  const safeInitials = escapeText(c.initials || '??');
                   return `
           <div class="comment-card">
             <div class="mb-2 flex items-center gap-2">

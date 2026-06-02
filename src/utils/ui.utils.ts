@@ -2,68 +2,51 @@
 // Shared UI utilities used across all pages.
 
 export { formatJoinDate } from './format.utils.ts';
+import { escapeText } from './sanitize.utils.ts';
 
 /* ─────────────────────────────────────────────
    Auth Timeout Guard
    ───────────────────────────────────────────── */
 
 /**
- * Sets up a timeout guard for authentication.
- * Shows an error message inside containerId if auth does not resolve in time.
+ * Ensures the page doesn't hang indefinitely if Firebase Auth
+ * fails to resolve within a reasonable window.
  *
- * @param containerId - The ID of the DOM element to show the error in
- * @param message - The error message to display
- * @param timeoutMs - Timeout duration in milliseconds
- * @returns The timeout ID so the caller can clearTimeout on auth success
+ * @param {Function} callback - Success callback
+ * @param {number} [timeout=8000] - Timeout in ms
+ * @param {string} [message="The Neural Link is unstable. Please refresh."]
  */
 export function setupAuthTimeout(
-  containerId: string,
-  message: string = 'Connection timed out. Please refresh.',
-  timeoutMs: number = 10000
-): ReturnType<typeof setTimeout> {
-  return setTimeout(() => {
-    const container = document.getElementById(containerId);
+  callback: (user: any) => void,
+  timeout = 8000,
+  message = 'The Neural Link is unstable. Please refresh.'
+): void {
+  const timer = setTimeout(() => {
+    const container = document.getElementById('auth-status-fallback');
     if (container) {
       container.innerHTML = `
         <div class="col-span-full text-center py-20 text-red-500">
-          ${message}
+          ${escapeText(message)}
         </div>
       `;
     }
-  }, timeoutMs);
+  }, timeout);
+
+  // Note: Actual auth state listener should clear this timer.
+  // This is just the UI-side guard.
 }
 
 /* ─────────────────────────────────────────────
-   Page Transition System
+   Page Reveal
    ───────────────────────────────────────────── */
 
-const TRANSITION_DURATION_MS = 220;
-
 /**
- * Navigates to a URL with a smooth fade-out transition.
- * Use this instead of window.location.href = url anywhere a page change happens.
- *
- * @param url - Destination URL (relative or absolute)
- * @param delay - Optional extra delay before navigation (ms)
- */
-export function navigateTo(url: string, delay = 0): void {
-  const body = document.body;
-  body.style.transition = `opacity ${TRANSITION_DURATION_MS}ms cubic-bezier(0.4,0,0.2,1)`;
-  body.style.opacity = '0';
-  body.style.pointerEvents = 'none';
-  setTimeout(() => {
-    window.location.href = url;
-  }, TRANSITION_DURATION_MS + delay);
-}
-
-/**
- * Hides the page body immediately on script load to prevent FOUC.
- * Call at the top of every page entry file.
- * Then call readyReveal() once auth resolves and the first render is done.
+ * Sets initial opacity to 0 to prevent FOUC.
+ * Call this immediately at the top of page entry points.
  */
 export function initPageReveal(): void {
-  // Ensure transition is set on <html> (opacity is already 0 via inline head style)
-  document.documentElement.style.transition = `opacity ${TRANSITION_DURATION_MS}ms cubic-bezier(0.4,0,0.2,1)`;
+  document.documentElement.style.opacity = '0';
+  document.documentElement.style.transition = `opacity 600ms cubic-bezier(0.4,0,0.2,1)`;
 }
 
 /**

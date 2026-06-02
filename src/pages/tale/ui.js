@@ -1,105 +1,90 @@
 // src/pages/tale/ui.js
-// Renders the high-fidelity tale overview and chronicles for the Archive page.
+// Presentation layer for the tale summary page.
+// Handles tale metadata rendering, chapter lists, and skeleton states.
 
-import {
-  getChapterState,
-  getChapterProgress,
-  getLastReadChapter,
-  getTotalReadTime,
-} from '@services/index.js';
-import { escapeHtml, setText, formatMs } from '@/utils';
-import { MS_PER_MINUTE } from '@config/app.config.js';
 import { initIcons } from '@ui/components/icons.js';
+import { setText, formatNumber, escapeText } from '@/utils';
+import { getTotalReadTime } from '@services/index.js';
+import { getChapterProgress } from '@services/reader/localProgress.service.js';
+import { MS_PER_MINUTE } from '@config/app.config.js';
 
-/**
- * Shows high-fidelity skeleton loaders for the Archive page.
- */
-export function showArchiveSkeletons() {
+/* ─────────────────────────────────────────────
+   State Helpers
+   ───────────────────────────────────────────── */
+
+function getChapterState(progress) {
+  if (!progress) return 'not_started';
+  if (progress.isFinished) return 'completed';
+  return 'in_progress';
+}
+
+/* ─────────────────────────────────────────────
+   Skeletons
+   ───────────────────────────────────────────── */
+
+export function renderTaleSkeleton() {
   const list = document.getElementById('chapter-list');
   if (list) {
     list.innerHTML = Array.from(
-      { length: 4 },
+      { length: 5 },
       () => `
-      <div class="glass-card p-6 md:p-8 rounded-[2rem] flex justify-between items-center animate-pulse">
-        <div class="flex items-center gap-6">
-           <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 skeleton"></div>
-           <div>
-             <div class="skeleton h-3 w-16 rounded-md mb-2"></div>
-             <div class="skeleton h-6 w-48 rounded-lg"></div>
-           </div>
-        </div>
-        <div class="skeleton h-5 w-5 rounded-full"></div>
-      </div>
+      <div class="h-24 rounded-[2rem] skeleton mb-4"></div>
     `
     ).join('');
   }
 
-  const title = document.getElementById('display-title');
+  const title = document.getElementById('tale-title');
   if (title) title.innerHTML = '<div class="skeleton h-12 w-3/4 rounded-2xl mb-4"></div>';
 
-  const desc = document.getElementById('display-description');
+  const desc = document.getElementById('tale-description');
   if (desc) {
     desc.innerHTML = `
-      <div class="space-y-3">
-        <div class="skeleton h-4 w-full rounded-lg"></div>
-        <div class="skeleton h-4 w-full rounded-lg"></div>
-        <div class="skeleton h-4 w-2/3 rounded-lg"></div>
-      </div>
+      <div class="skeleton h-4 w-full rounded-md mb-2"></div>
+      <div class="skeleton h-4 w-5/6 rounded-md"></div>
     `;
   }
 }
 
+/* ─────────────────────────────────────────────
+   Meta Render
+   ───────────────────────────────────────────── */
+
 /**
- * Renders the primary tale metadata with cinematic transitions.
+ * Populates the tale metadata into the UI.
+ *
+ * @param {import('@state/schemas/tale.schema.js').Tale} tale
+ * @param {string} userId
+ * @param {string} taleId
  */
-export async function renderTale(userId, tale, taleId) {
-  const lastChapter = getLastReadChapter({ userId, taleId });
-  const last = lastChapter != null ? lastChapter + 1 : null;
+export async function renderTaleMeta(tale, userId, taleId) {
+  const title = document.getElementById('tale-title');
+  const desc = document.getElementById('tale-description');
+  const chCount = document.getElementById('tale-chapters');
+  const author = document.getElementById('tale-author');
+  const era = document.getElementById('tale-era');
+  const cover = document.getElementById('tale-cover');
 
-  setText('loading-indicator', 'Archive Link Synchronised');
-  setText('header-tale-title', tale.title || 'Unknown Legend');
+  if (title) title.textContent = tale.title || 'Untitled Tale';
+  if (desc) desc.textContent = tale.description || 'A mysterious tale waiting to be uncovered...';
 
-  const titleEl = document.getElementById('display-title');
-  if (titleEl) {
-    titleEl.innerText = tale.title || 'Untitled Legend';
-    titleEl.classList.remove('opacity-0', 'translate-y-12');
-  }
+  const count = tale.chapterCount || 0;
+  if (chCount) chCount.textContent = `${count} ${count === 1 ? 'Fragment' : 'Fragments'}`;
 
-  const metaHero = document.getElementById('hero-meta');
-  if (metaHero) {
-    metaHero.classList.remove('opacity-0', 'translate-y-8');
-  }
+  if (cover) {
+    const url =
+      tale.coverUrl || 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=800';
+    cover.src = url;
+    cover.alt = tale.title || 'Tale cover';
 
-  setText('display-author', tale.authorName || 'Unknown Scribe');
-  setText('display-chapters', `${tale.chapterCount || 0} Fragments`);
-  setText('sidebar-chapter-count', tale.chapterCount || 0);
-  setText(
-    'display-description',
-    tale.description || 'A mysterious tale waiting to be uncovered...'
-  );
-
-  setText('tale-era', tale.era || 'Universal Era');
-  setText('tale-genre', tale.genre || 'Mythic Fiction');
-  setText('tale-language', tale.language || 'Primordial');
-  setText('sidebar-creation', tale.era || 'Neural Entry');
-
-  const resumeText = document.getElementById('resume-text');
-  if (resumeText) resumeText.innerText = last ? `Resume Fragment ${last}` : 'Resume Reading';
-
-  const authorAvatar = document.getElementById('author-avatar-hero');
-  if (authorAvatar) {
-    const seed = encodeURIComponent((tale.authorId || 'scribe').slice(0, 8));
-    authorAvatar.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
-  }
-
-  if (tale.coverUrl) {
-    const covers = document.querySelectorAll('#display-cover');
-    covers.forEach((img) => (img.src = tale.coverUrl));
-
+    // Apply as background too for the hero glow
     document
       .getElementById('hero-section')
       ?.style.setProperty('--bg-url', `url('${tale.coverUrl}')`);
   }
+
+  // Author and Era
+  if (author) author.textContent = tale.authorName || 'Unknown Scribe';
+  if (era) era.textContent = tale.era || 'Unknown Era';
 
   // Tags
   const tagList = document.getElementById('lore-tag-list');
@@ -108,7 +93,7 @@ export async function renderTale(userId, tale, taleId) {
       .map(
         (t) => `
       <span class="px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 text-[9px] font-black uppercase tracking-widest text-slate-400">
-        ${escapeHtml(t)}
+        ${escapeText(t)}
       </span>
     `
       )
@@ -159,7 +144,7 @@ export function renderChapters(userId, chapters, taleId) {
            </div>
            <div>
              <span class="text-[9px] font-black text-indigo-500/60 uppercase tracking-[0.3em] block mb-1">Fragment</span>
-             <h4 class="text-base md:text-lg font-bold text-white uppercase tracking-tight">${escapeHtml(ch.title || 'Untitled')}</h4>
+             <h4 class="text-base md:text-lg font-bold text-white uppercase tracking-tight">${escapeText(ch.title || 'Untitled')}</h4>
            </div>
         </div>
         <div class="flex items-center gap-4">

@@ -6,26 +6,41 @@ import DOMPurify from 'dompurify';
 
 /**
  * Sanitizes a raw HTML string for safe insertion into the DOM.
- * Allows only safe tags (b, i, em, strong, p, br, h1-h6, blockquote, ul, ol, li).
- * Strips all event handlers, javascript: URLs, and <script> tags.
+ * Allows only safe tags and attributes while stripping all event handlers,
+ * javascript: URLs, and <script> tags.
  *
- * @param dirty - Raw user-generated string
+ * @param dirty - Raw user-generated or dynamic string
  * @returns Clean HTML string safe for innerHTML
  */
 export function sanitizeHtml(dirty: string): string {
   if (!dirty) return '';
+
   return DOMPurify.sanitize(dirty, {
     ALLOWED_TAGS: [
-      'b', 'i', 'em', 'strong', 'p', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-      'blockquote', 'ul', 'ol', 'li', 'a', 'span', 'div', 'img', 'figure', 'figcaption',
+      'b', 'i', 'em', 'strong',
+      'p', 'br',
+      'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+      'blockquote',
+      'ul', 'ol', 'li',
+      'a',
+      'figure', 'figcaption',
+      'img',
+      'div', 'span'
     ],
+
     ALLOWED_ATTR: [
-      'href', 'title', 'alt', 'src', 'class', 'id', 'data-*',
+      'href',
+      'title',
+      'alt',
+      'src',
+      'id',
+      'class',
+      'style',
+      'aria-hidden'
     ],
-    // Force all links to open safely and strip javascript: URLs
-    SANITIZE_DOM: true,
-    // Keep data attributes for internal UI hooks
+
     ALLOW_DATA_ATTR: true,
+    SANITIZE_DOM: true,
   });
 }
 

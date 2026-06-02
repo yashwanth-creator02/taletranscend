@@ -92,8 +92,7 @@ service cloud.firestore {
 
         // Allow update for the auto-approve step in publish flow
         // In production this should be restricted to a Cloud Function
-        allow update: if isAuth()
-          && resource.data.authorId == request.auth.uid;
+        allow update: if false;
 
         allow delete: if false;
       }

@@ -7,7 +7,7 @@ import { refs, getDocs } from '@fb/index.js';
 import { getTaleMeta, getChapter } from '@services/index.js';
 import { createChapter } from '@state/index.js';
 import { readerState } from './state.js';
-import { escapeHtml, countWords, estimateReadMins, setText } from '@/utils';
+import { sanitizeHtml, escapeText, countWords, estimateReadMins, setText } from '@/utils';
 
 /* ─────────────────────────────────────────────
    Skeletons
@@ -131,7 +131,7 @@ export async function loadReaderChapter({ taleId, chapterIndex }) {
     // Render article body
     const container = document.getElementById('article-body');
     if (container) {
-      container.innerHTML = _processContent(chapter.content || '');
+      container.innerHTML = sanitizeHtml(_processContent(chapter.content || ''));
     }
 
     // Show read time in top bar
@@ -172,15 +172,15 @@ function _processContent(raw) {
       if (text.startsWith('## ')) {
         const title = text.slice(3);
         const id = title.toLowerCase().replace(/\s+/g, '-');
-        return `<h3 id="${id}">${escapeHtml(title)}</h3>`;
+        return `<h3 id="${id}">${escapeText(title)}</h3>`;
       }
       if (text.startsWith('# ')) {
         const title = text.slice(2);
         const id = title.toLowerCase().replace(/\s+/g, '-');
-        return `<h2 id="${id}">${escapeHtml(title)}</h2>`;
+        return `<h2 id="${id}">${escapeText(title)}</h2>`;
       }
       if (text.startsWith('> ')) {
-        return `<blockquote>${escapeHtml(text.slice(2))}</blockquote>`;
+        return `<blockquote>${escapeText(text.slice(2))}</blockquote>`;
       }
       if (text.startsWith('![figure]')) {
         const tint =
@@ -190,7 +190,7 @@ function _processContent(raw) {
 
       const cls = first ? 'materialize' : '';
       first = false;
-      return `<p class="${cls}">${escapeHtml(text)}</p>`;
+      return `<p class="${cls}">${escapeText(text)}</p>`;
     })
     .join('');
 }
@@ -228,7 +228,7 @@ function _renderBreadcrumbs(taleTitle) {
     .map(
       (c, i) => `
       <span class="flex items-center gap-2">
-        <span class="breadcrumb-item">${escapeHtml(c)}</span>
+        <span class="breadcrumb-item">${escapeText(c)}</span>
         ${
           i < crumbs.length - 1
             ? '<i data-lucide="chevron-right" style="width:12px;height:12px;opacity:0.5"></i>'

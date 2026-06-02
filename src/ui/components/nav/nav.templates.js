@@ -5,7 +5,7 @@
 // Keeping templates separate from behaviour makes both independently testable.
 
 import { PRIMARY_LINKS, DOCK_ITEMS } from './nav.config.js';
-import { getCurrentPage, escapeHtml, getAvatarSeed } from './nav.utils.js';
+import { getCurrentPage, escapeText, getAvatarSeed } from './nav.utils.js';
 
 /* ─────────────────────────────────────────────
    Desktop Header Templates
@@ -65,8 +65,8 @@ export function buildDropdownLink({ href, icon, label }, current) {
 export function buildAuthenticatedUser(user, current, userLinks) {
   const seed = getAvatarSeed(user);
   const avatarSrc = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
-  const displayName = escapeHtml(user.displayName || 'Your Account');
-  const email = escapeHtml(user.email || '');
+  const displayName = escapeText(user.displayName || 'Your Account');
+  const email = escapeText(user.email || '');
 
   const menuItems = userLinks.map((link) => buildDropdownLink(link, current)).join('');
 
@@ -245,7 +245,7 @@ export function buildCommandItem(item, current) {
       <span class="command-item__icon-wrap" aria-hidden="true">
         <i data-lucide="${item.icon}" class="command-item__icon"></i>
       </span>
-      <span class="command-item__label">${item.label}</span>
+      <span class="command-item__label">${escapeText(item.label)}</span>
       ${item.shortcut ? `<span class="command-item__shortcut" aria-label="Shortcut: ${item.shortcut}">${item.shortcut}</span>` : ''}
       ${isActive ? '<span class="command-item__badge">Current page</span>' : ''}
     </button>

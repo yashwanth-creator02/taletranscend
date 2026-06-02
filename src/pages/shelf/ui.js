@@ -4,7 +4,7 @@
 
 import { shelfState } from './state.js';
 import { initIcons } from '@ui/components/icons.js';
-import { setText, formatNumber, timeAgo } from '@/utils';
+import { setText, formatNumber, timeAgo, escapeText } from '@/utils';
 
 /* ─────────────────────────────────────────────
    Grid Renderers
@@ -71,7 +71,7 @@ export function setGridEmpty(message) {
         </div>
         <div>
           <h3 class="text-base font-cinzel font-bold text-white mb-2">Nothing here yet</h3>
-          <p class="text-sm text-slate-600 max-w-sm leading-relaxed">${message}</p>
+          <p class="text-sm text-slate-600 max-w-sm leading-relaxed">${escapeText(message)}</p>
         </div>
         <a href="library.html"
           class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold uppercase tracking-[0.15em] hover:bg-indigo-500/20 transition-colors">
@@ -125,6 +125,10 @@ export function buildBookmarkCard(tale) {
     progress = 0,
   } = tale;
 
+  const safeTitle = escapeText(title);
+  const safeDescription = escapeText(description);
+  const safeEra = escapeText(era);
+
   const cover =
     coverUrl || 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=800';
   const progressPercent = Math.min(100, Math.max(0, Math.round(progress)));
@@ -139,14 +143,14 @@ export function buildBookmarkCard(tale) {
       <div class="relative aspect-[16/10] bg-zinc-900 overflow-hidden">
         <img
           src="${cover}"
-          alt="${title}"
+          alt="${safeTitle}"
           class="w-full h-full object-cover opacity-55 group-hover:opacity-80 group-hover:scale-105 transition-all duration-700"
           loading="lazy"
         />
         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
 
         <div class="absolute top-3 left-3">
-          <span class="shelf-era-badge">${era}</span>
+          <span class="shelf-era-badge">${safeEra}</span>
         </div>
 
         <div class="absolute top-3 right-3">
@@ -155,7 +159,7 @@ export function buildBookmarkCard(tale) {
             class="shelf-options-btn"
             data-action="options"
             data-menu-id="${menuId}"
-            aria-label="More options for ${title}"
+            aria-label="More options for ${safeTitle}"
             aria-haspopup="menu"
             aria-expanded="false"
           >
@@ -201,10 +205,10 @@ export function buildBookmarkCard(tale) {
 
       <div class="p-4">
         <h3 class="font-bold text-white text-sm leading-snug mb-1.5 group-hover:text-indigo-300 transition-colors line-clamp-2">
-          ${title}
+          ${safeTitle}
         </h3>
         <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed mb-3">
-          ${description}
+          ${safeDescription}
         </p>
 
         <div class="flex items-center justify-between pt-3 border-t border-white/[0.04]">
@@ -248,6 +252,10 @@ export function buildDraftCard(draft) {
     updatedAt,
   } = draft;
 
+  const safeTitle = escapeText(title);
+  const safeSynopsis = escapeText(synopsis);
+  const safeEra = escapeText(era);
+
   const updated = updatedAt?.seconds ? timeAgo(new Date(updatedAt.seconds * 1000)) : 'Recently';
   const wordLabel =
     wordCount > 0
@@ -270,14 +278,14 @@ export function buildDraftCard(draft) {
       </div>
 
       <div class="p-5">
-        ${era ? `<span class="shelf-era-badge mb-3 inline-block">${era}</span>` : ''}
+        ${safeEra ? `<span class="shelf-era-badge mb-3 inline-block">${safeEra}</span>` : ''}
 
         <h3 class="font-bold text-white text-base leading-snug mb-2 group-hover:text-indigo-300 transition-colors">
-          ${title}
+          ${safeTitle}
         </h3>
 
         <p class="text-xs text-slate-600 line-clamp-3 leading-relaxed mb-4">
-          ${synopsis || 'No synopsis yet. Open the editor to add one.'}
+          ${safeSynopsis || 'No synopsis yet. Open the editor to add one.'}
         </p>
 
         <div class="grid grid-cols-2 gap-3 py-3 border-t border-white/[0.04] mb-4">
