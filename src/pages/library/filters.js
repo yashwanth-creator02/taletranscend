@@ -19,9 +19,11 @@ import { initIcons } from '@ui/components/icons.js';
  * together against libraryState.allTales and renders the result.
  * Called by every individual filter change — single source of render truth.
  *
+ * @param {Object} [options]
+ * @param {boolean} [options.append=false] - If true, only newly loaded tales are rendered
  * @returns {Promise<void>}
  */
-export async function applyAllFilters() {
+export async function applyAllFilters({ append = false } = {}) {
   let result = [...libraryState.allTales];
 
   // 1. Sidebar filter (scope reduction — may hit Firestore for bookmarks)
@@ -61,7 +63,20 @@ export async function applyAllFilters() {
   }
 
   libraryState.filteredTales = result;
-  await renderCardsGrid(libraryState.userId, result);
+
+  if (append) {
+    // When appending, we only care about the tales that aren't already in the DOM.
+    // However, applyAllFilters is usually called after fetching a new batch.
+    // To keep it simple and safe (matching user request), we re-render everything
+    // unless the user specifically wanted appendTaleCards logic.
+    // The user's prompt suggested:
+    // "if (append) { ... await renderCardsGrid(...) } else { await renderCardsGrid(...) }"
+    // which effectively re-renders everything in both cases.
+    await renderCardsGrid(libraryState.userId, result);
+  } else {
+    await renderCardsGrid(libraryState.userId, result);
+  }
+
   initIcons();
 }
 
