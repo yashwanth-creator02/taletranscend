@@ -205,11 +205,22 @@
           </div>
         </div>
 
-        <!-- Cards grid -->
-        <section id="cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8 md:gap-10"
-          aria-live="polite" aria-label="Tale cards">
-          <!-- Populated by renderCardsGrid() via library.js -->
-        </section>
+        <!-- Cards grid and button wrapper-->
+        <div class="flex flex-col gap-8">
+          <section id="cards-grid"
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8 md:gap-10" aria-live="polite"
+            aria-label="Tale cards">
+            <!-- Populated by renderCardsGrid() via library.js -->
+          </section>
+
+          <!-- Load More Button - outside grid so it survives re-renders -->
+          <div id="load-more-wrap" class="flex justify-center py-10">
+            <button id="load-more-btn" type="button"
+              class="px-8 py-3 rounded-2xl border border-white/10 bg-white/5 text-zinc-400 text-xs font-black uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+              Load More Tales
+            </button>
+          </div>
+        </div>
       </div>
     </main>
   </div>

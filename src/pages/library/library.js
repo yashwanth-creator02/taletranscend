@@ -1,6 +1,5 @@
 // src/pages/library/library.js
-// Library page entry point.
-// Wires auth, real-time tales subscription, filters, interactions, and UI state.
+// Library page entry point — now paginated.
 
 import '@css/base.css';
 import '@css/nav.css';
@@ -10,9 +9,9 @@ import '@css/pages/library.css';
 import { initAuth } from '@fb/index.js';
 import { initNav } from '@ui/components/nav/nav.js';
 import { initIcons } from '@ui/components/icons.js';
-import { initPageReveal, readyReveal, setupAuthTimeout } from '@/utils';
+import { initPageReveal, readyReveal } from '@/utils';
 
-import { subscribeToTales, stopTalesSubscription } from './content.js';
+import { loadTalesBatch, loadMoreTales } from './content.js';
 import {
   applyAllFilters,
   setupSearch,
@@ -46,38 +45,63 @@ document.addEventListener('DOMContentLoaded', () => {
    Auth + Data
    ───────────────────────────────────────────── */
 
-const authTimeout = setupAuthTimeout('cards-grid', 'Failed to load library. Please refresh.', 15000);
-
 initAuth(async (user) => {
-  clearTimeout(authTimeout);
   libraryState.userId = user.uid;
 
-  // Update sidebar with user identity
   updateSidebarUser(user);
-
-  // Wire card interactions now that userId is available
   setupCardInteractions(user.uid);
 
-  // Start real-time subscription
-  subscribeToTales(
-    async (tales) => {
-      // First batch — set up era chips (derived from actual data)
-      if (!libraryState.eraChipsBuilt) {
-        setupEraFilter(tales);
-        libraryState.eraChipsBuilt = true;
-      }
+  try {
+    const tales = await loadTalesBatch();
 
-      await applyAllFilters();
-      readyReveal();
-      initIcons();
-    },
-    () => showGridError()
-  );
+    if (!libraryState.eraChipsBuilt) {
+      setupEraFilter(tales);
+      libraryState.eraChipsBuilt = true;
+    }
+
+    await applyAllFilters();
+    readyReveal();
+    initIcons();
+
+    // Update button after initial load
+    const btn = document.getElementById('load-more-btn');
+    if (btn) {
+      if (!libraryState.hasMore) {
+        btn.textContent = 'All Tales Loaded';
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+      } else {
+        btn.textContent = 'Load More Tales';
+        btn.disabled = false;
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+    }
+  } catch (err) {
+    console.error('[library] Init failed:', err);
+    showGridError();
+  }
 });
 
 /* ─────────────────────────────────────────────
-   Teardown
+   Load More Button
    ───────────────────────────────────────────── */
 
-// Stop Firestore listener on page unload to prevent memory leaks
-window.addEventListener('pagehide', () => stopTalesSubscription());
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('load-more-btn');
+  if (!btn) return;
+
+  btn.addEventListener('click', async () => {
+    if (libraryState.isLoadingMore || !libraryState.hasMore) {
+      return;
+    }
+
+    btn.textContent = 'Loading...';
+    btn.disabled = true;
+
+    await applyAllFilters();
+
+    btn.disabled = false;
+    btn.textContent = libraryState.hasMore ? 'Load More Tales' : 'All Tales Loaded';
+    if (!libraryState.hasMore) btn.classList.add('opacity-50', 'cursor-not-allowed');
+  });
+});
