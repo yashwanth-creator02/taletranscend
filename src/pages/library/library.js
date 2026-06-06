@@ -1,5 +1,5 @@
 // src/pages/library/library.js
-// Library page entry point — now paginated.
+// Library page with Previous/Next pagination.
 
 import '@css/base.css';
 import '@css/nav.css';
@@ -11,7 +11,7 @@ import { initNav } from '@ui/components/nav/nav.js';
 import { initIcons } from '@ui/components/icons.js';
 import { initPageReveal, readyReveal } from '@/utils';
 
-import { loadTalesBatch, loadMoreTales } from './content.js';
+import { loadTalesPage, nextPage, prevPage } from './content.js';
 import {
   applyAllFilters,
   setupSearch,
@@ -27,10 +27,6 @@ import { libraryState } from './state.js';
 initNav();
 initPageReveal();
 
-/* ─────────────────────────────────────────────
-   DOM-ready — wire static UI before auth resolves
-   ───────────────────────────────────────────── */
-
 document.addEventListener('DOMContentLoaded', () => {
   setupSidebarToggle();
   setupSearch();
@@ -39,69 +35,94 @@ document.addEventListener('DOMContentLoaded', () => {
   setupSidebarFilter();
   showGridSkeleton();
   initIcons();
+  setupPagination();
 });
-
-/* ─────────────────────────────────────────────
-   Auth + Data
-   ───────────────────────────────────────────── */
 
 initAuth(async (user) => {
   libraryState.userId = user.uid;
-
   updateSidebarUser(user);
   setupCardInteractions(user.uid);
 
   try {
-    const tales = await loadTalesBatch();
+    await loadTalesPage(1);
 
     if (!libraryState.eraChipsBuilt) {
-      setupEraFilter(tales);
+      setupEraFilter(libraryState.allTales);
       libraryState.eraChipsBuilt = true;
     }
 
     await applyAllFilters();
+    updatePaginationUI();
     readyReveal();
     initIcons();
-
-    // Update button after initial load
-    const btn = document.getElementById('load-more-btn');
-    if (btn) {
-      if (!libraryState.hasMore) {
-        btn.textContent = 'All Tales Loaded';
-        btn.disabled = true;
-        btn.classList.add('opacity-50', 'cursor-not-allowed');
-      } else {
-        btn.textContent = 'Load More Tales';
-        btn.disabled = false;
-        btn.classList.remove('opacity-50', 'cursor-not-allowed');
-      }
-    }
   } catch (err) {
     console.error('[library] Init failed:', err);
     showGridError();
   }
 });
 
-/* ─────────────────────────────────────────────
-   Load More Button
-   ───────────────────────────────────────────── */
+function setupPagination() {
+  const prevBtn = document.getElementById('pagination-prev');
+  const nextBtn = document.getElementById('pagination-next');
 
-document.addEventListener('DOMContentLoaded', () => {
-  const btn = document.getElementById('load-more-btn');
-  if (!btn) return;
+  if (prevBtn) {
+    prevBtn.addEventListener('click', async () => {
+      if (libraryState.currentPage <= 1 || libraryState.isLoading) return;
 
-  btn.addEventListener('click', async () => {
-    if (libraryState.isLoadingMore || !libraryState.hasMore) {
-      return;
-    }
+      setPaginationLoading(true);
+      await prevPage();
+      await applyAllFilters();
+      updatePaginationUI();
+      setPaginationLoading(false);
+      initIcons();
+    });
+  }
 
-    btn.textContent = 'Loading...';
-    btn.disabled = true;
+  if (nextBtn) {
+    nextBtn.addEventListener('click', async () => {
+      if (libraryState.isLoading) return;
 
-    await applyAllFilters();
+      const maxPage = Math.ceil(libraryState.totalTales / libraryState.talesPerPage);
+      if (libraryState.currentPage >= maxPage) return;
 
-    btn.disabled = false;
-    btn.textContent = libraryState.hasMore ? 'Load More Tales' : 'All Tales Loaded';
-    if (!libraryState.hasMore) btn.classList.add('opacity-50', 'cursor-not-allowed');
-  });
-});
+      setPaginationLoading(true);
+      await nextPage();
+      await applyAllFilters();
+      updatePaginationUI();
+      setPaginationLoading(false);
+      initIcons();
+    });
+  }
+}
+
+function updatePaginationUI() {
+  const prevBtn = document.getElementById('pagination-prev');
+  const nextBtn = document.getElementById('pagination-next');
+  const pageInfo = document.getElementById('pagination-info');
+
+  const maxPage = Math.max(1, Math.ceil(libraryState.totalTales / libraryState.talesPerPage));
+
+  if (prevBtn) {
+    prevBtn.disabled = libraryState.currentPage <= 1;
+    prevBtn.classList.toggle('opacity-50', libraryState.currentPage <= 1);
+    prevBtn.classList.toggle('cursor-not-allowed', libraryState.currentPage <= 1);
+  }
+
+  if (nextBtn) {
+    nextBtn.disabled = libraryState.currentPage >= maxPage;
+    nextBtn.classList.toggle('opacity-50', libraryState.currentPage >= maxPage);
+    nextBtn.classList.toggle('cursor-not-allowed', libraryState.currentPage >= maxPage);
+  }
+
+  if (pageInfo) {
+    pageInfo.textContent = `Page ${libraryState.currentPage} of ${maxPage} (${libraryState.totalTales} tales)`;
+  }
+}
+
+function setPaginationLoading(loading) {
+  const prevBtn = document.getElementById('pagination-prev');
+  const nextBtn = document.getElementById('pagination-next');
+
+  if (prevBtn) prevBtn.disabled = loading;
+  if (nextBtn) nextBtn.disabled = loading;
+}

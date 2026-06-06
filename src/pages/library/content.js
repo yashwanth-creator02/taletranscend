@@ -1,63 +1,48 @@
 // src/pages/library/content.js
-// Manages paginated loading of published tales from Firestore.
-// Replaces the previous onSnapshot subscription to avoid unbounded reads.
+// Page-based pagination with Firestore.
 
-import { getTalesPage } from '@services/index.js';
+import { getTalesPageNumbered } from '@services/index.js';
 import { libraryState } from './state.js';
 import { safeCall } from '@/utils';
 
 /**
- * Loads the first (or next) batch of tales from Firestore.
- * Appends to libraryState.allTales, updates cursor state, and returns the full list.
+ * Loads a specific page of tales.
+ * Replaces allTales with just this page's tales.
  *
- * @returns {Promise<<import('@state/schemas/tale.schema.js').Tale[]>}
+ * @param {number} page - 1-based page number
+ * @returns {Promise<{tales: Tale[], total: number, hasMore: boolean}>}
  */
-export async function loadTalesBatch() {
-  if (libraryState.isLoadingMore) return libraryState.allTales;
+export async function loadTalesPage(page) {
+  if (libraryState.isLoading) return { tales: [], total: 0, hasMore: false };
 
-  libraryState.isLoadingMore = true;
+  libraryState.isLoading = true;
 
-  const { tales, lastDoc } = await safeCall(
-    getTalesPage({
-      count: libraryState.talesPerPage,
-      after: libraryState.lastVisible,
-    }),
-    { tales: [], lastDoc: null },
+  const result = await safeCall(
+    getTalesPageNumbered({ page, perPage: libraryState.talesPerPage }),
+    { tales: [], total: 0, hasMore: false },
     'Failed to load tales from the archive.'
   );
 
-  if (tales.length === 0) {
-    libraryState.hasMore = false;
-  } else {
-    // Deduplicate by id (safety net)
-    const existingIds = new Set(libraryState.allTales.map((t) => t.id));
-    const newTales = tales.filter((t) => !existingIds.has(t.id));
-    libraryState.allTales.push(...newTales);
-    libraryState.lastVisible = lastDoc;
-    libraryState.hasMore = tales.length === libraryState.talesPerPage;
-  }
+  libraryState.allTales = result.tales;
+  libraryState.totalTales = result.total;
+  libraryState.currentPage = page;
+  libraryState.isLoading = false;
 
-  libraryState.isLoadingMore = false;
-  return libraryState.allTales;
+  return result;
 }
 
 /**
- * Convenience wrapper for "Load More" button clicks.
- * Fetches the next batch and returns the updated full list.
+ * Goes to next page if available.
  */
-export async function loadMoreTales() {
-  if (!libraryState.hasMore || libraryState.isLoadingMore) return libraryState.allTales;
-  return loadTalesBatch();
+export async function nextPage() {
+  return loadTalesPage(libraryState.currentPage + 1);
 }
 
 /**
- * Resets pagination state and reloads from the first page.
- * Call this after a publish or when you want to refresh the library.
+ * Goes to previous page if available.
  */
-export async function resetAndLoadTales() {
-  libraryState.allTales = [];
-  libraryState.lastVisible = null;
-  libraryState.hasMore = true;
-  libraryState.isLoadingMore = false;
-  return loadTalesBatch();
+export async function prevPage() {
+  if (libraryState.currentPage <= 1)
+    return { tales: libraryState.allTales, total: libraryState.totalTales, hasMore: true };
+  return loadTalesPage(libraryState.currentPage - 1);
 }

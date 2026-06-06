@@ -30,9 +30,9 @@ export const libraryState = {
   sidebarCollapsed: JSON.parse(localStorage.getItem('tt-lib-sidebar-collapsed') ?? 'false'),
   eraChipsBuilt: false,
 
-  // Pagination
-  lastVisible: null,
-  hasMore: true,
-  isLoadingMore: false,
-  talesPerPage: 2,
+  // Pagination (page-based)
+  currentPage: 1, // 1-based page number
+  talesPerPage: 4, // Tales per page (adjust as needed)
+  totalTales: 0, // Total count from Firestore
+  isLoading: false,
 };

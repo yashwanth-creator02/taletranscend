@@ -24,6 +24,7 @@ import {
   startAfter,
   where,
   increment,
+  getCountFromServer,
 } from 'firebase/firestore';
 
 // Single shared Firestore instance bound to the initialized Firebase app.
@@ -49,4 +50,5 @@ export {
   startAfter,
   where,
   increment,
+  getCountFromServer,
 };
