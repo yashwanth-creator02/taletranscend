@@ -5,6 +5,7 @@
 
 import { getDocs, deleteDoc, setDoc, serverTimestamp, refs } from '@fb/index.js';
 import { createBookmark } from '@state/index.js';
+import { safeCall, guardOffline } from '@/utils';
 
 /**
  * Adds a tale to a user's bookmark collection.
@@ -18,19 +19,24 @@ import { createBookmark } from '@state/index.js';
  */
 export async function addToBookmarks({ userId, taleId, tale = {} }) {
   if (!userId || !taleId) return;
+  if (guardOffline()) return;
 
-  await setDoc(
-    refs.bookmark(userId, taleId),
-    {
-      taleId,
-      taleTitle: tale.title ?? '',
-      coverUrl: tale.coverUrl ?? '',
-      authorName: tale.authorName ?? '',
-      chapterCount: tale.chapterCount ?? 0,
-      era: tale.era ?? '',
-      bookmarkedAt: serverTimestamp(),
-    },
-    { merge: true }
+  return safeCall(
+    setDoc(
+      refs.bookmark(userId, taleId),
+      {
+        taleId,
+        taleTitle: tale.title ?? '',
+        coverUrl: tale.coverUrl ?? '',
+        authorName: tale.authorName ?? '',
+        chapterCount: tale.chapterCount ?? 0,
+        era: tale.era ?? '',
+        bookmarkedAt: serverTimestamp(),
+      },
+      { merge: true }
+    ),
+    undefined,
+    'Failed to save bookmark. Please try again.'
   );
 }
 
@@ -43,7 +49,13 @@ export async function addToBookmarks({ userId, taleId, tale = {} }) {
  */
 export async function removeFromBookmarks({ userId, taleId }) {
   if (!userId || !taleId) return;
-  await deleteDoc(refs.bookmark(userId, taleId));
+  if (guardOffline()) return;
+
+  return safeCall(
+    deleteDoc(refs.bookmark(userId, taleId)),
+    undefined,
+    'Failed to remove bookmark.'
+  );
 }
 
 /**
@@ -57,11 +69,15 @@ export async function removeFromBookmarks({ userId, taleId }) {
 export async function getBookmarks({ userId }) {
   if (!userId) return [];
 
-  const snap = await getDocs(refs.bookmarks(userId));
-
-  if (snap.empty) return [];
-
-  return snap.docs.map((d) => createBookmark(d.id, d.data()));
+  return safeCall(
+    (async () => {
+      const snap = await getDocs(refs.bookmarks(userId));
+      if (snap.empty) return [];
+      return snap.docs.map((d) => createBookmark(d.id, d.data()));
+    })(),
+    [],
+    'Failed to load bookmarks.'
+  );
 }
 
 /**
@@ -75,7 +91,14 @@ export async function getBookmarks({ userId }) {
 export async function isBookmarked({ userId, taleId }) {
   if (!userId || !taleId) return false;
 
-  const { getDoc } = await import('@fb/index.js');
-  const snap = await getDoc(refs.bookmark(userId, taleId));
-  return snap.exists();
+  return safeCall(
+    (async () => {
+      const { getDoc } = await import('@fb/index.js');
+      const snap = await getDoc(refs.bookmark(userId, taleId));
+      return snap.exists();
+    })(),
+    false,
+    'Failed to check bookmark status.',
+    true // silent
+  );
 }

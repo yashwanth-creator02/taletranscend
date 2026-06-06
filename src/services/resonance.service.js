@@ -13,6 +13,7 @@ import {
   serverTimestamp,
   refs,
 } from '@fb/index.js';
+import { safeCall, guardOffline } from '@/utils';
 
 /**
  * Toggles a user's Soul Resonance (reaction) on a tale.
@@ -20,38 +21,46 @@ import {
  * the tale's reactionCount via increment.
  *
  * @param {string} taleId
- * @returns {Promise<{ active: boolean, count: number }>}
+ * @returns {Promise<{ active: boolean, count: number, status?: string }>}
  */
 export async function toggleResonance(taleId) {
   const user = auth.currentUser;
   if (!user) throw new Error('Authentication required');
 
-  const reactionRef = refs.taleReaction(taleId, user.uid);
-  const taleRef = refs.tale(taleId);
+  if (guardOffline()) return { status: 'error' };
 
-  const reactionSnap = await getDoc(reactionRef);
-  const wasActive = reactionSnap.exists();
+  return safeCall(
+    (async () => {
+      const reactionRef = refs.taleReaction(taleId, user.uid);
+      const taleRef = refs.tale(taleId);
 
-  if (wasActive) {
-    // Remove reaction
-    await deleteDoc(reactionRef);
-    await updateDoc(taleRef, { reactionCount: increment(-1) });
-  } else {
-    // Add reaction
-    await setDoc(reactionRef, {
-      userId: user.uid,
-      type: 'like',
-      reactedAt: serverTimestamp(),
-    });
-    await updateDoc(taleRef, { reactionCount: increment(1) });
-  }
+      const reactionSnap = await getDoc(reactionRef);
+      const wasActive = reactionSnap.exists();
 
-  // Return the fresh count from the tale document
-  const updatedSnap = await getDoc(taleRef);
-  return {
-    active: !wasActive,
-    count: updatedSnap.data()?.reactionCount ?? 0,
-  };
+      if (wasActive) {
+        // Remove reaction
+        await deleteDoc(reactionRef);
+        await updateDoc(taleRef, { reactionCount: increment(-1) });
+      } else {
+        // Add reaction
+        await setDoc(reactionRef, {
+          userId: user.uid,
+          type: 'like',
+          reactedAt: serverTimestamp(),
+        });
+        await updateDoc(taleRef, { reactionCount: increment(1) });
+      }
+
+      // Return the fresh count from the tale document
+      const updatedSnap = await getDoc(taleRef);
+      return {
+        active: !wasActive,
+        count: updatedSnap.data()?.reactionCount ?? 0,
+      };
+    })(),
+    { status: 'error' },
+    'Failed to update resonance.'
+  );
 }
 
 /**
@@ -64,6 +73,13 @@ export async function getResonanceStatus(taleId) {
   const user = auth.currentUser;
   if (!user) return false;
 
-  const snap = await getDoc(refs.taleReaction(taleId, user.uid));
-  return snap.exists();
+  return safeCall(
+    (async () => {
+      const snap = await getDoc(refs.taleReaction(taleId, user.uid));
+      return snap.exists();
+    })(),
+    false,
+    'Failed to check resonance status.',
+    true // silent
+  );
 }

@@ -6,6 +6,7 @@
 import { getDoc, setDoc, serverTimestamp, getDocs, refs } from '@fb/index.js';
 import { createChapterProgress, createTaleProgress } from '@state/index.js';
 import { PROGRESS_SYNC_DELAY_MS } from '@config/app.config.js';
+import { safeCall } from '@/utils';
 
 /* ─────────────────────────────────────────────
    Sync
@@ -32,24 +33,31 @@ export async function syncChapterProgressToCloud({
   totalReadTimeMs,
 }) {
   if (!userId || !taleId || typeof chapterIndex !== 'number') return;
-
-  // Write chapter-level progress — conforms to ChapterProgress schema
-  await setDoc(
-    refs.progressChapter(userId, taleId, chapterIndex),
-    {
-      scrollPercent,
-      lastCharacterOffset,
-      updatedAt: serverTimestamp(),
-    },
-    { merge: true }
-  );
+  if (!navigator.onLine) return; // Silently skip if offline
 
   // Update tale-level progress with lastReadAt and optional totalReadTimeMs
   const taleUpdate = { lastReadAt: serverTimestamp() };
   if (typeof totalReadTimeMs === 'number') {
     taleUpdate.totalReadTimeMs = totalReadTimeMs;
   }
-  await setDoc(refs.progress(userId, taleId), taleUpdate, { merge: true });
+
+  return safeCall(
+    Promise.all([
+      setDoc(
+        refs.progressChapter(userId, taleId, chapterIndex),
+        {
+          scrollPercent,
+          lastCharacterOffset,
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      ),
+      setDoc(refs.progress(userId, taleId), taleUpdate, { merge: true }),
+    ]),
+    undefined,
+    'Failed to sync reading progress.',
+    true // silent
+  );
 }
 
 /* ─────────────────────────────────────────────
@@ -69,18 +77,25 @@ export async function syncChapterProgressToCloud({
 export async function getCloudProgress({ userId, taleId }) {
   if (!userId || !taleId) return null;
 
-  const snap = await getDoc(refs.progress(userId, taleId));
-  if (!snap.exists()) return null;
+  return safeCall(
+    (async () => {
+      const snap = await getDoc(refs.progress(userId, taleId));
+      if (!snap.exists()) return null;
 
-  const chaptersSnap = await getDocs(refs.progressChapters(userId, taleId));
+      const chaptersSnap = await getDocs(refs.progressChapters(userId, taleId));
 
-  // Build chapters map normalized through createChapterProgress
-  const chapters = {};
-  chaptersSnap.forEach((d) => {
-    chapters[d.id] = createChapterProgress(d.data());
-  });
+      // Build chapters map normalized through createChapterProgress
+      const chapters = {};
+      chaptersSnap.forEach((d) => {
+        chapters[d.id] = createChapterProgress(d.data());
+      });
 
-  return createTaleProgress(taleId, { ...snap.data(), chapters });
+      return createTaleProgress(taleId, { ...snap.data(), chapters });
+    })(),
+    null,
+    'Failed to load reading progress.',
+    true // silent - let local progress be the fallback without annoying the user
+  );
 }
 
 /* ─────────────────────────────────────────────

@@ -15,8 +15,7 @@
 
 import { auth, setDoc, updateDoc, serverTimestamp, refs } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
-import { navigateTo } from '@/utils';
-import { countWords, estimateReadMins } from '@/utils';
+import { navigateTo, countWords, estimateReadMins, safeCall, guardOffline } from '@/utils';
 
 import { state } from './state.js';
 import { saveAllChapters, syncMetadataFromDom } from './cloud.js';
@@ -32,6 +31,11 @@ import { saveAllChapters, syncMetadataFromDom } from './cloud.js';
 export async function publishFullTale() {
   if (!auth.currentUser) {
     _setPublishStatus('You must be signed in to publish.', 'error');
+    return;
+  }
+
+  if (guardOffline()) {
+    _setPublishStatus('You are offline. Connect to publish.', 'error');
     return;
   }
 
@@ -54,130 +58,132 @@ export async function publishFullTale() {
     return;
   }
 
-  _setPublishStatus('Publishing…', 'loading');
+  _setPublishStatus('Submitting to the archive...', 'loading');
   _setPublishButtonsDisabled(true);
 
-  try {
-    const userId = auth.currentUser.uid;
-    const authorName = auth.currentUser.displayName || `Scribe ${userId.slice(0, 5)}`;
+  const userId = auth.currentUser.uid;
 
-    /* ── Step 1: Save all chapters to draft ─────────────────── */
+  const taleId = await safeCall(
+    _doPublish(userId),
+    null,
+    'Publishing failed. Your draft is safe — try again.'
+  );
 
-    await saveAllChapters(userId);
-
-    /* ── Step 2: Determine tale ID ──────────────────────────── */
-
-    // Reuse existing draft ID if available, otherwise generate a new one via
-    // the tale ref (Firestore auto-ID approach: write with a known ref).
-    const taleId = state.draftId !== 'new' ? state.draftId : _generateId();
-    const taleRef = refs.tale(taleId);
-
-    /* ── Step 3: Write tale with status=pending ─────────────── */
-
-    const description = state.synopsis?.trim() || _extractDescription(state.chapters);
-    const wordCount = state.chapters.reduce((acc, ch) => {
-      return acc + countWords(ch.content);
-    }, 0);
-    const estimatedReadMins = estimateReadMins(wordCount);
-
-    await setDoc(taleRef, {
-      title: state.title,
-      authorId: userId,
-      authorName,
-      authorAvatarUrl: '',
-      description,
-      synopsis: state.synopsis || '',
-      coverUrl: state.coverUrl || '',
-      era: state.era || '',
-      tags: state.tags || [],
-      tone: state.tone || '',
-      language: state.language || 'English',
-      visibility: (state.visibility || 'public').toLowerCase(),
-      audience: state.audience || 'General',
-      contentWarnings: Array.isArray(state.contentWarnings)
-        ? state.contentWarnings
-        : state.contentWarnings
-          ? [state.contentWarnings]
-          : [],
-      worldSetting: state.worldSetting || '',
-      authorNotes: state.authorNotes || '',
-      chapterCount: state.chapters.length,
-      wordCount,
-      estimatedReadMins,
-      readCount: 0,
-      commentCount: 0,
-      reactionCount: 0,
-      bookmarkCount: 0,
-      status: 'pending',
-      submittedAt: serverTimestamp(),
-      reviewedAt: null,
-      reviewedBy: null,
-      rejectionReason: null,
-      moderationNotes: null,
-      isFeatured: false,
-      isEditorsPick: false,
-      featuredAt: null,
-      searchKeywords: _buildSearchKeywords(state.title, state.tags),
-      publishedAt: null,
-      lastChapterAddedAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-      createdAt: serverTimestamp(),
-    });
-
-    /* ── Step 4: Auto-approve (moderation hook) ─────────────── */
-
-    // In a future version this step will be gated behind a moderation queue.
-    // For now, auto-approve immediately after submission.
-    await updateDoc(taleRef, {
-      status: 'published',
-      publishedAt: serverTimestamp(),
-      reviewedAt: serverTimestamp(),
-      reviewedBy: 'auto-approve',
-    });
-
-    /* ── Step 5: Write chapters subcollection ───────────────── */
-
-    await Promise.all(
-      state.chapters.map(async (chapter, index) => {
-        const chapterWordCount = countWords(chapter.content);
-        const chapterReadMins = estimateReadMins(chapterWordCount);
-
-        await setDoc(refs.chapter(taleId, index), {
-          // chapterNum is 1-based for display — bug fix: was using index (0-based)
-          chapterNum: index + 1,
-          title: chapter.title?.trim() || `Fragment ${index + 1}`,
-          content: chapter.content || '',
-          wordCount: chapterWordCount,
-          estimatedReadMins: chapterReadMins,
-          publishedAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        });
-      })
-    );
-
-    /* ── Step 6: Update draft with published reference ──────── */
-
-    if (state.draftId !== 'new') {
-      await updateDoc(refs.draft(userId, state.draftId), {
-        publishedTaleId: taleId,
-        lastPublishedAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
-    }
-
+  if (taleId) {
     showToast('Legend recorded in the archives.', 'success');
     _setPublishStatus('Published successfully!', 'success');
 
     setTimeout(() => {
       navigateTo(`tale.html?id=${taleId}`);
     }, 1500);
-  } catch (error) {
-    console.error('[publish] Pipeline failed:', error);
-    showToast('Neural transmission failed.', 'error');
+  } else {
     _setPublishStatus('Publish failed. Please try again.', 'error');
-  } finally {
     _setPublishButtonsDisabled(false);
   }
+}
+
+/**
+ * Internal logic for the multi-step publishing process.
+ * Separated so it can be wrapped by safeCall.
+ *
+ * @param {string} userId
+ * @returns {Promise<string>} The published tale ID
+ */
+async function _doPublish(userId) {
+  const authorName = auth.currentUser.displayName || `Scribe ${userId.slice(0, 5)}`;
+
+  /* ── Step 1: Save all chapters to draft ─────────────────── */
+  await saveAllChapters(userId);
+
+  /* ── Step 2: Determine tale ID ──────────────────────────── */
+  const id = state.draftId !== 'new' ? state.draftId : _generateId();
+  const taleRef = refs.tale(id);
+
+  /* ── Step 3: Write tale with status=pending ─────────────── */
+  const description = state.synopsis?.trim() || _extractDescription(state.chapters);
+  const wordCount = state.chapters.reduce((acc, ch) => acc + countWords(ch.content), 0);
+  const estimatedReadMins = estimateReadMins(wordCount);
+
+  await setDoc(taleRef, {
+    title: state.title,
+    authorId: userId,
+    authorName,
+    authorAvatarUrl: '',
+    description,
+    synopsis: state.synopsis || '',
+    coverUrl: state.coverUrl || '',
+    era: state.era || '',
+    tags: state.tags || [],
+    tone: state.tone || '',
+    language: state.language || 'English',
+    visibility: (state.visibility || 'public').toLowerCase(),
+    audience: state.audience || 'General',
+    contentWarnings: Array.isArray(state.contentWarnings)
+      ? state.contentWarnings
+      : state.contentWarnings
+        ? [state.contentWarnings]
+        : [],
+    worldSetting: state.worldSetting || '',
+    authorNotes: state.authorNotes || '',
+    chapterCount: state.chapters.length,
+    wordCount,
+    estimatedReadMins,
+    readCount: 0,
+    commentCount: 0,
+    reactionCount: 0,
+    bookmarkCount: 0,
+    status: 'pending',
+    submittedAt: serverTimestamp(),
+    reviewedAt: null,
+    reviewedBy: null,
+    rejectionReason: null,
+    moderationNotes: null,
+    isFeatured: false,
+    isEditorsPick: false,
+    featuredAt: null,
+    searchKeywords: _buildSearchKeywords(state.title, state.tags),
+    publishedAt: null,
+    lastChapterAddedAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    createdAt: serverTimestamp(),
+  });
+
+  /* ── Step 4: Auto-approve (moderation hook) ─────────────── */
+  await updateDoc(taleRef, {
+    status: 'published',
+    publishedAt: serverTimestamp(),
+    reviewedAt: serverTimestamp(),
+    reviewedBy: 'auto-approve',
+  });
+
+  /* ── Step 5: Write chapters subcollection ───────────────── */
+  await Promise.all(
+    state.chapters.map(async (chapter, index) => {
+      const chapterWordCount = countWords(chapter.content);
+      const chapterReadMins = estimateReadMins(chapterWordCount);
+
+      await setDoc(refs.chapter(id, index), {
+        chapterNum: index + 1,
+        title: chapter.title?.trim() || `Fragment ${index + 1}`,
+        content: chapter.content || '',
+        wordCount: chapterWordCount,
+        estimatedReadMins: chapterReadMins,
+        publishedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+    })
+  );
+
+  /* ── Step 6: Update draft with published reference ──────── */
+  if (state.draftId !== 'new') {
+    await updateDoc(refs.draft(userId, state.draftId), {
+      publishedTaleId: id,
+      lastPublishedAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+  }
+
+  return id;
 }
 
 /* ─────────────────────────────────────────────
