@@ -9,3 +9,4 @@ export * from './dom.utils.ts';
 export * from './sanitize.utils.ts';
 export * from './navigation.ts';
 export * from './async.utils.ts';
+export * from './network.utils.ts';

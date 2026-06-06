@@ -15,6 +15,7 @@ import { createTale, createChapter } from '@state/index.js';
  * @returns {Promise<import('@state/schemas/tale.schema.js').Tale|null>}
  */
 export async function loadTale(taleId, user) {
+  console.log('[tale] loadTale', taleId);
   if (!taleId) return null;
 
   const publicSnap = await getDoc(refs.tale(taleId));

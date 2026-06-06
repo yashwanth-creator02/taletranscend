@@ -48,7 +48,7 @@ import {
 
 import { getDoc, setDoc, serverTimestamp, refs } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
-import { navigateTo, initPageReveal, readyReveal } from '@/utils';
+import { navigateTo, initPageReveal, readyReveal, setupAuthTimeout } from '@/utils';
 import { TTS_CHAR_LIMIT } from '@config/app.config.js';
 
 // Hide body immediately to prevent flash of unstyled content
@@ -591,7 +591,10 @@ export async function saveReaderPrefs(userId) {
 // Apply localStorage prefs immediately — before auth resolves — to avoid a flash
 initTheme();
 
+const authTimeout = setupAuthTimeout('article-body', 'Failed to load chapter. Please refresh.', 15000);
+
 initAuth(async (user) => {
+  clearTimeout(authTimeout);
   setAppUser(user.uid);
   readerState.userId = user.uid;
   readerState.userName = user.displayName || 'You';

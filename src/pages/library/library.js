@@ -10,7 +10,7 @@ import '@css/pages/library.css';
 import { initAuth } from '@fb/index.js';
 import { initNav } from '@ui/components/nav/nav.js';
 import { initIcons } from '@ui/components/icons.js';
-import { initPageReveal, readyReveal } from '@/utils';
+import { initPageReveal, readyReveal, setupAuthTimeout } from '@/utils';
 
 import { subscribeToTales, stopTalesSubscription } from './content.js';
 import {
@@ -46,7 +46,10 @@ document.addEventListener('DOMContentLoaded', () => {
    Auth + Data
    ───────────────────────────────────────────── */
 
+const authTimeout = setupAuthTimeout('cards-grid', 'Failed to load library. Please refresh.', 15000);
+
 initAuth(async (user) => {
+  clearTimeout(authTimeout);
   libraryState.userId = user.uid;
 
   // Update sidebar with user identity

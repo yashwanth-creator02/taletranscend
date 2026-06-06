@@ -4,8 +4,12 @@
 
 import { initializeApp } from 'firebase/app';
 import firebaseConfig from '@config/firebase.config.js';
+import { initNetworkListeners } from '@/utils';
 
 const app = initializeApp(firebaseConfig);
+
+// Initialize global network listeners (online/offline)
+initNetworkListeners();
 
 // Log initialization details in development only.
 // Stripped out by Vite in production builds.
