@@ -1,47 +1,63 @@
 // src/pages/library/content.js
-// Manages real-time subscription to the public tales collection.
-// Normalizes every incoming document through createTale before storing.
+// Manages paginated loading of published tales from Firestore.
+// Replaces the previous onSnapshot subscription to avoid unbounded reads.
 
-import { onSnapshot, query, where, refs } from '@fb/index.js';
-import { createTale } from '@state/index.js';
+import { getTalesPage } from '@services/index.js';
 import { libraryState } from './state.js';
-
-let _unsubscribe = null;
+import { safeCall } from '@/utils';
 
 /**
- * Subscribes to real-time updates for published community tales.
- * Normalizes all documents through createTale before storing in libraryState.
- * Guards against duplicate listeners on hot reload.
+ * Loads the first (or next) batch of tales from Firestore.
+ * Appends to libraryState.allTales, updates cursor state, and returns the full list.
  *
- * @param {(tales: import('@state/schemas/tale.schema.js').Tale[]) => void} onUpdate
- * @param {(err: Error) => void} onError
+ * @returns {Promise<<import('@state/schemas/tale.schema.js').Tale[]>}
  */
-export function subscribeToTales(onUpdate, onError) {
-  if (_unsubscribe) {
-    _unsubscribe();
-    _unsubscribe = null;
-  }
-  const q = query(refs.tales(), where('status', '==', 'published'));
+export async function loadTalesBatch() {
+  if (libraryState.isLoadingMore) return libraryState.allTales;
 
-  _unsubscribe = onSnapshot(
-    q,
-    (snapshot) => {
-      const tales = snapshot.docs.map((d) => createTale(d.id, d.data()));
-      libraryState.allTales = tales;
-      onUpdate(tales);
-    },
-    (err) => {
-      console.error('[library] subscribeToTales error:', err.code, err.message);
-      onError(err);
-    }
+  libraryState.isLoadingMore = true;
+
+  const { tales, lastDoc } = await safeCall(
+    getTalesPage({
+      count: libraryState.talesPerPage,
+      after: libraryState.lastVisible,
+    }),
+    { tales: [], lastDoc: null },
+    'Failed to load tales from the archive.'
   );
+
+  if (tales.length === 0) {
+    libraryState.hasMore = false;
+  } else {
+    // Deduplicate by id (safety net)
+    const existingIds = new Set(libraryState.allTales.map((t) => t.id));
+    const newTales = tales.filter((t) => !existingIds.has(t.id));
+    libraryState.allTales.push(...newTales);
+    libraryState.lastVisible = lastDoc;
+    libraryState.hasMore = tales.length === libraryState.talesPerPage;
+  }
+
+  libraryState.isLoadingMore = false;
+  return libraryState.allTales;
 }
 
 /**
- * Stops the active Firestore subscription.
- * Call on page unload to prevent memory leaks.
+ * Convenience wrapper for "Load More" button clicks.
+ * Fetches the next batch and returns the updated full list.
  */
-export function stopTalesSubscription() {
-  _unsubscribe?.();
-  _unsubscribe = null;
+export async function loadMoreTales() {
+  if (!libraryState.hasMore || libraryState.isLoadingMore) return libraryState.allTales;
+  return loadTalesBatch();
+}
+
+/**
+ * Resets pagination state and reloads from the first page.
+ * Call this after a publish or when you want to refresh the library.
+ */
+export async function resetAndLoadTales() {
+  libraryState.allTales = [];
+  libraryState.lastVisible = null;
+  libraryState.hasMore = true;
+  libraryState.isLoadingMore = false;
+  return loadTalesBatch();
 }

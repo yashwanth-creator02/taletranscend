@@ -1,128 +1,19 @@
-rules_version = '4';
+rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ==================== Helpers ====================
-
-    // Check if the request is from an authenticated user
-    function isAuth() {
-      return request.auth != null;
-    }
-
-    // Check if the requesting user owns the document
-    function isOwner(userId) {
-      return isAuth() && request.auth.uid == userId;
-    }
-
-    // Check if incoming data only sets allowed fields
-    function hasOnly(fields) {
-      return request.resource.data.keys().hasOnly(fields);
-    }
-
-    // ==================== App Namespace ====================
-
-    match /artifacts/{appId} {
-
-      // ==================== Public Data ====================
-
-      match /public/data/community_tales/{taleId} {
-
-        // Anyone authenticated can read published tales
-        allow read: if isAuth();
-
-        // Only the author can write their own tale
-        // Tale must have required fields and correct authorId
-        allow create: if isAuth()
-          && request.resource.data.authorId == request.auth.uid
-          && request.resource.data.keys().hasAll(['title', 'authorId', 'authorName', 'chapterCount'])
-          && request.resource.data.title is string
-          && request.resource.data.title.size() > 0
-          && request.resource.data.title.size() <= 200;
-
-        allow update: if isAuth()
-          && resource.data.authorId == request.auth.uid;
-
-        // No deletion for now — unpublish flow to be added later
-        allow delete: if false;
-
-        // Chapters subcollection
-        match /chapters/{chapterId} {
-          allow read: if isAuth();
-
-          // Only the tale author can write chapters
-          allow write: if isAuth()
-            && get(/databases/$(database)/documents/artifacts/$(appId)/public/data/community_tales/$(taleId)).data.authorId == request.auth.uid;
-        }
-
-        // Comments subcollection
-        match /comments/{commentId} {
-          allow read: if isAuth();
-
-          // Any authenticated user can post a comment
-          // Comment must include required fields and correct authorId
-          allow create: if isAuth()
-            && request.resource.data.authorId == request.auth.uid
-            && request.resource.data.keys().hasAll(['text', 'authorId', 'authorName', 'timestamp'])
-            && request.resource.data.text is string
-            && request.resource.data.text.size() > 0
-            && request.resource.data.text.size() <= 2000;
-
-          // Users can only delete their own comments
-          allow delete: if isAuth()
-            && resource.data.authorId == request.auth.uid;
-
-          // No editing comments
-          allow update: if false;
-        }
-      }
-
-      // ==================== Pending Review ====================
-
-      match /public/data/pending_tales/{taleId} {
-        // Only the submitter can read their own pending tale
-        allow read: if isAuth()
-          && resource.data.authorId == request.auth.uid;
-
-        // Any authenticated user can submit a tale for review
-        allow create: if isAuth()
-          && request.resource.data.authorId == request.auth.uid
-          && request.resource.data.keys().hasAll(['title', 'authorId', 'chapters'])
-          && request.resource.data.title.size() > 0;
-
-        // Allow update for the auto-approve step in publish flow
-        // In production this should be restricted to a Cloud Function
-        allow update: if false;
-
-        allow delete: if false;
-      }
-
-      // ==================== User Private Data ====================
-
-      match /users/{userId} {
-        // Users can only read and write their own profile
-        allow read, write: if isOwner(userId);
-
-        // Drafts subcollection
-        match /drafts/{draftId} {
-          allow read, write: if isOwner(userId);
-        }
-
-        // Bookmarks subcollection
-        match /bookmarks/{taleId} {
-          allow read, write: if isOwner(userId);
-        }
-
-        // Reader progress subcollection
-        match /readerProgress/{taleId} {
-          allow read, write: if isOwner(userId);
-
-          // Chapter progress sub-subcollection
-          match /chapters/{chapterId} {
-            allow read, write: if isOwner(userId);
-          }
-        }
-      }
+    // This rule allows anyone with your Firestore database reference to view, edit,
+    // and delete all data in your Firestore database. It is useful for getting
+    // started, but it is configured to expire after 30 days because it
+    // leaves your app open to attackers. At that time, all client
+    // requests to your Firestore database will be denied.
+    //
+    // Make sure to write security rules for your app before that time, or else
+    // all client requests to your Firestore database will be denied until you Update
+    // your rules
+    match /{document=**} {
+      allow read, write: if request.time < timestamp.date(2026, 8, 23);
     }
   }
 }

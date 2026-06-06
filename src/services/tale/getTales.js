@@ -41,6 +41,43 @@ export async function getTales({ status = 'published', count = 50, after = null 
 }
 
 /**
+ * Fetches a paginated batch of published tales.
+ * Returns both the normalized tales and the last document snapshot
+ * so the caller can request the next page via startAfter.
+ *
+ * @param {Object} [options]
+ * @param {number} [options.count=20] - Page size
+ * @param {import('firebase/firestore').DocumentSnapshot|null} [options.after=null] - Cursor
+ * @returns {Promise<{tales: import('@state/schemas/tale.schema.js').Tale[], lastDoc: import('firebase/firestore').DocumentSnapshot|null}>}
+ */
+export async function getTalesPage({ count = 20, after = null } = {}) {
+  let q = query(
+    refs.tales(),
+    where('status', '==', 'published'),
+    orderBy('publishedAt', 'desc'),
+    limit(count)
+  );
+
+  if (after) {
+    q = query(
+      refs.tales(),
+      where('status', '==', 'published'),
+      orderBy('publishedAt', 'desc'),
+      startAfter(after),
+      limit(count)
+    );
+  }
+
+  const snap = await getDocs(q);
+  if (snap.empty) return { tales: [], lastDoc: null };
+
+  return {
+    tales: snap.docs.map((d) => createTale(d.id, d.data())),
+    lastDoc: snap.docs[snap.docs.length - 1],
+  };
+}
+
+/**
  * Fetches all tales by a specific author regardless of status.
  * Used by the profile page to show a writer's full portfolio.
  *

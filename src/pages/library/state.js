@@ -29,4 +29,10 @@ export const libraryState = {
   sidebarFilter: 'all',
   sidebarCollapsed: JSON.parse(localStorage.getItem('tt-lib-sidebar-collapsed') ?? 'false'),
   eraChipsBuilt: false,
+
+  // Pagination
+  lastVisible: null,
+  hasMore: true,
+  isLoadingMore: false,
+  talesPerPage: 20,
 };

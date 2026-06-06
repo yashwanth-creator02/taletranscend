@@ -153,6 +153,45 @@ export function renderTaleCards(container, tales, metadata) {
   if (window.lucide) window.lucide.createIcons();
 }
 
+/**
+ * Appends additional tale cards to the grid without wiping existing ones.
+ * Used by the library "Load More" flow.
+ *
+ * @param {string} userId
+ * @param {import('@state/schemas/tale.schema.js').Tale[]} tales
+ */
+export async function appendTaleCards(userId, tales) {
+  const container = document.getElementById('cards-grid');
+  if (!container || !tales.length) return;
+
+  // Remove empty-state placeholder if present
+  const emptyState = container.querySelector('.empty-state');
+  if (emptyState) emptyState.remove();
+
+  const metadata = await fetchTalesMetadata(userId, tales);
+
+  const html = tales
+    .map((tale, index) => {
+      const chaptersProgress = metadata.progressSnapshots[index] || {};
+      const progressStats = getOverallProgress({
+        chapterCount: Number(tale.chapterCount) || 0,
+        chaptersProgress,
+      });
+      const displayPercent = tale.status === 'finished' ? 100 : progressStats.percent || 0;
+      return _createTaleCard(tale, displayPercent, metadata.readTimeMap, metadata.bookmarkMap);
+    })
+    .join('');
+
+  // Append instead of replace
+  const temp = document.createElement('div');
+  temp.innerHTML = html;
+  while (temp.firstChild) {
+    container.appendChild(temp.firstChild);
+  }
+
+  if (window.lucide) window.lucide.createIcons();
+}
+
 export async function renderCardsGrid(userId, tales) {
   const container = document.getElementById('cards-grid');
   if (!container) return;

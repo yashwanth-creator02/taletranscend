@@ -7,7 +7,7 @@ import { libraryState } from './state.js';
 import { debounce } from '@/utils';
 import { getBookmarks } from '@services/index.js';
 import { buildEraChips, setActiveEraChip, setActiveSidebarBtn } from './ui.js';
-import { renderCardsGrid } from '@ui/components/taleCard.js';
+import { renderCardsGrid, appendTaleCards } from '@ui/components/taleCard.js';
 import { initIcons } from '@ui/components/icons.js';
 
 /* ─────────────────────────────────────────────

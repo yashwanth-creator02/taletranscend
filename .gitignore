@@ -1,44 +1,100 @@
-# --- Environment & Secrets ---
+# =========================================================
+# Environment & Secrets
+# =========================================================
+
 .env
 .env.local
 .env.*.local
 
-# --- Dependencies ---
+# Firebase / Google Cloud credentials
+service-account.json
+firebase-adminsdk*.json
+google-credentials*.json
+
+
+# =========================================================
+# Dependencies
+# =========================================================
+
 node_modules/
 .pnp
 .pnp.js
 
-# --- System Files ---
+
+# =========================================================
+# System Files
+# =========================================================
+
 .DS_Store
 Thumbs.db
 *.log
 firebase-debug.log*
 
-# --- Build & Cache ---
+
+# =========================================================
+# Build & Cache
+# =========================================================
+
 dist/
 .vite/
 .eslintcache
 .prettiercache
+coverage/
 
-# --- Configuration ---
-# We keep the structure but ignore any potential hardcoded secrets
+
+# =========================================================
+# Configuration Files
+# =========================================================
+
+# Ignore all JSON by default
 *.json
+
+# Keep required project configuration
 !package.json
 !package-lock.json
 !jsconfig.json
 
-# If you moved secrets to .env, you can un-ignore this file:
-!config/firebase-config.js
+# Firebase project configuration
+!firebase.json
+!.firebaserc
+!firestore.indexes.json
 
+
+# =========================================================
+# Firebase Rules
+# =========================================================
+
+# Firestore rules are usually shared
+!firestore.rules
+
+
+# =========================================================
+# Local Scripts & Generated Assets
+# =========================================================
 
 migrate.js
-service-account.json
+seed-tale.js
+
 stats.html
 graph.png
 graph.svg
 architecture.svg
-.aider*
+
 ex.tale.html
+
+
+# =========================================================
+# Tool-Specific Local State
+# =========================================================
+
+.aider*
 .antigravitycli
+.agents
+
+
+# =========================================================
+# Local Demo / Scratch Content
+# =========================================================
+
 demo/
-seed-tale.js
+later.firestore.rules
