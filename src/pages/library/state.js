@@ -34,5 +34,5 @@ export const libraryState = {
   lastVisible: null,
   hasMore: true,
   isLoadingMore: false,
-  talesPerPage: 20,
+  talesPerPage: 2,
 };

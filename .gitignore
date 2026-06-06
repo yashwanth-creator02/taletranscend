@@ -10,6 +10,7 @@
 service-account.json
 firebase-adminsdk*.json
 google-credentials*.json
+*credentials*.json
 
 
 # =========================================================
@@ -29,6 +30,7 @@ node_modules/
 Thumbs.db
 *.log
 firebase-debug.log*
+firebase-debug.*.log
 
 
 # =========================================================
@@ -43,44 +45,22 @@ coverage/
 
 
 # =========================================================
-# Configuration Files
+# Generated / Local-only Assets
 # =========================================================
-
-# Ignore all JSON by default
-*.json
-
-# Keep required project configuration
-!package.json
-!package-lock.json
-!jsconfig.json
-
-# Firebase project configuration
-!firebase.json
-!.firebaserc
-!firestore.indexes.json
-
-
-# =========================================================
-# Firebase Rules
-# =========================================================
-
-# Firestore rules are usually shared
-!firestore.rules
-
-
-# =========================================================
-# Local Scripts & Generated Assets
-# =========================================================
-
-migrate.js
-seed-tale.js
 
 stats.html
 graph.png
 graph.svg
 architecture.svg
 
+# Local scripts (keep if you want them in repo)
+migrate.js
+seed-tale.js
+
+# Local demo / scratch
+demo/
 ex.tale.html
+later.firestore.rules
 
 
 # =========================================================
@@ -93,8 +73,12 @@ ex.tale.html
 
 
 # =========================================================
-# Local Demo / Scratch Content
+# IDE
 # =========================================================
 
-demo/
-later.firestore.rules
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
