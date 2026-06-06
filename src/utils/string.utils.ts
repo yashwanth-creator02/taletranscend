@@ -84,3 +84,37 @@ export function getAvatarUrl(uid: string): string {
   const seed = encodeURIComponent((uid ?? 'anon').slice(0, 8));
   return `${DICEBEAR_BASE_URL}?seed=${seed}`;
 }
+
+/* ─────────────────────────────────────────────
+   Text Manipulation
+   ───────────────────────────────────────────── */
+
+/**
+ * Truncates a string to a specific length and appends an ellipsis.
+ * Returns the original string if it's already shorter than the limit.
+ *
+ * @param text - Raw text content
+ * @param limit - Max length before truncation
+ * @returns Truncated string
+ */
+export function truncate(text: string | null | undefined, limit: number = 100): string {
+  if (!text) return '';
+  if (text.length <= limit) return text;
+  return text.slice(0, limit) + '...';
+}
+
+/**
+ * Converts a string into a URL-friendly slug.
+ * Lowercases, replaces spaces with hyphens, and strips special characters.
+ *
+ * @param text - Raw text content
+ * @returns URL-friendly slug
+ */
+export function slugify(text: string | null | undefined): string {
+  return (text ?? '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}

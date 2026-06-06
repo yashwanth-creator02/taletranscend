@@ -41,7 +41,17 @@ dist/
 .vite/
 .eslintcache
 .prettiercache
+
+
+# =========================================================
+# Testing (Vitest & Playwright)
+# =========================================================
+
 coverage/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
 
 
 # =========================================================

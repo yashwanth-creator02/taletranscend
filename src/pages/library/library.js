@@ -80,13 +80,28 @@ function setupPagination() {
 
   if (nextBtn) {
     nextBtn.addEventListener('click', async () => {
-      if (libraryState.isLoading) return;
+      console.log(
+        '[pagination] Next clicked. Current page:',
+        libraryState.currentPage,
+        'Loading:',
+        libraryState.isLoading
+      );
+      if (libraryState.isLoading) {
+        console.log('[pagination] Blocked by isLoading');
+        return;
+      }
 
       const maxPage = Math.ceil(libraryState.totalTales / libraryState.talesPerPage);
-      if (libraryState.currentPage >= maxPage) return;
+      console.log('[pagination] Max page:', maxPage);
+      if (libraryState.currentPage >= maxPage) {
+        console.log('[pagination] Blocked by maxPage');
+        return;
+      }
 
       setPaginationLoading(true);
+      console.log('[pagination] Loading page:', libraryState.currentPage + 1);
       await nextPage();
+      console.log('[pagination] Page loaded. New state page:', libraryState.currentPage);
       await applyAllFilters();
       updatePaginationUI();
       setPaginationLoading(false);
