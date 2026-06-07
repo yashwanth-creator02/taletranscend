@@ -17,27 +17,31 @@ export function sanitizeHtml(dirty: string): string {
 
   return DOMPurify.sanitize(dirty, {
     ALLOWED_TAGS: [
-      'b', 'i', 'em', 'strong',
-      'p', 'br',
-      'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+      'b',
+      'i',
+      'em',
+      'strong',
+      'p',
+      'br',
+      'h1',
+      'h2',
+      'h3',
+      'h4',
+      'h5',
+      'h6',
       'blockquote',
-      'ul', 'ol', 'li',
+      'ul',
+      'ol',
+      'li',
       'a',
-      'figure', 'figcaption',
+      'figure',
+      'figcaption',
       'img',
-      'div', 'span'
+      'div',
+      'span',
     ],
 
-    ALLOWED_ATTR: [
-      'href',
-      'title',
-      'alt',
-      'src',
-      'id',
-      'class',
-      'style',
-      'aria-hidden'
-    ],
+    ALLOWED_ATTR: ['href', 'title', 'alt', 'src', 'id', 'class', 'style', 'aria-hidden'],
 
     ALLOW_DATA_ATTR: true,
     SANITIZE_DOM: true,

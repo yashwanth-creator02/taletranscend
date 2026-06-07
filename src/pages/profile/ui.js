@@ -7,7 +7,14 @@ import { suggestNameFromBio } from './ai-name.js';
 import { debounce } from '@/utils';
 import { initIcons } from '@ui/components/icons.js';
 import { showToast } from '@ui/components/toast.js';
-import { setText, setInput, formatNumber, formatJoinDate, timeAgo, escapeHtml as escapeHtml } from '@/utils';
+import {
+  setText,
+  setInput,
+  formatNumber,
+  formatJoinDate,
+  timeAgo,
+  escapeHtml as escapeHtml,
+} from '@/utils';
 
 /* ─────────────────────────────────────────────
    Modal

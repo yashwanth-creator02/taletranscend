@@ -591,7 +591,11 @@ export async function saveReaderPrefs(userId) {
 // Apply localStorage prefs immediately — before auth resolves — to avoid a flash
 initTheme();
 
-const authTimeout = setupAuthTimeout('article-body', 'Failed to load chapter. Please refresh.', 15000);
+const authTimeout = setupAuthTimeout(
+  'article-body',
+  'Failed to load chapter. Please refresh.',
+  15000
+);
 
 initAuth(async (user) => {
   clearTimeout(authTimeout);

@@ -128,7 +128,9 @@ function _renderTrendingCard(tale) {
   const count = tale.chapterCount || 0;
 
   const safeTitle = escapeHtml(tale.title || 'Untitled Tale');
-  const safeDescription = escapeHtml(tale.description || 'A mysterious tale waiting to be uncovered...');
+  const safeDescription = escapeHtml(
+    tale.description || 'A mysterious tale waiting to be uncovered...'
+  );
   const safeEra = escapeHtml(tale.era || 'Unknown Era');
   const safeAuthor = escapeHtml(tale.authorName || 'Unknown Scribe');
 

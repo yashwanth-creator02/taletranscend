@@ -13,8 +13,7 @@ export const VIEWS_PATH = '/src/views/';
  */
 export function initPageReveal(): void {
   document.documentElement.style.opacity = '0';
-  document.documentElement.style.transition =
-    'opacity 600ms cubic-bezier(0.4,0,0.2,1)';
+  document.documentElement.style.transition = 'opacity 600ms cubic-bezier(0.4,0,0.2,1)';
 }
 
 /**
@@ -32,9 +31,7 @@ function resolveHref(target: string): string {
   if (!value) return value;
 
   const isExternal =
-    /^(https?:)?\/\//i.test(value) ||
-    value.startsWith('mailto:') ||
-    value.startsWith('tel:');
+    /^(https?:)?\/\//i.test(value) || value.startsWith('mailto:') || value.startsWith('tel:');
 
   const isRootRelative = value.startsWith('/');
 
@@ -61,8 +58,7 @@ export function navigateTo(target: string, delay = 0): void {
 
   const body = document.body;
   if (body) {
-    body.style.transition =
-      `opacity ${TRANSITION_DURATION_MS}ms cubic-bezier(0.4,0,0.2,1)`;
+    body.style.transition = `opacity ${TRANSITION_DURATION_MS}ms cubic-bezier(0.4,0,0.2,1)`;
     body.style.opacity = '0';
     body.style.pointerEvents = 'none';
   }

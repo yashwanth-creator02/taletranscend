@@ -1,295 +1,388 @@
 <!-- src/views/tale.html -->
 <!doctype html>
 <html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      html {
+        opacity: 0;
+        transition: opacity 220ms cubic-bezier(0.4, 0, 0.2, 1);
+      }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tale Archive | TaleTranscend</title>
 
-<head>
-  <meta charset="UTF-8" />
-  <style>
-    html {
-      opacity: 0;
-      transition: opacity 220ms cubic-bezier(0.4, 0, 0.2, 1)
-    }
-  </style>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tale Archive | TaleTranscend</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Cinzel:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap"
+      rel="stylesheet"
+    />
 
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Cinzel:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap"
-    rel="stylesheet" />
+    <script type="module" src="../pages/tale/tale.js"></script>
+  </head>
 
-  <script type="module" src="../pages/tale/tale.js"></script>
-</head>
+  <body
+    class="min-h-screen antialiased selection:bg-indigo-500/30 selection:text-white page-fade-in flex flex-col h-screen overflow-hidden"
+  >
+    <div class="atmosphere-base"></div>
+    <div class="particle-field"></div>
 
-<body
-  class="min-h-screen antialiased selection:bg-indigo-500/30 selection:text-white page-fade-in flex flex-col h-screen overflow-hidden">
-  <div class="atmosphere-base"></div>
-  <div class="particle-field"></div>
+    <!-- ── Global Navigation (injected by initNav) ── -->
 
-  <!-- ── Global Navigation (injected by initNav) ── -->
+    <main class="app-viewport scroll-container">
+      <!-- ── Hero Visual ── -->
+      <section
+        id="hero-section"
+        class="hero-gradient h-[60vh] md:h-[65vh] rounded-b-[3.5rem] px-4 md:px-12 lg:px-20 pb-20 mx-2 mt-1 shrink-0"
+      >
+        <div class="max-w-7xl mx-auto w-full relative z-10">
+          <div class="flex items-center gap-4 mb-8">
+            <span class="h-px w-16 bg-indigo-500/60"></span>
+            <p class="text-indigo-400 text-[11px] font-black uppercase tracking-[0.6em]">
+              Neural Fragment Identified
+            </p>
+          </div>
 
-  <main class="app-viewport scroll-container">
-    <!-- ── Hero Visual ── -->
-    <section id="hero-section"
-      class="hero-gradient h-[60vh] md:h-[65vh] rounded-b-[3.5rem] px-4 md:px-12 lg:px-20 pb-20 mx-2 mt-1 shrink-0">
-      <div class="max-w-7xl mx-auto w-full relative z-10">
-        <div class="flex items-center gap-4 mb-8">
-          <span class="h-px w-16 bg-indigo-500/60"></span>
-          <p class="text-indigo-400 text-[11px] font-black uppercase tracking-[0.6em]">
-            Neural Fragment Identified
-          </p>
+          <h1
+            id="display-title"
+            class="hero-title text-5xl md:text-7xl lg:text-8xl xl:text-9xl font-black text-white leading-[0.88] opacity-0 transition-all duration-1000 transform translate-y-12"
+          >
+            ...
+          </h1>
+
+          <div
+            id="hero-meta"
+            class="flex flex-wrap items-center gap-5 mt-10 opacity-0 transition-all duration-1000 delay-300 transform translate-y-8"
+          >
+            <div
+              class="flex items-center gap-3 px-5 py-3 glass-strong rounded-2xl border-white/10 shadow-2xl"
+            >
+              <img
+                id="author-avatar-hero"
+                src=""
+                class="w-8 h-8 rounded-lg bg-indigo-500/10 object-cover"
+                alt="Author"
+              />
+              <span
+                id="display-author"
+                class="text-[10px] font-black uppercase tracking-widest text-indigo-300"
+                >...</span
+              >
+            </div>
+            <div
+              class="flex items-center gap-3 px-5 py-3 glass rounded-2xl border-white/5 shadow-xl"
+            >
+              <i data-lucide="layers" class="w-4 h-4 text-slate-500"></i>
+              <span
+                id="display-chapters"
+                class="text-[10px] font-bold uppercase tracking-widest text-slate-300"
+                >0 Fragments</span
+              >
+            </div>
+            <div
+              class="flex items-center gap-3 px-5 py-3 glass rounded-2xl border-white/5 shadow-xl"
+            >
+              <i data-lucide="clock" class="w-4 h-4 text-slate-500"></i>
+              <span
+                id="read-time"
+                class="text-[10px] font-bold uppercase tracking-widest text-slate-300"
+                >0 min</span
+              >
+            </div>
+          </div>
         </div>
+      </section>
 
-        <h1 id="display-title"
-          class="hero-title text-5xl md:text-7xl lg:text-8xl xl:text-9xl font-black text-white leading-[0.88] opacity-0 transition-all duration-1000 transform translate-y-12">
-          ...
-        </h1>
-
-        <div id="hero-meta"
-          class="flex flex-wrap items-center gap-5 mt-10 opacity-0 transition-all duration-1000 delay-300 transform translate-y-8">
-          <div class="flex items-center gap-3 px-5 py-3 glass-strong rounded-2xl border-white/10 shadow-2xl">
-            <img id="author-avatar-hero" src="" class="w-8 h-8 rounded-lg bg-indigo-500/10 object-cover" alt="Author" />
-            <span id="display-author"
-              class="text-[10px] font-black uppercase tracking-widest text-indigo-300">...</span>
-          </div>
-          <div class="flex items-center gap-3 px-5 py-3 glass rounded-2xl border-white/5 shadow-xl">
-            <i data-lucide="layers" class="w-4 h-4 text-slate-500"></i>
-            <span id="display-chapters" class="text-[10px] font-bold uppercase tracking-widest text-slate-300">0
-              Fragments</span>
-          </div>
-          <div class="flex items-center gap-3 px-5 py-3 glass rounded-2xl border-white/5 shadow-xl">
-            <i data-lucide="clock" class="w-4 h-4 text-slate-500"></i>
-            <span id="read-time" class="text-[10px] font-bold uppercase tracking-widest text-slate-300">0 min</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── Main Grid ── -->
-    <div class="max-w-375 mx-auto px-4 md:px-8 lg:px-12 xl:px-20 py-16">
-      <div class="grid grid-cols-1 xl:grid-cols-[1fr_400px] gap-12 xl:gap-20 items-start">
-        <!-- ── Left: Interactive Modules ── -->
-        <div class="space-y-12 min-w-0">
-          <!-- Tab Navigation -->
-          <div class="flex gap-12 border-b border-white/5 mb-10 overflow-x-auto no-scrollbar snap-strip">
-            <button data-tab="about"
-              class="tab-btn active pb-6 text-[11px] font-black uppercase tracking-[0.4em] snap-item">
-              Synopsis
-            </button>
-            <button data-tab="chapters"
-              class="tab-btn pb-6 text-[11px] font-black uppercase tracking-[0.4em] snap-item">
-              Chronicles
-            </button>
-            <button data-tab="comments"
-              class="tab-btn pb-6 text-[11px] font-black uppercase tracking-[0.4em] snap-item">
-              Echoes
-            </button>
-          </div>
-
-          <!-- Synopsis Pane -->
-          <div id="content-about" class="tab-content space-y-10 animate-fade-in">
-            <div class="glass-card-strong p-8 md:p-12 rounded-[2.5rem]">
-              <div class="flex items-center gap-3 mb-8">
-                <i data-lucide="scroll-text" class="w-5 h-5 text-indigo-400"></i>
-                <span class="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-300">Narrative
-                  Extraction</span>
-              </div>
-              <div id="display-description"
-                class="text-base md:text-lg leading-[1.8] text-slate-400 max-w-4xl font-medium">
-                Initialising...
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-              <div class="glass p-6 rounded-2xl border-white/5 hover:border-indigo-500/20 transition-all">
-                <p class="text-[9px] font-black uppercase tracking-widest text-slate-600 mb-2">
-                  Era
-                </p>
-                <p id="tale-era" class="text-sm font-bold text-white uppercase tracking-wider">
-                  —
-                </p>
-              </div>
-              <div class="glass p-6 rounded-2xl border-white/5 hover:border-indigo-500/20 transition-all">
-                <p class="text-[9px] font-black uppercase tracking-widest text-slate-600 mb-2">
-                  Tone
-                </p>
-                <p id="tale-genre" class="text-sm font-bold text-white uppercase tracking-wider">
-                  —
-                </p>
-              </div>
-              <div class="glass p-6 rounded-2xl border-white/5 hover:border-indigo-500/20 transition-all">
-                <p class="text-[9px] font-black uppercase tracking-widest text-slate-600 mb-2">
-                  Language
-                </p>
-                <p id="tale-language" class="text-sm font-bold text-white uppercase tracking-wider">
-                  —
-                </p>
-              </div>
-            </div>
-
-            <div class="glass-card p-8 rounded-[2.5rem] border-white/5">
-              <div class="flex items-center gap-3 mb-6">
-                <i data-lucide="tags" class="w-4 h-4 text-indigo-400"></i>
-                <span class="text-[10px] font-black uppercase tracking-widest text-indigo-300">Knowledge Tags</span>
-              </div>
-              <div id="lore-tag-list" class="flex flex-wrap gap-2.5"></div>
-            </div>
-          </div>
-
-          <!-- Chronicles Pane -->
-          <div id="content-chapters" class="tab-content hidden animate-fade-in">
-            <div class="flex items-center justify-between mb-8 px-2">
-              <h3 class="text-xl font-black text-white uppercase tracking-[0.2em]">
-                Fragment Trail
-              </h3>
-              <span id="loading-indicator"
-                class="text-[9px] font-bold uppercase tracking-widest text-indigo-400/60">Neural Link Optimal</span>
-            </div>
-            <div id="chapter-list" class="space-y-4">
-              <!-- Rendered by ui.js -->
-            </div>
-          </div>
-
-          <!-- Echoes (Comments) Pane -->
-          <div id="content-comments" class="tab-content hidden animate-fade-in space-y-8">
-            <div class="glass-card-strong p-8 rounded-[2.5rem] border-indigo-500/10 shadow-2xl">
-              <div class="flex items-center gap-3 mb-6">
-                <i data-lucide="message-square-plus" class="w-5 h-5 text-indigo-400"></i>
-                <span class="text-[10px] font-black uppercase tracking-widest text-indigo-300">Transmit Echo</span>
-              </div>
-              <textarea id="comment-text"
-                class="comment-input w-full p-6 rounded-2xl text-sm mb-6 h-40 font-medium placeholder:text-zinc-800"
-                placeholder="Type your neural echo here..."></textarea>
-              <button id="post-btn"
-                class="px-10 py-4 bg-indigo-500 hover:bg-indigo-400 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl transition-all shadow-xl shadow-indigo-500/20 active:scale-95">
-                Post Echo
+      <!-- ── Main Grid ── -->
+      <div class="max-w-375 mx-auto px-4 md:px-8 lg:px-12 xl:px-20 py-16">
+        <div class="grid grid-cols-1 xl:grid-cols-[1fr_400px] gap-12 xl:gap-20 items-start">
+          <!-- ── Left: Interactive Modules ── -->
+          <div class="space-y-12 min-w-0">
+            <!-- Tab Navigation -->
+            <div
+              class="flex gap-12 border-b border-white/5 mb-10 overflow-x-auto no-scrollbar snap-strip"
+            >
+              <button
+                data-tab="about"
+                class="tab-btn active pb-6 text-[11px] font-black uppercase tracking-[0.4em] snap-item"
+              >
+                Synopsis
+              </button>
+              <button
+                data-tab="chapters"
+                class="tab-btn pb-6 text-[11px] font-black uppercase tracking-[0.4em] snap-item"
+              >
+                Chronicles
+              </button>
+              <button
+                data-tab="comments"
+                class="tab-btn pb-6 text-[11px] font-black uppercase tracking-[0.4em] snap-item"
+              >
+                Echoes
               </button>
             </div>
-            <div id="comments-list" class="space-y-6">
-              <!-- Rendered by comments.js -->
-            </div>
-          </div>
-        </div>
 
-        <!-- ── Right: Archive Context (Sticky Sidebar) ── -->
-        <aside class="sidebar-sticky hidden xl:block space-y-8 pb-32">
-          <!-- Cover Art -->
-          <div class="glass-card p-4 rounded-[3rem] shine-container group aspect-3/4 overflow-hidden shadow-2xl">
-            <img id="display-cover"
-              class="w-full h-full object-cover rounded-[2.5rem] grayscale-20 group-hover:grayscale-0 transition-all duration-1000 scale-100 group-hover:scale-105"
-              src="" alt="Cover" />
-            <div class="shine-layer"></div>
-          </div>
-
-          <!-- Resonance Module -->
-          <div class="glass-card p-8 rounded-[2.5rem] border-white/5 group">
-            <div class="flex items-center justify-between mb-8">
-              <div class="flex items-center gap-3">
-                <i data-lucide="flame" class="w-5 h-5 text-orange-400"></i>
-                <span class="text-[10px] font-black uppercase tracking-[0.4em] text-orange-300">Soul Resonance</span>
+            <!-- Synopsis Pane -->
+            <div id="content-about" class="tab-content space-y-10 animate-fade-in">
+              <div class="glass-card-strong p-8 md:p-12 rounded-[2.5rem]">
+                <div class="flex items-center gap-3 mb-8">
+                  <i data-lucide="scroll-text" class="w-5 h-5 text-indigo-400"></i>
+                  <span class="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-300"
+                    >Narrative Extraction</span
+                  >
+                </div>
+                <div
+                  id="display-description"
+                  class="text-base md:text-lg leading-[1.8] text-slate-400 max-w-4xl font-medium"
+                >
+                  Initialising...
+                </div>
               </div>
-              <span id="resonance-count" class="text-xs font-bold text-white tracking-wider">0</span>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div
+                  class="glass p-6 rounded-2xl border-white/5 hover:border-indigo-500/20 transition-all"
+                >
+                  <p class="text-[9px] font-black uppercase tracking-widest text-slate-600 mb-2">
+                    Era
+                  </p>
+                  <p id="tale-era" class="text-sm font-bold text-white uppercase tracking-wider">
+                    —
+                  </p>
+                </div>
+                <div
+                  class="glass p-6 rounded-2xl border-white/5 hover:border-indigo-500/20 transition-all"
+                >
+                  <p class="text-[9px] font-black uppercase tracking-widest text-slate-600 mb-2">
+                    Tone
+                  </p>
+                  <p id="tale-genre" class="text-sm font-bold text-white uppercase tracking-wider">
+                    —
+                  </p>
+                </div>
+                <div
+                  class="glass p-6 rounded-2xl border-white/5 hover:border-indigo-500/20 transition-all"
+                >
+                  <p class="text-[9px] font-black uppercase tracking-widest text-slate-600 mb-2">
+                    Language
+                  </p>
+                  <p
+                    id="tale-language"
+                    class="text-sm font-bold text-white uppercase tracking-wider"
+                  >
+                    —
+                  </p>
+                </div>
+              </div>
+
+              <div class="glass-card p-8 rounded-[2.5rem] border-white/5">
+                <div class="flex items-center gap-3 mb-6">
+                  <i data-lucide="tags" class="w-4 h-4 text-indigo-400"></i>
+                  <span class="text-[10px] font-black uppercase tracking-widest text-indigo-300"
+                    >Knowledge Tags</span
+                  >
+                </div>
+                <div id="lore-tag-list" class="flex flex-wrap gap-2.5"></div>
+              </div>
             </div>
-            <button id="resonance-btn"
-              class="w-full py-4 rounded-2xl border border-white/10 glass hover:border-orange-500/40 transition-all flex items-center justify-center gap-3 group/btn">
-              <i data-lucide="heart"
-                class="w-4 h-4 text-slate-500 group-hover/btn:text-orange-500 transition-colors"></i>
-              <span
-                class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 group-hover/btn:text-white">Align
-                Souls</span>
+
+            <!-- Chronicles Pane -->
+            <div id="content-chapters" class="tab-content hidden animate-fade-in">
+              <div class="flex items-center justify-between mb-8 px-2">
+                <h3 class="text-xl font-black text-white uppercase tracking-[0.2em]">
+                  Fragment Trail
+                </h3>
+                <span
+                  id="loading-indicator"
+                  class="text-[9px] font-bold uppercase tracking-widest text-indigo-400/60"
+                  >Neural Link Optimal</span
+                >
+              </div>
+              <div id="chapter-list" class="space-y-4">
+                <!-- Rendered by ui.js -->
+              </div>
+            </div>
+
+            <!-- Echoes (Comments) Pane -->
+            <div id="content-comments" class="tab-content hidden animate-fade-in space-y-8">
+              <div class="glass-card-strong p-8 rounded-[2.5rem] border-indigo-500/10 shadow-2xl">
+                <div class="flex items-center gap-3 mb-6">
+                  <i data-lucide="message-square-plus" class="w-5 h-5 text-indigo-400"></i>
+                  <span class="text-[10px] font-black uppercase tracking-widest text-indigo-300"
+                    >Transmit Echo</span
+                  >
+                </div>
+                <textarea
+                  id="comment-text"
+                  class="comment-input w-full p-6 rounded-2xl text-sm mb-6 h-40 font-medium placeholder:text-zinc-800"
+                  placeholder="Type your neural echo here..."
+                ></textarea>
+                <button
+                  id="post-btn"
+                  class="px-10 py-4 bg-indigo-500 hover:bg-indigo-400 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl transition-all shadow-xl shadow-indigo-500/20 active:scale-95"
+                >
+                  Post Echo
+                </button>
+              </div>
+              <div id="comments-list" class="space-y-6">
+                <!-- Rendered by comments.js -->
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Right: Archive Context (Sticky Sidebar) ── -->
+          <aside class="sidebar-sticky hidden xl:block space-y-8 pb-32">
+            <!-- Cover Art -->
+            <div
+              class="glass-card p-4 rounded-[3rem] shine-container group aspect-3/4 overflow-hidden shadow-2xl"
+            >
+              <img
+                id="display-cover"
+                class="w-full h-full object-cover rounded-[2.5rem] grayscale-20 group-hover:grayscale-0 transition-all duration-1000 scale-100 group-hover:scale-105"
+                src=""
+                alt="Cover"
+              />
+              <div class="shine-layer"></div>
+            </div>
+
+            <!-- Resonance Module -->
+            <div class="glass-card p-8 rounded-[2.5rem] border-white/5 group">
+              <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center gap-3">
+                  <i data-lucide="flame" class="w-5 h-5 text-orange-400"></i>
+                  <span class="text-[10px] font-black uppercase tracking-[0.4em] text-orange-300"
+                    >Soul Resonance</span
+                  >
+                </div>
+                <span id="resonance-count" class="text-xs font-bold text-white tracking-wider"
+                  >0</span
+                >
+              </div>
+              <button
+                id="resonance-btn"
+                class="w-full py-4 rounded-2xl border border-white/10 glass hover:border-orange-500/40 transition-all flex items-center justify-center gap-3 group/btn"
+              >
+                <i
+                  data-lucide="heart"
+                  class="w-4 h-4 text-slate-500 group-hover/btn:text-orange-500 transition-colors"
+                ></i>
+                <span
+                  class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 group-hover/btn:text-white"
+                  >Align Souls</span
+                >
+              </button>
+            </div>
+
+            <!-- Archive Stats -->
+            <div class="glass-card-strong p-8 rounded-[2.5rem] shadow-2xl">
+              <div class="flex items-center gap-3 mb-6">
+                <i data-lucide="database" class="w-4 h-4 text-indigo-400"></i>
+                <span class="text-[10px] font-black uppercase tracking-widest text-indigo-300"
+                  >Archive Identity</span
+                >
+              </div>
+              <p
+                id="sidebar-creation"
+                class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4"
+              >
+                —
+              </p>
+              <div class="sacred-divider mb-6"></div>
+              <div class="space-y-4">
+                <div
+                  class="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-600"
+                >
+                  <span>Fragments</span>
+                  <span id="sidebar-chapter-count" class="text-white">0</span>
+                </div>
+                <div
+                  class="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-600"
+                >
+                  <span>Sync Status</span>
+                  <span class="text-emerald-500">Optimal</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Warning Panel -->
+            <div class="glass-card p-8 rounded-[2.5rem] border-white/5">
+              <p class="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-4">
+                Neural Warning
+              </p>
+              <p class="text-xs text-slate-500 leading-relaxed italic">
+                Archive data may contain fragments of high-fidelity memory. Viewer discretion is
+                advised during narrative decryption.
+              </p>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </main>
+
+    <!-- ── Floating Action Bar ── -->
+    <div id="tale-action-bar" class="floating-bar">
+      <div class="floating-bar__inner">
+        <div class="flex items-center justify-between gap-6">
+          <div class="flex items-center gap-4 min-w-0">
+            <div
+              class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0 max-md:hidden"
+            >
+              <i data-lucide="scroll" class="w-5 h-5 text-indigo-400"></i>
+            </div>
+            <div class="min-w-0">
+              <h2 id="header-tale-title" class="text-white font-bold text-sm truncate">
+                Loading Archive...
+              </h2>
+              <p
+                id="reader-chapter-label"
+                class="text-[8px] font-black uppercase tracking-[0.3em] text-indigo-400/80 mt-0.5"
+              >
+                Neural Access Required
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 shrink-0">
+            <button
+              id="resume-btn"
+              class="action-btn h-12 px-5 md:px-7 glass-strong rounded-xl text-[9px] font-black uppercase tracking-widest text-indigo-300 border-indigo-500/20 flex items-center gap-2.5"
+            >
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+              <span id="resume-text">Resume</span>
+            </button>
+            <button
+              id="start-btn"
+              class="action-btn h-12 px-5 md:px-7 bg-linear-to-r from-indigo-500 to-violet-600 rounded-xl text-[9px] font-black uppercase tracking-widest text-white shadow-xl shadow-indigo-500/20 flex items-center gap-2.5"
+            >
+              <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+              Initiate
+            </button>
+            <div class="h-8 w-px bg-white/10 mx-1 hidden sm:block"></div>
+            <!-- Bug fix: added id="shelf-btn" — was missing, JS could not find this button -->
+            <button
+              id="shelf-btn"
+              class="action-btn w-12 h-12 glass rounded-xl text-slate-400 hover:text-white transition-colors flex items-center justify-center"
+              title="Save to Shelf"
+            >
+              <i data-lucide="bookmark-plus" class="w-4 h-4"></i>
+              <span class="sr-only">Add to Shelf</span>
+            </button>
+            <!-- Bug fix: added id="share-btn" — was missing, JS could not find this button -->
+            <button
+              id="share-btn"
+              class="action-btn w-12 h-12 glass rounded-xl text-slate-400 hover:text-white transition-colors flex items-center justify-center"
+              title="Share Tale"
+            >
+              <i data-lucide="share-2" class="w-4 h-4"></i>
+              <span class="sr-only">Share Tale</span>
             </button>
           </div>
-
-          <!-- Archive Stats -->
-          <div class="glass-card-strong p-8 rounded-[2.5rem] shadow-2xl">
-            <div class="flex items-center gap-3 mb-6">
-              <i data-lucide="database" class="w-4 h-4 text-indigo-400"></i>
-              <span class="text-[10px] font-black uppercase tracking-widest text-indigo-300">Archive Identity</span>
-            </div>
-            <p id="sidebar-creation" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">
-              —
-            </p>
-            <div class="sacred-divider mb-6"></div>
-            <div class="space-y-4">
-              <div
-                class="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-600">
-                <span>Fragments</span>
-                <span id="sidebar-chapter-count" class="text-white">0</span>
-              </div>
-              <div
-                class="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-600">
-                <span>Sync Status</span>
-                <span class="text-emerald-500">Optimal</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Warning Panel -->
-          <div class="glass-card p-8 rounded-[2.5rem] border-white/5">
-            <p class="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-4">
-              Neural Warning
-            </p>
-            <p class="text-xs text-slate-500 leading-relaxed italic">
-              Archive data may contain fragments of high-fidelity memory. Viewer discretion is
-              advised during narrative decryption.
-            </p>
-          </div>
-        </aside>
-      </div>
-    </div>
-  </main>
-
-  <!-- ── Floating Action Bar ── -->
-  <div id="tale-action-bar" class="floating-bar">
-    <div class="floating-bar__inner">
-      <div class="flex items-center justify-between gap-6">
-        <div class="flex items-center gap-4 min-w-0">
-          <div
-            class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0 max-md:hidden">
-            <i data-lucide="scroll" class="w-5 h-5 text-indigo-400"></i>
-          </div>
-          <div class="min-w-0">
-            <h2 id="header-tale-title" class="text-white font-bold text-sm truncate">
-              Loading Archive...
-            </h2>
-            <p id="reader-chapter-label"
-              class="text-[8px] font-black uppercase tracking-[0.3em] text-indigo-400/80 mt-0.5">
-              Neural Access Required
-            </p>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-3 shrink-0">
-          <button id="resume-btn"
-            class="action-btn h-12 px-5 md:px-7 glass-strong rounded-xl text-[9px] font-black uppercase tracking-widest text-indigo-300 border-indigo-500/20 flex items-center gap-2.5">
-            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-            <span id="resume-text">Resume</span>
-          </button>
-          <button id="start-btn"
-            class="action-btn h-12 px-5 md:px-7 bg-linear-to-r from-indigo-500 to-violet-600 rounded-xl text-[9px] font-black uppercase tracking-widest text-white shadow-xl shadow-indigo-500/20 flex items-center gap-2.5">
-            <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
-            Initiate
-          </button>
-          <div class="h-8 w-px bg-white/10 mx-1 hidden sm:block"></div>
-          <!-- Bug fix: added id="shelf-btn" — was missing, JS could not find this button -->
-          <button id="shelf-btn"
-            class="action-btn w-12 h-12 glass rounded-xl text-slate-400 hover:text-white transition-colors flex items-center justify-center"
-            title="Save to Shelf">
-            <i data-lucide="bookmark-plus" class="w-4 h-4"></i>
-            <span class="sr-only">Add to Shelf</span>
-          </button>
-          <!-- Bug fix: added id="share-btn" — was missing, JS could not find this button -->
-          <button id="share-btn"
-            class="action-btn w-12 h-12 glass rounded-xl text-slate-400 hover:text-white transition-colors flex items-center justify-center"
-            title="Share Tale">
-            <i data-lucide="share-2" class="w-4 h-4"></i>
-            <span class="sr-only">Share Tale</span>
-          </button>
         </div>
       </div>
     </div>
-  </div>
 
-  <div id="reader-toast-container" class="fixed top-24 right-8 z-200 flex flex-col gap-3 pointer-events-none"></div>
-</body>
-
+    <div
+      id="reader-toast-container"
+      class="fixed top-24 right-8 z-200 flex flex-col gap-3 pointer-events-none"
+    ></div>
+  </body>
 </html>

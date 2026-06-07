@@ -7,7 +7,13 @@ import { refs, getDocs } from '@fb/index.js';
 import { getTaleMeta, getChapter } from '@services/index.js';
 import { createChapter } from '@state/index.js';
 import { readerState } from './state.js';
-import { sanitizeHtml, escapeText as escapeHtml, countWords, estimateReadMins, setText } from '@/utils';
+import {
+  sanitizeHtml,
+  escapeText as escapeHtml,
+  countWords,
+  estimateReadMins,
+  setText,
+} from '@/utils';
 
 /* ─────────────────────────────────────────────
    Skeletons
