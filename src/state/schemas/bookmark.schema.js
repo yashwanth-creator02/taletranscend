@@ -21,18 +21,26 @@
  * Merges raw Firestore bookmark document data with safe defaults.
  * taleId comes from the document ID (snap.id), not snap.data().
  *
+ * @param {string} userId
  * @param {string} taleId
  * @param {Partial<Bookmark>} data
  * @returns {Bookmark}
  */
-export function createBookmark(taleId, data = {}) {
+export function createBookmark(userId, taleId, data = {}) {
   return {
+    userId,
     taleId,
-    taleTitle: data.taleTitle ?? '',
+    taleTitle: data.taleTitle || data.title || '',
+    title: data.taleTitle || data.title || '',
     coverUrl: data.coverUrl ?? '',
     authorName: data.authorName ?? '',
-    chapterCount: data.chapterCount ?? 0,
+    chapterCount: Number(data.chapterCount ?? 0),
     era: data.era ?? '',
+    createdAt: data.createdAt
+      ? data.createdAt.toDate
+        ? data.createdAt.toDate()
+        : new Date(data.createdAt)
+      : new Date(),
     bookmarkedAt: data.bookmarkedAt ?? null,
   };
 }
