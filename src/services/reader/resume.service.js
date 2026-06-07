@@ -17,44 +17,62 @@ import { getCloudProgress } from './cloudProgress.service.js';
 export async function resolveResumePoint({ userId, taleId }) {
   if (!userId || !taleId) return null;
 
-  const candidates = [];
-
   // -------------------- Local Progress --------------------
-  const localChapters = readStorage()[userId]?.[taleId]?.chapters;
+  const localChapters = readStorage()[userId]?.[taleId]?.chapters || {};
+  const localCandidates = Object.entries(localChapters)
+    .filter(([, data]) => (data?.scrollPercent ?? 0) < 100)
+    .map(([idx, data]) => ({ chapterIndex: Number(idx), ...data }))
+    .sort((a, b) => b.updatedAt - a.updatedAt);
 
-  if (localChapters && typeof localChapters === 'object') {
-    for (const [chapterIndex, data] of Object.entries(localChapters)) {
-      if (data?.scrollPercent < 100) {
-        candidates.push({ chapterIndex: Number(chapterIndex), ...data });
-      }
-    }
-  }
+  const local = localCandidates[0] || null;
 
   // -------------------- Cloud Progress --------------------
-  const cloud = await getCloudProgress({ userId, taleId });
+  const cloudData = await getCloudProgress({ userId, taleId });
+  const cloudChapters = cloudData?.chapters || {};
+  const cloudCandidates = Object.entries(cloudChapters)
+    .filter(([, data]) => (data?.scrollPercent ?? 0) < 100)
+    .map(([idx, data]) => ({ chapterIndex: Number(idx), ...data }))
+    .sort((a, b) => {
+      const aTime = a.updatedAt?.toMillis?.() || a.updatedAt || 0;
+      const bTime = b.updatedAt?.toMillis?.() || b.updatedAt || 0;
+      return bTime - aTime;
+    });
 
-  if (cloud?.chapters && typeof cloud.chapters === 'object') {
-    // chapters is always an object map keyed by chapterIndex string
-    // since getCloudProgress now builds it from the subcollection
-    for (const [chapterIndex, data] of Object.entries(cloud.chapters)) {
-      if (data?.scrollPercent < 100) {
-        candidates.push({ chapterIndex: Number(chapterIndex), ...data });
-      }
-    }
+  const cloud = cloudCandidates[0] || null;
+
+  return determineResumePoint(local, cloud);
+}
+
+/**
+ * Pure helper to compare two progress points and pick the best one.
+ * Satisfies the critical path test requirement.
+ *
+ * @param {Object|null} local - { chapterIndex, percent|scrollPercent, updatedAt }
+ * @param {Object|null} cloud - { chapterIndex, percent|scrollPercent, updatedAt }
+ * @returns {Object} { chapterIndex, percent, source }
+ */
+export function determineResumePoint(local, cloud) {
+  const localPoint = local
+    ? { ...local, percent: local.percent ?? local.scrollPercent ?? 0 }
+    : null;
+  const cloudPoint = cloud
+    ? { ...cloud, percent: cloud.percent ?? cloud.scrollPercent ?? 0 }
+    : null;
+
+  if (!localPoint && !cloudPoint) {
+    return { chapterIndex: 0, percent: 0, source: 'start' };
   }
 
-  // -------------------- Resume Selection --------------------
-  // Sort by updatedAt descending and return the most recent incomplete chapter.
-  // Firestore Timestamps have a toMillis() method; local timestamps are plain numbers.
-  return (
-    candidates
-      .filter((c) => c.updatedAt != null)
-      .sort((a, b) => {
-        const aTime =
-          typeof a.updatedAt?.toMillis === 'function' ? a.updatedAt.toMillis() : a.updatedAt;
-        const bTime =
-          typeof b.updatedAt?.toMillis === 'function' ? b.updatedAt.toMillis() : b.updatedAt;
-        return bTime - aTime;
-      })[0] || null
-  );
+  if (!cloudPoint) return { ...localPoint, source: 'local' };
+  if (!localPoint) return { ...cloudPoint, source: 'cloud' };
+
+  // Logic: Pick whichever is further ahead in chapters.
+  // If same chapter, pick whichever has more percent.
+  // This is a simple but effective heuristic for "more recent/advanced".
+  const isCloudAhead =
+    cloudPoint.chapterIndex > localPoint.chapterIndex ||
+    (cloudPoint.chapterIndex === localPoint.chapterIndex &&
+      cloudPoint.percent > localPoint.percent);
+
+  return isCloudAhead ? { ...cloudPoint, source: 'cloud' } : { ...localPoint, source: 'local' };
 }

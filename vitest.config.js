@@ -10,7 +10,13 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      exclude: ['node_modules/', 'src/test/'],
+      exclude: ['node_modules/', 'src/test/', 'src/**/*.config.*'],
+      thresholds: {
+        lines: 60,
+        functions: 60,
+        branches: 50,
+        statements: 60,
+      },
     },
   },
   resolve: {

@@ -51,7 +51,7 @@
 export function createUserProfile(uid, data = {}) {
   return {
     uid,
-    name: data.name ?? '',
+    name: data.name || 'Anonymous Reader',
     bio: data.bio ?? '',
     pronouns: data.pronouns ?? '',
     avatarUrl: data.avatarUrl ?? '',
@@ -76,7 +76,11 @@ export function createUserProfile(uid, data = {}) {
     isVerifiedWriter: data.isVerifiedWriter ?? false,
     joinedAt: data.joinedAt ?? null,
     lastActiveAt: data.lastActiveAt ?? null,
-    createdAt: data.createdAt ?? null,
+    createdAt: data.createdAt
+      ? data.createdAt.toDate
+        ? data.createdAt.toDate()
+        : new Date(data.createdAt)
+      : new Date(),
     updatedAt: data.updatedAt ?? null,
   };
 }
@@ -109,10 +113,10 @@ export function createUserProfile(uid, data = {}) {
  */
 export function createReaderPreferences(data = {}) {
   return {
-    theme: data.theme ?? 'noir',
-    fontFamily: data.fontFamily ?? 'serif',
+    theme: data.theme ?? 'dark',
+    fontFamily: data.fontFamily ?? 'inter',
     fontSize: data.fontSize ?? 18,
-    lineHeight: data.lineHeight ?? 1.75,
+    lineHeight: data.lineHeight ?? 1.6,
     measure: data.measure ?? 68,
     readingWidth: data.readingWidth ?? 'normal',
     contentFilters: data.contentFilters ?? [],
