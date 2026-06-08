@@ -230,3 +230,50 @@ body {
 .fade-in-stagger > *:nth-child(8) {
   animation-delay: 0.8s;
 }
+
+/* ── Dev Mode ──────────────────────────────────────────────────────── */
+
+.dev-badge {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 1000;
+  padding: 0.6rem 1.25rem;
+  background: rgba(13, 13, 20, 0.8);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: var(--radius-full);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  pointer-events: auto;
+  animation: slide-up 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+.dev-badge__indicator {
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--accent);
+  border-radius: var(--radius-full);
+  box-shadow: 0 0 12px var(--accent);
+}
+
+.dev-badge__label {
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--text-primary);
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

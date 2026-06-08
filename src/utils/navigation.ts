@@ -1,5 +1,7 @@
 // src/utils/navigation.ts
 
+import { initDevMode } from './dev.utils.ts';
+
 /* ─────────────────────────────────────────────
    Page Reveal
    ───────────────────────────────────────────── */
@@ -14,6 +16,9 @@ export const VIEWS_PATH = '/src/views/';
 export function initPageReveal(): void {
   document.documentElement.style.opacity = '0';
   document.documentElement.style.transition = 'opacity 600ms cubic-bezier(0.4,0,0.2,1)';
+
+  // Initialize Developer Mode
+  initDevMode();
 }
 
 /**

@@ -70,3 +70,9 @@ export const STORAGE_KEYS = {
 
 // Gemini AI API Key for mythic suggestions.
 export const AI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
+
+// ── Development Mode ─────────────────────────────────────────────────
+
+// Global Dev Mode toggle.
+// Set VITE_DEV_MODE=true in your local .env to enable developer-only features and logging.
+export const IS_DEV_MODE = import.meta.env.VITE_DEV_MODE === 'true';
