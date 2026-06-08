@@ -37,7 +37,7 @@ function getCommandItems() {
     });
   } else {
     commands.push({
-      href: 'profile.html',
+      href: 'login.html',
       icon: 'log-in',
       label: 'Sign In',
       keywords: ['login', 'sign in', 'account'],

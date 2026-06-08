@@ -1,0 +1,77 @@
+/* src/assets/css/pages/login.css */
+/* Styles for the mythic entrance (login page) */
+
+@import '../base.css';
+
+.login-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-3xl);
+  box-shadow: var(--shadow-xl);
+  backdrop-filter: blur(20px);
+}
+
+.rune-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--border-strong), transparent);
+  position: relative;
+}
+
+.rune-divider::after {
+  content: '✦';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--bg-elevated);
+  padding: 0 0.75rem;
+  color: var(--border-strong);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+}
+
+#btn-google-login {
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+}
+
+#btn-google-login:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(99, 102, 241, 0.15);
+}
+
+#btn-guest-login:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Atmospheric effects */
+.atmosphere-base {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, #0a0a14 0%, #030305 100%);
+  z-index: -2;
+}
+
+.particle-field {
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 20px 30px, #ffffff1a, transparent),
+    radial-gradient(1.5px 1.5px at 40px 70px, #ffffff15, transparent),
+    radial-gradient(1px 1px at 50px 160px, #ffffff10, transparent),
+    radial-gradient(2px 2px at 90px 40px, #ffffff1a, transparent);
+  background-size: 200px 200px;
+  opacity: 0.4;
+  z-index: -1;
+  animation: drift 60s linear infinite;
+}
+
+@keyframes drift {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 200px 200px;
+  }
+}

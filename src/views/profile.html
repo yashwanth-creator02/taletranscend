@@ -213,6 +213,33 @@
                 class="w-4 h-4 text-slate-700 group-hover:text-red-400/60 group-hover:translate-x-1 transition-all"
               ></i>
             </button>
+
+            <!-- Upgrade Account — visible for anonymous users -->
+            <button
+              type="button"
+              id="btn-upgrade-account"
+              class="hidden items-center justify-between w-full p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/20 hover:bg-indigo-500/10 hover:border-indigo-500/30 transition-all group !mt-6"
+            >
+              <div class="flex items-center gap-4">
+                <div
+                  class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center group-hover:bg-indigo-500/20 transition-colors"
+                >
+                  <i data-lucide="shield-check" class="w-4 h-4 text-indigo-400"></i>
+                </div>
+                <div class="flex flex-col items-start">
+                  <span class="text-sm font-bold text-indigo-300 group-hover:text-white"
+                    >Secure Account</span
+                  >
+                  <span class="text-[9px] text-indigo-500/70 font-bold uppercase tracking-wider"
+                    >Link to Google</span
+                  >
+                </div>
+              </div>
+              <i
+                data-lucide="arrow-right"
+                class="w-4 h-4 text-indigo-500/50 group-hover:text-white group-hover:translate-x-1 transition-all"
+              ></i>
+            </button>
           </div>
         </div>
       </aside>

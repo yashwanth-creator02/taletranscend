@@ -69,6 +69,7 @@ export function buildAuthenticatedUser(user, current, userLinks) {
   const email = escapeText(user.email || '');
 
   const menuItems = userLinks.map((link) => buildDropdownLink(link, current)).join('');
+  const isAnonymous = user.isAnonymous;
 
   return `
     <div class="nav-user" id="nav-user">
@@ -117,6 +118,22 @@ export function buildAuthenticatedUser(user, current, userLinks) {
 
         <nav aria-label="Account navigation">
           ${menuItems}
+          ${
+            isAnonymous
+              ? `
+            <div class="dropdown__divider" role="separator"></div>
+            <button
+              class="dropdown-link dropdown-link--primary"
+              id="nav-upgrade-btn"
+              type="button"
+              role="menuitem"
+            >
+              <i data-lucide="shield-check" class="dropdown-link__icon" aria-hidden="true"></i>
+              <span>Secure Account</span>
+            </button>
+          `
+              : ''
+          }
         </nav>
 
         <div class="dropdown__divider" role="separator"></div>
@@ -143,7 +160,7 @@ export function buildAuthenticatedUser(user, current, userLinks) {
 export function buildGuestUser() {
   return `
     <div id="nav-user">
-      <a href="profile.html" class="signin-btn">
+      <a href="login.html" class="signin-btn">
         <i data-lucide="log-in" class="signin-btn__icon" aria-hidden="true"></i>
         <span>Sign In</span>
       </a>
@@ -197,16 +214,17 @@ export function buildDockItem({ href, icon, label, active, primary = false }) {
 export function buildMobileDock(current, user) {
   const profileIcon = user ? 'user' : 'log-in';
   const profileLabel = user ? 'Profile' : 'Sign In';
+  const profileHref = user ? 'profile.html' : 'login.html';
 
   const dockItems = DOCK_ITEMS.map((item) =>
     buildDockItem({ ...item, active: current === item.href })
   ).join('');
 
   const profileItem = buildDockItem({
-    href: 'profile.html',
+    href: profileHref,
     icon: profileIcon,
     label: profileLabel,
-    active: current === 'profile.html',
+    active: current === profileHref,
   });
 
   return `

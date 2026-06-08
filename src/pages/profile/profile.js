@@ -8,7 +8,7 @@ import '@css/components.css';
 import '@css/pages/profile.css';
 
 import { initNav } from '@ui/components/nav/nav.js';
-import { initAuth, auth } from '@fb/index.js';
+import { initAuth, auth, upgradeAnonymousToGoogle } from '@fb/index.js';
 import { signOut } from 'firebase/auth';
 import { navigateTo, initPageReveal, readyReveal, setupAuthTimeout } from '@/utils';
 import { initIcons } from '@ui/components/icons.js';
@@ -53,6 +53,15 @@ const authTimeout = setupAuthTimeout(
 initAuth(async (user) => {
   clearTimeout(authTimeout);
   const uid = user.uid;
+
+  // Show upgrade button if user is anonymous
+  if (user.isAnonymous) {
+    const upgradeBtn = document.getElementById('btn-upgrade-account');
+    if (upgradeBtn) {
+      upgradeBtn.classList.remove('hidden');
+      upgradeBtn.classList.add('flex');
+    }
+  }
 
   // Real-time profile listener — updates UI on every Firestore write
   startProfileSync(uid);
@@ -101,6 +110,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Default to published tab
   switchContribTab('published');
+
+  // ── Account Upgrade ─────────────────────────────────────────────
+  document.getElementById('btn-upgrade-account')?.addEventListener('click', async () => {
+    try {
+      await upgradeAnonymousToGoogle();
+      showToast('Account secured with Google!', 'success');
+      // Hide the button after successful upgrade
+      const upgradeBtn = document.getElementById('btn-upgrade-account');
+      if (upgradeBtn) {
+        upgradeBtn.classList.add('hidden');
+        upgradeBtn.classList.remove('flex');
+      }
+    } catch (err) {
+      console.error('[profile] Upgrade failed:', err);
+      // If user cancelled or closed popup, don't show error toast as it's expected
+      if (err.code !== 'auth/popup-closed-by-user') {
+        showToast('Account link failed. Try again.', 'error');
+      }
+    }
+  });
 
   // ── Sign Out (TODO #2) ──────────────────────────────────────────
   // Wires both the desktop and mobile sign-out buttons.
