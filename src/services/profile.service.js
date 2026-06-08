@@ -6,6 +6,7 @@ import { getDocs, getDoc, refs } from '@fb/index.js';
 import { readStorage } from '@services/index.js';
 import { createTale, createDraft } from '@state/index.js';
 import { getTalesByAuthor } from './tale/getTales.js';
+import { safeAsync } from '@/utils';
 
 /* ─────────────────────────────────────────────
    Continue Reading
@@ -33,33 +34,33 @@ export async function getContinueReading(userId) {
 
   const tales = await Promise.all(
     taleIds.map(async (taleId) => {
-      try {
-        const snap = await getDoc(refs.tale(taleId));
-        if (!snap.exists()) return null;
+      const snap = await safeAsync(getDoc(refs.tale(taleId)), {
+        fallback: { exists: () => false },
+        logContext: `services.profile.getContinueReading.${taleId}`,
+      });
 
-        const tale = createTale(snap.id, snap.data());
-        const chapters = userProgress[taleId]?.chapters || {};
+      if (!snap.exists()) return null;
 
-        // Most recently read chapter
-        const lastEntry = Object.entries(chapters).sort(
-          (a, b) => (b[1].updatedAt || 0) - (a[1].updatedAt || 0)
-        )[0];
+      const tale = createTale(snap.id, snap.data());
+      const chapters = userProgress[taleId]?.chapters || {};
 
-        const lastChapterIndex = lastEntry ? Number(lastEntry[0]) : 0;
-        const lastUpdatedAt = lastEntry?.[1]?.updatedAt || 0;
+      // Most recently read chapter
+      const lastEntry = Object.entries(chapters).sort(
+        (a, b) => (b[1].updatedAt || 0) - (a[1].updatedAt || 0)
+      )[0];
 
-        // Overall tale progress as a percentage
-        const chapterCount = tale.chapterCount || 1;
-        const progressUnits = Object.values(chapters).reduce(
-          (acc, ch) => acc + Math.min(100, Math.max(0, ch.scrollPercent || 0)) / 100,
-          0
-        );
-        const percent = Math.min(100, Math.round((progressUnits / chapterCount) * 100));
+      const lastChapterIndex = lastEntry ? Number(lastEntry[0]) : 0;
+      const lastUpdatedAt = lastEntry?.[1]?.updatedAt || 0;
 
-        return { ...tale, lastChapterIndex, lastUpdatedAt, percent };
-      } catch {
-        return null;
-      }
+      // Overall tale progress as a percentage
+      const chapterCount = tale.chapterCount || 1;
+      const progressUnits = Object.values(chapters).reduce(
+        (acc, ch) => acc + Math.min(100, Math.max(0, ch.scrollPercent || 0)) / 100,
+        0
+      );
+      const percent = Math.min(100, Math.round((progressUnits / chapterCount) * 100));
+
+      return { ...tale, lastChapterIndex, lastUpdatedAt, percent };
     })
   );
 
@@ -99,21 +100,20 @@ export async function getUserPublishedTales(userId) {
 export async function getUserDrafts(userId) {
   if (!userId) return [];
 
-  try {
-    const snapshot = await getDocs(refs.drafts(userId));
-    if (snapshot.empty) return [];
+  const snapshot = await safeAsync(getDocs(refs.drafts(userId)), {
+    fallback: { empty: true, docs: [] },
+    logContext: 'services.profile.getUserDrafts',
+  });
 
-    return snapshot.docs
-      .map((d) => createDraft(d.id, d.data()))
-      .sort((a, b) => {
-        const aTime = a.updatedAt?.seconds ?? 0;
-        const bTime = b.updatedAt?.seconds ?? 0;
-        return bTime - aTime;
-      });
-  } catch (err) {
-    console.error('[profile.service] getUserDrafts error:', err);
-    return [];
-  }
+  if (snapshot.empty) return [];
+
+  return snapshot.docs
+    .map((d) => createDraft(d.id, d.data()))
+    .sort((a, b) => {
+      const aTime = a.updatedAt?.seconds ?? 0;
+      const bTime = b.updatedAt?.seconds ?? 0;
+      return bTime - aTime;
+    });
 }
 
 /* ─────────────────────────────────────────────
@@ -130,31 +130,36 @@ export async function getUserDrafts(userId) {
 export async function computeAndSyncStats(userId) {
   if (!userId) return 0;
 
-  try {
-    const draftsSnap = await getDocs(refs.drafts(userId));
-    if (draftsSnap.empty) return 0;
+  const draftsSnap = await safeAsync(getDocs(refs.drafts(userId)), {
+    fallback: { empty: true, docs: [] },
+    logContext: 'services.profile.computeAndSyncStats.drafts',
+  });
 
-    let totalWords = 0;
+  if (draftsSnap.empty) return 0;
 
-    await Promise.all(
-      draftsSnap.docs.map(async (draftDoc) => {
-        const chaptersSnap = await getDocs(refs.draftChapters(userId, draftDoc.id));
-        chaptersSnap.forEach((ch) => {
-          totalWords += ch.data().wordCount || 0;
-        });
-      })
-    );
+  let totalWords = 0;
 
-    // Sync to user profile document
-    const { updateDoc, serverTimestamp } = await import('@fb/index.js');
-    await updateDoc(refs.user(userId), {
+  await Promise.all(
+    draftsSnap.docs.map(async (draftDoc) => {
+      const chaptersSnap = await safeAsync(getDocs(refs.draftChapters(userId, draftDoc.id)), {
+        fallback: { forEach: () => {} },
+        logContext: `services.profile.computeAndSyncStats.chapters.${draftDoc.id}`,
+      });
+      chaptersSnap.forEach((ch) => {
+        totalWords += ch.data().wordCount || 0;
+      });
+    })
+  );
+
+  // Sync to user profile document
+  const { updateDoc, serverTimestamp } = await import('@fb/index.js');
+  await safeAsync(
+    updateDoc(refs.user(userId), {
       totalWordsWritten: totalWords,
       updatedAt: serverTimestamp(),
-    });
+    }),
+    { logContext: 'services.profile.computeAndSyncStats.sync' }
+  );
 
-    return totalWords;
-  } catch (err) {
-    console.error('[profile.service] computeAndSyncStats error:', err);
-    return 0;
-  }
+  return totalWords;
 }

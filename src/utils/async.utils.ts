@@ -3,16 +3,50 @@
 
 import { showToast } from '@ui/components/toast.js';
 
+interface SafeAsyncOptions<T> {
+  onError?: (err: any) => void;
+  fallback?: T;
+  logContext?: string;
+  errorMessage?: string;
+}
+
 /**
- * Wraps a promise with error handling.
- * On failure, shows a toast and returns the fallback value.
- * Optionally suppresses the toast for silent background ops.
+ * Robust async wrapper for consistent error handling across the app.
+ * Resolves CB-002 by ensuring no 'naked' awaits crash the application.
  *
- * @param promise - The async operation
- * @param fallback - Value to return on failure
- * @param errorMessage - Human-readable message for the toast
- * @param silent - If true, no toast is shown (for background syncs)
- * @returns Promise resolving to the result or fallback
+ * @param promise - The async operation to protect
+ * @param options - Configuration for fallbacks, logging, and callbacks
+ */
+export async function safeAsync<T>(
+  promise: Promise<T>,
+  options: SafeAsyncOptions<T> = {}
+): Promise<T> {
+  const {
+    onError,
+    fallback = null as unknown as T,
+    logContext = 'async.op',
+    errorMessage,
+  } = options;
+
+  try {
+    return await promise;
+  } catch (err) {
+    console.error(`[${logContext}] Failure:`, err);
+
+    if (errorMessage) {
+      showToast(errorMessage, 'error');
+    }
+
+    if (onError) {
+      onError(err);
+    }
+
+    return fallback;
+  }
+}
+
+/**
+ * @deprecated Use safeAsync instead.
  */
 export async function safeCall<T>(
   promise: Promise<T>,
@@ -20,13 +54,11 @@ export async function safeCall<T>(
   errorMessage: string = 'Something went wrong. Please try again.',
   silent: boolean = false
 ): Promise<T> {
-  try {
-    return await promise;
-  } catch (err) {
-    console.error('[safeCall]', err);
-    if (!silent) showToast(errorMessage, 'error');
-    return fallback;
-  }
+  return safeAsync(promise, {
+    fallback,
+    errorMessage: silent ? undefined : errorMessage,
+    logContext: 'legacy.safeCall',
+  });
 }
 
 /**

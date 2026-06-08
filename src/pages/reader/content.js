@@ -13,6 +13,7 @@ import {
   countWords,
   estimateReadMins,
   setText,
+  safeAsync,
 } from '@/utils';
 
 /* ─────────────────────────────────────────────
@@ -53,49 +54,51 @@ export function showReaderSkeletons() {
  * @param {string} taleId
  */
 export async function loadReaderMeta(taleId) {
-  try {
-    const meta = await getTaleMeta(taleId);
+  const meta = await safeAsync(getTaleMeta(taleId), {
+    fallback: {},
+    logContext: 'pages.reader.content.loadReaderMeta',
+  });
 
-    // Sync tale fields into readerState
-    readerState.taleTitle = meta.title || 'Untitled Tale';
-    readerState.authorName = meta.authorName || 'Unknown Scribe';
-    readerState.authorBio = meta.authorBio || 'A mysterious scribe from the forgotten archives.';
-    readerState.authorHandle =
-      meta.authorHandle || `@${(meta.authorName || 'scribe').toLowerCase().replace(/\s+/g, '')}`;
-    readerState.coverUrl = meta.coverUrl || '';
-    readerState.tags = meta.tags || [];
-    readerState.era = meta.era || 'Mythic';
-    readerState.language = meta.language || 'High Elven';
+  // Sync tale fields into readerState
+  readerState.taleTitle = meta.title || 'Untitled Tale';
+  readerState.authorName = meta.authorName || 'Unknown Scribe';
+  readerState.authorBio = meta.authorBio || 'A mysterious scribe from the forgotten archives.';
+  readerState.authorHandle =
+    meta.authorHandle || `@${(meta.authorName || 'scribe').toLowerCase().replace(/\s+/g, '')}`;
+  readerState.coverUrl = meta.coverUrl || '';
+  readerState.tags = meta.tags || [];
+  readerState.era = meta.era || 'Mythic';
+  readerState.language = meta.language || 'High Elven';
 
-    // Populate UI elements
-    setText('article-meta-title', readerState.taleTitle);
-    setText('author-name', readerState.authorName);
-    setText('author-heading', readerState.authorName);
-    setText('author-handle', readerState.authorHandle);
-    setText('author-card-bio', readerState.authorBio);
-    setText('top-bar-ch-title', 'Loading...');
+  // Populate UI elements
+  setText('article-meta-title', readerState.taleTitle);
+  setText('author-name', readerState.authorName);
+  setText('author-heading', readerState.authorName);
+  setText('author-handle', readerState.authorHandle);
+  setText('author-card-bio', readerState.authorBio);
+  setText('top-bar-ch-title', 'Loading...');
 
-    _renderBreadcrumbs(readerState.taleTitle);
-    _renderAvatars(readerState.authorName);
+  _renderBreadcrumbs(readerState.taleTitle);
+  _renderAvatars(readerState.authorName);
 
-    // Fetch all chapters for the TOC — normalized through createChapter
-    const chaptersSnap = await getDocs(refs.chapters(taleId));
+  // Fetch all chapters for the TOC — normalized through createChapter
+  const chaptersSnap = await safeAsync(getDocs(refs.chapters(taleId)), {
+    fallback: { docs: [] },
+    logContext: 'pages.reader.content.loadReaderMeta.chapters',
+  });
 
-    readerState.chapters = chaptersSnap.docs
-      .map((d) => {
-        const ch = createChapter(d.id, d.data());
-        return {
-          id: ch.id,
-          number: ch.chapterNum,
-          title: ch.title || `Fragment ${ch.chapterNum}`,
-          wordCount: ch.wordCount || countWords(ch.content),
-          sections: _extractSections(ch.content || ''),
-        };
-      })
-      .sort((a, b) => a.number - b.number);
-  } catch (err) {
-    console.error('[reader] Meta load failed:', err);
-  }
+  readerState.chapters = chaptersSnap.docs
+    .map((d) => {
+      const ch = createChapter(d.id, d.data());
+      return {
+        id: ch.id,
+        number: ch.chapterNum,
+        title: ch.title || `Fragment ${ch.chapterNum}`,
+        wordCount: ch.wordCount || countWords(ch.content),
+        sections: _extractSections(ch.content || ''),
+      };
+    })
+    .sort((a, b) => a.number - b.number);
 }
 
 /* ─────────────────────────────────────────────
@@ -112,48 +115,51 @@ export async function loadReaderMeta(taleId) {
  * @returns {Promise<Object|null>} Navigation object or null on failure
  */
 export async function loadReaderChapter({ taleId, chapterIndex }) {
-  try {
-    const { chapter, navigation } = await getChapter({ taleId, chapterIndex });
+  const result = await safeAsync(getChapter({ taleId, chapterIndex }), {
+    logContext: 'pages.reader.content.loadReaderChapter',
+    onError: () => {
+      setText('article-title', 'Chapter load failed.');
+    },
+  });
 
-    // Sync chapter fields into readerState
-    readerState.chapterTitle = chapter.title || `Fragment ${chapterIndex + 1}`;
-    readerState.totalChapters = navigation.totalChapters;
-    readerState.wordCount = chapter.wordCount || countWords(chapter.content);
-    readerState.estimatedReadMins =
-      chapter.estimatedReadMins || estimateReadMins(readerState.wordCount);
-    readerState.currentChapterId = readerState.chapters[chapterIndex]?.id || '';
+  if (!result) return null;
 
-    // Populate UI elements
-    console.log(readerState.chapterTitle);
-    setText('top-bar-ch-num', chapterIndex + 1);
-    setText('top-bar-ch-total', navigation.totalChapters);
-    setText('top-bar-ch-title', readerState.chapterTitle);
-    setText('header-ch-num', chapterIndex + 1);
-    setText('header-ch-total', navigation.totalChapters);
-    setText('article-title', readerState.chapterTitle);
-    setText('article-subtitle', chapter.subtitle || '');
-    setText('read-minutes', readerState.estimatedReadMins);
+  const { chapter, navigation } = result;
 
-    // Render article body
-    const container = document.getElementById('article-body');
-    if (container) {
-      container.innerHTML = sanitizeHtml(_processContent(chapter.content || ''));
-    }
+  // Sync chapter fields into readerState
+  readerState.chapterTitle = chapter.title || `Fragment ${chapterIndex + 1}`;
+  readerState.totalChapters = navigation.totalChapters;
+  readerState.wordCount = chapter.wordCount || countWords(chapter.content);
+  readerState.estimatedReadMins =
+    chapter.estimatedReadMins || estimateReadMins(readerState.wordCount);
+  readerState.currentChapterId = readerState.chapters[chapterIndex]?.id || '';
 
-    // Show read time in top bar
-    const topBarReadTime = document.getElementById('top-bar-read-time');
-    if (topBarReadTime) {
-      setText('top-bar-min', readerState.estimatedReadMins);
-      topBarReadTime.classList.remove('hidden');
-      topBarReadTime.classList.add('flex');
-    }
+  // Populate UI elements
+  console.log(readerState.chapterTitle);
+  setText('top-bar-ch-num', chapterIndex + 1);
+  setText('top-bar-ch-total', navigation.totalChapters);
+  setText('top-bar-ch-title', readerState.chapterTitle);
+  setText('header-ch-num', chapterIndex + 1);
+  setText('header-ch-total', navigation.totalChapters);
+  setText('article-title', readerState.chapterTitle);
+  setText('article-subtitle', chapter.subtitle || '');
+  setText('read-minutes', readerState.estimatedReadMins);
 
-    return navigation;
-  } catch (err) {
-    console.error('[reader] Chapter load failed:', err);
-    setText('article-title', 'Chapter load failed.');
-    return null;
+  // Render article body
+  const container = document.getElementById('article-body');
+  if (container) {
+    container.innerHTML = sanitizeHtml(_processContent(chapter.content || ''));
   }
+
+  // Show read time in top bar
+  const topBarReadTime = document.getElementById('top-bar-read-time');
+  if (topBarReadTime) {
+    setText('top-bar-min', readerState.estimatedReadMins);
+    topBarReadTime.classList.remove('hidden');
+    topBarReadTime.classList.add('flex');
+  }
+
+  return navigation;
 }
 
 /* ─────────────────────────────────────────────

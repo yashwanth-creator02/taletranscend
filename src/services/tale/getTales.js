@@ -13,6 +13,7 @@ import {
   getCountFromServer,
 } from '@fb/index.js';
 import { createTale } from '@state/index.js';
+import { safeAsync } from '@/utils';
 
 /**
  * Retrieves published tales from Firestore.
@@ -43,7 +44,11 @@ export async function getTales({ status = 'published', count = 50, after = null 
     );
   }
 
-  const snap = await getDocs(q);
+  const snap = await safeAsync(getDocs(q), {
+    fallback: { empty: true, docs: [] },
+    logContext: 'services.tale.getTales',
+  });
+
   if (snap.empty) return [];
 
   return snap.docs.map((d) => createTale(d.id, d.data()));
@@ -77,7 +82,11 @@ export async function getTalesPage({ count = 20, after = null } = {}) {
     );
   }
 
-  const snap = await getDocs(q);
+  const snap = await safeAsync(getDocs(q), {
+    fallback: { empty: true, docs: [] },
+    logContext: 'services.tale.getTalesPage',
+  });
+
   if (snap.empty) return { tales: [], lastDoc: null };
 
   return {
@@ -98,7 +107,10 @@ export async function getTalesPage({ count = 20, after = null } = {}) {
 export async function getTalesPageNumbered({ page = 1, perPage = 8 } = {}) {
   // Get total count first
   const countQuery = query(refs.tales(), where('status', '==', 'published'));
-  const countSnap = await getCountFromServer(countQuery);
+  const countSnap = await safeAsync(getCountFromServer(countQuery), {
+    fallback: { data: () => ({ count: 0 }) },
+    logContext: 'services.tale.getTalesPageNumbered.count',
+  });
   const total = countSnap.data().count;
 
   // Build page query
@@ -118,7 +130,10 @@ export async function getTalesPageNumbered({ page = 1, perPage = 8 } = {}) {
       orderBy('publishedAt', 'desc'),
       limit((page - 1) * perPage)
     );
-    const prevSnap = await getDocs(prevQ);
+    const prevSnap = await safeAsync(getDocs(prevQ), {
+      fallback: { docs: [] },
+      logContext: 'services.tale.getTalesPageNumbered.cursor',
+    });
     const lastDoc = prevSnap.docs[prevSnap.docs.length - 1];
 
     if (lastDoc) {
@@ -132,7 +147,10 @@ export async function getTalesPageNumbered({ page = 1, perPage = 8 } = {}) {
     }
   }
 
-  const snap = await getDocs(q);
+  const snap = await safeAsync(getDocs(q), {
+    fallback: { empty: true, docs: [] },
+    logContext: 'services.tale.getTalesPageNumbered.data',
+  });
   const tales = snap.docs.map((d) => createTale(d.id, d.data()));
 
   return {
@@ -153,7 +171,10 @@ export async function getTalesByAuthor(authorId) {
   if (!authorId) return [];
 
   const q = query(refs.tales(), where('authorId', '==', authorId));
-  const snap = await getDocs(q);
+  const snap = await safeAsync(getDocs(q), {
+    fallback: { empty: true, docs: [] },
+    logContext: 'services.tale.getTalesByAuthor',
+  });
 
   if (snap.empty) return [];
 

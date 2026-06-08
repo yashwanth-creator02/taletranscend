@@ -27,7 +27,6 @@ import {
   showContinueReadingSkeleton,
   showContributionsSkeleton,
   switchContribTab,
-  showNotification,
   closeModal,
 } from './index.js';
 
