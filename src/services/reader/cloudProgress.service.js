@@ -6,6 +6,10 @@
 import { getDoc, setDoc, serverTimestamp, getDocs, refs } from '@fb/index.js';
 import { createChapterProgress, createTaleProgress } from '@state/index.js';
 import { PROGRESS_SYNC_DELAY_MS } from '@config/app.config.js';
+import { safeCall, createLogger } from '@/utils';
+
+const log = createLogger('CloudProgressService');
+log.debug('Module initialized');
 
 /* ─────────────────────────────────────────────
    Sync
@@ -32,24 +36,38 @@ export async function syncChapterProgressToCloud({
   totalReadTimeMs,
 }) {
   if (!userId || !taleId || typeof chapterIndex !== 'number') return;
+  if (!navigator.onLine) {
+    log.debug('Offline: skipping cloud sync');
+    return;
+  }
 
-  // Write chapter-level progress — conforms to ChapterProgress schema
-  await setDoc(
-    refs.progressChapter(userId, taleId, chapterIndex),
-    {
-      scrollPercent,
-      lastCharacterOffset,
-      updatedAt: serverTimestamp(),
-    },
-    { merge: true }
-  );
+  log.info('Syncing progress to cloud', { taleId, chapterIndex, scrollPercent });
 
   // Update tale-level progress with lastReadAt and optional totalReadTimeMs
   const taleUpdate = { lastReadAt: serverTimestamp() };
   if (typeof totalReadTimeMs === 'number') {
     taleUpdate.totalReadTimeMs = totalReadTimeMs;
   }
-  await setDoc(refs.progress(userId, taleId), taleUpdate, { merge: true });
+
+  return safeCall(
+    Promise.all([
+      setDoc(
+        refs.progressChapter(userId, taleId, chapterIndex),
+        {
+          scrollPercent,
+          lastCharacterOffset,
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      ),
+      setDoc(refs.progress(userId, taleId), taleUpdate, { merge: true }),
+    ]),
+    undefined,
+    'Failed to sync reading progress.',
+    true // silent
+  ).then(() => {
+    log.debug('Cloud sync complete', { taleId, chapterIndex });
+  });
 }
 
 /* ─────────────────────────────────────────────
@@ -69,18 +87,30 @@ export async function syncChapterProgressToCloud({
 export async function getCloudProgress({ userId, taleId }) {
   if (!userId || !taleId) return null;
 
-  const snap = await getDoc(refs.progress(userId, taleId));
-  if (!snap.exists()) return null;
+  log.debug('Retrieving cloud progress', { userId, taleId });
+  return safeCall(
+    (async () => {
+      const snap = await getDoc(refs.progress(userId, taleId));
+      if (!snap.exists()) {
+        log.info('No cloud progress found', { userId, taleId });
+        return null;
+      }
 
-  const chaptersSnap = await getDocs(refs.progressChapters(userId, taleId));
+      const chaptersSnap = await getDocs(refs.progressChapters(userId, taleId));
+      log.info(`Found ${chaptersSnap.docs.length} chapters with cloud progress`);
 
-  // Build chapters map normalized through createChapterProgress
-  const chapters = {};
-  chaptersSnap.forEach((d) => {
-    chapters[d.id] = createChapterProgress(d.data());
-  });
+      // Build chapters map normalized through createChapterProgress
+      const chapters = {};
+      chaptersSnap.forEach((d) => {
+        chapters[d.id] = createChapterProgress(d.data());
+      });
 
-  return createTaleProgress(taleId, { ...snap.data(), chapters });
+      return createTaleProgress(taleId, { ...snap.data(), chapters });
+    })(),
+    null,
+    'Failed to load reading progress.',
+    true // silent - let local progress be the fallback without annoying the user
+  );
 }
 
 /* ─────────────────────────────────────────────
@@ -106,7 +136,8 @@ export function scheduleProgressSync(payload) {
   _timers.set(
     key,
     setTimeout(
-      () => syncChapterProgressToCloud(payload).catch(console.warn),
+      () =>
+        syncChapterProgressToCloud(payload).catch((err) => log.warn('Debounced sync failed', err)),
       PROGRESS_SYNC_DELAY_MS
     )
   );

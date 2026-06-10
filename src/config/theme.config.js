@@ -11,6 +11,9 @@
 //   - The DARK_THEMES set drives atmosphere/particle visibility logic.
 //   - reader/theme.js imports from here — never defines its own lists.
 
+import { createLogger } from '@/utils';
+const log = createLogger('ThemeConfig');
+
 /* ─────────────────────────────────────────────
    Reader Themes
    ───────────────────────────────────────────── */
@@ -209,3 +212,5 @@ export const READER_STORAGE_KEYS = {
   lineHeight: 'tt-reader-lh',
   measure: 'tt-reader-measure',
 };
+
+log.debug('Theme configuration initialized');

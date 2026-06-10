@@ -5,7 +5,7 @@
 // Keeping templates separate from behaviour makes both independently testable.
 
 import { PRIMARY_LINKS, DOCK_ITEMS } from './nav.config.js';
-import { getCurrentPage, escapeHtml, getAvatarSeed } from './nav.utils.js';
+import { getCurrentPage, escapeText, getAvatarSeed } from './nav.utils.js';
 
 /* ─────────────────────────────────────────────
    Desktop Header Templates
@@ -65,10 +65,11 @@ export function buildDropdownLink({ href, icon, label }, current) {
 export function buildAuthenticatedUser(user, current, userLinks) {
   const seed = getAvatarSeed(user);
   const avatarSrc = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
-  const displayName = escapeHtml(user.displayName || 'Your Account');
-  const email = escapeHtml(user.email || '');
+  const displayName = escapeText(user.displayName || 'Your Account');
+  const email = escapeText(user.email || '');
 
   const menuItems = userLinks.map((link) => buildDropdownLink(link, current)).join('');
+  const isAnonymous = user.isAnonymous;
 
   return `
     <div class="nav-user" id="nav-user">
@@ -117,6 +118,22 @@ export function buildAuthenticatedUser(user, current, userLinks) {
 
         <nav aria-label="Account navigation">
           ${menuItems}
+          ${
+            isAnonymous
+              ? `
+            <div class="dropdown__divider" role="separator"></div>
+            <button
+              class="dropdown-link dropdown-link--primary"
+              id="nav-upgrade-btn"
+              type="button"
+              role="menuitem"
+            >
+              <i data-lucide="shield-check" class="dropdown-link__icon" aria-hidden="true"></i>
+              <span>Secure Account</span>
+            </button>
+          `
+              : ''
+          }
         </nav>
 
         <div class="dropdown__divider" role="separator"></div>
@@ -143,7 +160,7 @@ export function buildAuthenticatedUser(user, current, userLinks) {
 export function buildGuestUser() {
   return `
     <div id="nav-user">
-      <a href="profile.html" class="signin-btn">
+      <a href="login.html" class="signin-btn">
         <i data-lucide="log-in" class="signin-btn__icon" aria-hidden="true"></i>
         <span>Sign In</span>
       </a>
@@ -197,16 +214,17 @@ export function buildDockItem({ href, icon, label, active, primary = false }) {
 export function buildMobileDock(current, user) {
   const profileIcon = user ? 'user' : 'log-in';
   const profileLabel = user ? 'Profile' : 'Sign In';
+  const profileHref = user ? 'profile.html' : 'login.html';
 
   const dockItems = DOCK_ITEMS.map((item) =>
     buildDockItem({ ...item, active: current === item.href })
   ).join('');
 
   const profileItem = buildDockItem({
-    href: 'profile.html',
+    href: profileHref,
     icon: profileIcon,
     label: profileLabel,
-    active: current === 'profile.html',
+    active: current === profileHref,
   });
 
   return `
@@ -245,7 +263,7 @@ export function buildCommandItem(item, current) {
       <span class="command-item__icon-wrap" aria-hidden="true">
         <i data-lucide="${item.icon}" class="command-item__icon"></i>
       </span>
-      <span class="command-item__label">${item.label}</span>
+      <span class="command-item__label">${escapeText(item.label)}</span>
       ${item.shortcut ? `<span class="command-item__shortcut" aria-label="Shortcut: ${item.shortcut}">${item.shortcut}</span>` : ''}
       ${isActive ? '<span class="command-item__badge">Current page</span>' : ''}
     </button>

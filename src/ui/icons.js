@@ -14,6 +14,10 @@
 //     replayed once it resolves, so no call site needs to know about
 //     the async nature of icon loading.
 
+import { createLogger } from '@/utils';
+
+const log = createLogger('Icons');
+
 const RETRY_DELAY_MS = 2000;
 const RETRY_MAX = 2;
 
@@ -180,12 +184,12 @@ async function _bootstrap(attempt = 0) {
     _loading = false;
 
     if (attempt < RETRY_MAX) {
-      console.warn(
-        `[icons] Lucide load failed (attempt ${attempt + 1}/${RETRY_MAX}). Retrying in ${RETRY_DELAY_MS}ms…`
+      log.warn(
+        `Lucide load failed (attempt ${attempt + 1}/${RETRY_MAX}). Retrying in ${RETRY_DELAY_MS}ms…`
       );
       setTimeout(() => _bootstrap(attempt + 1), RETRY_DELAY_MS);
     } else {
-      console.warn('[icons] Lucide unavailable after all retries. Icons will not render.');
+      log.warn('Lucide unavailable after all retries. Icons will not render.');
       // Flush queue as no-ops so callers are not left waiting forever
       const pending = _queue.splice(0);
       for (const { resolve } of pending) resolve();
@@ -219,7 +223,7 @@ function _render(scope) {
     });
   } catch (err) {
     // Never let icon rendering crash the page — just log and move on
-    console.warn('[icons] createIcons() threw:', err?.message ?? err);
+    log.warn('createIcons() threw', err?.message ?? err);
   }
 }
 

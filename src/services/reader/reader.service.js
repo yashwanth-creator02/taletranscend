@@ -4,21 +4,34 @@
 
 import { refs, getDoc, getDocs } from '@fb/index.js';
 import { createTale, createChapter } from '@state/index.js';
+import { safeCall, createLogger } from '@/utils';
+
+const log = createLogger('ReaderService');
+log.debug('Module initialized');
 
 /**
  * Fetches metadata for a specific tale.
  *
  * @param {string} taleId
- * @returns {Promise<import('@state/schemas/tale.schema.js').Tale>}
- * @throws {Error} If the tale does not exist
+ * @returns {Promise<import('@state/schemas/tale.schema.js').Tale|null>}
  */
 export async function getTaleMeta(taleId) {
-  if (!taleId) throw new Error('getTaleMeta: taleId is required');
+  if (!taleId) return null;
 
-  const snap = await getDoc(refs.tale(taleId));
-  if (!snap.exists()) throw new Error(`Tale not found: ${taleId}`);
-
-  return createTale(snap.id, snap.data());
+  log.debug('Fetching tale meta', { taleId });
+  return safeCall(
+    (async () => {
+      const snap = await getDoc(refs.tale(taleId));
+      if (!snap.exists()) {
+        log.error(`Tale not found: ${taleId}`);
+        throw new Error(`Tale not found: ${taleId}`);
+      }
+      log.info('Loaded tale meta', { taleId, title: snap.data()?.title });
+      return createTale(snap.id, snap.data());
+    })(),
+    null,
+    'Failed to load tale.'
+  );
 }
 
 /**
@@ -28,35 +41,46 @@ export async function getTaleMeta(taleId) {
  * @param {Object} params
  * @param {string} params.taleId
  * @param {number} params.chapterIndex - Zero-based index
- * @returns {Promise<{ chapter: import('@state/schemas/tale.schema.js').Chapter, navigation: Object }>}
- * @throws {Error} If the chapter does not exist at the given index
+ * @returns {Promise<{ chapter: import('@state/schemas/tale.schema.js').Chapter, navigation: Object }|null>}
  */
 export async function getChapter({ taleId, chapterIndex }) {
-  if (!taleId) throw new Error('getChapter: taleId is required');
-  if (typeof chapterIndex !== 'number')
-    throw new Error('getChapter: chapterIndex must be a number');
+  if (!taleId || typeof chapterIndex !== 'number') return null;
 
-  const snap = await getDocs(refs.chapters(taleId));
+  log.debug('Fetching chapter list', { taleId, chapterIndex });
+  return safeCall(
+    (async () => {
+      const snap = await getDocs(refs.chapters(taleId));
 
-  const chapters = snap.docs
-    .map((d) => createChapter(d.id, d.data()))
-    .sort((a, b) => a.chapterNum - b.chapterNum);
+      const chapters = snap.docs
+        .map((d) => createChapter(d.id, d.data()))
+        .sort((a, b) => a.chapterNum - b.chapterNum);
 
-  const total = chapters.length;
-  const chapter = chapters[chapterIndex];
+      const total = chapters.length;
+      log.info(`Tale has ${total} chapters. Resolving index ${chapterIndex}...`);
 
-  if (!chapter) throw new Error(`Chapter not found at index ${chapterIndex}`);
+      const chapter = chapters[chapterIndex];
 
-  return {
-    chapter,
-    navigation: {
-      hasPrev: chapterIndex > 0,
-      hasNext: chapterIndex < total - 1,
-      prevTitle: chapterIndex > 0 ? chapters[chapterIndex - 1].title : null,
-      prevIndex: chapterIndex > 0 ? chapterIndex - 1 : null,
-      nextTitle: chapterIndex < total - 1 ? chapters[chapterIndex + 1].title : null,
-      nextIndex: chapterIndex < total - 1 ? chapterIndex + 1 : null,
-      totalChapters: total,
-    },
-  };
+      if (!chapter) {
+        log.error(`Chapter not found at index ${chapterIndex}`, { total });
+        throw new Error(`Chapter not found at index ${chapterIndex}`);
+      }
+
+      log.info('Chapter resolved', { title: chapter.title });
+
+      return {
+        chapter,
+        navigation: {
+          hasPrev: chapterIndex > 0,
+          hasNext: chapterIndex < total - 1,
+          prevTitle: chapterIndex > 0 ? chapters[chapterIndex - 1].title : null,
+          prevIndex: chapterIndex > 0 ? chapterIndex - 1 : null,
+          nextTitle: chapterIndex < total - 1 ? chapters[chapterIndex + 1].title : null,
+          nextIndex: chapterIndex < total - 1 ? chapterIndex + 1 : null,
+          totalChapters: total,
+        },
+      };
+    })(),
+    null,
+    'Failed to load chapter.'
+  );
 }

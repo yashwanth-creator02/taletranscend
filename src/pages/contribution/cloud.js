@@ -10,8 +10,10 @@
 
 import { auth, getDoc, getDocs, addDoc, setDoc, serverTimestamp, refs } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
-import { countWords, setInput, getInput, setSelect } from '@/utils';
+import { countWords, setInput, getInput, setSelect, createLogger } from '@/utils';
 import { state } from './state.js';
+
+const log = createLogger('Cloud');
 
 /* ─────────────────────────────────────────────
    Draft ID from URL
@@ -46,12 +48,17 @@ function _syncDraftIdToUrl() {
  * Firestore document and updates state.draftId + the URL param.
  */
 export async function saveToCloud() {
-  if (!auth.currentUser) return;
+  if (!auth.currentUser) {
+    log.warn('Save requested without authenticated user');
+    return;
+  }
 
   const userId = auth.currentUser.uid;
+  log.info('Saving draft to cloud...', { draftId: state.draftId, userId });
   const payload = _buildMetadataPayload();
 
   if (state.draftId === 'new') {
+    log.debug('Creating new draft document');
     const newRef = await addDoc(refs.drafts(userId), {
       ...payload,
       createdAt: serverTimestamp(),
@@ -59,8 +66,10 @@ export async function saveToCloud() {
     });
 
     state.draftId = newRef.id;
+    log.info('New draft created', { id: state.draftId });
     _syncDraftIdToUrl();
   } else {
+    log.debug('Updating existing draft document');
     await setDoc(
       refs.draft(userId, state.draftId),
       { ...payload, updatedAt: serverTimestamp() },
@@ -261,3 +270,5 @@ function _buildMetadataPayload() {
     wordCount,
   };
 }
+
+log.debug('Cloud initialized');

@@ -1,6 +1,5 @@
 // src/pages/library/library.js
-// Library page entry point.
-// Wires auth, real-time tales subscription, filters, interactions, and UI state.
+// Library page with Previous/Next pagination.
 
 import '@css/base.css';
 import '@css/nav.css';
@@ -10,9 +9,11 @@ import '@css/pages/library.css';
 import { initAuth } from '@fb/index.js';
 import { initNav } from '@ui/components/nav/nav.js';
 import { initIcons } from '@ui/components/icons.js';
-import { initPageReveal, readyReveal } from '@/utils';
+import { initPageReveal, readyReveal, createLogger } from '@/utils';
 
-import { subscribeToTales, stopTalesSubscription } from './content.js';
+const log = createLogger('Library');
+
+import { loadTalesPage, nextPage, prevPage } from './content.js';
 import {
   applyAllFilters,
   setupSearch,
@@ -27,10 +28,7 @@ import { libraryState } from './state.js';
 
 initNav();
 initPageReveal();
-
-/* ─────────────────────────────────────────────
-   DOM-ready — wire static UI before auth resolves
-   ───────────────────────────────────────────── */
+log.debug('Module initialized');
 
 document.addEventListener('DOMContentLoaded', () => {
   setupSidebarToggle();
@@ -40,41 +38,109 @@ document.addEventListener('DOMContentLoaded', () => {
   setupSidebarFilter();
   showGridSkeleton();
   initIcons();
+  setupPagination();
 });
-
-/* ─────────────────────────────────────────────
-   Auth + Data
-   ───────────────────────────────────────────── */
 
 initAuth(async (user) => {
   libraryState.userId = user.uid;
-
-  // Update sidebar with user identity
   updateSidebarUser(user);
-
-  // Wire card interactions now that userId is available
   setupCardInteractions(user.uid);
 
-  // Start real-time subscription
-  subscribeToTales(
-    async (tales) => {
-      // First batch — set up era chips (derived from actual data)
-      if (!libraryState.eraChipsBuilt) {
-        setupEraFilter(tales);
-        libraryState.eraChipsBuilt = true;
-      }
+  try {
+    await loadTalesPage(1);
 
-      await applyAllFilters();
-      readyReveal();
-      initIcons();
-    },
-    () => showGridError()
-  );
+    if (!libraryState.eraChipsBuilt) {
+      setupEraFilter(libraryState.allTales);
+      libraryState.eraChipsBuilt = true;
+    }
+
+    await applyAllFilters();
+    updatePaginationUI();
+    readyReveal();
+    initIcons();
+  } catch (err) {
+    log.error('Init failed:', err);
+    showGridError();
+  }
 });
 
-/* ─────────────────────────────────────────────
-   Teardown
-   ───────────────────────────────────────────── */
+function setupPagination() {
+  const prevBtn = document.getElementById('pagination-prev');
+  const nextBtn = document.getElementById('pagination-next');
 
-// Stop Firestore listener on page unload to prevent memory leaks
-window.addEventListener('pagehide', () => stopTalesSubscription());
+  if (prevBtn) {
+    prevBtn.addEventListener('click', async () => {
+      if (libraryState.currentPage <= 1 || libraryState.isLoading) return;
+
+      setPaginationLoading(true);
+      await prevPage();
+      await applyAllFilters();
+      updatePaginationUI();
+      setPaginationLoading(false);
+      initIcons();
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', async () => {
+      log.log(
+        'Next clicked. Current page:',
+        libraryState.currentPage,
+        'Loading:',
+        libraryState.isLoading
+      );
+      if (libraryState.isLoading) {
+        log.log('Blocked by isLoading');
+        return;
+      }
+
+      const maxPage = Math.ceil(libraryState.totalTales / libraryState.talesPerPage);
+      log.log('Max page:', maxPage);
+      if (libraryState.currentPage >= maxPage) {
+        log.log('Blocked by maxPage');
+        return;
+      }
+
+      setPaginationLoading(true);
+      log.log('Loading page:', libraryState.currentPage + 1);
+      await nextPage();
+      log.log('Page loaded. New state page:', libraryState.currentPage);
+      await applyAllFilters();
+      updatePaginationUI();
+      setPaginationLoading(false);
+      initIcons();
+    });
+  }
+}
+
+function updatePaginationUI() {
+  const prevBtn = document.getElementById('pagination-prev');
+  const nextBtn = document.getElementById('pagination-next');
+  const pageInfo = document.getElementById('pagination-info');
+
+  const maxPage = Math.max(1, Math.ceil(libraryState.totalTales / libraryState.talesPerPage));
+
+  if (prevBtn) {
+    prevBtn.disabled = libraryState.currentPage <= 1;
+    prevBtn.classList.toggle('opacity-50', libraryState.currentPage <= 1);
+    prevBtn.classList.toggle('cursor-not-allowed', libraryState.currentPage <= 1);
+  }
+
+  if (nextBtn) {
+    nextBtn.disabled = libraryState.currentPage >= maxPage;
+    nextBtn.classList.toggle('opacity-50', libraryState.currentPage >= maxPage);
+    nextBtn.classList.toggle('cursor-not-allowed', libraryState.currentPage >= maxPage);
+  }
+
+  if (pageInfo) {
+    pageInfo.textContent = `Page ${libraryState.currentPage} of ${maxPage} (${libraryState.totalTales} tales)`;
+  }
+}
+
+function setPaginationLoading(loading) {
+  const prevBtn = document.getElementById('pagination-prev');
+  const nextBtn = document.getElementById('pagination-next');
+
+  if (prevBtn) prevBtn.disabled = loading;
+  if (nextBtn) nextBtn.disabled = loading;
+}

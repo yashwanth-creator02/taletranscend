@@ -59,7 +59,7 @@
 export function createTale(id, data = {}) {
   return {
     id,
-    title: data.title ?? '',
+    title: data.title || 'Untitled Tale',
     authorId: data.authorId ?? '',
     authorName: data.authorName ?? '',
     authorAvatarUrl: data.authorAvatarUrl ?? '',
@@ -75,13 +75,13 @@ export function createTale(id, data = {}) {
     contentWarnings: data.contentWarnings ?? [],
     worldSetting: data.worldSetting ?? '',
     authorNotes: data.authorNotes ?? '',
-    chapterCount: data.chapterCount ?? 0,
-    wordCount: data.wordCount ?? 0,
-    estimatedReadMins: data.estimatedReadMins ?? 0,
-    readCount: data.readCount ?? 0,
-    commentCount: data.commentCount ?? 0,
-    reactionCount: data.reactionCount ?? 0,
-    bookmarkCount: data.bookmarkCount ?? 0,
+    chapterCount: Number(data.chapterCount ?? 0),
+    wordCount: Number(data.wordCount ?? 0),
+    estimatedReadMins: Number(data.estimatedReadMins ?? 0),
+    readCount: Number(data.readCount ?? 0),
+    commentCount: Number(data.commentCount ?? 0),
+    reactionCount: Number(data.reactionCount ?? 0),
+    bookmarkCount: Number(data.bookmarkCount ?? 0),
     status: data.status ?? 'draft',
     submittedAt: data.submittedAt ?? null,
     reviewedAt: data.reviewedAt ?? null,
@@ -95,7 +95,11 @@ export function createTale(id, data = {}) {
     publishedAt: data.publishedAt ?? null,
     lastChapterAddedAt: data.lastChapterAddedAt ?? null,
     updatedAt: data.updatedAt ?? null,
-    createdAt: data.createdAt ?? null,
+    createdAt: data.createdAt
+      ? data.createdAt.toDate
+        ? data.createdAt.toDate()
+        : new Date(data.createdAt)
+      : new Date(),
   };
 }
 
@@ -123,13 +127,14 @@ export function createTale(id, data = {}) {
  * @returns {Chapter}
  */
 export function createChapter(id, data = {}) {
+  const numId = parseInt(id, 10);
   return {
     id,
-    chapterNum: data.chapterNum ?? Number(id) + 1,
-    title: data.title ?? '',
+    chapterNum: data.chapterNum ?? (isNaN(numId) ? 1 : numId + 1),
+    title: data.title || 'Untitled Chapter',
     content: data.content ?? '',
-    wordCount: data.wordCount ?? 0,
-    estimatedReadMins: data.estimatedReadMins ?? 0,
+    wordCount: Number(data.wordCount ?? 0),
+    estimatedReadMins: Number(data.estimatedReadMins ?? 0),
     publishedAt: data.publishedAt ?? null,
     updatedAt: data.updatedAt ?? null,
   };

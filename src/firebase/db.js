@@ -5,6 +5,9 @@
 
 import { getFirestore } from 'firebase/firestore';
 import app from './app.js';
+import { createLogger } from '@/utils';
+
+const log = createLogger('DB');
 
 import {
   doc,
@@ -24,10 +27,12 @@ import {
   startAfter,
   where,
   increment,
+  getCountFromServer,
 } from 'firebase/firestore';
 
 // Single shared Firestore instance bound to the initialized Firebase app.
 export const db = getFirestore(app);
+log.debug('Firestore initialized');
 
 // Re-export all Firestore utilities through a single import surface.
 // Pages and services should import Firestore helpers from here, not the SDK directly.
@@ -49,4 +54,5 @@ export {
   startAfter,
   where,
   increment,
+  getCountFromServer,
 };

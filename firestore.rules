@@ -1,129 +1,493 @@
-rules_version = '4';
-
+rules_version = '3';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ==================== Helpers ====================
+    // ═══════════════════════════════════════════════════════════════
+    //  GLOBAL HELPERS  —  Reusable functions for all collections
+    // ═══════════════════════════════════════════════════════════════
 
-    // Check if the request is from an authenticated user
-    function isAuth() {
+    /** Returns true if the request is from an authenticated user. */
+    function isAuthenticated() {
       return request.auth != null;
     }
 
-    // Check if the requesting user owns the document
+    /** Returns true if the authenticated user's UID matches the given userId. */
     function isOwner(userId) {
-      return isAuth() && request.auth.uid == userId;
+      return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // Check if incoming data only sets allowed fields
-    function hasOnly(fields) {
-      return request.resource.data.keys().hasOnly(fields);
+    /** Returns true if the authenticated user is the author of the resource. */
+    function isAuthor() {
+      return isAuthenticated() && resource.data.authorId == request.auth.uid;
     }
 
-    // ==================== App Namespace ====================
+    /** Returns true if the authenticated user is the author of the incoming write. */
+    function isAuthorOfIncoming() {
+      return isAuthenticated() && request.resource.data.authorId == request.auth.uid;
+    }
 
-    match /artifacts/{appId} {
+    /** Returns true if the user has an admin or moderator custom claim. */
+    function isAdmin() {
+      return isAuthenticated() &&
+        (request.auth.token.admin == true || request.auth.token.moderator == true);
+    }
 
-      // ==================== Public Data ====================
+    /** Validates that a string field exists, is a string, and is within length bounds. */
+    function isValidString(field, minLen, maxLen) {
+      return request.resource.data.keys().hasAny([field])
+        && request.resource.data[field] is string
+        && request.resource.data[field].size() >= minLen
+        && request.resource.data[field].size() <= maxLen;
+    }
 
-      match /public/data/community_tales/{taleId} {
+    /** Validates that a field is a list with bounded length. */
+    function isValidList(field, maxLen) {
+      return request.resource.data.keys().hasAny([field])
+        && request.resource.data[field] is list
+        && request.resource.data[field].size() <= maxLen;
+    }
 
-        // Anyone authenticated can read published tales
-        allow read: if isAuth();
+    /** Validates that a field is an integer within a range. */
+    function isValidInt(field, min, max) {
+      return request.resource.data.keys().hasAny([field])
+        && request.resource.data[field] is int
+        && request.resource.data[field] >= min
+        && request.resource.data[field] <= max;
+    }
 
-        // Only the author can write their own tale
-        // Tale must have required fields and correct authorId
-        allow create: if isAuth()
+    /** Validates that a field is a number (int or float) within a range. */
+    function isValidNumber(field, min, max) {
+      return request.resource.data.keys().hasAny([field])
+        && request.resource.data[field] is number
+        && request.resource.data[field] >= min
+        && request.resource.data[field] <= max;
+    }
+
+    /** Validates that a field is a valid Firestore Timestamp. */
+    function isValidTimestamp(field) {
+      return request.resource.data.keys().hasAny([field])
+        && request.resource.data[field] is timestamp;
+    }
+
+    /** Validates that a field is a boolean. */
+    function isValidBool(field) {
+      return request.resource.data.keys().hasAny([field])
+        && request.resource.data[field] is bool;
+    }
+
+    /** Validates that a field is a valid URL string (basic protocol check). */
+    function isValidUrl(field) {
+      return request.resource.data.keys().hasAny([field])
+        && request.resource.data[field] is string
+        && (
+          request.resource.data[field].matches('^https://.+')
+          || request.resource.data[field] == ''
+        );
+    }
+
+    /** Rate-limit helper: prevents rapid re-writes by the same user on the same doc.
+        Enforces a minimum 5-second gap between updates. */
+    function respectsCooldown() {
+      return request.time > resource.data.updatedAt + duration.value(5, "seconds");
+    }
+
+    /** Prevent mass-deletion or mass-update attacks by limiting batch writes. */
+    function notBatchWrite() {
+      return !request.writeFields.hasAll(['__batchWrite']);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  USERS  —  /users/{userId}
+    // ═══════════════════════════════════════════════════════════════
+
+    match /users/{userId} {
+      // Anyone can read public profile data
+      allow read: if true;
+
+      // Only the owner can create or update their own profile
+      allow create: if isOwner(userId)
+        && isValidString('name', 1, 100)
+        && isValidString('bio', 0, 2000)
+        && isValidString('pronouns', 0, 50)
+        && isValidUrl('avatarUrl')
+        && isValidUrl('website')
+        && isValidString('twitterHandle', 0, 50)
+        && isValidString('instagramHandle', 0, 50)
+        && isValidInt('readingGoal', 0, 1000000)
+        && isValidList('favouriteGenres', 20)
+        && isValidNumber('totalWordsWritten', 0, 1000000000)
+        && isValidNumber('totalReaders', 0, 1000000000)
+        && isValidInt('writingStreak', 0, 3650)
+        && request.resource.data.keys().hasAll(['joinedAt'])
+        && isValidTimestamp('joinedAt')
+        && isValidTimestamp('updatedAt')
+        && request.resource.data.createdAt == request.time; // Enforce server-set createdAt on create
+
+      allow update: if isOwner(userId)
+        && respectsCooldown()
+        && isValidString('name', 1, 100)
+        && isValidString('bio', 0, 2000)
+        && isValidString('pronouns', 0, 50)
+        && isValidUrl('avatarUrl')
+        && isValidUrl('website')
+        && isValidString('twitterHandle', 0, 50)
+        && isValidString('instagramHandle', 0, 50)
+        && isValidInt('readingGoal', 0, 1000000)
+        && isValidList('favouriteGenres', 20)
+        && isValidNumber('totalWordsWritten', 0, 1000000000)
+        && isValidNumber('totalReaders', 0, 1000000000)
+        && isValidInt('writingStreak', 0, 3650)
+        && isValidTimestamp('updatedAt');
+
+      // Only owner or admin can delete
+      allow delete: if isOwner(userId) || isAdmin();
+
+      // ═══════════════════════════════════════════════════════════
+      //  USER SUBCOLLECTIONS  —  Drafts, Progress, Bookmarks
+      // ═══════════════════════════════════════════════════════════
+
+      // DRAFTS  —  /users/{userId}/drafts/{draftId}
+      match /drafts/{draftId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId)
+          && isValidString('title', 0, 200)
+          && isValidString('synopsis', 0, 5000)
+          && isValidString('description', 0, 2000)
+          && isValidString('coverUrl', 0, 500)
+          && isValidString('era', 0, 100)
+          && isValidString('tone', 0, 100)
+          && isValidString('language', 0, 50)
+          && isValidString('audience', 0, 100)
+          && isValidString('worldSetting', 0, 2000)
+          && isValidString('authorNotes', 0, 5000)
+          && isValidInt('chapterCount', 0, 1000)
+          && isValidInt('wordCount', 0, 10000000)
+          && isValidInt('estimatedReadMins', 0, 1000000)
+          && isValidString('status', 0, 50)
+          && isValidList('tags', 50)
+          && isValidList('contentWarnings', 50)
+          && isValidList('searchKeywords', 200)
+          && isValidTimestamp('createdAt')
+          && isValidTimestamp('updatedAt')
+          && request.resource.data.authorId == userId;
+
+        allow update: if isOwner(userId)
+          && respectsCooldown()
+          && isValidString('title', 0, 200)
+          && isValidString('synopsis', 0, 5000)
+          && isValidString('description', 0, 2000)
+          && isValidString('coverUrl', 0, 500)
+          && isValidString('era', 0, 100)
+          && isValidString('tone', 0, 100)
+          && isValidString('language', 0, 50)
+          && isValidString('audience', 0, 100)
+          && isValidString('worldSetting', 0, 2000)
+          && isValidString('authorNotes', 0, 5000)
+          && isValidInt('chapterCount', 0, 1000)
+          && isValidInt('wordCount', 0, 10000000)
+          && isValidInt('estimatedReadMins', 0, 1000000)
+          && isValidString('status', 0, 50)
+          && isValidList('tags', 50)
+          && isValidList('contentWarnings', 50)
+          && isValidList('searchKeywords', 200)
+          && isValidTimestamp('updatedAt');
+
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+
+      // PROGRESS  —  /users/{userId}/progress/{taleId}
+      match /progress/{taleId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId)
+          && isValidString('taleId', 1, 100)
+          && request.resource.data.taleId == taleId
+          && isValidNumber('scrollPercent', 0, 100)
+          && isValidInt('lastChapterIndex', 0, 1000)
+          && isValidTimestamp('updatedAt')
+          && request.resource.data.keys().hasAll(['chapters'])
+          && request.resource.data.chapters is map;
+
+        allow update: if isOwner(userId)
+          && isValidNumber('scrollPercent', 0, 100)
+          && isValidInt('lastChapterIndex', 0, 1000)
+          && isValidTimestamp('updatedAt')
+          && request.resource.data.keys().hasAll(['chapters'])
+          && request.resource.data.chapters is map;
+
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+
+      // BOOKMARKS  —  /users/{userId}/bookmarks/{bookmarkId}
+      match /bookmarks/{bookmarkId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId)
+          && isValidString('taleId', 1, 100)
+          && isValidString('userId', 1, 100)
+          && request.resource.data.userId == userId
+          && isValidTimestamp('createdAt')
+          && isValidTimestamp('updatedAt');
+
+        allow update: if isOwner(userId)
+          && isValidTimestamp('updatedAt');
+
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  TALES  —  /tales/{taleId}
+    //  Public read. Write restricted to author, admin, or moderation.
+    // ═══════════════════════════════════════════════════════════════
+
+    match /tales/{taleId} {
+      // Public read for published tales; drafts hidden
+      allow read: if resource.data.visibility == 'public'
+        || resource.data.status == 'published'
+        || isAuthor()
+        || isAdmin();
+
+      // Create: must be authenticated, set self as author, valid fields
+      allow create: if isAuthenticated()
+        && isAuthorOfIncoming()
+        && isValidString('title', 1, 200)
+        && isValidString('synopsis', 0, 5000)
+        && isValidString('description', 0, 2000)
+        && isValidString('coverUrl', 0, 500)
+        && isValidString('era', 0, 100)
+        && isValidString('tone', 0, 100)
+        && isValidString('language', 0, 50)
+        && isValidString('audience', 0, 100)
+        && isValidString('worldSetting', 0, 2000)
+        && isValidString('authorNotes', 0, 5000)
+        && isValidInt('chapterCount', 0, 1000)
+        && isValidInt('wordCount', 0, 10000000)
+        && isValidInt('estimatedReadMins', 0, 1000000)
+        && isValidString('status', 0, 50)
+        && isValidString('visibility', 0, 50)
+        && isValidList('tags', 50)
+        && isValidList('contentWarnings', 50)
+        && isValidList('searchKeywords', 200)
+        && isValidBool('isFeatured')
+        && isValidBool('isEditorsPick')
+        && isValidNumber('readCount', 0, 1000000000)
+        && isValidNumber('commentCount', 0, 1000000000)
+        && isValidNumber('reactionCount', 0, 1000000000)
+        && isValidNumber('bookmarkCount', 0, 1000000000)
+        && isValidTimestamp('submittedAt')
+        && isValidTimestamp('publishedAt')
+        && isValidTimestamp('createdAt')
+        && isValidTimestamp('updatedAt');
+
+      // Update: author can update their own tale; admin can moderate
+      allow update: if (isAuthor() || isAdmin())
+        && respectsCooldown()
+        && isValidString('title', 1, 200)
+        && isValidString('synopsis', 0, 5000)
+        && isValidString('description', 0, 2000)
+        && isValidString('coverUrl', 0, 500)
+        && isValidString('era', 0, 100)
+        && isValidString('tone', 0, 100)
+        && isValidString('language', 0, 50)
+        && isValidString('audience', 0, 100)
+        && isValidString('worldSetting', 0, 2000)
+        && isValidString('authorNotes', 0, 5000)
+        && isValidInt('chapterCount', 0, 1000)
+        && isValidInt('wordCount', 0, 10000000)
+        && isValidInt('estimatedReadMins', 0, 1000000)
+        && isValidString('status', 0, 50)
+        && isValidString('visibility', 0, 50)
+        && isValidList('tags', 50)
+        && isValidList('contentWarnings', 50)
+        && isValidList('searchKeywords', 200)
+        && isValidBool('isFeatured')
+        && isValidBool('isEditorsPick')
+        && isValidNumber('readCount', 0, 1000000000)
+        && isValidNumber('commentCount', 0, 1000000000)
+        && isValidNumber('reactionCount', 0, 1000000000)
+        && isValidNumber('bookmarkCount', 0, 1000000000)
+        && isValidTimestamp('updatedAt');
+
+      // Delete: author or admin only
+      allow delete: if isAuthor() || isAdmin();
+
+      // ═══════════════════════════════════════════════════════════
+      //  CHAPTERS  —  /tales/{taleId}/chapters/{chapterIndex}
+      // ═══════════════════════════════════════════════════════════
+
+      match /chapters/{chapterIndex} {
+        allow read: if get(/databases/$(database)/documents/tales/$(taleId)).data.visibility == 'public'
+          || get(/databases/$(database)/documents/tales/$(taleId)).data.status == 'published'
+          || isAdmin()
+          || (
+            isAuthenticated()
+            && get(/databases/$(database)/documents/tales/$(taleId)).data.authorId == request.auth.uid
+          );
+
+        allow create: if isAuthenticated()
+          && get(/databases/$(database)/documents/tales/$(taleId)).data.authorId == request.auth.uid
+          && isValidString('title', 0, 200)
+          && isValidString('content', 0, 500000)  // ~500KB max per chapter
+          && isValidInt('index', 0, 1000)
+          && isValidInt('wordCount', 0, 100000)
+          && isValidInt('estimatedReadMins', 0, 10000)
+          && isValidTimestamp('createdAt')
+          && isValidTimestamp('updatedAt');
+
+        allow update: if isAuthenticated()
+          && get(/databases/$(database)/documents/tales/$(taleId)).data.authorId == request.auth.uid
+          && respectsCooldown()
+          && isValidString('title', 0, 200)
+          && isValidString('content', 0, 500000)
+          && isValidInt('index', 0, 1000)
+          && isValidInt('wordCount', 0, 100000)
+          && isValidInt('estimatedReadMins', 0, 10000)
+          && isValidTimestamp('updatedAt');
+
+        allow delete: if isAuthenticated()
+          && get(/databases/$(database)/documents/tales/$(taleId)).data.authorId == request.auth.uid
+          || isAdmin();
+      }
+
+      // ═══════════════════════════════════════════════════════════
+      //  COMMENTS  —  /tales/{taleId}/comments/{commentId}
+      // ═══════════════════════════════════════════════════════════
+
+      match /comments/{commentId} {
+        // Public read for published tales
+        allow read: if get(/databases/$(database)/documents/tales/$(taleId)).data.visibility == 'public'
+          || get(/databases/$(database)/documents/tales/$(taleId)).data.status == 'published'
+          || isAdmin();
+
+        // Create: authenticated users only, with strict content validation
+        allow create: if isAuthenticated()
+          && isValidString('text', 1, 5000)
+          && isValidString('taleId', 1, 100)
+          && request.resource.data.taleId == taleId
+          && isValidString('authorId', 1, 100)
           && request.resource.data.authorId == request.auth.uid
-          && request.resource.data.keys().hasAll(['title', 'authorId', 'authorName', 'chapterCount'])
-          && request.resource.data.title is string
-          && request.resource.data.title.size() > 0
-          && request.resource.data.title.size() <= 200;
+          && isValidString('authorName', 1, 100)
+          && isValidString('type', 1, 50)
+          && request.resource.data.type in ['general', 'chapter']
+          && isValidInt('depth', 0, 3)  // Prevent deep nesting abuse
+          && isValidInt('replyCount', 0, 10000)
+          && isValidInt('likeCount', 0, 1000000)
+          && isValidInt('reportCount', 0, 1000)
+          && isValidBool('isEdited')
+          && isValidBool('isPinned')
+          && isValidBool('isHidden')
+          && isValidString('parentId', 0, 100)
+          && isValidString('chapterIndex', 0, 10)  // Can be null or string
+          && isValidTimestamp('createdAt')
+          && isValidTimestamp('updatedAt')
+          // Prevent empty or whitespace-only comments
+          && request.resource.data.text.trim().size() > 0;
 
-        allow update: if isAuth()
-          && resource.data.authorId == request.auth.uid;
+        // Update: only the author can edit their own comment; admins can hide/pin
+        allow update: if (
+            isAuthenticated()
+            && resource.data.authorId == request.auth.uid
+            && isValidString('text', 1, 5000)
+            && request.resource.data.text.trim().size() > 0
+            && isValidBool('isEdited')
+            && request.resource.data.isEdited == true
+            && isValidTimestamp('updatedAt')
+            && isValidTimestamp('editedAt')
+          ) || (
+            isAdmin()
+            && isValidBool('isHidden')
+            && isValidBool('isPinned')
+            && isValidInt('reportCount', 0, 1000)
+          );
 
-        // No deletion for now — unpublish flow to be added later
-        allow delete: if false;
-
-        // Chapters subcollection
-        match /chapters/{chapterId} {
-          allow read: if isAuth();
-
-          // Only the tale author can write chapters
-          allow write: if isAuth()
-            && get(/databases/$(database)/documents/artifacts/$(appId)/public/data/community_tales/$(taleId)).data.authorId == request.auth.uid;
-        }
-
-        // Comments subcollection
-        match /comments/{commentId} {
-          allow read: if isAuth();
-
-          // Any authenticated user can post a comment
-          // Comment must include required fields and correct authorId
-          allow create: if isAuth()
-            && request.resource.data.authorId == request.auth.uid
-            && request.resource.data.keys().hasAll(['text', 'authorId', 'authorName', 'timestamp'])
-            && request.resource.data.text is string
-            && request.resource.data.text.size() > 0
-            && request.resource.data.text.size() <= 2000;
-
-          // Users can only delete their own comments
-          allow delete: if isAuth()
-            && resource.data.authorId == request.auth.uid;
-
-          // No editing comments
-          allow update: if false;
-        }
+        // Delete: author or admin
+        allow delete: if (
+          isAuthenticated() && resource.data.authorId == request.auth.uid
+        ) || isAdmin();
       }
 
-      // ==================== Pending Review ====================
+      // ═══════════════════════════════════════════════════════════
+      //  REACTIONS  —  /tales/{taleId}/reactions/{reactionId}
+      // ═══════════════════════════════════════════════════════════
 
-      match /public/data/pending_tales/{taleId} {
-        // Only the submitter can read their own pending tale
-        allow read: if isAuth()
-          && resource.data.authorId == request.auth.uid;
+      match /reactions/{reactionId} {
+        allow read: if true;
+        allow create: if isAuthenticated()
+          && isValidString('userId', 1, 100)
+          && request.resource.data.userId == request.auth.uid
+          && isValidString('taleId', 1, 100)
+          && request.resource.data.taleId == taleId
+          && isValidString('type', 1, 50)
+          && request.resource.data.type in ['like', 'love', 'insightful', 'mythic']
+          && isValidTimestamp('createdAt');
 
-        // Any authenticated user can submit a tale for review
-        allow create: if isAuth()
-          && request.resource.data.authorId == request.auth.uid
-          && request.resource.data.keys().hasAll(['title', 'authorId', 'chapters'])
-          && request.resource.data.title.size() > 0;
+        allow update: if isAuthenticated()
+          && resource.data.userId == request.auth.uid
+          && isValidString('type', 1, 50)
+          && request.resource.data.type in ['like', 'love', 'insightful', 'mythic']
+          && isValidTimestamp('updatedAt');
 
-        // Allow update for the auto-approve step in publish flow
-        // In production this should be restricted to a Cloud Function
-        allow update: if isAuth()
-          && resource.data.authorId == request.auth.uid;
-
-        allow delete: if false;
+        allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
       }
+    }
 
-      // ==================== User Private Data ====================
+    // ═══════════════════════════════════════════════════════════════
+    //  ADMIN / MODERATION COLLECTIONS
+    // ═══════════════════════════════════════════════════════════════
 
-      match /users/{userId} {
-        // Users can only read and write their own profile
-        allow read, write: if isOwner(userId);
+    // REPORTS  —  /reports/{reportId}
+    match /reports/{reportId} {
+      allow create: if isAuthenticated()
+        && isValidString('reporterId', 1, 100)
+        && request.resource.data.reporterId == request.auth.uid
+        && isValidString('targetId', 1, 100)
+        && isValidString('targetType', 1, 50)
+        && request.resource.data.targetType in ['tale', 'comment', 'user']
+        && isValidString('reason', 1, 500)
+        && isValidString('status', 1, 50)
+        && request.resource.data.status == 'pending'
+        && isValidTimestamp('createdAt');
 
-        // Drafts subcollection
-        match /drafts/{draftId} {
-          allow read, write: if isOwner(userId);
-        }
+      allow read: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
 
-        // Bookmarks subcollection
-        match /bookmarks/{taleId} {
-          allow read, write: if isOwner(userId);
-        }
+    // MODERATION LOG  —  /moderationLogs/{logId}
+    match /moderationLogs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin()
+        && isValidString('moderatorId', 1, 100)
+        && request.resource.data.moderatorId == request.auth.uid
+        && isValidString('action', 1, 100)
+        && isValidString('targetId', 1, 100)
+        && isValidString('targetType', 1, 50)
+        && isValidString('reason', 1, 1000)
+        && isValidTimestamp('createdAt');
+      allow update, delete: if isAdmin();
+    }
 
-        // Reader progress subcollection
-        match /readerProgress/{taleId} {
-          allow read, write: if isOwner(userId);
+    // ═══════════════════════════════════════════════════════════════
+    //  SYSTEM / CONFIG COLLECTIONS
+    // ═══════════════════════════════════════════════════════════════
 
-          // Chapter progress sub-subcollection
-          match /chapters/{chapterId} {
-            allow read, write: if isOwner(userId);
-          }
-        }
-      }
+    // APP CONFIG  —  /appConfig/{docId}
+    match /appConfig/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // FEATURE FLAGS  —  /featureFlags/{flagId}
+    match /featureFlags/{flagId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  GLOBAL FALLBACK  —  Deny everything not explicitly matched
+    // ═══════════════════════════════════════════════════════════════
+
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

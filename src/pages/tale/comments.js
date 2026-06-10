@@ -17,10 +17,11 @@ import {
 } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
 import { createComment } from '@state/index.js';
-import { escapeHtml } from '@/utils';
+import { escapeHtml as escapeHtml, createLogger } from '@/utils';
 import { initIcons } from '@ui/components/icons.js';
 import { PATHS } from '@fb/paths.js';
 
+const log = createLogger('Comments');
 const PAGE_SIZE = 10;
 
 let _lastVisible = null;
@@ -39,6 +40,7 @@ let _isFetching = false;
  */
 export async function listenToComments(taleId) {
   _currentTaleId = taleId;
+  log.info('Initializing Neural Echoes (comments)', { taleId });
   const list = document.getElementById('comments-list');
   if (!list) return;
 
@@ -93,7 +95,7 @@ export async function postComment(taleId) {
     showToast('Echo transmitted to the weave.', 'success');
     await _fetchComments(true);
   } catch (err) {
-    console.error('[comments] Post failed:', err);
+    log.error('Post failed', err);
     showToast('Transmission failed. Neural link unstable.', 'error');
   } finally {
     if (btn) {
@@ -173,7 +175,7 @@ async function _fetchComments(isInitial = false) {
 
     initIcons(list);
   } catch (err) {
-    console.error('[comments] Fetch failed:', err);
+    log.error('Fetch failed', err);
   } finally {
     _isFetching = false;
   }
@@ -202,7 +204,7 @@ async function _fetchReplies(commentId) {
     container.innerHTML = snap.docs.map((d) => _renderReply(d.data())).join('');
     initIcons(container);
   } catch (err) {
-    console.error('[replies] Fetch failed:', err);
+    log.error('Fetch replies failed', err);
   }
 }
 
@@ -233,7 +235,7 @@ async function _handlePostReply(commentId, btn) {
     showToast('Echo back recorded.', 'success');
     await _fetchReplies(commentId);
   } catch (err) {
-    console.error('[replies] Post failed:', err);
+    log.error('Post reply failed', err);
     showToast('Failed to echo back.', 'error');
   } finally {
     btn.disabled = false;

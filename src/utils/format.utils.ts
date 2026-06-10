@@ -1,8 +1,35 @@
-// src/utils/format.util.ts
-
 // src/utils/format.utils.ts
 // Shared formatting utilities.
 // Import from here for date, time, and number display formatting.
+
+import { createLogger } from '@/utils';
+
+const log = createLogger('FormatUtils');
+
+/* ─────────────────────────────────────────────
+   Date Formatting
+   ───────────────────────────────────────────── */
+
+/**
+ * Formats a date into a standard human-readable format.
+ *
+ * @param date - Date object or ISO string
+ * @returns e.g. "January 15, 2026"
+ */
+export function formatDate(date: Date | string | null | undefined): string {
+  if (!date) return '';
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return d.toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+/**
+ * Alias for timeAgo (used in tests).
+ */
+export const formatRelativeTime = timeAgo;
 
 /* ─────────────────────────────────────────────
    Relative Time
@@ -18,7 +45,7 @@ export function timeAgo(date: Date): string {
   const diff = Date.now() - date.getTime();
   const mins = Math.floor(diff / 60000);
 
-  if (mins < 2) return 'Just now';
+  if (mins < 2) return 'just now';
   if (mins < 60) return `${mins}m ago`;
 
   const hrs = Math.floor(mins / 60);
@@ -72,3 +99,5 @@ export function formatNumber(n: number | null | undefined): string {
 
   return String(num);
 }
+
+log.debug('FormatUtils initialized');

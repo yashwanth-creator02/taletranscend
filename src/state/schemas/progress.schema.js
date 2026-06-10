@@ -22,20 +22,27 @@
  */
 
 /**
+ * @param {string} userId
  * @param {string} taleId
  * @param {Partial<TaleProgress>} data
  * @returns {TaleProgress}
  */
-export function createTaleProgress(taleId, data = {}) {
+export function createTaleProgress(userId, taleId, data = {}) {
   return {
+    userId,
     taleId,
-    totalReadTimeMs: data.totalReadTimeMs ?? 0,
+    totalReadTimeMs: Number(data.totalReadTimeMs ?? 0),
     status: data.status ?? 'in_progress',
     finishedAt: data.finishedAt ?? null,
-    lastReadAt: data.lastReadAt ?? null,
+    lastReadAt: data.lastReadAt
+      ? data.lastReadAt.toDate
+        ? data.lastReadAt.toDate()
+        : new Date(data.lastReadAt)
+      : new Date(),
     taleTitle: data.taleTitle ?? '',
     coverUrl: data.coverUrl ?? '',
-    chapterCount: data.chapterCount ?? 0,
+    chapterCount: Number(data.chapterCount ?? 0),
+    lastChapterIndex: Number(data.lastChapterIndex ?? 0),
     createdAt: data.createdAt ?? null,
     updatedAt: data.updatedAt ?? null,
     chapters: data.chapters ?? {},
@@ -48,19 +55,32 @@ export function createTaleProgress(taleId, data = {}) {
 
 /**
  * @typedef {Object} ChapterProgress
+ * @property {string} taleId
+ * @property {number} chapterIndex
  * @property {number} scrollPercent        - 0–100 coarse scroll position
  * @property {number} lastCharacterOffset  - Precise character position for exact resume
+ * @property {string} status               - 'unread' | 'in_progress' | 'finished'
+ * @property {number} percent              - Alias for scrollPercent
  * @property {import('firebase/firestore').Timestamp|null} updatedAt
  */
 
 /**
+ * @param {string} taleId
+ * @param {number} chapterIndex
  * @param {Partial<ChapterProgress>} data
  * @returns {ChapterProgress}
  */
-export function createChapterProgress(data = {}) {
+export function createChapterProgress(taleId, chapterIndex, data = {}) {
+  const status = data.status ?? 'unread';
+  const percent = status === 'finished' ? 100 : (data.percent ?? data.scrollPercent ?? 0);
+
   return {
-    scrollPercent: data.scrollPercent ?? 0,
-    lastCharacterOffset: data.lastCharacterOffset ?? 0,
+    taleId,
+    chapterIndex,
+    scrollPercent: percent,
+    percent: percent,
+    lastCharacterOffset: Number(data.lastCharacterOffset ?? 0),
+    status: status,
     updatedAt: data.updatedAt ?? null,
   };
 }
@@ -103,11 +123,15 @@ export function createLocalChapterProgress(data = {}) {
 /**
  * Creates a safe local tale progress entry.
  *
+ * @param {string} taleId
  * @param {Partial<LocalTaleProgress>} data
  * @returns {LocalTaleProgress}
  */
-export function createLocalTaleProgress(data = {}) {
+export function createLocalTaleProgress(taleId, data = {}) {
   return {
+    taleId,
+    chapterIndex: data.chapterIndex ?? 0,
+    percent: data.percent ?? 0,
     chapters: data.chapters ?? {},
     totalReadTimeMs: data.totalReadTimeMs ?? 0,
     updatedAt: data.updatedAt ?? Date.now(),

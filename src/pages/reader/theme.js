@@ -19,7 +19,9 @@ import {
   TYPOGRAPHY_BOUNDS,
   READER_STORAGE_KEYS,
 } from '@config/theme.config.js';
-import { setInput, setText } from '@/utils';
+import { setInput, setText, createLogger } from '@/utils';
+
+const log = createLogger('ReaderTheme');
 
 /* ─────────────────────────────────────────────
    Surface Element
@@ -42,6 +44,7 @@ function _getSurface() {
  * afterwards — it will override the localStorage values.
  */
 export function initTheme() {
+  log.info('Initialising local theme preferences');
   readerState.theme = localStorage.getItem(READER_STORAGE_KEYS.theme) || DEFAULT_THEME;
   readerState.fontFamily = localStorage.getItem(READER_STORAGE_KEYS.fontFamily) || DEFAULT_FONT;
   readerState.fontSize =
@@ -53,6 +56,11 @@ export function initTheme() {
   readerState.measure =
     Number(localStorage.getItem(READER_STORAGE_KEYS.measure)) || TYPOGRAPHY_BOUNDS.measure.default;
 
+  log.debug('Local preferences loaded', {
+    theme: readerState.theme,
+    font: readerState.fontFamily,
+    size: readerState.fontSize,
+  });
   _applyAll();
 }
 
@@ -64,6 +72,7 @@ export function initTheme() {
  * @param {import('@state/schemas/user.schema.js').ReaderPreferences} prefs
  */
 export function applyCloudPrefs(prefs) {
+  log.info('Applying cloud theme preferences', prefs);
   readerState.theme = prefs.theme || readerState.theme;
   readerState.fontFamily = prefs.fontFamily || readerState.fontFamily;
   readerState.fontSize = prefs.fontSize || readerState.fontSize;

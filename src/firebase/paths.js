@@ -6,6 +6,9 @@
 // Single collection 'tales' replaces the old community_tales / pending_tales split.
 // Status field on the tale document handles the moderation pipeline.
 
+import { createLogger } from '@/utils';
+const log = createLogger('Paths');
+
 const APP_ROOT = 'v1/taletranscend/projects/v1';
 
 export { APP_ROOT };
@@ -168,3 +171,5 @@ export const PATHS = {
   /** Single achievement document (keyed by achievement slug) */
   achievement: (uid, achievementId) => `${APP_ROOT}/users/${uid}/achievements/${achievementId}`,
 };
+
+log.debug('Firestore paths initialized');

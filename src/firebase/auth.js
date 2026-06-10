@@ -1,37 +1,73 @@
 // src/firebase/auth.js
 // Firebase Authentication setup and initialization helper.
-// Uses anonymous authentication only — custom token dead code has been removed.
+// Uses anonymous authentication only.
 
-import { getAuth, signOut, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+import {
+  getAuth,
+  signOut,
+  signInAnonymously,
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup,
+  linkWithPopup,
+} from 'firebase/auth';
 import app from './app.js';
+import { createLogger } from '@/utils';
 
-// Single shared Auth instance used across the entire application.
+const log = createLogger('Auth');
+
 export const auth = getAuth(app);
 
 /**
  * Initializes authentication for the application.
- * Signs in anonymously if no session exists, then fires onReady once a
- * valid user session is confirmed via the onAuthStateChanged listener.
+ * Reuses an existing anonymous session if one exists in the browser;
+ * otherwise creates a new one. Guarantees onReady fires exactly once.
  *
  * @param {(user: import('firebase/auth').User) => void} onReady
  */
 export function initAuth(onReady) {
-  // Register a state listener — fires on load and on every auth change.
-  // This is the primary mechanism for notifying pages that auth is ready.
-  onAuthStateChanged(auth, (user) => {
-    if (user) onReady(user);
-  });
-
-  // Immediately attempt anonymous sign-in if no session exists.
-  // Runs in parallel with the state listener to minimise auth latency.
-  (async () => {
-    if (auth.currentUser) return;
-    try {
-      await signInAnonymously(auth);
-    } catch (err) {
-      console.error('[auth] Anonymous sign-in failed:', err);
+  log.info('Initialising authentication...');
+  const unsubscribe = onAuthStateChanged(auth, (user) => {
+    unsubscribe(); // Prevent duplicate calls if auth state flips again
+    if (user) {
+      log.info('Existing session found', { uid: user.uid, isAnonymous: user.isAnonymous });
+      onReady(user);
+    } else {
+      log.info('No session found. Creating anonymous identity...');
+      signInAnonymously(auth)
+        .then((credential) => {
+          log.info('Anonymous session established', { uid: credential.user.uid });
+          onReady(credential.user);
+        })
+        .catch((err) => {
+          log.error('Anonymous sign-in failed:', err);
+        });
     }
-  })();
+  });
 }
 
-export { onAuthStateChanged, signOut };
+/**
+ * Signs in the user with Google.
+ * @returns {Promise<import('firebase/auth').User>}
+ */
+export async function signInWithGoogle() {
+  const provider = new GoogleAuthProvider();
+  const result = await signInWithPopup(auth, provider);
+  return result.user;
+}
+
+/**
+ * Upgrades the current anonymous user to a Google account.
+ * Links the current anonymous session with a Google identity.
+ * @returns {Promise<import('firebase/auth').User>}
+ */
+export async function upgradeAnonymousToGoogle() {
+  if (!auth.currentUser) {
+    throw new Error('No user is currently signed in.');
+  }
+  const provider = new GoogleAuthProvider();
+  const result = await linkWithPopup(auth.currentUser, provider);
+  return result.user;
+}
+
+export { onAuthStateChanged, signOut, signInAnonymously };

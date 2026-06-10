@@ -1,10 +1,12 @@
 // src/pages/tale/interactions.js
 // User interactions for the Tale Archive page.
 
-import { navigateTo } from '@/utils';
+import { navigateTo, createLogger } from '@/utils';
 import { resolveResumePoint, toggleResonance, getResonanceStatus } from '@services/index.js';
 import { showToast } from '@ui/components/toast.js';
 import { initIcons } from '@ui/components/icons.js';
+
+const log = createLogger('TaleInteractions');
 
 /* ─────────────────────────────────────────────
    Soul Resonance
@@ -16,21 +18,25 @@ import { initIcons } from '@ui/components/icons.js';
  * @param {string} taleId
  */
 export async function setupResonance(taleId) {
+  log.info('Setting up resonance', { taleId });
   const btn = document.getElementById('resonance-btn');
   const countEl = document.getElementById('resonance-count');
   if (!btn || !countEl) return;
 
   const isActive = await getResonanceStatus(taleId);
+  log.debug('Initial resonance status', { isActive });
   _updateResonanceUI(btn, countEl, isActive);
 
   btn.addEventListener('click', async () => {
+    log.info('Resonance toggle clicked');
     btn.disabled = true;
     try {
       const { active, count } = await toggleResonance(taleId);
+      log.info('Resonance toggled', { active, count });
       _updateResonanceUI(btn, countEl, active, count);
       showToast(active ? 'Souls Aligned.' : 'Resonance Decoupled.', 'success');
     } catch (err) {
-      console.error('[resonance] Failed:', err);
+      log.error('Resonance failed', err);
       showToast('Neural resonance failed. Authentication required.', 'error');
     } finally {
       btn.disabled = false;
@@ -111,7 +117,6 @@ export function setupTabs() {
 
 /**
  * Starts reading from chapter 0.
- * Bug fix: was using chapters[0].id which could be any string — always use chapterId=0.
  *
  * @param {string} taleId
  * @param {import('@state/schemas/tale.schema.js').Chapter[]} chapters
@@ -183,7 +188,7 @@ export async function setupShelfButton(userId, taleId, tale, bookmarkService) {
         showToast('Added to your shelf.', 'success');
       }
     } catch (err) {
-      console.error('[shelf] Failed:', err);
+      log.error('Shelf operation failed', err);
       showToast('Could not update shelf.', 'error');
     } finally {
       btn.disabled = false;

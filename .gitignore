@@ -1,44 +1,94 @@
-# --- Environment & Secrets ---
+# =========================================================
+# Environment & Secrets
+# =========================================================
+
 .env
 .env.local
 .env.*.local
 
-# --- Dependencies ---
+# Firebase / Google Cloud credentials
+service-account.json
+firebase-adminsdk*.json
+google-credentials*.json
+*credentials*.json
+
+
+# =========================================================
+# Dependencies
+# =========================================================
+
 node_modules/
 .pnp
 .pnp.js
 
-# --- System Files ---
+
+# =========================================================
+# System Files
+# =========================================================
+
 .DS_Store
 Thumbs.db
 *.log
 firebase-debug.log*
+firebase-debug.*.log
 
-# --- Build & Cache ---
+
+# =========================================================
+# Build & Cache
+# =========================================================
+
 dist/
 .vite/
 .eslintcache
 .prettiercache
 
-# --- Configuration ---
-# We keep the structure but ignore any potential hardcoded secrets
-*.json
-!package.json
-!package-lock.json
-!jsconfig.json
 
-# If you moved secrets to .env, you can un-ignore this file:
-!config/firebase-config.js
+# =========================================================
+# Testing (Vitest & Playwright)
+# =========================================================
+
+coverage/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
 
 
-migrate.js
-service-account.json
+# =========================================================
+# Generated / Local-only Assets
+# =========================================================
+
 stats.html
 graph.png
 graph.svg
 architecture.svg
-.aider*
-ex.tale.html
-.antigravitycli
-demo/
+
+# Local scripts (keep if you want them in repo)
+migrate.js
 seed-tale.js
+
+# Local demo / scratch
+demo/
+ex.tale.html
+later.firestore.rules
+
+
+# =========================================================
+# Tool-Specific Local State
+# =========================================================
+
+.aider*
+.antigravitycli
+.agents
+
+
+# =========================================================
+# IDE
+# =========================================================
+
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo

@@ -3,6 +3,9 @@
 // Combines local and cloud read time via the readTime selector.
 
 import { getTotalReadTime } from './readTime.selector.js';
+import { createLogger } from '@/utils';
+
+const log = createLogger('GetTotalReadTimes');
 
 /**
  * Retrieves total read times for multiple tales in parallel.
@@ -16,6 +19,7 @@ import { getTotalReadTime } from './readTime.selector.js';
 export async function getTotalReadTimes({ userId, taleIds }) {
   if (!userId || !Array.isArray(taleIds) || taleIds.length === 0) return {};
 
+  log.debug('Fetching batch read times', { userId, count: taleIds.length });
   const entries = await Promise.all(
     taleIds.map(async (taleId) => {
       const ms = await getTotalReadTime({ userId, taleId });
@@ -23,5 +27,7 @@ export async function getTotalReadTimes({ userId, taleIds }) {
     })
   );
 
-  return Object.fromEntries(entries);
+  const result = Object.fromEntries(entries);
+  log.info('Batch read times resolved', { count: Object.keys(result).length });
+  return result;
 }

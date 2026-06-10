@@ -10,6 +10,9 @@
 import { db } from './db.js';
 import { doc, collection } from 'firebase/firestore';
 import { PATHS } from './paths.js';
+import { createLogger } from '@/utils';
+
+const log = createLogger('Refs');
 
 export const refs = {
   // ── Public Tales ──────────────────────────────────────────────────
@@ -162,3 +165,5 @@ export const refs = {
   /** Single achievement document */
   achievement: (uid, achievementId) => doc(db, PATHS.achievement(uid, achievementId)),
 };
+
+log.debug('Firestore references initialized');

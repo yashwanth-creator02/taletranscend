@@ -31,13 +31,15 @@
 
 /**
  * @param {string} id
+ * @param {string} userId
  * @param {Partial<Draft>} data
  * @returns {Draft}
  */
-export function createDraft(id, data = {}) {
+export function createDraft(id, userId, data = {}) {
   return {
     id,
-    title: data.title ?? '',
+    userId,
+    title: data.title || 'Untitled Draft',
     synopsis: data.synopsis ?? '',
     coverUrl: data.coverUrl ?? '',
     era: data.era ?? '',
@@ -49,11 +51,17 @@ export function createDraft(id, data = {}) {
     contentWarnings: data.contentWarnings ?? [],
     worldSetting: data.worldSetting ?? '',
     authorNotes: data.authorNotes ?? '',
-    chapterCount: data.chapterCount ?? 0,
-    wordCount: data.wordCount ?? 0,
+    chapterCount: Number(data.chapterCount ?? 0),
+    wordCount: Number(data.wordCount ?? 0),
+    status: data.status ?? 'draft',
     isDirty: data.isDirty ?? false,
     updatedAt: data.updatedAt ?? null,
-    createdAt: data.createdAt ?? null,
+    createdAt: data.createdAt
+      ? data.createdAt.toDate
+        ? data.createdAt.toDate()
+        : new Date(data.createdAt)
+      : new Date(),
+    chapters: data.chapters ?? [],
   };
 }
 
@@ -73,16 +81,17 @@ export function createDraft(id, data = {}) {
 
 /**
  * @param {string} id
+ * @param {number} chapterNum
  * @param {Partial<DraftChapter>} data
  * @returns {DraftChapter}
  */
-export function createDraftChapter(id, data = {}) {
+export function createDraftChapter(id, chapterNum, data = {}) {
   return {
     id,
-    chapterNum: data.chapterNum ?? Number(id) + 1,
-    title: data.title ?? '',
+    chapterNum: chapterNum ?? data.chapterNum ?? Number(id) + 1,
+    title: data.title || `Chapter ${chapterNum}`,
     content: data.content ?? '',
-    wordCount: data.wordCount ?? 0,
+    wordCount: Number(data.wordCount ?? 0),
     updatedAt: data.updatedAt ?? null,
   };
 }
@@ -98,8 +107,10 @@ export function createDraftChapter(id, data = {}) {
  * @returns {Object}
  */
 export function draftToFirestore(draft) {
-  const { id: _id, isDirty: _isDirty, ...rest } = draft;
-  return rest;
+  const data = { ...draft };
+  delete data.id;
+  delete data.isDirty;
+  return data;
 }
 
 /**
@@ -109,6 +120,7 @@ export function draftToFirestore(draft) {
  * @returns {Object}
  */
 export function draftChapterToFirestore(chapter) {
-  const { id: _chapterId, ...rest } = chapter;
-  return rest;
+  const data = { ...chapter };
+  delete data.id;
+  return data;
 }

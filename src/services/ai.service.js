@@ -2,6 +2,10 @@
 // Centralized AI Oracle Service.
 // Interface for all generative and assistive features.
 
+import { createLogger } from '@/utils';
+
+const log = createLogger('AIService');
+
 const GEMINI_MODEL = 'gemini-2.0-flash';
 const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
@@ -15,6 +19,7 @@ const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models
 export async function suggestTitle(prompt, apiKey) {
   if (!prompt || prompt.trim().length < 10) return null;
 
+  log.info('Requesting mythic title suggestion...');
   return _callGemini(
     `Suggest ONE epic, mythic, or fantasy title for a story with this synopsis: "${prompt}". Return ONLY the title text, no punctuation or formatting.`,
     apiKey
@@ -31,6 +36,7 @@ export async function suggestTitle(prompt, apiKey) {
 export async function refineMythicText(text, apiKey) {
   if (!text || text.trim().length < 20) return null;
 
+  log.info('Requesting mythic text refinement...');
   return _callGemini(
     `Rewrite the following paragraph to be more epic, mythic, and elevated in tone while fixing grammar. Keep it roughly the same length. Return ONLY the refined text:\n\n"${text}"`,
     apiKey
@@ -41,6 +47,7 @@ export async function refineMythicText(text, apiKey) {
  * Internal Gemini implementation.
  */
 async function _callGemini(text, apiKey) {
+  log.debug('Calling Gemini API', { model: GEMINI_MODEL });
   try {
     const res = await fetch(`${GEMINI_ENDPOINT}?key=${encodeURIComponent(apiKey)}`, {
       method: 'POST',
@@ -51,15 +58,23 @@ async function _callGemini(text, apiKey) {
     });
 
     if (!res.ok) {
-      console.warn('[ai] Gemini request failed:', res.status);
+      log.warn('Gemini request failed', { status: res.status, statusText: res.statusText });
       return null;
     }
 
     const json = await res.json();
     const raw = json.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
-    return raw.trim() || null;
+    const result = raw.trim() || null;
+
+    if (result) {
+      log.info('Gemini response received and parsed successfully');
+    } else {
+      log.warn('Gemini returned an empty or invalid response');
+    }
+
+    return result;
   } catch (err) {
-    console.error('[ai] Request error:', err);
+    log.error('AI Request error', err);
     return null;
   }
 }

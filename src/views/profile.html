@@ -2,1801 +2,2078 @@
 
 <!doctype html>
 <html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>TaleTranscend | Profile</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <script type="module" src="../pages/profile/profile.js"></script>
+    <style>
+      /* ═══════════════════════════════════════════════
+       Reveal Effect
+       ═══════════════════════════════════════════════ */
+      html {
+        opacity: 0;
+        transition: opacity 220ms cubic-bezier(0.4, 0, 0.2, 1);
+        scroll-behavior: smooth;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        -webkit-text-size-adjust: 100%;
+      }
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>TaleTranscend | Profile</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap"
-    rel="stylesheet">
-  <script type="module" src="../pages/profile/profile.js"></script>
-  <style>
-    /* ═══════════════════════════════════════════════
+      /* ═══════════════════════════════════════════════
        Design Tokens
        ═══════════════════════════════════════════════ */
-    :root {
-      --spacing-xs: 0.25rem;
-      --spacing-sm: 0.5rem;
-      --spacing-md: 1rem;
-      --spacing-lg: 1.5rem;
-      --spacing-xl: 2rem;
+      :root {
+        --spacing-xs: 0.25rem;
+        --spacing-sm: 0.5rem;
+        --spacing-md: 1rem;
+        --spacing-lg: 1.5rem;
+        --spacing-xl: 2rem;
 
-      --radius-sm: 0.5rem;
-      --radius-md: 0.75rem;
-      --radius-lg: 1rem;
-      --radius-xl: 1.5rem;
+        --radius-sm: 0.5rem;
+        --radius-md: 0.75rem;
+        --radius-lg: 1rem;
+        --radius-xl: 1.5rem;
 
-      --bg-glass: rgba(255, 255, 255, 0.03);
-      --bg-glass-strong: rgba(255, 255, 255, 0.07);
-      --border-glass: rgba(255, 255, 255, 0.08);
+        --bg-glass: rgba(255, 255, 255, 0.03);
+        --bg-glass-strong: rgba(255, 255, 255, 0.07);
+        --border-glass: rgba(255, 255, 255, 0.08);
 
-      --left-panel-width: 320px;
-      --right-panel-width: 320px;
+        --left-panel-width: 320px;
+        --right-panel-width: 320px;
 
-      --transition-fast: 150ms ease;
-      --transition-normal: 300ms ease;
-      --transition-slow: 500ms ease;
-    }
+        --transition-fast: 150ms ease;
+        --transition-normal: 300ms ease;
+        --transition-slow: 500ms ease;
+      }
 
-    /* ═══════════════════════════════════════════════
+      /* ═══════════════════════════════════════════════
        Base & Typography
        ═══════════════════════════════════════════════ */
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-    }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
 
-    html {
-      scroll-behavior: smooth;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      -webkit-text-size-adjust: 100%;
-    }
+      body {
+        font-family: 'Inter', sans-serif;
+        background: #030305;
+        color: #ffffff;
+        margin: 0;
+        padding: 0;
+      }
 
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #030305;
-      color: #ffffff;
-      margin: 0;
-      padding: 0;
-    }
+      .font-cinzel {
+        font-family: 'Cinzel', serif;
+      }
 
-    .font-cinzel {
-      font-family: 'Cinzel', serif;
-    }
-
-    /* ═══════════════════════════════════════════════
+      /* ═══════════════════════════════════════════════
        Scroll Architecture
        ═══════════════════════════════════════════════ */
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-
-    /* ═══════════════════════════════════════════════
-       Ambient Background
-       ═══════════════════════════════════════════════ */
-    .atmosphere-base {
-      position: fixed;
-      inset: 0;
-      z-index: -2;
-      background:
-        radial-gradient(ellipse at 15% 15%, rgba(99, 102, 241, 0.08) 0%, transparent 55%),
-        radial-gradient(ellipse at 85% 85%, rgba(139, 92, 246, 0.06) 0%, transparent 55%),
-        radial-gradient(ellipse at 50% 50%, rgba(16, 185, 129, 0.04) 0%, transparent 60%),
-        radial-gradient(ellipse at 70% 20%, rgba(236, 72, 153, 0.04) 0%, transparent 50%),
-        #030305;
-    }
-
-    /* ═══════════════════════════════════════════════
-       Particle Layer (CSS-only, GPU-friendly)
-       ═══════════════════════════════════════════════ */
-    .particle-field {
-      position: fixed;
-      inset: 0;
-      z-index: -1;
-      overflow: hidden;
-      pointer-events: none;
-    }
-
-    .particle-field::before,
-    .particle-field::after {
-      content: '';
-      position: absolute;
-      width: 2px;
-      height: 2px;
-      background: rgba(255, 255, 255, 0.35);
-      border-radius: 50%;
-      box-shadow:
-        8vw 15vh 0 rgba(255, 255, 255, 0.2),
-        25vw 35vh 0 rgba(255, 255, 255, 0.15),
-        45vw 8vh 0 rgba(255, 255, 255, 0.25),
-        65vw 55vh 0 rgba(255, 255, 255, 0.1),
-        85vw 25vh 0 rgba(255, 255, 255, 0.2),
-        12vw 75vh 0 rgba(255, 255, 255, 0.15),
-        38vw 88vh 0 rgba(255, 255, 255, 0.1),
-        58vw 18vh 0 rgba(255, 255, 255, 0.2),
-        78vw 65vh 0 rgba(255, 255, 255, 0.15),
-        92vw 45vh 0 rgba(255, 255, 255, 0.1),
-        5vw 55vh 0 rgba(255, 255, 255, 0.12),
-        35vw 5vh 0 rgba(255, 255, 255, 0.18),
-        55vw 95vh 0 rgba(255, 255, 255, 0.08),
-        75vw 40vh 0 rgba(255, 255, 255, 0.22);
-      animation: particleFloat 22s ease-in-out infinite;
-    }
-
-    .particle-field::after {
-      animation-delay: -11s;
-      animation-duration: 28s;
-      opacity: 0.5;
-      transform: scale(0.7);
-    }
-
-    @keyframes particleFloat {
-
-      0%,
-      100% {
-        transform: translateY(0) translateX(0);
-      }
-
-      20% {
-        transform: translateY(-25px) translateX(12px);
-      }
-
-      40% {
-        transform: translateY(12px) translateX(-18px);
-      }
-
-      60% {
-        transform: translateY(-18px) translateX(8px);
-      }
-
-      80% {
-        transform: translateY(8px) translateX(22px);
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-
-      .particle-field::before,
-      .particle-field::after {
-        animation: none;
-      }
-
-      .page-fade-in {
-        animation: none;
-      }
-    }
-
-    /* ═══════════════════════════════════════════════
-       Page Entrance
-       ═══════════════════════════════════════════════ */
-    .page-fade-in {
-      animation: pageFadeIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    }
-
-    @keyframes pageFadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* ═══════════════════════════════════════════════
-       Layout Grid & Resize Handles
-       ═══════════════════════════════════════════════ */
-    .profile-main-layout {
-      position: relative;
-      flex: 1;
-      overflow: hidden;
-    }
-
-    /* Desktop: 3-column grid with resize handles */
-    @media (min-width: 1200px) {
-      .profile-main-layout {
-        display: grid;
-        grid-template-columns: var(--left-panel-width) 4px minmax(0, 1fr) 4px var(--right-panel-width);
-        height: 100vh;
-        overflow: hidden;
-      }
-
-      .pillar-left,
-      #column-chronicles,
-      #column-insights {
-        height: 100vh;
-        overflow-y: auto;
-      }
-
-      body {
-        overflow: hidden;
-        height: 100vh;
-      }
-    }
-
-    /* Tablet: stacked vertical, natural scroll */
-    @media (max-width: 1199px) {
-      .profile-main-layout {
-        display: flex;
-        flex-direction: column;
-        overflow-y: auto;
-        height: auto;
-        min-height: 100vh;
-      }
-
-      .pillar-left,
-      #column-chronicles,
-      #column-insights {
-        height: auto;
-        overflow-y: visible;
-        width: 100% !important;
-      }
-
-      body {
-        overflow-x: hidden;
-        overflow-y: auto;
-        height: auto;
-      }
-    }
-
-    /* Resize Handles — Desktop only */
-    .resize-handle {
-      display: none;
-    }
-
-    @media (min-width: 1200px) {
-      .resize-handle {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 4px;
-        background: rgba(255, 255, 255, 0.02);
-        cursor: col-resize;
-        position: relative;
-        z-index: 50;
-        transition: background var(--transition-fast);
-        touch-action: none;
-      }
-
-      .resize-handle:hover,
-      .resize-handle:focus-visible,
-      body.resizing .resize-handle {
-        background: rgba(99, 102, 241, 0.4);
-      }
-
-      .resize-handle::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 2px;
-        height: 32px;
-        background: rgba(255, 255, 255, 0.06);
-        border-radius: 1px;
-        transition: all var(--transition-fast);
-      }
-
-      .resize-handle:hover::after,
-      .resize-handle:focus-visible::after,
-      body.resizing .resize-handle::after {
-        background: rgba(255, 255, 255, 0.25);
-        height: 48px;
-      }
-    }
-
-    /* ═══════════════════════════════════════════════
-       Glass Panels
-       ═══════════════════════════════════════════════ */
-    .glass-panel {
-      background: var(--bg-glass);
-      border: 1px solid var(--border-glass);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-radius: var(--radius-lg);
-    }
-
-    .glass-panel-elevated {
-      background: var(--bg-glass-strong);
-      border: 1px solid var(--border-glass);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border-radius: var(--radius-xl);
-    }
-
-    /* ═══════════════════════════════════════════════
-       Identity Card
-       ═══════════════════════════════════════════════ */
-    .identity-card {
-      background: var(--bg-glass);
-      border: 1px solid var(--border-glass);
-      border-radius: var(--radius-xl);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      transition: transform var(--transition-normal), box-shadow var(--transition-normal);
-    }
-
-    .identity-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
-    }
-
-    .avatar-container {
-      position: relative;
-      transition: transform var(--transition-normal);
-      aspect-ratio: 1 / 1;
-    }
-
-    .avatar-container:hover {
-      transform: scale(1.03);
-    }
-
-    .mythic-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.375rem;
-      padding: 0.375rem 0.875rem;
-      background: rgba(99, 102, 241, 0.1);
-      border: 1px solid rgba(99, 102, 241, 0.2);
-      border-radius: 9999px;
-      color: rgba(165, 180, 252, 1);
-      font-size: 0.625rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      transition: all var(--transition-normal);
-    }
-
-    .mythic-badge:hover {
-      background: rgba(99, 102, 241, 0.2);
-      border-color: rgba(99, 102, 241, 0.4);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.15);
-    }
-
-    /* ═══════════════════════════════════════════════
-       Stat Cards
-       ═══════════════════════════════════════════════ */
-    .stat-card-mythic {
-      background: var(--bg-glass);
-      border: 1px solid var(--border-glass);
-      border-radius: var(--radius-lg);
-      padding: var(--spacing-lg);
-      transition: transform var(--transition-normal), box-shadow var(--transition-normal);
-    }
-
-    .stat-card-mythic:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
-    }
-
-    /* ═══════════════════════════════════════════════
-       Section Headers & Dividers
-       ═══════════════════════════════════════════════ */
-    .rune-divider {
-      width: 3rem;
-      height: 2px;
-      background: linear-gradient(90deg, rgba(99, 102, 241, 0.6), transparent);
-      margin-top: var(--spacing-sm);
-      border-radius: 1px;
-      transition: width var(--transition-slow);
-    }
-
-    .section-header:hover .rune-divider {
-      width: 4.5rem;
-    }
-
-    .sacred-divider {
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
-    }
-
-    /* ═══════════════════════════════════════════════
-       Tabs — Contributions
-       ═══════════════════════════════════════════════ */
-    .tab-nav {
-      display: inline-flex;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: var(--radius-md);
-      padding: 0.25rem;
-      gap: 0.25rem;
-      flex-wrap: wrap;
-    }
-
-    .tab-trigger {
-      position: relative;
-      padding: 0.5rem 1.25rem;
-      border-radius: var(--radius-sm);
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      transition: all var(--transition-normal);
-      border: 1px solid transparent;
-      background: transparent;
-      color: rgba(148, 163, 184, 0.7);
-      cursor: pointer;
-      min-height: 44px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .tab-trigger:hover {
-      background: rgba(255, 255, 255, 0.04);
-      color: rgba(226, 232, 240, 1);
-    }
-
-    .tab-trigger--active {
-      background: rgba(99, 102, 241, 0.15);
-      color: rgba(165, 180, 252, 1);
-      border-color: rgba(99, 102, 241, 0.25);
-    }
-
-    .tab-trigger--active:hover {
-      background: rgba(99, 102, 241, 0.2);
-    }
-
-    /* ═══════════════════════════════════════════════
-       Tabs — Modal
-       ═══════════════════════════════════════════════ */
-    .tab-btn--active {
-      background: rgba(99, 102, 241, 0.15);
-      color: rgba(165, 180, 252, 1);
-      border-color: rgba(99, 102, 241, 0.3);
-    }
-
-    .tab-btn--inactive {
-      background: transparent;
-      color: rgba(148, 163, 184, 0.7);
-      border-color: rgba(255, 255, 255, 0.06);
-    }
-
-    .tab-btn--inactive:hover {
-      background: rgba(255, 255, 255, 0.04);
-      color: rgba(226, 232, 240, 1);
-      border-color: rgba(255, 255, 255, 0.12);
-    }
-
-    /* ═══════════════════════════════════════════════
-       Buttons
-       ═══════════════════════════════════════════════ */
-    .btn-primary {
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.9), rgba(139, 92, 246, 0.9));
-      border: 1px solid rgba(99, 102, 241, 0.3);
-      color: white;
-      transition: all var(--transition-normal);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .btn-primary::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.12), transparent);
-      opacity: 0;
-      transition: opacity var(--transition-normal);
-    }
-
-    .btn-primary:hover {
-      transform: scale(1.02);
-      box-shadow: 0 4px 24px rgba(99, 102, 241, 0.3);
-    }
-
-    .btn-primary:hover::before {
-      opacity: 1;
-    }
-
-    .btn-primary:active {
-      transform: scale(0.98);
-    }
-
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: white;
-      transition: all var(--transition-normal);
-    }
-
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.08);
-      transform: scale(1.02);
-      box-shadow: 0 4px 16px rgba(255, 255, 255, 0.05);
-    }
-
-    .btn-ghost {
-      background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      color: rgba(203, 213, 225, 1);
-      transition: all var(--transition-normal);
-    }
-
-    .btn-ghost:hover {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: rgba(255, 255, 255, 0.15);
-      color: white;
-      transform: scale(1.02);
-    }
-
-    /* ═══════════════════════════════════════════════
-       Inputs
-       ═══════════════════════════════════════════════ */
-    .input-mythic {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      color: white;
-      transition: all var(--transition-normal);
-      outline: none;
-    }
-
-    .input-mythic::placeholder {
-      color: rgba(148, 163, 184, 0.45);
-    }
-
-    .input-mythic:focus {
-      border-color: rgba(99, 102, 241, 0.5);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-      background: rgba(255, 255, 255, 0.05);
-    }
-
-    /* ═══════════════════════════════════════════════
-       Reading Goal Bar
-       ═══════════════════════════════════════════════ */
-    #reading-goal-bar {
-      width: calc(var(--progress, 0) * 100%);
-      transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
-      will-change: width;
-    }
-
-    /* ═══════════════════════════════════════════════
-       Genre Chips
-       ═══════════════════════════════════════════════ */
-    #genre-selector button,
-    #genre-selector .genre-chip {
-      padding: 0.5rem 1rem;
-      border-radius: var(--radius-md);
-      font-size: 0.75rem;
-      font-weight: 600;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(255, 255, 255, 0.03);
-      color: rgba(148, 163, 184, 1);
-      transition: all var(--transition-normal);
-      cursor: pointer;
-      min-height: 44px;
-      display: inline-flex;
-      align-items: center;
-    }
-
-    #genre-selector button:hover,
-    #genre-selector .genre-chip:hover {
-      background: rgba(255, 255, 255, 0.06);
-      border-color: rgba(255, 255, 255, 0.15);
-      transform: translateY(-1px);
-    }
-
-    #genre-selector button.active,
-    #genre-selector .genre-chip.active {
-      background: rgba(99, 102, 241, 0.18);
-      border-color: rgba(99, 102, 241, 0.4);
-      color: rgba(165, 180, 252, 1);
-      box-shadow: 0 0 16px rgba(99, 102, 241, 0.15);
-      transform: translateY(-1px);
-    }
-
-    /* ═══════════════════════════════════════════════
-       Modal System
-       ═══════════════════════════════════════════════ */
-    #edit-modal {
-      transition: opacity var(--transition-normal), visibility var(--transition-normal);
-      overscroll-behavior: contain;
-    }
-
-    #edit-modal.hidden {
-      display: flex !important;
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-    }
-
-    #edit-modal:not(.hidden) {
-      display: flex;
-      opacity: 1;
-      visibility: visible;
-      pointer-events: auto;
-    }
-
-    #edit-modal>div[class*="glass-panel-elevated"] {
-      transition: transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
-      transform: scale(0.95) translateY(20px);
-      max-width: 480px;
-      width: 100%;
-    }
-
-    #edit-modal:not(.hidden)>div[class*="glass-panel-elevated"] {
-      transform: scale(1) translateY(0);
-    }
-
-    /* Mobile Modal: Bottom Sheet */
-    @media (max-width: 767px) {
-      #edit-modal {
-        align-items: flex-end !important;
-        padding: 0 !important;
-      }
-
-      #edit-modal>div[class*="glass-panel-elevated"] {
-        max-width: 100% !important;
-        border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-        max-height: 85vh;
-        transform: scale(1) translateY(100%);
-      }
-
-      #edit-modal:not(.hidden)>div[class*="glass-panel-elevated"] {
-        transform: scale(1) translateY(0);
-      }
-
-      #edit-modal .flex.items-center.gap-1\.5 {
-        overflow-x: auto;
-        flex-wrap: nowrap;
-        padding-bottom: 0.5rem;
-        -webkit-overflow-scrolling: touch;
-      }
-
-      #edit-modal .flex.items-center.gap-1\.5::-webkit-scrollbar {
+      .no-scrollbar::-webkit-scrollbar {
         display: none;
       }
 
-      #edit-modal .flex.items-center.gap-1\.5 button {
-        flex-shrink: 0;
-        min-width: 80px;
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
       }
-    }
 
-    /* ═══════════════════════════════════════════════
+      /* ═══════════════════════════════════════════════
+       Ambient Background
+       ═══════════════════════════════════════════════ */
+      .atmosphere-base {
+        position: fixed;
+        inset: 0;
+        z-index: -2;
+        background:
+          radial-gradient(ellipse at 15% 15%, rgba(99, 102, 241, 0.08) 0%, transparent 55%),
+          radial-gradient(ellipse at 85% 85%, rgba(139, 92, 246, 0.06) 0%, transparent 55%),
+          radial-gradient(ellipse at 50% 50%, rgba(16, 185, 129, 0.04) 0%, transparent 60%),
+          radial-gradient(ellipse at 70% 20%, rgba(236, 72, 153, 0.04) 0%, transparent 50%), #030305;
+      }
+
+      /* ═══════════════════════════════════════════════
+       Particle Layer (CSS-only, GPU-friendly)
+       ═══════════════════════════════════════════════ */
+      .particle-field {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        overflow: hidden;
+        pointer-events: none;
+      }
+
+      .particle-field::before,
+      .particle-field::after {
+        content: '';
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.35);
+        border-radius: 50%;
+        box-shadow:
+          8vw 15vh 0 rgba(255, 255, 255, 0.2),
+          25vw 35vh 0 rgba(255, 255, 255, 0.15),
+          45vw 8vh 0 rgba(255, 255, 255, 0.25),
+          65vw 55vh 0 rgba(255, 255, 255, 0.1),
+          85vw 25vh 0 rgba(255, 255, 255, 0.2),
+          12vw 75vh 0 rgba(255, 255, 255, 0.15),
+          38vw 88vh 0 rgba(255, 255, 255, 0.1),
+          58vw 18vh 0 rgba(255, 255, 255, 0.2),
+          78vw 65vh 0 rgba(255, 255, 255, 0.15),
+          92vw 45vh 0 rgba(255, 255, 255, 0.1),
+          5vw 55vh 0 rgba(255, 255, 255, 0.12),
+          35vw 5vh 0 rgba(255, 255, 255, 0.18),
+          55vw 95vh 0 rgba(255, 255, 255, 0.08),
+          75vw 40vh 0 rgba(255, 255, 255, 0.22);
+        animation: particleFloat 22s ease-in-out infinite;
+      }
+
+      .particle-field::after {
+        animation-delay: -11s;
+        animation-duration: 28s;
+        opacity: 0.5;
+        transform: scale(0.7);
+      }
+
+      @keyframes particleFloat {
+        0%,
+        100% {
+          transform: translateY(0) translateX(0);
+        }
+
+        20% {
+          transform: translateY(-25px) translateX(12px);
+        }
+
+        40% {
+          transform: translateY(12px) translateX(-18px);
+        }
+
+        60% {
+          transform: translateY(-18px) translateX(8px);
+        }
+
+        80% {
+          transform: translateY(8px) translateX(22px);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .particle-field::before,
+        .particle-field::after {
+          animation: none;
+        }
+
+        .page-fade-in {
+          animation: none;
+        }
+      }
+
+      /* ═══════════════════════════════════════════════
+       Page Entrance
+       ═══════════════════════════════════════════════ */
+      .page-fade-in {
+        animation: pageFadeIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      }
+
+      @keyframes pageFadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* ═══════════════════════════════════════════════
+       Layout Grid & Resize Handles
+       ═══════════════════════════════════════════════ */
+      .profile-main-layout {
+        position: relative;
+        flex: 1;
+        overflow: hidden;
+      }
+
+      /* Desktop: 3-column grid with resize handles */
+      @media (min-width: 1200px) {
+        .profile-main-layout {
+          display: grid;
+          grid-template-columns: var(--left-panel-width) 4px minmax(0, 1fr) 4px var(
+              --right-panel-width
+            );
+          height: 100vh;
+          overflow: hidden;
+        }
+
+        .pillar-left,
+        #column-chronicles,
+        #column-insights {
+          height: 100vh;
+          overflow-y: auto;
+        }
+
+        body {
+          overflow: hidden;
+          height: 100vh;
+        }
+      }
+
+      /* Tablet: stacked vertical, natural scroll */
+      @media (max-width: 1199px) {
+        .profile-main-layout {
+          display: flex;
+          flex-direction: column;
+          overflow-y: auto;
+          height: auto;
+          min-height: 100vh;
+        }
+
+        .pillar-left,
+        #column-chronicles,
+        #column-insights {
+          height: auto;
+          overflow-y: visible;
+          width: 100% !important;
+        }
+
+        body {
+          overflow-x: hidden;
+          overflow-y: auto;
+          height: auto;
+        }
+      }
+
+      /* Resize Handles — Desktop only */
+      .resize-handle {
+        display: none;
+      }
+
+      @media (min-width: 1200px) {
+        .resize-handle {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 4px;
+          background: rgba(255, 255, 255, 0.02);
+          cursor: col-resize;
+          position: relative;
+          z-index: 50;
+          transition: background var(--transition-fast);
+          touch-action: none;
+        }
+
+        .resize-handle:hover,
+        .resize-handle:focus-visible,
+        body.resizing .resize-handle {
+          background: rgba(99, 102, 241, 0.4);
+        }
+
+        .resize-handle::after {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 2px;
+          height: 32px;
+          background: rgba(255, 255, 255, 0.06);
+          border-radius: 1px;
+          transition: all var(--transition-fast);
+        }
+
+        .resize-handle:hover::after,
+        .resize-handle:focus-visible::after,
+        body.resizing .resize-handle::after {
+          background: rgba(255, 255, 255, 0.25);
+          height: 48px;
+        }
+      }
+
+      /* ═══════════════════════════════════════════════
+       Glass Panels
+       ═══════════════════════════════════════════════ */
+      .glass-panel {
+        background: var(--bg-glass);
+        border: 1px solid var(--border-glass);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: var(--radius-lg);
+      }
+
+      .glass-panel-elevated {
+        background: var(--bg-glass-strong);
+        border: 1px solid var(--border-glass);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border-radius: var(--radius-xl);
+      }
+
+      /* ═══════════════════════════════════════════════
+       Identity Card
+       ═══════════════════════════════════════════════ */
+      .identity-card {
+        background: var(--bg-glass);
+        border: 1px solid var(--border-glass);
+        border-radius: var(--radius-xl);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition:
+          transform var(--transition-normal),
+          box-shadow var(--transition-normal);
+      }
+
+      .identity-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+      }
+
+      .avatar-container {
+        position: relative;
+        transition: transform var(--transition-normal);
+        aspect-ratio: 1 / 1;
+      }
+
+      .avatar-container:hover {
+        transform: scale(1.03);
+      }
+
+      .mythic-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.375rem 0.875rem;
+        background: rgba(99, 102, 241, 0.1);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        border-radius: 9999px;
+        color: rgba(165, 180, 252, 1);
+        font-size: 0.625rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        transition: all var(--transition-normal);
+      }
+
+      .mythic-badge:hover {
+        background: rgba(99, 102, 241, 0.2);
+        border-color: rgba(99, 102, 241, 0.4);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.15);
+      }
+
+      /* ═══════════════════════════════════════════════
+       Stat Cards
+       ═══════════════════════════════════════════════ */
+      .stat-card-mythic {
+        background: var(--bg-glass);
+        border: 1px solid var(--border-glass);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        transition:
+          transform var(--transition-normal),
+          box-shadow var(--transition-normal);
+      }
+
+      .stat-card-mythic:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
+      }
+
+      /* ═══════════════════════════════════════════════
+       Section Headers & Dividers
+       ═══════════════════════════════════════════════ */
+      .rune-divider {
+        width: 3rem;
+        height: 2px;
+        background: linear-gradient(90deg, rgba(99, 102, 241, 0.6), transparent);
+        margin-top: var(--spacing-sm);
+        border-radius: 1px;
+        transition: width var(--transition-slow);
+      }
+
+      .section-header:hover .rune-divider {
+        width: 4.5rem;
+      }
+
+      .sacred-divider {
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+      }
+
+      /* ═══════════════════════════════════════════════
+       Tabs — Contributions
+       ═══════════════════════════════════════════════ */
+      .tab-nav {
+        display: inline-flex;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: var(--radius-md);
+        padding: 0.25rem;
+        gap: 0.25rem;
+        flex-wrap: wrap;
+      }
+
+      .tab-trigger {
+        position: relative;
+        padding: 0.5rem 1.25rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        transition: all var(--transition-normal);
+        border: 1px solid transparent;
+        background: transparent;
+        color: rgba(148, 163, 184, 0.7);
+        cursor: pointer;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .tab-trigger:hover {
+        background: rgba(255, 255, 255, 0.04);
+        color: rgba(226, 232, 240, 1);
+      }
+
+      .tab-trigger--active {
+        background: rgba(99, 102, 241, 0.15);
+        color: rgba(165, 180, 252, 1);
+        border-color: rgba(99, 102, 241, 0.25);
+      }
+
+      .tab-trigger--active:hover {
+        background: rgba(99, 102, 241, 0.2);
+      }
+
+      /* ═══════════════════════════════════════════════
+       Tabs — Modal
+       ═══════════════════════════════════════════════ */
+      .tab-btn--active {
+        background: rgba(99, 102, 241, 0.15);
+        color: rgba(165, 180, 252, 1);
+        border-color: rgba(99, 102, 241, 0.3);
+      }
+
+      .tab-btn--inactive {
+        background: transparent;
+        color: rgba(148, 163, 184, 0.7);
+        border-color: rgba(255, 255, 255, 0.06);
+      }
+
+      .tab-btn--inactive:hover {
+        background: rgba(255, 255, 255, 0.04);
+        color: rgba(226, 232, 240, 1);
+        border-color: rgba(255, 255, 255, 0.12);
+      }
+
+      /* ═══════════════════════════════════════════════
+       Buttons
+       ═══════════════════════════════════════════════ */
+      .btn-primary {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.9), rgba(139, 92, 246, 0.9));
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        color: white;
+        transition: all var(--transition-normal);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .btn-primary::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+        opacity: 0;
+        transition: opacity var(--transition-normal);
+      }
+
+      .btn-primary:hover {
+        transform: scale(1.02);
+        box-shadow: 0 4px 24px rgba(99, 102, 241, 0.3);
+      }
+
+      .btn-primary:hover::before {
+        opacity: 1;
+      }
+
+      .btn-primary:active {
+        transform: scale(0.98);
+      }
+
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        transition: all var(--transition-normal);
+      }
+
+      .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.08);
+        transform: scale(1.02);
+        box-shadow: 0 4px 16px rgba(255, 255, 255, 0.05);
+      }
+
+      .btn-ghost {
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: rgba(203, 213, 225, 1);
+        transition: all var(--transition-normal);
+      }
+
+      .btn-ghost:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.15);
+        color: white;
+        transform: scale(1.02);
+      }
+
+      /* ═══════════════════════════════════════════════
+       Inputs
+       ═══════════════════════════════════════════════ */
+      .input-mythic {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: white;
+        transition: all var(--transition-normal);
+        outline: none;
+      }
+
+      .input-mythic::placeholder {
+        color: rgba(148, 163, 184, 0.45);
+      }
+
+      .input-mythic:focus {
+        border-color: rgba(99, 102, 241, 0.5);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      /* ═══════════════════════════════════════════════
+       Reading Goal Bar
+       ═══════════════════════════════════════════════ */
+      #reading-goal-bar {
+        width: calc(var(--progress, 0) * 100%);
+        transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+        will-change: width;
+      }
+
+      /* ═══════════════════════════════════════════════
+       Genre Chips
+       ═══════════════════════════════════════════════ */
+      #genre-selector button,
+      #genre-selector .genre-chip {
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-md);
+        font-size: 0.75rem;
+        font-weight: 600;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.03);
+        color: rgba(148, 163, 184, 1);
+        transition: all var(--transition-normal);
+        cursor: pointer;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+      }
+
+      #genre-selector button:hover,
+      #genre-selector .genre-chip:hover {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(255, 255, 255, 0.15);
+        transform: translateY(-1px);
+      }
+
+      #genre-selector button.active,
+      #genre-selector .genre-chip.active {
+        background: rgba(99, 102, 241, 0.18);
+        border-color: rgba(99, 102, 241, 0.4);
+        color: rgba(165, 180, 252, 1);
+        box-shadow: 0 0 16px rgba(99, 102, 241, 0.15);
+        transform: translateY(-1px);
+      }
+
+      /* ═══════════════════════════════════════════════
+       Modal System
+       ═══════════════════════════════════════════════ */
+      #edit-modal {
+        transition:
+          opacity var(--transition-normal),
+          visibility var(--transition-normal);
+        overscroll-behavior: contain;
+      }
+
+      #edit-modal.hidden {
+        display: flex !important;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      #edit-modal:not(.hidden) {
+        display: flex;
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+      }
+
+      #edit-modal > div[class*='glass-panel-elevated'] {
+        transition: transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+        transform: scale(0.95) translateY(20px);
+        max-width: 480px;
+        width: 100%;
+      }
+
+      #edit-modal:not(.hidden) > div[class*='glass-panel-elevated'] {
+        transform: scale(1) translateY(0);
+      }
+
+      /* Mobile Modal: Bottom Sheet */
+      @media (max-width: 767px) {
+        #edit-modal {
+          align-items: flex-end !important;
+          padding: 0 !important;
+        }
+
+        #edit-modal > div[class*='glass-panel-elevated'] {
+          max-width: 100% !important;
+          border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+          max-height: 85vh;
+          transform: scale(1) translateY(100%);
+        }
+
+        #edit-modal:not(.hidden) > div[class*='glass-panel-elevated'] {
+          transform: scale(1) translateY(0);
+        }
+
+        #edit-modal .flex.items-center.gap-1\.5 {
+          overflow-x: auto;
+          flex-wrap: nowrap;
+          padding-bottom: 0.5rem;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        #edit-modal .flex.items-center.gap-1\.5::-webkit-scrollbar {
+          display: none;
+        }
+
+        #edit-modal .flex.items-center.gap-1\.5 button {
+          flex-shrink: 0;
+          min-width: 80px;
+        }
+      }
+
+      /* ═══════════════════════════════════════════════
        Focus & Accessibility
        ═══════════════════════════════════════════════ */
-    *:focus-visible {
-      outline: 2px solid rgba(99, 102, 241, 0.5);
-      outline-offset: 2px;
-    }
+      *:focus-visible {
+        outline: 2px solid rgba(99, 102, 241, 0.5);
+        outline-offset: 2px;
+      }
 
-    button:focus-visible,
-    a:focus-visible,
-    [tabindex]:not([tabindex="-1"]):focus-visible {
-      outline: 2px solid rgba(99, 102, 241, 0.6);
-      outline-offset: 3px;
-    }
+      button:focus-visible,
+      a:focus-visible,
+      [tabindex]:not([tabindex='-1']):focus-visible {
+        outline: 2px solid rgba(99, 102, 241, 0.6);
+        outline-offset: 3px;
+      }
 
-    .resize-handle:focus-visible {
-      outline: 2px solid rgba(99, 102, 241, 0.8);
-      outline-offset: -2px;
-    }
+      .resize-handle:focus-visible {
+        outline: 2px solid rgba(99, 102, 241, 0.8);
+        outline-offset: -2px;
+      }
 
-    /* ═══════════════════════════════════════════════
+      /* ═══════════════════════════════════════════════
        Hover Enhancements
        ═══════════════════════════════════════════════ */
-    #contributions-grid>*:not(#btn-new-story),
-    #drafts-grid>* {
-      transition: transform var(--transition-normal), box-shadow var(--transition-normal);
-    }
-
-    #contributions-grid>*:not(#btn-new-story):hover,
-    #drafts-grid>*:hover {
-      transform: translateY(-2px);
-    }
-
-    #btn-new-story {
-      transition: all var(--transition-normal);
-    }
-
-    #btn-new-story:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 40px rgba(99, 102, 241, 0.12);
-    }
-
-    [data-social-wrap] a {
-      transition: all var(--transition-normal);
-      min-width: 44px;
-      min-height: 44px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    [data-social-wrap] a:hover {
-      transform: scale(1.1) rotate(-4deg);
-      box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
-    }
-
-    .pillar-left a[href],
-    #btn-sign-out {
-      transition: all var(--transition-normal);
-      min-height: 44px;
-    }
-
-    .pillar-left a[href]:hover,
-    #btn-sign-out:hover {
-      transform: translateX(3px);
-    }
-
-    /* ═══════════════════════════════════════════════
-       Performance
-       ═══════════════════════════════════════════════ */
-    .identity-card,
-    .stat-card-mythic,
-    .glass-panel,
-    .glass-panel-elevated,
-    #btn-new-story,
-    #contributions-grid>*,
-    #drafts-grid>*,
-    .avatar-container {
-      will-change: transform;
-    }
-
-    /* ═══════════════════════════════════════════════
-       Continue Reading Horizontal Scroll
-       ═══════════════════════════════════════════════ */
-    #continue-reading-list {
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      padding-left: var(--spacing-md);
-      padding-right: var(--spacing-md);
-    }
-
-    #continue-reading-list>* {
-      scroll-snap-align: start;
-      flex-shrink: 0;
-    }
-
-    /* ═══════════════════════════════════════════════
-       RESPONSIVE OVERRIDES
-       ═══════════════════════════════════════════════ */
-
-    /* ── Tablet (768px - 1199px) ── */
-    @media (max-width: 1199px) and (min-width: 768px) {
-      .pillar-left .p-6 {
-        padding: var(--spacing-lg);
+      #contributions-grid > *:not(#btn-new-story),
+      #drafts-grid > * {
+        transition:
+          transform var(--transition-normal),
+          box-shadow var(--transition-normal);
       }
 
-      #column-chronicles .p-8 {
-        padding: var(--spacing-xl);
+      #contributions-grid > *:not(#btn-new-story):hover,
+      #drafts-grid > *:hover {
+        transform: translateY(-2px);
       }
 
-      #column-insights .p-8 {
-        padding: var(--spacing-lg);
+      #btn-new-story {
+        transition: all var(--transition-normal);
       }
 
-      .identity-card {
-        padding: var(--spacing-xl);
+      #btn-new-story:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(99, 102, 241, 0.12);
       }
 
-      .avatar-container {
-        width: 120px;
-        height: 120px;
+      [data-social-wrap] a {
+        transition: all var(--transition-normal);
+        min-width: 44px;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
       }
 
-      #desktop-display-name {
-        font-size: 1.75rem;
+      [data-social-wrap] a:hover {
+        transform: scale(1.1) rotate(-4deg);
+        box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
       }
 
-      #contributions-grid,
-      #drafts-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    /* ── Mobile (320px - 767px) ── */
-    @media (max-width: 767px) {
-      .profile-main-layout {
-        display: flex;
-        flex-direction: column;
-      }
-
-      /* Reset desktop sizing classes */
-      .h-screen {
-        height: auto !important;
-        min-height: 100vh;
-      }
-
-      .overflow-hidden {
-        overflow-x: hidden !important;
-        overflow-y: visible !important;
-      }
-
-      /* Padding reduction */
-      .pillar-left .p-6,
-      .pillar-left .lg\:p-8 {
-        padding: var(--spacing-md) !important;
-      }
-
-      #column-chronicles .p-8,
-      #column-chronicles .md\:p-12,
-      #column-chronicles .xl\:p-14 {
-        padding: var(--spacing-md) !important;
-      }
-
-      #column-insights .p-8 {
-        padding: var(--spacing-md) !important;
-      }
-
-      /* Identity card mobile */
-      .identity-card {
-        padding: var(--spacing-lg) !important;
-        border-radius: var(--radius-lg);
-      }
-
-      .avatar-container {
-        width: 96px !important;
-        height: 96px !important;
-      }
-
-      /* Typography scaling */
-      #desktop-display-name {
-        font-size: 1.5rem !important;
-        line-height: 1.2;
-      }
-
-      .section-header h2 {
-        font-size: 1.5rem !important;
-      }
-
-      #desktop-display-bio {
-        font-size: 0.875rem;
-      }
-
-      /* Metadata wrap */
-      #profile-location,
-      #profile-joined {
-        font-size: 0.625rem;
-      }
-
-      /* Buttons full width on mobile */
-      #btn-edit-desktop {
-        width: 100%;
-        min-height: 48px;
-      }
-
-      /* Navigation links touch targets */
       .pillar-left a[href],
       #btn-sign-out {
-        padding: var(--spacing-md);
-        min-height: 56px;
+        transition: all var(--transition-normal);
+        min-height: 44px;
       }
 
-      /* Stats grid: 2 columns on small mobile, 1 on very small */
-      .stat-card-mythic {
-        padding: var(--spacing-md);
+      .pillar-left a[href]:hover,
+      #btn-sign-out:hover {
+        transform: translateX(3px);
       }
 
-      /* Quick stats row */
-      #column-insights .grid-cols-3 {
-        grid-template-columns: repeat(3, 1fr);
-        gap: var(--spacing-sm);
+      /* ═══════════════════════════════════════════════
+       Performance
+       ═══════════════════════════════════════════════ */
+      .identity-card,
+      .stat-card-mythic,
+      .glass-panel,
+      .glass-panel-elevated,
+      #btn-new-story,
+      #contributions-grid > *,
+      #drafts-grid > *,
+      .avatar-container {
+        will-change: transform;
       }
 
-      #column-insights .grid-cols-3 .text-xl {
-        font-size: 1.125rem;
-      }
-
-      /* Reading goal card */
-      #column-insights .rounded-4xl {
-        border-radius: var(--radius-lg);
-      }
-
-      /* Contributions grid single column */
-      #contributions-grid,
-      #drafts-grid {
-        grid-template-columns: 1fr !important;
-        gap: var(--spacing-md);
-      }
-
-      /* New story button min height for touch */
-      #btn-new-story {
-        min-height: 200px;
-      }
-
-      /* Continue reading horizontal padding */
+      /* ═══════════════════════════════════════════════
+       Continue Reading Horizontal Scroll
+       ═══════════════════════════════════════════════ */
       #continue-reading-list {
-        margin-left: calc(var(--spacing-md) * -1);
-        margin-right: calc(var(--spacing-md) * -1);
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
         padding-left: var(--spacing-md);
         padding-right: var(--spacing-md);
       }
 
-      /* Modal form padding */
-      #profile-form .p-6 {
-        padding: var(--spacing-md) !important;
+      #continue-reading-list > * {
+        scroll-snap-align: start;
+        flex-shrink: 0;
       }
 
-      /* Modal action buttons stack */
-      #profile-form .flex.gap-3 {
-        flex-direction: column;
-        gap: var(--spacing-sm);
+      /* ═══════════════════════════════════════════════
+       RESPONSIVE OVERRIDES
+       ═══════════════════════════════════════════════ */
+
+      /* ── Tablet (768px - 1199px) ── */
+      @media (max-width: 1199px) and (min-width: 768px) {
+        .pillar-left .p-6 {
+          padding: var(--spacing-lg);
+        }
+
+        #column-chronicles .p-8 {
+          padding: var(--spacing-xl);
+        }
+
+        #column-insights .p-8 {
+          padding: var(--spacing-lg);
+        }
+
+        .identity-card {
+          padding: var(--spacing-xl);
+        }
+
+        .avatar-container {
+          width: 120px;
+          height: 120px;
+        }
+
+        #desktop-display-name {
+          font-size: 1.75rem;
+        }
+
+        #contributions-grid,
+        #drafts-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
       }
 
-      /* Genre selector mobile */
-      #genre-selector {
-        gap: var(--spacing-sm);
+      /* ── Mobile (320px - 767px) ── */
+      @media (max-width: 767px) {
+        .profile-main-layout {
+          display: flex;
+          flex-direction: column;
+        }
+
+        /* Reset desktop sizing classes */
+        .h-screen {
+          height: auto !important;
+          min-height: 100vh;
+        }
+
+        .overflow-hidden {
+          overflow-x: hidden !important;
+          overflow-y: visible !important;
+        }
+
+        /* Padding reduction */
+        .pillar-left .p-6,
+        .pillar-left .lg\:p-8 {
+          padding: var(--spacing-md) !important;
+        }
+
+        #column-chronicles .p-8,
+        #column-chronicles .md\:p-12,
+        #column-chronicles .xl\:p-14 {
+          padding: var(--spacing-md) !important;
+        }
+
+        #column-insights .p-8 {
+          padding: var(--spacing-md) !important;
+        }
+
+        /* Identity card mobile */
+        .identity-card {
+          padding: var(--spacing-lg) !important;
+          border-radius: var(--radius-lg);
+        }
+
+        .avatar-container {
+          width: 96px !important;
+          height: 96px !important;
+        }
+
+        /* Typography scaling */
+        #desktop-display-name {
+          font-size: 1.5rem !important;
+          line-height: 1.2;
+        }
+
+        .section-header h2 {
+          font-size: 1.5rem !important;
+        }
+
+        #desktop-display-bio {
+          font-size: 0.875rem;
+        }
+
+        /* Metadata wrap */
+        #profile-location,
+        #profile-joined {
+          font-size: 0.625rem;
+        }
+
+        /* Buttons full width on mobile */
+        #btn-edit-desktop {
+          width: 100%;
+          min-height: 48px;
+        }
+
+        /* Navigation links touch targets */
+        .pillar-left a[href],
+        #btn-sign-out {
+          padding: var(--spacing-md);
+          min-height: 56px;
+        }
+
+        /* Stats grid: 2 columns on small mobile, 1 on very small */
+        .stat-card-mythic {
+          padding: var(--spacing-md);
+        }
+
+        /* Quick stats row */
+        #column-insights .grid-cols-3 {
+          grid-template-columns: repeat(3, 1fr);
+          gap: var(--spacing-sm);
+        }
+
+        #column-insights .grid-cols-3 .text-xl {
+          font-size: 1.125rem;
+        }
+
+        /* Reading goal card */
+        #column-insights .rounded-4xl {
+          border-radius: var(--radius-lg);
+        }
+
+        /* Contributions grid single column */
+        #contributions-grid,
+        #drafts-grid {
+          grid-template-columns: 1fr !important;
+          gap: var(--spacing-md);
+        }
+
+        /* New story button min height for touch */
+        #btn-new-story {
+          min-height: 200px;
+        }
+
+        /* Continue reading horizontal padding */
+        #continue-reading-list {
+          margin-left: calc(var(--spacing-md) * -1);
+          margin-right: calc(var(--spacing-md) * -1);
+          padding-left: var(--spacing-md);
+          padding-right: var(--spacing-md);
+        }
+
+        /* Modal form padding */
+        #profile-form .p-6 {
+          padding: var(--spacing-md) !important;
+        }
+
+        /* Modal action buttons stack */
+        #profile-form .flex.gap-3 {
+          flex-direction: column;
+          gap: var(--spacing-sm);
+        }
+
+        /* Genre selector mobile */
+        #genre-selector {
+          gap: var(--spacing-sm);
+        }
+
+        #genre-selector button,
+        #genre-selector .genre-chip {
+          font-size: 0.8125rem;
+          padding: 0.5rem 0.75rem;
+        }
+
+        /* Tab nav in contributions */
+        .tab-nav {
+          width: 100%;
+          min-width: unset;
+        }
+
+        .tab-nav .tab-trigger {
+          flex: 1;
+          text-align: center;
+          font-size: 0.6875rem;
+          padding: 0.5rem;
+        }
+
+        /* Section spacing reduction */
+        .mb-20 {
+          margin-bottom: 3rem !important;
+        }
+
+        /* Social icons row */
+        [data-social-wrap] a {
+          width: 48px;
+          height: 48px;
+        }
+
+        /* Ensure no horizontal overflow */
+        body,
+        html {
+          overflow-x: hidden;
+          max-width: 100vw;
+        }
+
+        /* Toast container mobile positioning */
+        #toast-container {
+          left: var(--spacing-md);
+          right: var(--spacing-md);
+          max-width: none;
+          top: var(--spacing-md);
+        }
+
+        /* Reading goal text sizes */
+        #reading-goal-target,
+        #column-insights .text-\[9px\] {
+          font-size: 0.625rem;
+        }
       }
 
-      #genre-selector button,
-      #genre-selector .genre-chip {
-        font-size: 0.8125rem;
-        padding: 0.5rem 0.75rem;
+      /* ── Very small mobile (320px - 374px) ── */
+      @media (max-width: 374px) {
+        #desktop-display-name {
+          font-size: 1.25rem !important;
+        }
+
+        .section-header h2 {
+          font-size: 1.25rem !important;
+        }
+
+        .avatar-container {
+          width: 80px !important;
+          height: 80px !important;
+        }
+
+        .identity-card {
+          padding: var(--spacing-md) !important;
+        }
+
+        .mythic-badge {
+          font-size: 0.5625rem;
+        }
+
+        #profile-pronouns {
+          font-size: 0.5625rem !important;
+        }
+
+        .stat-card-mythic .text-2xl {
+          font-size: 1.25rem;
+        }
+
+        #column-insights .grid-cols-3 .text-xl {
+          font-size: 1rem;
+        }
       }
+    </style>
+  </head>
 
-      /* Tab nav in contributions */
-      .tab-nav {
-        width: 100%;
-        min-width: unset;
-      }
+  <body
+    class="antialiased selection:bg-indigo-500/30 page-fade-in flex flex-col h-screen overflow-hidden"
+  >
+    <!-- Atmosphere -->
+    <div class="atmosphere-base"></div>
+    <div class="particle-field"></div>
 
-      .tab-nav .tab-trigger {
-        flex: 1;
-        text-align: center;
-        font-size: 0.6875rem;
-        padding: 0.5rem;
-      }
+    <!-- Toast container -->
+    <div
+      id="toast-container"
+      class="fixed top-6 right-6 z-200 flex flex-col gap-3 pointer-events-none max-w-sm w-full"
+    ></div>
 
-      /* Section spacing reduction */
-      .mb-20 {
-        margin-bottom: 3rem !important;
-      }
-
-      /* Social icons row */
-      [data-social-wrap] a {
-        width: 48px;
-        height: 48px;
-      }
-
-      /* Ensure no horizontal overflow */
-      body,
-      html {
-        overflow-x: hidden;
-        max-width: 100vw;
-      }
-
-      /* Toast container mobile positioning */
-      #toast-container {
-        left: var(--spacing-md);
-        right: var(--spacing-md);
-        max-width: none;
-        top: var(--spacing-md);
-      }
-
-      /* Reading goal text sizes */
-      #reading-goal-target,
-      #column-insights .text-\[9px\] {
-        font-size: 0.625rem;
-      }
-    }
-
-    /* ── Very small mobile (320px - 374px) ── */
-    @media (max-width: 374px) {
-      #desktop-display-name {
-        font-size: 1.25rem !important;
-      }
-
-      .section-header h2 {
-        font-size: 1.25rem !important;
-      }
-
-      .avatar-container {
-        width: 80px !important;
-        height: 80px !important;
-      }
-
-      .identity-card {
-        padding: var(--spacing-md) !important;
-      }
-
-      .mythic-badge {
-        font-size: 0.5625rem;
-      }
-
-      #profile-pronouns {
-        font-size: 0.5625rem !important;
-      }
-
-      .stat-card-mythic .text-2xl {
-        font-size: 1.25rem;
-      }
-
-      #column-insights .grid-cols-3 .text-xl {
-        font-size: 1rem;
-      }
-    }
-  </style>
-</head>
-
-<body class="antialiased selection:bg-indigo-500/30 page-fade-in flex flex-col h-screen overflow-hidden">
-  <!-- Atmosphere -->
-  <div class="atmosphere-base"></div>
-  <div class="particle-field"></div>
-
-  <!-- Toast container -->
-  <div id="toast-container" class="fixed top-6 right-6 z-200 flex flex-col gap-3 pointer-events-none max-w-sm w-full">
-  </div>
-
-  <main class="profile-main-layout">
-    <!-- ══════════════════════════════════════════════
+    <main class="profile-main-layout">
+      <!-- ══════════════════════════════════════════════
            LEFT PANEL: Identity Pillar
            ══════════════════════════════════════════════ -->
-    <aside id="column-identity" class="pillar-left scroll-container no-scrollbar">
-      <div class="p-6 lg:p-8 space-y-8">
-        <!-- Identity card -->
-        <div class="identity-card p-8 relative">
-          <div class="flex flex-col items-center text-center relative z-10">
-            <!-- Avatar -->
-            <div class="avatar-container w-28 h-28 mb-6">
+      <aside id="column-identity" class="pillar-left scroll-container no-scrollbar">
+        <div class="p-6 lg:p-8 space-y-8">
+          <!-- Identity card -->
+          <div class="identity-card p-8 relative">
+            <div class="flex flex-col items-center text-center relative z-10">
+              <!-- Avatar -->
+              <div class="avatar-container w-28 h-28 mb-6">
+                <div
+                  class="relative z-10 w-full h-full bg-zinc-900 rounded-4xl flex items-center justify-center overflow-hidden border border-white/10"
+                >
+                  <i data-lucide="user" class="w-12 h-12 text-slate-700 avatar-placeholder"></i>
+                  <img
+                    id="profile-avatar-desktop"
+                    src=""
+                    alt="Avatar"
+                    class="avatar-img w-full h-full object-cover hidden"
+                  />
+                </div>
+                <!-- Online indicator -->
+                <div
+                  class="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-4 border-[#030305] rounded-full shadow-[0_0_15px_rgba(16,185,129,0.4)] z-20"
+                ></div>
+              </div>
+
+              <!-- Rank badge -->
+              <div class="mythic-badge">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                Explorer
+              </div>
+
+              <!-- Name & Bio -->
+              <div class="mt-6">
+                <h1
+                  id="desktop-display-name"
+                  class="text-2xl xl:text-3xl font-cinzel font-bold text-white tracking-wide"
+                >
+                  User_Name
+                </h1>
+                <p
+                  id="profile-pronouns"
+                  class="text-[10px] text-indigo-400 font-bold uppercase tracking-[0.2em] mt-1.5"
+                ></p>
+                <p
+                  id="desktop-display-bio"
+                  class="mt-4 text-slate-400 text-sm leading-relaxed font-medium"
+                >
+                  Whispering stories to the stars…
+                </p>
+              </div>
+
+              <!-- Metadata -->
               <div
-                class="relative z-10 w-full h-full bg-zinc-900 rounded-4xl flex items-center justify-center overflow-hidden border border-white/10">
-                <i data-lucide="user" class="w-12 h-12 text-slate-700 avatar-placeholder"></i>
-                <img id="profile-avatar-desktop" src="" alt="Avatar"
-                  class="avatar-img w-full h-full object-cover hidden" />
+                class="mt-6 flex flex-wrap items-center justify-center gap-4 text-[10px] text-slate-500 font-bold uppercase tracking-wider"
+              >
+                <span id="profile-location" class="flex items-center gap-1.5"></span>
+                <span id="profile-joined" class="flex items-center gap-1.5"></span>
               </div>
-              <!-- Online indicator -->
-              <div
-                class="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-4 border-[#030305] rounded-full shadow-[0_0_15px_rgba(16,185,129,0.4)] z-20">
+
+              <!-- Genres -->
+              <div id="profile-genres" class="mt-6 flex flex-wrap justify-center gap-2">
+                <span class="text-xs text-slate-600 italic">No genres set</span>
               </div>
-            </div>
 
-            <!-- Rank badge -->
-            <div class="mythic-badge">
-              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-              Explorer
-            </div>
-
-            <!-- Name & Bio -->
-            <div class="mt-6">
-              <h1 id="desktop-display-name" class="text-2xl xl:text-3xl font-cinzel font-bold text-white tracking-wide">
-                User_Name
-              </h1>
-              <p id="profile-pronouns" class="text-[10px] text-indigo-400 font-bold uppercase tracking-[0.2em] mt-1.5">
-              </p>
-              <p id="desktop-display-bio" class="mt-4 text-slate-400 text-sm leading-relaxed font-medium">
-                Whispering stories to the stars…
-              </p>
-            </div>
-
-            <!-- Metadata -->
-            <div
-              class="mt-6 flex flex-wrap items-center justify-center gap-4 text-[10px] text-slate-500 font-bold uppercase tracking-wider">
-              <span id="profile-location" class="flex items-center gap-1.5"></span>
-              <span id="profile-joined" class="flex items-center gap-1.5"></span>
-            </div>
-
-            <!-- Genres -->
-            <div id="profile-genres" class="mt-6 flex flex-wrap justify-center gap-2">
-              <span class="text-xs text-slate-600 italic">No genres set</span>
-            </div>
-
-            <!-- Socials -->
-            <div class="mt-8 flex items-center gap-4">
-              <div data-social-wrap class="hidden">
-                <a id="social-link-twitter" href="#" target="_blank" rel="noopener"
-                  class="w-10 h-10 rounded-2xl bg-white/3 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/8 hover:border-white/20 transition-all">
-                  <i data-lucide="badge-x" class="w-4 h-4"></i>
-                </a>
+              <!-- Socials -->
+              <div class="mt-8 flex items-center gap-4">
+                <div data-social-wrap class="hidden">
+                  <a
+                    id="social-link-twitter"
+                    href="#"
+                    target="_blank"
+                    rel="noopener"
+                    class="w-10 h-10 rounded-2xl bg-white/3 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/8 hover:border-white/20 transition-all"
+                  >
+                    <i data-lucide="badge-x" class="w-4 h-4"></i>
+                  </a>
+                </div>
+                <div data-social-wrap class="hidden">
+                  <a
+                    id="social-link-instagram"
+                    href="#"
+                    target="_blank"
+                    rel="noopener"
+                    class="w-10 h-10 rounded-2xl bg-white/3 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/8 hover:border-white/20 transition-all"
+                  >
+                    <i data-lucide="instagram" class="w-4 h-4"></i>
+                  </a>
+                </div>
+                <div data-social-wrap class="hidden">
+                  <a
+                    id="social-link-website"
+                    href="#"
+                    target="_blank"
+                    rel="noopener"
+                    class="w-10 h-10 rounded-2xl bg-white/3 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/8 hover:border-white/20 transition-all"
+                  >
+                    <i data-lucide="globe" class="w-4 h-4"></i>
+                  </a>
+                </div>
               </div>
-              <div data-social-wrap class="hidden">
-                <a id="social-link-instagram" href="#" target="_blank" rel="noopener"
-                  class="w-10 h-10 rounded-2xl bg-white/3 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/8 hover:border-white/20 transition-all">
-                  <i data-lucide="instagram" class="w-4 h-4"></i>
-                </a>
-              </div>
-              <div data-social-wrap class="hidden">
-                <a id="social-link-website" href="#" target="_blank" rel="noopener"
-                  class="w-10 h-10 rounded-2xl bg-white/3 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/8 hover:border-white/20 transition-all">
-                  <i data-lucide="globe" class="w-4 h-4"></i>
-                </a>
-              </div>
-            </div>
 
-            <!-- Edit Action -->
-            <button id="btn-edit-desktop"
-              class="mt-8 w-full py-4 rounded-[1.25rem] bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[11px] font-black uppercase tracking-[0.25em] hover:bg-indigo-500/20 hover:text-indigo-300 transition-all group btn-secondary">
-              <span class="flex items-center justify-center gap-3">
-                <i data-lucide="settings"
-                  class="w-3.5 h-3.5 group-hover:rotate-90 transition-transform duration-500"></i>
-                Customise Identity
-              </span>
+              <!-- Edit Action -->
+              <button
+                id="btn-edit-desktop"
+                class="mt-8 w-full py-4 rounded-[1.25rem] bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[11px] font-black uppercase tracking-[0.25em] hover:bg-indigo-500/20 hover:text-indigo-300 transition-all group btn-secondary"
+              >
+                <span class="flex items-center justify-center gap-3">
+                  <i
+                    data-lucide="settings"
+                    class="w-3.5 h-3.5 group-hover:rotate-90 transition-transform duration-500"
+                  ></i>
+                  Customise Identity
+                </span>
+              </button>
+
+              <!-- Upgrade Account — visible for anonymous users -->
+              <button
+                type="button"
+                id="btn-upgrade-account"
+                class="hidden items-center justify-between w-full p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/20 hover:bg-indigo-500/10 hover:border-indigo-500/30 transition-all group !mt-6"
+              >
+                <div class="flex items-center gap-4">
+                  <div
+                    class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center group-hover:bg-indigo-500/20 transition-colors"
+                  >
+                    <i data-lucide="shield-check" class="w-4 h-4 text-indigo-400"></i>
+                  </div>
+                  <div class="flex flex-col items-start">
+                    <span class="text-sm font-bold text-indigo-300 group-hover:text-white"
+                      >Secure Account</span
+                    >
+                    <span class="text-[9px] text-indigo-500/70 font-bold uppercase tracking-wider"
+                      >Link to Google</span
+                    >
+                  </div>
+                </div>
+                <i
+                  data-lucide="arrow-right"
+                  class="w-4 h-4 text-indigo-500/50 group-hover:text-white group-hover:translate-x-1 transition-all"
+                ></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Navigation Links -->
+          <div class="space-y-3">
+            <a
+              href="library.html"
+              class="flex items-center justify-between p-4 rounded-2xl bg-white/2 border border-white/5 hover:bg-white/5 hover:border-white/10 transition-all group"
+            >
+              <div class="flex items-center gap-4">
+                <div
+                  class="w-10 h-10 rounded-xl bg-indigo-500/5 flex items-center justify-center group-hover:bg-indigo-500/10 transition-colors"
+                >
+                  <i data-lucide="book-open" class="w-4 h-4 text-indigo-400"></i>
+                </div>
+                <span class="text-sm font-bold text-slate-300 group-hover:text-white"
+                  >Great Library</span
+                >
+              </div>
+              <i
+                data-lucide="chevron-right"
+                class="w-4 h-4 text-slate-600 group-hover:translate-x-1 transition-transform"
+              ></i>
+            </a>
+            <a
+              href="shelf.html"
+              class="flex items-center justify-between p-4 rounded-2xl bg-white/2 border border-white/5 hover:bg-white/5 hover:border-white/10 transition-all group"
+            >
+              <div class="flex items-center gap-4">
+                <div
+                  class="w-10 h-10 rounded-xl bg-violet-500/5 flex items-center justify-center group-hover:bg-violet-500/10 transition-colors"
+                >
+                  <i data-lucide="bookmark" class="w-4 h-4 text-violet-400"></i>
+                </div>
+                <span class="text-sm font-bold text-slate-300 group-hover:text-white"
+                  >Saved Fragments</span
+                >
+              </div>
+              <i
+                data-lucide="chevron-right"
+                class="w-4 h-4 text-slate-600 group-hover:translate-x-1 transition-transform"
+              ></i>
+            </a>
+
+            <!-- Sign Out — desktop identity pillar (TODO #2) -->
+            <button
+              type="button"
+              id="btn-sign-out"
+              class="flex items-center justify-between w-full p-4 rounded-2xl bg-white/2 border border-white/5 hover:bg-red-500/5 hover:border-red-500/20 transition-all group"
+            >
+              <div class="flex items-center gap-4">
+                <div
+                  class="w-10 h-10 rounded-xl bg-red-500/5 flex items-center justify-center group-hover:bg-red-500/10 transition-colors"
+                >
+                  <i
+                    data-lucide="log-out"
+                    class="w-4 h-4 text-red-400/60 group-hover:text-red-400 transition-colors"
+                  ></i>
+                </div>
+                <span
+                  class="text-sm font-bold text-slate-500 group-hover:text-red-400 transition-colors"
+                  >Sign Out</span
+                >
+              </div>
+              <i
+                data-lucide="chevron-right"
+                class="w-4 h-4 text-slate-700 group-hover:text-red-400/60 group-hover:translate-x-1 transition-all"
+              ></i>
             </button>
           </div>
         </div>
+      </aside>
 
-        <!-- Navigation Links -->
-        <div class="space-y-3">
-          <a href="library.html"
-            class="flex items-center justify-between p-4 rounded-2xl bg-white/2 border border-white/5 hover:bg-white/5 hover:border-white/10 transition-all group">
-            <div class="flex items-center gap-4">
-              <div
-                class="w-10 h-10 rounded-xl bg-indigo-500/5 flex items-center justify-center group-hover:bg-indigo-500/10 transition-colors">
-                <i data-lucide="book-open" class="w-4 h-4 text-indigo-400"></i>
-              </div>
-              <span class="text-sm font-bold text-slate-300 group-hover:text-white">Great Library</span>
-            </div>
-            <i data-lucide="chevron-right"
-              class="w-4 h-4 text-slate-600 group-hover:translate-x-1 transition-transform"></i>
-          </a>
-          <a href="shelf.html"
-            class="flex items-center justify-between p-4 rounded-2xl bg-white/2 border border-white/5 hover:bg-white/5 hover:border-white/10 transition-all group">
-            <div class="flex items-center gap-4">
-              <div
-                class="w-10 h-10 rounded-xl bg-violet-500/5 flex items-center justify-center group-hover:bg-violet-500/10 transition-colors">
-                <i data-lucide="bookmark" class="w-4 h-4 text-violet-400"></i>
-              </div>
-              <span class="text-sm font-bold text-slate-300 group-hover:text-white">Saved Fragments</span>
-            </div>
-            <i data-lucide="chevron-right"
-              class="w-4 h-4 text-slate-600 group-hover:translate-x-1 transition-transform"></i>
-          </a>
+      <!-- Left Resize Handle -->
+      <div
+        class="resize-handle resize-handle-left"
+        data-resize="left"
+        role="separator"
+        aria-label="Resize left panel"
+        tabindex="0"
+      ></div>
 
-          <!-- Sign Out — desktop identity pillar (TODO #2) -->
-          <button type="button" id="btn-sign-out"
-            class="flex items-center justify-between w-full p-4 rounded-2xl bg-white/2 border border-white/5 hover:bg-red-500/5 hover:border-red-500/20 transition-all group">
-            <div class="flex items-center gap-4">
-              <div
-                class="w-10 h-10 rounded-xl bg-red-500/5 flex items-center justify-center group-hover:bg-red-500/10 transition-colors">
-                <i data-lucide="log-out" class="w-4 h-4 text-red-400/60 group-hover:text-red-400 transition-colors"></i>
-              </div>
-              <span class="text-sm font-bold text-slate-500 group-hover:text-red-400 transition-colors">Sign Out</span>
-            </div>
-            <i data-lucide="chevron-right"
-              class="w-4 h-4 text-slate-700 group-hover:text-red-400/60 group-hover:translate-x-1 transition-all"></i>
-          </button>
-        </div>
-      </div>
-    </aside>
-
-    <!-- Left Resize Handle -->
-    <div class="resize-handle resize-handle-left" data-resize="left" role="separator" aria-label="Resize left panel"
-      tabindex="0"></div>
-
-    <!-- ══════════════════════════════════════════════
+      <!-- ══════════════════════════════════════════════
            CENTER COLUMN: Chronicle Flow
            ══════════════════════════════════════════════ -->
-    <section id="column-chronicles" class="dashboard-column scroll-container no-scrollbar border-r border-white/3">
-      <div class="p-8 md:p-12 xl:p-14 max-w-4xl mx-auto w-full">
-        <!-- ── Continue Reading ───────────────────── -->
-        <section class="mb-20">
-          <header class="section-header flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div>
-              <h2 class="text-3xl md:text-4xl font-cinzel font-bold text-white tracking-wide">
-                Continue Reading
-              </h2>
-              <div class="rune-divider"></div>
-              <p class="text-slate-500 text-sm mt-4 max-w-md font-medium">
-                Resume your journey through the woven memories.
-              </p>
-            </div>
-          </header>
-
-          <div id="continue-reading-list" class="flex gap-6 overflow-x-auto pb-6 no-scrollbar -mx-4 px-4">
-            <div class="text-sm text-slate-600 italic py-10">Consulting the oracle…</div>
-          </div>
-        </section>
-
-        <!-- ── Contributions ─────────────────────── -->
-        <section class="mb-20">
-          <header class="section-header flex flex-col md:flex-row md:items-end justify-between gap-8">
-            <div>
-              <h2 class="text-3xl md:text-4xl font-cinzel font-bold text-white tracking-wide">
-                The Archive
-              </h2>
-              <div class="rune-divider"></div>
-              <p class="text-slate-500 text-sm mt-4 max-w-md font-medium">
-                The legends you've preserved for eternity.
-              </p>
-            </div>
-
-            <!-- Tab Switcher -->
-            <div class="tab-nav min-w-60">
-              <button data-contrib-tab="published" class="tab-trigger tab-trigger--active"
-                aria-label="Show published tales">
-                Published
-              </button>
-              <button data-contrib-tab="drafts" class="tab-trigger" aria-label="Show story drafts">
-                Drafts
-              </button>
-            </div>
-          </header>
-
-          <!-- Published -->
-          <div id="contrib-panel-published">
-            <div id="contributions-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <!-- New Tale CTA -->
-              <button id="btn-new-story"
-                class="group relative bg-white/2 border-2 border-dashed border-white/10 hover:border-indigo-500/40 rounded-[2.5rem] flex flex-col items-center justify-center p-8 transition-all min-h-70 overflow-hidden">
-                <div
-                  class="absolute inset-0 bg-linear-to-br from-indigo-500/0 to-violet-500/0 group-hover:from-indigo-500/3 group-hover:to-violet-500/3 transition-all duration-700">
-                </div>
-                <div class="relative z-10 flex flex-col items-center gap-4">
-                  <div
-                    class="w-16 h-16 bg-indigo-500/5 rounded-3xl flex items-center justify-center border border-indigo-500/10 group-hover:scale-110 group-hover:bg-indigo-500/15 transition-all duration-500">
-                    <i data-lucide="feather" class="text-indigo-400 w-7 h-7"></i>
-                  </div>
-                  <div class="text-center">
-                    <span
-                      class="block font-cinzel text-lg text-white font-bold group-hover:text-indigo-200 transition-colors">Record
-                      a New Legend</span>
-                    <span class="block text-[9px] text-slate-500 mt-2 font-black uppercase tracking-[0.3em]">Expand
-                      the Archive</span>
-                  </div>
-                </div>
-              </button>
-            </div>
-          </div>
-
-          <!-- Drafts -->
-          <div id="contrib-panel-drafts" hidden>
-            <div id="drafts-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-          </div>
-        </section>
-      </div>
-    </section>
-
-    <!-- Right Resize Handle -->
-    <div class="resize-handle resize-handle-right" data-resize="right" role="separator" aria-label="Resize right panel"
-      tabindex="0"></div>
-
-    <!-- ══════════════════════════════════════════════
-           RIGHT COLUMN: Runic Insights
-           ══════════════════════════════════════════════ -->
-    <aside id="column-insights" class="dashboard-column scroll-container no-scrollbar bg-white/1">
-      <div class="p-8 space-y-10">
-        <!-- ── Statistics ────────────────────────── -->
-        <section>
-          <header class="mb-8">
-            <h3 class="text-xs font-black text-slate-500 uppercase tracking-[0.4em]">
-              Legacy Metrics
-            </h3>
-            <div class="h-px w-10 bg-indigo-500/30 mt-3"></div>
-          </header>
-
-          <div class="space-y-4">
-            <div class="stat-card-mythic">
-              <div class="flex items-center justify-between mb-4">
-                <div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
-                  <i data-lucide="scroll-text" class="w-5 h-5 text-indigo-400"></i>
-                </div>
-                <span id="stat-words-written" class="text-2xl font-bold text-white tracking-tight">—</span>
+      <section
+        id="column-chronicles"
+        class="dashboard-column scroll-container no-scrollbar border-r border-white/3"
+      >
+        <div class="p-8 md:p-12 xl:p-14 max-w-4xl mx-auto w-full">
+          <!-- ── Continue Reading ───────────────────── -->
+          <section class="mb-20">
+            <header
+              class="section-header flex flex-col md:flex-row md:items-end justify-between gap-6"
+            >
+              <div>
+                <h2 class="text-3xl md:text-4xl font-cinzel font-bold text-white tracking-wide">
+                  Continue Reading
+                </h2>
+                <div class="rune-divider"></div>
+                <p class="text-slate-500 text-sm mt-4 max-w-md font-medium">
+                  Resume your journey through the woven memories.
+                </p>
               </div>
-              <span class="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] block">Words Written</span>
-            </div>
+            </header>
 
-            <div class="stat-card-mythic">
-              <div class="flex items-center justify-between mb-4">
-                <div class="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center">
-                  <i data-lucide="users-2" class="w-5 h-5 text-violet-400"></i>
-                </div>
-                <span id="stat-total-readers" class="text-2xl font-bold text-white tracking-tight">—</span>
-              </div>
-              <span class="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] block">Soul Readers</span>
-            </div>
-
-            <div class="stat-card-mythic">
-              <div class="flex items-center justify-between mb-4">
-                <div class="w-10 h-10 rounded-xl bg-fuchsia-500/10 flex items-center justify-center">
-                  <i data-lucide="clock-4" class="w-5 h-5 text-fuchsia-400"></i>
-                </div>
-                <span id="stat-reading-time-given" class="text-2xl font-bold text-white tracking-tight">—</span>
-              </div>
-              <span class="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] block">Time
-                Preserved</span>
-            </div>
-
-            <div class="stat-card-mythic">
-              <div class="flex items-center justify-between mb-4">
-                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-                  <i data-lucide="flame" class="w-5 h-5 text-emerald-400"></i>
-                </div>
-                <span id="stat-streak" class="text-2xl font-bold text-white tracking-tight">—</span>
-              </div>
-              <span class="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] block">Active Streak</span>
-            </div>
-          </div>
-        </section>
-
-        <!-- ── Reading Progress ───────────────────── -->
-        <section>
-          <header class="mb-8">
-            <h3 class="text-xs font-black text-slate-500 uppercase tracking-[0.4em]">
-              Chronicle Goal
-            </h3>
-            <div class="h-px w-10 bg-violet-500/30 mt-3"></div>
-          </header>
-
-          <div class="p-6 rounded-4xl bg-white/2 border border-white/5 relative overflow-hidden group">
             <div
-              class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-3xl pointer-events-none group-hover:bg-indigo-500/10 transition-colors">
+              id="continue-reading-list"
+              class="flex gap-6 overflow-x-auto pb-6 no-scrollbar -mx-4 px-4"
+            >
+              <div class="text-sm text-slate-600 italic py-10">Consulting the oracle…</div>
             </div>
-            <div class="flex items-center justify-between mb-4">
-              <span class="text-[9px] font-black uppercase tracking-[0.3em] text-slate-500">Annual Path</span>
-              <span id="reading-goal-target" class="text-[9px] text-indigo-400 font-black tracking-widest">12
-                TALES</span>
-            </div>
-            <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden mb-3">
-              <div id="reading-goal-bar"
-                class="h-full bg-linear-to-r from-indigo-500 to-violet-600 shadow-[0_0_10px_rgba(99,102,241,0.5)]"
-                style="--progress: 0.25;"></div>
-            </div>
-            <p class="text-[10px] text-slate-500 font-medium">
-              3 of 12 chronicles preserved this year
-            </p>
-          </div>
-        </section>
+          </section>
 
-        <!-- Quick Stats (Legacy) -->
-        <div class="pt-8 border-t border-white/5 grid grid-cols-3 gap-2">
-          <div class="text-center">
-            <span id="sidebar-tale-count" class="block text-xl font-bold text-white">—</span>
-            <span class="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1">Tales</span>
-          </div>
-          <div class="text-center border-x border-white/5">
-            <span id="sidebar-reader-count" class="block text-xl font-bold text-white">—</span>
-            <span class="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1">Readers</span>
-          </div>
-          <div class="text-center">
-            <span id="sidebar-saved-count" class="block text-xl font-bold text-white">—</span>
-            <span class="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1">Saved</span>
-          </div>
-        </div>
-      </div>
-    </aside>
-  </main>
-
-  <!-- ══════════════════════════════════════════════
-       EDIT PROFILE MODAL — Tabbed
-       ══════════════════════════════════════════════ -->
-  <div id="edit-modal" class="fixed inset-0 z-100 hidden items-center justify-center px-4">
-    <div class="absolute inset-0 bg-black/65 backdrop-blur-xl"></div>
-
-    <div
-      class="relative glass-panel-elevated w-full max-w-[480px] rounded-4xl overflow-hidden shadow-2xl shadow-black/60 flex flex-col max-h-[90vh]">
-      <!-- Top glow line -->
-      <div
-        class="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px bg-linear-to-r from-transparent via-indigo-500/40 to-transparent pointer-events-none">
-      </div>
-
-      <!-- Modal header -->
-      <div class="p-6 pb-0 flex justify-between items-start shrink-0">
-        <div>
-          <h2 class="text-xl font-cinzel font-bold text-white">Edit Profile</h2>
-          <p class="text-xs text-slate-600 mt-1">Customise your chronicler identity</p>
-        </div>
-        <button id="btn-close-modal"
-          class="text-slate-600 hover:text-white p-2 hover:bg-white/5 rounded-xl transition-all group">
-          <i data-lucide="x" class="w-4 h-4 group-hover:rotate-90 transition-transform duration-300"></i>
-        </button>
-      </div>
-
-      <!-- Tab navigation -->
-      <div class="flex items-center gap-1.5 px-6 pt-5 pb-0 shrink-0">
-        <button data-tab="basic"
-          class="tab-btn--active flex-1 py-2 rounded-xl text-[10px] font-bold uppercase tracking-[0.15em] border transition-all">
-          Basic
-        </button>
-        <button data-tab="identity"
-          class="tab-btn--inactive flex-1 py-2 rounded-xl text-[10px] font-bold uppercase tracking-[0.15em] border transition-all">
-          Identity
-        </button>
-        <button data-tab="social"
-          class="tab-btn--inactive flex-1 py-2 rounded-xl text-[10px] font-bold uppercase tracking-[0.15em] border transition-all">
-          Social
-        </button>
-        <button data-tab="goals"
-          class="tab-btn--inactive flex-1 py-2 rounded-xl text-[10px] font-bold uppercase tracking-[0.15em] border transition-all">
-          Goals
-        </button>
-      </div>
-
-      <!-- Scrollable form area -->
-      <form id="profile-form" class="flex-1 overflow-y-auto">
-        <div class="p-6 space-y-5">
-          <!-- ── Tab: Basic ─────────────────────────── -->
-          <div id="tab-panel-basic">
-            <!-- Avatar -->
-            <div class="flex items-center gap-4 p-4 glass-panel rounded-2xl mb-5">
-              <div
-                class="w-14 h-14 bg-zinc-800 rounded-xl flex items-center justify-center border border-white/7 overflow-hidden shrink-0">
-                <i data-lucide="user" class="w-6 h-6 text-slate-700 avatar-placeholder"></i>
-                <img id="modal-avatar-preview" src="" alt="Avatar preview"
-                  class="avatar-img w-full h-full object-cover hidden" />
+          <!-- ── Contributions ─────────────────────── -->
+          <section class="mb-20">
+            <header
+              class="section-header flex flex-col md:flex-row md:items-end justify-between gap-8"
+            >
+              <div>
+                <h2 class="text-3xl md:text-4xl font-cinzel font-bold text-white tracking-wide">
+                  The Archive
+                </h2>
+                <div class="rune-divider"></div>
+                <p class="text-slate-500 text-sm mt-4 max-w-md font-medium">
+                  The legends you've preserved for eternity.
+                </p>
               </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-white mb-0.5">Avatar</p>
-                <input type="url" id="input-avatar-url" placeholder="Paste image URL…"
-                  class="input-mythic w-full rounded-xl px-3 py-2 text-xs" />
-              </div>
-            </div>
 
-            <!-- Display name -->
-            <div class="space-y-1.5 mb-4">
-              <label
-                class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1">
-                <i data-lucide="signature" class="w-3 h-3"></i>
-                Display Name
-              </label>
-              <div class="relative">
-                <input type="text" id="input-name" class="input-mythic w-full rounded-xl px-4 py-3.5 text-sm pr-32"
-                  placeholder="Enter your name…" />
-                <button type="button" id="btn-suggest-name"
-                  class="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[9px] font-bold uppercase tracking-[0.12em] hover:bg-indigo-500/20 transition-colors">
-                  Suggest Name
+              <!-- Tab Switcher -->
+              <div class="tab-nav min-w-60">
+                <button
+                  data-contrib-tab="published"
+                  class="tab-trigger tab-trigger--active"
+                  aria-label="Show published tales"
+                >
+                  Published
+                </button>
+                <button
+                  data-contrib-tab="drafts"
+                  class="tab-trigger"
+                  aria-label="Show story drafts"
+                >
+                  Drafts
+                </button>
+              </div>
+            </header>
+
+            <!-- Published -->
+            <div id="contrib-panel-published">
+              <div id="contributions-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- New Tale CTA -->
+                <button
+                  id="btn-new-story"
+                  class="group relative bg-white/2 border-2 border-dashed border-white/10 hover:border-indigo-500/40 rounded-[2.5rem] flex flex-col items-center justify-center p-8 transition-all min-h-70 overflow-hidden"
+                >
+                  <div
+                    class="absolute inset-0 bg-linear-to-br from-indigo-500/0 to-violet-500/0 group-hover:from-indigo-500/3 group-hover:to-violet-500/3 transition-all duration-700"
+                  ></div>
+                  <div class="relative z-10 flex flex-col items-center gap-4">
+                    <div
+                      class="w-16 h-16 bg-indigo-500/5 rounded-3xl flex items-center justify-center border border-indigo-500/10 group-hover:scale-110 group-hover:bg-indigo-500/15 transition-all duration-500"
+                    >
+                      <i data-lucide="feather" class="text-indigo-400 w-7 h-7"></i>
+                    </div>
+                    <div class="text-center">
+                      <span
+                        class="block font-cinzel text-lg text-white font-bold group-hover:text-indigo-200 transition-colors"
+                        >Record a New Legend</span
+                      >
+                      <span
+                        class="block text-[9px] text-slate-500 mt-2 font-black uppercase tracking-[0.3em]"
+                        >Expand the Archive</span
+                      >
+                    </div>
+                  </div>
                 </button>
               </div>
             </div>
 
-            <!-- Bio -->
-            <div class="space-y-1.5 mb-4">
-              <label
-                class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1">
-                <i data-lucide="scroll" class="w-3 h-3"></i>
-                Short Bio
-              </label>
-              <textarea id="input-bio" rows="3" class="input-mythic w-full rounded-xl px-4 py-3.5 text-sm resize-none"
-                placeholder="Tell us your story… (used for AI name suggestions)"></textarea>
-              <p class="text-[10px] text-slate-700 ml-1">Max 160 characters</p>
+            <!-- Drafts -->
+            <div id="contrib-panel-drafts" hidden>
+              <div id="drafts-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
             </div>
+          </section>
+        </div>
+      </section>
 
-            <!-- Pronouns -->
-            <div class="space-y-1.5">
-              <label
-                class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1">
-                <i data-lucide="user-check" class="w-3 h-3"></i>
-                Pronouns
-              </label>
-              <input type="text" id="input-pronouns" class="input-mythic w-full rounded-xl px-4 py-3.5 text-sm"
-                placeholder="they/them, she/her, he/him…" />
-            </div>
-          </div>
+      <!-- Right Resize Handle -->
+      <div
+        class="resize-handle resize-handle-right"
+        data-resize="right"
+        role="separator"
+        aria-label="Resize right panel"
+        tabindex="0"
+      ></div>
 
-          <!-- ── Tab: Identity ──────────────────────── -->
-          <div id="tab-panel-identity" hidden>
-            <!-- Location -->
-            <div class="space-y-1.5 mb-4">
-              <label
-                class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1">
-                <i data-lucide="map-pin" class="w-3 h-3"></i>
-                Location
-              </label>
-              <input type="text" id="input-location" class="input-mythic w-full rounded-xl px-4 py-3.5 text-sm"
-                placeholder="City, Country or 'The Void'" />
-            </div>
+      <!-- ══════════════════════════════════════════════
+           RIGHT COLUMN: Runic Insights
+           ══════════════════════════════════════════════ -->
+      <aside id="column-insights" class="dashboard-column scroll-container no-scrollbar bg-white/1">
+        <div class="p-8 space-y-10">
+          <!-- ── Statistics ────────────────────────── -->
+          <section>
+            <header class="mb-8">
+              <h3 class="text-xs font-black text-slate-500 uppercase tracking-[0.4em]">
+                Legacy Metrics
+              </h3>
+              <div class="h-px w-10 bg-indigo-500/30 mt-3"></div>
+            </header>
 
-            <!-- Favourite Genres -->
-            <div class="space-y-2">
-              <label
-                class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1">
-                <i data-lucide="tags" class="w-3 h-3"></i>
-                Favourite Genres
-              </label>
-              <p class="text-[10px] text-slate-600 ml-1 mb-2">Select all that apply.</p>
-              <div id="genre-selector" class="flex flex-wrap gap-2">
-                <!-- Chips built by _buildGenreSelector() in ui.js -->
-              </div>
-            </div>
-          </div>
-
-          <!-- ── Tab: Social ────────────────────────── -->
-          <div id="tab-panel-social" hidden>
             <div class="space-y-4">
-              <div class="space-y-1.5">
-                <label
-                  class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1">
-                  <i data-lucide="globe" class="w-3 h-3"></i>
-                  Website
-                </label>
-                <input type="url" id="input-website" class="input-mythic w-full rounded-xl px-4 py-3.5 text-sm"
-                  placeholder="https://yoursite.com" />
+              <div class="stat-card-mythic">
+                <div class="flex items-center justify-between mb-4">
+                  <div
+                    class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center"
+                  >
+                    <i data-lucide="scroll-text" class="w-5 h-5 text-indigo-400"></i>
+                  </div>
+                  <span id="stat-words-written" class="text-2xl font-bold text-white tracking-tight"
+                    >—</span
+                  >
+                </div>
+                <span class="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] block"
+                  >Words Written</span
+                >
               </div>
 
-              <div class="space-y-1.5">
-                <label
-                  class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1">
-                  <i data-lucide="badge-x" class="w-3 h-3"></i>
-                  Twitter / X
-                </label>
-                <div class="relative">
-                  <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 text-sm">@</span>
-                  <input type="text" id="input-twitter" class="input-mythic w-full rounded-xl pl-8 pr-4 py-3.5 text-sm"
-                    placeholder="handle" />
+              <div class="stat-card-mythic">
+                <div class="flex items-center justify-between mb-4">
+                  <div
+                    class="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center"
+                  >
+                    <i data-lucide="users-2" class="w-5 h-5 text-violet-400"></i>
+                  </div>
+                  <span id="stat-total-readers" class="text-2xl font-bold text-white tracking-tight"
+                    >—</span
+                  >
                 </div>
+                <span class="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] block"
+                  >Soul Readers</span
+                >
               </div>
 
-              <div class="space-y-1.5">
-                <label
-                  class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1">
-                  <i data-lucide="instagram" class="w-3 h-3"></i>
-                  Instagram
-                </label>
-                <div class="relative">
-                  <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 text-sm">@</span>
-                  <input type="text" id="input-instagram"
-                    class="input-mythic w-full rounded-xl pl-8 pr-4 py-3.5 text-sm" placeholder="handle" />
+              <div class="stat-card-mythic">
+                <div class="flex items-center justify-between mb-4">
+                  <div
+                    class="w-10 h-10 rounded-xl bg-fuchsia-500/10 flex items-center justify-center"
+                  >
+                    <i data-lucide="clock-4" class="w-5 h-5 text-fuchsia-400"></i>
+                  </div>
+                  <span
+                    id="stat-reading-time-given"
+                    class="text-2xl font-bold text-white tracking-tight"
+                    >—</span
+                  >
                 </div>
+                <span class="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] block"
+                  >Time Preserved</span
+                >
+              </div>
+
+              <div class="stat-card-mythic">
+                <div class="flex items-center justify-between mb-4">
+                  <div
+                    class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center"
+                  >
+                    <i data-lucide="flame" class="w-5 h-5 text-emerald-400"></i>
+                  </div>
+                  <span id="stat-streak" class="text-2xl font-bold text-white tracking-tight"
+                    >—</span
+                  >
+                </div>
+                <span class="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] block"
+                  >Active Streak</span
+                >
               </div>
             </div>
-          </div>
+          </section>
 
-          <!-- ── Tab: Goals ─────────────────────────── -->
-          <div id="tab-panel-goals" hidden>
-            <div class="space-y-5">
-              <div class="space-y-1.5">
-                <label
-                  class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1">
-                  <i data-lucide="target" class="w-3 h-3"></i>
-                  Yearly Reading Goal
-                </label>
-                <p class="text-[10px] text-slate-600 ml-1">
-                  How many tales do you want to read this year?
-                </p>
-                <input type="number" id="input-reading-goal" min="1" max="365"
-                  class="input-mythic w-full rounded-xl px-4 py-3.5 text-sm" placeholder="12" />
-              </div>
+          <!-- ── Reading Progress ───────────────────── -->
+          <section>
+            <header class="mb-8">
+              <h3 class="text-xs font-black text-slate-500 uppercase tracking-[0.4em]">
+                Chronicle Goal
+              </h3>
+              <div class="h-px w-10 bg-violet-500/30 mt-3"></div>
+            </header>
 
-              <!-- Placeholder for future goals -->
-              <div class="glass-panel rounded-2xl p-4 border border-dashed border-white/6">
-                <div class="flex items-center gap-2 text-slate-600 mb-2">
-                  <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-500/50"></i>
-                  <span class="text-[10px] font-bold uppercase tracking-[0.15em]">More goals coming soon</span>
-                </div>
-                <p class="text-[11px] text-slate-700 leading-relaxed">
-                  Writing streak goals, word count targets, and contribution milestones will be
-                  available in a future update.
-                </p>
+            <div
+              class="p-6 rounded-4xl bg-white/2 border border-white/5 relative overflow-hidden group"
+            >
+              <div
+                class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-3xl pointer-events-none group-hover:bg-indigo-500/10 transition-colors"
+              ></div>
+              <div class="flex items-center justify-between mb-4">
+                <span class="text-[9px] font-black uppercase tracking-[0.3em] text-slate-500"
+                  >Annual Path</span
+                >
+                <span
+                  id="reading-goal-target"
+                  class="text-[9px] text-indigo-400 font-black tracking-widest"
+                  >12 TALES</span
+                >
               </div>
+              <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden mb-3">
+                <div
+                  id="reading-goal-bar"
+                  class="h-full bg-linear-to-r from-indigo-500 to-violet-600 shadow-[0_0_10px_rgba(99,102,241,0.5)]"
+                  style="--progress: 0.25"
+                ></div>
+              </div>
+              <p class="text-[10px] text-slate-500 font-medium">
+                3 of 12 chronicles preserved this year
+              </p>
+            </div>
+          </section>
+
+          <!-- Quick Stats (Legacy) -->
+          <div class="pt-8 border-t border-white/5 grid grid-cols-3 gap-2">
+            <div class="text-center">
+              <span id="sidebar-tale-count" class="block text-xl font-bold text-white">—</span>
+              <span class="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1"
+                >Tales</span
+              >
+            </div>
+            <div class="text-center border-x border-white/5">
+              <span id="sidebar-reader-count" class="block text-xl font-bold text-white">—</span>
+              <span class="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1"
+                >Readers</span
+              >
+            </div>
+            <div class="text-center">
+              <span id="sidebar-saved-count" class="block text-xl font-bold text-white">—</span>
+              <span class="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1"
+                >Saved</span
+              >
             </div>
           </div>
         </div>
+      </aside>
+    </main>
 
-        <!-- Divider + action buttons (always visible) -->
-        <div class="shrink-0 px-6 pb-6">
-          <div class="sacred-divider mb-5"></div>
-          <div class="flex gap-3">
-            <button type="button" id="btn-cancel-modal"
-              class="flex-1 btn-ghost py-3.5 text-slate-300 rounded-xl font-semibold text-sm">
-              Cancel
-            </button>
-            <button type="submit"
-              class="flex-1 btn-primary py-3.5 text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-2">
-              <i data-lucide="check" class="w-4 h-4"></i>
-              Save Changes
-            </button>
+    <!-- ══════════════════════════════════════════════
+       EDIT PROFILE MODAL — Tabbed
+       ══════════════════════════════════════════════ -->
+    <div id="edit-modal" class="fixed inset-0 z-100 hidden items-center justify-center px-4">
+      <div class="absolute inset-0 bg-black/65 backdrop-blur-xl"></div>
+
+      <div
+        class="relative glass-panel-elevated w-full max-w-[480px] rounded-4xl overflow-hidden shadow-2xl shadow-black/60 flex flex-col max-h-[90vh]"
+      >
+        <!-- Top glow line -->
+        <div
+          class="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px bg-linear-to-r from-transparent via-indigo-500/40 to-transparent pointer-events-none"
+        ></div>
+
+        <!-- Modal header -->
+        <div class="p-6 pb-0 flex justify-between items-start shrink-0">
+          <div>
+            <h2 class="text-xl font-cinzel font-bold text-white">Edit Profile</h2>
+            <p class="text-xs text-slate-600 mt-1">Customise your chronicler identity</p>
           </div>
-
-          <!-- Sign Out — mobile modal footer (TODO #2) -->
-          <button type="button" id="btn-sign-out-mobile"
-            class="mt-3 w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-red-500/15 bg-red-500/4 text-red-400/70 hover:text-red-400 hover:bg-red-500/8 hover:border-red-500/25 transition-all text-[10px] font-black uppercase tracking-[0.25em]">
-            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-            Sign Out
+          <button
+            id="btn-close-modal"
+            class="text-slate-600 hover:text-white p-2 hover:bg-white/5 rounded-xl transition-all group"
+          >
+            <i
+              data-lucide="x"
+              class="w-4 h-4 group-hover:rotate-90 transition-transform duration-300"
+            ></i>
           </button>
         </div>
-      </form>
-    </div>
-  </div>
 
-  <!-- ═══════════════════════════════════════════════
+        <!-- Tab navigation -->
+        <div class="flex items-center gap-1.5 px-6 pt-5 pb-0 shrink-0">
+          <button
+            data-tab="basic"
+            class="tab-btn--active flex-1 py-2 rounded-xl text-[10px] font-bold uppercase tracking-[0.15em] border transition-all"
+          >
+            Basic
+          </button>
+          <button
+            data-tab="identity"
+            class="tab-btn--inactive flex-1 py-2 rounded-xl text-[10px] font-bold uppercase tracking-[0.15em] border transition-all"
+          >
+            Identity
+          </button>
+          <button
+            data-tab="social"
+            class="tab-btn--inactive flex-1 py-2 rounded-xl text-[10px] font-bold uppercase tracking-[0.15em] border transition-all"
+          >
+            Social
+          </button>
+          <button
+            data-tab="goals"
+            class="tab-btn--inactive flex-1 py-2 rounded-xl text-[10px] font-bold uppercase tracking-[0.15em] border transition-all"
+          >
+            Goals
+          </button>
+        </div>
+
+        <!-- Scrollable form area -->
+        <form id="profile-form" class="flex-1 overflow-y-auto">
+          <div class="p-6 space-y-5">
+            <!-- ── Tab: Basic ─────────────────────────── -->
+            <div id="tab-panel-basic">
+              <!-- Avatar -->
+              <div class="flex items-center gap-4 p-4 glass-panel rounded-2xl mb-5">
+                <div
+                  class="w-14 h-14 bg-zinc-800 rounded-xl flex items-center justify-center border border-white/7 overflow-hidden shrink-0"
+                >
+                  <i data-lucide="user" class="w-6 h-6 text-slate-700 avatar-placeholder"></i>
+                  <img
+                    id="modal-avatar-preview"
+                    src=""
+                    alt="Avatar preview"
+                    class="avatar-img w-full h-full object-cover hidden"
+                  />
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-white mb-0.5">Avatar</p>
+                  <input
+                    type="url"
+                    id="input-avatar-url"
+                    placeholder="Paste image URL…"
+                    class="input-mythic w-full rounded-xl px-3 py-2 text-xs"
+                  />
+                </div>
+              </div>
+
+              <!-- Display name -->
+              <div class="space-y-1.5 mb-4">
+                <label
+                  class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
+                >
+                  <i data-lucide="signature" class="w-3 h-3"></i>
+                  Display Name
+                </label>
+                <div class="relative">
+                  <input
+                    type="text"
+                    id="input-name"
+                    class="input-mythic w-full rounded-xl px-4 py-3.5 text-sm pr-32"
+                    placeholder="Enter your name…"
+                  />
+                  <button
+                    type="button"
+                    id="btn-suggest-name"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[9px] font-bold uppercase tracking-[0.12em] hover:bg-indigo-500/20 transition-colors"
+                  >
+                    Suggest Name
+                  </button>
+                </div>
+              </div>
+
+              <!-- Bio -->
+              <div class="space-y-1.5 mb-4">
+                <label
+                  class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
+                >
+                  <i data-lucide="scroll" class="w-3 h-3"></i>
+                  Short Bio
+                </label>
+                <textarea
+                  id="input-bio"
+                  rows="3"
+                  class="input-mythic w-full rounded-xl px-4 py-3.5 text-sm resize-none"
+                  placeholder="Tell us your story… (used for AI name suggestions)"
+                ></textarea>
+                <p class="text-[10px] text-slate-700 ml-1">Max 160 characters</p>
+              </div>
+
+              <!-- Pronouns -->
+              <div class="space-y-1.5">
+                <label
+                  class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
+                >
+                  <i data-lucide="user-check" class="w-3 h-3"></i>
+                  Pronouns
+                </label>
+                <input
+                  type="text"
+                  id="input-pronouns"
+                  class="input-mythic w-full rounded-xl px-4 py-3.5 text-sm"
+                  placeholder="they/them, she/her, he/him…"
+                />
+              </div>
+            </div>
+
+            <!-- ── Tab: Identity ──────────────────────── -->
+            <div id="tab-panel-identity" hidden>
+              <!-- Location -->
+              <div class="space-y-1.5 mb-4">
+                <label
+                  class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
+                >
+                  <i data-lucide="map-pin" class="w-3 h-3"></i>
+                  Location
+                </label>
+                <input
+                  type="text"
+                  id="input-location"
+                  class="input-mythic w-full rounded-xl px-4 py-3.5 text-sm"
+                  placeholder="City, Country or 'The Void'"
+                />
+              </div>
+
+              <!-- Favourite Genres -->
+              <div class="space-y-2">
+                <label
+                  class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
+                >
+                  <i data-lucide="tags" class="w-3 h-3"></i>
+                  Favourite Genres
+                </label>
+                <p class="text-[10px] text-slate-600 ml-1 mb-2">Select all that apply.</p>
+                <div id="genre-selector" class="flex flex-wrap gap-2">
+                  <!-- Chips built by _buildGenreSelector() in ui.js -->
+                </div>
+              </div>
+            </div>
+
+            <!-- ── Tab: Social ────────────────────────── -->
+            <div id="tab-panel-social" hidden>
+              <div class="space-y-4">
+                <div class="space-y-1.5">
+                  <label
+                    class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
+                  >
+                    <i data-lucide="globe" class="w-3 h-3"></i>
+                    Website
+                  </label>
+                  <input
+                    type="url"
+                    id="input-website"
+                    class="input-mythic w-full rounded-xl px-4 py-3.5 text-sm"
+                    placeholder="https://yoursite.com"
+                  />
+                </div>
+
+                <div class="space-y-1.5">
+                  <label
+                    class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
+                  >
+                    <i data-lucide="badge-x" class="w-3 h-3"></i>
+                    Twitter / X
+                  </label>
+                  <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 text-sm"
+                      >@</span
+                    >
+                    <input
+                      type="text"
+                      id="input-twitter"
+                      class="input-mythic w-full rounded-xl pl-8 pr-4 py-3.5 text-sm"
+                      placeholder="handle"
+                    />
+                  </div>
+                </div>
+
+                <div class="space-y-1.5">
+                  <label
+                    class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
+                  >
+                    <i data-lucide="instagram" class="w-3 h-3"></i>
+                    Instagram
+                  </label>
+                  <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 text-sm"
+                      >@</span
+                    >
+                    <input
+                      type="text"
+                      id="input-instagram"
+                      class="input-mythic w-full rounded-xl pl-8 pr-4 py-3.5 text-sm"
+                      placeholder="handle"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── Tab: Goals ─────────────────────────── -->
+            <div id="tab-panel-goals" hidden>
+              <div class="space-y-5">
+                <div class="space-y-1.5">
+                  <label
+                    class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
+                  >
+                    <i data-lucide="target" class="w-3 h-3"></i>
+                    Yearly Reading Goal
+                  </label>
+                  <p class="text-[10px] text-slate-600 ml-1">
+                    How many tales do you want to read this year?
+                  </p>
+                  <input
+                    type="number"
+                    id="input-reading-goal"
+                    min="1"
+                    max="365"
+                    class="input-mythic w-full rounded-xl px-4 py-3.5 text-sm"
+                    placeholder="12"
+                  />
+                </div>
+
+                <!-- Placeholder for future goals -->
+                <div class="glass-panel rounded-2xl p-4 border border-dashed border-white/6">
+                  <div class="flex items-center gap-2 text-slate-600 mb-2">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-500/50"></i>
+                    <span class="text-[10px] font-bold uppercase tracking-[0.15em]"
+                      >More goals coming soon</span
+                    >
+                  </div>
+                  <p class="text-[11px] text-slate-700 leading-relaxed">
+                    Writing streak goals, word count targets, and contribution milestones will be
+                    available in a future update.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Divider + action buttons (always visible) -->
+          <div class="shrink-0 px-6 pb-6">
+            <div class="sacred-divider mb-5"></div>
+            <div class="flex gap-3">
+              <button
+                type="button"
+                id="btn-cancel-modal"
+                class="flex-1 btn-ghost py-3.5 text-slate-300 rounded-xl font-semibold text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="flex-1 btn-primary py-3.5 text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-2"
+              >
+                <i data-lucide="check" class="w-4 h-4"></i>
+                Save Changes
+              </button>
+            </div>
+
+            <!-- Sign Out — mobile modal footer (TODO #2) -->
+            <button
+              type="button"
+              id="btn-sign-out-mobile"
+              class="mt-3 w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-red-500/15 bg-red-500/4 text-red-400/70 hover:text-red-400 hover:bg-red-500/8 hover:border-red-500/25 transition-all text-[10px] font-black uppercase tracking-[0.25em]"
+            >
+              <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+              Sign Out
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
        Enhancement Scripts
        ═══════════════════════════════════════════════ -->
-  <script>
-    (function () {
-      'use strict';
+    <script>
+      (function () {
+        'use strict';
 
-      /* ── LocalStorage Panel Widths ── */
-      const LEFT_MIN = 280;
-      const LEFT_MAX = 500;
-      const RIGHT_MIN = 280;
-      const RIGHT_MAX = 500;
+        /* ── LocalStorage Panel Widths ── */
+        const LEFT_MIN = 280;
+        const LEFT_MAX = 500;
+        const RIGHT_MIN = 280;
+        const RIGHT_MAX = 500;
 
-      const savedLeft = localStorage.getItem('profile_left_width');
-      const savedRight = localStorage.getItem('profile_right_width');
+        const savedLeft = localStorage.getItem('profile_left_width');
+        const savedRight = localStorage.getItem('profile_right_width');
 
-      if (savedLeft) {
-        document.documentElement.style.setProperty('--left-panel-width', Math.max(LEFT_MIN, Math.min(LEFT_MAX, parseInt(savedLeft))) + 'px');
-      }
-      if (savedRight) {
-        document.documentElement.style.setProperty('--right-panel-width', Math.max(RIGHT_MIN, Math.min(RIGHT_MAX, parseInt(savedRight))) + 'px');
-      }
-
-      /* ── Resize Handles ── */
-      const handles = document.querySelectorAll('.resize-handle');
-      let activeHandle = null;
-      let startX = 0;
-      let startWidth = 0;
-
-      function onMouseDown(e, side) {
-        activeHandle = side;
-        startX = e.clientX;
-        const prop = side === 'left' ? '--left-panel-width' : '--right-panel-width';
-        startWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue(prop)) || 320;
-        document.body.classList.add('resizing');
-        e.preventDefault();
-        e.stopPropagation();
-      }
-
-      function onMouseMove(e) {
-        if (!activeHandle) return;
-        const delta = e.clientX - startX;
-        const prop = activeHandle === 'left' ? '--left-panel-width' : '--right-panel-width';
-        const min = activeHandle === 'left' ? LEFT_MIN : RIGHT_MIN;
-        const max = activeHandle === 'left' ? LEFT_MAX : RIGHT_MAX;
-
-        let newWidth;
-        if (activeHandle === 'left') {
-          newWidth = startWidth + delta;
-        } else {
-          newWidth = startWidth - delta;
+        if (savedLeft) {
+          document.documentElement.style.setProperty(
+            '--left-panel-width',
+            Math.max(LEFT_MIN, Math.min(LEFT_MAX, parseInt(savedLeft))) + 'px'
+          );
+        }
+        if (savedRight) {
+          document.documentElement.style.setProperty(
+            '--right-panel-width',
+            Math.max(RIGHT_MIN, Math.min(RIGHT_MAX, parseInt(savedRight))) + 'px'
+          );
         }
 
-        newWidth = Math.max(min, Math.min(max, newWidth));
-        document.documentElement.style.setProperty(prop, newWidth + 'px');
-      }
+        /* ── Resize Handles ── */
+        const handles = document.querySelectorAll('.resize-handle');
+        let activeHandle = null;
+        let startX = 0;
+        let startWidth = 0;
 
-      function onMouseUp() {
-        if (!activeHandle) return;
-        const prop = activeHandle === 'left' ? '--left-panel-width' : '--right-panel-width';
-        const val = parseInt(getComputedStyle(document.documentElement).getPropertyValue(prop));
-        localStorage.setItem('profile_' + activeHandle + '_width', val);
-        activeHandle = null;
-        document.body.classList.remove('resizing');
-      }
-
-      handles.forEach(handle => {
-        const side = handle.dataset.resize;
-        handle.addEventListener('mousedown', e => onMouseDown(e, side));
-        handle.addEventListener('touchstart', e => onMouseDown(e.touches[0], side), { passive: false });
-      });
-
-      document.addEventListener('mousemove', onMouseMove);
-      document.addEventListener('touchmove', e => { if (activeHandle) onMouseMove(e.touches[0]); }, { passive: false });
-      document.addEventListener('mouseup', onMouseUp);
-      document.addEventListener('touchend', onMouseUp);
-
-      /* Keyboard resize support */
-      handles.forEach(handle => {
-        handle.addEventListener('keydown', (e) => {
-          const side = handle.dataset.resize;
-          if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        function onMouseDown(e, side) {
+          activeHandle = side;
+          startX = e.clientX;
           const prop = side === 'left' ? '--left-panel-width' : '--right-panel-width';
-          const current = parseInt(getComputedStyle(document.documentElement).getPropertyValue(prop)) || 320;
-          const step = 20;
-          let newWidth = current;
-
-          if (side === 'left') {
-            newWidth = e.key === 'ArrowRight' ? current + step : current - step;
-          } else {
-            newWidth = e.key === 'ArrowLeft' ? current + step : current - step;
-          }
-
-          const min = side === 'left' ? LEFT_MIN : RIGHT_MIN;
-          const max = side === 'left' ? LEFT_MAX : RIGHT_MAX;
-          newWidth = Math.max(min, Math.min(max, newWidth));
-
-          document.documentElement.style.setProperty(prop, newWidth + 'px');
-          localStorage.setItem('profile_' + side + '_width', newWidth);
+          startWidth =
+            parseInt(getComputedStyle(document.documentElement).getPropertyValue(prop)) || 320;
+          document.body.classList.add('resizing');
           e.preventDefault();
-        });
-      });
-
-      /* ── Modal Accessibility ── */
-      const modal = document.getElementById('edit-modal');
-      const modalCloseBtn = document.getElementById('btn-close-modal');
-      const modalCancelBtn = document.getElementById('btn-cancel-modal');
-
-      if (modal) {
-        /* Focus trap */
-        function getFocusables() {
-          return Array.from(modal.querySelectorAll(
-            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-          )).filter(el => !el.disabled && el.offsetParent !== null);
+          e.stopPropagation();
         }
 
-        modal.addEventListener('keydown', (e) => {
-          if (e.key !== 'Tab') return;
-          const focusables = getFocusables();
-          if (focusables.length === 0) return;
-          const first = focusables[0];
-          const last = focusables[focusables.length - 1];
+        function onMouseMove(e) {
+          if (!activeHandle) return;
+          const delta = e.clientX - startX;
+          const prop = activeHandle === 'left' ? '--left-panel-width' : '--right-panel-width';
+          const min = activeHandle === 'left' ? LEFT_MIN : RIGHT_MIN;
+          const max = activeHandle === 'left' ? LEFT_MAX : RIGHT_MAX;
 
-          if (e.shiftKey) {
-            if (document.activeElement === first) {
-              last.focus();
-              e.preventDefault();
-            }
+          let newWidth;
+          if (activeHandle === 'left') {
+            newWidth = startWidth + delta;
           } else {
-            if (document.activeElement === last) {
-              first.focus();
-              e.preventDefault();
+            newWidth = startWidth - delta;
+          }
+
+          newWidth = Math.max(min, Math.min(max, newWidth));
+          document.documentElement.style.setProperty(prop, newWidth + 'px');
+        }
+
+        function onMouseUp() {
+          if (!activeHandle) return;
+          const prop = activeHandle === 'left' ? '--left-panel-width' : '--right-panel-width';
+          const val = parseInt(getComputedStyle(document.documentElement).getPropertyValue(prop));
+          localStorage.setItem('profile_' + activeHandle + '_width', val);
+          activeHandle = null;
+          document.body.classList.remove('resizing');
+        }
+
+        handles.forEach((handle) => {
+          const side = handle.dataset.resize;
+          handle.addEventListener('mousedown', (e) => onMouseDown(e, side));
+          handle.addEventListener('touchstart', (e) => onMouseDown(e.touches[0], side), {
+            passive: false,
+          });
+        });
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener(
+          'touchmove',
+          (e) => {
+            if (activeHandle) onMouseMove(e.touches[0]);
+          },
+          { passive: false }
+        );
+        document.addEventListener('mouseup', onMouseUp);
+        document.addEventListener('touchend', onMouseUp);
+
+        /* Keyboard resize support */
+        handles.forEach((handle) => {
+          handle.addEventListener('keydown', (e) => {
+            const side = handle.dataset.resize;
+            if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+            const prop = side === 'left' ? '--left-panel-width' : '--right-panel-width';
+            const current =
+              parseInt(getComputedStyle(document.documentElement).getPropertyValue(prop)) || 320;
+            const step = 20;
+            let newWidth = current;
+
+            if (side === 'left') {
+              newWidth = e.key === 'ArrowRight' ? current + step : current - step;
+            } else {
+              newWidth = e.key === 'ArrowLeft' ? current + step : current - step;
             }
-          }
+
+            const min = side === 'left' ? LEFT_MIN : RIGHT_MIN;
+            const max = side === 'left' ? LEFT_MAX : RIGHT_MAX;
+            newWidth = Math.max(min, Math.min(max, newWidth));
+
+            document.documentElement.style.setProperty(prop, newWidth + 'px');
+            localStorage.setItem('profile_' + side + '_width', newWidth);
+            e.preventDefault();
+          });
         });
 
-        /* Close on Escape */
-        document.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-            modalCancelBtn?.click();
-          }
-        });
+        /* ── Modal Accessibility ── */
+        const modal = document.getElementById('edit-modal');
+        const modalCloseBtn = document.getElementById('btn-close-modal');
+        const modalCancelBtn = document.getElementById('btn-cancel-modal');
 
-        /* Close on backdrop click */
-        modal.addEventListener('click', (e) => {
-          if (e.target === modal) {
-            modalCancelBtn?.click();
+        if (modal) {
+          /* Focus trap */
+          function getFocusables() {
+            return Array.from(
+              modal.querySelectorAll(
+                'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+              )
+            ).filter((el) => !el.disabled && el.offsetParent !== null);
           }
-        });
-      }
 
-      /* ── Reading Goal Bar CSS Variable Bridge ── */
-      const goalBar = document.getElementById('reading-goal-bar');
-      if (goalBar) {
-        const observer = new MutationObserver((mutations) => {
-          mutations.forEach((m) => {
-            if (m.type === 'attributes' && m.attributeName === 'style') {
-              const width = goalBar.style.width;
-              if (width && !width.includes('calc')) {
-                const num = parseFloat(width);
-                if (!isNaN(num)) {
-                  goalBar.style.setProperty('--progress', num / 100);
-                }
+          modal.addEventListener('keydown', (e) => {
+            if (e.key !== 'Tab') return;
+            const focusables = getFocusables();
+            if (focusables.length === 0) return;
+            const first = focusables[0];
+            const last = focusables[focusables.length - 1];
+
+            if (e.shiftKey) {
+              if (document.activeElement === first) {
+                last.focus();
+                e.preventDefault();
+              }
+            } else {
+              if (document.activeElement === last) {
+                first.focus();
+                e.preventDefault();
               }
             }
           });
-        });
-        observer.observe(goalBar, { attributes: true });
-      }
 
-      /* ── Tab Trigger Enhancement ── */
-      function enhanceInactiveTabs() {
-        document.querySelectorAll('.tab-trigger:not(.tab-trigger--active)').forEach(el => {
-          el.classList.add('tab-trigger--inactive');
-        });
-        document.querySelectorAll('.tab-trigger--active').forEach(el => {
-          el.classList.remove('tab-trigger--inactive');
-        });
-      }
-      enhanceInactiveTabs();
-
-      const tabNavs = document.querySelectorAll('.tab-nav');
-      tabNavs.forEach(nav => {
-        nav.addEventListener('click', (e) => {
-          const btn = e.target.closest('.tab-trigger');
-          if (!btn) return;
-          nav.querySelectorAll('.tab-trigger').forEach(t => {
-            t.classList.remove('tab-trigger--active');
-            t.classList.add('tab-trigger--inactive');
+          /* Close on Escape */
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+              modalCancelBtn?.click();
+            }
           });
-          btn.classList.remove('tab-trigger--inactive');
-          btn.classList.add('tab-trigger--active');
+
+          /* Close on backdrop click */
+          modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+              modalCancelBtn?.click();
+            }
+          });
+        }
+
+        /* ── Reading Goal Bar CSS Variable Bridge ── */
+        const goalBar = document.getElementById('reading-goal-bar');
+        if (goalBar) {
+          const observer = new MutationObserver((mutations) => {
+            mutations.forEach((m) => {
+              if (m.type === 'attributes' && m.attributeName === 'style') {
+                const width = goalBar.style.width;
+                if (width && !width.includes('calc')) {
+                  const num = parseFloat(width);
+                  if (!isNaN(num)) {
+                    goalBar.style.setProperty('--progress', num / 100);
+                  }
+                }
+              }
+            });
+          });
+          observer.observe(goalBar, { attributes: true });
+        }
+
+        /* ── Tab Trigger Enhancement ── */
+        function enhanceInactiveTabs() {
+          document.querySelectorAll('.tab-trigger:not(.tab-trigger--active)').forEach((el) => {
+            el.classList.add('tab-trigger--inactive');
+          });
+          document.querySelectorAll('.tab-trigger--active').forEach((el) => {
+            el.classList.remove('tab-trigger--inactive');
+          });
+        }
+        enhanceInactiveTabs();
+
+        const tabNavs = document.querySelectorAll('.tab-nav');
+        tabNavs.forEach((nav) => {
+          nav.addEventListener('click', (e) => {
+            const btn = e.target.closest('.tab-trigger');
+            if (!btn) return;
+            nav.querySelectorAll('.tab-trigger').forEach((t) => {
+              t.classList.remove('tab-trigger--active');
+              t.classList.add('tab-trigger--inactive');
+            });
+            btn.classList.remove('tab-trigger--inactive');
+            btn.classList.add('tab-trigger--active');
+          });
         });
-      });
 
-      /* ── Genre Chip Enhancement ── */
-      const genreSelector = document.getElementById('genre-selector');
-      if (genreSelector) {
-        genreSelector.addEventListener('click', (e) => {
-          const chip = e.target.closest('button, .genre-chip');
-          if (!chip) return;
-          chip.classList.toggle('active');
-        });
-      }
-
-    })();
-  </script>
-</body>
-
+        /* ── Genre Chip Enhancement ── */
+        const genreSelector = document.getElementById('genre-selector');
+        if (genreSelector) {
+          genreSelector.addEventListener('click', (e) => {
+            const chip = e.target.closest('button, .genre-chip');
+            if (!chip) return;
+            chip.classList.toggle('active');
+          });
+        }
+      })();
+    </script>
+  </body>
 </html>

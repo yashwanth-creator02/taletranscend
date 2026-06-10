@@ -13,8 +13,9 @@ import {
 import { setActiveTab, buildSortPanel, refreshSortPanel } from './ui.js';
 import { showToast } from '@ui/components/toast.js';
 import { removeFromBookmarks } from '@services/index.js';
-import { debounce } from '@/utils';
-import { navigateTo } from '@/utils';
+import { debounce, navigateTo, createLogger } from '@/utils';
+
+const log = createLogger('ShelfInteractions');
 
 /* ─────────────────────────────────────────────
    Public Init
@@ -43,10 +44,14 @@ function _bindTabs() {
       const tab = btn.dataset.tab;
       if (!tab || tab === shelfState.activeTab) return;
 
+      log.info('Switching tab', { from: shelfState.activeTab, to: tab });
       shelfState.activeTab = tab;
       setActiveTab(tab);
 
-      if (!shelfState.userId) return;
+      if (!shelfState.userId) {
+        log.warn('No userId available for tab data load');
+        return;
+      }
 
       if (tab === 'bookmarked') {
         await loadBookmarkedTales(shelfState.userId);
@@ -226,7 +231,7 @@ async function _handleCardAction(action, id, e) {
         computeAndRenderHeroStats();
         showToast('Removed from shelf.', 'info');
       } catch (err) {
-        console.error('[shelf] Decouple failed:', err);
+        log.error('Decouple failed:', err);
         showToast('Could not remove from shelf.', 'error');
       }
       break;

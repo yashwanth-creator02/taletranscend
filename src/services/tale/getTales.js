@@ -2,8 +2,20 @@
 // Fetches community tales from Firestore.
 // Used by the library and home pages to populate tale listings.
 
-import { getDocs, query, where, orderBy, limit, startAfter, refs } from '@fb/index.js';
+import {
+  getDocs,
+  query,
+  where,
+  orderBy,
+  limit,
+  startAfter,
+  refs,
+  getCountFromServer,
+} from '@fb/index.js';
 import { createTale } from '@state/index.js';
+import { safeAsync, createLogger } from '@/utils';
+
+const log = createLogger('GetTalesService');
 
 /**
  * Retrieves published tales from Firestore.
@@ -17,6 +29,7 @@ import { createTale } from '@state/index.js';
  * @returns {Promise<import('@state/schemas/tale.schema.js').Tale[]>}
  */
 export async function getTales({ status = 'published', count = 50, after = null } = {}) {
+  log.debug('Fetching tales', { status, count, afterId: after?.id });
   let q = query(
     refs.tales(),
     where('status', '==', status),
@@ -34,10 +47,120 @@ export async function getTales({ status = 'published', count = 50, after = null 
     );
   }
 
-  const snap = await getDocs(q);
+  const snap = await safeAsync(getDocs(q), {
+    fallback: { empty: true, docs: [] },
+    logContext: 'services.tale.getTales',
+  });
+
   if (snap.empty) return [];
 
   return snap.docs.map((d) => createTale(d.id, d.data()));
+}
+
+/**
+ * Fetches a paginated batch of published tales.
+ * Returns both the normalized tales and the last document snapshot
+ * so the caller can request the next page via startAfter.
+ *
+ * @param {Object} [options]
+ * @param {number} [options.count=20] - Page size
+ * @param {import('firebase/firestore').DocumentSnapshot|null} [options.after=null] - Cursor
+ * @returns {Promise<{tales: import('@state/schemas/tale.schema.js').Tale[], lastDoc: import('firebase/firestore').DocumentSnapshot|null}>}
+ */
+export async function getTalesPage({ count = 20, after = null } = {}) {
+  let q = query(
+    refs.tales(),
+    where('status', '==', 'published'),
+    orderBy('publishedAt', 'desc'),
+    limit(count)
+  );
+
+  if (after) {
+    q = query(
+      refs.tales(),
+      where('status', '==', 'published'),
+      orderBy('publishedAt', 'desc'),
+      startAfter(after),
+      limit(count)
+    );
+  }
+
+  const snap = await safeAsync(getDocs(q), {
+    fallback: { empty: true, docs: [] },
+    logContext: 'services.tale.getTalesPage',
+  });
+
+  if (snap.empty) return { tales: [], lastDoc: null };
+
+  return {
+    tales: snap.docs.map((d) => createTale(d.id, d.data())),
+    lastDoc: snap.docs[snap.docs.length - 1],
+  };
+}
+
+/**
+ * Fetches a specific page of published tales with total count.
+ * Uses page number instead of cursor for bidirectional navigation.
+ *
+ * @param {Object} options
+ * @param {number} [options.page=1] - 1-based page number
+ * @param {number} [options.perPage=8] - Items per page
+ * @returns {Promise<{tales: Tale[], total: number, hasMore: boolean}>}
+ */
+export async function getTalesPageNumbered({ page = 1, perPage = 8 } = {}) {
+  // Get total count first
+  const countQuery = query(refs.tales(), where('status', '==', 'published'));
+  const countSnap = await safeAsync(getCountFromServer(countQuery), {
+    fallback: { data: () => ({ count: 0 }) },
+    logContext: 'services.tale.getTalesPageNumbered.count',
+  });
+  const total = countSnap.data().count;
+
+  // Build page query
+  let q = query(
+    refs.tales(),
+    where('status', '==', 'published'),
+    orderBy('publishedAt', 'desc'),
+    limit(perPage)
+  );
+
+  // If not first page, use startAfter with cursor from previous page
+  if (page > 1) {
+    // Get cursor from previous page
+    const prevQ = query(
+      refs.tales(),
+      where('status', '==', 'published'),
+      orderBy('publishedAt', 'desc'),
+      limit((page - 1) * perPage)
+    );
+    const prevSnap = await safeAsync(getDocs(prevQ), {
+      fallback: { docs: [] },
+      logContext: 'services.tale.getTalesPageNumbered.cursor',
+    });
+    const lastDoc = prevSnap.docs[prevSnap.docs.length - 1];
+
+    if (lastDoc) {
+      q = query(
+        refs.tales(),
+        where('status', '==', 'published'),
+        orderBy('publishedAt', 'desc'),
+        startAfter(lastDoc),
+        limit(perPage)
+      );
+    }
+  }
+
+  const snap = await safeAsync(getDocs(q), {
+    fallback: { empty: true, docs: [] },
+    logContext: 'services.tale.getTalesPageNumbered.data',
+  });
+  const tales = snap.docs.map((d) => createTale(d.id, d.data()));
+
+  return {
+    tales,
+    total,
+    hasMore: page * perPage < total,
+  };
 }
 
 /**
@@ -51,7 +174,10 @@ export async function getTalesByAuthor(authorId) {
   if (!authorId) return [];
 
   const q = query(refs.tales(), where('authorId', '==', authorId));
-  const snap = await getDocs(q);
+  const snap = await safeAsync(getDocs(q), {
+    fallback: { empty: true, docs: [] },
+    logContext: 'services.tale.getTalesByAuthor',
+  });
 
   if (snap.empty) return [];
 

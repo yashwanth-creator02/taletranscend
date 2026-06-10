@@ -5,9 +5,12 @@
 
 import { auth, onSnapshot, setDoc, serverTimestamp, getDoc, refs } from '@fb/index.js';
 
+import { createLogger } from '@/utils';
 import { createUserProfile } from '@state/index.js';
 import { updateProfileUI, showNotification } from './ui.js';
 import { profileState } from './state.js';
+
+const log = createLogger('ProfileSync');
 
 // Re-export UI utilities so profile/index.js barrel works without changing
 export * from './ui.js';
@@ -27,16 +30,23 @@ export * from './ui.js';
 export function startProfileSync(uid) {
   // Clean up stale listener — prevents duplicate listeners on hot reload
   if (profileState.unsubscribeProfile) {
+    log.debug('Cleaning up existing profile sync listener');
     profileState.unsubscribeProfile();
     profileState.unsubscribeProfile = null;
   }
 
+  log.info('Starting real-time profile sync', { uid });
   profileState.uid = uid;
 
   profileState.unsubscribeProfile = onSnapshot(
     refs.user(uid),
     (snapshot) => {
-      if (!snapshot.exists()) return;
+      if (!snapshot.exists()) {
+        log.warn('Profile snapshot received but document does not exist', { uid });
+        return;
+      }
+
+      log.debug('Profile snapshot received', { uid });
 
       // Normalize through schema — guarantees every field is present with safe defaults
       const normalized = createUserProfile(uid, snapshot.data());
@@ -64,7 +74,7 @@ export function startProfileSync(uid) {
       updateProfileUI(profileState);
     },
     (error) => {
-      console.error('[profile] Sync error:', error);
+      log.error('Sync error:', error);
       showNotification('Failed to sync profile. Check your connection.', 'error');
     }
   );
@@ -94,7 +104,10 @@ export async function saveProfile() {
     return;
   }
 
-  const userRef = refs.user(auth.currentUser.uid);
+  const uid = auth.currentUser.uid;
+  log.info('Saving profile...', { uid });
+
+  const userRef = refs.user(uid);
   const snapshot = await getDoc(userRef);
 
   const data = {
@@ -113,6 +126,7 @@ export async function saveProfile() {
 
   // Stamp createdAt and joinedAt on first save only
   if (!snapshot.exists()) {
+    log.info('First-time profile save; stamping creation dates');
     data.createdAt = serverTimestamp();
     data.joinedAt = serverTimestamp();
     data.role = 'reader';
@@ -121,9 +135,10 @@ export async function saveProfile() {
 
   try {
     await setDoc(userRef, data, { merge: true });
+    log.info('Profile saved successfully');
     showNotification('Profile saved.', 'success');
   } catch (error) {
-    console.error('[profile] Save error:', error);
+    log.error('Save error:', error);
     showNotification('Failed to save profile. Please try again.', 'error');
   }
 }
@@ -156,7 +171,7 @@ export async function computeAndSyncStats(uid) {
       streak: profileState.writingStreak,
     };
   } catch (err) {
-    console.error('[profile] computeAndSyncStats error:', err);
+    log.error('computeAndSyncStats error:', err);
     return { wordsWritten: 0, readers: 0, readingTime: 0, streak: 0 };
   }
 }

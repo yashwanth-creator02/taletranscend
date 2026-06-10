@@ -15,7 +15,6 @@ export default [
         ...globals.browser, // Browser globals like window, document
         ...globals.node, // Node globals like process, Buffer
         firebase: 'readonly', // Your Firebase SDK global
-        __initial_auth_token: 'readonly', // Custom global
         lucide: 'readonly', // Icon library global
       },
     },

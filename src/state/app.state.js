@@ -11,6 +11,10 @@
 
 import { createUserProfile } from './schemas/user.schema.js';
 import { createReaderPreferences } from './schemas/user.schema.js';
+import { IS_DEV_MODE } from '@config/app.config.js';
+import { createLogger } from '@/utils';
+
+const log = createLogger('AppState');
 
 /**
  * @typedef {Object} AppState
@@ -19,6 +23,7 @@ import { createReaderPreferences } from './schemas/user.schema.js';
  * @property {import('./schemas/user.schema.js').ReaderPreferences} readerPrefs
  * @property {boolean}                                            prefsLoaded
  * @property {boolean}                                            profileLoaded
+ * @property {boolean}                                            isDev
  * @property {(() => void)|null}                                  unsubscribeProfile
  */
 
@@ -42,6 +47,9 @@ export const appState = {
 
   // True once the user profile document has been fetched at least once.
   profileLoaded: false,
+
+  // Global Dev Mode toggle.
+  isDev: IS_DEV_MODE,
 
   // Firestore onSnapshot unsubscribe handle for the profile listener.
   // Stored here so any page can call appState.unsubscribeProfile?.() on teardown.
@@ -87,3 +95,5 @@ export function setAppReaderPrefs(data) {
   appState.readerPrefs = createReaderPreferences(data);
   appState.prefsLoaded = true;
 }
+
+log.debug('AppState initialized');

@@ -27,6 +27,9 @@ import { navState } from './nav.state.js';
 import { buildNav } from './nav.templates.js';
 import { renderIcons } from './nav.utils.js';
 import { attachGlobalListeners, detachGlobalListeners, updateNavUser } from './nav.interactions.js';
+import { createLogger } from '@/utils';
+
+const log = createLogger('Nav');
 
 /* ─────────────────────────────────────────────
    Public lifecycle API
@@ -48,6 +51,8 @@ export function initNav() {
   // Guard: Check if either component is already mounted
   if (document.getElementById('app-nav') || document.getElementById('mobile-dock-container'))
     return;
+
+  log.info('Initializing Navigation');
 
   // 1. Build HTML and destructure parts
   const { headerHtml, dockHtml } = buildNav();
@@ -80,6 +85,7 @@ export function initNav() {
  * Call this when doing SPA-style full teardown, or in tests.
  */
 export function destroyNav() {
+  log.info('Destroying Navigation');
   // Unsubscribe Firebase auth listener
   navState.unsubscribeAuth?.();
   navState.unsubscribeAuth = null;

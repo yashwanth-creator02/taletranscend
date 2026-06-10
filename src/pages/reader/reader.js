@@ -48,8 +48,10 @@ import {
 
 import { getDoc, setDoc, serverTimestamp, refs } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
-import { navigateTo, initPageReveal, readyReveal } from '@/utils';
+import { navigateTo, initPageReveal, readyReveal, setupAuthTimeout, createLogger } from '@/utils';
 import { TTS_CHAR_LIMIT } from '@config/app.config.js';
+
+const log = createLogger('Reader');
 
 // Hide body immediately to prevent flash of unstyled content
 initPageReveal();
@@ -529,7 +531,7 @@ async function _handleBookmark() {
       showToast('Removed from Library.', 'info');
     }
   } catch (err) {
-    console.error('[reader] Bookmark failed:', err);
+    log.error('Bookmark failed:', err);
     readerState.bookmarked = !readerState.bookmarked;
     showToast('Could not update bookmark.', 'error');
   }
@@ -554,7 +556,7 @@ async function _loadAndApplyCloudPrefs(userId) {
     setAppReaderPrefs(prefs);
     applyCloudPrefs(appState.readerPrefs);
   } catch (err) {
-    console.warn('[reader] Could not load cloud prefs, using local defaults:', err);
+    log.warn('Could not load cloud prefs, using local defaults:', err);
   }
 }
 
@@ -580,7 +582,7 @@ export async function saveReaderPrefs(userId) {
       { merge: true }
     );
   } catch (err) {
-    console.warn('[reader] Could not save prefs to cloud:', err);
+    log.warn('Could not save prefs to cloud:', err);
   }
 }
 
@@ -591,7 +593,14 @@ export async function saveReaderPrefs(userId) {
 // Apply localStorage prefs immediately — before auth resolves — to avoid a flash
 initTheme();
 
+const authTimeout = setupAuthTimeout(
+  'article-body',
+  'Failed to load chapter. Please refresh.',
+  15000
+);
+
 initAuth(async (user) => {
+  clearTimeout(authTimeout);
   setAppUser(user.uid);
   readerState.userId = user.uid;
   readerState.userName = user.displayName || 'You';

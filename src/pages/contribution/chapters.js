@@ -5,6 +5,9 @@
 import { state } from './state.js';
 import { updateStats } from './editor.js';
 import { initIcons } from '@ui/components/icons.js';
+import { escapeText as escapeHtml, createLogger } from '@/utils';
+
+const log = createLogger('Chapters');
 
 /* ── Add ──────────────────────────────────────────────────────────── */
 
@@ -13,6 +16,7 @@ import { initIcons } from '@ui/components/icons.js';
  * and refreshes the sidebar and editor.
  */
 export function addNewChapter() {
+  log.info('Adding new chapter');
   state.chapters.push({ title: 'Untitled Chapter', content: '' });
   state.currentChapterIndex = state.chapters.length - 1;
 
@@ -31,8 +35,12 @@ export function addNewChapter() {
  * @param {number} index
  */
 export function deleteChapter(index) {
-  if (state.chapters.length <= 1) return; // Always keep at least one chapter
+  if (state.chapters.length <= 1) {
+    log.warn('Delete requested on the last remaining chapter — blocked');
+    return;
+  }
 
+  log.info('Deleting chapter', { index });
   state.chapters.splice(index, 1);
 
   // Keep index in bounds
@@ -95,7 +103,7 @@ export function renderChapterList() {
     item.innerHTML = `
       <button class="chapter-item__select" type="button" aria-label="Select chapter ${index + 1}">
         <span class="chapter-item__num">${index + 1}</span>
-        <span class="chapter-item__title">${ch.title || 'Untitled Chapter'}</span>
+        <span class="chapter-item__title">${escapeHtml(ch.title || 'Untitled Chapter')}</span>
       </button>
       <div class="chapter-item__actions">
         <button
@@ -206,3 +214,5 @@ function saveCurrentChapterToState() {
   chapter.content = document.getElementById('chapter-content')?.value ?? '';
   chapter.title = document.getElementById('current-chapter-title')?.value ?? '';
 }
+
+log.debug('Chapters initialized');

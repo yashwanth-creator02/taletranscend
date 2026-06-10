@@ -3,6 +3,12 @@
 <html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
+    <style>
+      html {
+        opacity: 0;
+        transition: opacity 220ms cubic-bezier(0.4, 0, 0.2, 1);
+      }
+    </style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Library | TaleTranscend</title>
 
@@ -283,15 +289,45 @@
             </div>
           </div>
 
-          <!-- Cards grid -->
-          <section
-            id="cards-grid"
-            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8 md:gap-10"
-            aria-live="polite"
-            aria-label="Tale cards"
-          >
-            <!-- Populated by renderCardsGrid() via library.js -->
-          </section>
+          <!-- Cards grid and button wrapper-->
+          <div class="flex flex-col gap-8">
+            <section
+              id="cards-grid"
+              class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8 md:gap-10"
+              aria-live="polite"
+              aria-label="Tale cards"
+            >
+              <!-- Populated by renderCardsGrid() via library.js -->
+            </section>
+
+            <!-- Pagination -->
+            <div id="pagination-wrap" class="flex items-center justify-center gap-4 py-10">
+              <button
+                id="pagination-prev"
+                type="button"
+                class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/10 bg-white/5 text-zinc-400 text-xs font-black uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                Previous
+              </button>
+
+              <span
+                id="pagination-info"
+                class="text-xs font-medium text-zinc-500 tracking-wide min-w-[140px] text-center"
+              >
+                Page 1 of 1
+              </span>
+
+              <button
+                id="pagination-next"
+                type="button"
+                class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/10 bg-white/5 text-zinc-400 text-xs font-black uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
         </div>
       </main>
     </div>

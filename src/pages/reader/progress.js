@@ -2,6 +2,10 @@
 // Scroll progress tracking, top progress bar, scroll restoration,
 // and reading time tracking for the reader page.
 
+import { createLogger } from '@/utils';
+
+const log = createLogger('ReaderProgress');
+
 /* ─────────────────────────────────────────────
    Progress Bar
    ───────────────────────────────────────────── */
@@ -12,6 +16,7 @@
  * @param {{ scrollPercent: number }} params
  */
 export function updateReaderProgress({ scrollPercent = 0 }) {
+  log.debug('Updating reader progress', { scrollPercent });
   // 1. Top progress bar
   const topBar = document.getElementById('progressBar');
   if (topBar) topBar.style.width = `${scrollPercent}%`;

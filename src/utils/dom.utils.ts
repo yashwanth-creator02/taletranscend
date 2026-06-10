@@ -1,6 +1,59 @@
 // src/utils/dom.utils.ts
 // DOM helper utilities.
 
+import { createLogger } from '@/utils';
+
+const log = createLogger('DomUtils');
+
+/* ─────────────────────────────────────────────
+   Selectors
+   ───────────────────────────────────────────── */
+
+/**
+ * Selects a single element from the DOM.
+ */
+export function qs<T extends HTMLElement>(selector: string): T | null {
+  return document.querySelector(selector);
+}
+
+/**
+ * Selects all elements matching a selector.
+ */
+export function qsa<T extends HTMLElement>(selector: string): T[] {
+  return Array.from(document.querySelectorAll(selector));
+}
+
+/* ─────────────────────────────────────────────
+   Creation & Manipulation
+   ───────────────────────────────────────────── */
+
+/**
+ * Creates a new DOM element with optional attributes and text.
+ */
+export function createEl<T extends keyof HTMLElementTagNameMap>(
+  tag: T,
+  attrs: Record<string, string> = {},
+  text: string = ''
+): HTMLElementTagNameMap[T] {
+  const el = document.createElement(tag);
+  Object.entries(attrs).forEach(([key, val]) => {
+    if (key === 'class' || key === 'className') {
+      el.className = val;
+    } else {
+      el.setAttribute(key, val);
+    }
+  });
+  if (text) el.textContent = text;
+  return el;
+}
+
+/**
+ * Toggles a CSS class on an element.
+ */
+export function toggleClass(el: HTMLElement | null, className: string, force?: boolean): void {
+  el?.classList.toggle(className, force);
+}
+
 /* ─────────────────────────────────────────────
    Inputs
    ───────────────────────────────────────────── */
@@ -57,3 +110,5 @@ export function setText(id: string, value: string | number | null | undefined): 
   const el = document.getElementById(id);
   if (el) el.textContent = String(value ?? '');
 }
+
+log.debug('DomUtils initialized');

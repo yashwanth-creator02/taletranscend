@@ -3,7 +3,9 @@
 // Uses navigateTo() for all page changes so transitions are smooth.
 
 import { readerState } from './state.js';
-import { navigateTo } from '@/utils';
+import { navigateTo, createLogger } from '@/utils';
+
+const log = createLogger('ReaderMobile');
 
 /* ─────────────────────────────────────────────
    Settings Drawer (Mobile)
@@ -17,6 +19,7 @@ export function initMobileDrawer() {
   if (!panel) return;
 
   const openPanel = () => {
+    log.debug('Opening mobile settings drawer');
     panel.classList.remove('hidden');
     panel.classList.add('is-open');
     document.body.style.overflow = 'hidden';
@@ -24,6 +27,7 @@ export function initMobileDrawer() {
   };
 
   const closePanel = () => {
+    log.debug('Closing mobile settings drawer');
     panel.classList.remove('is-open');
     document.body.style.overflow = '';
     readerState.settingsPanelOpen = false;

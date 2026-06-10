@@ -15,11 +15,19 @@
 
 import { auth, setDoc, updateDoc, serverTimestamp, refs } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
-import { navigateTo } from '@/utils';
-import { countWords, estimateReadMins } from '@/utils';
+import {
+  navigateTo,
+  countWords,
+  estimateReadMins,
+  safeAsync,
+  guardOffline,
+  createLogger,
+} from '@/utils';
 
 import { state } from './state.js';
 import { saveAllChapters, syncMetadataFromDom } from './cloud.js';
+
+const log = createLogger('Publish');
 
 /* ─────────────────────────────────────────────
    Publish Pipeline
@@ -30,8 +38,16 @@ import { saveAllChapters, syncMetadataFromDom } from './cloud.js';
  * Validates state, writes to the tales collection, then redirects to the new tale.
  */
 export async function publishFullTale() {
+  log.info('Publish pipeline initiated');
   if (!auth.currentUser) {
+    log.warn('Publish requested without authenticated user');
     _setPublishStatus('You must be signed in to publish.', 'error');
+    return;
+  }
+
+  if (guardOffline()) {
+    log.warn('Publish requested while offline');
+    _setPublishStatus('You are offline. Connect to publish.', 'error');
     return;
   }
 
@@ -40,6 +56,7 @@ export async function publishFullTale() {
   /* ── Validation ──────────────────────────────────────────────── */
 
   if (!state.title?.trim()) {
+    log.warn('Publish failed: missing title');
     _setPublishStatus('Add a title before publishing.', 'error');
     return;
   }
@@ -54,33 +71,55 @@ export async function publishFullTale() {
     return;
   }
 
-  _setPublishStatus('Publishing…', 'loading');
+  _setPublishStatus('Submitting to the archive...', 'loading');
   _setPublishButtonsDisabled(true);
 
-  try {
-    const userId = auth.currentUser.uid;
-    const authorName = auth.currentUser.displayName || `Scribe ${userId.slice(0, 5)}`;
+  const userId = auth.currentUser.uid;
 
-    /* ── Step 1: Save all chapters to draft ─────────────────── */
+  const taleId = await safeAsync(_doPublish(userId), {
+    errorMessage: 'Publishing failed. Your draft is safe — try again.',
+    logContext: 'pages.contribution.publish.fullPipeline',
+  });
 
-    await saveAllChapters(userId);
+  if (taleId) {
+    showToast('Legend recorded in the archives.', 'success');
+    _setPublishStatus('Published successfully!', 'success');
 
-    /* ── Step 2: Determine tale ID ──────────────────────────── */
+    setTimeout(() => {
+      navigateTo(`tale.html?id=${taleId}`);
+    }, 1500);
+  } else {
+    _setPublishStatus('Publish failed. Please try again.', 'error');
+    _setPublishButtonsDisabled(false);
+  }
+}
 
-    // Reuse existing draft ID if available, otherwise generate a new one via
-    // the tale ref (Firestore auto-ID approach: write with a known ref).
-    const taleId = state.draftId !== 'new' ? state.draftId : _generateId();
-    const taleRef = refs.tale(taleId);
+/**
+ * Internal logic for the multi-step publishing process.
+ * Separated so it can be wrapped by safeCall.
+ *
+ * @param {string} userId
+ * @returns {Promise<string>} The published tale ID
+ */
+async function _doPublish(userId) {
+  const authorName = auth.currentUser.displayName || `Scribe ${userId.slice(0, 5)}`;
 
-    /* ── Step 3: Write tale with status=pending ─────────────── */
+  /* ── Step 1: Save all chapters to draft ─────────────────── */
+  await safeAsync(saveAllChapters(userId), {
+    logContext: 'pages.contribution.publish.saveDraftChapters',
+  });
 
-    const description = state.synopsis?.trim() || _extractDescription(state.chapters);
-    const wordCount = state.chapters.reduce((acc, ch) => {
-      return acc + countWords(ch.content);
-    }, 0);
-    const estimatedReadMins = estimateReadMins(wordCount);
+  /* ── Step 2: Determine tale ID ──────────────────────────── */
+  const id = state.draftId !== 'new' ? state.draftId : _generateId();
+  const taleRef = refs.tale(id);
 
-    await setDoc(taleRef, {
+  /* ── Step 3: Write tale with status=pending ─────────────── */
+  const description = state.synopsis?.trim() || _extractDescription(state.chapters);
+  const wordCount = state.chapters.reduce((acc, ch) => acc + countWords(ch.content), 0);
+  const estimatedReadMins = estimateReadMins(wordCount);
+
+  await safeAsync(
+    setDoc(taleRef, {
       title: state.title,
       authorId: userId,
       authorName,
@@ -122,28 +161,29 @@ export async function publishFullTale() {
       lastChapterAddedAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
       createdAt: serverTimestamp(),
-    });
+    }),
+    { logContext: 'pages.contribution.publish.writeTaleDoc' }
+  );
 
-    /* ── Step 4: Auto-approve (moderation hook) ─────────────── */
-
-    // In a future version this step will be gated behind a moderation queue.
-    // For now, auto-approve immediately after submission.
-    await updateDoc(taleRef, {
+  /* ── Step 4: Auto-approve (moderation hook) ─────────────── */
+  await safeAsync(
+    updateDoc(taleRef, {
       status: 'published',
       publishedAt: serverTimestamp(),
       reviewedAt: serverTimestamp(),
       reviewedBy: 'auto-approve',
-    });
+    }),
+    { logContext: 'pages.contribution.publish.autoApprove' }
+  );
 
-    /* ── Step 5: Write chapters subcollection ───────────────── */
-
-    await Promise.all(
+  /* ── Step 5: Write chapters subcollection ───────────────── */
+  await safeAsync(
+    Promise.all(
       state.chapters.map(async (chapter, index) => {
         const chapterWordCount = countWords(chapter.content);
         const chapterReadMins = estimateReadMins(chapterWordCount);
 
-        await setDoc(refs.chapter(taleId, index), {
-          // chapterNum is 1-based for display — bug fix: was using index (0-based)
+        await setDoc(refs.chapter(id, index), {
           chapterNum: index + 1,
           title: chapter.title?.trim() || `Fragment ${index + 1}`,
           content: chapter.content || '',
@@ -153,31 +193,23 @@ export async function publishFullTale() {
           updatedAt: serverTimestamp(),
         });
       })
-    );
+    ),
+    { logContext: 'pages.contribution.publish.writeChapters' }
+  );
 
-    /* ── Step 6: Update draft with published reference ──────── */
-
-    if (state.draftId !== 'new') {
-      await updateDoc(refs.draft(userId, state.draftId), {
-        publishedTaleId: taleId,
+  /* ── Step 6: Update draft with published reference ──────── */
+  if (state.draftId !== 'new') {
+    await safeAsync(
+      updateDoc(refs.draft(userId, state.draftId), {
+        publishedTaleId: id,
         lastPublishedAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-      });
-    }
-
-    showToast('Legend recorded in the archives.', 'success');
-    _setPublishStatus('Published successfully!', 'success');
-
-    setTimeout(() => {
-      navigateTo(`tale.html?id=${taleId}`);
-    }, 1500);
-  } catch (error) {
-    console.error('[publish] Pipeline failed:', error);
-    showToast('Neural transmission failed.', 'error');
-    _setPublishStatus('Publish failed. Please try again.', 'error');
-  } finally {
-    _setPublishButtonsDisabled(false);
+      }),
+      { logContext: 'pages.contribution.publish.updateDraftRef' }
+    );
   }
+
+  return id;
 }
 
 /* ─────────────────────────────────────────────
@@ -271,3 +303,5 @@ function _setPublishButtonsDisabled(disabled) {
     }
   });
 }
+
+log.debug('Publish initialized');

@@ -8,15 +8,24 @@ import '@css/components.css';
 import '@css/pages/home.css';
 
 import { initNav } from '@ui/components/nav/nav.js';
-import { navigateTo, initPageReveal, readyReveal } from '@/utils';
+import {
+  navigateTo,
+  initPageReveal,
+  readyReveal,
+  escapeHtml as escapeHtml,
+  createLogger,
+} from '@/utils';
 import { initIcons } from '@ui/components/icons.js';
 import { getTales } from '@services/index.js';
 import { DEFAULT_COVER_URL } from '@config/app.config.js';
+
+const log = createLogger('Home');
 
 initPageReveal();
 initNav();
 
 document.addEventListener('DOMContentLoaded', () => {
+  log.info('Home page initialized');
   initIcons();
   _initInteractions();
   readyReveal();
@@ -53,6 +62,7 @@ function _initInteractions() {
 function _performSearch() {
   const term = document.getElementById('home-search-input')?.value.trim();
   if (!term) return;
+  log.info('Performing search:', term);
   navigateTo(`library.html?search=${encodeURIComponent(term)}`);
 }
 
@@ -75,14 +85,16 @@ async function _loadTrendingTales() {
     const tales = await getTales({ status: 'published', count: 3 });
 
     if (!tales.length) {
+      log.info('No trending tales found');
       _hideTrendingSection();
       return;
     }
 
+    log.info(`Loaded ${tales.length} trending tales`);
     container.innerHTML = tales.map(_renderTrendingCard).join('');
     initIcons();
   } catch (err) {
-    console.error('[home] Failed to load trending tales:', err);
+    log.error('Failed to load trending tales:', err);
     _hideTrendingSection();
   }
 }
@@ -125,8 +137,14 @@ function _hideTrendingSection() {
  */
 function _renderTrendingCard(tale) {
   const cover = tale.coverUrl || DEFAULT_COVER_URL;
-
   const count = tale.chapterCount || 0;
+
+  const safeTitle = escapeHtml(tale.title || 'Untitled Tale');
+  const safeDescription = escapeHtml(
+    tale.description || 'A mysterious tale waiting to be uncovered...'
+  );
+  const safeEra = escapeHtml(tale.era || 'Unknown Era');
+  const safeAuthor = escapeHtml(tale.authorName || 'Unknown Scribe');
 
   return `
     <a
@@ -136,7 +154,7 @@ function _renderTrendingCard(tale) {
       <div class="aspect-[4/3] rounded-[2rem] overflow-hidden mb-6 border border-zinc-800">
         <img
           src="${cover}"
-          alt="${tale.title}"
+          alt="${safeTitle}"
           class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
           loading="lazy"
         />
@@ -144,7 +162,7 @@ function _renderTrendingCard(tale) {
 
       <div class="flex items-center gap-2 mb-3">
         <span class="bg-indigo-500/10 text-indigo-400 text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md">
-          ${tale.era || 'Unknown Era'}
+          ${safeEra}
         </span>
         <span class="text-zinc-600 text-[10px] font-bold">
           ${count} ${count === 1 ? 'Fragment' : 'Fragments'}
@@ -152,16 +170,16 @@ function _renderTrendingCard(tale) {
       </div>
 
       <h3 class="text-2xl font-extrabold text-white mb-3 group-hover:text-indigo-400 transition-colors truncate">
-        ${tale.title || 'Untitled Tale'}
+        ${safeTitle}
       </h3>
 
       <p class="text-slate-500 text-sm leading-relaxed mb-6 line-clamp-3">
-        ${tale.description || 'A mysterious tale waiting to be uncovered...'}
+        ${safeDescription}
       </p>
 
       <div class="flex items-center justify-between pt-4 border-t border-zinc-800/50">
         <span class="text-zinc-500 text-xs font-bold">
-          ${tale.authorName || 'Unknown Scribe'}
+          ${safeAuthor}
         </span>
         <span class="flex items-center gap-1 text-indigo-400 text-xs font-bold group-hover:gap-2 transition-all">
           Read

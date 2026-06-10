@@ -8,6 +8,10 @@
 
 import { libraryState } from './state.js';
 import { initIcons } from '@ui/components/icons.js';
+import { escapeHtml as escapeHtml, createLogger } from '@/utils';
+
+const log = createLogger('LibraryUI');
+log.debug('Module initialized');
 
 /* ─────────────────────────────────────────────
    Sidebar Toggle
@@ -78,7 +82,7 @@ export function buildEraChips(eras) {
       data-era="${era}"
       class="era-chip${era === libraryState.activeEra ? ' era-chip--active' : ' era-chip--inactive'}"
     >
-      ${label}
+      ${escapeHtml(label)}
     </button>
   `
     )
@@ -168,7 +172,7 @@ export function showGridEmpty(message = 'No tales found in the archives.') {
       </div>
       <div class="space-y-2">
         <h3 class="text-xl font-cinzel font-bold text-white tracking-tight">The Weave is Silent</h3>
-        <p class="text-sm text-slate-500 max-w-xs mx-auto leading-relaxed font-medium italic">${message}</p>
+        <p class="text-sm text-slate-500 max-w-xs mx-auto leading-relaxed font-medium italic">${escapeHtml(message)}</p>
       </div>
       <button
         id="empty-search-focus-btn"

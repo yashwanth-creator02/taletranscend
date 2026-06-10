@@ -4,18 +4,23 @@
 import { readerState } from './state.js';
 import { renderTocPanel } from './templates.js';
 import { initIcons } from '@ui/components/icons.js';
+import { createLogger } from '@/utils';
+
+const log = createLogger('ReaderTOC');
 
 /**
  * Builds the TOC list based on headers in the article body.
  * Note: Now largely handled by templates.js, this builds the section list.
  */
 export function buildTOC() {
+  log.debug('Building Table of Contents from DOM');
   const article = document.getElementById('article-body');
   if (!article) return;
 
   const currentChapter = readerState.chapters.find((c) => c.id === readerState.currentChapterId);
   if (currentChapter) {
     currentChapter.sections = _extractSectionsFromDOM(article);
+    log.info(`TOC built: ${currentChapter.sections.length} sections found`);
   }
 }
 
