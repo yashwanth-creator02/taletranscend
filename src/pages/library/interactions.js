@@ -5,7 +5,10 @@
 
 import { showToast } from '@ui/components/toast.js';
 import { initIcons } from '@ui/components/icons.js';
-import { navigateTo } from '@/utils';
+import { navigateTo, createLogger } from '@/utils';
+
+const log = createLogger('LibraryInteractions');
+log.debug('Module initialized');
 import {
   resolveResumePoint,
   addToBookmarks,
@@ -95,18 +98,22 @@ export function setupCardInteractions(userId) {
    ───────────────────────────────────────────── */
 
 async function _handleResume(userId, taleId) {
+  log.info('Resume requested', { taleId });
   try {
     const resume = await resolveResumePoint({ userId, taleId });
     const chapterId = resume?.chapterIndex ?? 0;
+    log.info('Resume point resolved', { chapterId });
     navigateTo(`reader.html?taleId=${encodeURIComponent(taleId)}&chapterId=${chapterId}`);
   } catch (err) {
-    console.error('[library] Resume failed:', err);
+    log.error('Resume failed:', err);
   }
 }
 
 function _handleCopyLink(taleId) {
+  log.info('Copy link requested', { taleId });
   // Bug fix: was building URL with wrong path after refactor
   const url = `${window.location.origin}/src/views/tale.html?id=${encodeURIComponent(taleId)}`;
+  log.debug('Link built', { url });
   const modal = document.getElementById('copy-link-modal');
   const input = document.getElementById('copy-link-input');
   if (!modal || !input) return;
@@ -161,7 +168,7 @@ function _confirmMarkFinished(onConfirm) {
     try {
       await onConfirm();
     } catch (err) {
-      console.error('[library] Mark finished:', err);
+      log.error('Mark finished:', err);
     }
   };
 
@@ -187,7 +194,7 @@ async function _handleCouple(userId, taleId, btn) {
     _closeAllMenus();
     showToast('Added to shelf.', 'success');
   } catch (err) {
-    console.error('[library] Couple failed:', err);
+    log.error('Couple failed:', err);
     showToast('Could not add to shelf.', 'error');
   } finally {
     btn.removeAttribute('disabled');
@@ -206,7 +213,7 @@ async function _handleDecouple(userId, taleId, btn) {
     _closeAllMenus();
     showToast('Removed from shelf.', 'info');
   } catch (err) {
-    console.error('[library] Decouple failed:', err);
+    log.error('Decouple failed:', err);
     showToast('Could not remove from shelf.', 'error');
   } finally {
     btn.removeAttribute('disabled');

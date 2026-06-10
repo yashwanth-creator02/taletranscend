@@ -4,9 +4,9 @@
 // Auto-save to state is debounced to avoid excessive writes on every keystroke.
 
 import { state } from './state.js';
-import { debounce } from '@/utils';
-import { setText } from '@/utils';
-import { countWords, estimateReadMins } from '@/utils';
+import { debounce, setText, countWords, createLogger } from '@/utils';
+
+const log = createLogger('Editor');
 
 /* ── Auto-Save ────────────────────────────────────────────────────── */
 
@@ -19,6 +19,7 @@ export const autoSaveLocal = debounce(function () {
   const chapter = state.chapters[state.currentChapterIndex];
   if (!chapter) return;
 
+  log.debug('Auto-saving to local state...', { index: state.currentChapterIndex });
   const content = document.getElementById('chapter-content')?.value ?? '';
   chapter.content = content;
   state.isDirty = true;
@@ -45,7 +46,6 @@ export const autoSaveLocal = debounce(function () {
  */
 export function updateStats() {
   const content = document.getElementById('chapter-content')?.value ?? '';
-  const trimmed = content.trim();
   const words = countWords(content);
   const chars = content.length;
 
@@ -58,3 +58,5 @@ export function updateStats() {
   setText('stat-chars', `${chars} Characters`);
   setText('stat-reading-time', readingLabel);
 }
+
+log.debug('Editor initialized');

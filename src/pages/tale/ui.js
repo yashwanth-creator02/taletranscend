@@ -3,10 +3,12 @@
 // Keeps the v2 rendering logic, but maps output to the older DOM IDs used by v1.
 
 import { initIcons } from '@ui/components/icons.js';
-import { setText, escapeHtml } from '@/utils';
+import { setText, escapeHtml, createLogger } from '@/utils';
 import { getTotalReadTime } from '@services/index.js';
 import { getChapterProgress } from '@services/reader/localProgress.service.js';
 import { MS_PER_MINUTE } from '@config/app.config.js';
+
+const log = createLogger('TaleUI');
 
 /* ─────────────────────────────────────────────
    Small DOM helpers
@@ -19,11 +21,6 @@ function getEl(id) {
 function setTextIfExists(id, value) {
   const el = getEl(id);
   if (el) el.textContent = value;
-}
-
-function setHTMLIfExists(id, value) {
-  const el = getEl(id);
-  if (el) el.innerHTML = value;
 }
 
 function setCoverImage(url, title) {
@@ -88,6 +85,7 @@ export function showArchiveSkeletons() {
  * @param {string} taleId
  */
 export async function renderTale(userId, tale, taleId) {
+  log.info('Rendering tale metadata', { taleId, title: tale.title });
   const title = tale.title || 'Untitled Tale';
   const description = tale.description || 'A mysterious tale waiting to be uncovered...';
   const count = tale.chapterCount || 0;
@@ -97,6 +95,7 @@ export async function renderTale(userId, tale, taleId) {
   const genreName = tale.genre || 'Unknown Genre';
   const languageName = tale.language || 'Unknown Language';
 
+  log.debug('Updating UI elements for tale');
   setText('loading-indicator', 'Archive Link Synchronised');
   setText('header-tale-title', title);
 
@@ -177,10 +176,12 @@ export async function renderTale(userId, tale, taleId) {
  * @param {string} taleId
  */
 export function renderChapters(userId, chapters, taleId) {
+  log.info(`Rendering ${chapters.length} chapters`, { taleId });
   const list = getEl('chapter-list');
   if (!list) return;
 
   if (!chapters.length) {
+    log.info('No chapters found to render');
     list.innerHTML = `<div class="glass p-12 rounded-[2rem] text-center text-slate-600 text-[10px] font-black uppercase tracking-widest">No chronicles detected in this archive.</div>`;
     return;
   }

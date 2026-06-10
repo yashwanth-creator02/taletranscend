@@ -7,6 +7,9 @@
 //   - All magic numbers live here with a named constant
 //   - All repeated string literals (URLs, labels) live here
 
+import { createLogger } from '@/utils';
+const log = createLogger('AppConfig');
+
 // ── App Identity ─────────────────────────────────────────────────────
 
 // The Firestore root document ID under the artifacts collection.
@@ -76,3 +79,5 @@ export const AI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
 // Global Dev Mode toggle.
 // Set VITE_DEV_MODE=true in your local .env to enable developer-only features and logging.
 export const IS_DEV_MODE = import.meta.env.VITE_DEV_MODE === 'true';
+
+log.debug('App configuration initialized');

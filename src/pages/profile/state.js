@@ -1,6 +1,11 @@
 // src/pages/profile/state.js
 // Centralised mutable state for the profile page.
 
+import { createLogger } from '@/utils';
+
+const log = createLogger('ProfileState');
+log.debug('Module loaded');
+
 /**
  * @typedef {Object} ProfileState
  * @property {string|null}   uid

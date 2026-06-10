@@ -3,7 +3,9 @@
 
 import { getTalesPageNumbered } from '@services/index.js';
 import { libraryState } from './state.js';
-import { safeCall } from '@/utils';
+import { safeCall, createLogger } from '@/utils';
+
+const log = createLogger('LibraryContent');
 
 /**
  * Loads a specific page of tales.
@@ -13,8 +15,12 @@ import { safeCall } from '@/utils';
  * @returns {Promise<{tales: Tale[], total: number, hasMore: boolean}>}
  */
 export async function loadTalesPage(page) {
-  if (libraryState.isLoading) return { tales: [], total: 0, hasMore: false };
+  if (libraryState.isLoading) {
+    log.debug('Load requested while already loading', { page });
+    return { tales: [], total: 0, hasMore: false };
+  }
 
+  log.info(`Loading page ${page}...`, { perPage: libraryState.talesPerPage });
   libraryState.isLoading = true;
 
   const result = await safeCall(
@@ -28,6 +34,9 @@ export async function loadTalesPage(page) {
   libraryState.currentPage = page;
   libraryState.isLoading = false;
 
+  log.info(
+    `Loaded page ${page}. Found ${result.tales.length} tales. Total in archive: ${result.total}`
+  );
   return result;
 }
 
@@ -35,6 +44,7 @@ export async function loadTalesPage(page) {
  * Goes to next page if available.
  */
 export async function nextPage() {
+  log.info('Navigating to next page');
   return loadTalesPage(libraryState.currentPage + 1);
 }
 
@@ -42,7 +52,10 @@ export async function nextPage() {
  * Goes to previous page if available.
  */
 export async function prevPage() {
-  if (libraryState.currentPage <= 1)
+  if (libraryState.currentPage <= 1) {
+    log.info('Already on the first page');
     return { tales: libraryState.allTales, total: libraryState.totalTales, hasMore: true };
+  }
+  log.info('Navigating to previous page');
   return loadTalesPage(libraryState.currentPage - 1);
 }

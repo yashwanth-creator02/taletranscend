@@ -53,7 +53,7 @@ describe('library pagination', () => {
     libraryState.talesPerPage = 4;
     await loadTalesPage(2);
 
-    const result = await prevPage();
+    await prevPage();
 
     expect(libraryState.currentPage).toBe(1);
   });
@@ -61,7 +61,7 @@ describe('library pagination', () => {
   it('does not go below page 1', async () => {
     await loadTalesPage(1);
 
-    const result = await prevPage();
+    await prevPage();
 
     expect(libraryState.currentPage).toBe(1);
   });

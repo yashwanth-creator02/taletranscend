@@ -13,7 +13,9 @@ import {
   serverTimestamp,
   refs,
 } from '@fb/index.js';
-import { safeCall, guardOffline } from '@/utils';
+import { safeCall, guardOffline, createLogger } from '@/utils';
+
+const log = createLogger('ResonanceService');
 
 /**
  * Toggles a user's Soul Resonance (reaction) on a tale.
@@ -29,6 +31,7 @@ export async function toggleResonance(taleId) {
 
   if (guardOffline()) return { status: 'error' };
 
+  log.log('Toggling resonance', { userId: user.uid, taleId });
   return safeCall(
     (async () => {
       const reactionRef = refs.taleReaction(taleId, user.uid);

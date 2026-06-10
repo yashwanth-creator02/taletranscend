@@ -2,6 +2,11 @@
 // Manages reader progress in localStorage for offline-first persistence.
 // All cloud syncing is handled separately in cloudProgress.service.js.
 
+import { createLogger } from '@/utils';
+
+const log = createLogger('LocalProgressService');
+log.debug('Module initialized');
+
 const STORAGE_KEY = 'taletranscend:reader-progress';
 
 /* ================= Storage Helpers ================= */
@@ -17,7 +22,8 @@ export function readStorage() {
   if (!raw) return {};
   try {
     return JSON.parse(raw);
-  } catch {
+  } catch (err) {
+    log.error('Failed to parse local storage progress', err);
     // Return empty store if data is corrupted
     return {};
   }
@@ -30,7 +36,11 @@ export function readStorage() {
  * @param {Object} data - Full progress store
  */
 function writeStorage(data) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (err) {
+    log.error('Failed to write to localStorage', err);
+  }
 }
 
 /* ================= Progress ================= */
@@ -47,6 +57,7 @@ function writeStorage(data) {
 export function saveReaderProgress({ userId, taleId, chapterIndex, scrollPercent }) {
   if (!userId || !taleId || typeof chapterIndex !== 'number') return;
 
+  log.debug('Saving local progress', { taleId, chapterIndex, scrollPercent });
   const store = readStorage();
 
   // Initialize nested structure if it does not exist

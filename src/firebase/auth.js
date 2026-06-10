@@ -12,6 +12,9 @@ import {
   linkWithPopup,
 } from 'firebase/auth';
 import app from './app.js';
+import { createLogger } from '@/utils';
+
+const log = createLogger('Auth');
 
 export const auth = getAuth(app);
 
@@ -23,14 +26,22 @@ export const auth = getAuth(app);
  * @param {(user: import('firebase/auth').User) => void} onReady
  */
 export function initAuth(onReady) {
+  log.info('Initialising authentication...');
   const unsubscribe = onAuthStateChanged(auth, (user) => {
     unsubscribe(); // Prevent duplicate calls if auth state flips again
     if (user) {
+      log.info('Existing session found', { uid: user.uid, isAnonymous: user.isAnonymous });
       onReady(user);
     } else {
+      log.info('No session found. Creating anonymous identity...');
       signInAnonymously(auth)
-        .then((credential) => onReady(credential.user))
-        .catch((err) => console.error('[auth] Anonymous sign-in failed:', err));
+        .then((credential) => {
+          log.info('Anonymous session established', { uid: credential.user.uid });
+          onReady(credential.user);
+        })
+        .catch((err) => {
+          log.error('Anonymous sign-in failed:', err);
+        });
     }
   });
 }

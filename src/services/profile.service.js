@@ -6,7 +6,10 @@ import { getDocs, getDoc, refs } from '@fb/index.js';
 import { readStorage } from '@services/index.js';
 import { createTale, createDraft } from '@state/index.js';
 import { getTalesByAuthor } from './tale/getTales.js';
-import { safeAsync } from '@/utils';
+import { safeAsync, createLogger } from '@/utils';
+
+const log = createLogger('ProfileService');
+log.debug('Module initialized');
 
 /* ─────────────────────────────────────────────
    Continue Reading
@@ -22,16 +25,24 @@ import { safeAsync } from '@/utils';
 export async function getContinueReading(userId) {
   if (!userId) return [];
 
+  log.debug('Fetching continue reading list', { userId });
   const store = readStorage();
   const userProgress = store[userId];
-  if (!userProgress) return [];
+  if (!userProgress) {
+    log.info('No local progress found for user', { userId });
+    return [];
+  }
 
   // Only include tales where at least one chapter has been started
   const taleIds = Object.keys(userProgress).filter(
     (id) => Object.keys(userProgress[id]?.chapters || {}).length > 0
   );
-  if (!taleIds.length) return [];
+  if (!taleIds.length) {
+    log.info('No tales with started chapters found', { userId });
+    return [];
+  }
 
+  log.info(`Found ${taleIds.length} tales in progress. Fetching metadata...`, { taleIds });
   const tales = await Promise.all(
     taleIds.map(async (taleId) => {
       const snap = await safeAsync(getDoc(refs.tale(taleId)), {
@@ -39,7 +50,10 @@ export async function getContinueReading(userId) {
         logContext: `services.profile.getContinueReading.${taleId}`,
       });
 
-      if (!snap.exists()) return null;
+      if (!snap.exists()) {
+        log.warn(`Tale ${taleId} found in local progress but not in Firestore`);
+        return null;
+      }
 
       const tale = createTale(snap.id, snap.data());
       const chapters = userProgress[taleId]?.chapters || {};
@@ -83,6 +97,7 @@ export async function getContinueReading(userId) {
  */
 export async function getUserPublishedTales(userId) {
   if (!userId) return [];
+  log.debug('Fetching user published tales', { userId });
   return getTalesByAuthor(userId);
 }
 
@@ -100,13 +115,18 @@ export async function getUserPublishedTales(userId) {
 export async function getUserDrafts(userId) {
   if (!userId) return [];
 
+  log.debug('Fetching user drafts', { userId });
   const snapshot = await safeAsync(getDocs(refs.drafts(userId)), {
     fallback: { empty: true, docs: [] },
     logContext: 'services.profile.getUserDrafts',
   });
 
-  if (snapshot.empty) return [];
+  if (snapshot.empty) {
+    log.info('No drafts found for user', { userId });
+    return [];
+  }
 
+  log.info(`Found ${snapshot.docs.length} drafts`, { userId });
   return snapshot.docs
     .map((d) => createDraft(d.id, d.data()))
     .sort((a, b) => {
@@ -130,6 +150,7 @@ export async function getUserDrafts(userId) {
 export async function computeAndSyncStats(userId) {
   if (!userId) return 0;
 
+  log.debug('Computing stats', { userId });
   const draftsSnap = await safeAsync(getDocs(refs.drafts(userId)), {
     fallback: { empty: true, docs: [] },
     logContext: 'services.profile.computeAndSyncStats.drafts',

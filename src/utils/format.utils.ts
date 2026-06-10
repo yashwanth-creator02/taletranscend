@@ -1,8 +1,10 @@
-// src/utils/format.util.ts
-
 // src/utils/format.utils.ts
 // Shared formatting utilities.
 // Import from here for date, time, and number display formatting.
+
+import { createLogger } from '@/utils';
+
+const log = createLogger('FormatUtils');
 
 /* ─────────────────────────────────────────────
    Date Formatting
@@ -97,3 +99,5 @@ export function formatNumber(n: number | null | undefined): string {
 
   return String(num);
 }
+
+log.debug('FormatUtils initialized');

@@ -1,6 +1,10 @@
 // src/utils/dom.utils.ts
 // DOM helper utilities.
 
+import { createLogger } from '@/utils';
+
+const log = createLogger('DomUtils');
+
 /* ─────────────────────────────────────────────
    Selectors
    ───────────────────────────────────────────── */
@@ -106,3 +110,5 @@ export function setText(id: string, value: string | number | null | undefined): 
   const el = document.getElementById(id);
   if (el) el.textContent = String(value ?? '');
 }
+
+log.debug('DomUtils initialized');

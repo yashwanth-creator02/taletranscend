@@ -1,6 +1,10 @@
 // src/pages/profile/ai-name.js
 // AI helper for profile name suggestions.
 
+import { createLogger } from '@/utils';
+
+const log = createLogger('AIName');
+
 const GEMINI_MODEL = 'gemini-2.0-flash';
 const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
@@ -31,7 +35,7 @@ export async function suggestNameFromBio(bio, apiKey) {
     const raw = json.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
     return raw.trim() || null;
   } catch (err) {
-    console.error('[ai-name] Suggestion failed:', err);
+    log.error('Suggestion failed:', err);
     return null;
   }
 }

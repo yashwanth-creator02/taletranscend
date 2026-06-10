@@ -3,7 +3,9 @@
 
 import { readerState } from './state.js';
 import { initIcons } from '@ui/components/icons.js';
-import { navigateTo, escapeHtml as escapeHtml } from '@/utils';
+import { navigateTo, escapeHtml as escapeHtml, createLogger } from '@/utils';
+
+const log = createLogger('ReaderNavigation');
 
 /**
  * Renders the previous/next chapter navigation buttons and wires their click handlers.
@@ -19,6 +21,8 @@ import { navigateTo, escapeHtml as escapeHtml } from '@/utils';
 export function applyNavigation(nav) {
   const container = document.getElementById('chapter-nav');
   if (!container) return;
+
+  log.debug('Applying navigation', nav);
 
   const prev = nav.hasPrev
     ? `

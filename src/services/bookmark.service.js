@@ -5,7 +5,10 @@
 
 import { getDocs, deleteDoc, setDoc, serverTimestamp, refs } from '@fb/index.js';
 import { createBookmark } from '@state/index.js';
-import { safeAsync, guardOffline } from '@/utils';
+import { safeAsync, guardOffline, createLogger } from '@/utils';
+
+const log = createLogger('BookmarkService');
+log.debug('Module initialized');
 
 /**
  * Adds a tale to a user's bookmark collection.
@@ -21,6 +24,7 @@ export async function addToBookmarks({ userId, taleId, tale = {} }) {
   if (!userId || !taleId) return;
   if (guardOffline()) return;
 
+  log.info('Adding bookmark', { userId, taleId });
   return safeAsync(
     setDoc(
       refs.bookmark(userId, taleId),
@@ -53,6 +57,7 @@ export async function removeFromBookmarks({ userId, taleId }) {
   if (!userId || !taleId) return;
   if (guardOffline()) return;
 
+  log.info('Removing bookmark', { userId, taleId });
   return safeAsync(deleteDoc(refs.bookmark(userId, taleId)), {
     errorMessage: 'Failed to remove bookmark.',
     logContext: 'services.bookmark.removeFromBookmarks',
@@ -70,10 +75,15 @@ export async function removeFromBookmarks({ userId, taleId }) {
 export async function getBookmarks({ userId }) {
   if (!userId) return [];
 
+  log.debug('Fetching bookmarks', { userId });
   return safeAsync(
     (async () => {
       const snap = await getDocs(refs.bookmarks(userId));
-      if (snap.empty) return [];
+      if (snap.empty) {
+        log.info('No bookmarks found', { userId });
+        return [];
+      }
+      log.info(`Loaded ${snap.docs.length} bookmarks`, { userId });
       return snap.docs.map((d) => createBookmark(d.id, d.data()));
     })(),
     {
@@ -95,11 +105,14 @@ export async function getBookmarks({ userId }) {
 export async function isBookmarked({ userId, taleId }) {
   if (!userId || !taleId) return false;
 
+  log.debug('Checking bookmark status', { userId, taleId });
   return safeAsync(
     (async () => {
       const { getDoc } = await import('@fb/index.js');
       const snap = await getDoc(refs.bookmark(userId, taleId));
-      return snap.exists();
+      const exists = snap.exists();
+      log.debug('Bookmark status resolved', { userId, taleId, exists });
+      return exists;
     })(),
     {
       fallback: false,

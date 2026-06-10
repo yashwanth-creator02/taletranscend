@@ -2,6 +2,9 @@
 // Wraps async operations with consistent error handling and user feedback.
 
 import { showToast } from '@ui/components/toast.js';
+import { createLogger } from '@/utils';
+
+const log = createLogger('AsyncUtils');
 
 interface SafeAsyncOptions<T> {
   onError?: (err: any) => void;
@@ -31,7 +34,7 @@ export async function safeAsync<T>(
   try {
     return await promise;
   } catch (err) {
-    console.error(`[${logContext}] Failure:`, err);
+    log.error(`[${logContext}] Failure:`, err);
 
     if (errorMessage) {
       showToast(errorMessage, 'error');
@@ -79,3 +82,5 @@ export function guardOffline(): boolean {
   }
   return false;
 }
+
+log.debug('AsyncUtils initialized');

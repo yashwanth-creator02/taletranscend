@@ -15,10 +15,19 @@
 
 import { auth, setDoc, updateDoc, serverTimestamp, refs } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
-import { navigateTo, countWords, estimateReadMins, safeAsync, guardOffline } from '@/utils';
+import {
+  navigateTo,
+  countWords,
+  estimateReadMins,
+  safeAsync,
+  guardOffline,
+  createLogger,
+} from '@/utils';
 
 import { state } from './state.js';
 import { saveAllChapters, syncMetadataFromDom } from './cloud.js';
+
+const log = createLogger('Publish');
 
 /* ─────────────────────────────────────────────
    Publish Pipeline
@@ -29,12 +38,15 @@ import { saveAllChapters, syncMetadataFromDom } from './cloud.js';
  * Validates state, writes to the tales collection, then redirects to the new tale.
  */
 export async function publishFullTale() {
+  log.info('Publish pipeline initiated');
   if (!auth.currentUser) {
+    log.warn('Publish requested without authenticated user');
     _setPublishStatus('You must be signed in to publish.', 'error');
     return;
   }
 
   if (guardOffline()) {
+    log.warn('Publish requested while offline');
     _setPublishStatus('You are offline. Connect to publish.', 'error');
     return;
   }
@@ -44,6 +56,7 @@ export async function publishFullTale() {
   /* ── Validation ──────────────────────────────────────────────── */
 
   if (!state.title?.trim()) {
+    log.warn('Publish failed: missing title');
     _setPublishStatus('Add a title before publishing.', 'error');
     return;
   }
@@ -290,3 +303,5 @@ function _setPublishButtonsDisabled(disabled) {
     }
   });
 }
+
+log.debug('Publish initialized');

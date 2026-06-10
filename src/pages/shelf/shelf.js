@@ -1,5 +1,5 @@
 // src/pages/shelf/shelf.js
-import { initPageReveal, readyReveal } from '@/utils';
+import { initPageReveal, readyReveal, setupAuthTimeout, createLogger } from '@/utils';
 // Entry point for the shelf page.
 // Authenticates the user, loads both data sets in parallel,
 // then hands off to interactions and renderers.
@@ -21,9 +21,11 @@ import {
   initAuth,
   initIcons,
 } from './index.js';
-import { setupAuthTimeout } from '@/utils';
+
+const log = createLogger('Shelf');
 
 initPageReveal();
+log.info('Initializing Shelf page');
 initNav();
 
 /* ─────────────────────────────────────────────
@@ -39,6 +41,7 @@ const authTimeout = setupAuthTimeout('studio-grid');
 initAuth(async (user) => {
   clearTimeout(authTimeout);
   shelfState.userId = user.uid;
+  log.info('Auth resolved', { userId: user.uid });
 
   setGridLoading();
 
@@ -46,6 +49,7 @@ initAuth(async (user) => {
   // drafts in the background so hero stats can be computed immediately.
   // Bug fix: was calling loadBookmarkedTales twice (once in parallel, once after)
   // which caused two Firestore reads for no reason.
+  log.debug('Loading bookmarks and drafts...');
   await Promise.all([loadBookmarkedTales(user.uid), loadDrafts(user.uid)]);
 
   // Default view — bookmarks tab

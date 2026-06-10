@@ -4,17 +4,15 @@
 
 import { initializeApp } from 'firebase/app';
 import firebaseConfig from '@config/firebase.config.js';
-import { initNetworkListeners } from '@/utils';
+import { initNetworkListeners, createLogger } from '@/utils';
 
 const app = initializeApp(firebaseConfig);
+const log = createLogger('Firebase');
 
 // Initialize global network listeners (online/offline)
 initNetworkListeners();
 
 // Log initialization details in development only.
-// Stripped out by Vite in production builds.
-if (import.meta.env.DEV) {
-  console.log('TaleTranscend Firebase initialized:', app.name);
-}
+log.log('TaleTranscend Firebase initialized:', app.name);
 
 export default app;

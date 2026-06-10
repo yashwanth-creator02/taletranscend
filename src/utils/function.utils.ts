@@ -1,6 +1,10 @@
 // src/utils/function.utils.ts
 // Pure function utilities — debounce, throttle, once.
 
+import { createLogger } from '@/utils';
+
+const log = createLogger('FunctionUtils');
+
 /**
  * Returns a debounced version of a function.
  *
@@ -56,3 +60,5 @@ export function once<T extends (...args: unknown[]) => unknown>(
     return result;
   };
 }
+
+log.debug('FunctionUtils initialized');

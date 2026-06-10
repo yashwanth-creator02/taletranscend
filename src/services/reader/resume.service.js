@@ -4,6 +4,10 @@
 
 import { readStorage } from './localProgress.service.js';
 import { getCloudProgress } from './cloudProgress.service.js';
+import { createLogger } from '@/utils';
+
+const log = createLogger('ResumeService');
+log.debug('Module initialized');
 
 /**
  * Determines the optimal resume point for a user across local and cloud progress.
@@ -17,6 +21,7 @@ import { getCloudProgress } from './cloudProgress.service.js';
 export async function resolveResumePoint({ userId, taleId }) {
   if (!userId || !taleId) return null;
 
+  log.debug('Resolving resume point', { userId, taleId });
   // -------------------- Local Progress --------------------
   const localChapters = readStorage()[userId]?.[taleId]?.chapters || {};
   const localCandidates = Object.entries(localChapters)
@@ -25,6 +30,12 @@ export async function resolveResumePoint({ userId, taleId }) {
     .sort((a, b) => b.updatedAt - a.updatedAt);
 
   const local = localCandidates[0] || null;
+  if (local) {
+    log.info('Found local resume candidate', {
+      index: local.chapterIndex,
+      percent: local.scrollPercent,
+    });
+  }
 
   // -------------------- Cloud Progress --------------------
   const cloudData = await getCloudProgress({ userId, taleId });
@@ -39,8 +50,16 @@ export async function resolveResumePoint({ userId, taleId }) {
     });
 
   const cloud = cloudCandidates[0] || null;
+  if (cloud) {
+    log.info('Found cloud resume candidate', {
+      index: cloud.chapterIndex,
+      percent: cloud.scrollPercent,
+    });
+  }
 
-  return determineResumePoint(local, cloud);
+  const result = determineResumePoint(local, cloud);
+  log.info('Final resume point resolved', result);
+  return result;
 }
 
 /**

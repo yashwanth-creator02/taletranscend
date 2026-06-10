@@ -1,6 +1,9 @@
 // src/utils/navigation.ts
 
 import { initDevMode } from './dev.utils.ts';
+import { createLogger } from '@/utils';
+
+const log = createLogger('Navigation');
 
 /* ─────────────────────────────────────────────
    Page Reveal
@@ -60,6 +63,7 @@ export function navigateTo(target: string, delay = 0): void {
   if (!target) return;
 
   const href = resolveHref(target);
+  log.info('Navigating to', { target, resolvedHref: href });
 
   const body = document.body;
   if (body) {
@@ -72,3 +76,5 @@ export function navigateTo(target: string, delay = 0): void {
     window.location.href = href;
   }, TRANSITION_DURATION_MS + delay);
 }
+
+log.debug('Navigation initialized');

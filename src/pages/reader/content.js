@@ -14,7 +14,10 @@ import {
   estimateReadMins,
   setText,
   safeAsync,
+  createLogger,
 } from '@/utils';
+
+const log = createLogger('ReaderContent');
 
 /* ─────────────────────────────────────────────
    Skeletons
@@ -54,6 +57,7 @@ export function showReaderSkeletons() {
  * @param {string} taleId
  */
 export async function loadReaderMeta(taleId) {
+  log.info('Loading reader metadata', { taleId });
   const meta = await safeAsync(getTaleMeta(taleId), {
     fallback: {},
     logContext: 'pages.reader.content.loadReaderMeta',
@@ -61,6 +65,7 @@ export async function loadReaderMeta(taleId) {
 
   // Sync tale fields into readerState
   readerState.taleTitle = meta.title || 'Untitled Tale';
+  log.debug('Metadata loaded', { title: readerState.taleTitle });
   readerState.authorName = meta.authorName || 'Unknown Scribe';
   readerState.authorBio = meta.authorBio || 'A mysterious scribe from the forgotten archives.';
   readerState.authorHandle =
@@ -135,7 +140,7 @@ export async function loadReaderChapter({ taleId, chapterIndex }) {
   readerState.currentChapterId = readerState.chapters[chapterIndex]?.id || '';
 
   // Populate UI elements
-  console.log(readerState.chapterTitle);
+  log.debug('Loading chapter:', readerState.chapterTitle);
   setText('top-bar-ch-num', chapterIndex + 1);
   setText('top-bar-ch-total', navigation.totalChapters);
   setText('top-bar-ch-title', readerState.chapterTitle);

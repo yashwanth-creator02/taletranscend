@@ -4,7 +4,10 @@
 
 import { refs, getDoc, getDocs } from '@fb/index.js';
 import { createTale, createChapter } from '@state/index.js';
-import { safeCall } from '@/utils';
+import { safeCall, createLogger } from '@/utils';
+
+const log = createLogger('ReaderService');
+log.debug('Module initialized');
 
 /**
  * Fetches metadata for a specific tale.
@@ -15,10 +18,15 @@ import { safeCall } from '@/utils';
 export async function getTaleMeta(taleId) {
   if (!taleId) return null;
 
+  log.debug('Fetching tale meta', { taleId });
   return safeCall(
     (async () => {
       const snap = await getDoc(refs.tale(taleId));
-      if (!snap.exists()) throw new Error(`Tale not found: ${taleId}`);
+      if (!snap.exists()) {
+        log.error(`Tale not found: ${taleId}`);
+        throw new Error(`Tale not found: ${taleId}`);
+      }
+      log.info('Loaded tale meta', { taleId, title: snap.data()?.title });
       return createTale(snap.id, snap.data());
     })(),
     null,
@@ -38,6 +46,7 @@ export async function getTaleMeta(taleId) {
 export async function getChapter({ taleId, chapterIndex }) {
   if (!taleId || typeof chapterIndex !== 'number') return null;
 
+  log.debug('Fetching chapter list', { taleId, chapterIndex });
   return safeCall(
     (async () => {
       const snap = await getDocs(refs.chapters(taleId));
@@ -47,9 +56,16 @@ export async function getChapter({ taleId, chapterIndex }) {
         .sort((a, b) => a.chapterNum - b.chapterNum);
 
       const total = chapters.length;
+      log.info(`Tale has ${total} chapters. Resolving index ${chapterIndex}...`);
+
       const chapter = chapters[chapterIndex];
 
-      if (!chapter) throw new Error(`Chapter not found at index ${chapterIndex}`);
+      if (!chapter) {
+        log.error(`Chapter not found at index ${chapterIndex}`, { total });
+        throw new Error(`Chapter not found at index ${chapterIndex}`);
+      }
+
+      log.info('Chapter resolved', { title: chapter.title });
 
       return {
         chapter,

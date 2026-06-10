@@ -5,7 +5,10 @@
 import { state } from './state.js';
 import { updateStats } from './editor.js';
 import { initIcons } from '@ui/components/icons.js';
-import { sanitizeHtml, escapeText as escapeHtml } from '@/utils';
+import { escapeText as escapeHtml, createLogger } from '@/utils';
+
+const log = createLogger('Chapters');
+
 /* ── Add ──────────────────────────────────────────────────────────── */
 
 /**
@@ -13,6 +16,7 @@ import { sanitizeHtml, escapeText as escapeHtml } from '@/utils';
  * and refreshes the sidebar and editor.
  */
 export function addNewChapter() {
+  log.info('Adding new chapter');
   state.chapters.push({ title: 'Untitled Chapter', content: '' });
   state.currentChapterIndex = state.chapters.length - 1;
 
@@ -31,8 +35,12 @@ export function addNewChapter() {
  * @param {number} index
  */
 export function deleteChapter(index) {
-  if (state.chapters.length <= 1) return; // Always keep at least one chapter
+  if (state.chapters.length <= 1) {
+    log.warn('Delete requested on the last remaining chapter — blocked');
+    return;
+  }
 
+  log.info('Deleting chapter', { index });
   state.chapters.splice(index, 1);
 
   // Keep index in bounds
@@ -206,3 +214,5 @@ function saveCurrentChapterToState() {
   chapter.content = document.getElementById('chapter-content')?.value ?? '';
   chapter.title = document.getElementById('current-chapter-title')?.value ?? '';
 }
+
+log.debug('Chapters initialized');

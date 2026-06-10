@@ -1,5 +1,5 @@
 // src/pages/tale/tale.js
-import { initPageReveal, readyReveal } from '@/utils';
+import { initPageReveal, readyReveal, setupAuthTimeout, createLogger } from '@/utils';
 // Tale Archive page entry point.
 // Orchestrates data hydration and all user interactions.
 
@@ -29,9 +29,11 @@ import {
 } from './index.js';
 import { addToBookmarks, removeFromBookmarks, isBookmarked } from '@services/index.js';
 import { initNav } from '@ui/components/nav/nav.js';
-import { setupAuthTimeout } from '@/utils';
+
+const log = createLogger('TaleArchive');
 
 initPageReveal();
+log.info('Initializing Tale Archive page');
 
 /* ─────────────────────────────────────────────
    URL Parameters
@@ -58,6 +60,7 @@ const authTimeout = setupAuthTimeout(
 initAuth(async (user) => {
   clearTimeout(authTimeout);
   const userId = user.uid;
+  log.info('Auth resolved', { userId });
 
   // 0. Skeleton loaders
   showArchiveSkeletons();
@@ -65,7 +68,10 @@ initAuth(async (user) => {
   // 1. Data hydration
   const [tale, chapters] = await Promise.all([loadTale(taleId, user), loadChapters(taleId)]);
 
-  if (!tale) return;
+  if (!tale) {
+    log.error('Tale not found', { taleId });
+    return;
+  }
 
   // 2. Primary UI
   await renderTale(userId, tale, taleId);

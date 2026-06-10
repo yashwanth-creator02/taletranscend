@@ -13,7 +13,9 @@ import {
   getCountFromServer,
 } from '@fb/index.js';
 import { createTale } from '@state/index.js';
-import { safeAsync } from '@/utils';
+import { safeAsync, createLogger } from '@/utils';
+
+const log = createLogger('GetTalesService');
 
 /**
  * Retrieves published tales from Firestore.
@@ -27,6 +29,7 @@ import { safeAsync } from '@/utils';
  * @returns {Promise<import('@state/schemas/tale.schema.js').Tale[]>}
  */
 export async function getTales({ status = 'published', count = 50, after = null } = {}) {
+  log.debug('Fetching tales', { status, count, afterId: after?.id });
   let q = query(
     refs.tales(),
     where('status', '==', status),

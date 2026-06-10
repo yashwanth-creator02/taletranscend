@@ -3,9 +3,11 @@
 // Renders a grid of tale cards with progress, bookmarks, and read time overlays.
 
 import { getTotalReadTime, getBookmarks, getTaleProgressData } from '@services/index.js';
-import { getOverallProgress, formatMs, escapeHtml as escapeHtml } from '@/utils';
-import { DEFAULT_COVER_URL, MS_PER_MINUTE } from '@config/app.config.js';
+import { getOverallProgress, formatMs, escapeHtml as escapeHtml, createLogger } from '@/utils';
+import { DEFAULT_COVER_URL } from '@config/app.config.js';
 import { renderEmptyState, renderErrorState } from './feedback.js';
+
+const log = createLogger('TaleCard');
 import '@css/pages/tale-cards.css';
 
 /* ─────────────────────────────────────────────
@@ -18,13 +20,6 @@ function _defaultCover() {
 
 function _formatReadTime(totalMs = 0) {
   return formatMs(Number(totalMs || 0));
-}
-
-function _statusLabel(status) {
-  if (status === 'finished') return 'Completed';
-  if (status === 'draft') return 'Draft';
-  if (status === 'published') return 'Live';
-  return 'In Progress';
 }
 
 function _badge(text, classes = '') {
@@ -214,7 +209,7 @@ export async function renderCardsGrid(userId, tales) {
     const metadata = await fetchTalesMetadata(userId, safeTales);
     renderTaleCards(container, safeTales, metadata);
   } catch (err) {
-    console.error('[taleCard] renderCardsGrid failed:', err);
+    log.error('renderCardsGrid failed', err);
     renderErrorState(container, {
       message: 'We could not load the tales right now.',
       subMessage: 'Please refresh and try again.',

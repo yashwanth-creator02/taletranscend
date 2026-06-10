@@ -3,6 +3,9 @@
 // All values are injected by Vite at build time via import.meta.env.
 // Never hardcode these values — keep them in your .env file.
 
+import { createLogger } from '@/utils';
+const log = createLogger('FirebaseConfig');
+
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -12,5 +15,7 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
+
+log.debug('Firebase config loaded');
 
 export default firebaseConfig;

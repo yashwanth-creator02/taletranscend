@@ -1,11 +1,13 @@
 // src/pages/contribution/contribution.js
 // Entry point for the tale editor page.
 // Bootstraps nav, auth, draft loading, and all editor interactions.
-import { initPageReveal, readyReveal } from '@/utils';
+import { initPageReveal, readyReveal, createLogger } from '@/utils';
 import '@css/base.css';
 import '@css/nav.css';
 import '@css/components.css';
 import '@css/pages/contribution.css';
+
+const log = createLogger('Contribution');
 
 import {
   initAuth,
@@ -41,7 +43,7 @@ initDraftId();
 
 const authTimeout = setupAuthTimeout('stat-status', 'Connection timed out. Please refresh.');
 
-initAuth(async (user) => {
+initAuth(async () => {
   clearTimeout(authTimeout);
   await init();
   readyReveal();
@@ -108,18 +110,18 @@ function bindEditorEvents() {
   document.getElementById('publish-btn')?.addEventListener('click', publishFullTale);
   document.getElementById('publish-btn-mobile')?.addEventListener('click', publishFullTale);
 
-  // AI stubs — console for now, easy to swap for real calls later
+  // AI stubs
   document.getElementById('ai-continue-btn')?.addEventListener('click', () => {
     setStatus('AI continue — coming soon.', 'neutral');
-    console.info('[AI] Continue not yet implemented');
+    log.info('Continue not yet implemented');
   });
   document.getElementById('ai-enhance-btn')?.addEventListener('click', () => {
     setStatus('AI enhance — coming soon.', 'neutral');
-    console.info('[AI] Enhance not yet implemented');
+    log.info('Enhance not yet implemented');
   });
   document.getElementById('btn-generate-cover')?.addEventListener('click', () => {
     setStatus('Cover suggestion — coming soon.', 'neutral');
-    console.info('[AI] Cover suggestion not yet implemented');
+    log.info('Cover suggestion not yet implemented');
   });
 
   // Warn on unload only if there are unsaved changes
@@ -209,7 +211,7 @@ function bindAIEvents() {
         showToast('The oracle remains silent.', 'warning');
       }
     } catch (err) {
-      console.error('[ai] Enhancement failed:', err);
+      log.error('Enhancement failed:', err);
       showToast('Neural link severed during refinement.', 'error');
     } finally {
       enhanceBtn.disabled = false;
@@ -267,7 +269,7 @@ function bindVoiceEvents() {
     };
 
     recognition.onerror = (event) => {
-      console.warn('[voice] Recognition error:', event.error);
+      log.warn('Recognition error:', event.error);
       setStatus(`Voice error: ${event.error}`, 'error');
     };
 

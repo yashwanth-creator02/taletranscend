@@ -5,7 +5,9 @@ import '@css/base.css';
 import '@css/pages/login.css';
 
 import { auth, signInAnonymously, signInWithGoogle, onAuthStateChanged } from '@fb/index.js';
-import { navigateTo, initPageReveal, readyReveal } from '@/utils';
+import { navigateTo, initPageReveal, readyReveal, createLogger } from '@/utils';
+
+const log = createLogger('Login');
 import { initIcons } from '@ui/components/icons.js';
 import { showToast } from '@ui/components/toast.js';
 
@@ -63,12 +65,14 @@ function addSuccessGlow() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  log.info('Login page initialized');
   initIcons();
   readyReveal();
 
   // If already signed in (non-anonymously), redirect to profile
   const unsubscribe = onAuthStateChanged(auth, (user) => {
     if (user && !user.isAnonymous) {
+      log.info('User already authenticated, redirecting to profile');
       unsubscribe();
       navigateTo('profile.html');
     }
@@ -76,13 +80,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Google Login
   document.getElementById('btn-google-login')?.addEventListener('click', async () => {
+    log.info('Google login initiated');
     toggleButtonLoading('btn-google-login', true);
     try {
       await signInWithGoogle();
+      log.info('Google login successful');
       addSuccessGlow();
       handleAuthSuccess();
     } catch (err) {
-      console.error('[login] Google login failed:', err);
+      log.error('Google login failed:', err);
       if (err.code !== 'auth/popup-closed-by-user') {
         showToast('Login failed. Please try again.', 'error');
       }
@@ -93,13 +99,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Guest Login (Anonymous)
   document.getElementById('btn-guest-login')?.addEventListener('click', async () => {
+    log.info('Guest login initiated');
     toggleButtonLoading('btn-guest-login', true);
     try {
       await signInAnonymously(auth);
+      log.info('Guest login successful');
       addSuccessGlow();
       handleAuthSuccess();
     } catch (err) {
-      console.error('[login] Guest login failed:', err);
+      log.error('Guest login failed', err);
       showToast('Guest entry failed.', 'error');
     } finally {
       toggleButtonLoading('btn-guest-login', false);

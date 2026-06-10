@@ -9,8 +9,11 @@
 
 import { getBookmarks, getUserDrafts } from '@services/index.js';
 import { createBookmark } from '@state/index.js';
+import { createLogger } from '@/utils';
 import { shelfState } from './state.js';
 import { renderGrid, renderHeroStats, setGridLoading, setGridEmpty, setGridError } from './ui.js';
+
+const log = createLogger('ShelfContent');
 
 /* ─────────────────────────────────────────────
    Bookmarked Tales
@@ -27,8 +30,10 @@ import { renderGrid, renderHeroStats, setGridLoading, setGridEmpty, setGridError
 export async function loadBookmarkedTales(userId, force = false) {
   if (!userId) return;
 
+  log.info('Loading bookmarked tales', { userId, force });
   // Use cache unless forced or empty
   if (!force && shelfState.bookmarkedTales.length) {
+    log.debug('Using cached bookmarked tales');
     renderGrid(applyFilterSort(shelfState.bookmarkedTales), 'bookmarked');
     return;
   }
@@ -38,6 +43,7 @@ export async function loadBookmarkedTales(userId, force = false) {
 
   try {
     const bookmarks = await getBookmarks({ userId });
+    log.info(`Found ${bookmarks.length} bookmarks`);
 
     // Normalize through schema — ensures every field has a safe default
     // Build a card-compatible shape from the cached bookmark fields.
@@ -65,7 +71,7 @@ export async function loadBookmarkedTales(userId, force = false) {
 
     renderGrid(applyFilterSort(tales), 'bookmarked');
   } catch (err) {
-    console.error('[shelf] loadBookmarkedTales failed:', err);
+    log.error('loadBookmarkedTales failed:', err);
     setGridError();
   } finally {
     shelfState.isLoading = false;
@@ -85,7 +91,9 @@ export async function loadBookmarkedTales(userId, force = false) {
 export async function loadDrafts(userId, force = false) {
   if (!userId) return;
 
+  log.info('Loading drafts', { userId, force });
   if (!force && shelfState.drafts.length) {
+    log.debug('Using cached drafts');
     renderGrid(applyFilterSort(shelfState.drafts), 'drafts');
     return;
   }
@@ -95,6 +103,7 @@ export async function loadDrafts(userId, force = false) {
 
   try {
     const drafts = await getUserDrafts(userId);
+    log.info(`Found ${drafts.length} drafts`);
     shelfState.drafts = drafts;
 
     if (!drafts.length) {
@@ -104,7 +113,7 @@ export async function loadDrafts(userId, force = false) {
 
     renderGrid(applyFilterSort(drafts), 'drafts');
   } catch (err) {
-    console.error('[shelf] loadDrafts failed:', err);
+    log.error('loadDrafts failed:', err);
     setGridError();
   } finally {
     shelfState.isLoading = false;
@@ -120,11 +129,13 @@ export async function loadDrafts(userId, force = false) {
  * Call after both bookmarkedTales and drafts have been loaded.
  */
 export function computeAndRenderHeroStats() {
+  log.debug('Computing hero stats...');
   const bookmarkCount = shelfState.bookmarkedTales.length;
   const draftCount = shelfState.drafts.length;
   const wordsPreserved = shelfState.drafts.reduce((acc, d) => acc + (d.wordCount || 0), 0);
 
   shelfState.heroStats = { draftCount, bookmarkCount, wordsPreserved };
+  log.info('Hero stats updated', shelfState.heroStats);
   renderHeroStats(shelfState.heroStats);
 }
 
@@ -137,12 +148,24 @@ export function computeAndRenderHeroStats() {
  * and re-renders the grid. Called on every filter/sort change.
  */
 export function applyAndRender() {
+  log.info('Applying filters and sorting...', {
+    tab: shelfState.activeTab,
+    query: shelfState.filterQuery,
+    sortBy: shelfState.sortBy,
+    dir: shelfState.sortDir,
+  });
+
   const data =
     shelfState.activeTab === 'bookmarked' ? shelfState.bookmarkedTales : shelfState.drafts;
 
-  if (!data.length) return;
+  if (!data.length) {
+    log.debug('No data to filter/sort');
+    return;
+  }
 
-  renderGrid(applyFilterSort(data), shelfState.activeTab);
+  const filtered = applyFilterSort(data);
+  log.info(`Rendered ${filtered.length} items after filtering`);
+  renderGrid(filtered, shelfState.activeTab);
 }
 
 /**

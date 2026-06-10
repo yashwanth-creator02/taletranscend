@@ -11,3 +11,4 @@ export * from './navigation.ts';
 export * from './async.utils.ts';
 export * from './network.utils.ts';
 export * from './dev.utils.ts';
+export * from './logger.ts';

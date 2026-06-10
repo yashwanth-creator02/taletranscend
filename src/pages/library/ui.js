@@ -8,7 +8,10 @@
 
 import { libraryState } from './state.js';
 import { initIcons } from '@ui/components/icons.js';
-import { escapeHtml as escapeHtml } from '@/utils';
+import { escapeHtml as escapeHtml, createLogger } from '@/utils';
+
+const log = createLogger('LibraryUI');
+log.debug('Module initialized');
 
 /* ─────────────────────────────────────────────
    Sidebar Toggle

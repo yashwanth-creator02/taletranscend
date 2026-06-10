@@ -9,7 +9,9 @@ import '@css/pages/library.css';
 import { initAuth } from '@fb/index.js';
 import { initNav } from '@ui/components/nav/nav.js';
 import { initIcons } from '@ui/components/icons.js';
-import { initPageReveal, readyReveal } from '@/utils';
+import { initPageReveal, readyReveal, createLogger } from '@/utils';
+
+const log = createLogger('Library');
 
 import { loadTalesPage, nextPage, prevPage } from './content.js';
 import {
@@ -26,6 +28,7 @@ import { libraryState } from './state.js';
 
 initNav();
 initPageReveal();
+log.debug('Module initialized');
 
 document.addEventListener('DOMContentLoaded', () => {
   setupSidebarToggle();
@@ -56,7 +59,7 @@ initAuth(async (user) => {
     readyReveal();
     initIcons();
   } catch (err) {
-    console.error('[library] Init failed:', err);
+    log.error('Init failed:', err);
     showGridError();
   }
 });
@@ -80,28 +83,28 @@ function setupPagination() {
 
   if (nextBtn) {
     nextBtn.addEventListener('click', async () => {
-      console.log(
-        '[pagination] Next clicked. Current page:',
+      log.log(
+        'Next clicked. Current page:',
         libraryState.currentPage,
         'Loading:',
         libraryState.isLoading
       );
       if (libraryState.isLoading) {
-        console.log('[pagination] Blocked by isLoading');
+        log.log('Blocked by isLoading');
         return;
       }
 
       const maxPage = Math.ceil(libraryState.totalTales / libraryState.talesPerPage);
-      console.log('[pagination] Max page:', maxPage);
+      log.log('Max page:', maxPage);
       if (libraryState.currentPage >= maxPage) {
-        console.log('[pagination] Blocked by maxPage');
+        log.log('Blocked by maxPage');
         return;
       }
 
       setPaginationLoading(true);
-      console.log('[pagination] Loading page:', libraryState.currentPage + 1);
+      log.log('Loading page:', libraryState.currentPage + 1);
       await nextPage();
-      console.log('[pagination] Page loaded. New state page:', libraryState.currentPage);
+      log.log('Page loaded. New state page:', libraryState.currentPage);
       await applyAllFilters();
       updatePaginationUI();
       setPaginationLoading(false);

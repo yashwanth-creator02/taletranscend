@@ -3,6 +3,10 @@
 // All editor modules read and write through this shared object.
 // Fields mirror the Firestore draft document schema.
 
+import { createLogger } from '@/utils';
+
+const log = createLogger('State');
+
 export const state = {
   // ── Identity ──────────────────────────────────────────────────────
   // Firestore draft document ID.
@@ -35,3 +39,5 @@ export const state = {
   // True when there are unsaved changes in the current chapter
   isDirty: false,
 };
+
+log.info('Global editor state initialized');

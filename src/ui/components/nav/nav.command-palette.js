@@ -13,7 +13,9 @@ import { auth, signOut } from '@fb/index.js';
 import { BASE_COMMANDS } from './nav.config.js';
 import { getNavElements, getCurrentPage, renderIcons } from './nav.utils.js';
 import { navState } from './nav.state.js';
-import { escapeText as escapeHtml } from '@/utils';
+import { escapeText as escapeHtml, createLogger } from '@/utils';
+
+const log = createLogger('NavCommandPalette');
 
 /* ─────────────────────────────────────────────
    Command Item Builders
@@ -236,7 +238,7 @@ export async function executeCommand(element) {
     try {
       await signOut(auth);
     } catch (error) {
-      console.error('[nav] Sign out failed:', error);
+      log.error('Sign out failed', error);
     }
   }
 }

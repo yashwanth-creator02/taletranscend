@@ -12,6 +12,9 @@
 import { createUserProfile } from './schemas/user.schema.js';
 import { createReaderPreferences } from './schemas/user.schema.js';
 import { IS_DEV_MODE } from '@config/app.config.js';
+import { createLogger } from '@/utils';
+
+const log = createLogger('AppState');
 
 /**
  * @typedef {Object} AppState
@@ -92,3 +95,5 @@ export function setAppReaderPrefs(data) {
   appState.readerPrefs = createReaderPreferences(data);
   appState.prefsLoaded = true;
 }
+
+log.debug('AppState initialized');

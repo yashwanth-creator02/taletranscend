@@ -2,6 +2,9 @@
 // Developer-only utilities and initialization.
 
 import { IS_DEV_MODE } from '@config/app.config.js';
+import { createLogger } from '@/utils';
+
+const log = createLogger('DevUtils');
 
 /**
  * Global developer flag.
@@ -30,7 +33,7 @@ export function initDevMode(): void {
     document.body.appendChild(badge);
 
     // Cinematic console announcement
-    console.log(
+    log.log(
       '%c[TaleTranscend] %cDev Mode Active %c✦ %cNeural link established.',
       'color: #6366f1; font-weight: 900; font-family: serif; font-size: 14px;',
       'color: #e2e8f0; font-weight: 500; font-family: sans-serif; font-size: 14px;',
@@ -38,10 +41,12 @@ export function initDevMode(): void {
       'color: #64748b; font-style: italic; font-size: 12px;'
     );
 
-    console.log(
+    log.log(
       '%c🛠 Commands available: %cwindow.__TT_DEV__',
       'color: #94a3b8; font-weight: bold; font-size: 11px;',
       'color: #6366f1; font-family: monospace; font-size: 11px;'
     );
   }
 }
+
+log.debug('DevUtils initialized');

@@ -18,6 +18,7 @@ import { getNavElements, renderIcons, getCurrentPage } from './nav.utils.js';
 import { USER_LINKS } from './nav.config.js';
 import { buildAuthenticatedUser, buildGuestUser, buildMobileDock } from './nav.templates.js';
 import { showToast } from '@ui/components/toast.js';
+import { createLogger } from '@/utils';
 import {
   openCommandPalette,
   closeCommandPalette,
@@ -26,6 +27,8 @@ import {
   moveFocus,
   renderCommandList,
 } from './nav.command-palette.js';
+
+const log = createLogger('NavInteractions');
 
 /* ─────────────────────────────────────────────
    Dropdown
@@ -130,7 +133,7 @@ function handleDocumentClick(event) {
   if (target.closest('#signout-btn')) {
     event.preventDefault();
     closeDropdown(false);
-    signOut(auth).catch((err) => console.error('[nav] Sign out error:', err));
+    signOut(auth).catch((err) => log.error('Sign out error', err));
     return;
   }
 
@@ -144,7 +147,7 @@ function handleDocumentClick(event) {
       })
       .catch((err) => {
         if (err.code !== 'auth/popup-closed-by-user') {
-          console.error('[nav] Upgrade error:', err);
+          log.error('Upgrade error', err);
           showToast('Account link failed. Try again.', 'error');
         }
       });

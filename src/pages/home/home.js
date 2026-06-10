@@ -8,15 +8,24 @@ import '@css/components.css';
 import '@css/pages/home.css';
 
 import { initNav } from '@ui/components/nav/nav.js';
-import { navigateTo, initPageReveal, readyReveal, escapeHtml as escapeHtml } from '@/utils';
+import {
+  navigateTo,
+  initPageReveal,
+  readyReveal,
+  escapeHtml as escapeHtml,
+  createLogger,
+} from '@/utils';
 import { initIcons } from '@ui/components/icons.js';
 import { getTales } from '@services/index.js';
 import { DEFAULT_COVER_URL } from '@config/app.config.js';
+
+const log = createLogger('Home');
 
 initPageReveal();
 initNav();
 
 document.addEventListener('DOMContentLoaded', () => {
+  log.info('Home page initialized');
   initIcons();
   _initInteractions();
   readyReveal();
@@ -53,6 +62,7 @@ function _initInteractions() {
 function _performSearch() {
   const term = document.getElementById('home-search-input')?.value.trim();
   if (!term) return;
+  log.info('Performing search:', term);
   navigateTo(`library.html?search=${encodeURIComponent(term)}`);
 }
 
@@ -75,14 +85,16 @@ async function _loadTrendingTales() {
     const tales = await getTales({ status: 'published', count: 3 });
 
     if (!tales.length) {
+      log.info('No trending tales found');
       _hideTrendingSection();
       return;
     }
 
+    log.info(`Loaded ${tales.length} trending tales`);
     container.innerHTML = tales.map(_renderTrendingCard).join('');
     initIcons();
   } catch (err) {
-    console.error('[home] Failed to load trending tales:', err);
+    log.error('Failed to load trending tales:', err);
     _hideTrendingSection();
   }
 }

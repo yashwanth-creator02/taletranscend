@@ -3,6 +3,9 @@
 // Every innerHTML assignment that renders Firestore text MUST go through here.
 
 import DOMPurify from 'dompurify';
+import { createLogger } from '@/utils';
+
+const log = createLogger('SanitizeUtils');
 
 /**
  * Sanitizes a raw HTML string for safe insertion into the DOM.

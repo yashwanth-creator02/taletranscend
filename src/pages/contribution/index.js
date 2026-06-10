@@ -2,6 +2,10 @@
 // Barrel export for all contribution page modules.
 // contribution.js imports everything from here.
 
+import { createLogger } from '@/utils';
+
+const log = createLogger('Index');
+
 export {
   addNewChapter,
   updateSidebarTitle,
@@ -26,3 +30,5 @@ export { state } from './state.js';
 export { initIcons } from '@ui/components/icons.js';
 
 export * from '@fb/index.js';
+
+log.debug('Index initialized');
