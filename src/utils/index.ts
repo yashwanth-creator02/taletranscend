@@ -1,5 +1,6 @@
 // src/utils/index.ts
 
+export * from './logger.ts';
 export * from './string.utils.ts';
 export * from './format.utils.ts';
 export * from './function.utils.ts';
@@ -11,4 +12,3 @@ export * from './navigation.ts';
 export * from './async.utils.ts';
 export * from './network.utils.ts';
 export * from './dev.utils.ts';
-export * from './logger.ts';

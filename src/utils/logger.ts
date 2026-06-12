@@ -1,7 +1,8 @@
 // src/utils/logger.ts
 // Centralized logging utility that respects Dev Mode.
 
-import { IS_DEV_MODE } from '@config/app.config.js';
+const IS_DEV_MODE =
+  typeof import.meta.env !== 'undefined' && import.meta.env.VITE_DEV_MODE === 'true';
 
 /**
  * Higher-order function to create a logger with a specific context.

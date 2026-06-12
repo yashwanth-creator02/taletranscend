@@ -73,7 +73,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const unsubscribe = onAuthStateChanged(auth, (user) => {
     if (user && !user.isAnonymous) {
       log.info('User already authenticated, redirecting to profile');
-      unsubscribe();
+      if (unsubscribe) {
+        unsubscribe();
+      }
       navigateTo('profile.html');
     }
   });
