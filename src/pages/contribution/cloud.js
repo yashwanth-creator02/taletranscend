@@ -10,7 +10,16 @@
 
 import { auth, getDoc, getDocs, addDoc, setDoc, serverTimestamp, refs } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
-import { countWords, setInput, getInput, setSelect, createLogger } from '@/utils';
+import {
+  countWords,
+  setInput,
+  getInput,
+  setSelect,
+  createLogger,
+  validateData,
+  DraftMetadataSchema,
+  DraftChapterSchema,
+} from '@/utils';
 import { state } from './state.js';
 
 const log = createLogger('Cloud');
@@ -57,10 +66,17 @@ export async function saveToCloud() {
   log.info('Saving draft to cloud...', { draftId: state.draftId, userId });
   const payload = _buildMetadataPayload();
 
+  // Validation
+  const validated = validateData(DraftMetadataSchema, payload);
+  if (!validated.success) {
+    showToast(validated.error, 'error');
+    return;
+  }
+
   if (state.draftId === 'new') {
     log.debug('Creating new draft document');
     const newRef = await addDoc(refs.drafts(userId), {
-      ...payload,
+      ...validated.data,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
@@ -72,7 +88,7 @@ export async function saveToCloud() {
     log.debug('Updating existing draft document');
     await setDoc(
       refs.draft(userId, state.draftId),
-      { ...payload, updatedAt: serverTimestamp() },
+      { ...validated.data, updatedAt: serverTimestamp() },
       { merge: true }
     );
   }
@@ -119,12 +135,24 @@ async function _saveChapter(userId, index, chapter) {
   const text = (chapter.content || '').trim();
   const wordCount = countWords(text);
 
-  await setDoc(refs.draftChapter(userId, state.draftId, String(index)), {
+  const payload = {
     // chapterNum is 1-based for display — bug fix: was index (0-based)
     chapterNum: index + 1,
     title: chapter.title?.trim() || `Fragment ${index + 1}`,
     content: chapter.content || '',
     wordCount,
+  };
+
+  const validated = validateData(DraftChapterSchema, payload);
+  if (!validated.success) {
+    // Don't show toast here as it might be called in a loop (saveAllChapters)
+    // but log it. The UI should prevent this state anyway.
+    log.error('Chapter validation failed', { error: validated.error, payload });
+    return;
+  }
+
+  await setDoc(refs.draftChapter(userId, state.draftId, String(index)), {
+    ...validated.data,
     updatedAt: serverTimestamp(),
   });
 }

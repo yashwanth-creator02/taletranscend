@@ -29,6 +29,8 @@ vi.mock('@/utils', () => ({
   setText: vi.fn(),
   escapeText: vi.fn((s) => s),
   formatNumber: vi.fn((n) => String(n)),
+  validateData: vi.fn((schema, data) => ({ success: true, data })),
+  UserProfileSchema: {},
 }));
 
 describe('ProfileSync', () => {

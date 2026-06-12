@@ -23,6 +23,8 @@ import {
   checkRateLimit,
   getRemainingTime,
   applyButtonCooldown,
+  validateData,
+  CommentSchema,
 } from '@/utils';
 import { initIcons } from '@ui/components/icons.js';
 import { PATHS } from '@fb/paths.js';
@@ -88,18 +90,33 @@ export async function postComment(taleId) {
     btn.textContent = 'Transmitting...';
   }
 
+  // Validation
+  const payload = {
+    taleId,
+    text,
+    type: 'general',
+    authorId: userId,
+    authorName: auth.currentUser.displayName || 'Anonymous Scribe',
+    authorAvatarUrl: '',
+    depth: 0,
+  };
+
+  const validated = validateData(CommentSchema, payload);
+  if (!validated.success) {
+    showToast(validated.error, 'error');
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+    return;
+  }
+
   try {
     await addDoc(refs.comments(taleId), {
-      taleId,
-      text,
-      type: 'general',
+      ...validated.data,
       chapterIndex: null,
-      authorId: auth.currentUser.uid,
-      authorName: auth.currentUser.displayName || 'Anonymous Scribe',
-      authorAvatarUrl: '',
       parentId: null,
       replyCount: 0,
-      depth: 0,
       likeCount: 0,
       isEdited: false,
       editedAt: null,
@@ -252,15 +269,32 @@ async function _handlePostReply(commentId, btn) {
   btn.disabled = true;
   btn.textContent = '...';
 
+  // Validation
+  const payload = {
+    taleId: _currentTaleId,
+    text,
+    type: 'general',
+    authorId: userId,
+    authorName: auth.currentUser.displayName || 'Anonymous Scribe',
+    authorAvatarUrl: '',
+    parentId: commentId,
+    depth: 1, // Replies are always depth 1 for now in this UI
+  };
+
+  const validated = validateData(CommentSchema, payload);
+  if (!validated.success) {
+    showToast(validated.error, 'error');
+    btn.disabled = false;
+    btn.textContent = originalText;
+    return;
+  }
+
   try {
     const repliesPath = `${PATHS.publicTaleComment(_currentTaleId, commentId)}/replies`;
     const repliesRef = collection(db, repliesPath);
 
     await addDoc(repliesRef, {
-      text,
-      authorId: auth.currentUser.uid,
-      authorName: auth.currentUser.displayName || 'Anonymous Scribe',
-      authorAvatarUrl: '',
+      ...validated.data,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });

@@ -34,6 +34,8 @@ vi.mock('@/utils', () => ({
   checkRateLimit: vi.fn(() => true),
   getRemainingTime: vi.fn(() => 1000),
   applyButtonCooldown: vi.fn(),
+  validateData: vi.fn((schema, data) => ({ success: true, data })),
+  CommentSchema: {},
 }));
 
 import { checkRateLimit, applyButtonCooldown } from '@/utils';

@@ -22,6 +22,9 @@ import {
   safeAsync,
   guardOffline,
   createLogger,
+  validateData,
+  TaleSchema,
+  DraftChapterSchema,
 } from '@/utils';
 
 import { state } from './state.js';
@@ -118,45 +121,53 @@ async function _doPublish(userId) {
   const wordCount = state.chapters.reduce((acc, ch) => acc + countWords(ch.content), 0);
   const estimatedReadMins = estimateReadMins(wordCount);
 
+  const talePayload = {
+    title: state.title,
+    authorId: userId,
+    authorName,
+    authorAvatarUrl: '',
+    description,
+    synopsis: state.synopsis || '',
+    coverUrl: state.coverUrl || '',
+    era: state.era || '',
+    tags: state.tags || [],
+    tone: state.tone || '',
+    language: state.language || 'English',
+    visibility: (state.visibility || 'public').toLowerCase(),
+    audience: state.audience || 'General',
+    contentWarnings: Array.isArray(state.contentWarnings)
+      ? state.contentWarnings
+      : state.contentWarnings
+        ? [state.contentWarnings]
+        : [],
+    worldSetting: state.worldSetting || '',
+    authorNotes: state.authorNotes || '',
+    chapterCount: state.chapters.length,
+    wordCount,
+    estimatedReadMins,
+    readCount: 0,
+    commentCount: 0,
+    reactionCount: 0,
+    bookmarkCount: 0,
+    status: 'pending',
+    isFeatured: false,
+    isEditorsPick: false,
+    searchKeywords: _buildSearchKeywords(state.title, state.tags),
+  };
+
+  const taleValidated = validateData(TaleSchema, talePayload);
+  if (!taleValidated.success) {
+    throw new Error(`Validation Error: ${taleValidated.error}`);
+  }
+
   await safeAsync(
     setDoc(taleRef, {
-      title: state.title,
-      authorId: userId,
-      authorName,
-      authorAvatarUrl: '',
-      description,
-      synopsis: state.synopsis || '',
-      coverUrl: state.coverUrl || '',
-      era: state.era || '',
-      tags: state.tags || [],
-      tone: state.tone || '',
-      language: state.language || 'English',
-      visibility: (state.visibility || 'public').toLowerCase(),
-      audience: state.audience || 'General',
-      contentWarnings: Array.isArray(state.contentWarnings)
-        ? state.contentWarnings
-        : state.contentWarnings
-          ? [state.contentWarnings]
-          : [],
-      worldSetting: state.worldSetting || '',
-      authorNotes: state.authorNotes || '',
-      chapterCount: state.chapters.length,
-      wordCount,
-      estimatedReadMins,
-      readCount: 0,
-      commentCount: 0,
-      reactionCount: 0,
-      bookmarkCount: 0,
-      status: 'pending',
+      ...taleValidated.data,
       submittedAt: serverTimestamp(),
       reviewedAt: null,
       reviewedBy: null,
       rejectionReason: null,
       moderationNotes: null,
-      isFeatured: false,
-      isEditorsPick: false,
-      featuredAt: null,
-      searchKeywords: _buildSearchKeywords(state.title, state.tags),
       publishedAt: null,
       lastChapterAddedAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
@@ -183,11 +194,20 @@ async function _doPublish(userId) {
         const chapterWordCount = countWords(chapter.content);
         const chapterReadMins = estimateReadMins(chapterWordCount);
 
-        await setDoc(refs.chapter(id, index), {
+        const chapterPayload = {
           chapterNum: index + 1,
           title: chapter.title?.trim() || `Fragment ${index + 1}`,
           content: chapter.content || '',
           wordCount: chapterWordCount,
+        };
+
+        const chapterValidated = validateData(DraftChapterSchema, chapterPayload);
+        if (!chapterValidated.success) {
+          throw new Error(`Chapter ${index + 1} Validation Error: ${chapterValidated.error}`);
+        }
+
+        await setDoc(refs.chapter(id, index), {
+          ...chapterValidated.data,
           estimatedReadMins: chapterReadMins,
           publishedAt: serverTimestamp(),
           updatedAt: serverTimestamp(),

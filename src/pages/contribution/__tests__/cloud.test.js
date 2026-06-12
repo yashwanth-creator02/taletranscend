@@ -43,9 +43,12 @@ vi.mock('@/utils', () => ({
   setInput: vi.fn(),
   getInput: vi.fn((id) => {
     const el = document.getElementById(id);
-    return el ? el.value : '';
+    return el ? el.value || el.textContent : '';
   }),
   setSelect: vi.fn(),
+  validateData: vi.fn((schema, data) => ({ success: true, data })),
+  DraftMetadataSchema: {},
+  DraftChapterSchema: {},
 }));
 
 describe('Contribution Cloud', () => {

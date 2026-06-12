@@ -5,7 +5,7 @@
 
 import { auth, onSnapshot, setDoc, serverTimestamp, getDoc, refs } from '@fb/index.js';
 
-import { createLogger } from '@/utils';
+import { createLogger, validateData, UserProfileSchema } from '@/utils';
 import { createUserProfile } from '@state/index.js';
 import { updateProfileUI, showNotification } from './ui.js';
 import { profileState } from './state.js';
@@ -121,20 +121,31 @@ export async function saveProfile() {
     instagramHandle: _getVal('input-instagram'),
     readingGoal: Number(_getVal('input-reading-goal')) || 30,
     favouriteGenres: [...profileState.favouriteGenres],
+  };
+
+  // Validation
+  const validated = validateData(UserProfileSchema, data);
+  if (!validated.success) {
+    showNotification(validated.error, 'error');
+    return;
+  }
+
+  const updateData = {
+    ...validated.data,
     updatedAt: serverTimestamp(),
   };
 
   // Stamp createdAt and joinedAt on first save only
   if (!snapshot.exists()) {
     log.info('First-time profile save; stamping creation dates');
-    data.createdAt = serverTimestamp();
-    data.joinedAt = serverTimestamp();
-    data.role = 'reader';
-    data.isBanned = false;
+    updateData.createdAt = serverTimestamp();
+    updateData.joinedAt = serverTimestamp();
+    updateData.role = 'reader';
+    updateData.isBanned = false;
   }
 
   try {
-    await setDoc(userRef, data, { merge: true });
+    await setDoc(userRef, updateData, { merge: true });
     log.info('Profile saved successfully');
     showNotification('Profile saved.', 'success');
   } catch (error) {
