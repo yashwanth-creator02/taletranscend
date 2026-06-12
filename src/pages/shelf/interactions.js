@@ -7,6 +7,7 @@ import { shelfState } from './state.js';
 import {
   loadBookmarkedTales,
   loadDrafts,
+  loadRecentTales,
   applyAndRender,
   computeAndRenderHeroStats,
 } from './content.js';
@@ -58,6 +59,8 @@ function _bindTabs() {
       } else if (tab === 'drafts') {
         await loadDrafts(shelfState.userId);
         computeAndRenderHeroStats();
+      } else if (tab === 'recent') {
+        await loadRecentTales(shelfState.userId);
       }
     });
   });

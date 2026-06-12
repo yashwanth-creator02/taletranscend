@@ -14,6 +14,7 @@
  * @property {string}   authorName
  * @property {number}   chapterCount
  * @property {string}   era
+ * @property {string}   synopsis
  * @property {import('firebase/firestore').Timestamp|null} bookmarkedAt
  */
 
@@ -36,6 +37,7 @@ export function createBookmark(userId, taleId, data = {}) {
     authorName: data.authorName ?? '',
     chapterCount: Number(data.chapterCount ?? 0),
     era: data.era ?? '',
+    synopsis: data.synopsis || data.description || '',
     createdAt: data.createdAt
       ? data.createdAt.toDate
         ? data.createdAt.toDate()
@@ -62,6 +64,7 @@ export function bookmarkToFirestore(taleId, tale, serverTimestamp) {
     authorName: tale.authorName ?? '',
     chapterCount: tale.chapterCount ?? 0,
     era: tale.era ?? '',
+    synopsis: tale.synopsis || tale.description || '',
     bookmarkedAt: serverTimestamp,
   };
 }

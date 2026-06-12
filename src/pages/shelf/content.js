@@ -7,7 +7,13 @@
 // Bookmarks already cache taleTitle, coverUrl, era, chapterCount — enough to render.
 // The bookmark objects are cast to the Tale-compatible shape needed by buildBookmarkCard.
 
-import { getBookmarks, getUserDrafts } from '@services/index.js';
+import {
+  getBookmarks,
+  getUserDrafts,
+  getContinueReading,
+  getOverallProgress,
+  getAllLocalChapters,
+} from '@services/index.js';
 import { createBookmark } from '@state/index.js';
 import { createLogger } from '@/utils';
 import { shelfState } from './state.js';
@@ -46,10 +52,15 @@ export async function loadBookmarkedTales(userId, force = false) {
     log.info(`Found ${bookmarks.length} bookmarks`);
 
     // Normalize through schema — ensures every field has a safe default
-    // Build a card-compatible shape from the cached bookmark fields.
-    // Bug fix: was using b.id (Firestore doc auto-ID) instead of b.taleId.
-    const tales = bookmarks.map((b) => {
-      const bm = createBookmark(b.taleId, b);
+    const tales = bookmarks.map((bm) => {
+      // bm is already normalized by getBookmarks service, but we use it to build the card shape
+      // Get local progress for this tale
+      const localChapters = getAllLocalChapters({ userId, taleId: bm.taleId });
+      const overall = getOverallProgress({
+        chapterCount: bm.chapterCount || 1,
+        chaptersProgress: localChapters,
+      });
+
       return {
         id: bm.taleId,
         title: bm.taleTitle,
@@ -57,8 +68,9 @@ export async function loadBookmarkedTales(userId, force = false) {
         authorName: bm.authorName,
         chapterCount: bm.chapterCount,
         era: bm.era,
-        description: '',
-        progress: 0,
+        description: bm.synopsis || '', // Bookmarks might not cache full synopsis, fallback to empty
+        progress: overall.percent,
+        bookmarkedAt: bm.bookmarkedAt,
       };
     });
 
@@ -72,6 +84,62 @@ export async function loadBookmarkedTales(userId, force = false) {
     renderGrid(applyFilterSort(tales), 'bookmarked');
   } catch (err) {
     log.error('loadBookmarkedTales failed:', err);
+    setGridError();
+  } finally {
+    shelfState.isLoading = false;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   Recent Tales
+   ───────────────────────────────────────────── */
+
+/**
+ * Loads recently opened tales from the continue reading service.
+ *
+ * @param {string} userId
+ * @param {boolean} [force=false]
+ */
+export async function loadRecentTales(userId, force = false) {
+  if (!userId) return;
+
+  log.info('Loading recent tales', { userId, force });
+  if (!force && shelfState.recentTales.length) {
+    log.debug('Using cached recent tales');
+    renderGrid(applyFilterSort(shelfState.recentTales), 'recent');
+    return;
+  }
+
+  shelfState.isLoading = true;
+  setGridLoading();
+
+  try {
+    const recent = await getContinueReading(userId);
+    log.info(`Found ${recent.length} recent tales`);
+
+    // Normalize to the same shape as bookmarked tales
+    const tales = recent.map((r) => ({
+      id: r.id,
+      title: r.title,
+      coverUrl: r.coverUrl,
+      authorName: r.authorName,
+      chapterCount: r.chapterCount,
+      era: r.era,
+      description: r.synopsis || '',
+      progress: r.percent || 0,
+      lastReadAt: r.lastUpdatedAt,
+    }));
+
+    shelfState.recentTales = tales;
+
+    if (!tales.length) {
+      setGridEmpty("You haven't opened any tales yet. Your reading history will appear here.");
+      return;
+    }
+
+    renderGrid(applyFilterSort(tales), 'recent');
+  } catch (err) {
+    log.error('loadRecentTales failed:', err);
     setGridError();
   } finally {
     shelfState.isLoading = false;
@@ -156,7 +224,11 @@ export function applyAndRender() {
   });
 
   const data =
-    shelfState.activeTab === 'bookmarked' ? shelfState.bookmarkedTales : shelfState.drafts;
+    shelfState.activeTab === 'bookmarked'
+      ? shelfState.bookmarkedTales
+      : shelfState.activeTab === 'recent'
+        ? shelfState.recentTales
+        : shelfState.drafts;
 
   if (!data.length) {
     log.debug('No data to filter/sort');
@@ -208,8 +280,29 @@ export function applyFilterSort(items) {
 
       case 'date':
       default: {
-        const aTime = a.updatedAt?.seconds ?? a.bookmarkedAt?.seconds ?? a.lastUpdatedAt ?? 0;
-        const bTime = b.updatedAt?.seconds ?? b.bookmarkedAt?.seconds ?? b.lastUpdatedAt ?? 0;
+        const getTime = (val) => {
+          if (!val) return 0;
+          if (typeof val === 'number') return val;
+          if (val.seconds) return val.seconds * 1000;
+          if (val.toDate && typeof val.toDate === 'function') return val.toDate().getTime();
+          if (val instanceof Date) return val.getTime();
+          return 0;
+        };
+
+        const aTime = Math.max(
+          getTime(a.lastReadAt),
+          getTime(a.bookmarkedAt),
+          getTime(a.updatedAt),
+          getTime(a.createdAt)
+        );
+
+        const bTime = Math.max(
+          getTime(b.lastReadAt),
+          getTime(b.bookmarkedAt),
+          getTime(b.updatedAt),
+          getTime(b.createdAt)
+        );
+
         return dir * (aTime - bTime);
       }
     }

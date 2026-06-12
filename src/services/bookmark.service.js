@@ -49,6 +49,7 @@ export async function addToBookmarks({ userId, taleId, tale = {} }) {
     authorName: tale.authorName ?? '',
     chapterCount: tale.chapterCount ?? 0,
     era: tale.era ?? '',
+    synopsis: tale.synopsis || tale.description || '',
     bookmarkedAt: Date.now(),
   };
 
@@ -112,7 +113,7 @@ export async function getBookmarks({ userId }) {
   if (!navigator.onLine) {
     log.info('Offline: loading bookmarks from local storage');
     const local = await getBookmarksOffline();
-    return local.map((b) => createBookmark(b.taleId, b));
+    return local.map((b) => createBookmark(userId, b.taleId, b));
   }
 
   log.debug('Fetching bookmarks', { userId });
@@ -125,7 +126,7 @@ export async function getBookmarks({ userId }) {
         return [];
       }
       log.info(`Loaded ${snap.docs.length} bookmarks`, { userId });
-      const bookmarks = snap.docs.map((d) => createBookmark(d.id, d.data()));
+      const bookmarks = snap.docs.map((d) => createBookmark(userId, d.id, d.data()));
 
       // Sync to offline storage
       await syncBookmarksOffline(
@@ -136,6 +137,7 @@ export async function getBookmarks({ userId }) {
           authorName: b.authorName,
           chapterCount: b.chapterCount,
           era: b.era,
+          synopsis: b.synopsis,
           bookmarkedAt: b.bookmarkedAt?.seconds ? b.bookmarkedAt.seconds * 1000 : Date.now(),
         }))
       );

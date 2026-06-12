@@ -15,6 +15,7 @@ import {
   setActiveTab,
   loadBookmarkedTales,
   loadDrafts,
+  loadRecentTales,
   computeAndRenderHeroStats,
   initShelfInteractions,
   initNav,
@@ -49,8 +50,12 @@ initAuth(async (user) => {
   // drafts in the background so hero stats can be computed immediately.
   // Bug fix: was calling loadBookmarkedTales twice (once in parallel, once after)
   // which caused two Firestore reads for no reason.
-  log.debug('Loading bookmarks and drafts...');
-  await Promise.all([loadBookmarkedTales(user.uid), loadDrafts(user.uid)]);
+  log.debug('Loading bookmarks, drafts, and recent tales...');
+  await Promise.all([
+    loadBookmarkedTales(user.uid),
+    loadDrafts(user.uid),
+    loadRecentTales(user.uid),
+  ]);
 
   // Default view — bookmarks tab
   setActiveTab('bookmarked');

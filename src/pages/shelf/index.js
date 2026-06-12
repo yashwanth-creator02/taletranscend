@@ -7,6 +7,7 @@ export { renderGrid, setGridLoading, setGridEmpty, setGridError, setActiveTab } 
 export {
   loadBookmarkedTales,
   loadDrafts,
+  loadRecentTales,
   computeAndRenderHeroStats,
   applyAndRender,
 } from './content.js';

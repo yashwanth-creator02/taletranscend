@@ -14,18 +14,19 @@ import { setText, formatNumber, timeAgo, escapeHtml as escapeHtml } from '@/util
  * Renders items into #studio-grid using the correct card type.
  *
  * @param {Array<Object>} items
- * @param {'bookmarked' | 'drafts'} type
+ * @param {'bookmarked' | 'drafts' | 'recent'} type
  */
 export function renderGrid(items, type) {
   const grid = document.getElementById('studio-grid');
   if (!grid) return;
 
   if (!items.length) {
-    setGridEmpty(
-      type === 'bookmarked'
-        ? 'No bookmarked tales match your filter.'
-        : 'No drafts match your filter.'
-    );
+    let emptyMsg = 'No fragments match your filter.';
+    if (type === 'bookmarked') emptyMsg = 'No bookmarked tales match your filter.';
+    else if (type === 'drafts') emptyMsg = 'No drafts match your filter.';
+    else if (type === 'recent') emptyMsg = 'No recently opened tales match your filter.';
+
+    setGridEmpty(emptyMsg);
     return;
   }
 
@@ -119,6 +120,7 @@ export function buildBookmarkCard(tale) {
     id = '0000',
     title = 'Untitled Echo',
     coverUrl,
+    authorName = 'Unknown Scribe',
     description = '',
     era = 'Unknown Era',
     chapterCount = 0,
@@ -126,6 +128,7 @@ export function buildBookmarkCard(tale) {
   } = tale;
 
   const safeTitle = escapeHtml(title);
+  const safeAuthor = escapeHtml(authorName);
   const safeDescription = escapeHtml(description);
   const safeEra = escapeHtml(era);
 
@@ -204,6 +207,7 @@ export function buildBookmarkCard(tale) {
       </div>
 
       <div class="p-4">
+        <p class="text-[9px] font-bold uppercase tracking-[0.2em] text-indigo-500/60 mb-1.5">${safeAuthor}</p>
         <h3 class="font-bold text-white text-sm leading-snug mb-1.5 group-hover:text-indigo-300 transition-colors line-clamp-2">
           ${safeTitle}
         </h3>
@@ -375,13 +379,17 @@ export function refreshSortPanel() {
    ───────────────────────────────────────────── */
 
 /**
- * @param {'bookmarked' | 'drafts'} activeTab
+ * @param {'bookmarked' | 'drafts' | 'recent'} activeTab
  */
 export function setActiveTab(activeTab) {
   document.querySelectorAll('.shelf-tab').forEach((btn) => {
     const isActive = btn.dataset.tab === activeTab;
     btn.classList.toggle('studio-tab-active', isActive);
-    btn.classList.toggle('text-zinc-500', !isActive);
-    btn.classList.remove(isActive ? 'text-zinc-500' : 'studio-tab-active');
+    btn.classList.toggle('text-zinc-500', !isActive && btn.dataset.tab !== 'recent');
+    btn.classList.toggle('text-zinc-600', !isActive && btn.dataset.tab === 'recent');
+
+    if (isActive) {
+      btn.classList.remove('text-zinc-500', 'text-zinc-600');
+    }
   });
 }
