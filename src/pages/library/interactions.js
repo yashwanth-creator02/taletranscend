@@ -5,7 +5,7 @@
 
 import { showToast } from '@ui/components/toast.js';
 import { initIcons } from '@ui/components/icons.js';
-import { navigateTo, createLogger } from '@/utils';
+import { navigateTo, resolveHref, createLogger } from '@/utils';
 
 const log = createLogger('LibraryInteractions');
 log.debug('Module initialized');
@@ -111,8 +111,8 @@ async function _handleResume(userId, taleId) {
 
 function _handleCopyLink(taleId) {
   log.info('Copy link requested', { taleId });
-  // Bug fix: was building URL with wrong path after refactor
-  const url = `${window.location.origin}/src/views/tale.html?id=${encodeURIComponent(taleId)}`;
+  // Use resolveHref for cross-environment compatibility
+  const url = `${window.location.origin}${resolveHref(`tale.html?id=${encodeURIComponent(taleId)}`)}`;
   log.debug('Link built', { url });
   const modal = document.getElementById('copy-link-modal');
   const input = document.getElementById('copy-link-input');

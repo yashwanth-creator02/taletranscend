@@ -60,8 +60,10 @@ export default defineConfig({
             purpose: 'any maskable',
           },
         ],
+        start_url: '/',
       },
       workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -96,6 +98,33 @@ export default defineConfig({
               expiration: {
                 maxEntries: 50,
                 maxAgeSeconds: 60 * 60 * 24 * 30,
+              },
+            },
+          },
+          {
+            // Firestore API caching for offline access to data
+            urlPattern: /^https:\/\/firestore\.googleapis\.com/,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'firestore-api',
+              expiration: {
+                maxEntries: 200,
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          {
+            // Image caching (covers, etc.)
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'images',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
               },
             },
           },

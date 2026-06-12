@@ -34,7 +34,13 @@ export function readyReveal(): void {
   });
 }
 
-function resolveHref(target: string): string {
+/**
+ * Resolves a target view name or URL to its final href.
+ *
+ * @param target - Destination view or URL
+ * @returns Resolved href string
+ */
+export function resolveHref(target: string): string {
   const value = target.trim();
   if (!value) return value;
 
@@ -47,6 +53,8 @@ function resolveHref(target: string): string {
     return value;
   }
 
+  // If it's a simple view name without .html, we can append it,
+  // but let's stick to the current logic which assumes it might have it or not.
   return `${VIEWS_PATH}${value}`;
 }
 

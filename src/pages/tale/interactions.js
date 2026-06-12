@@ -1,7 +1,13 @@
 // src/pages/tale/interactions.js
 // User interactions for the Tale Archive page.
 
-import { navigateTo, createLogger, getRemainingTime, applyButtonCooldown } from '@/utils';
+import {
+  navigateTo,
+  resolveHref,
+  createLogger,
+  getRemainingTime,
+  applyButtonCooldown,
+} from '@/utils';
 import {
   resolveResumePoint,
   toggleResonance,
@@ -286,8 +292,8 @@ export function setupShareButton(taleId) {
   if (!btn) return;
 
   btn.addEventListener('click', async () => {
-    // Build the canonical tale URL using the current origin
-    const url = `${window.location.origin}/src/views/tale.html?id=${taleId}`;
+    // Build the canonical tale URL using resolveHref for cross-environment compatibility
+    const url = `${window.location.origin}${resolveHref(`tale.html?id=${taleId}`)}`;
 
     if (navigator.share) {
       try {

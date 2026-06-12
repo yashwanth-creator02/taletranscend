@@ -12,8 +12,8 @@ import {
 } from './content.js';
 import { setActiveTab, buildSortPanel, refreshSortPanel } from './ui.js';
 import { showToast } from '@ui/components/toast.js';
-import { removeFromBookmarks } from '@services/index.js';
-import { debounce, navigateTo, createLogger } from '@/utils';
+import { removeFromBookmarks, getTaleMeta, getChapters } from '@services/index.js';
+import { debounce, navigateTo, resolveHref, createLogger } from '@/utils';
 
 const log = createLogger('ShelfInteractions');
 
@@ -209,9 +209,24 @@ async function _handleCardAction(action, id, e) {
       break;
 
     case 'copy-link': {
-      const url = `${window.location.origin}/src/views/tale.html?id=${id}`;
+      const url = `${window.location.origin}${resolveHref(`tale.html?id=${id}`)}`;
       await navigator.clipboard?.writeText(url);
       showToast('Link copied to clipboard.', 'success');
+      break;
+    }
+
+    case 'save-offline': {
+      if (!id) break;
+      showToast('Downloading for offline access...', 'info');
+      try {
+        // This will fetch and automatically save to IndexedDB via the service logic
+        await getTaleMeta(id);
+        await getChapters(id);
+        showToast('Tale saved for offline reading.', 'success');
+      } catch (err) {
+        log.error('Save offline failed:', err);
+        showToast('Could not save tale offline.', 'error');
+      }
       break;
     }
 

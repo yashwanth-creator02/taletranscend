@@ -3,6 +3,25 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getTaleMeta, getChapter } from '../reader.service.js';
 import { refs, getDoc, getDocs } from '@fb/index.js';
 
+// Mock @/utils
+vi.mock('@/utils', () => ({
+  safeCall: vi.fn(async (promise, fallback) => {
+    try {
+      return await promise;
+    } catch (e) {
+      return fallback;
+    }
+  }),
+  createLogger: vi.fn(() => ({
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  })),
+  saveTaleOffline: vi.fn(() => Promise.resolve()),
+  getTaleOffline: vi.fn(() => Promise.resolve(null)),
+}));
+
 describe('ReaderService', () => {
   beforeEach(() => {
     vi.clearAllMocks();

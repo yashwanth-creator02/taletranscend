@@ -5,7 +5,16 @@
 
 import { getDocs, deleteDoc, setDoc, serverTimestamp, refs } from '@fb/index.js';
 import { createBookmark } from '@state/index.js';
-import { safeAsync, guardOffline, createLogger, checkRateLimit } from '@/utils';
+import {
+  safeAsync,
+  guardOffline,
+  createLogger,
+  checkRateLimit,
+  saveBookmarkOffline,
+  removeBookmarkOffline,
+  syncBookmarksOffline,
+  getBookmarksOffline,
+} from '@/utils';
 
 const log = createLogger('BookmarkService');
 log.debug('Module initialized');
@@ -33,16 +42,24 @@ export async function addToBookmarks({ userId, taleId, tale = {} }) {
   }
 
   log.info('Adding bookmark', { userId, taleId });
+  const bookmarkData = {
+    taleId,
+    taleTitle: tale.title ?? '',
+    coverUrl: tale.coverUrl ?? '',
+    authorName: tale.authorName ?? '',
+    chapterCount: tale.chapterCount ?? 0,
+    era: tale.era ?? '',
+    bookmarkedAt: Date.now(),
+  };
+
+  // Optimistically save offline
+  await saveBookmarkOffline(bookmarkData);
+
   return safeAsync(
     setDoc(
       refs.bookmark(userId, taleId),
       {
-        taleId,
-        taleTitle: tale.title ?? '',
-        coverUrl: tale.coverUrl ?? '',
-        authorName: tale.authorName ?? '',
-        chapterCount: tale.chapterCount ?? 0,
-        era: tale.era ?? '',
+        ...bookmarkData,
         bookmarkedAt: serverTimestamp(),
       },
       { merge: true }
@@ -72,6 +89,8 @@ export async function removeFromBookmarks({ userId, taleId }) {
   }
 
   log.info('Removing bookmark', { userId, taleId });
+  await removeBookmarkOffline(taleId);
+
   return safeAsync(deleteDoc(refs.bookmark(userId, taleId)), {
     errorMessage: 'Failed to remove bookmark.',
     logContext: 'services.bookmark.removeFromBookmarks',
@@ -89,16 +108,39 @@ export async function removeFromBookmarks({ userId, taleId }) {
 export async function getBookmarks({ userId }) {
   if (!userId) return [];
 
+  // If offline, return local cache
+  if (!navigator.onLine) {
+    log.info('Offline: loading bookmarks from local storage');
+    const local = await getBookmarksOffline();
+    return local.map((b) => createBookmark(b.taleId, b));
+  }
+
   log.debug('Fetching bookmarks', { userId });
   return safeAsync(
     (async () => {
       const snap = await getDocs(refs.bookmarks(userId));
       if (snap.empty) {
         log.info('No bookmarks found', { userId });
+        await syncBookmarksOffline([]);
         return [];
       }
       log.info(`Loaded ${snap.docs.length} bookmarks`, { userId });
-      return snap.docs.map((d) => createBookmark(d.id, d.data()));
+      const bookmarks = snap.docs.map((d) => createBookmark(d.id, d.data()));
+
+      // Sync to offline storage
+      await syncBookmarksOffline(
+        bookmarks.map((b) => ({
+          taleId: b.taleId,
+          taleTitle: b.taleTitle,
+          coverUrl: b.coverUrl,
+          authorName: b.authorName,
+          chapterCount: b.chapterCount,
+          era: b.era,
+          bookmarkedAt: b.bookmarkedAt?.seconds ? b.bookmarkedAt.seconds * 1000 : Date.now(),
+        }))
+      );
+
+      return bookmarks;
     })(),
     {
       fallback: [],

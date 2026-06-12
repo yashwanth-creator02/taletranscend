@@ -171,7 +171,7 @@ export function buildBookmarkCard(tale) {
             <button class="shelf-menu-item" role="menuitem" type="button" data-action="copy-link" data-id="${id}">
               <i data-lucide="link" class="w-3.5 h-3.5"></i> Copy link
             </button>
-            <button class="shelf-menu-item" role="menuitem" type="button">
+            <button class="shelf-menu-item" role="menuitem" type="button" data-action="save-offline" data-id="${id}">
               <i data-lucide="download" class="w-3.5 h-3.5"></i> Save offline
             </button>
             <div class="shelf-menu-divider"></div>

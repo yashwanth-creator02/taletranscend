@@ -3,8 +3,7 @@
 // All Firestore data is normalized through schema factories before
 // being stored in readerState.
 
-import { refs, getDocs } from '@fb/index.js';
-import { getTaleMeta, getChapter } from '@services/index.js';
+import { getTaleMeta, getChapter, getChapters } from '@services/index.js';
 import { createChapter } from '@state/index.js';
 import { readerState } from './state.js';
 import {
@@ -86,15 +85,14 @@ export async function loadReaderMeta(taleId) {
   _renderBreadcrumbs(readerState.taleTitle);
   _renderAvatars(readerState.authorName);
 
-  // Fetch all chapters for the TOC — normalized through createChapter
-  const chaptersSnap = await safeAsync(getDocs(refs.chapters(taleId)), {
-    fallback: { docs: [] },
+  // Fetch all chapters for the TOC — uses getChapters service for offline fallback
+  const chapters = await safeAsync(getChapters(taleId), {
+    fallback: [],
     logContext: 'pages.reader.content.loadReaderMeta.chapters',
   });
 
-  readerState.chapters = chaptersSnap.docs
-    .map((d) => {
-      const ch = createChapter(d.id, d.data());
+  readerState.chapters = chapters
+    .map((ch) => {
       return {
         id: ch.id,
         number: ch.chapterNum,
