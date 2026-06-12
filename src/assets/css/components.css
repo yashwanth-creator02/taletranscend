@@ -312,3 +312,19 @@
   border-color: var(--accent);
   color: white;
 }
+
+/* ─────────────────────────────────────────────
+   Rate Limit UI
+   ───────────────────────────────────────────── */
+
+.cooldown-active {
+  opacity: 0.6;
+  cursor: wait !important;
+  filter: saturate(0.5);
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.cooldown-active span {
+  font-variant-numeric: tabular-nums;
+}

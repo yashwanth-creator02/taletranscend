@@ -28,6 +28,8 @@ vi.mock('@state/index.js', () => ({
 vi.mock('@/utils', () => ({
   safeAsync: vi.fn((promise) => promise),
   guardOffline: vi.fn(() => false),
+  checkRateLimit: vi.fn(() => true),
+  escapeText: vi.fn((s) => s),
   createLogger: vi.fn(() => ({
     debug: vi.fn(),
     info: vi.fn(),
@@ -73,6 +75,16 @@ describe('bookmark.service', () => {
     it('returns null if userId or taleId is missing', async () => {
       const { setDoc } = await import('@fb/index.js');
       await addToBookmarks({ userId: '', taleId: 'tale-456' });
+      expect(setDoc).not.toHaveBeenCalled();
+    });
+
+    it('blocks adding bookmark if rate-limited', async () => {
+      const { checkRateLimit } = await import('@/utils');
+      const { setDoc } = await import('@fb/index.js');
+      vi.mocked(checkRateLimit).mockReturnValue(false);
+
+      await addToBookmarks({ userId: 'u1', taleId: 't1' });
+
       expect(setDoc).not.toHaveBeenCalled();
     });
   });

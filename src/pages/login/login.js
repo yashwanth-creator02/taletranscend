@@ -73,9 +73,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const unsubscribe = onAuthStateChanged(auth, (user) => {
     if (user && !user.isAnonymous) {
       log.info('User already authenticated, redirecting to profile');
-      if (unsubscribe) {
-        unsubscribe();
-      }
+      // Initial call might be synchronous, causing TDZ if we access 'unsubscribe' directly.
+      // We use a microtask to ensure 'unsubscribe' is initialized before calling it.
+      Promise.resolve().then(() => {
+        if (unsubscribe) unsubscribe();
+      });
       navigateTo('profile.html');
     }
   });

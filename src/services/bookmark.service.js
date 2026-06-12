@@ -5,10 +5,12 @@
 
 import { getDocs, deleteDoc, setDoc, serverTimestamp, refs } from '@fb/index.js';
 import { createBookmark } from '@state/index.js';
-import { safeAsync, guardOffline, createLogger } from '@/utils';
+import { safeAsync, guardOffline, createLogger, checkRateLimit } from '@/utils';
 
 const log = createLogger('BookmarkService');
 log.debug('Module initialized');
+
+export const BOOKMARK_COOLDOWN_MS = 5000; // 5s
 
 /**
  * Adds a tale to a user's bookmark collection.
@@ -23,6 +25,12 @@ log.debug('Module initialized');
 export async function addToBookmarks({ userId, taleId, tale = {} }) {
   if (!userId || !taleId) return;
   if (guardOffline()) return;
+
+  if (!checkRateLimit(`bookmark:${userId}`, BOOKMARK_COOLDOWN_MS)) {
+    const { showToast } = await import('@ui/components/toast.js');
+    showToast('Soul link unstable. Please wait.', 'warning');
+    return { status: 'rate-limited' };
+  }
 
   log.info('Adding bookmark', { userId, taleId });
   return safeAsync(
@@ -56,6 +64,12 @@ export async function addToBookmarks({ userId, taleId, tale = {} }) {
 export async function removeFromBookmarks({ userId, taleId }) {
   if (!userId || !taleId) return;
   if (guardOffline()) return;
+
+  if (!checkRateLimit(`bookmark:${userId}`, BOOKMARK_COOLDOWN_MS)) {
+    const { showToast } = await import('@ui/components/toast.js');
+    showToast('Soul link unstable. Please wait.', 'warning');
+    return { status: 'rate-limited' };
+  }
 
   log.info('Removing bookmark', { userId, taleId });
   return safeAsync(deleteDoc(refs.bookmark(userId, taleId)), {

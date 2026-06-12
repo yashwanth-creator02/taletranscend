@@ -1,8 +1,15 @@
 // src/pages/tale/interactions.js
 // User interactions for the Tale Archive page.
 
-import { navigateTo, createLogger } from '@/utils';
-import { resolveResumePoint, toggleResonance, getResonanceStatus } from '@services/index.js';
+import { navigateTo, createLogger, getRemainingTime, applyButtonCooldown } from '@/utils';
+import {
+  resolveResumePoint,
+  toggleResonance,
+  getResonanceStatus,
+  RESONANCE_COOLDOWN_MS,
+  BOOKMARK_COOLDOWN_MS,
+} from '@services/index.js';
+import { auth } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
 import { initIcons } from '@ui/components/icons.js';
 
@@ -31,14 +38,34 @@ export async function setupResonance(taleId) {
     log.info('Resonance toggle clicked');
     btn.disabled = true;
     try {
-      const { active, count } = await toggleResonance(taleId);
+      const result = await toggleResonance(taleId);
+
+      if (result.status === 'rate-limited') {
+        const rateLimitKey = `resonance:${auth.currentUser?.uid}:${taleId}`;
+        const label = btn.querySelector('span');
+        const currentText = label?.textContent || 'Align Souls';
+
+        applyButtonCooldown(btn, RESONANCE_COOLDOWN_MS, currentText, () =>
+          getRemainingTime(rateLimitKey, RESONANCE_COOLDOWN_MS)
+        );
+        return;
+      }
+
+      const { active, count } = result;
       log.info('Resonance toggled', { active, count });
       _updateResonanceUI(btn, countEl, active, count);
       showToast(active ? 'Souls Aligned.' : 'Resonance Decoupled.', 'success');
+
+      // Start cooldown after success
+      const rateLimitKey = `resonance:${auth.currentUser?.uid}:${taleId}`;
+      const label = btn.querySelector('span');
+      const currentText = label?.textContent || 'Align Souls';
+      applyButtonCooldown(btn, RESONANCE_COOLDOWN_MS, currentText, () =>
+        getRemainingTime(rateLimitKey, RESONANCE_COOLDOWN_MS)
+      );
     } catch (err) {
       log.error('Resonance failed', err);
       showToast('Neural resonance failed. Authentication required.', 'error');
-    } finally {
       btn.disabled = false;
     }
   });
@@ -176,21 +203,58 @@ export async function setupShelfButton(userId, taleId, tale, bookmarkService) {
 
   btn.addEventListener('click', async () => {
     btn.disabled = true;
+    const rateLimitKey = `bookmark:${userId}`;
+
     try {
       const current = btn.dataset.shelved === 'true';
       if (current) {
-        await bookmarkService.removeFromBookmarks({ userId, taleId });
+        // Remove from bookmarks (now rate limited)
+        const result = await bookmarkService.removeFromBookmarks({ userId, taleId });
+
+        if (result?.status === 'rate-limited') {
+          const label = btn.querySelector('span');
+          const currentText = label?.textContent || 'On Your Shelf';
+          applyButtonCooldown(btn, BOOKMARK_COOLDOWN_MS, currentText, () =>
+            getRemainingTime(rateLimitKey, BOOKMARK_COOLDOWN_MS)
+          );
+          return;
+        }
+
         _updateShelfUI(btn, false);
         showToast('Removed from your shelf.', 'info');
+
+        // Start cooldown after success
+        const label = btn.querySelector('span');
+        const currentText = label?.textContent || 'Add to Shelf';
+        applyButtonCooldown(btn, BOOKMARK_COOLDOWN_MS, currentText, () =>
+          getRemainingTime(rateLimitKey, BOOKMARK_COOLDOWN_MS)
+        );
       } else {
-        await bookmarkService.addToBookmarks({ userId, taleId, tale });
+        // Add to bookmarks (rate limited)
+        const result = await bookmarkService.addToBookmarks({ userId, taleId, tale });
+
+        if (result?.status === 'rate-limited') {
+          const label = btn.querySelector('span');
+          const currentText = label?.textContent || 'Add to Shelf';
+          applyButtonCooldown(btn, BOOKMARK_COOLDOWN_MS, currentText, () =>
+            getRemainingTime(rateLimitKey, BOOKMARK_COOLDOWN_MS)
+          );
+          return;
+        }
+
         _updateShelfUI(btn, true);
         showToast('Added to your shelf.', 'success');
+
+        // Start cooldown after success
+        const label = btn.querySelector('span');
+        const currentText = label?.textContent || 'Add to Shelf';
+        applyButtonCooldown(btn, BOOKMARK_COOLDOWN_MS, currentText, () =>
+          getRemainingTime(rateLimitKey, BOOKMARK_COOLDOWN_MS)
+        );
       }
     } catch (err) {
       log.error('Shelf operation failed', err);
       showToast('Could not update shelf.', 'error');
-    } finally {
       btn.disabled = false;
     }
   });

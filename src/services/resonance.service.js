@@ -13,9 +13,10 @@ import {
   serverTimestamp,
   refs,
 } from '@fb/index.js';
-import { safeCall, guardOffline, createLogger } from '@/utils';
+import { safeCall, guardOffline, createLogger, checkRateLimit } from '@/utils';
 
 const log = createLogger('ResonanceService');
+export const RESONANCE_COOLDOWN_MS = 2000; // 2s
 
 /**
  * Toggles a user's Soul Resonance (reaction) on a tale.
@@ -30,6 +31,12 @@ export async function toggleResonance(taleId) {
   if (!user) throw new Error('Authentication required');
 
   if (guardOffline()) return { status: 'error' };
+
+  if (!checkRateLimit(`resonance:${user.uid}:${taleId}`, RESONANCE_COOLDOWN_MS)) {
+    const { showToast } = await import('@ui/components/toast.js');
+    showToast('The weave needs time to stabilize.', 'warning');
+    return { status: 'rate-limited' };
+  }
 
   log.log('Toggling resonance', { userId: user.uid, taleId });
   return safeCall(

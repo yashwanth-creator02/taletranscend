@@ -17,12 +17,19 @@ import {
 } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
 import { createComment } from '@state/index.js';
-import { escapeHtml as escapeHtml, createLogger } from '@/utils';
+import {
+  escapeHtml,
+  createLogger,
+  checkRateLimit,
+  getRemainingTime,
+  applyButtonCooldown,
+} from '@/utils';
 import { initIcons } from '@ui/components/icons.js';
 import { PATHS } from '@fb/paths.js';
 
 const log = createLogger('Comments');
 const PAGE_SIZE = 10;
+const COMMENT_COOLDOWN_MS = 30000; // 30s
 
 let _lastVisible = null;
 let _allLoaded = false;
@@ -62,8 +69,20 @@ export async function postComment(taleId) {
   const text = input?.value.trim();
   if (!text || !auth.currentUser) return;
 
+  // Rate Limiting
+  const userId = auth.currentUser.uid;
+  const rateLimitKey = `comment:${userId}`;
   const btn = document.getElementById('post-btn');
-  const originalText = btn?.textContent;
+  const originalText = 'Post Echo';
+
+  if (!checkRateLimit(rateLimitKey, COMMENT_COOLDOWN_MS)) {
+    showToast('Please wait before transmitting another echo.', 'warning');
+    applyButtonCooldown(btn, COMMENT_COOLDOWN_MS, originalText, () =>
+      getRemainingTime(rateLimitKey, COMMENT_COOLDOWN_MS)
+    );
+    return;
+  }
+
   if (btn) {
     btn.disabled = true;
     btn.textContent = 'Transmitting...';
@@ -94,10 +113,14 @@ export async function postComment(taleId) {
     if (input) input.value = '';
     showToast('Echo transmitted to the weave.', 'success');
     await _fetchComments(true);
+
+    // Start cooldown timer after success
+    applyButtonCooldown(btn, COMMENT_COOLDOWN_MS, originalText, () =>
+      getRemainingTime(rateLimitKey, COMMENT_COOLDOWN_MS)
+    );
   } catch (err) {
     log.error('Post failed', err);
     showToast('Transmission failed. Neural link unstable.', 'error');
-  } finally {
     if (btn) {
       btn.disabled = false;
       btn.textContent = originalText;
@@ -213,8 +236,20 @@ async function _handlePostReply(commentId, btn) {
   const text = input?.value.trim();
   if (!text || !auth.currentUser) return;
 
+  // Rate Limiting
+  const userId = auth.currentUser.uid;
+  const rateLimitKey = `comment:${userId}`;
+  const originalText = 'Transmit';
+
+  if (!checkRateLimit(rateLimitKey, COMMENT_COOLDOWN_MS)) {
+    showToast('Please wait before transmitting another echo.', 'warning');
+    applyButtonCooldown(btn, COMMENT_COOLDOWN_MS, originalText, () =>
+      getRemainingTime(rateLimitKey, COMMENT_COOLDOWN_MS)
+    );
+    return;
+  }
+
   btn.disabled = true;
-  const originalText = btn.textContent;
   btn.textContent = '...';
 
   try {
@@ -234,10 +269,14 @@ async function _handlePostReply(commentId, btn) {
     document.getElementById(`reply-form-${commentId}`)?.classList.add('hidden');
     showToast('Echo back recorded.', 'success');
     await _fetchReplies(commentId);
+
+    // The button is inside a form that might have been hidden, but let's apply anyway
+    applyButtonCooldown(btn, COMMENT_COOLDOWN_MS, originalText, () =>
+      getRemainingTime(rateLimitKey, COMMENT_COOLDOWN_MS)
+    );
   } catch (err) {
     log.error('Post reply failed', err);
     showToast('Failed to echo back.', 'error');
-  } finally {
     btn.disabled = false;
     btn.textContent = originalText;
   }

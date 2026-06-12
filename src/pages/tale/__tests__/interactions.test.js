@@ -14,6 +14,8 @@ vi.mock('@services/index.js', () => ({
   toggleResonance: vi.fn(),
   getResonanceStatus: vi.fn(),
   resolveResumePoint: vi.fn(),
+  RESONANCE_COOLDOWN_MS: 2000,
+  BOOKMARK_COOLDOWN_MS: 5000,
 }));
 
 vi.mock('@/utils', () => ({
@@ -23,6 +25,12 @@ vi.mock('@/utils', () => ({
     debug: vi.fn(),
     error: vi.fn(),
   })),
+  getRemainingTime: vi.fn(() => 1000),
+  applyButtonCooldown: vi.fn(),
+}));
+
+vi.mock('@fb/index.js', () => ({
+  auth: { currentUser: { uid: 'u1' } },
 }));
 
 vi.mock('@ui/components/toast.js', () => ({
@@ -64,6 +72,18 @@ describe('TaleInteractions', () => {
       expect(services.toggleResonance).toHaveBeenCalledWith('t1');
       expect(document.getElementById('resonance-count').textContent).toBe('1');
       expect(btn.querySelector('span').textContent).toBe('Souls Aligned');
+    });
+
+    it('applies cooldown if resonance is rate-limited', async () => {
+      vi.mocked(services.getResonanceStatus).mockResolvedValue(false);
+      vi.mocked(services.toggleResonance).mockResolvedValue({ status: 'rate-limited' });
+
+      await setupResonance('t1');
+
+      const btn = document.getElementById('resonance-btn');
+      await btn.click();
+
+      expect(utils.applyButtonCooldown).toHaveBeenCalled();
     });
   });
 

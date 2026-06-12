@@ -26,6 +26,8 @@ vi.mock('@/utils', () => ({
     }
   }),
   guardOffline: vi.fn(() => false),
+  checkRateLimit: vi.fn(() => true),
+  escapeText: vi.fn((s) => s),
   createLogger: vi.fn(() => ({
     debug: vi.fn(),
     info: vi.fn(),
@@ -89,6 +91,15 @@ describe('ResonanceService', () => {
       expect(deleteDoc).toHaveBeenCalled();
       expect(updateDoc).toHaveBeenCalled();
       expect(result).toEqual({ active: false, count: 9 });
+    });
+
+    it('returns error status if rate-limited', async () => {
+      const { checkRateLimit } = await import('@/utils');
+      vi.mocked(checkRateLimit).mockReturnValue(false);
+
+      const result = await toggleResonance('t1');
+
+      expect(result.status).toBe('rate-limited');
     });
   });
 

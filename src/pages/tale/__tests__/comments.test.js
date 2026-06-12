@@ -31,7 +31,12 @@ vi.mock('@/utils', () => ({
     error: vi.fn(),
   })),
   escapeHtml: vi.fn((s) => s),
+  checkRateLimit: vi.fn(() => true),
+  getRemainingTime: vi.fn(() => 1000),
+  applyButtonCooldown: vi.fn(),
 }));
+
+import { checkRateLimit, applyButtonCooldown } from '@/utils';
 
 describe('TaleComments', () => {
   beforeEach(() => {
@@ -79,6 +84,17 @@ describe('TaleComments', () => {
       );
       expect(showToast).toHaveBeenCalledWith(expect.stringContaining('transmitted'), 'success');
       expect(document.getElementById('comment-text').value).toBe('');
+    });
+
+    it('blocks submission if rate-limited and applies cooldown', async () => {
+      document.getElementById('comment-text').value = 'Valid comment';
+      vi.mocked(checkRateLimit).mockReturnValue(false);
+
+      await postComment('t1');
+
+      expect(fb.addDoc).not.toHaveBeenCalled();
+      expect(showToast).toHaveBeenCalledWith(expect.stringContaining('wait'), 'warning');
+      expect(applyButtonCooldown).toHaveBeenCalled();
     });
   });
 });
