@@ -31,6 +31,7 @@ import {
   switchContribTab,
   closeModal,
 } from './index.js';
+import { initProfileLayout } from './layout.js';
 
 import { getContinueReading, getUserPublishedTales, getUserDrafts } from '@services/index.js';
 
@@ -99,6 +100,7 @@ initAuth(async (user) => {
    ───────────────────────────────────────────── */
 
 document.addEventListener('DOMContentLoaded', () => {
+  initProfileLayout();
   initProfileUI();
 
   // Profile form submit
