@@ -12,79 +12,102 @@
 
 /* ── Dashboard Layout (The Solution) ─────────── */
 
+:root {
+  --left-panel-width: 320px;
+  --right-panel-width: 320px;
+  --transition-fast: 150ms ease;
+}
+
 .profile-main-layout {
   display: flex;
   flex-direction: column;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  background: var(--paper-bg);
+  background: #030305;
 }
 
-.pillar-left {
-  width: 100%;
-  height: auto;
-  min-height: 0;
-  overflow-y: auto;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-  z-index: 20;
-}
-
-.pillar-right {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  overflow: hidden;
-}
-
-@media (min-width: 768px) {
+/* Desktop: 3-column grid with resize handles */
+@media (min-width: 1200px) {
   .profile-main-layout {
-    flex-direction: row !important;
-  }
-
-  .pillar-left {
-    width: 320px;
-    height: 100%;
-    border-bottom: none;
-    border-right: 1px solid rgba(255, 255, 255, 0.03);
-    flex-shrink: 0;
-  }
-
-  .pillar-right {
     display: grid !important;
-    grid-template-columns: 1fr 300px !important;
+    grid-template-columns: var(--left-panel-width) 4px minmax(0, 1fr) 4px var(--right-panel-width) !important;
     grid-template-rows: 100% !important;
+    flex-direction: unset !important;
   }
 
-  .dashboard-column {
-    height: 100% !important;
-    min-height: 0;
-    overflow-y: auto;
-    border-right: 1px solid rgba(255, 255, 255, 0.03);
+  .pillar-left,
+  #column-chronicles,
+  #column-insights {
+    height: 100vh !important;
+    overflow-y: auto !important;
   }
 }
 
-@media (min-width: 1280px) {
-  .pillar-left {
-    width: 380px;
+/* Tablet/Small Desktop: stacked or 2-column if needed, but following HTML's lead of flex-col below 1200px */
+@media (max-width: 1199px) {
+  .profile-main-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    overflow-y: auto !important;
+    height: auto !important;
+    min-height: 100vh !important;
   }
 
-  .pillar-right {
-    grid-template-columns: 1fr 340px !important;
+  .pillar-left,
+  #column-chronicles,
+  #column-insights {
+    height: auto !important;
+    overflow-y: visible !important;
+    width: 100% !important;
   }
 }
 
-@media (min-width: 1536px) {
-  .pillar-left {
-    width: 420px;
-  }
-  .pillar-right {
-    grid-template-columns: 1fr 380px !important;
-  }
+/* Resize Handles — Desktop only */
+.resize-handle {
+  display: none;
 }
 
-/* ── Custom Scrollbar ───────────────────────── */
+@media (min-width: 1200px) {
+  .resize-handle {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 4px;
+    background: rgba(255, 255, 255, 0.02);
+    cursor: col-resize;
+    position: relative;
+    z-index: 50;
+    transition: background var(--transition-fast);
+    touch-action: none;
+  }
+
+  .resize-handle:hover,
+  .resize-handle:focus-visible,
+  body.resizing .resize-handle {
+    background: rgba(99, 102, 241, 0.4) !important;
+  }
+
+  .resize-handle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 2px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 1px;
+    transition: all var(--transition-fast);
+  }
+
+  .resize-handle:hover::after,
+  .resize-handle:focus-visible::after,
+  body.resizing .resize-handle::after {
+    background: rgba(255, 255, 255, 0.25) !important;
+    height: 48px;
+  }
+}
 
 .scroll-container::-webkit-scrollbar {
   width: 4px;

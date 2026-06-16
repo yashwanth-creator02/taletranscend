@@ -101,7 +101,7 @@
          LEFT PANE — Tale metadata + chapters
          ════════════════════════════════════════ -->
       <aside
-        class="editor-pane custom-scrollbar hidden w-68 shrink-0 border-r border-slate-800/70 bg-slate-900/20 lg:block"
+        class="editor-pane custom-scrollbar hidden border-r border-slate-800/70 bg-slate-900/20 lg:block"
       >
         <div class="space-y-5 p-4">
           <!-- Cover -->
@@ -414,6 +414,15 @@
         </div>
       </aside>
 
+      <!-- Left Resize Handle -->
+      <div
+        class="resize-handle resize-handle-left"
+        data-resize="left"
+        role="separator"
+        aria-label="Resize left panel"
+        tabindex="0"
+      ></div>
+
       <!-- ════════════════════════════════════════
          CENTER PANE — Chapter editor
          ════════════════════════════════════════ -->
@@ -546,11 +555,20 @@
         </div>
       </section>
 
+      <!-- Right Resize Handle -->
+      <div
+        class="resize-handle resize-handle-right"
+        data-resize="right"
+        role="separator"
+        aria-label="Resize right panel"
+        tabindex="0"
+      ></div>
+
       <!-- ════════════════════════════════════════
          RIGHT PANE — Analytics + settings + checklist
          ════════════════════════════════════════ -->
       <aside
-        class="editor-pane custom-scrollbar hidden w-76 shrink-0 border-l border-slate-800/70 bg-slate-900/20 xl:block"
+        class="editor-pane custom-scrollbar hidden border-l border-slate-800/70 bg-slate-900/20 xl:block"
       >
         <div class="space-y-5 p-4">
           <!-- Writing metrics -->
@@ -716,5 +734,127 @@
         </div>
       </aside>
     </main>
+
+    <script>
+      (function () {
+        'use strict';
+
+        const LEFT_MIN = 240;
+        const LEFT_MAX = 500;
+        const RIGHT_MIN = 260;
+        const RIGHT_MAX = 500;
+
+        const savedLeft = localStorage.getItem('contribution_left_width');
+        const savedRight = localStorage.getItem('contribution_right_width');
+
+        if (savedLeft) {
+          document.documentElement.style.setProperty(
+            '--left-pane-width',
+            Math.max(LEFT_MIN, Math.min(LEFT_MAX, parseInt(savedLeft))) + 'px'
+          );
+        }
+        if (savedRight) {
+          document.documentElement.style.setProperty(
+            '--right-pane-width',
+            Math.max(RIGHT_MIN, Math.min(RIGHT_MAX, parseInt(savedRight))) + 'px'
+          );
+        }
+
+        const handles = document.querySelectorAll('.resize-handle');
+        let activeHandle = null;
+        let startX = 0;
+        let startWidth = 0;
+
+        function onMouseDown(e, side) {
+          activeHandle = side;
+          const touch = e.touches && e.touches[0];
+          startX = touch ? touch.clientX : e.clientX;
+
+          const prop = side === 'left' ? '--left-pane-width' : '--right-pane-width';
+          const style = getComputedStyle(document.documentElement);
+          startWidth = parseInt(style.getPropertyValue(prop)) || (side === 'left' ? 280 : 320);
+
+          document.body.classList.add('resizing');
+
+          if (e.cancelable !== false) e.preventDefault();
+          e.stopPropagation();
+        }
+
+        function onMouseMove(e) {
+          if (!activeHandle) return;
+
+          const touch = e.touches && e.touches[0];
+          const clientX = touch ? touch.clientX : e.clientX;
+          if (clientX === undefined) return;
+
+          const delta = clientX - startX;
+          const prop = activeHandle === 'left' ? '--left-pane-width' : '--right-pane-width';
+          const min = activeHandle === 'left' ? LEFT_MIN : RIGHT_MIN;
+          const max = activeHandle === 'left' ? LEFT_MAX : RIGHT_MAX;
+
+          let newWidth;
+          if (activeHandle === 'left') {
+            newWidth = startWidth + delta;
+          } else {
+            newWidth = startWidth - delta;
+          }
+
+          newWidth = Math.max(min, Math.min(max, newWidth));
+          document.documentElement.style.setProperty(prop, newWidth + 'px');
+        }
+
+        function onMouseUp() {
+          if (!activeHandle) return;
+          const prop = activeHandle === 'left' ? '--left-pane-width' : '--right-pane-width';
+          const val = parseInt(getComputedStyle(document.documentElement).getPropertyValue(prop));
+          if (!isNaN(val)) {
+            localStorage.setItem('contribution_' + activeHandle + '_width', val);
+          }
+          activeHandle = null;
+          document.body.classList.remove('resizing');
+        }
+
+        handles.forEach((handle) => {
+          const side = handle.dataset.resize;
+          handle.addEventListener('mousedown', (e) => onMouseDown(e, side));
+          handle.addEventListener('touchstart', (e) => onMouseDown(e, side), {
+            passive: false,
+          });
+        });
+
+        window.addEventListener('mousemove', onMouseMove, { capture: true });
+        window.addEventListener('touchmove', onMouseMove, { passive: false, capture: true });
+        window.addEventListener('mouseup', onMouseUp, { capture: true });
+        window.addEventListener('touchend', onMouseUp, { capture: true });
+
+        /* Keyboard resize support */
+        handles.forEach((handle) => {
+          handle.addEventListener('keydown', (e) => {
+            const side = handle.dataset.resize;
+            if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+            const prop = side === 'left' ? '--left-pane-width' : '--right-pane-width';
+            const current =
+              parseInt(getComputedStyle(document.documentElement).getPropertyValue(prop)) ||
+              (side === 'left' ? 280 : 320);
+            const step = 20;
+            let newWidth = current;
+
+            if (side === 'left') {
+              newWidth = e.key === 'ArrowRight' ? current + step : current - step;
+            } else {
+              newWidth = e.key === 'ArrowLeft' ? current + step : current - step;
+            }
+
+            const min = side === 'left' ? LEFT_MIN : RIGHT_MIN;
+            const max = side === 'left' ? LEFT_MAX : RIGHT_MAX;
+            newWidth = Math.max(min, Math.min(max, newWidth));
+
+            document.documentElement.style.setProperty(prop, newWidth + 'px');
+            localStorage.setItem('contribution_' + side + '_width', newWidth);
+            e.preventDefault();
+          });
+        });
+      })();
+    </script>
   </body>
 </html>

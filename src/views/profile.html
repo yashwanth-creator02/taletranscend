@@ -1888,18 +1888,27 @@
 
         function onMouseDown(e, side) {
           activeHandle = side;
-          startX = e.clientX;
+          const touch = e.touches && e.touches[0];
+          startX = touch ? touch.clientX : e.clientX;
+
           const prop = side === 'left' ? '--left-panel-width' : '--right-panel-width';
-          startWidth =
-            parseInt(getComputedStyle(document.documentElement).getPropertyValue(prop)) || 320;
+          const style = getComputedStyle(document.documentElement);
+          startWidth = parseInt(style.getPropertyValue(prop)) || 320;
+
           document.body.classList.add('resizing');
-          e.preventDefault();
+
+          if (e.cancelable !== false) e.preventDefault();
           e.stopPropagation();
         }
 
         function onMouseMove(e) {
           if (!activeHandle) return;
-          const delta = e.clientX - startX;
+
+          const touch = e.touches && e.touches[0];
+          const clientX = touch ? touch.clientX : e.clientX;
+          if (clientX === undefined) return;
+
+          const delta = clientX - startX;
           const prop = activeHandle === 'left' ? '--left-panel-width' : '--right-panel-width';
           const min = activeHandle === 'left' ? LEFT_MIN : RIGHT_MIN;
           const max = activeHandle === 'left' ? LEFT_MAX : RIGHT_MAX;
@@ -1919,7 +1928,9 @@
           if (!activeHandle) return;
           const prop = activeHandle === 'left' ? '--left-panel-width' : '--right-panel-width';
           const val = parseInt(getComputedStyle(document.documentElement).getPropertyValue(prop));
-          localStorage.setItem('profile_' + activeHandle + '_width', val);
+          if (!isNaN(val)) {
+            localStorage.setItem('profile_' + activeHandle + '_width', val);
+          }
           activeHandle = null;
           document.body.classList.remove('resizing');
         }
@@ -1927,21 +1938,15 @@
         handles.forEach((handle) => {
           const side = handle.dataset.resize;
           handle.addEventListener('mousedown', (e) => onMouseDown(e, side));
-          handle.addEventListener('touchstart', (e) => onMouseDown(e.touches[0], side), {
+          handle.addEventListener('touchstart', (e) => onMouseDown(e, side), {
             passive: false,
           });
         });
 
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener(
-          'touchmove',
-          (e) => {
-            if (activeHandle) onMouseMove(e.touches[0]);
-          },
-          { passive: false }
-        );
-        document.addEventListener('mouseup', onMouseUp);
-        document.addEventListener('touchend', onMouseUp);
+        window.addEventListener('mousemove', onMouseMove, { capture: true });
+        window.addEventListener('touchmove', onMouseMove, { passive: false, capture: true });
+        window.addEventListener('mouseup', onMouseUp, { capture: true });
+        window.addEventListener('touchend', onMouseUp, { capture: true });
 
         /* Keyboard resize support */
         handles.forEach((handle) => {

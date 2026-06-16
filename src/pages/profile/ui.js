@@ -647,7 +647,7 @@ export function showContributionsSkeleton() {
   const skeletons = Array.from(
     { length: 2 },
     () => `
-    <div class="skeleton-card rounded-4xl overflow-hidden">
+    <div class="skeleton-card rounded-4xl overflow-hidden hidden">
       <div class="aspect-video skeleton"></div>
       <div class="p-6 space-y-3">
         <div class="skeleton h-5 w-2/3 rounded-lg"></div>

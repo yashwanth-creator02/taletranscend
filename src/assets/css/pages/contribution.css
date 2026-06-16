@@ -2,6 +2,8 @@
 
 :root {
   --editor-header-height: 56px;
+  --left-pane-width: 280px;
+  --right-pane-width: 320px;
 }
 
 /* ── Custom Scrollbar ───────────────────────── */
@@ -51,13 +53,91 @@
 .editor-layout {
   flex: 1;
   display: flex;
-  overflow: hidden;
+  flex-direction: column;
+  overflow-y: auto;
   background: #030305;
+}
+
+@media (min-width: 1024px) {
+  .editor-layout {
+    display: grid;
+    grid-template-columns: var(--left-pane-width) 4px minmax(0, 1fr);
+    overflow: hidden;
+  }
+}
+
+@media (min-width: 1280px) {
+  .editor-layout {
+    grid-template-columns: var(--left-pane-width) 4px minmax(0, 1fr) 4px var(--right-pane-width);
+  }
 }
 
 .editor-pane {
   height: 100%;
   overflow-y: auto;
+}
+
+/* Resize Handles — Desktop only */
+.resize-handle {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .resize-handle-left {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 4px;
+    background: rgba(255, 255, 255, 0.02);
+    cursor: col-resize;
+    position: relative;
+    z-index: 50;
+    transition: background 150ms ease;
+    touch-action: none;
+  }
+}
+
+@media (min-width: 1280px) {
+  .resize-handle-right {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 4px;
+    background: rgba(255, 255, 255, 0.02);
+    cursor: col-resize;
+    position: relative;
+    z-index: 50;
+    transition: background 150ms ease;
+    touch-action: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .resize-handle:hover,
+  .resize-handle:focus-visible,
+  body.resizing .resize-handle {
+    background: rgba(99, 102, 241, 0.4);
+  }
+
+  .resize-handle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 2px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 1px;
+    transition: all 150ms ease;
+  }
+
+  .resize-handle:hover::after,
+  .resize-handle:focus-visible::after,
+  body.resizing .resize-handle::after {
+    background: rgba(255, 255, 255, 0.25);
+    height: 48px;
+  }
 }
 
 /* ── Chapter list items ───────────────────────────────────── */
