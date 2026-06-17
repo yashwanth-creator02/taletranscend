@@ -1,7 +1,7 @@
 // src/utils/network.utils.ts
 // Listens for browser online/offline events and broadcasts to the app.
 
-import { createLogger } from '@/utils';
+import { createLogger } from './logger.ts';
 
 const log = createLogger('NetworkUtils');
 

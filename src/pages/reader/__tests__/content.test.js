@@ -8,6 +8,7 @@ import * as fb from '@fb/index.js';
 vi.mock('@services/index.js', () => ({
   getTaleMeta: vi.fn(),
   getChapter: vi.fn(),
+  getChapters: vi.fn(),
 }));
 
 vi.mock('@fb/index.js', () => ({
@@ -57,9 +58,9 @@ describe('ReaderContent', () => {
         title: 'Epic Myth',
         authorName: 'Scribe',
       });
-      vi.mocked(fb.getDocs).mockResolvedValue({
-        docs: [{ id: 'c1', data: () => ({ chapterNum: 1, title: 'Ch 1', content: '...' }) }],
-      });
+      vi.mocked(services.getChapters).mockResolvedValue([
+        { id: 'c1', chapterNum: 1, title: 'Ch 1', content: '...' },
+      ]);
 
       await loadReaderMeta('t1');
 

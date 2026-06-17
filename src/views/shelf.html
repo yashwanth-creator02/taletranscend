@@ -6,7 +6,7 @@
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="../assets/css/pages/shelf.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Studio | TaleTranscend</title>
+    <title>My Shelf | TaleTranscend</title>
 
     <script type="module" src="../pages/shelf/shelf.js"></script>
 
@@ -48,7 +48,7 @@
               <h1
                 class="archive-title mt-8 text-5xl md:text-6xl xl:text-7xl font-cinzel font-black text-white tracking-tight leading-none"
               >
-                My Studio
+                My Shelf
               </h1>
 
               <p class="mt-8 text-slate-400 max-w-2xl leading-relaxed text-sm md:text-base">
@@ -121,14 +121,14 @@
       </section>
 
       <!-- Tabs + Controls -->
-      <section class="mb-10">
+      <section class="mb-10 relative z-20">
         <div class="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-6 items-start">
           <div class="glass-panel rounded-4xl p-2 overflow-x-auto no-scrollbar">
             <div class="flex items-center gap-2 min-w-max">
               <button
                 id="tab-bookmarked"
                 data-tab="bookmarked"
-                class="shelf-tab studio-tab-active rounded-2xl px-6 py-4 text-[11px] uppercase tracking-[0.22em] font-black transition-all"
+                class="shelf-tab shelf-tab-active rounded-2xl px-6 py-4 text-[11px] uppercase tracking-[0.22em] font-black transition-all"
               >
                 <span class="flex items-center gap-3">
                   <i data-lucide="bookmark" class="w-4 h-4"></i>
@@ -241,7 +241,7 @@
       <section class="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-8 items-start">
         <div class="min-w-0">
           <div
-            id="studio-grid"
+            id="shelf-grid"
             class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 md:gap-8"
           >
             <!-- loading -->
@@ -274,7 +274,7 @@
           <div class="glass-panel-elevated rounded-4xl p-6 md:p-8">
             <div class="flex items-center gap-2 text-indigo-300 mb-5">
               <i data-lucide="wand-sparkles" class="w-4 h-4"></i>
-              <span class="text-[9px] font-black uppercase tracking-[0.3em]">Studio Rituals</span>
+              <span class="text-[9px] font-black uppercase tracking-[0.3em]">Shelf Rituals</span>
             </div>
 
             <div class="space-y-3">

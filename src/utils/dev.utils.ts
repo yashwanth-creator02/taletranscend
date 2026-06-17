@@ -2,7 +2,7 @@
 // Developer-only utilities and initialization.
 
 import { IS_DEV_MODE } from '@config/app.config.js';
-import { createLogger } from '@/utils';
+import { createLogger } from './logger.ts';
 
 const log = createLogger('DevUtils');
 

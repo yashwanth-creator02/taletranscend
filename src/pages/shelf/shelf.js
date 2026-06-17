@@ -7,6 +7,7 @@ import { initPageReveal, readyReveal, setupAuthTimeout, createLogger } from '@/u
 import '@css/base.css';
 import '@css/nav.css';
 import '@css/components.css';
+import '@css/pages/tale-cards.css';
 import '@css/pages/shelf.css';
 
 import {
@@ -33,7 +34,7 @@ initNav();
    Auth timeout guard
    ───────────────────────────────────────────── */
 
-const authTimeout = setupAuthTimeout('studio-grid');
+const authTimeout = setupAuthTimeout('shelf-grid');
 
 /* ─────────────────────────────────────────────
    Auth + Data

@@ -51,7 +51,7 @@ describe('ShelfInteractions', () => {
       <div id="sort-panel" hidden>
         <button data-sort="title"></button>
       </div>
-      <div id="studio-grid">
+      <div id="shelf-grid">
         <div data-id="t1">
           <button data-action="options" data-menu-id="menu-t1"></button>
           <div id="menu-t1" class="shelf-menu" hidden>

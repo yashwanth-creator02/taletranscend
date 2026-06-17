@@ -32,7 +32,7 @@ describe('ShelfUI', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     document.body.innerHTML = `
-      <div id="studio-grid"></div>
+      <div id="shelf-grid"></div>
       <div id="hero-stat-drafts"></div>
       <div id="hero-stat-bookmarks"></div>
       <div id="hero-stat-words"></div>
@@ -47,7 +47,7 @@ describe('ShelfUI', () => {
     it('renders bookmark cards', () => {
       const items = [{ id: 't1', title: 'Tale 1', progress: 50 }];
       renderGrid(items, 'bookmarked');
-      const grid = document.getElementById('studio-grid');
+      const grid = document.getElementById('shelf-grid');
       expect(grid.innerHTML).toContain('Tale 1');
       expect(grid.innerHTML).toContain('50%');
     });
@@ -55,14 +55,14 @@ describe('ShelfUI', () => {
     it('renders draft cards', () => {
       const items = [{ id: 'd1', title: 'Draft 1', wordCount: 500 }];
       renderGrid(items, 'drafts');
-      const grid = document.getElementById('studio-grid');
+      const grid = document.getElementById('shelf-grid');
       expect(grid.innerHTML).toContain('Draft 1');
       expect(grid.innerHTML).toContain('500 words');
     });
 
     it('shows empty state if no items', () => {
       renderGrid([], 'drafts');
-      expect(document.getElementById('studio-grid').textContent).toContain('No drafts match');
+      expect(document.getElementById('shelf-grid').textContent).toContain('No drafts match');
     });
   });
 
@@ -87,8 +87,8 @@ describe('ShelfUI', () => {
       setActiveTab('drafts');
       const dBtn = document.querySelector('[data-tab="drafts"]');
       const bBtn = document.querySelector('[data-tab="bookmarked"]');
-      expect(dBtn.classList.contains('studio-tab-active')).toBe(true);
-      expect(bBtn.classList.contains('studio-tab-active')).toBe(false);
+      expect(dBtn.classList.contains('shelf-tab-active')).toBe(true);
+      expect(bBtn.classList.contains('shelf-tab-active')).toBe(false);
     });
   });
 });

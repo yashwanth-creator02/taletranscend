@@ -1,10 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import {
-  addToBookmarks,
-  removeFromBookmarks,
-  getBookmarks,
-  isBookmarked,
-} from '../bookmark.service.js';
 
 // Mock Firebase
 vi.mock('@fb/index.js', () => ({
@@ -21,7 +15,7 @@ vi.mock('@fb/index.js', () => ({
 
 // Mock @state/index.js
 vi.mock('@state/index.js', () => ({
-  createBookmark: vi.fn((id, data) => ({ id, ...data })),
+  createBookmark: vi.fn((userId, taleId, data) => ({ userId, taleId, ...data })),
 }));
 
 // Mock @/utils
@@ -39,9 +33,18 @@ vi.mock('@/utils', async (importOriginal) => {
   };
 });
 
+import {
+  addToBookmarks,
+  removeFromBookmarks,
+  getBookmarks,
+  isBookmarked,
+} from '../bookmark.service.js';
+
 describe('bookmark.service', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    const { checkRateLimit } = await import('@/utils');
+    vi.mocked(checkRateLimit).mockReturnValue(true);
   });
 
   describe('addToBookmarks', () => {
@@ -93,9 +96,11 @@ describe('bookmark.service', () => {
   describe('removeFromBookmarks', () => {
     it('calls deleteDoc', async () => {
       const { deleteDoc } = await import('@fb/index.js');
+      const { removeBookmarkOffline } = await import('@/utils');
 
       await removeFromBookmarks({ userId: 'user-123', taleId: 'tale-456' });
 
+      expect(removeBookmarkOffline).toHaveBeenCalledWith('tale-456');
       expect(deleteDoc).toHaveBeenCalled();
     });
   });

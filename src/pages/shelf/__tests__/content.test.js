@@ -13,6 +13,8 @@ import * as ui from '../ui.js';
 vi.mock('@services/index.js', () => ({
   getBookmarks: vi.fn(),
   getUserDrafts: vi.fn(),
+  getOverallProgress: vi.fn(() => ({ percent: 0 })),
+  getAllLocalChapters: vi.fn(() => []),
 }));
 
 vi.mock('../ui.js', () => ({

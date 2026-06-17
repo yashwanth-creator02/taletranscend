@@ -1,7 +1,7 @@
 // src/utils/navigation.ts
 
 import { initDevMode } from './dev.utils.ts';
-import { createLogger } from '@/utils';
+import { createLogger } from './logger.ts';
 
 const log = createLogger('Navigation');
 

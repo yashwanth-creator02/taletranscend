@@ -1,7 +1,7 @@
 // src/utils/dom.utils.ts
 // DOM helper utilities.
 
-import { createLogger } from '@/utils';
+import { createLogger } from './logger.ts';
 
 const log = createLogger('DomUtils');
 

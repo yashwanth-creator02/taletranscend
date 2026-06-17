@@ -15,6 +15,7 @@ vi.mock('../index.js', () => ({
   setActiveTab: vi.fn(),
   loadBookmarkedTales: vi.fn(),
   loadDrafts: vi.fn(),
+  loadRecentTales: vi.fn(),
   computeAndRenderHeroStats: vi.fn(),
   initShelfInteractions: vi.fn(),
   initNav: vi.fn(),
@@ -35,7 +36,7 @@ describe('Shelf Page Controller', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     vi.resetModules();
-    document.body.innerHTML = '<div id="studio-grid"></div>';
+    document.body.innerHTML = '<div id="shelf-grid"></div>';
   });
 
   async function initPage() {

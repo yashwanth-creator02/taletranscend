@@ -2,7 +2,7 @@
 // Wraps async operations with consistent error handling and user feedback.
 
 import { showToast } from '@ui/components/toast.js';
-import { createLogger } from '@/utils';
+import { createLogger } from './logger.ts';
 
 const log = createLogger('AsyncUtils');
 

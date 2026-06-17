@@ -1,7 +1,7 @@
 // src/pages/shelf/interactions.js
 // All event wiring for the shelf page.
 // Tab switching, filter input, sort panel, card action delegation,
-// and right-rail studio ritual buttons.
+// and right-rail shelf ritual buttons.
 
 import { shelfState } from './state.js';
 import {
@@ -140,7 +140,7 @@ function _bindSort() {
    ───────────────────────────────────────────── */
 
 function _bindCardActions() {
-  const grid = document.getElementById('studio-grid');
+  const grid = document.getElementById('shelf-grid');
   if (!grid) return;
 
   grid.addEventListener('click', async (e) => {
@@ -165,7 +165,7 @@ function _bindCardActions() {
 
     // Card body click → navigate to tale
     const card = target.closest('[data-id]');
-    if (card && !target.closest('.shelf-menu') && !target.closest('.shelf-options-btn')) {
+    if (card && !target.closest('.options-menu') && !target.closest('[data-action="options"]')) {
       const id = card.dataset.id;
       if (id) navigateTo(`tale.html?id=${id}`);
     }
@@ -179,7 +179,7 @@ function _bindCardActions() {
 }
 
 function _toggleMenu(menuId, triggerBtn) {
-  document.querySelectorAll('.shelf-menu:not([hidden])').forEach((m) => {
+  document.querySelectorAll('.options-menu:not([hidden])').forEach((m) => {
     if (m.id !== menuId) {
       m.hidden = true;
       document.querySelector(`[data-menu-id="${m.id}"]`)?.setAttribute('aria-expanded', 'false');
@@ -195,7 +195,7 @@ function _toggleMenu(menuId, triggerBtn) {
 }
 
 function _closeAllMenus() {
-  document.querySelectorAll('.shelf-menu:not([hidden])').forEach((m) => {
+  document.querySelectorAll('.options-menu:not([hidden])').forEach((m) => {
     m.hidden = true;
   });
   document.querySelectorAll('[data-action="options"]').forEach((btn) => {
@@ -255,6 +255,26 @@ async function _handleCardAction(action, id, e) {
       break;
     }
 
+    case 'delete-draft': {
+      if (!shelfState.userId || !id) break;
+      if (!confirm('Are you sure you want to discard this draft? This cannot be undone.')) break;
+
+      try {
+        const { deleteDoc, refs } = await import('@fb/index.js');
+        await deleteDoc(refs.draft(shelfState.userId, id));
+
+        // Optimistic UI: remove card from DOM and cached state
+        document.querySelector(`[data-id="${id}"]`)?.remove();
+        shelfState.drafts = shelfState.drafts.filter((d) => d.id !== id);
+        computeAndRenderHeroStats();
+        showToast('Draft discarded.', 'info');
+      } catch (err) {
+        log.error('Delete draft failed:', err);
+        showToast('Could not discard draft.', 'error');
+      }
+      break;
+    }
+
     default:
       break;
   }
@@ -263,7 +283,7 @@ async function _handleCardAction(action, id, e) {
 }
 
 /* ─────────────────────────────────────────────
-   Right Rail — Studio Rituals
+   Right Rail — shelf Rituals
    ───────────────────────────────────────────── */
 
 function _bindRightRail() {

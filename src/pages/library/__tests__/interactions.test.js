@@ -13,6 +13,7 @@ vi.mock('@services/index.js', () => ({
 
 vi.mock('@/utils', () => ({
   navigateTo: vi.fn(),
+  resolveHref: vi.fn((href) => href),
   createLogger: vi.fn(() => ({
     info: vi.fn(),
     debug: vi.fn(),

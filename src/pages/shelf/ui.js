@@ -7,17 +7,25 @@ import { initIcons } from '@ui/components/icons.js';
 import { setText, formatNumber, timeAgo, escapeHtml as escapeHtml } from '@/utils';
 
 /* ─────────────────────────────────────────────
+   Helpers
+   ───────────────────────────────────────────── */
+
+function _badge(text, classes = '') {
+  return `<span class="badge ${classes}">${escapeHtml(text)}</span>`;
+}
+
+/* ─────────────────────────────────────────────
    Grid Renderers
    ───────────────────────────────────────────── */
 
 /**
- * Renders items into #studio-grid using the correct card type.
+ * Renders items into #shelf-grid using the correct card type.
  *
  * @param {Array<Object>} items
  * @param {'bookmarked' | 'drafts' | 'recent'} type
  */
 export function renderGrid(items, type) {
-  const grid = document.getElementById('studio-grid');
+  const grid = document.getElementById('shelf-grid');
   if (!grid) return;
 
   if (!items.length) {
@@ -38,7 +46,7 @@ export function renderGrid(items, type) {
 }
 
 export function setGridLoading() {
-  const grid = document.getElementById('studio-grid');
+  const grid = document.getElementById('shelf-grid');
   if (!grid) return;
 
   grid.innerHTML = Array.from(
@@ -61,7 +69,8 @@ export function setGridLoading() {
 }
 
 export function setGridEmpty(message) {
-  const grid = document.getElementById('studio-grid');
+  const grid = document.getElementById('shelf-grid');
+
   if (!grid) return;
 
   grid.innerHTML = `
@@ -86,7 +95,8 @@ export function setGridEmpty(message) {
 }
 
 export function setGridError() {
-  const grid = document.getElementById('studio-grid');
+  const grid = document.getElementById('shelf-grid');
+
   if (!grid) return;
 
   grid.innerHTML = `
@@ -138,6 +148,12 @@ export function buildBookmarkCard(tale) {
   const menuId = `menu-${id}`;
   const isFinished = progress >= 100;
 
+  const statusBadgeClasses = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+  const isBookmarked = true;
+  const bookmarkedAction = 'decouple';
+  const bookmarkedIcon = 'bookmark-minus';
+  const bookmarkedLabel = 'Remove from Shelf';
+
   return `
     <article
       class="shelf-card group relative rounded-[2rem] overflow-hidden border border-white/[0.05] bg-white/[0.025] hover:border-indigo-500/25 transition-all duration-400 cursor-pointer"
@@ -152,43 +168,62 @@ export function buildBookmarkCard(tale) {
         />
         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
 
-        <div class="absolute top-3 left-3">
-          <span class="shelf-era-badge">${safeEra}</span>
-        </div>
+        <!-- Header: Badges & Actions -->
+        <div class="absolute top-0 left-0 right-0 p-4 flex items-start justify-between gap-3 z-10">
+          <div class="flex flex-wrap items-center gap-2">
+            ${_badge(safeEra, 'bg-indigo-500/5 text-indigo-300')}
+            ${isFinished ? _badge('Finished', statusBadgeClasses) : ''}
+          </div>
 
-        <div class="absolute top-3 right-3">
-          <button
-            type="button"
-            class="shelf-options-btn"
-            data-action="options"
-            data-menu-id="${menuId}"
-            aria-label="More options for ${safeTitle}"
-            aria-haspopup="menu"
-            aria-expanded="false"
-          >
-            <i data-lucide="more-horizontal" class="w-3.5 h-3.5"></i>
-          </button>
+          <div class="relative shrink-0">
+            <button
+              type="button"
+              data-action="options"
+              data-menu-id="${escapeHtml(menuId)}"
+              class="w-9 h-9 flex items-center justify-center rounded-xl bg-black/40 backdrop-blur-md border border-white/10 text-zinc-400 transition-all hover:bg-indigo-500/20 hover:border-indigo-500/40 hover:text-white"
+            >
+              <i data-lucide="more-horizontal" class="h-4 w-4"></i>
+            </button>
 
-          <div id="${menuId}" class="shelf-menu" role="menu" hidden>
-            <p class="shelf-menu-label">Actions</p>
-            <button class="shelf-menu-item" role="menuitem" type="button" data-action="copy-link" data-id="${id}">
-              <i data-lucide="link" class="w-3.5 h-3.5"></i> Copy link
-            </button>
-            <button class="shelf-menu-item" role="menuitem" type="button" data-action="save-offline" data-id="${id}">
-              <i data-lucide="download" class="w-3.5 h-3.5"></i> Save offline
-            </button>
-            <div class="shelf-menu-divider"></div>
-            <p class="shelf-menu-label">Manage</p>
-            <button class="shelf-menu-item" role="menuitem" type="button"
-              data-action="${isFinished ? '' : 'mark-finished'}" data-id="${id}"
-              ${isFinished ? 'disabled aria-disabled="true"' : ''}>
-              <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
-              ${isFinished ? 'Already finished' : 'Mark as finished'}
-            </button>
-            <button class="shelf-menu-item shelf-menu-item--danger" role="menuitem" type="button"
-              data-action="decouple" data-id="${id}">
-              <i data-lucide="bookmark-minus" class="w-3.5 h-3.5"></i> Remove from shelf
-            </button>
+            <div
+              id="${escapeHtml(menuId)}"
+              class="options-menu hidden absolute right-0 z-[60] mt-2 w-60 overflow-hidden rounded-2xl p-2"
+              role="menu"
+            >
+              <div class="px-3 py-2 border-b border-white/5 mb-1">
+                <span class="text-[8px] font-black uppercase tracking-widest text-zinc-600">Archive Operations</span>
+              </div>
+
+              <button type="button" data-action="copy-link" data-id="${escapeHtml(id)}"
+                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400 transition-colors hover:bg-white/5 hover:text-white">
+                <i data-lucide="link" class="h-3.5 w-3.5"></i>
+                <span>Copy Access Link</span>
+              </button>
+
+              <button type="button" data-action="save-offline" data-id="${escapeHtml(id)}"
+                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400 transition-colors hover:bg-white/5 hover:text-white">
+                <i data-lucide="download" class="h-3.5 w-3.5"></i>
+                <span>Neural Download</span>
+              </button>
+
+              <div class="h-px bg-white/5 my-1"></div>
+
+              <button type="button"
+                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] transition-colors ${isFinished ? 'opacity-40 text-zinc-600' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
+                data-action="${isFinished ? '' : 'mark-finished'}" data-id="${escapeHtml(id)}">
+                <i data-lucide="check-circle" class="h-3.5 w-3.5"></i>
+                <span>${isFinished ? 'Already Sealed' : 'Seal Chronicle'}</span>
+              </button>
+
+              <div class="h-px bg-white/5 my-1"></div>
+
+              <button type="button"
+                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] transition-colors ${isBookmarked ? 'text-rose-400 hover:bg-rose-500/10' : 'text-emerald-400 hover:bg-emerald-500/10'}"
+                data-action="${bookmarkedAction}" data-id="${escapeHtml(id)}">
+                <i data-lucide="${bookmarkedIcon}" class="h-3.5 w-3.5"></i>
+                <span>${bookmarkedLabel}</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -241,10 +276,6 @@ export function buildBookmarkCard(tale) {
    Draft Card
    ───────────────────────────────────────────── */
 
-/**
- * @param {import('@state/schemas/draft.schema.js').Draft} draft
- * @returns {string}
- */
 export function buildDraftCard(draft) {
   const {
     id,
@@ -268,21 +299,56 @@ export function buildDraftCard(draft) {
         : `${wordCount} words`
       : 'No content yet';
 
+  const menuId = `menu-${id}`;
+
   return `
     <article
-      class="shelf-card group relative rounded-[2rem] border border-white/[0.05] bg-white/[0.025] hover:border-indigo-500/25 transition-all duration-400 overflow-hidden"
+      class="shelf-card group relative rounded-[2rem] border border-white/[0.05] bg-white/[0.025] hover:border-indigo-500/25 transition-all duration-400 overflow-hidden cursor-pointer"
       data-id="${id}"
     >
-      <div class="flex items-center justify-between px-5 pt-4 pb-3 border-b border-white/[0.04]">
-        <span class="shelf-draft-badge">
-          <i data-lucide="feather" class="w-2.5 h-2.5"></i>
-          Draft
-        </span>
-        <span class="text-[9px] text-slate-700">${updated}</span>
-      </div>
+      <div class="relative p-5">
+        <!-- Header: Badges & Actions -->
+        <div class="flex items-start justify-between gap-3 mb-4">
+          <div class="flex flex-wrap items-center gap-2">
+            ${_badge('Draft', 'bg-amber-500/10 text-amber-400 border-amber-500/20')}
+            ${safeEra ? _badge(safeEra, 'bg-indigo-500/5 text-indigo-300') : ''}
+          </div>
 
-      <div class="p-5">
-        ${safeEra ? `<span class="shelf-era-badge mb-3 inline-block">${safeEra}</span>` : ''}
+          <div class="relative shrink-0">
+            <button
+              type="button"
+              data-action="options"
+              data-menu-id="${escapeHtml(menuId)}"
+              class="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 text-zinc-500 transition-all hover:bg-indigo-500/10 hover:border-indigo-500/30 hover:text-white"
+            >
+              <i data-lucide="more-horizontal" class="h-4 w-4"></i>
+            </button>
+
+            <div
+              id="${escapeHtml(menuId)}"
+              class="options-menu hidden absolute right-0 z-[60] mt-2 w-56 overflow-hidden rounded-2xl p-2"
+              role="menu"
+            >
+              <div class="px-3 py-2 border-b border-white/5 mb-1">
+                <span class="text-[8px] font-black uppercase tracking-widest text-zinc-600">Draft Operations</span>
+              </div>
+
+              <button type="button" data-action="copy-link" data-id="${escapeHtml(id)}"
+                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400 transition-colors hover:bg-white/5 hover:text-white">
+                <i data-lucide="link" class="h-3.5 w-3.5"></i>
+                <span>Copy Draft Link</span>
+              </button>
+
+              <div class="h-px bg-white/5 my-1"></div>
+
+              <button type="button" data-action="delete-draft" data-id="${escapeHtml(id)}"
+                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] text-rose-400/70 transition-colors hover:bg-rose-500/10 hover:text-rose-400">
+                <i data-lucide="trash-2" class="h-3.5 w-3.5"></i>
+                <span>Discard Draft</span>
+              </button>
+            </div>
+          </div>
+        </div>
 
         <h3 class="font-bold text-white text-base leading-snug mb-2 group-hover:text-indigo-300 transition-colors">
           ${safeTitle}
@@ -303,13 +369,16 @@ export function buildDraftCard(draft) {
           </div>
         </div>
 
-        <a
-          href="contribution.html?draft=${id}"
-          class="flex items-center justify-between w-full px-4 py-2.5 rounded-xl bg-indigo-500/[0.07] border border-indigo-500/15 text-indigo-400 text-[10px] font-bold uppercase tracking-wider hover:bg-indigo-500/15 transition-colors group/btn"
-        >
-          Continue Writing
-          <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform"></i>
-        </a>
+        <div class="flex items-center justify-between">
+          <span class="text-[9px] text-slate-700">Last updated ${updated}</span>
+          <a
+            href="contribution.html?draft=${id}"
+            class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-indigo-400 hover:text-indigo-300 transition-colors group/btn"
+          >
+            Edit
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform"></i>
+          </a>
+        </div>
       </div>
     </article>
   `;
@@ -384,7 +453,7 @@ export function refreshSortPanel() {
 export function setActiveTab(activeTab) {
   document.querySelectorAll('.shelf-tab').forEach((btn) => {
     const isActive = btn.dataset.tab === activeTab;
-    btn.classList.toggle('studio-tab-active', isActive);
+    btn.classList.toggle('shelf-tab-active', isActive);
     btn.classList.toggle('text-zinc-500', !isActive && btn.dataset.tab !== 'recent');
     btn.classList.toggle('text-zinc-600', !isActive && btn.dataset.tab === 'recent');
 

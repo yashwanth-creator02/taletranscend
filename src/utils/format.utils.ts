@@ -2,7 +2,7 @@
 // Shared formatting utilities.
 // Import from here for date, time, and number display formatting.
 
-import { createLogger } from '@/utils';
+import { createLogger } from './logger.ts';
 
 const log = createLogger('FormatUtils');
 

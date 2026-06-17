@@ -3,7 +3,7 @@
 // Every innerHTML assignment that renders Firestore text MUST go through here.
 
 import DOMPurify from 'dompurify';
-import { createLogger } from '@/utils';
+import { createLogger } from './logger.ts';
 
 const log = createLogger('SanitizeUtils');
 

@@ -92,3 +92,7 @@ later.firestore.rules
 .idea/
 *.swp
 *.swo
+
+# Code Cosmos per-developer settings
+.cosmos
+.cosmos.cache

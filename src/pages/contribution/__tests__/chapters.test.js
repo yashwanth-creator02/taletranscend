@@ -45,7 +45,7 @@ describe('Contribution Chapters', () => {
       <div id="chapter-list"></div>
       <input id="current-chapter-title" />
       <textarea id="chapter-content"></textarea>
-      <div id="studio-chapter-count"></div>
+      <div id="shelf-chapter-count"></div>
     `;
 
     vi.clearAllMocks();
@@ -56,7 +56,7 @@ describe('Contribution Chapters', () => {
     expect(state.chapters).toHaveLength(3);
     expect(state.chapters[2].title).toBe('Untitled Chapter');
     expect(state.currentChapterIndex).toBe(2);
-    expect(document.getElementById('studio-chapter-count').textContent).toBe('3');
+    expect(document.getElementById('shelf-chapter-count').textContent).toBe('3');
   });
 
   it('deletes a chapter', () => {

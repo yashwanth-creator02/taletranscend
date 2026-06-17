@@ -166,7 +166,7 @@ export function renderChapterList() {
   initIcons();
 
   // Update chapter count stat
-  const countEl = document.getElementById('studio-chapter-count');
+  const countEl = document.getElementById('shelf-chapter-count');
   if (countEl) countEl.textContent = String(state.chapters.length);
 }
 

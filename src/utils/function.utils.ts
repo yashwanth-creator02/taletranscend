@@ -1,7 +1,7 @@
 // src/utils/function.utils.ts
 // Pure function utilities — debounce, throttle, once.
 
-import { createLogger } from '@/utils';
+import { createLogger } from './logger.ts';
 
 const log = createLogger('FunctionUtils');
 
