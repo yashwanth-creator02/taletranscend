@@ -5,7 +5,7 @@
  */
 
 import { initIcons } from '@/ui/icons.js';
-import { escapeText } from '@/utils';
+import { escapeText } from '../../utils/sanitize.utils.ts';
 
 const TOAST_DURATION = 4000;
 const TOAST_CONTAINER_ID = 'mythic-toast-hub';

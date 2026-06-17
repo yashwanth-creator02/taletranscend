@@ -7,7 +7,7 @@
 //   - All magic numbers live here with a named constant
 //   - All repeated string literals (URLs, labels) live here
 
-import { createLogger } from '@/utils';
+import { createLogger } from '../utils/logger.ts';
 const log = createLogger('AppConfig');
 
 // ── App Identity ─────────────────────────────────────────────────────

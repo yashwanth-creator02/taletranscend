@@ -14,7 +14,7 @@
 //     replayed once it resolves, so no call site needs to know about
 //     the async nature of icon loading.
 
-import { createLogger } from '@/utils';
+import { createLogger } from '../utils/logger.ts';
 
 const log = createLogger('Icons');
 

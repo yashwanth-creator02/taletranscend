@@ -20,8 +20,8 @@ vi.mock('@fb/index.js', () => ({
   serverTimestamp: vi.fn(() => 'mock-timestamp'),
 }));
 
-// Mock @services/index.js (readStorage)
-vi.mock('@services/index.js', () => ({
+// Mock localProgress.service.js (readStorage)
+vi.mock('../reader/localProgress.service.js', () => ({
   readStorage: vi.fn(),
 }));
 
@@ -58,13 +58,13 @@ describe('profile.service', () => {
     });
 
     it('returns empty array if no local progress', async () => {
-      const { readStorage } = await import('@services/index.js');
+      const { readStorage } = await import('../reader/localProgress.service.js');
       readStorage.mockReturnValue({});
       expect(await getContinueReading('u1')).toEqual([]);
     });
 
     it('returns continue reading list', async () => {
-      const { readStorage } = await import('@services/index.js');
+      const { readStorage } = await import('../reader/localProgress.service.js');
       const { getDoc } = await import('@fb/index.js');
 
       readStorage.mockReturnValue({
