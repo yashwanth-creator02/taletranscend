@@ -20,8 +20,8 @@ import {
   initShelfInteractions,
   initNav,
   initAuth,
-  initIcons,
 } from './index.js';
+import { initShelfLayout } from './layout.js';
 
 const log = createLogger('Shelf');
 
@@ -64,7 +64,7 @@ initAuth(async (user) => {
   // Compute hero stats now that both data sets are cached
   computeAndRenderHeroStats();
   readyReveal();
-  initIcons();
+  initShelfLayout();
 });
 
 /* ─────────────────────────────────────────────
@@ -72,6 +72,6 @@ initAuth(async (user) => {
    ───────────────────────────────────────────── */
 
 document.addEventListener('DOMContentLoaded', () => {
+  initShelfLayout();
   initShelfInteractions();
-  initIcons();
 });

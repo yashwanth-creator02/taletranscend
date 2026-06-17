@@ -682,11 +682,21 @@ a:focus-visible,
 /* ═══════════════════════════════════════════════
  Hover Enhancements
  ═══════════════════════════════════════════════ */
+#contributions-grid,
+#drafts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--spacing-lg);
+}
+
 #contributions-grid > *:not(#btn-new-story),
 #drafts-grid > * {
   transition:
     transform var(--transition-normal),
     box-shadow var(--transition-normal);
+  max-width: 360px;
+  width: 100%;
+  justify-self: center;
 }
 
 #contributions-grid > *:not(#btn-new-story):hover,

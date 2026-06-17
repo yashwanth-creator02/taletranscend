@@ -4,72 +4,7 @@
 <html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <style>
-      html {
-        opacity: 0;
-        transition: opacity 220ms cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      /* ── Enhanced Sort Popup ────────────────────────────────────────── */
-      #sort-panel {
-        background: rgba(10, 10, 15, 0.98) !important;
-        backdrop-filter: blur(40px) !important;
-        border: 1px solid rgba(99, 102, 241, 0.25) !important;
-        box-shadow:
-          0 30px 70px rgba(0, 0, 0, 0.7),
-          0 0 30px rgba(99, 102, 241, 0.1) !important;
-        border-radius: 1.75rem !important;
-        overflow: hidden;
-      }
-
-      .sort-panel-label {
-        padding: 1.25rem 1.5rem 0.65rem !important;
-        font-size: 10px !important;
-        font-weight: 900 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.3em !important;
-        color: rgba(99, 102, 241, 0.6) !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
-        margin-bottom: 0.5rem !important;
-      }
-
-      .sort-option {
-        width: 100% !important;
-        padding: 0.9rem 1.5rem !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 1.25rem !important;
-        font-size: 13px !important;
-        color: rgba(255, 255, 255, 0.5) !important;
-        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        text-align: left !important;
-        position: relative !important;
-      }
-
-      .sort-option:hover {
-        background: rgba(255, 255, 255, 0.05) !important;
-        color: white !important;
-        padding-left: 2rem !important;
-      }
-
-      .sort-option--active {
-        color: #a5b4fc !important;
-        background: rgba(99, 102, 241, 0.12) !important;
-        font-weight: 700 !important;
-      }
-
-      .sort-option--active::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 20%;
-        bottom: 20%;
-        width: 3px;
-        background: #6366f1;
-        border-radius: 0 4px 4px 0;
-        box-shadow: 0 0 15px #6366f1;
-      }
-    </style>
+    <link rel="stylesheet" href="../assets/css/pages/shelf.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Studio | TaleTranscend</title>
 
@@ -399,12 +334,5 @@
         </aside>
       </section>
     </main>
-
-    <script type="module">
-      import { initIcons } from '../ui/icons.js';
-      window.addEventListener('DOMContentLoaded', () => {
-        initIcons();
-      });
-    </script>
   </body>
 </html>
