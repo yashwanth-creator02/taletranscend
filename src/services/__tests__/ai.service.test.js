@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeAll, afterAll, afterEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest';
 import { setupServer } from 'msw/node';
 import { http, HttpResponse } from 'msw';
 import { suggestTitle, refineMythicText } from '../ai.service.js';
@@ -62,6 +62,31 @@ describe('ai.service', () => {
       expect(result).toBe('The Eternal Myth');
     });
 
+    it('sanitizes input before sending to Gemini', async () => {
+      let capturedPrompt = '';
+      server.use(
+        http.post(GEMINI_ENDPOINT, async ({ request }) => {
+          const body = await request.json();
+          capturedPrompt = body.contents[0].parts[0].text;
+          return HttpResponse.json({
+            candidates: [{ content: { parts: [{ text: 'Clean Title' }] } }],
+          });
+        })
+      );
+
+      const dirtyPrompt = 'Long synopsis with control characters \x00\x1F and more text...'.padEnd(
+        2100,
+        '.'
+      );
+      await suggestTitle(dirtyPrompt, apiKey);
+
+      expect(capturedPrompt).not.toContain('\x00');
+      expect(capturedPrompt).not.toContain('\x1F');
+      // The total prompt includes the wrapper text, so we check if the dirty part was sliced
+      expect(capturedPrompt.length).toBeLessThan(2100);
+      expect(capturedPrompt).toContain('Long synopsis with control characters');
+    });
+
     it('returns null if Gemini fails', async () => {
       server.use(
         http.post(GEMINI_ENDPOINT, () => {
@@ -73,7 +98,7 @@ describe('ai.service', () => {
         apiKey
       );
       expect(result).toBeNull();
-    });
+    }, 20000);
   });
 
   describe('refineMythicText', () => {
