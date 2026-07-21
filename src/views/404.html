@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      html {
+        opacity: 0;
+        transition: opacity 220ms cubic-bezier(0.4, 0, 0.2, 1);
+      }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Page Not Found | TaleTranscend</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Cinzel:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <script type="module" src="../pages/404/404.js"></script>
+  </head>
+
+  <body
+    class="text-slate-300 antialiased selection:bg-indigo-500/30 flex flex-col h-screen overflow-hidden"
+  >
+    <!-- Background (matches your existing pages) -->
+    <div class="fixed inset-0 -z-10 bg-slate-950">
+      <div
+        class="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(99,102,241,0.08),transparent_50%)]"
+      ></div>
+      <div
+        class="absolute inset-0 bg-[radial-gradient(circle_at_80%_80%,rgba(139,92,246,0.05),transparent_40%)]"
+      ></div>
+    </div>
+
+    <!-- Content -->
+    <main class="flex-1 flex items-center justify-center px-6">
+      <div class="text-center max-w-md">
+        <!-- 404 Number -->
+        <h1
+          class="text-[8rem] leading-none font-black text-transparent bg-clip-text bg-linear-to-b from-slate-200 to-slate-800 tracking-tighter select-none"
+        >
+          404
+        </h1>
+
+        <!-- Message -->
+        <h2 class="mt-4 text-2xl font-bold text-slate-100 font-cinzel">Lost in the Archives</h2>
+        <p class="mt-3 text-sm text-slate-400 leading-relaxed">
+          The tale you seek has vanished into the mists of time. Perhaps it was never written, or
+          the pages have turned to dust.
+        </p>
+
+        <!-- Actions -->
+        <div class="mt-8 flex items-center justify-center gap-4">
+          <a
+            href="./index.html"
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 text-sm font-semibold hover:bg-indigo-600/30 hover:text-indigo-200 transition-all"
+          >
+            <i data-lucide="home" class="w-4 h-4"></i>
+            Return Home
+          </a>
+          <a
+            href="./library.html"
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-slate-300 text-sm font-semibold hover:bg-white/10 hover:text-white transition-all"
+          >
+            <i data-lucide="library" class="w-4 h-4"></i>
+            Browse Library
+          </a>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-6 text-center text-xs text-slate-600">
+      TaleTranscend — Preserving the roots of our culture
+    </footer>
+  </body>
+</html>
