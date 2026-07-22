@@ -100,7 +100,7 @@ service cloud.firestore {
     //  USERS  —  /users/{userId}
     // ═══════════════════════════════════════════════════════════════
 
-    match /users/{userId} {
+    match /v1/taletranscend/projects/v1/users/{userId} {
       // Anyone can read public profile data
       allow read: if true;
 
@@ -239,7 +239,7 @@ service cloud.firestore {
     //  Public read. Write restricted to author, admin, or moderation.
     // ═══════════════════════════════════════════════════════════════
 
-    match /tales/{taleId} {
+    match /v1/taletranscend/projects/v1/tales/{taleId} {
       // Public read for published tales; drafts hidden
       allow read: if resource.data.visibility == 'public'
         || resource.data.status == 'published'
@@ -435,7 +435,7 @@ service cloud.firestore {
     // ═══════════════════════════════════════════════════════════════
 
     // REPORTS  —  /reports/{reportId}
-    match /reports/{reportId} {
+    match /v1/taletranscend/projects/v1/reports/{reportId} {
       allow create: if isAuthenticated()
         && isValidString('reporterId', 1, 100)
         && request.resource.data.reporterId == request.auth.uid
@@ -453,7 +453,7 @@ service cloud.firestore {
     }
 
     // MODERATION LOG  —  /moderationLogs/{logId}
-    match /moderationLogs/{logId} {
+    match /v1/taletranscend/projects/v1/moderationLogs/{logId} {
       allow read: if isAdmin();
       allow create: if isAdmin()
         && isValidString('moderatorId', 1, 100)
@@ -471,13 +471,13 @@ service cloud.firestore {
     // ═══════════════════════════════════════════════════════════════
 
     // APP CONFIG  —  /appConfig/{docId}
-    match /appConfig/{docId} {
+    match /v1/taletranscend/projects/v1/appConfig/{docId} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
     // FEATURE FLAGS  —  /featureFlags/{flagId}
-    match /featureFlags/{flagId} {
+    match /v1/taletranscend/projects/v1/featureFlags/{flagId} {
       allow read: if true;
       allow write: if isAdmin();
     }
@@ -486,7 +486,7 @@ service cloud.firestore {
     //  GLOBAL FALLBACK  —  Deny everything not explicitly matched
     // ═══════════════════════════════════════════════════════════════
 
-    match /{document=**} {
+    match /v1/taletranscend/projects/v1/{document=**} {
       allow read, write: if false;
     }
   }
