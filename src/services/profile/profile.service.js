@@ -3,9 +3,9 @@
 // All returned objects are normalized through schema factories.
 
 import { getDocs, getDoc, refs } from '@fb/index.js';
-import { readStorage } from './reader/localProgress.service.js';
+import { readStorage } from '../reader/localProgress.service.js';
 import { createTale, createDraft } from '@state/index.js';
-import { getTalesByAuthor } from './tale/getTales.js';
+import { getTalesByAuthor } from '../tale/getTales.js';
 import { safeAsync, createLogger } from '@/utils';
 
 const log = createLogger('ProfileService');

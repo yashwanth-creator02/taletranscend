@@ -21,7 +21,7 @@ vi.mock('@fb/index.js', () => ({
 }));
 
 // Mock localProgress.service.js (readStorage)
-vi.mock('../reader/localProgress.service.js', () => ({
+vi.mock('../../reader/localProgress.service.js', () => ({
   readStorage: vi.fn(),
 }));
 
@@ -32,7 +32,7 @@ vi.mock('@state/index.js', () => ({
 }));
 
 // Mock ../tale/getTales.js
-vi.mock('../tale/getTales.js', () => ({
+vi.mock('../../tale/getTales.js', () => ({
   getTalesByAuthor: vi.fn(),
 }));
 
@@ -58,13 +58,13 @@ describe('profile.service', () => {
     });
 
     it('returns empty array if no local progress', async () => {
-      const { readStorage } = await import('../reader/localProgress.service.js');
+      const { readStorage } = await import('../../reader/localProgress.service.js');
       readStorage.mockReturnValue({});
       expect(await getContinueReading('u1')).toEqual([]);
     });
 
     it('returns continue reading list', async () => {
-      const { readStorage } = await import('../reader/localProgress.service.js');
+      const { readStorage } = await import('../../reader/localProgress.service.js');
       const { getDoc } = await import('@fb/index.js');
 
       readStorage.mockReturnValue({
@@ -98,7 +98,7 @@ describe('profile.service', () => {
     });
 
     it('calls getTalesByAuthor', async () => {
-      const { getTalesByAuthor } = await import('../tale/getTales.js');
+      const { getTalesByAuthor } = await import('../../tale/getTales.js');
       getTalesByAuthor.mockResolvedValueOnce([{ id: 't1' }]);
 
       const result = await getUserPublishedTales('u1');

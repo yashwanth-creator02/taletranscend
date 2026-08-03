@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getTaleProgressData } from '../progress.utils.service.js';
+import { getTaleProgressData } from '../../reader/progress.utils.service.js';
 import { getDocs, refs } from '@fb/index.js';
 
 vi.mock('@fb/index.js', () => ({

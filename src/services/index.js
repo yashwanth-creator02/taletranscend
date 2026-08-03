@@ -20,28 +20,27 @@ export * from './reader/resume.service.js';
 export * from './reader/readTime.selector.js';
 export * from './reader/getTotalReadTimes.service.js';
 
+export * from './reader/markFinish.service.js';
+
+// Fetch chapter progress data for a tale (same reasoning as above)
+export * from './reader/progress.utils.service.js';
+
 // ── Bookmarks ─────────────────────────────────────────────────────────
 // Add, remove, and fetch user bookmarks
-export * from './bookmark.service.js';
+export * from './bookmark/bookmark.service.js';
 
 // ── Tales ─────────────────────────────────────────────────────────────
 // Fetch community tales from Firestore (filtered / paginated)
 export * from './tale/getTales.js';
 
-// Mark a tale as finished across all chapters
-export * from './markFinish.service.js';
-
-// Fetch chapter progress data for a tale
-export * from './progress.utils.service.js';
-
 // ── Profile ───────────────────────────────────────────────────────────
 // User profile reads, continue-reading, published tales, drafts
-export * from './profile.service.js';
+export * from './profile/profile.service.js';
 
 // ── Resonance ─────────────────────────────────────────────────────────
 // Soul Resonance (reaction) toggle and status checks
-export * from './resonance.service.js';
+export * from './resonance/resonance.service.js';
 
 // ── AI ────────────────────────────────────────────────────────────────
 // Gemini-powered title suggestions and text refinement
-export * from './ai.service.js';
+export * from './ai/ai.service.js';

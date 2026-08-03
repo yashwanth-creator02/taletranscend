@@ -6,13 +6,21 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.js'],
-    include: ['src/**/*.test.js', 'src/**/*.test.ts', 'firestore/tests/**/*.test.{js,ts}'],
-    exclude: ['**/node_modules/**', '**/.git/**'],
+
+    // Run only application/unit tests by default
+    include: ['src/**/*.test.js', 'src/**/*.test.ts'],
+
+    // Exclude emulator tests from normal runs
+    exclude: ['**/node_modules/**', '**/.git/**', 'firestore/tests/**'],
+
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       all: true,
-      include: ['src/**/*.js', 'src/**/*.ts', 'firestore/tests/**/*.test.{js,ts}'],
+
+      // Measure coverage for application source only
+      include: ['src/**/*.js', 'src/**/*.ts'],
+
       exclude: [
         'node_modules/',
         'src/test/',
@@ -23,6 +31,7 @@ export default defineConfig({
         'src/**/*.test.ts',
         '**/*.d.ts',
       ],
+
       thresholds: {
         lines: 70,
         functions: 70,
@@ -31,6 +40,7 @@ export default defineConfig({
       },
     },
   },
+
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { toggleResonance, getResonanceStatus } from '../resonance.service.js';
+import { toggleResonance, getResonanceStatus } from '../../resonance/resonance.service.js';
 
 // Mock @fb/index.js
 vi.mock('@fb/index.js', () => ({

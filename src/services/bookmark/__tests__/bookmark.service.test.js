@@ -1,4 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import {
+  addToBookmarks,
+  removeFromBookmarks,
+  getBookmarks,
+  isBookmarked,
+} from '../../bookmark/bookmark.service.js';
 
 // Mock Firebase
 vi.mock('@fb/index.js', () => ({
@@ -32,13 +38,6 @@ vi.mock('@/utils', async (importOriginal) => {
     getBookmarksOffline: vi.fn(() => Promise.resolve([])),
   };
 });
-
-import {
-  addToBookmarks,
-  removeFromBookmarks,
-  getBookmarks,
-  isBookmarked,
-} from '../bookmark.service.js';
 
 describe('bookmark.service', () => {
   beforeEach(async () => {
