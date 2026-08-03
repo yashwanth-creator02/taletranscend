@@ -1,4 +1,4 @@
-// src/services/profile.service.js
+// src/services/profile/profile.service.js
 // Profile-specific data fetching: reading history, published tales, drafts.
 // All returned objects are normalized through schema factories.
 

@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { auth, signInAnonymously, signInWithGoogle, onAuthStateChanged } from '@fb/index.js';
 import * as utils from '@/utils';
-import { showToast } from '@ui/components/toast.js';
+import { showToast } from '@shared/components/toast/toast.js';
 
 // We need to import the module to trigger its DOMContentLoaded listener
 // but since it uses top-level code (initPageReveal), we might need to be careful.
@@ -24,11 +24,11 @@ vi.mock('@/utils', async (importOriginal) => {
   };
 });
 
-vi.mock('@ui/components/icons.js', () => ({
+vi.mock('@shared/icons.js', () => ({
   initIcons: vi.fn(),
 }));
 
-vi.mock('@ui/components/toast.js', () => ({
+vi.mock('@shared/components/toast/toast.js', () => ({
   showToast: vi.fn(),
 }));
 

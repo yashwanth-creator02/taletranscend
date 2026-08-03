@@ -12,7 +12,7 @@ import {
   computeAndRenderHeroStats,
 } from './content.js';
 import { setActiveTab, buildSortPanel, refreshSortPanel } from './ui.js';
-import { showToast } from '@ui/components/toast.js';
+import { showToast } from '@shared/components/toast/toast.js';
 import { removeFromBookmarks, getTaleMeta, getChapters } from '@services/index.js';
 import { debounce, navigateTo, resolveHref, createLogger } from '@/utils';
 

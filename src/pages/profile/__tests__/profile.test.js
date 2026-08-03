@@ -15,7 +15,7 @@ vi.mock('firebase/auth', () => ({
   signOut: vi.fn(),
 }));
 
-vi.mock('@ui/components/nav/nav.js', () => ({
+vi.mock('@shared/components/nav/nav.js', () => ({
   initNav: vi.fn(),
 }));
 
@@ -53,11 +53,11 @@ vi.mock('@services/index.js', () => ({
   getUserDrafts: vi.fn(() => Promise.resolve([])),
 }));
 
-vi.mock('@ui/components/icons.js', () => ({
+vi.mock('@shared/icons.js', () => ({
   initIcons: vi.fn(),
 }));
 
-vi.mock('@ui/components/toast.js', () => ({
+vi.mock('@shared/components/toast/toast.js', () => ({
   showToast: vi.fn(),
 }));
 

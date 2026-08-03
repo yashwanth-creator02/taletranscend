@@ -1,4 +1,4 @@
-// src/services/ai.service.js
+// src/services/ai/ai.service.js
 // Centralized AI Oracle Service.
 // Interface for all generative and assistive features.
 

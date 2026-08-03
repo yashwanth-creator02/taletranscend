@@ -5,8 +5,8 @@
 import { profileState, GENRE_OPTIONS } from './state.js';
 import { suggestNameFromBio } from './ai-name.js';
 import { debounce } from '@/utils';
-import { initIcons } from '@ui/components/icons.js';
-import { showToast } from '@ui/components/toast.js';
+import { initIcons } from '@shared/icons.js';
+import { showToast } from '@shared/components/toast/toast.js';
 import {
   setText,
   setInput,

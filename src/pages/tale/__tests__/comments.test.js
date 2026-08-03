@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { listenToComments, postComment } from '../comments.js';
 import * as fb from '@fb/index.js';
-import { showToast } from '@ui/components/toast.js';
+import { showToast } from '@shared/components/toast/toast.js';
 
 vi.mock('@fb/index.js', () => ({
   auth: { currentUser: { uid: 'u1', displayName: 'Hero' } },
@@ -16,11 +16,11 @@ vi.mock('@fb/index.js', () => ({
   serverTimestamp: vi.fn(() => 'mock-ts'),
 }));
 
-vi.mock('@ui/components/toast.js', () => ({
+vi.mock('@shared/components/toast/toast.js', () => ({
   showToast: vi.fn(),
 }));
 
-vi.mock('@ui/components/icons.js', () => ({
+vi.mock('@shared/icons.js', () => ({
   initIcons: vi.fn(),
 }));
 

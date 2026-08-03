@@ -27,7 +27,7 @@ vi.mock('../index.js', () => ({
   initIcons: vi.fn(),
 }));
 
-vi.mock('@ui/components/nav/nav.js', () => ({
+vi.mock('@shared/components/nav/nav.js', () => ({
   initNav: vi.fn(),
 }));
 

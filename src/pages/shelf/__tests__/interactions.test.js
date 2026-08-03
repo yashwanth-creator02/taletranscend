@@ -35,7 +35,7 @@ vi.mock('@/utils', () => ({
   })),
 }));
 
-vi.mock('@ui/components/toast.js', () => ({
+vi.mock('@shared/components/toast/toast.js', () => ({
   showToast: vi.fn(),
 }));
 

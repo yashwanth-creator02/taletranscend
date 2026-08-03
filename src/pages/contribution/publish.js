@@ -14,7 +14,7 @@
 // The status field on the tale document handles the moderation pipeline.
 
 import { auth, setDoc, updateDoc, serverTimestamp, refs } from '@fb/index.js';
-import { showToast } from '@ui/components/toast.js';
+import { showToast } from '@shared/components/toast/toast.js';
 import {
   navigateTo,
   countWords,

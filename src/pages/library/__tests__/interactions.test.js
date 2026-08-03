@@ -21,11 +21,11 @@ vi.mock('@/utils', () => ({
   })),
 }));
 
-vi.mock('@ui/components/toast.js', () => ({
+vi.mock('@shared/components/toast/toast.js', () => ({
   showToast: vi.fn(),
 }));
 
-vi.mock('@ui/components/icons.js', () => ({
+vi.mock('@shared/icons.js', () => ({
   initIcons: vi.fn(),
 }));
 

@@ -2,7 +2,7 @@
 // Handles prev/next chapter navigation buttons and returning to the tale view.
 
 import { readerState } from './state.js';
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@shared/icons.js';
 import { navigateTo, escapeHtml as escapeHtml, createLogger } from '@/utils';
 
 const log = createLogger('ReaderNavigation');

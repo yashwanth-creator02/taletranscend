@@ -12,5 +12,5 @@ export {
   applyAndRender,
 } from './content.js';
 export { initShelfInteractions } from './interactions.js';
-export { initNav } from '@ui/components/nav/nav.js';
-export { initIcons } from '@ui/components/icons.js';
+export { initNav } from '@shared/components/nav/nav.js';
+export { initIcons } from '@shared/icons.js';

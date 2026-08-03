@@ -3,7 +3,7 @@
 
 import { readerState } from './state.js';
 import { renderTocPanel } from './templates.js';
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@shared/icons.js';
 import { createLogger } from '@/utils';
 
 const log = createLogger('ReaderTOC');

@@ -27,10 +27,10 @@ import {
 } from './index.js';
 import { debounce } from '@/utils';
 import { setupAuthTimeout } from '@/utils';
-import { initNav } from '@ui/components/nav/nav.js';
+import { initNav } from '@shared/components/nav/nav.js';
 import { refineMythicText } from '@services/index.js';
 import { AI_API_KEY } from '@config/app.config.js';
-import { showToast } from '@ui/components/toast.js';
+import { showToast } from '@shared/components/toast/toast.js';
 
 initPageReveal();
 initNav();

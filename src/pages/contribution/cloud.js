@@ -9,7 +9,7 @@
 //     updated + the URL param is set so refreshes reload the same draft.
 
 import { auth, getDoc, getDocs, addDoc, setDoc, serverTimestamp, refs } from '@fb/index.js';
-import { showToast } from '@ui/components/toast.js';
+import { showToast } from '@shared/components/toast/toast.js';
 import {
   countWords,
   setInput,

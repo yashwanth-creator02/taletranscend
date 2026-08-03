@@ -47,7 +47,7 @@ import {
 } from './index.js';
 
 import { getDoc, setDoc, serverTimestamp, refs } from '@fb/index.js';
-import { showToast } from '@ui/components/toast.js';
+import { showToast } from '@shared/components/toast/toast.js';
 import { navigateTo, initPageReveal, readyReveal, setupAuthTimeout, createLogger } from '@/utils';
 import { TTS_CHAR_LIMIT } from '@config/app.config.js';
 

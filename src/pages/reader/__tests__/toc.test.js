@@ -8,7 +8,7 @@ vi.mock('../templates.js', () => ({
   renderTocPanel: vi.fn(() => 'mock-toc-html'),
 }));
 
-vi.mock('@ui/components/icons.js', () => ({
+vi.mock('@shared/icons.js', () => ({
   initIcons: vi.fn(),
 }));
 

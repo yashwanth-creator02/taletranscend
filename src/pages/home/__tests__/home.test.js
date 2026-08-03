@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as utils from '@/utils';
 import { getTales } from '@services/index.js';
 
-vi.mock('@ui/components/nav/nav.js', () => ({
+vi.mock('@shared/components/nav/nav.js', () => ({
   initNav: vi.fn(),
 }));
 
@@ -21,7 +21,7 @@ vi.mock('@/utils', async (importOriginal) => {
   };
 });
 
-vi.mock('@ui/components/icons.js', () => ({
+vi.mock('@shared/icons.js', () => ({
   initIcons: vi.fn(),
 }));
 

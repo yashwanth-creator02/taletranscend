@@ -12,7 +12,7 @@ vi.mock('@/utils', async (importOriginal) => {
   };
 });
 
-vi.mock('@ui/components/icons.js', () => ({
+vi.mock('@shared/icons.js', () => ({
   initIcons: vi.fn(),
 }));
 

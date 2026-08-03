@@ -1,4 +1,4 @@
-// src/services/markFinish.service.js
+// src/services/reader/markFinish.service.js
 // Marks a tale as fully finished in Firestore.
 // Sets scrollPercent to 100 on all chapter progress documents and
 // updates the tale-level progress document with status and timestamps.

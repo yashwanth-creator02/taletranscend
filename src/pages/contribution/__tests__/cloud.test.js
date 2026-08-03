@@ -27,7 +27,7 @@ vi.mock('@fb/index.js', () => ({
 }));
 
 // Mock toast
-vi.mock('@ui/components/toast.js', () => ({
+vi.mock('@shared/components/toast/toast.js', () => ({
   showToast: vi.fn(),
 }));
 

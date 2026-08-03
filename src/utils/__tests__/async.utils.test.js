@@ -1,9 +1,10 @@
 // src/utils/__tests__/async.utils.test.js
+
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { safeAsync, safeCall, isOffline, guardOffline } from '../async.utils.ts';
-import { showToast } from '@ui/components/toast.js';
+import { showToast } from '@shared/components/toast/toast.js';
 
-vi.mock('@ui/components/toast.js', () => ({
+vi.mock('@shared/components/toast/toast.js', () => ({
   showToast: vi.fn(),
 }));
 

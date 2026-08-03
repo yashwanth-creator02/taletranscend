@@ -48,7 +48,7 @@ export default defineConfig({
       '@fb': resolve(__dirname, 'src/firebase'),
       '@state': resolve(__dirname, 'src/state'),
       '@services': resolve(__dirname, 'src/services'),
-      '@ui': resolve(__dirname, 'src/ui'),
+      '@shared': resolve(__dirname, 'src/shared'),
       '@utils': resolve(__dirname, 'src/utils'),
       '@config': resolve(__dirname, 'src/config'),
       '@pages': resolve(__dirname, 'src/pages'),

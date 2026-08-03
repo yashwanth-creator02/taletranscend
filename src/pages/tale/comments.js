@@ -15,7 +15,7 @@ import {
   refs,
   db,
 } from '@fb/index.js';
-import { showToast } from '@ui/components/toast.js';
+import { showToast } from '@shared/components/toast/toast.js';
 import { createComment } from '@state/index.js';
 import {
   escapeHtml,
@@ -26,7 +26,7 @@ import {
   validateData,
   CommentSchema,
 } from '@/utils';
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@shared/icons.js';
 import { PATHS } from '@fb/paths.js';
 
 const log = createLogger('Comments');

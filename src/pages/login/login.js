@@ -8,8 +8,8 @@ import { auth, signInAnonymously, signInWithGoogle, onAuthStateChanged } from '@
 import { navigateTo, initPageReveal, readyReveal, createLogger } from '@/utils';
 
 const log = createLogger('Login');
-import { initIcons } from '@ui/components/icons.js';
-import { showToast } from '@ui/components/toast.js';
+import { initIcons } from '@shared/icons.js';
+import { showToast } from '@shared/components/toast/toast.js';
 
 // Initialize page reveal animation
 initPageReveal();

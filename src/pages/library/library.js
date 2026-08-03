@@ -7,8 +7,8 @@ import '@css/components.css';
 import '@css/pages/library.css';
 
 import { initAuth } from '@fb/index.js';
-import { initNav } from '@ui/components/nav/nav.js';
-import { initIcons } from '@ui/components/icons.js';
+import { initNav } from '@shared/components/nav/nav.js';
+import { initIcons } from '@shared/icons.js';
 import { initPageReveal, readyReveal, createLogger } from '@/utils';
 
 const log = createLogger('Library');

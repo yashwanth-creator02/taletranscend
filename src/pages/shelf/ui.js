@@ -3,7 +3,7 @@
 // Pure presentation layer — no data fetching here.
 
 import { shelfState } from './state.js';
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@shared/icons.js';
 import { setText, formatNumber, timeAgo, escapeHtml as escapeHtml } from '@/utils';
 
 /* ─────────────────────────────────────────────

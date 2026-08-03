@@ -1,4 +1,4 @@
-// src/services/bookmark.service.js
+// src/services/bookmark/bookmark.service.js
 // Manages user bookmarks stored in Firestore.
 // Bookmarks are private to each user under users/{uid}/bookmarks/{taleId}.
 // Key tale fields are cached on the bookmark document to avoid extra reads on the shelf page.
@@ -36,7 +36,7 @@ export async function addToBookmarks({ userId, taleId, tale = {} }) {
   if (guardOffline()) return;
 
   if (!checkRateLimit(`bookmark:${userId}`, BOOKMARK_COOLDOWN_MS)) {
-    const { showToast } = await import('@ui/components/toast.js');
+    const { showToast } = await import('@shared/components/toast/toast.js');
     showToast('Soul link unstable. Please wait.', 'warning');
     return { status: 'rate-limited' };
   }
@@ -84,7 +84,7 @@ export async function removeFromBookmarks({ userId, taleId }) {
   if (guardOffline()) return;
 
   if (!checkRateLimit(`bookmark:${userId}`, BOOKMARK_COOLDOWN_MS)) {
-    const { showToast } = await import('@ui/components/toast.js');
+    const { showToast } = await import('@shared/components/toast/toast.js');
     showToast('Soul link unstable. Please wait.', 'warning');
     return { status: 'rate-limited' };
   }

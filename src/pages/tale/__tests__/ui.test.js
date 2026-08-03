@@ -12,7 +12,7 @@ vi.mock('@services/reader/localProgress.service.js', () => ({
   getChapterProgress: vi.fn(),
 }));
 
-vi.mock('@ui/components/icons.js', () => ({
+vi.mock('@shared/icons.js', () => ({
   initIcons: vi.fn(),
 }));
 

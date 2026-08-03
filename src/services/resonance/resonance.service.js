@@ -1,4 +1,4 @@
-// src/services/resonance.service.js
+// src/services/resonance/resonance.service.js
 // Manages tale reactions (Soul Resonance) stored in Firestore.
 // Reactions live at tales/{taleId}/reactions/{userId} per the finalized schema.
 // Reaction count on the tale document is synced by the onReactionCreate/Delete Cloud Function.
@@ -33,7 +33,7 @@ export async function toggleResonance(taleId) {
   if (guardOffline()) return { status: 'error' };
 
   if (!checkRateLimit(`resonance:${user.uid}:${taleId}`, RESONANCE_COOLDOWN_MS)) {
-    const { showToast } = await import('@ui/components/toast.js');
+    const { showToast } = await import('@shared/components/toast/toast.js');
     showToast('The weave needs time to stabilize.', 'warning');
     return { status: 'rate-limited' };
   }

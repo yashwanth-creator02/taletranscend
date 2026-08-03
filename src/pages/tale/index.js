@@ -16,4 +16,4 @@ export {
 export { listenToComments, postComment } from './comments.js';
 
 export { initAuth } from '@fb/index.js';
-export { initIcons } from '@ui/components/icons.js';
+export { initIcons } from '@shared/icons.js';

@@ -7,7 +7,7 @@ import '@css/nav.css';
 import '@css/components.css';
 import '@css/pages/home.css';
 
-import { initNav } from '@ui/components/nav/nav.js';
+import { initNav } from '@shared/components/nav/nav.js';
 import {
   navigateTo,
   initPageReveal,
@@ -15,7 +15,7 @@ import {
   escapeHtml as escapeHtml,
   createLogger,
 } from '@/utils';
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@shared/icons.js';
 import { getTales } from '@services/index.js';
 import { DEFAULT_COVER_URL } from '@config/app.config.js';
 

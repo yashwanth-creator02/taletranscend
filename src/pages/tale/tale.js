@@ -28,7 +28,7 @@ import {
   initIcons,
 } from './index.js';
 import { addToBookmarks, removeFromBookmarks, isBookmarked } from '@services/index.js';
-import { initNav } from '@ui/components/nav/nav.js';
+import { initNav } from '@shared/components/nav/nav.js';
 
 const log = createLogger('TaleArchive');
 

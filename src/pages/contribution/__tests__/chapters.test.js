@@ -15,7 +15,7 @@ vi.mock('../editor.js', () => ({
 }));
 
 // Mock initIcons
-vi.mock('@ui/components/icons.js', () => ({
+vi.mock('@shared/icons.js', () => ({
   initIcons: vi.fn(),
 }));
 

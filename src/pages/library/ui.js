@@ -7,7 +7,7 @@
 //   - Skeleton / empty / error grid states
 
 import { libraryState } from './state.js';
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@shared/icons.js';
 import { escapeHtml as escapeHtml, createLogger } from '@/utils';
 
 const log = createLogger('LibraryUI');

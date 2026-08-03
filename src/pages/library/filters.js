@@ -7,8 +7,8 @@ import { libraryState } from './state.js';
 import { debounce, createLogger } from '@/utils';
 import { getBookmarks } from '@services/index.js';
 import { buildEraChips, setActiveEraChip, setActiveSidebarBtn } from './ui.js';
-import { renderCardsGrid } from '@ui/components/taleCard.js';
-import { initIcons } from '@ui/components/icons.js';
+import { renderCardsGrid } from '@/shared/components/taleCard/taleCard.js';
+import { initIcons } from '@shared/icons.js';
 
 const log = createLogger('LibraryFilters');
 

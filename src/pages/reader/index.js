@@ -22,7 +22,7 @@ export * from '@services/index.js';
 export { appState, setAppUser, setAppReaderPrefs } from '@state/app.state.js';
 
 // ── Icons ─────────────────────────────────────────────────────────────
-export { initIcons } from '@ui/components/icons.js';
+export { initIcons } from '@shared/icons.js';
 
 // ── Page State ────────────────────────────────────────────────────────
 export * from './state.js';

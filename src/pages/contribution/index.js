@@ -27,7 +27,7 @@ export { publishFullTale } from './publish.js';
 
 export { state } from './state.js';
 
-export { initIcons } from '@ui/components/icons.js';
+export { initIcons } from '@shared/icons.js';
 
 export * from '@fb/index.js';
 

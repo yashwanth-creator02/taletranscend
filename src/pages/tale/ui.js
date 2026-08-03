@@ -2,7 +2,7 @@
 // Presentation layer for the tale summary page.
 // Keeps the v2 rendering logic, but maps output to the older DOM IDs used by v1.
 
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@shared/icons.js';
 import { setText, escapeHtml, createLogger } from '@/utils';
 import { getTotalReadTime } from '@services/index.js';
 import { getChapterProgress } from '@services/reader/localProgress.service.js';

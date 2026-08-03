@@ -1,4 +1,4 @@
-// src/services/progress.utils.service.js
+// src/services/reader/progress.utils.service.js
 // Fetches chapter-level progress data for a tale from Firestore.
 // Used for rendering progress indicators across the UI.
 

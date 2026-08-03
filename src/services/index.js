@@ -22,7 +22,7 @@ export * from './reader/getTotalReadTimes.service.js';
 
 export * from './reader/markFinish.service.js';
 
-// Fetch chapter progress data for a tale (same reasoning as above)
+// Fetch chapter progress data for a tale
 export * from './reader/progress.utils.service.js';
 
 // ── Bookmarks ─────────────────────────────────────────────────────────

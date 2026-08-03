@@ -4,7 +4,7 @@
 
 import { state } from './state.js';
 import { updateStats } from './editor.js';
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@shared/icons.js';
 import { escapeText as escapeHtml, createLogger } from '@/utils';
 
 const log = createLogger('Chapters');

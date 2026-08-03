@@ -11,7 +11,7 @@ import {
 import { libraryState } from '../state.js';
 import * as services from '@services/index.js';
 import * as ui from '../ui.js';
-import { renderCardsGrid } from '@ui/components/taleCard.js';
+import { renderCardsGrid } from '@/shared/components/taleCard/taleCard.js';
 
 vi.mock('@services/index.js', () => ({
   getBookmarks: vi.fn(),
@@ -23,11 +23,11 @@ vi.mock('../ui.js', () => ({
   setActiveSidebarBtn: vi.fn(),
 }));
 
-vi.mock('@ui/components/taleCard.js', () => ({
+vi.mock('@shared/components/taleCard/taleCard.js', () => ({
   renderCardsGrid: vi.fn(),
 }));
 
-vi.mock('@ui/components/icons.js', () => ({
+vi.mock('@shared/icons.js', () => ({
   initIcons: vi.fn(),
 }));
 

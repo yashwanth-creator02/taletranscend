@@ -12,7 +12,7 @@ import {
 } from '../ui.js';
 import { libraryState } from '../state.js';
 
-vi.mock('@ui/components/icons.js', () => ({
+vi.mock('@shared/icons.js', () => ({
   initIcons: vi.fn(),
 }));
 

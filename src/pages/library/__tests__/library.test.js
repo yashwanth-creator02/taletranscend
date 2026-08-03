@@ -9,7 +9,7 @@ vi.mock('@fb/index.js', () => ({
   initAuth: vi.fn(),
 }));
 
-vi.mock('@ui/components/nav/nav.js', () => ({
+vi.mock('@shared/components/nav/nav.js', () => ({
   initNav: vi.fn(),
 }));
 
@@ -50,7 +50,7 @@ vi.mock('../interactions.js', () => ({
   setupCardInteractions: vi.fn(),
 }));
 
-vi.mock('@ui/components/icons.js', () => ({
+vi.mock('@shared/icons.js', () => ({
   initIcons: vi.fn(),
 }));
 
