@@ -19,7 +19,8 @@
     "test:coverage": "vitest run --coverage",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test:rules": "firebase emulators:exec --only firestore \"vitest run firestore/tests\""
   },
   "repository": {
     "type": "git",
@@ -62,11 +63,14 @@
     "vitest": "^4.1.8"
   },
   "dependencies": {
+    "@firebase/rules-unit-testing": "^5.0.1",
+    "firebase-tools": "^15.24.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@tailwindcss/vite": "^4.1.18",
     "dompurify": "^3.4.7",
     "dotenv": "^17.4.2",
     "firebase": "^12.8.0",
+    "firebase-admin": "^14.2.0",
     "idb": "^8.0.3",
     "lucide": "^1.14.0",
     "zod": "^4.4.3"
@@ -79,5 +83,11 @@
     "*.{css,html}": [
       "prettier --write"
     ]
+  },
+  "allowScripts": {
+    "@firebase/util@1.15.1": true,
+    "esbuild@0.28.1": true,
+    "msw@2.14.6": true,
+    "protobufjs@7.6.5": true
   }
 }

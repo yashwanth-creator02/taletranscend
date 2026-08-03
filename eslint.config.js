@@ -25,4 +25,7 @@ export default [
       'no-console': 'off', // Allow console.log (don’t throw errors)
     },
   },
+  {
+    ignores: ['dist/*', 'node_modules/', '**/*.min.js'],
+  },
 ];

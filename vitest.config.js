@@ -6,12 +6,13 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.js'],
-    include: ['src/**/*.test.js', 'src/**/*.test.ts'],
+    include: ['src/**/*.test.js', 'src/**/*.test.ts', 'firestore/tests/**/*.test.{js,ts}'],
+    exclude: ['**/node_modules/**', '**/.git/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       all: true,
-      include: ['src/**/*.js', 'src/**/*.ts'],
+      include: ['src/**/*.js', 'src/**/*.ts', 'firestore/tests/**/*.test.{js,ts}'],
       exclude: [
         'node_modules/',
         'src/test/',

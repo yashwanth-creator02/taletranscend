@@ -1,0 +1,725 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ═══════════════════════════════════════════════════════════════
+    //  GLOBAL HELPERS  —  Reusable functions for all collections
+    // ═══════════════════════════════════════════════════════════════
+
+    /** Returns true if the request is from an authenticated user. */
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    /** Returns true if the authenticated user's UID matches the given userId. */
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    /** Returns true if the authenticated user is the author of the resource. */
+    function isAuthor() {
+      return isAuthenticated() && resource.data.authorId == request.auth.uid;
+    }
+
+    /** Returns true if the authenticated user is the author of the incoming write.
+        Guards presence explicitly since this is called before any per-field
+        validation runs (e.g. first condition in the tales create rule). */
+    function isAuthorOfIncoming() {
+      return isAuthenticated()
+        && 'authorId' in request.resource.data
+        && request.resource.data.authorId == request.auth.uid;
+    }
+
+    /** Returns true if the user has an admin or moderator custom claim. */
+    function isAdmin() {
+      return isAuthenticated() &&
+        (request.auth.token.admin == true || request.auth.token.moderator == true);
+    }
+
+    // ── Field validators ──────────────────────────────────────────────
+    // FIX (see docs/MIGRATION_PLAN.md Phase 2 follow-up): these used to
+    // presence-check each field with `request.resource.data.keys().hasAny([field])`.
+    // `.keys()` materializes the FULL key list of the document on every single
+    // call, so on a ~28-field document validated with 20+ chained isValidX()
+    // calls, that's 20+ full re-materializations of the same key list — this
+    // is what blew Firestore's 1000-expression-per-request evaluation budget
+    // ("Unable to evaluate the expression as the maximum of 1000 expressions
+    // to evaluate has been reached"), caught when running `npm run test:rules`
+    // against the real emulator. `field in request.resource.data` performs a
+    // single direct key lookup instead — no full-list materialization — and
+    // is both the cheaper and the more idiomatic way to check for one key's
+    // existence in Firestore rules (`.keys().hasAny([...])` is meant for
+    // checking membership against a candidate SET of possible keys, which
+    // isn't what a single-field presence check needs).
+
+    /** Validates that a string field exists, is a string, and is within length bounds. */
+    function isValidString(field, minLen, maxLen) {
+      return field in request.resource.data
+        && request.resource.data[field] is string
+        && request.resource.data[field].size() >= minLen
+        && request.resource.data[field].size() <= maxLen;
+    }
+
+    /** Validates that a field is a list with bounded length. */
+    function isValidList(field, maxLen) {
+      return field in request.resource.data
+        && request.resource.data[field] is list
+        && request.resource.data[field].size() <= maxLen;
+    }
+
+    /** Validates that a field is an integer within a range. */
+    function isValidInt(field, min, max) {
+      return field in request.resource.data
+        && request.resource.data[field] is int
+        && request.resource.data[field] >= min
+        && request.resource.data[field] <= max;
+    }
+
+    /** Validates that a field is a number (int or float) within a range. */
+    function isValidNumber(field, min, max) {
+      return field in request.resource.data
+        && request.resource.data[field] is number
+        && request.resource.data[field] >= min
+        && request.resource.data[field] <= max;
+    }
+
+    /** Validates that a field is a valid Firestore Timestamp. */
+    function isValidTimestamp(field) {
+      return field in request.resource.data
+        && request.resource.data[field] is timestamp;
+    }
+
+    /** Validates that a field is a boolean. */
+    function isValidBool(field) {
+      return field in request.resource.data
+        && request.resource.data[field] is bool;
+    }
+
+    /** Validates that a field is a valid URL string (basic protocol check). */
+    function isValidUrl(field) {
+      return field in request.resource.data
+        && request.resource.data[field] is string
+        && (
+          request.resource.data[field].matches('^https://.+')
+          || request.resource.data[field] == ''
+        );
+    }
+
+    /** Validates an OPTIONAL field: passes if the field is absent, otherwise
+        delegates to the given check. Use for fields the client only sometimes
+        sends (e.g. a merge update that doesn't touch every field every time). */
+    function isValidOptionalNumber(field, min, max) {
+      return !(field in request.resource.data) || isValidNumber(field, min, max);
+    }
+
+    function isValidOptionalInt(field, min, max) {
+      return !(field in request.resource.data) || isValidInt(field, min, max);
+    }
+
+    /** Rate-limit helper: prevents rapid re-writes by the same user on the same doc.
+        Enforces a minimum 5-second gap between updates.
+        FIX: duration.value()'s unit argument must be one of w/d/h/m/s/ms/ns —
+        "seconds" is not a valid unit string, only "s" is. */
+    function respectsCooldown() {
+      return request.time > resource.data.updatedAt + duration.value(5, "s");
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  APP ROOT  —  everything the app actually reads/writes lives here.
+    //  This wrapper is the rules-language equivalent of APP_ROOT in
+    //  src/firebase/paths.js: the literal fixed prefix is written exactly
+    //  once, here, instead of being repeated on every collection below.
+    //  Firestore rules have no string-interpolated path constant, so this
+    //  structural nesting is the closest equivalent — everything inside
+    //  still matches paths.js's real, un-flattened path strings exactly
+    //  (public/data/..., public/meta/..., readerProgress, etc. — nothing
+    //  was renamed here). See docs/MIGRATION_PLAN.md Phase 2.
+    // ═══════════════════════════════════════════════════════════════
+
+    match /v1/taletranscend/projects/v1 {
+
+      // ═════════════════════════════════════════════════════════════
+      //  USERS  —  users/{userId}
+      // ═════════════════════════════════════════════════════════════
+
+      match /users/{userId} {
+        // Anyone can read public profile data
+        allow read: if true;
+
+        // FIX (see docs/MIGRATION_PLAN.md Phase 2 follow-up #2): trimmed from
+        // 13 per-field checks to the ones that matter — only the owner can
+        // ever write this document, so a bad value in bio/pronouns/socials/
+        // reading stats only affects that user's own profile, not a security
+        // concern worth spending rules budget on. avatarUrl/website keep
+        // their URL-shape check since that's genuinely security-relevant
+        // (guards against a non-https/javascript: URI ending up somewhere
+        // rendered later). A `size() <= 20` blanket check replaces the
+        // dropped per-field bound checks.
+        allow create: if isOwner(userId)
+          && isValidString('name', 1, 100)
+          && isValidUrl('avatarUrl')
+          && isValidUrl('website')
+          && isValidTimestamp('joinedAt')
+          && isValidTimestamp('updatedAt')
+          && 'createdAt' in request.resource.data
+          && request.resource.data.createdAt == request.time // Enforce server-set createdAt on create
+          && request.resource.data.size() <= 20;
+
+        allow update: if isOwner(userId)
+          && respectsCooldown()
+          && isValidString('name', 1, 100)
+          && isValidUrl('avatarUrl')
+          && isValidUrl('website')
+          && isValidTimestamp('updatedAt')
+          && request.resource.data.size() <= 20;
+
+        // Only owner or admin can delete
+        allow delete: if isOwner(userId) || isAdmin();
+
+        // ═══════════════════════════════════════════════════════════
+        //  PREFERENCES  —  users/{userId}/preferences/{prefId}
+        //  (paths.js: readerPrefs — single doc keyed "reader")
+        // ═══════════════════════════════════════════════════════════
+
+        match /preferences/{prefId} {
+          allow read: if isOwner(userId) || isAdmin();
+          allow create, update: if isOwner(userId);
+          allow delete: if isOwner(userId) || isAdmin();
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  DRAFTS  —  users/{userId}/drafts/{draftId}
+        // ═══════════════════════════════════════════════════════════
+
+        match /drafts/{draftId} {
+          allow read: if isOwner(userId) || isAdmin();
+
+          // FIX (see docs/MIGRATION_PLAN.md Phase 2 follow-up #2): trimmed
+          // from 19/18 per-field checks — only the owner can ever write a
+          // draft, so bad values in the descriptive content fields only
+          // affect that user's own draft, not a security concern. Kept:
+          // ownership match on authorId (create), status (used elsewhere
+          // to gate publish flow), and updatedAt (cooldown). A
+          // `size() <= 25` blanket check replaces the dropped per-field
+          // bound checks.
+          allow create: if isOwner(userId)
+            && isValidString('title', 0, 200)
+            && isValidString('status', 0, 50)
+            && isValidTimestamp('createdAt')
+            && isValidTimestamp('updatedAt')
+            && isValidString('authorId', 1, 100)
+            && request.resource.data.authorId == userId
+            && request.resource.data.size() <= 25;
+
+          allow update: if isOwner(userId)
+            && respectsCooldown()
+            && isValidString('title', 0, 200)
+            && isValidString('status', 0, 50)
+            && isValidTimestamp('updatedAt')
+            && request.resource.data.size() <= 25;
+
+          allow delete: if isOwner(userId) || isAdmin();
+
+          // DRAFT CHAPTERS  —  users/{userId}/drafts/{draftId}/chapters/{index}
+          match /chapters/{chapterIndex} {
+            allow read: if isOwner(userId) || isAdmin();
+            allow create: if isOwner(userId)
+              && isValidString('title', 0, 200)
+              && isValidString('content', 0, 500000)
+              && isValidInt('index', 0, 1000)
+              && isValidInt('wordCount', 0, 100000)
+              && isValidTimestamp('createdAt')
+              && isValidTimestamp('updatedAt');
+            allow update: if isOwner(userId)
+              && respectsCooldown()
+              && isValidString('title', 0, 200)
+              && isValidString('content', 0, 500000)
+              && isValidInt('index', 0, 1000)
+              && isValidInt('wordCount', 0, 100000)
+              && isValidTimestamp('updatedAt');
+            allow delete: if isOwner(userId) || isAdmin();
+          }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  READER PROGRESS  —  users/{userId}/readerProgress/{taleId}
+        //  (collection name matches paths.js's `progressList`/`progress`
+        //  exactly — NOT renamed, per the decision to keep original paths)
+        //
+        //  Rewritten (Phase 2) to match the subcollection-based model
+        //  cloudProgress.service.js actually uses. This tale-level document
+        //  only ever holds `lastReadAt` and an optional `totalReadTimeMs` —
+        //  it does NOT hold `scrollPercent`, `lastChapterIndex`, or an inline
+        //  `chapters` map, which the old rule incorrectly required. Precise
+        //  per-chapter scroll position lives in the nested chapters/{index}
+        //  subcollection below instead, written independently.
+        // ═══════════════════════════════════════════════════════════
+
+        match /readerProgress/{taleId} {
+          allow read: if isOwner(userId) || isAdmin();
+
+          allow create, update: if isOwner(userId)
+            && isValidTimestamp('lastReadAt')
+            && isValidOptionalNumber('totalReadTimeMs', 0, 1000000000000);
+
+          allow delete: if isOwner(userId) || isAdmin();
+
+          // users/{userId}/readerProgress/{taleId}/chapters/{index}
+          match /chapters/{chapterIndex} {
+            allow read: if isOwner(userId) || isAdmin();
+            allow create, update: if isOwner(userId)
+              && isValidNumber('scrollPercent', 0, 100)
+              && isValidTimestamp('updatedAt')
+              && isValidOptionalInt('lastCharacterOffset', 0, 100000000);
+            allow delete: if isOwner(userId) || isAdmin();
+          }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  BOOKMARKS  —  users/{userId}/bookmarks/{bookmarkId}
+        // ═══════════════════════════════════════════════════════════
+
+        match /bookmarks/{bookmarkId} {
+          allow read: if isOwner(userId) || isAdmin();
+          allow create: if isOwner(userId)
+            && isValidString('taleId', 1, 100)
+            && isValidString('userId', 1, 100)
+            && request.resource.data.userId == userId
+            && isValidTimestamp('createdAt')
+            && isValidTimestamp('updatedAt');
+
+          allow update: if isOwner(userId)
+            && isValidTimestamp('updatedAt');
+
+          allow delete: if isOwner(userId) || isAdmin();
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  READING LISTS  —  users/{userId}/lists/{listId}
+        // ═══════════════════════════════════════════════════════════
+
+        match /lists/{listId} {
+          allow read: if isOwner(userId) || isAdmin();
+          allow create: if isOwner(userId)
+            && isValidString('name', 1, 100)
+            && isValidString('description', 0, 1000)
+            && isValidTimestamp('createdAt')
+            && isValidTimestamp('updatedAt');
+          allow update: if isOwner(userId)
+            && isValidString('name', 1, 100)
+            && isValidString('description', 0, 1000)
+            && isValidTimestamp('updatedAt');
+          allow delete: if isOwner(userId) || isAdmin();
+
+          // LIST TALES  —  users/{userId}/lists/{listId}/tales/{taleId}
+          match /tales/{taleId} {
+            allow read: if isOwner(userId) || isAdmin();
+            allow create: if isOwner(userId)
+              && isValidString('taleId', 1, 100)
+              && isValidTimestamp('addedAt');
+            allow delete: if isOwner(userId) || isAdmin();
+          }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  READING HISTORY  —  users/{userId}/readingHistory/{taleId}
+        // ═══════════════════════════════════════════════════════════
+
+        match /readingHistory/{taleId} {
+          allow read: if isOwner(userId) || isAdmin();
+          allow create, update: if isOwner(userId)
+            && isValidTimestamp('lastVisitedAt');
+          allow delete: if isOwner(userId) || isAdmin();
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  SOCIAL  —  following / followers
+        //
+        //  NOTE: this feature has no client implementation yet (schema
+        //  fields exist, no service/UI writes it) — see docs/MIGRATION_PLAN.md
+        //  Phase 2. Rules are written now so the shape is correct on day one,
+        //  in particular the followers write-identity below, which is the
+        //  same class of bug as the reaction-count issue: the writer of a
+        //  `followers` doc under userId's subcollection is the OTHER user
+        //  (the follower), not userId themselves.
+        // ═══════════════════════════════════════════════════════════
+
+        // FOLLOWING  —  users/{userId}/following/{targetUid}
+        // Written by userId themselves (I am following someone) — owner-write is correct here.
+        match /following/{targetUid} {
+          allow read: if isOwner(userId) || isAdmin();
+          allow create: if isOwner(userId) && isValidTimestamp('followedAt');
+          allow delete: if isOwner(userId) || isAdmin();
+        }
+
+        // FOLLOWERS  —  users/{userId}/followers/{followerUid}
+        // Written by the follower (followerUid), not by userId — do NOT use
+        // isOwner(userId) for create/delete here, or every non-self follow
+        // write will be rejected exactly like the reactionCount bug was.
+        match /followers/{followerUid} {
+          allow read: if isOwner(userId) || isAdmin() || isOwner(followerUid);
+          allow create: if isOwner(followerUid) && isValidTimestamp('followedAt');
+          allow delete: if isOwner(userId) || isAdmin() || isOwner(followerUid);
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  NOTIFICATIONS  —  users/{userId}/notifications/{notificationId}
+        //
+        //  Creation is intentionally admin/trusted-server-only for now —
+        //  once functions/ exists (Phase 6) these should be written by a
+        //  Cloud Function, not directly by clients. Until then, nothing in
+        //  the app actually creates these, so this is a conservative
+        //  placeholder, not a verified-against-live-usage rule.
+        // ═══════════════════════════════════════════════════════════
+
+        match /notifications/{notificationId} {
+          allow read: if isOwner(userId) || isAdmin();
+          allow create: if isAdmin();
+          allow update: if isOwner(userId)
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isRead', 'readAt']);
+          allow delete: if isOwner(userId) || isAdmin();
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  ACHIEVEMENTS  —  users/{userId}/achievements/{achievementId}
+        //  Granted by trusted server-side logic, not user-writable.
+        // ═══════════════════════════════════════════════════════════
+
+        match /achievements/{achievementId} {
+          allow read: if isOwner(userId) || isAdmin();
+          allow write: if isAdmin();
+        }
+      }
+
+      // ═════════════════════════════════════════════════════════════
+      //  PUBLIC DATA  —  public/data/tales/{taleId}, public/data/tags/{tag}
+      //  (kept nested under public/data exactly as paths.js defines it —
+      //  not flattened)
+      // ═════════════════════════════════════════════════════════════
+
+      match /public/data/tales/{taleId} {
+        // Public read for published tales; drafts hidden
+        allow read: if resource.data.visibility == 'public'
+          || resource.data.status == 'published'
+          || isAuthor()
+          || isAdmin();
+
+        // FIX (see docs/MIGRATION_PLAN.md Phase 2 follow-up #2): this rule used
+        // to individually type/bounds-check all ~27 fields on create and
+        // update. Switching the isValidX() helpers to cheap `in`-based
+        // presence checks (the first fix attempt) was not enough on its own —
+        // the emulator still hit Firestore's 1000-expression-per-request
+        // budget on a full author update. Firestore's own guidance is blunt
+        // about why: rules should verify WHO is allowed to write, not
+        // exhaustively re-validate WHAT they write — that's the client's job
+        // (and this app's own draft/publish flow already does it before
+        // anything reaches Firestore). Only fields with real consequences
+        // elsewhere in these rules are still checked here: authorId
+        // (ownership), status/visibility (read rules branch on these),
+        // the four counters (the only fields a non-author is allowed to
+        // touch at all, via the second branch below), and updatedAt
+        // (respectsCooldown() depends on it). A single `size() <= 40` check
+        // replaces the old per-field bound checks as a cheap blanket guard
+        // against a malicious author padding the document with junk fields —
+        // still a real guard, just one expression instead of twenty.
+        allow create: if isAuthenticated()
+          && isAuthorOfIncoming()
+          && isValidString('title', 1, 200)
+          && 'status' in request.resource.data
+          && request.resource.data.status in ['draft', 'submitted', 'published', 'rejected']
+          && 'visibility' in request.resource.data
+          && request.resource.data.visibility in ['public', 'private']
+          && isValidNumber('readCount', 0, 1000000000)
+          && isValidNumber('commentCount', 0, 1000000000)
+          && isValidNumber('reactionCount', 0, 1000000000)
+          && isValidNumber('bookmarkCount', 0, 1000000000)
+          && isValidTimestamp('createdAt')
+          && isValidTimestamp('updatedAt')
+          && request.resource.data.size() <= 40;
+
+        // Update: EITHER the author/admin doing a full edit, OR any
+        // authenticated user adjusting only the engagement counters.
+        //
+        // The second branch is the Phase 2 fix for Critical Finding #2: the
+        // original rule required isAuthor()||isAdmin() for ANY update,
+        // including reactionCount — meaning reacting to someone else's tale
+        // was rejected by this exact rule. resonance.service.js writes
+        // reactionCount directly (not via a Cloud Function — none exists in
+        // this repo), so it needs its own narrower permission, not the
+        // full-document author-only path. commentCount/bookmarkCount are
+        // included here too even though nothing writes them client-side yet,
+        // so this doesn't need revisiting if that gets wired up later.
+        allow update: if (
+            (isAuthor() || isAdmin())
+            && respectsCooldown()
+            && isValidString('title', 1, 200)
+            && 'status' in request.resource.data
+            && request.resource.data.status in ['draft', 'submitted', 'published', 'rejected']
+            && 'visibility' in request.resource.data
+            && request.resource.data.visibility in ['public', 'private']
+            && isValidNumber('readCount', 0, 1000000000)
+            && isValidNumber('commentCount', 0, 1000000000)
+            && isValidNumber('reactionCount', 0, 1000000000)
+            && isValidNumber('bookmarkCount', 0, 1000000000)
+            && isValidTimestamp('updatedAt')
+            && request.resource.data.size() <= 40
+          ) || (
+            isAuthenticated()
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['reactionCount', 'commentCount', 'bookmarkCount'])
+            && isValidNumber('reactionCount', 0, 1000000000)
+            && isValidNumber('commentCount', 0, 1000000000)
+            && isValidNumber('bookmarkCount', 0, 1000000000)
+          );
+
+        // Delete: author or admin only
+        allow delete: if isAuthor() || isAdmin();
+
+        // ═══════════════════════════════════════════════════════════
+        //  CHAPTERS  —  public/data/tales/{taleId}/chapters/{chapterIndex}
+        // ═══════════════════════════════════════════════════════════
+
+        match /chapters/{chapterIndex} {
+          allow read: if get(/databases/$(database)/documents/v1/taletranscend/projects/v1/public/data/tales/$(taleId)).data.visibility == 'public'
+            || get(/databases/$(database)/documents/v1/taletranscend/projects/v1/public/data/tales/$(taleId)).data.status == 'published'
+            || isAdmin()
+            || (
+              isAuthenticated()
+              && get(/databases/$(database)/documents/v1/taletranscend/projects/v1/public/data/tales/$(taleId)).data.authorId == request.auth.uid
+            );
+
+          allow create: if isAuthenticated()
+            && get(/databases/$(database)/documents/v1/taletranscend/projects/v1/public/data/tales/$(taleId)).data.authorId == request.auth.uid
+            && isValidString('title', 0, 200)
+            && isValidString('content', 0, 500000)  // ~500KB max per chapter
+            && isValidInt('index', 0, 1000)
+            && isValidInt('wordCount', 0, 100000)
+            && isValidInt('estimatedReadMins', 0, 10000)
+            && isValidTimestamp('createdAt')
+            && isValidTimestamp('updatedAt');
+
+          allow update: if isAuthenticated()
+            && get(/databases/$(database)/documents/v1/taletranscend/projects/v1/public/data/tales/$(taleId)).data.authorId == request.auth.uid
+            && respectsCooldown()
+            && isValidString('title', 0, 200)
+            && isValidString('content', 0, 500000)
+            && isValidInt('index', 0, 1000)
+            && isValidInt('wordCount', 0, 100000)
+            && isValidInt('estimatedReadMins', 0, 10000)
+            && isValidTimestamp('updatedAt');
+
+          allow delete: if isAuthenticated()
+            && get(/databases/$(database)/documents/v1/taletranscend/projects/v1/public/data/tales/$(taleId)).data.authorId == request.auth.uid
+            || isAdmin();
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  COMMENTS  —  public/data/tales/{taleId}/comments/{commentId}
+        // ═══════════════════════════════════════════════════════════
+
+        match /comments/{commentId} {
+          // Public read for published tales
+          allow read: if get(/databases/$(database)/documents/v1/taletranscend/projects/v1/public/data/tales/$(taleId)).data.visibility == 'public'
+            || get(/databases/$(database)/documents/v1/taletranscend/projects/v1/public/data/tales/$(taleId)).data.status == 'published'
+            || isAdmin();
+
+          // FIX (see docs/MIGRATION_PLAN.md Phase 2 follow-up #2): trimmed
+          // from 16 per-field checks. Unlike drafts/tales/users, this one
+          // genuinely needs identity checks — comments are the one place a
+          // non-owner writes into another user's space by design — so
+          // authorId/taleId/type/non-empty-text stay. Counter/flag fields
+          // (replyCount, likeCount, reportCount, isEdited, isPinned,
+          // isHidden, parentId, chapterIndex) are system-managed at creation
+          // time (always 0/false/empty), so a blanket `size() <= 20` check
+          // is enough to guard against a malicious payload, without
+          // re-validating each one individually.
+          allow create: if isAuthenticated()
+            && isValidString('text', 1, 5000)
+            && request.resource.data.text.trim().size() > 0
+            && isValidString('taleId', 1, 100)
+            && request.resource.data.taleId == taleId
+            && isValidString('authorId', 1, 100)
+            && request.resource.data.authorId == request.auth.uid
+            && isValidString('authorName', 1, 100)
+            && isValidString('type', 1, 50)
+            && request.resource.data.type in ['general', 'chapter']
+            && isValidInt('depth', 0, 3)  // Prevent deep nesting abuse
+            && isValidTimestamp('createdAt')
+            && isValidTimestamp('updatedAt')
+            && request.resource.data.size() <= 20;
+
+          // Update: EITHER the author editing their own comment, OR admin
+          // moderating, OR any authenticated user adjusting only likeCount
+          // (mirrors the tale reactionCount fix above — same bug shape,
+          // fixed proactively since commentLikes isn't wired up client-side
+          // yet, but will hit the same wall the moment it is).
+          allow update: if (
+              isAuthenticated()
+              && resource.data.authorId == request.auth.uid
+              && isValidString('text', 1, 5000)
+              && request.resource.data.text.trim().size() > 0
+              && isValidBool('isEdited')
+              && request.resource.data.isEdited == true
+              && isValidTimestamp('updatedAt')
+              && isValidTimestamp('editedAt')
+            ) || (
+              isAdmin()
+              && isValidBool('isHidden')
+              && isValidBool('isPinned')
+              && isValidInt('reportCount', 0, 1000)
+            ) || (
+              isAuthenticated()
+              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount'])
+              && isValidInt('likeCount', 0, 1000000)
+            );
+
+          // Delete: author or admin
+          allow delete: if (
+            isAuthenticated() && resource.data.authorId == request.auth.uid
+          ) || isAdmin();
+
+          // COMMENT LIKES  —  .../comments/{commentId}/likes/{uid}
+          match /likes/{uid} {
+            allow read: if true;
+            allow create: if isOwner(uid);
+            allow delete: if isOwner(uid) || isAdmin();
+          }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  REACTIONS  —  public/data/tales/{taleId}/reactions/{reactionId}
+        // ═══════════════════════════════════════════════════════════
+
+        match /reactions/{reactionId} {
+          allow read: if true;
+          allow create: if isAuthenticated()
+            && isValidString('userId', 1, 100)
+            && request.resource.data.userId == request.auth.uid
+            && isValidString('taleId', 1, 100)
+            && request.resource.data.taleId == taleId
+            && isValidString('type', 1, 50)
+            && request.resource.data.type in ['like', 'love', 'insightful', 'mythic']
+            && isValidTimestamp('createdAt');
+
+          allow update: if isAuthenticated()
+            && resource.data.userId == request.auth.uid
+            && isValidString('type', 1, 50)
+            && request.resource.data.type in ['like', 'love', 'insightful', 'mythic']
+            && isValidTimestamp('updatedAt');
+
+          allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  VERSIONS  —  public/data/tales/{taleId}/versions/{versionId}
+        //  Immutable publish-time snapshots. Author can create/read; only
+        //  admin can modify/remove history.
+        // ═══════════════════════════════════════════════════════════
+
+        match /versions/{versionId} {
+          allow read: if isAdmin()
+            || (
+              isAuthenticated()
+              && get(/databases/$(database)/documents/v1/taletranscend/projects/v1/public/data/tales/$(taleId)).data.authorId == request.auth.uid
+            );
+          allow create: if isAuthenticated()
+            && get(/databases/$(database)/documents/v1/taletranscend/projects/v1/public/data/tales/$(taleId)).data.authorId == request.auth.uid
+            && isValidTimestamp('createdAt');
+          allow update, delete: if isAdmin();
+        }
+      }
+
+      // TAGS  —  public/data/tags/{tag} — admin-curated, publicly readable.
+      match /public/data/tags/{tag} {
+        allow read: if true;
+        allow write: if isAdmin();
+      }
+
+      // ═════════════════════════════════════════════════════════════
+      //  PUBLIC META  —  public/meta/featured, public/meta/stats
+      //
+      //  KNOWN SEPARATE BUG (not a rules issue, flagging for awareness):
+      //  paths.js defines these as `${APP_ROOT}/public/meta/featured` /
+      //  `.../stats`, which is an ODD number of path segments (a collection
+      //  reference), but refs.js calls them with doc(db, ...), which
+      //  requires an EVEN number of segments. That mismatch means
+      //  refs.featured()/refs.globalStats() likely throw a real runtime
+      //  error ("Invalid document reference") today, independent of
+      //  anything in this rules file. The rule below matches the path
+      //  AS-DECLARED (a collection with child documents), since rewriting
+      //  the app's data model itself is outside this phase's scope.
+      // ═════════════════════════════════════════════════════════════
+
+      match /public/meta/featured/{docId} {
+        allow read: if true;
+        allow write: if isAdmin();
+      }
+
+      match /public/meta/stats/{docId} {
+        allow read: if true;
+        allow write: if isAdmin();
+      }
+
+      // ═════════════════════════════════════════════════════════════
+      //  ADMIN / MODERATION COLLECTIONS
+      // ═════════════════════════════════════════════════════════════
+
+      // REPORTS  —  reports/{reportId}
+      match /reports/{reportId} {
+        allow create: if isAuthenticated()
+          && isValidString('reporterId', 1, 100)
+          && request.resource.data.reporterId == request.auth.uid
+          && isValidString('targetId', 1, 100)
+          && isValidString('targetType', 1, 50)
+          && request.resource.data.targetType in ['tale', 'comment', 'user']
+          && isValidString('reason', 1, 500)
+          && isValidString('status', 1, 50)
+          && request.resource.data.status == 'pending'
+          && isValidTimestamp('createdAt');
+
+        allow read: if isAdmin();
+        allow update: if isAdmin();
+        allow delete: if isAdmin();
+      }
+
+      // MODERATION LOG  —  moderationLogs/{logId}
+      match /moderationLogs/{logId} {
+        allow read: if isAdmin();
+        allow create: if isAdmin()
+          && isValidString('moderatorId', 1, 100)
+          && request.resource.data.moderatorId == request.auth.uid
+          && isValidString('action', 1, 100)
+          && isValidString('targetId', 1, 100)
+          && isValidString('targetType', 1, 50)
+          && isValidString('reason', 1, 1000)
+          && isValidTimestamp('createdAt');
+        allow update, delete: if isAdmin();
+      }
+
+      // ═════════════════════════════════════════════════════════════
+      //  SYSTEM / CONFIG COLLECTIONS
+      // ═════════════════════════════════════════════════════════════
+
+      // APP CONFIG  —  appConfig/{docId}
+      match /appConfig/{docId} {
+        allow read: if true;
+        allow write: if isAdmin();
+      }
+
+      // FEATURE FLAGS  —  featureFlags/{flagId}
+      match /featureFlags/{flagId} {
+        allow read: if true;
+        allow write: if isAdmin();
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  GLOBAL FALLBACK  —  Deny everything not explicitly matched
+    //  (anything outside the v1/taletranscend/projects/v1 prefix above)
+    // ═══════════════════════════════════════════════════════════════
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

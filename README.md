@@ -85,7 +85,8 @@ npm run format
 ## Firestore Configuration
 
 ### Database Path
-All data lives under: `v1/taletranscend/projects/v1/`
+All data lives under: `v1/taletranscend/projects/v1/` (kept as-is by design — see
+`docs/MIGRATION_PLAN.md`).
 
 ### Required Composite Index
 ```json
@@ -98,11 +99,22 @@ All data lives under: `v1/taletranscend/projects/v1/`
   ]
 }
 ```
-**Deploy:** `firebase deploy --only firestore:indexes`
+**Deploy:** `firebase deploy --only firestore:indexes` (index file now lives at
+`firestore/firestore.indexes.json`)
 
 ### Security Rules
-Rules are defined in `firestore.rules`.
-> **Note:** Current rules use test-mode logic. Ensure production-ready rules are deployed before launch.
+Rules are defined in `firestore/firestore.rules` (moved from the repo root as of Phase 2 —
+see `docs/MIGRATION_PLAN.md`). As of Phase 2, the rules are nested under the same
+`v1/taletranscend/projects/v1/` prefix the app actually writes to, closing the mismatch that
+used to send every real read/write to the file's `deny all` fallback. Run `npm run test:rules`
+(requires a local Java runtime for the Firestore emulator) before deploying rule changes —
+that command runs `firestore/tests/rules.emulator.test.ts` against a real emulator, which is
+the only reliable way to verify rule behavior.
+> **Known gap:** `public/meta/featured` and `public/meta/stats` are defined in
+> `src/firebase/paths.js` with an odd number of path segments, but `refs.js` reads them with
+> `doc()`, which requires an even number — this likely throws a real runtime error today,
+> independent of the rules themselves. Not fixed as part of Phase 2, since it's a data-model
+> question rather than a rules question.
 
 ## Architecture Notes
 - **Multi-Page Application (MPA):** Each page is a separate HTML file bundled by Vite. No client-side SPA router.

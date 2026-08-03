@@ -28,6 +28,6 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "firestore/tests/**/*"],
   "exclude": ["node_modules", "dist"]
 }
