@@ -10,7 +10,7 @@
       "@fb/*": ["src/firebase/*"],
       "@services/*": ["src/services/*"],
       "@shared/*": ["src/shared/*"],
-      "@pages/*": ["src/pages/*"],
+      "@features/*": ["src/features/*"],
       "@config/*": ["src/config/*"],
       "@css/*": ["src/assets/css/*"],
       "@/*": ["src/*"]

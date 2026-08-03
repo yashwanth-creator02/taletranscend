@@ -35,7 +35,7 @@ This document provides high-signal instructions for OpenCode sessions to quickly
   - `@fb/*`: `src/firebase/*`
   - `@services/*`: `src/services/*`
   - `@ui/*`: `src/ui/*`
-  - `@pages/*`: `src/pages/*`
+  - `@features/*`: `src/pages/*`
   - `@config/*`: `src/config/*`
   - `@css/*`: `src/assets/css/*`
   - `@/*`: `src/*`

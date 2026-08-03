@@ -1,0 +1,241 @@
+// src/features/library/interactions.js
+// Card action handlers for the library page.
+// Scope: resume, bookmark (couple/decouple), copy link, mark finished.
+// Everything else (search, filters, sidebar toggle) lives in filters.js / ui.js.
+
+import { showToast } from '@shared/components/toast/toast.js';
+import { initIcons } from '@shared/icons.js';
+import { navigateTo, resolveHref, createLogger } from '@/utils';
+
+const log = createLogger('LibraryInteractions');
+log.debug('Module initialized');
+import {
+  resolveResumePoint,
+  addToBookmarks,
+  removeFromBookmarks,
+  markTaleFinished,
+} from '@services/index.js';
+
+/* ─────────────────────────────────────────────
+   Card Interactions — single delegated handler
+   ───────────────────────────────────────────── */
+
+/**
+ * Sets up all card interactions via a single delegated click handler on #cards-grid.
+ *
+ * @param {string} userId
+ */
+export function setupCardInteractions(userId) {
+  const grid = document.getElementById('cards-grid');
+  if (!grid) return;
+
+  grid.addEventListener('click', async (e) => {
+    const actionEl = e.target.closest('[data-action]');
+    const card = e.target.closest('.tale-card');
+
+    if (!card || !grid.contains(card)) return;
+
+    const taleId = card.dataset.id;
+    if (!taleId) return;
+
+    if (actionEl && card.contains(actionEl)) {
+      e.stopPropagation();
+
+      switch (actionEl.dataset.action) {
+        case 'options':
+          _toggleMenu(actionEl.dataset.menuId);
+          return;
+
+        case 'resume':
+          await _handleResume(userId, taleId);
+          return;
+
+        case 'copy-link':
+          _handleCopyLink(taleId);
+          return;
+
+        case 'mark-finished':
+          if (actionEl.hasAttribute('disabled')) return;
+          _confirmMarkFinished(() => _handleMarkFinished(userId, taleId));
+          return;
+
+        case 'couple':
+          await _handleCouple(userId, taleId, actionEl);
+          return;
+
+        case 'decouple':
+          await _handleDecouple(userId, taleId, actionEl);
+          return;
+
+        default:
+          return;
+      }
+    }
+
+    // Card body click → tale detail page
+    if (!e.target.closest('.options-menu')) {
+      // Card body click → navigate to tale detail page
+      if (!e.target.closest('.options-menu')) {
+        navigateTo(`tale.html?id=${encodeURIComponent(taleId)}`);
+      }
+    }
+  });
+
+  // Close menus on outside click
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.options-menu') && !e.target.closest('[data-action="options"]')) {
+      _closeAllMenus();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') _closeAllMenus();
+  });
+}
+
+/* ─────────────────────────────────────────────
+   Handlers
+   ───────────────────────────────────────────── */
+
+async function _handleResume(userId, taleId) {
+  log.info('Resume requested', { taleId });
+  try {
+    const resume = await resolveResumePoint({ userId, taleId });
+    const chapterId = resume?.chapterIndex ?? 0;
+    log.info('Resume point resolved', { chapterId });
+    navigateTo(`reader.html?taleId=${encodeURIComponent(taleId)}&chapterId=${chapterId}`);
+  } catch (err) {
+    log.error('Resume failed:', err);
+  }
+}
+
+function _handleCopyLink(taleId) {
+  log.info('Copy link requested', { taleId });
+  // Use resolveHref for cross-environment compatibility
+  const url = `${window.location.origin}${resolveHref(`tale.html?id=${encodeURIComponent(taleId)}`)}`;
+  log.debug('Link built', { url });
+  const modal = document.getElementById('copy-link-modal');
+  const input = document.getElementById('copy-link-input');
+  if (!modal || !input) return;
+
+  input.value = url;
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+
+  const close = () => {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  };
+
+  // Wire modal buttons via event listeners — no onclick attributes
+  const confirmBtn = document.getElementById('copy-link-confirm');
+  const closeBtn = document.getElementById('copy-link-close');
+
+  const onConfirm = async () => {
+    await navigator.clipboard.writeText(url);
+    close();
+    showToast('Link copied.', 'success');
+    confirmBtn?.removeEventListener('click', onConfirm);
+    closeBtn?.removeEventListener('click', close);
+  };
+
+  confirmBtn?.addEventListener('click', onConfirm);
+  closeBtn?.addEventListener('click', () => {
+    close();
+    confirmBtn?.removeEventListener('click', onConfirm);
+  });
+}
+
+function _confirmMarkFinished(onConfirm) {
+  const modal = document.getElementById('confirm-modal');
+  const cancel = document.getElementById('confirm-cancel');
+  const accept = document.getElementById('confirm-accept');
+  if (!modal || !cancel || !accept) return;
+
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+
+  const cleanup = () => {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    cancel.removeEventListener('click', onCancel);
+    accept.removeEventListener('click', onAccept);
+  };
+
+  const onCancel = () => cleanup();
+  const onAccept = async () => {
+    cleanup();
+    try {
+      await onConfirm();
+    } catch (err) {
+      log.error('Mark finished:', err);
+    }
+  };
+
+  cancel.addEventListener('click', onCancel);
+  accept.addEventListener('click', onAccept);
+}
+
+async function _handleMarkFinished(userId, taleId) {
+  await markTaleFinished({ userId, taleId });
+  _closeAllMenus();
+  initIcons();
+}
+
+async function _handleCouple(userId, taleId, btn) {
+  btn.setAttribute('disabled', 'true');
+  try {
+    await addToBookmarks({ userId, taleId });
+    btn.dataset.action = 'decouple';
+    btn.innerHTML = `<i data-lucide="bookmark-minus" class="w-3.5 h-3.5"></i> Remove from shelf`;
+    btn.classList.remove('text-emerald-400', 'hover:bg-emerald-500/20');
+    btn.classList.add('text-red-400', 'hover:bg-red-500/20');
+    initIcons();
+    _closeAllMenus();
+    showToast('Added to shelf.', 'success');
+  } catch (err) {
+    log.error('Couple failed:', err);
+    showToast('Could not add to shelf.', 'error');
+  } finally {
+    btn.removeAttribute('disabled');
+  }
+}
+
+async function _handleDecouple(userId, taleId, btn) {
+  btn.setAttribute('disabled', 'true');
+  try {
+    await removeFromBookmarks({ userId, taleId });
+    btn.dataset.action = 'couple';
+    btn.innerHTML = `<i data-lucide="bookmark-plus" class="w-3.5 h-3.5"></i> Add to shelf`;
+    btn.classList.remove('text-red-400', 'hover:bg-red-500/20');
+    btn.classList.add('text-emerald-400', 'hover:bg-emerald-500/20');
+    initIcons();
+    _closeAllMenus();
+    showToast('Removed from shelf.', 'info');
+  } catch (err) {
+    log.error('Decouple failed:', err);
+    showToast('Could not remove from shelf.', 'error');
+  } finally {
+    btn.removeAttribute('disabled');
+  }
+}
+
+/* ─────────────────────────────────────────────
+   Helpers
+   ───────────────────────────────────────────── */
+
+function _toggleMenu(menuId) {
+  if (!menuId) return;
+  const menu = document.getElementById(menuId);
+  if (!menu) return;
+
+  document.querySelectorAll('.options-menu:not(.hidden)').forEach((m) => {
+    if (m !== menu) m.classList.add('hidden');
+  });
+
+  menu.classList.toggle('hidden');
+}
+
+function _closeAllMenus() {
+  document.querySelectorAll('.options-menu:not(.hidden)').forEach((m) => m.classList.add('hidden'));
+}

@@ -1,3 +1,5 @@
+// vitest.config.js
+
 import { defineConfig } from 'vitest/config';
 import { resolve } from 'path';
 
@@ -51,7 +53,7 @@ export default defineConfig({
       '@shared': resolve(__dirname, 'src/shared'),
       '@utils': resolve(__dirname, 'src/utils'),
       '@config': resolve(__dirname, 'src/config'),
-      '@pages': resolve(__dirname, 'src/pages'),
+      '@features': resolve(__dirname, 'src/features'),
     },
   },
 });

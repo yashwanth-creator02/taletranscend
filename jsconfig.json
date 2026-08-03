@@ -7,7 +7,7 @@
       "@services/*": ["src/services/*"],
       "@state/*": ["src/state/*"],
       "@shared/*": ["src/shared/*"],
-      "@pages/*": ["src/pages/*"],
+      "@features/*": ["src/features/*"],
       "@config/*": ["src/config/*"],
       "@css/*": ["src/assets/css/*"],
       "@/*": ["src/*"]

@@ -3,7 +3,7 @@
 // This is NOT persisted — it is rebuilt on every page load from Firebase.
 //
 // Page-specific state (readerState, libraryState etc.) stays in
-// src/pages/{page}/state.js. This file holds only what crosses page boundaries:
+// src/features/{page}/state.js. This file holds only what crosses page boundaries:
 // the authenticated user identity and loaded reader preferences.
 //
 // All modules that need the current user or preferences read from here
