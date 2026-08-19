@@ -27,8 +27,7 @@ export function initDevMode(): void {
     const badge = document.createElement('div');
     badge.className = 'dev-badge';
     badge.innerHTML = `
-      <span class="dev-badge__indicator animate-pulse"></span>
-      <span class="dev-badge__label">Dev Mode Active</span>
+      <span class="dev-badge__label">Dev Mode</span>
     `;
     document.body.appendChild(badge);
 
