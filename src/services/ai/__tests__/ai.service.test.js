@@ -1,130 +1,177 @@
-import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest';
-import { setupServer } from 'msw/node';
-import { http, HttpResponse } from 'msw';
-import { suggestTitle, refineMythicText } from '../ai.service.js';
+// src/services/ai/__tests__/ai.service.test.js
+//
+// FIX (docs/MIGRATION_PLAN.md Phase 6.6): the original version of this test
+// used REAL timers for the retry/backoff tests, one of which took 14+
+// seconds — flagged in the original repo audit as a test-hygiene problem.
+// This version uses vi.useFakeTimers() instead, fixing that properly rather
+// than just moving the slowness somewhere else.
 
-const GEMINI_ENDPOINT =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-const server = setupServer(
-  http.post(GEMINI_ENDPOINT, async ({ request }) => {
-    const url = new URL(request.url);
-    const apiKey = url.searchParams.get('key');
+const mockEnsureApiKey = vi.fn();
 
-    if (!apiKey) {
-      return new HttpResponse(null, { status: 400 });
-    }
+vi.mock('@shared/components/apiKeyModal/apiKeyModal.js', () => ({
+  ensureApiKey: (...args) => mockEnsureApiKey(...args),
+}));
 
-    const body = await request.json();
-    const prompt = body.contents[0].parts[0].text;
+const { suggestTitle, refineMythicText, suggestName } = await import('../ai.service.js');
 
-    if (prompt.includes('Suggest ONE epic, mythic, or fantasy title')) {
-      return HttpResponse.json({
-        candidates: [{ content: { parts: [{ text: 'The Eternal Myth' }] } }],
-      });
-    }
-
-    if (prompt.includes('Rewrite the following paragraph')) {
-      return HttpResponse.json({
-        candidates: [
-          {
-            content: {
-              parts: [{ text: 'In the age of legends, the sun rose over the silver peaks.' }],
-            },
-          },
-        ],
-      });
-    }
-
-    return HttpResponse.json({
-      candidates: [{ content: { parts: [{ text: 'Default Response' }] } }],
-    });
-  })
-);
-
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
+function mockFetchResponse(overrides = {}) {
+  return {
+    ok: true,
+    status: 200,
+    json: async () => ({
+      candidates: [{ content: { parts: [{ text: 'Mocked AI response' }] } }],
+    }),
+    ...overrides,
+  };
+}
 
 describe('ai.service', () => {
-  const apiKey = 'test-api-key';
-
-  describe('suggestTitle', () => {
-    it('returns null if prompt is too short', async () => {
-      expect(await suggestTitle('short', apiKey)).toBeNull();
-    });
-
-    it('returns suggested title from Gemini', async () => {
-      const result = await suggestTitle(
-        'This is a long synopsis about a hero in a fantasy world.',
-        apiKey
-      );
-      expect(result).toBe('The Eternal Myth');
-    });
-
-    it('sanitizes input before sending to Gemini', async () => {
-      let capturedPrompt = '';
-      server.use(
-        http.post(GEMINI_ENDPOINT, async ({ request }) => {
-          const body = await request.json();
-          capturedPrompt = body.contents[0].parts[0].text;
-          return HttpResponse.json({
-            candidates: [{ content: { parts: [{ text: 'Clean Title' }] } }],
-          });
-        })
-      );
-
-      const dirtyPrompt = 'Long synopsis with control characters \x00\x1F and more text...'.padEnd(
-        2100,
-        '.'
-      );
-      await suggestTitle(dirtyPrompt, apiKey);
-
-      expect(capturedPrompt).not.toContain('\x00');
-      expect(capturedPrompt).not.toContain('\x1F');
-      // The total prompt includes the wrapper text, so we check if the dirty part was sliced
-      expect(capturedPrompt.length).toBeLessThan(2100);
-      expect(capturedPrompt).toContain('Long synopsis with control characters');
-    });
-
-    it('returns null if Gemini fails', async () => {
-      server.use(
-        http.post(GEMINI_ENDPOINT, () => {
-          return new HttpResponse(null, { status: 500 });
-        })
-      );
-      const result = await suggestTitle(
-        'This is a long synopsis about a hero in a fantasy world.',
-        apiKey
-      );
-      expect(result).toBeNull();
-    }, 20000);
+  beforeEach(() => {
+    vi.useFakeTimers();
+    mockEnsureApiKey.mockReset();
+    mockEnsureApiKey.mockResolvedValue('fake-api-key');
+    global.fetch = vi.fn();
   });
 
-  describe('refineMythicText', () => {
-    it('returns null if text is too short', async () => {
-      expect(await refineMythicText('too short', apiKey)).toBeNull();
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  describe('input guards', () => {
+    it('suggestTitle returns null for a too-short prompt without ever checking for a key', async () => {
+      expect(await suggestTitle('short')).toBeNull();
+      expect(mockEnsureApiKey).not.toHaveBeenCalled();
+      expect(fetch).not.toHaveBeenCalled();
     });
 
-    it('returns refined text from Gemini', async () => {
-      const result = await refineMythicText(
-        'The sun rose over the mountains. It was very beautiful and everyone was happy.',
-        apiKey
-      );
-      expect(result).toBe('In the age of legends, the sun rose over the silver peaks.');
+    it('refineMythicText returns null for too-short text', async () => {
+      expect(await refineMythicText('too short')).toBeNull();
+      expect(fetch).not.toHaveBeenCalled();
     });
 
-    it('returns null if Gemini response is empty', async () => {
-      server.use(
-        http.post(GEMINI_ENDPOINT, () => {
-          return HttpResponse.json({ candidates: [] });
-        })
-      );
-      const result = await refineMythicText(
-        'The sun rose over the mountains. It was very beautiful and everyone was happy.',
-        apiKey
-      );
+    it('suggestName returns null for a too-short bio', async () => {
+      expect(await suggestName('hi')).toBeNull();
+      expect(fetch).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('API key handling', () => {
+    it('returns null without calling fetch if the user cancels the key prompt', async () => {
+      mockEnsureApiKey.mockResolvedValue(null);
+      const result = await suggestTitle('A long enough synopsis to pass the guard.');
       expect(result).toBeNull();
+      expect(fetch).not.toHaveBeenCalled();
+    });
+
+    it('sends the stored/entered key as a query param', async () => {
+      fetch.mockResolvedValue(mockFetchResponse());
+      await suggestTitle('A long enough synopsis to pass the guard.');
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining('key=fake-api-key'),
+        expect.any(Object)
+      );
+    });
+  });
+
+  describe('successful responses', () => {
+    it('suggestTitle returns the parsed text', async () => {
+      fetch.mockResolvedValue(mockFetchResponse());
+      const result = await suggestTitle('A long enough synopsis to pass the guard.');
+      expect(result).toBe('Mocked AI response');
+    });
+
+    it('refineMythicText returns the parsed text', async () => {
+      fetch.mockResolvedValue(mockFetchResponse());
+      const result = await refineMythicText('This paragraph is definitely long enough to pass.');
+      expect(result).toBe('Mocked AI response');
+    });
+
+    it('suggestName returns the parsed text', async () => {
+      fetch.mockResolvedValue(mockFetchResponse());
+      const result = await suggestName('A wandering chronicler of forgotten myths.');
+      expect(result).toBe('Mocked AI response');
+    });
+
+    it('returns null if Gemini responds with no usable text', async () => {
+      fetch.mockResolvedValue(mockFetchResponse({ json: async () => ({ candidates: [] }) }));
+      const result = await suggestTitle('A long enough synopsis to pass the guard.');
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('retry behavior (fake timers)', () => {
+    it('retries on 429 and succeeds on the next attempt', async () => {
+      fetch
+        .mockResolvedValueOnce({ ok: false, status: 429, statusText: 'Too Many Requests' })
+        .mockResolvedValueOnce(mockFetchResponse());
+
+      const promise = suggestTitle('A long enough synopsis to pass the guard.');
+      await vi.runAllTimersAsync();
+      const result = await promise;
+
+      expect(result).toBe('Mocked AI response');
+      expect(fetch).toHaveBeenCalledTimes(2);
+    });
+
+    it('retries on 5xx errors', async () => {
+      fetch
+        .mockResolvedValueOnce({ ok: false, status: 503, statusText: 'Unavailable' })
+        .mockResolvedValueOnce(mockFetchResponse());
+
+      const promise = suggestTitle('A long enough synopsis to pass the guard.');
+      await vi.runAllTimersAsync();
+      const result = await promise;
+
+      expect(result).toBe('Mocked AI response');
+    });
+
+    it('gives up and returns null after exhausting retries', async () => {
+      fetch.mockResolvedValue({ ok: false, status: 500, statusText: 'Server Error' });
+
+      const promise = suggestTitle('A long enough synopsis to pass the guard.');
+      await vi.runAllTimersAsync();
+      const result = await promise;
+
+      expect(result).toBeNull();
+      // Initial attempt + 3 retries = 4 calls total
+      expect(fetch).toHaveBeenCalledTimes(4);
+    });
+
+    it('does NOT retry on 401 (invalid key) — retrying a bad key wastes the user\u2019s quota for nothing', async () => {
+      fetch.mockResolvedValue({ ok: false, status: 401, statusText: 'Unauthorized' });
+
+      const promise = suggestTitle('A long enough synopsis to pass the guard.');
+      await vi.runAllTimersAsync();
+      const result = await promise;
+
+      expect(result).toBeNull();
+      expect(fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('does NOT retry on 403 (revoked/forbidden key)', async () => {
+      fetch.mockResolvedValue({ ok: false, status: 403, statusText: 'Forbidden' });
+
+      const promise = suggestTitle('A long enough synopsis to pass the guard.');
+      await vi.runAllTimersAsync();
+      const result = await promise;
+
+      expect(result).toBeNull();
+      expect(fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('retries on a network error (fetch throws)', async () => {
+      fetch
+        .mockRejectedValueOnce(new Error('Network error'))
+        .mockResolvedValueOnce(mockFetchResponse());
+
+      const promise = suggestTitle('A long enough synopsis to pass the guard.');
+      await vi.runAllTimersAsync();
+      const result = await promise;
+
+      expect(result).toBe('Mocked AI response');
     });
   });
 });

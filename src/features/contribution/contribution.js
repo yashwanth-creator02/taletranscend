@@ -29,7 +29,6 @@ import { debounce } from '@/utils';
 import { setupAuthTimeout } from '@/utils';
 import { initNav } from '@shared/components/nav/nav.js';
 import { refineMythicText } from '@services/index.js';
-import { AI_API_KEY } from '@config/app.config.js';
 import { showToast } from '@shared/components/toast/toast.js';
 
 initPageReveal();
@@ -202,7 +201,7 @@ function bindAIEvents() {
     showToast('Consulting the Oracle...', 'info');
 
     try {
-      const refined = await refineMythicText(text, AI_API_KEY);
+      const refined = await refineMythicText(text);
       if (refined) {
         contentArea.value = refined;
         contentArea.dispatchEvent(new Event('input', { bubbles: true }));

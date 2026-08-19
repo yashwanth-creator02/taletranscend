@@ -5,19 +5,20 @@
 ## What It Is
 
 TaleTranscend is a browser-based platform where:
+
 - **Readers** discover and read curated tales with a rich, customizable reader.
 - **Writers** draft multi-chapter stories, publish to a public library, and receive AI-assisted suggestions.
 - **Everyone** engages through bookmarks, comments, and reactions — no traditional account required (Anonymous Auth).
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | Vanilla JavaScript (ES2022 modules), Tailwind CSS |
-| Build | Vite 7.x with PWA plugin |
-| Backend | Firebase (Firestore, Anonymous Auth, Storage) |
-| TypeScript | Utility modules (`src/utils/`) |
-| Testing | Vitest (unit), Playwright (E2E) |
+| Layer      | Technology                                        |
+| ---------- | ------------------------------------------------- |
+| Frontend   | Vanilla JavaScript (ES2022 modules), Tailwind CSS |
+| Build      | Vite 7.x with PWA plugin                          |
+| Backend    | Firebase (Firestore, Anonymous Auth, Storage)     |
+| TypeScript | Utility modules (`src/utils/`)                    |
+| Testing    | Vitest (unit), Playwright (E2E)                   |
 
 ## Project Structure
 
@@ -78,6 +79,7 @@ npm run format
 ```
 
 ### Environment Setup
+
 1. Copy `.env.example` to `.env`
 2. Fill in your Firebase project credentials.
 3. Ensure Firestore composite index is deployed (see below).
@@ -85,10 +87,12 @@ npm run format
 ## Firestore Configuration
 
 ### Database Path
+
 All data lives under: `v1/taletranscend/projects/v1/` (kept as-is by design — see
 `docs/MIGRATION_PLAN.md`).
 
 ### Required Composite Index
+
 ```json
 {
   "collectionGroup": "tales",
@@ -99,10 +103,12 @@ All data lives under: `v1/taletranscend/projects/v1/` (kept as-is by design — 
   ]
 }
 ```
+
 **Deploy:** `firebase deploy --only firestore:indexes` (index file now lives at
 `firestore/firestore.indexes.json`)
 
 ### Security Rules
+
 Rules are defined in `firestore/firestore.rules` (moved from the repo root as of Phase 2 —
 see `docs/MIGRATION_PLAN.md`). As of Phase 2, the rules are nested under the same
 `v1/taletranscend/projects/v1/` prefix the app actually writes to, closing the mismatch that
@@ -110,6 +116,7 @@ used to send every real read/write to the file's `deny all` fallback. Run `npm r
 (requires a local Java runtime for the Firestore emulator) before deploying rule changes —
 that command runs `firestore/tests/rules.emulator.test.ts` against a real emulator, which is
 the only reliable way to verify rule behavior.
+
 > **Known gap:** `public/meta/featured` and `public/meta/stats` are defined in
 > `src/firebase/paths.js` with an odd number of path segments, but `refs.js` reads them with
 > `doc()`, which requires an even number — this likely throws a real runtime error today,
@@ -117,10 +124,12 @@ the only reliable way to verify rule behavior.
 > question rather than a rules question.
 
 ## Architecture Notes
+
 - **Multi-Page Application (MPA):** Each page is a separate HTML file bundled by Vite. No client-side SPA router.
 - **State Management:** Global mutable singleton (`appState`) + page-local state objects. No reactive framework (direct DOM manipulation).
 - **Firebase Anonymous Auth:** Every visitor gets a persistent, anonymous UID.
 - **Image Storage:** Cover images currently use external URLs.
 
 ## License
+
 MIT

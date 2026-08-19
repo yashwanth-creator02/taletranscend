@@ -1,10 +1,8 @@
 // src/config/app.config.js
 // Central configuration for application-wide constants.
-// Import from here — never hardcode these values across the codebase.
 //
 // Rules:
 //   - All localStorage keys live in STORAGE_KEYS (never raw strings elsewhere)
-//   - All magic numbers live here with a named constant
 //   - All repeated string literals (URLs, labels) live here
 
 import { createLogger } from '../utils/logger.ts';
@@ -68,11 +66,6 @@ export const STORAGE_KEYS = {
   // Progress — keyed dynamically: `tt-progress-${uid}-${taleId}`
   progressPrefix: 'tt-progress',
 };
-
-// ── AI ────────────────────────────────────────────────────────────────
-
-// Gemini AI API Key for mythic suggestions.
-export const AI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
 
 // ── Development Mode ─────────────────────────────────────────────────
 

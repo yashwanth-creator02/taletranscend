@@ -3,7 +3,8 @@
 // genre multi-select, avatar preview, toast notifications.
 
 import { profileState, GENRE_OPTIONS } from './state.js';
-import { suggestNameFromBio } from './ai-name.js';
+import { suggestName } from '@services/index.js';
+import { showApiKeyModal } from '@shared/components/apiKeyModal/apiKeyModal.js';
 import { debounce } from '@/utils';
 import { initIcons } from '@shared/icons.js';
 import { showToast } from '@shared/components/toast/toast.js';
@@ -35,7 +36,20 @@ export function initProfileUI() {
   _buildGenreSelector();
   _bindAvatarPreview();
   _bindAiNameButton();
+  _bindApiKeyManager();
   _bindBackdropClose();
+}
+
+function _bindApiKeyManager() {
+  const btn = document.getElementById('btn-manage-api-key');
+  if (!btn) return;
+
+  btn.addEventListener('click', async () => {
+    const result = await showApiKeyModal();
+    if (result) {
+      showNotification('AI API key saved.', 'success');
+    }
+  });
 }
 
 function _bindModalTriggers() {
@@ -212,9 +226,7 @@ function _bindAiNameButton() {
     btn.disabled = true;
     btn.textContent = 'Conjuring…';
 
-    // API key should come from your environment/config — not hardcoded
-    const apiKey = window.__GEMINI_KEY__ ?? null;
-    const suggested = await suggestNameFromBio(bio, apiKey);
+    const suggested = await suggestName(bio);
 
     btn.disabled = false;
     btn.textContent = 'Suggest Name';
