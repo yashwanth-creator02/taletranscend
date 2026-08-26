@@ -84,6 +84,25 @@ npm run format
 2. Fill in your Firebase project credentials.
 3. Ensure Firestore composite index is deployed (see below).
 
+## CI/CD
+
+`.github/workflows/ci.yml` runs on every PR and push to `main`: lint, typecheck, unit tests,
+`functions/`'s own typecheck, the Firestore rules emulator tests, and E2E — each as a separate
+job so a failure in one doesn't block visibility into the others. A `ci-required` job
+aggregates all of them into a single status check, so branch protection only needs to point at
+one job instead of being updated every time a job is renamed or added.
+
+`.github/workflows/deploy.yml` deploys Hosting and Firestore rules/indexes —
+**deliberately not `functions/`**, since Cloud Functions require the Firebase Blaze plan and
+this project stays on the free Spark plan (see `functions/README.md`). It's triggered manually
+(`workflow_dispatch`), not automatically on push, until you're ready for continuous deployment.
+To use it, add a repository secret:
+
+- **`FIREBASE_SERVICE_ACCOUNT`** — a Firebase/GCP service account JSON key with Hosting Admin
+  and Cloud Datastore/Firestore permissions. Generate one from the
+  [Google Cloud Console](https://console.cloud.google.com/iam-admin/serviceaccounts) for the
+  `taletranscend` project, then paste the full JSON as the secret value.
+
 ## Firestore Configuration
 
 ### Database Path

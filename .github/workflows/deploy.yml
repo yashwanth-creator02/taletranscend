@@ -1,0 +1,45 @@
+name: Deploy
+
+# Manual trigger by default, not automatic on every push to main — this
+# project doesn't have deploy secrets configured yet (see README below), and
+# auto-deploying to production on every merge isn't something to turn on
+# silently. Switch the trigger to `push: branches: [main]` once you're ready
+# for continuous deployment and the secret below is set up.
+on:
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  deploy:
+    name: Deploy Hosting + Firestore Rules
+    runs-on: ubuntu-latest
+    # Deliberately NOT deploying functions/ here — Cloud Functions require
+    # the Firebase Blaze plan, which this project intentionally stays off
+    # of. See functions/README.md. This workflow only touches Hosting and
+    # Firestore rules/indexes, both of which work on the free Spark plan.
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+      - name: Deploy to Firebase
+        run: |
+          npx firebase-tools deploy \
+            --only hosting,firestore:rules,firestore:indexes \
+            --project taletranscend \
+            --non-interactive

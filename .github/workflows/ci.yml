@@ -1,0 +1,111 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Cancel superseded runs on the same PR/branch instead of letting them queue
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  lint-and-typecheck:
+    name: Lint & Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run type-check
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+  functions-typecheck:
+    name: Cloud Functions Typecheck
+    runs-on: ubuntu-latest
+    # These functions are written and compiled but not deployed (this project
+    # stays on Firebase's free Spark plan; Cloud Functions of any kind require
+    # Blaze — see functions/README.md). This job exists to catch a broken
+    # build before it becomes a surprise on the day this project does move to
+    # Blaze, not because anything here runs in production today.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: functions/package-lock.json
+      - working-directory: functions
+        run: npm ci
+      - working-directory: functions
+        run: npx tsc
+
+  rules-tests:
+    name: Firestore Rules Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      # The Firestore emulator is a JVM process — needs a real Java runtime,
+      # not just the Firebase CLI.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - run: npm ci
+      - run: npm run test:rules
+
+  e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      # playwright.config.js runs both a chromium and a firefox project, and
+      # starts its own dev server (npx vite) automatically via `webServer` —
+      # no separate build step needed here.
+      - run: npx playwright install --with-deps
+      - run: npm run e2e
+
+  # A single required status check to point branch protection at, instead of
+  # having to list every job above individually (and remember to update the
+  # branch protection rule every time a job is renamed or added).
+  ci-required:
+    name: CI required checks passed
+    runs-on: ubuntu-latest
+    needs: [lint-and-typecheck, unit-tests, functions-typecheck, rules-tests, e2e]
+    if: always()
+    steps:
+      - name: Fail if any required job failed
+        run: |
+          if [ "${{ contains(needs.*.result, 'failure') }}" = "true" ]; then
+            echo "One or more required jobs failed."
+            exit 1
+          fi
