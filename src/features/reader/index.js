@@ -6,7 +6,8 @@
 export * from './theme.js';
 
 // ── Firebase & Auth ───────────────────────────────────────────────────
-export { initAuth, appId } from '@fb/index.js';
+
+export { initAuth } from '@fb/index.js';
 
 // ── Reader Core ───────────────────────────────────────────────────────
 export * from './content.js';

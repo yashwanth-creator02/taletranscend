@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import tailwindcss from '@tailwindcss/vite';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { VitePWA } from 'vite-plugin-pwa';
+import { htmlIncludes } from './vite-html-includes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,17 +28,15 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        input: {
-          main: path.resolve(__dirname, 'src/views/index.html'),
-          library: path.resolve(__dirname, 'src/views/library.html'),
-          shelf: path.resolve(__dirname, 'src/views/shelf.html'),
-          reader: path.resolve(__dirname, 'src/views/reader.html'),
-          tale: path.resolve(__dirname, 'src/views/tale.html'),
-          contribution: path.resolve(__dirname, 'src/views/contribution.html'),
-          profile: path.resolve(__dirname, 'src/views/profile.html'),
-          login: path.resolve(__dirname, 'src/views/login.html'),
-          404: path.resolve(__dirname, 'src/views/404.html'),
-        },
+        main: path.resolve(__dirname, 'src/views/index.html'),
+        library: path.resolve(__dirname, 'src/views/library.html'),
+        shelf: path.resolve(__dirname, 'src/views/shelf.html'),
+        reader: path.resolve(__dirname, 'src/views/reader.html'),
+        tale: path.resolve(__dirname, 'src/views/tale.html'),
+        contribution: path.resolve(__dirname, 'src/views/contribution.html'),
+        profile: path.resolve(__dirname, 'src/views/profile.html'),
+        login: path.resolve(__dirname, 'src/views/login.html'),
+        404: path.resolve(__dirname, 'src/views/404.html'),
       },
     },
   },
@@ -45,6 +44,7 @@ export default defineConfig({
     open: '/src/views/library.html',
   },
   plugins: [
+    htmlIncludes({ root: path.resolve(__dirname, 'src/views') }),
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
