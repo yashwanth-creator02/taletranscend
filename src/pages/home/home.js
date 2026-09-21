@@ -107,21 +107,19 @@ function _showSkeletons(container) {
   container.innerHTML = Array.from(
     { length: 3 },
     () => `
-    <div class="glass-card rounded-[2.5rem] bg-indigo-600/5 p-5 border border-white/[0.03]">
-      <div class="aspect-[4/3] rounded-[2rem] skeleton mb-6"></div>
-      <div class="space-y-4 px-1">
-        <div class="flex gap-3">
-          <div class="skeleton h-4 w-20 rounded-md"></div>
-          <div class="skeleton h-4 w-24 rounded-md"></div>
+    <div class="home-tale-card home-tale-card--skeleton">
+      <div class="home-tale-card__media skeleton"></div>
+      <div class="home-tale-card__body">
+        <div class="flex gap-2 mb-2">
+          <div class="skeleton h-3 w-16 rounded"></div>
+          <div class="skeleton h-3 w-20 rounded"></div>
         </div>
-        <div class="skeleton h-7 w-3/4 rounded-lg"></div>
-        <div class="space-y-2">
-          <div class="skeleton h-3.5 w-full rounded-md"></div>
-          <div class="skeleton h-3.5 w-5/6 rounded-md"></div>
-        </div>
-        <div class="flex items-center justify-between pt-4 border-t border-white/5 mt-2">
-          <div class="skeleton h-4 w-28 rounded-md"></div>
-          <div class="skeleton h-4 w-12 rounded-md"></div>
+        <div class="skeleton h-4 w-3/4 rounded mb-2"></div>
+        <div class="skeleton h-3 w-full rounded mb-1"></div>
+        <div class="skeleton h-3 w-4/5 rounded mb-3"></div>
+        <div class="flex items-center justify-between pt-2 border-t border-white/5">
+          <div class="skeleton h-3 w-20 rounded"></div>
+          <div class="skeleton h-3 w-8 rounded"></div>
         </div>
       </div>
     </div>
@@ -153,39 +151,39 @@ function _renderTrendingCard(tale) {
   return `
     <a
       href="tale.html?id=${tale.id}"
-      class="glass-card rounded-[2.5rem] bg-indigo-600/10 p-5 group hover:border-indigo-500/50 transition-all duration-500 block"
+      class="home-tale-card group"
     >
-      <div class="aspect-[4/3] rounded-[2rem] overflow-hidden mb-6 border border-zinc-800">
+      <div class="home-tale-card__media">
         <img
           src="${cover}"
           alt="${safeTitle}"
-          class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+          class="home-tale-card__img"
           loading="lazy"
         />
       </div>
 
-      <div class="flex items-center gap-2 mb-3">
-        <span class="bg-indigo-500/10 text-indigo-400 text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md">
+      <div class="home-tale-card__meta">
+        <span class="home-tale-card__era">
           ${safeEra}
         </span>
-        <span class="text-zinc-600 text-[10px] font-bold">
+        <span class="home-tale-card__count">
           ${count} ${count === 1 ? 'Fragment' : 'Fragments'}
         </span>
       </div>
 
-      <h3 class="text-2xl font-extrabold text-white mb-3 group-hover:text-indigo-400 transition-colors truncate">
+      <h3 class="home-tale-card__title">
         ${safeTitle}
       </h3>
 
-      <p class="text-slate-500 text-sm leading-relaxed mb-6 line-clamp-3">
+      <p class="home-tale-card__desc">
         ${safeDescription}
       </p>
 
-      <div class="flex items-center justify-between pt-4 border-t border-zinc-800/50">
-        <span class="text-zinc-500 text-xs font-bold">
+      <div class="home-tale-card__footer">
+        <span class="home-tale-card__author">
           ${safeAuthor}
         </span>
-        <span class="flex items-center gap-1 text-indigo-400 text-xs font-bold group-hover:gap-2 transition-all">
+        <span class="home-tale-card__link">
           Read
           <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
         </span>
