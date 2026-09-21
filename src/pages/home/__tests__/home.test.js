@@ -37,6 +37,7 @@ describe('Home Page', () => {
       </form>
       <div id="trending-grid"></div>
       <div id="trending-section"></div>
+      <div id="archive-reliquary-container"></div>
       <form id="newsletter-form"></form>
     `;
   });

@@ -18,6 +18,7 @@ import {
 import { initIcons } from '@ui/components/icons.js';
 import { getTales } from '@services/index.js';
 import { DEFAULT_COVER_URL } from '@config/app.config.js';
+import { initReliquary } from './reliquary.js';
 
 const log = createLogger('Home');
 
@@ -27,6 +28,7 @@ initNav();
 document.addEventListener('DOMContentLoaded', () => {
   log.info('Home page initialized');
   initIcons();
+  initReliquary('archive-reliquary-container');
   _initInteractions();
   readyReveal();
   _loadTrendingTales();
@@ -96,6 +98,7 @@ async function _loadTrendingTales() {
 
     log.info(`Loaded ${tales.length} trending tales`);
     container.innerHTML = tales.map(_renderTrendingCard).join('');
+    initReliquary('archive-reliquary-container', tales);
     initIcons();
   } catch (err) {
     log.error('Failed to load trending tales:', err);

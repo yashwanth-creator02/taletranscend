@@ -80,4 +80,12 @@ export const AI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
 // Set VITE_DEV_MODE=true in your local .env to enable developer-only features and logging.
 export const IS_DEV_MODE = import.meta.env.VITE_DEV_MODE === 'true';
 
+// ── Reliquary Artifact Generation ──────────────────────────────────────
+
+// Controls whether new tales in the archive dynamically generate and mount
+// corresponding artifacts (maps, books, relics) onto the home reliquary tableau.
+// Controlled via VITE_ENABLE_DYNAMIC_TALE_ARTIFACTS in .env.
+export const ENABLE_DYNAMIC_TALE_ARTIFACTS =
+  import.meta.env.VITE_ENABLE_DYNAMIC_TALE_ARTIFACTS === 'true';
+
 log.debug('App configuration initialized');
