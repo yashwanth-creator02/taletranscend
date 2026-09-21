@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 380" width="100%" height="100%" fill="none">
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 380" width="520" height="380" fill="none">
   <defs>
     <!-- Soft warm amber glow for runes -->
     <filter id="runeGlow" x="-20%" y="-20%" width="140%" height="140%">
@@ -15,11 +16,11 @@
     </linearGradient>
   </defs>
 
-  <!-- Leather Outer Binding & Metal Clasps (Base) -->
+  <!-- Leather Outer Binding and Metal Clasps (Base) -->
   <path d="M 40 105 C 120 90, 240 98, 255 125 C 270 98, 390 90, 470 105 C 485 110, 495 285, 475 325 C 395 305, 275 315, 255 340 C 235 315, 115 305, 35 325 C 15 285, 25 110, 40 105 Z" 
         fill="url(#leatherCover)" stroke="#d4af37" stroke-width="2.5"/>
 
-  <!-- Metal Corner Brackets & Clasp Hinges -->
+  <!-- Metal Corner Brackets and Clasp Hinges -->
   <!-- Left Corner Top -->
   <path d="M 40 105 L 65 102 L 68 128 L 52 132 L 40 105 Z" fill="#92400e" stroke="#fbbf24" stroke-width="1.2"/>
   <circle cx="56" cy="116" r="2" fill="#fbbf24"/>
@@ -73,7 +74,7 @@
     <line x1="80" y1="290" x2="190" y2="290"/>
   </g>
 
-  <!-- Book Spine Center Gutter & Ribbon Bookmark -->
+  <!-- Book Spine Center Gutter and Ribbon Bookmark -->
   <path d="M 253 145 C 255 180, 255 280, 255 330" stroke="#b45309" stroke-width="3"/>
   <path d="M 255 140 C 265 200, 240 280, 258 355 L 268 350 L 265 335" fill="#b91c1c" stroke="#dc2626" stroke-width="1.2"/>
 

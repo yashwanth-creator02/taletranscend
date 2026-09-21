@@ -107,8 +107,22 @@ function _buildReliquaryMarkup(artifacts) {
  * @returns {string}
  */
 function _buildArtifactNode(artifact) {
-  const { id, type, title, era, taleTitle, asset, readUrl, position, zIndex, animation } = artifact;
+  const {
+    id,
+    type,
+    title,
+    era,
+    taleTitle,
+    asset,
+    readUrl,
+    position,
+    zIndex,
+    animation,
+    pillPlacement,
+  } = artifact;
   const isSelected = id === activeRelicId;
+  const pillModifier =
+    pillPlacement === 'top' ? 'reliquary-item__pill--top' : 'reliquary-item__pill--bottom';
 
   return `
     <a
@@ -138,8 +152,8 @@ function _buildArtifactNode(artifact) {
         loading="eager"
         draggable="false"
       />
-      <!-- Contextual floating pill attached to each piece -->
-      <span class="reliquary-item__pill" aria-hidden="true">
+      <!-- Contextual floating pill placed cleanly away from the artwork -->
+      <span class="reliquary-item__pill ${pillModifier}" aria-hidden="true">
         <span class="reliquary-item__pill-text">${escapeHtml(title)}</span>
         <span class="reliquary-item__pill-arrow">&rarr;</span>
       </span>
@@ -148,12 +162,13 @@ function _buildArtifactNode(artifact) {
 }
 
 /**
- * Sets up click, hover, and keyboard listeners for artifact interaction.
+ * Sets up click, hover (with dwell delay), keyboard, and layer hit-testing for artifact interaction.
  *
  * @param {HTMLElement} container
  * @param {import('./reliquary.data.js').ReliquaryArtifact[]} artifacts
  */
 function _setupInteractivity(container, artifacts) {
+  const stage = container.querySelector('.reliquary-stage');
   const items = container.querySelectorAll('.reliquary-item');
   const inspector = container.querySelector('#relic-inspector');
   const eraEl = container.querySelector('#relic-inspector-era');
@@ -163,6 +178,41 @@ function _setupInteractivity(container, artifacts) {
   const linkEl = container.querySelector('#relic-inspector-link');
 
   let hideTimer = null;
+  let dwellTimer = null;
+  let currentCandidateId = null;
+
+  // In-memory offscreen canvases for alpha transparency hit testing
+  const artifactBitmaps = new Map();
+
+  artifacts.forEach((artifact) => {
+    if (!artifact.asset) return;
+    try {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = artifact.asset;
+      img.onload = () => {
+        try {
+          const offCanvas = document.createElement('canvas');
+          offCanvas.width = 120;
+          offCanvas.height =
+            Math.round(120 * ((img.naturalHeight || 300) / (img.naturalWidth || 400))) || 120;
+          const ctx = offCanvas.getContext('2d', { willReadFrequently: true });
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, offCanvas.width, offCanvas.height);
+            artifactBitmaps.set(artifact.id, {
+              ctx,
+              width: offCanvas.width,
+              height: offCanvas.height,
+            });
+          }
+        } catch {
+          // Gracefully fallback if canvas context is unavailable
+        }
+      };
+    } catch {
+      // Fallback
+    }
+  });
 
   function selectArtifact(artifact, showInspector = true) {
     if (!artifact) return;
@@ -195,16 +245,144 @@ function _setupInteractivity(container, artifacts) {
     }, 400);
   }
 
+  /**
+   * Identifies which artifact lies beneath the viewport coordinate (clientX, clientY)
+   * using z-index layering and alpha transparency inspection so overlapping empty areas don't trigger.
+   *
+   * @param {number} clientX
+   * @param {number} clientY
+   * @returns {import('./reliquary.data.js').ReliquaryArtifact|null}
+   */
+  function identifyArtifactAtPoint(clientX, clientY) {
+    // Check items sorted by zIndex descending (top visual layer first)
+    const sorted = [...artifacts].sort((a, b) => (b.zIndex || 0) - (a.zIndex || 0));
+
+    for (const artifact of sorted) {
+      const itemEl = container.querySelector(`[data-relic-id="${artifact.id}"]`);
+      if (!itemEl) continue;
+
+      const rect = itemEl.getBoundingClientRect();
+      if (
+        clientX < rect.left ||
+        clientX > rect.right ||
+        clientY < rect.top ||
+        clientY > rect.bottom
+      ) {
+        continue;
+      }
+
+      // Check pixel alpha bitmap if available
+      const bitmap = artifactBitmaps.get(artifact.id);
+      if (bitmap && bitmap.ctx) {
+        const relX = (clientX - rect.left) / rect.width;
+        const relY = (clientY - rect.top) / rect.height;
+        const px = Math.min(bitmap.width - 1, Math.max(0, Math.floor(relX * bitmap.width)));
+        const py = Math.min(bitmap.height - 1, Math.max(0, Math.floor(relY * bitmap.height)));
+
+        try {
+          const pixel = bitmap.ctx.getImageData(px, py, 1, 1).data;
+          // Alpha > 25 indicates non-transparent drawn artwork on this layer
+          if (pixel[3] > 25) {
+            return artifact;
+          }
+          // Transparent pixel on this layer: continue down to lower layers
+          continue;
+        } catch {
+          // Fall through to geometric fallback
+        }
+      }
+
+      // Fallback: Inset geometric hit zone (12% inset avoids outer bounding overlaps)
+      const insetX = rect.width * 0.12;
+      const insetY = rect.height * 0.12;
+      if (
+        clientX >= rect.left + insetX &&
+        clientX <= rect.right - insetX &&
+        clientY >= rect.top + insetY &&
+        clientY <= rect.bottom - insetY
+      ) {
+        return artifact;
+      }
+    }
+
+    return null;
+  }
+
+  // Pointer move on stage: Layer identification + Dwell Delay (~280ms)
+  function onStagePointerMove(e) {
+    const hitArtifact = identifyArtifactAtPoint(e.clientX, e.clientY);
+
+    if (stage) {
+      stage.style.cursor = hitArtifact ? 'pointer' : 'default';
+    }
+
+    if (!hitArtifact) {
+      if (dwellTimer) {
+        clearTimeout(dwellTimer);
+        dwellTimer = null;
+      }
+      currentCandidateId = null;
+      return;
+    }
+
+    // Already awaiting or hovering this same artifact
+    if (currentCandidateId === hitArtifact.id) {
+      return;
+    }
+
+    // New candidate artifact hovered: start dwell timer
+    if (dwellTimer) {
+      clearTimeout(dwellTimer);
+    }
+    currentCandidateId = hitArtifact.id;
+    dwellTimer = setTimeout(() => {
+      selectArtifact(hitArtifact, true);
+    }, 280);
+  }
+
+  function onStagePointerLeave() {
+    if (dwellTimer) {
+      clearTimeout(dwellTimer);
+      dwellTimer = null;
+    }
+    currentCandidateId = null;
+    if (stage) stage.style.cursor = 'default';
+    hideInspector();
+  }
+
+  function onStageClick(e) {
+    if (e.target && e.target.closest('.reliquary-item')) {
+      return;
+    }
+    const hitArtifact = identifyArtifactAtPoint(e.clientX, e.clientY);
+    if (hitArtifact) {
+      selectArtifact(hitArtifact, true);
+      if (hitArtifact.readUrl) {
+        window.location.href = hitArtifact.readUrl;
+      }
+    }
+  }
+
+  if (stage) {
+    stage.addEventListener('pointermove', onStagePointerMove);
+    stage.addEventListener('pointerleave', onStagePointerLeave);
+    stage.addEventListener('click', onStageClick);
+
+    cleanupFns.push(() => {
+      stage.removeEventListener('pointermove', onStagePointerMove);
+      stage.removeEventListener('pointerleave', onStagePointerLeave);
+      stage.removeEventListener('click', onStageClick);
+    });
+  }
+
+  // Individual item listeners for keyboard accessibility and direct DOM events
   items.forEach((item) => {
     const relicId = item.dataset.relicId;
     const artifact = artifacts.find((a) => a.id === relicId);
 
-    const onEnter = () => selectArtifact(artifact, true);
-    const onLeave = () => hideInspector();
-    const onClick = () => {
-      // Allow link navigation while recording selection
-      selectArtifact(artifact, false);
-    };
+    const onFocus = () => selectArtifact(artifact, true);
+    const onBlur = () => hideInspector();
+    const onClick = () => selectArtifact(artifact, true);
     const onKey = (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
@@ -215,18 +393,14 @@ function _setupInteractivity(container, artifacts) {
       }
     };
 
-    item.addEventListener('mouseenter', onEnter);
-    item.addEventListener('mouseleave', onLeave);
-    item.addEventListener('focus', onEnter);
-    item.addEventListener('blur', onLeave);
+    item.addEventListener('focus', onFocus);
+    item.addEventListener('blur', onBlur);
     item.addEventListener('click', onClick);
     item.addEventListener('keydown', onKey);
 
     cleanupFns.push(() => {
-      item.removeEventListener('mouseenter', onEnter);
-      item.removeEventListener('mouseleave', onLeave);
-      item.removeEventListener('focus', onEnter);
-      item.removeEventListener('blur', onLeave);
+      item.removeEventListener('focus', onFocus);
+      item.removeEventListener('blur', onBlur);
       item.removeEventListener('click', onClick);
       item.removeEventListener('keydown', onKey);
     });

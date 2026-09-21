@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%" fill="none">
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" fill="none">
   <!-- Aged Parchment Map Base with Curled Edges -->
   <defs>
     <radialGradient id="parchmentGlow" cx="50%" cy="50%" r="50%">
@@ -59,9 +60,9 @@
 
   <!-- Vintage Script Inscription -->
   <text x="75" y="240" font-family="serif" font-size="11" font-style="italic" fill="#fbbf24" fill-opacity="0.75" letter-spacing="1">
-    Terra Incognita &#183; Cartographia Mythica
+    Terra Incognita · Cartographia Mythica
   </text>
   <text x="75" y="254" font-family="serif" font-size="8" fill="#d97706" fill-opacity="0.6">
-    ANNO DOMINI ARCHIVUM &#183; FOLIO IV
+    ANNO DOMINI ARCHIVUM · FOLIO IV
   </text>
 </svg>

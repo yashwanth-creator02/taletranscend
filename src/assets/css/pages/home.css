@@ -284,12 +284,14 @@
   border: none;
   overflow: visible;
   user-select: none;
+  margin-bottom: var(--space-8);
 }
 
 @media (max-width: 40rem) {
   .archive-reliquary {
     max-width: 100%;
     aspect-ratio: 16 / 14;
+    margin-bottom: var(--space-7);
   }
 }
 
@@ -358,11 +360,17 @@
     filter var(--transition-base);
   transform-origin: center center;
   outline: none;
+  pointer-events: none; /* Layer identification handles hover without bounding box overlap */
+}
+
+.reliquary-item.is-selected {
+  pointer-events: auto; /* Once cleanly identified/selected, item is directly clickable */
 }
 
 .reliquary-item:focus-visible {
   border-radius: var(--radius-md);
   outline: 2px solid var(--accent);
+  pointer-events: auto;
 }
 
 .reliquary-item__asset {
@@ -405,12 +413,10 @@
     drop-shadow(0 6px 14px rgb(var(--dark-rgb) / 0.6));
 }
 
-/* Contextual floating pill attached to each piece */
+/* Contextual floating pill placed cleanly away from the artifact artwork */
 .reliquary-item__pill {
   position: absolute;
-  bottom: -10px;
   left: 50%;
-  transform: translateX(-50%) translateY(4px);
   opacity: 0;
   pointer-events: none;
   transition:
@@ -430,7 +436,7 @@
   font-weight: 600;
   color: var(--text-primary);
   box-shadow: var(--shadow-md);
-  z-index: 15;
+  z-index: 35;
 }
 
 .reliquary-item__pill-arrow {
@@ -438,10 +444,32 @@
   font-size: 0.75rem;
 }
 
-.reliquary-item:hover .reliquary-item__pill,
-.reliquary-item:focus .reliquary-item__pill {
+/* Pill placement variants floating further away to prevent overlapping adjacent artwork */
+.reliquary-item__pill--bottom {
+  bottom: -38px;
+  transform: translateX(-50%) translateY(6px);
+}
+
+.reliquary-item__pill--top {
+  top: -38px;
+  bottom: auto;
+  transform: translateX(-50%) translateY(-6px);
+}
+
+.reliquary-item:hover .reliquary-item__pill--bottom,
+.reliquary-item:focus .reliquary-item__pill--bottom,
+.reliquary-item.is-selected .reliquary-item__pill--bottom {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+
+.reliquary-item:hover .reliquary-item__pill--top,
+.reliquary-item:focus .reliquary-item__pill--top,
+.reliquary-item.is-selected .reliquary-item__pill--top {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
 }
 
 /* ── Individual Artifact Motion Keyframes ─────────────────────────────── */
@@ -540,9 +568,9 @@
 
 .relic-inspector--hover-only {
   position: absolute;
-  bottom: -24px;
+  bottom: -58px;
   left: 50%;
-  transform: translateX(-50%) translateY(6px);
+  transform: translateX(-50%) translateY(8px);
   opacity: 0;
   pointer-events: none;
   transition:
@@ -554,7 +582,7 @@
   background: var(--surface-overlay);
   backdrop-filter: blur(var(--blur-md));
   -webkit-backdrop-filter: blur(var(--blur-md));
-  z-index: 25;
+  z-index: 40;
   box-shadow: var(--shadow-lg);
   white-space: nowrap;
 }
