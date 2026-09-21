@@ -96,3 +96,6 @@ later.firestore.rules
 # Code Cosmos per-developer settings
 .cosmos
 .cosmos.cache
+
+# brand-leo-utils: managed skills (source of truth lives in the brand-leo-utils repo)
+agents/skills/
