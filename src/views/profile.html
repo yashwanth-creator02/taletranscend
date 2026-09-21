@@ -1,33 +1,65 @@
-<!-- src/views/profile.html -->
-
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <!-- @include: partials/_fade-in-guard.html -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+    <title>Profile | TaleTranscend</title>
     <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+      name="description"
+      content="Your chronicler profile — published tales, reading statistics and achievements."
     />
-    <title>TaleTranscend | Profile</title>
+    <link rel="canonical" href="https://taletranscend.web.app/profile" />
+
+    <meta name="theme-color" content="#030305" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icon.svg" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="TaleTranscend" />
+    <meta property="og:url" content="https://taletranscend.web.app/profile" />
+    <meta property="og:title" content="Profile | TaleTranscend" />
+    <meta
+      property="og:description"
+      content="Your chronicler profile — published tales, reading statistics and achievements."
+    />
+    <meta property="og:image" content="https://taletranscend.web.app/icon.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Profile | TaleTranscend" />
+    <meta
+      name="twitter:description"
+      content="Your chronicler profile — published tales, reading statistics and achievements."
+    />
+
+    <!-- One font request, identical on every page. Nine different Google
+         Fonts URLs across nine pages meant every navigation re-fetched a
+         slightly different family set and re-rendered the whole document. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap"
       rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cinzel:wght@500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap"
     />
-    <script type="module" src="../features/profile/profile.js"></script>
-    <link rel="stylesheet" href="../assets/css/pages/profile.css" />
+
+    <script type="module" src="../pages/profile/profile.js"></script>
   </head>
 
   <body
     class="antialiased selection:bg-indigo-500/30 page-fade-in flex flex-col h-screen overflow-hidden"
   >
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <!-- Atmosphere -->
     <div class="atmosphere-base"></div>
     <div class="particle-field"></div>
 
-    <main class="profile-main-layout">
+    <!-- Toast container -->
+    <div
+      id="toast-container"
+      class="fixed top-6 right-6 z-200 flex flex-col gap-3 pointer-events-none max-w-sm w-full"
+    ></div>
+
+    <main id="main-content" class="profile-main-layout">
       <!-- ══════════════════════════════════════════════
            LEFT PANEL: Identity Pillar
            ══════════════════════════════════════════════ -->
@@ -99,7 +131,6 @@
                 <div data-social-wrap class="hidden">
                   <a
                     id="social-link-twitter"
-                    href="#"
                     target="_blank"
                     rel="noopener"
                     class="w-10 h-10 rounded-2xl bg-white/3 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/8 hover:border-white/20 transition-all"
@@ -110,7 +141,6 @@
                 <div data-social-wrap class="hidden">
                   <a
                     id="social-link-instagram"
-                    href="#"
                     target="_blank"
                     rel="noopener"
                     class="w-10 h-10 rounded-2xl bg-white/3 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/8 hover:border-white/20 transition-all"
@@ -121,7 +151,6 @@
                 <div data-social-wrap class="hidden">
                   <a
                     id="social-link-website"
-                    href="#"
                     target="_blank"
                     rel="noopener"
                     class="w-10 h-10 rounded-2xl bg-white/3 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/8 hover:border-white/20 transition-all"
@@ -177,7 +206,7 @@
           <!-- Navigation Links -->
           <div class="space-y-3">
             <a
-              href="library.html"
+              href="/library.html"
               class="flex items-center justify-between p-4 rounded-2xl bg-white/2 border border-white/5 hover:bg-white/5 hover:border-white/10 transition-all group"
             >
               <div class="flex items-center gap-4">
@@ -196,7 +225,7 @@
               ></i>
             </a>
             <a
-              href="shelf.html"
+              href="/shelf.html"
               class="flex items-center justify-between p-4 rounded-2xl bg-white/2 border border-white/5 hover:bg-white/5 hover:border-white/10 transition-all group"
             >
               <div class="flex items-center gap-4">
@@ -521,7 +550,7 @@
       <div class="absolute inset-0 bg-black/65 backdrop-blur-xl"></div>
 
       <div
-        class="relative glass-panel-elevated w-full max-w-[480px] rounded-4xl overflow-hidden shadow-2xl shadow-black/60 flex flex-col max-h-[90vh]"
+        class="relative profile-panel-elevated w-full max-w-[480px] rounded-4xl overflow-hidden shadow-2xl shadow-black/60 flex flex-col max-h-[90vh]"
       >
         <!-- Top glow line -->
         <div
@@ -579,7 +608,7 @@
             <!-- ── Tab: Basic ─────────────────────────── -->
             <div id="tab-panel-basic">
               <!-- Avatar -->
-              <div class="flex items-center gap-4 p-4 glass-panel rounded-2xl mb-5">
+              <div class="flex items-center gap-4 p-4 profile-panel rounded-2xl mb-5">
                 <div
                   class="w-14 h-14 bg-zinc-800 rounded-xl flex items-center justify-center border border-white/7 overflow-hidden shrink-0"
                 >
@@ -623,13 +652,6 @@
                     class="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[9px] font-bold uppercase tracking-[0.12em] hover:bg-indigo-500/20 transition-colors"
                   >
                     Suggest Name
-                  </button>
-                  <button
-                    type="button"
-                    id="btn-manage-api-key"
-                    class="ml-1 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500 hover:text-indigo-400 transition-colors"
-                  >
-                    Manage AI API Key
                   </button>
                 </div>
               </div>
@@ -785,7 +807,7 @@
                 </div>
 
                 <!-- Placeholder for future goals -->
-                <div class="glass-panel rounded-2xl p-4 border border-dashed border-white/6">
+                <div class="profile-panel rounded-2xl p-4 border border-dashed border-white/6">
                   <div class="flex items-center gap-2 text-slate-600 mb-2">
                     <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-500/50"></i>
                     <span class="text-[10px] font-bold uppercase tracking-[0.15em]"

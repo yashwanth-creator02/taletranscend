@@ -1,17 +1,52 @@
-<!-- src/views/contribution.html -->
-
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <!-- @include: partials/_fade-in-guard.html -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Contribution | TaleTranscend</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
-    <script type="module" src="../features/contribution/contribution.js"></script>
+    <title>Write | TaleTranscend</title>
+    <meta
+      name="description"
+      content="Add your legend to the archive. Draft, structure and publish a tale chapter by chapter."
+    />
+    <link rel="canonical" href="https://taletranscend.web.app/contribution" />
+
+    <meta name="theme-color" content="#030305" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icon.svg" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="TaleTranscend" />
+    <meta property="og:url" content="https://taletranscend.web.app/contribution" />
+    <meta property="og:title" content="Write | TaleTranscend" />
+    <meta
+      property="og:description"
+      content="Add your legend to the archive. Draft, structure and publish a tale chapter by chapter."
+    />
+    <meta property="og:image" content="https://taletranscend.web.app/icon.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Write | TaleTranscend" />
+    <meta
+      name="twitter:description"
+      content="Add your legend to the archive. Draft, structure and publish a tale chapter by chapter."
+    />
+
+    <!-- One font request, identical on every page. Nine different Google
+         Fonts URLs across nine pages meant every navigation re-fetched a
+         slightly different family set and re-rendered the whole document. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cinzel:wght@500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap"
+    />
+
+    <script type="module" src="../pages/contribution/contribution.js"></script>
   </head>
 
   <body class="text-slate-200 antialiased page-fade-in flex flex-col h-screen overflow-hidden">
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <div class="atmosphere-base"></div>
     <div class="particle-field"></div>
 
@@ -38,7 +73,7 @@
         <!-- Left: back + title -->
         <div class="flex min-w-0 items-center gap-3 sm:gap-5">
           <a
-            href="profile.html"
+            href="/profile.html"
             class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.24em] text-slate-500 transition hover:bg-white/5 hover:text-white"
           >
             <i data-lucide="chevron-left" class="h-3.5 w-3.5"></i>
@@ -91,7 +126,7 @@
     </header>
 
     <!-- ── Main editor workspace ──────────────────────────────────── -->
-    <main class="editor-layout fade-in-stagger">
+    <main id="main-content" class="editor-layout fade-in-stagger">
       <!-- ════════════════════════════════════════
          LEFT PANE — Tale metadata + chapters
          ════════════════════════════════════════ -->

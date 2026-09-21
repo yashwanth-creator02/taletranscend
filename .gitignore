@@ -96,8 +96,3 @@ later.firestore.rules
 # Code Cosmos per-developer settings
 .cosmos
 .cosmos.cache
-
-# =========================================================
-# Extras
-# =========================================================
-md.patch

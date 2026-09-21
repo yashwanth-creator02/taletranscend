@@ -28,7 +28,7 @@
 
 - **JavaScript:** Use ES2022 modules, follow `camelCase` for variables/functions, and ensure strict type safety through schema factories.
 - **TypeScript:** Primarily used for utility modules in `src/utils/`. Maintain strict typing for these shared helpers.
-- **CSS:** Prefer Tailwind utility classes. Shared design tokens should be managed in `src/assets/css/tokens.css`.
+- **CSS:** Prefer Tailwind utility classes. Shared design tokens live in `src/assets/css/tokens.css` — never inline a hex value, an `rgba()`/`hsl()` literal, or a page-local `:root` re-declaration of a token that already exists there. `npm run lint:tokens` enforces this and will fail your build on a violation; see the "Design System" section of `ARCHITECTURE.md` for the reasoning.
 - **Firebase Paths:** Never hardcode Firestore paths. Always use the predefined functions in `src/firebase/paths.js`.
 
 ## Adding a Test
@@ -52,9 +52,12 @@ Before submitting a Pull Request, ensure:
 
 1. [ ] All tests pass (`npm test`).
 2. [ ] No lint errors (`npm run lint`).
-3. [ ] Code is formatted (`npm run format`).
-4. [ ] Schema factories are updated if the data shape changed.
-5. [ ] Firestore security rules and indexes are updated if access patterns changed.
+3. [ ] No raw colour literals outside the design-token files (`npm run lint:tokens`).
+4. [ ] Code is formatted (`npm run format`).
+5. [ ] Schema factories are updated if the data shape changed.
+6. [ ] Firestore security rules and indexes are updated if access patterns changed.
+
+Or run all of the above (plus type-checking) in one command: `npm run verify`.
 
 ## Documentation
 

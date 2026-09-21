@@ -1,330 +1,391 @@
-/* css/components.css */
+/* ══════════════════════════════════════════════════════════════════════════
+   src/assets/css/components.css
+   Shared component primitives — surfaces, buttons, inputs, dividers.
+   ══════════════════════════════════════════════════════════════════════════
 
+   Anything used on more than one page belongs here. Anything used on exactly
+   one page belongs in pages/*.css.
+
+   Every value comes from tokens.css. `npm run lint:tokens` fails the build
+   if a colour literal reappears here.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ══ SURFACES ════════════════════════════════════════════════════════════
+   The glass family.
+
+   There were five of these — .glass, .glass-strong, .glass-card,
+   .glass-card-strong, .glass-panel, .glass-panel-elevated — with six
+   different blur radii (20, 24, 28, 30px), five border alphas and four
+   shadow recipes, none of which mapped to a rule anyone could state.
+
+   They are now two levels, expressed as one base plus a modifier. The old
+   names are kept as aliases because they appear 100+ times across the
+   markup, and renaming them in a pass that also changes their values would
+   make any visual regression impossible to attribute.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.glass,
+.glass-panel,
 .glass-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.36),
-    0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+  background: var(--surface-gradient);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(var(--blur-lg));
+  -webkit-backdrop-filter: blur(var(--blur-lg));
+  box-shadow: var(--shadow-md), var(--shadow-inset-hairline);
+  border-radius: var(--radius-xl);
+  /* Promotes to its own compositing layer. A backdrop-filter that is not
+     promoted forces the browser to re-sample everything behind it on every
+     scroll frame, which is what made the library grid stutter. */
   transform: translateZ(0);
-  border-radius: 2rem;
-  transition: all 0.4s ease;
+  transition:
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-spring);
 }
 
-.glass-card-strong {
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.06) 0%,
-    rgba(255, 255, 255, 0.025) 100%
-  );
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
-  box-shadow:
-    0 16px 48px rgba(0, 0, 0, 0.48),
-    0 0 0 1px rgba(255, 255, 255, 0.02) inset;
-  transform: translateZ(0);
-}
-
-.glass-panel {
-  background: rgba(255, 255, 255, 0.025);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
+.glass-strong,
+.glass-card-strong,
 .glass-panel-elevated {
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.035) 0%,
-    rgba(255, 255, 255, 0.01) 100%
-  );
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  border: 1px solid rgba(255, 255, 255, 0.065);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  background: var(--surface-gradient-strong);
+  border: 1px solid var(--border-strong);
+  backdrop-filter: blur(var(--blur-xl));
+  -webkit-backdrop-filter: blur(var(--blur-xl));
+  box-shadow: var(--shadow-lg), var(--shadow-inset-hairline);
+  border-radius: var(--radius-2xl);
+  transform: translateZ(0);
+  transition:
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-spring);
 }
 
-.input-glow {
-  transition: all 0.25s ease;
+/* Interactive surfaces only. A static panel that lifts on hover reads as a
+   button that does nothing. */
+@media (hover: hover) {
+  a.glass-card:hover,
+  button.glass-card:hover,
+  .glass-card[role='button']:hover,
+  .panel-hover:hover {
+    border-color: var(--border-accent);
+    box-shadow: var(--shadow-lg), var(--shadow-glow), var(--shadow-inset-hairline);
+    transform: translateY(-3px);
+  }
 }
 
-.input-glow:focus-within {
-  box-shadow:
-    0 0 0 1px rgba(99, 102, 241, 0.2),
-    0 0 0 4px rgba(99, 102, 241, 0.08),
-    0 16px 40px rgba(0, 0, 0, 0.35);
-}
+/* ══ BUTTONS ══════════════════════════════════════════════════════════════
+   Three variants, one shared base. Every button in the app should be one of
+   these; the markup currently rebuilds them out of eight Tailwind classes
+   at a time, which is why no two primary buttons had the same padding.
+   ══════════════════════════════════════════════════════════════════════════ */
 
+.btn,
+.btn-primary,
+.btn-ghost,
 .btn-mythic {
-  transition: all 0.28s ease;
+  --btn-pad-y: var(--space-3);
+  --btn-pad-x: var(--space-5);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--btn-pad-y) var(--btn-pad-x);
+  border-radius: var(--radius-lg);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid transparent;
+  /* Never smaller than the WCAG 2.5.5 target size, however tight the
+     padding a page passes in. */
+  min-height: 44px;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-base),
+    transform var(--dur-instant) var(--ease-standard);
 }
 
-.btn-mythic:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 18px 40px rgba(99, 102, 241, 0.18);
+.btn:active:not(:disabled),
+.btn-primary:active:not(:disabled),
+.btn-ghost:active:not(:disabled),
+.btn-mythic:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
-.btn-primary {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.9) 0%, rgba(139, 92, 246, 0.8) 100%);
+.btn:disabled,
+.btn-primary:disabled,
+.btn-ghost:disabled,
+.btn-mythic:disabled,
+.btn[aria-disabled='true'] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Primary ───────────────────────────────────────────────────────────── */
+
+.btn-primary,
+.btn-mythic {
+  background: var(--accent-gradient);
+  color: var(--text-on-accent);
   box-shadow:
-    0 4px 15px rgba(99, 102, 241, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  transition: all 0.25s ease;
+    0 4px 14px rgb(var(--accent-rgb) / var(--a-07)),
+    var(--shadow-inset-hairline);
 }
 
-.btn-primary:hover {
-  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.35);
-  transform: translateY(-1px);
+@media (hover: hover) {
+  .btn-primary:hover:not(:disabled),
+  .btn-mythic:hover:not(:disabled) {
+    box-shadow: var(--shadow-glow-lg), var(--shadow-inset-hairline);
+    transform: translateY(-1px);
+  }
 }
+
+/* ── Ghost ─────────────────────────────────────────────────────────────── */
 
 .btn-ghost {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  transition: all 0.2s ease;
+  background: var(--surface-2);
+  border-color: var(--border);
+  color: var(--text-primary);
 }
 
-.btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(99, 102, 241, 0.3);
+@media (hover: hover) {
+  .btn-ghost:hover:not(:disabled) {
+    background: var(--surface-4);
+    border-color: var(--border-strong);
+  }
 }
+
+/* ── Size modifiers ────────────────────────────────────────────────────── */
+
+.btn--sm {
+  --btn-pad-y: var(--space-2);
+  --btn-pad-x: var(--space-4);
+  font-size: var(--text-xs);
+  min-height: 36px;
+}
+
+.btn--lg {
+  --btn-pad-y: var(--space-4);
+  --btn-pad-x: var(--space-6);
+  font-size: var(--text-base);
+  min-height: 52px;
+}
+
+.btn--block {
+  width: 100%;
+}
+
+/* Icon-only. Needs an aria-label; there is no visible text to announce. */
+.btn--icon {
+  --btn-pad-x: var(--space-3);
+  aspect-ratio: 1;
+  min-width: 44px;
+}
+
+/* ── Cooldown ──────────────────────────────────────────────────────────── */
+/* Applied while a rate-limited action (AI suggestion, publish) is blocked. */
+
+.cooldown-active {
+  pointer-events: none;
+  opacity: 0.55;
+  filter: saturate(0.4);
+}
+
+/* ══ INPUTS ══════════════════════════════════════════════════════════════ */
 
 .input-mythic {
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  /* 16px minimum on touch devices. Anything smaller makes iOS Safari zoom
+     the whole viewport on focus and never zoom back out. */
+  line-height: var(--leading-normal);
+  transition:
+    border-color var(--transition-fast),
+    background var(--transition-fast),
+    box-shadow var(--transition-base);
 }
 
 .input-mythic::placeholder {
   color: var(--text-disabled);
 }
 
-.input-mythic:focus {
+.input-mythic:hover:not(:disabled) {
+  border-color: var(--border-strong);
+}
+
+.input-mythic:focus,
+.input-mythic:focus-visible {
   outline: none;
-  border-color: rgba(99, 102, 241, 0.45);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-}
-
-.section-title {
-  letter-spacing: -0.04em;
-  position: relative;
-  display: inline-block;
-}
-
-.section-title::after {
-  content: '';
-  position: absolute;
-  bottom: -6px;
-  left: 0;
-  width: 38%;
-  height: 2px;
-  background: linear-gradient(90deg, rgba(99, 102, 241, 0.6), transparent);
-  border-radius: 1px;
-}
-
-.panel-hover {
-  transition: all 0.3s ease;
-}
-
-.panel-hover:hover {
-  transform: translateY(-4px);
-  border-color: rgba(99, 102, 241, 0.2);
+  border-color: var(--accent-border);
+  background: var(--surface-3);
   box-shadow:
-    0 0 30px rgba(99, 102, 241, 0.08),
-    0 18px 48px rgba(0, 0, 0, 0.35);
+    0 0 0 3px var(--accent-subtle),
+    var(--shadow-md);
 }
 
-.shimmer {
-  position: relative;
-  overflow: hidden;
+.input-mythic[aria-invalid='true'] {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px var(--danger-subtle);
 }
 
-.shimmer::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  transform: translateX(-120%);
-  background: linear-gradient(
-    110deg,
-    transparent 35%,
-    rgba(255, 255, 255, 0.04) 45%,
-    rgba(255, 255, 255, 0.08) 50%,
-    rgba(255, 255, 255, 0.04) 55%,
-    transparent 65%
-  );
-  transition: transform 0.7s ease;
-  pointer-events: none;
+/* Container-level focus treatment, for composed fields with a leading icon. */
+.input-glow {
+  transition: box-shadow var(--transition-base);
 }
 
-.shimmer:hover::after {
-  transform: translateX(120%);
+.input-glow:focus-within {
+  box-shadow:
+    0 0 0 1px var(--accent-border),
+    0 0 0 4px var(--accent-subtle),
+    var(--shadow-md);
 }
 
-.skeleton {
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.03) 25%,
-    rgba(255, 255, 255, 0.06) 50%,
-    rgba(255, 255, 255, 0.03) 75%
-  );
-  background-size: 200% 100%;
-  animation: skeleton-shimmer 1.6s ease-in-out infinite;
-  border-radius: 8px;
-}
-
-@keyframes skeleton-shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-
-  100% {
-    background-position: -200% 0;
-  }
-}
-
-.sacred-divider {
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(99, 102, 241, 0.3) 20%,
-    rgba(139, 92, 246, 0.4) 50%,
-    rgba(99, 102, 241, 0.3) 80%,
-    transparent 100%
-  );
-}
-
-.stat-value {
-  background: linear-gradient(135deg, var(--text-primary) 0%, rgba(165, 180, 252, 1) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+/* ══ PROGRESS ════════════════════════════════════════════════════════════ */
 
 .progress-mythic {
-  position: relative;
-  height: 2px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 2px;
+  width: 100%;
+  height: 4px;
+  background: var(--surface-3);
+  border-radius: var(--radius-full);
+  overflow: hidden;
 }
 
 .progress-mythic-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
-  border-radius: 2px;
-  box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+  background: var(--accent-gradient-wide);
+  border-radius: var(--radius-full);
+  /* Width, not transform: the bar is measured by assistive technology from
+     its computed width, and a transform leaves that at 100%. */
+  transition: width var(--transition-slow);
 }
 
-.section-divider {
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(99, 102, 241, 0.25),
-    rgba(139, 92, 246, 0.2),
-    transparent
-  );
+/* ══ DIVIDERS ════════════════════════════════════════════════════════════ */
+
+.sacred-divider {
+  height: 1px;
+  border: 0;
+  background: linear-gradient(90deg, transparent, var(--border-strong), transparent);
+}
+
+/* ══ TEXT ROLES ══════════════════════════════════════════════════════════ */
+
+.stat-value {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text-primary);
+  /* Stops a column of figures from reflowing as values change — proportional
+     digits made the profile stats jitter on every sync. */
+  font-variant-numeric: tabular-nums;
 }
 
 .footer-link {
-  transition: color 0.2s ease;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color var(--transition-fast);
 }
 
-.footer-link:hover {
-  color: var(--accent-secondary);
+.footer-link:hover,
+.footer-link:focus-visible {
+  color: var(--accent-tint);
 }
 
-.glass {
-  background: var(--glass-bg, rgba(255, 255, 255, 0.03));
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.06));
-}
-
-.glass-strong {
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.025);
-}
-
-.header-orb {
-  position: relative;
-  width: 56px;
-  height: 56px;
-  background: var(--bg-base);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(99, 102, 241, 0.4);
-  box-shadow: 0 0 20px rgba(79, 70, 229, 0.2);
-  transition: all 0.3s ease;
-}
-
-.header-orb::before {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: 50%;
-  padding: 2px;
-  background: conic-gradient(
-    from 0deg,
-    transparent,
-    var(--accent),
-    transparent,
-    var(--accent),
-    transparent
-  );
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  animation: rotate 4s linear infinite;
-}
-
-@keyframes rotate {
-  to {
-    transform: rotate(360deg);
-  }
-}
+/* ══ THEME SWATCH ════════════════════════════════════════════════════════ */
+/* Used by the reader's theme picker. */
 
 .theme-btn {
+  position: relative;
   border: 1px solid var(--border);
-  color: var(--text-muted);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  cursor: pointer;
+  transition:
+    border-color var(--transition-fast),
+    transform var(--dur-instant) var(--ease-standard);
 }
 
-.theme-btn.active {
-  background: var(--accent);
+.theme-btn:hover {
+  border-color: var(--border-strong);
+}
+
+.theme-btn[aria-pressed='true'],
+.theme-btn.is-active {
   border-color: var(--accent);
-  color: white;
+  box-shadow: 0 0 0 2px var(--accent-subtle);
 }
 
-/* ─────────────────────────────────────────────
-   Rate Limit UI
-   ───────────────────────────────────────────── */
+/* ══ MISC ════════════════════════════════════════════════════════════════ */
 
-.cooldown-active {
-  opacity: 0.6;
-  cursor: wait !important;
-  filter: saturate(0.5);
-  transition: all 0.3s ease;
+.header-orb {
+  position: absolute;
+  border-radius: var(--radius-full);
+  filter: blur(80px);
+  opacity: var(--a-07);
   pointer-events: none;
 }
 
-.cooldown-active span {
-  font-variant-numeric: tabular-nums;
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--surface-1) 25%,
+    var(--surface-3) 50%,
+    var(--surface-1) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-slide 1.6s infinite linear;
+}
+
+@keyframes shimmer-slide {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* ══ SCROLL SNAP ═════════════════════════════════════════════════════════
+   `.snap-strip` / `.snap-item` were applied to the tale page's tab bar but
+   never defined anywhere, so the horizontal tab strip scrolled freely and
+   left tabs half-cut on narrow screens. The intent was legible from the
+   names; this is it. */
+
+.snap-strip {
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--space-4);
+  overscroll-behavior-x: contain;
+}
+
+.snap-item {
+  scroll-snap-align: start;
+  flex: none;
+}
+
+/* ══ PROVIDER ICON ═══════════════════════════════════════════════════════
+   `.google-icon` wraps the Google mark on the sign-in button and had no
+   rule, so the SVG rendered at its intrinsic size and broke the button's
+   vertical rhythm. */
+
+.google-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: none;
+}
+
+.google-icon svg,
+.google-icon img {
+  width: 100%;
+  height: 100%;
 }

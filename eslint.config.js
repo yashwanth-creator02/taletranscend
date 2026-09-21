@@ -5,6 +5,16 @@ import skipFormatting from 'eslint-config-prettier';
 import globals from 'globals';
 
 export default [
+  {
+    ignores: [
+      'dist/**',
+      'coverage/**',
+      'test-results/**',
+      'playwright-report/**',
+      'node_modules/**',
+      'functions/**',
+    ],
+  },
   js.configs.recommended, // Base recommended ESLint rules for JS
   skipFormatting, // Must come after ESLint rules to disable conflicts with Prettier
   {
@@ -24,8 +34,5 @@ export default [
       'prefer-const': 'error', // Prefer const over let when variables are not reassigned
       'no-console': 'off', // Allow console.log (don’t throw errors)
     },
-  },
-  {
-    ignores: ['dist/*', 'node_modules/', '**/*.min.js'],
   },
 ];

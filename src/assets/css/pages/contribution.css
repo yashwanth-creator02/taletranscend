@@ -17,36 +17,36 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgb(var(--light-rgb) / var(--a-03));
   border-radius: 10px;
 }
 
 .custom-scrollbar:hover::-webkit-scrollbar-thumb {
-  background: rgba(99, 102, 241, 0.2);
+  background: rgb(var(--accent-rgb) / var(--a-07));
 }
 
 /* ── shelf surfaces ──────────────────────────────────────── */
 .shelf-card {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgb(var(--light-rgb) / var(--a-01));
+  border: 1px solid rgb(var(--light-rgb) / var(--a-03));
   backdrop-filter: blur(24px) saturate(160%);
   -webkit-backdrop-filter: blur(24px) saturate(160%);
-  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  transition: all var(--transition-spring);
 }
 
 .shelf-card:focus-within {
-  border-color: rgba(99, 102, 241, 0.25);
-  box-shadow: 0 0 30px rgba(99, 102, 241, 0.05);
+  border-color: rgb(var(--accent-rgb) / var(--a-07));
+  box-shadow: 0 0 30px rgb(var(--accent-rgb) / var(--a-03));
 }
 
 .shelf-input {
-  transition: all 0.3s ease;
+  transition: all var(--transition-base);
 }
 
 .shelf-input:focus {
   outline: none;
-  border-color: rgba(99, 102, 241, 0.4) !important;
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.05);
+  border-color: rgb(var(--accent-rgb) / var(--a-09)) !important;
+  box-shadow: 0 0 0 4px rgb(var(--accent-rgb) / var(--a-03));
 }
 
 /* ── Editor layout: fills viewport below the two sticky headers ── */
@@ -55,7 +55,7 @@
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  background: #030305;
+  background: var(--bg-base);
 }
 
 @media (min-width: 1024px) {
@@ -88,7 +88,7 @@
     align-items: center;
     justify-content: center;
     width: 4px;
-    background: rgba(255, 255, 255, 0.02);
+    background: rgb(var(--light-rgb) / var(--a-01));
     cursor: col-resize;
     position: relative;
     z-index: 50;
@@ -103,7 +103,7 @@
     align-items: center;
     justify-content: center;
     width: 4px;
-    background: rgba(255, 255, 255, 0.02);
+    background: rgb(var(--light-rgb) / var(--a-01));
     cursor: col-resize;
     position: relative;
     z-index: 50;
@@ -116,7 +116,7 @@
   .resize-handle:hover,
   .resize-handle:focus-visible,
   body.resizing .resize-handle {
-    background: rgba(99, 102, 241, 0.4);
+    background: rgb(var(--accent-rgb) / var(--a-09));
   }
 
   .resize-handle::after {
@@ -127,7 +127,7 @@
     transform: translate(-50%, -50%);
     width: 2px;
     height: 32px;
-    background: rgba(255, 255, 255, 0.06);
+    background: rgb(var(--light-rgb) / var(--a-03));
     border-radius: 1px;
     transition: all 150ms ease;
   }
@@ -135,7 +135,7 @@
   .resize-handle:hover::after,
   .resize-handle:focus-visible::after,
   body.resizing .resize-handle::after {
-    background: rgba(255, 255, 255, 0.25);
+    background: rgb(var(--light-rgb) / var(--a-07));
     height: 48px;
   }
 }
@@ -153,13 +153,13 @@
 }
 
 .chapter-item:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgb(var(--light-rgb) / var(--a-01));
 }
 
 .chapter-item--active {
-  background: rgba(99, 102, 241, 0.06);
-  border-color: rgba(99, 102, 241, 0.2);
-  box-shadow: inset 0 0 20px rgba(99, 102, 241, 0.02);
+  background: rgb(var(--accent-rgb) / var(--a-03));
+  border-color: rgb(var(--accent-rgb) / var(--a-07));
+  box-shadow: inset 0 0 20px rgb(var(--accent-rgb) / var(--a-01));
 }
 
 .chapter-item__select {
@@ -179,8 +179,8 @@
   font-size: 0.6rem;
   font-weight: 900;
   letter-spacing: 0.1em;
-  color: #818cf8;
-  background: rgba(99, 102, 241, 0.1);
+  color: var(--accent-tint);
+  background: rgb(var(--accent-rgb) / var(--a-05));
   border-radius: 8px;
   width: 24px;
   height: 24px;
@@ -188,27 +188,27 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: all 0.3s ease;
+  transition: all var(--transition-base);
 }
 
 .chapter-item--active .chapter-item__num {
-  background: #6366f1;
+  background: var(--accent);
   color: white;
-  box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 0 15px rgb(var(--accent-rgb) / var(--a-09));
 }
 
 .chapter-item__title {
   font-size: 13px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: color 0.3s ease;
+  transition: color var(--transition-base);
 }
 
 .chapter-item--active .chapter-item__title {
-  color: #f8fafc;
+  color: var(--text-primary);
 }
 
 .chapter-item__actions {
@@ -216,7 +216,7 @@
   gap: 2px;
   opacity: 0;
   transform: translateX(4px);
-  transition: all 0.3s ease;
+  transition: all var(--transition-base);
 }
 
 .chapter-item:hover .chapter-item__actions,
@@ -234,14 +234,14 @@
   border-radius: 8px;
   border: none;
   background: none;
-  color: #475569;
+  color: var(--text-disabled);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .chapter-item__action:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.05);
-  color: #cbd5e1;
+  background: rgb(var(--light-rgb) / var(--a-03));
+  color: var(--text-primary);
 }
 
 .chapter-item__action:disabled {
@@ -250,25 +250,25 @@
 }
 
 .chapter-item__action--danger:hover:not(:disabled) {
-  background: rgba(244, 63, 94, 0.1);
-  color: #fb7185;
+  background: rgb(var(--danger-rgb) / var(--a-05));
+  color: var(--danger);
 }
 
 /* ── Voice button active state ────────────────────────────── */
 .voice-btn--active {
-  background: rgba(99, 102, 241, 0.2) !important;
-  color: #818cf8 !important;
-  border-color: rgba(99, 102, 241, 0.4) !important;
+  background: rgb(var(--accent-rgb) / var(--a-07)) !important;
+  color: var(--accent-tint) !important;
+  border-color: rgb(var(--accent-rgb) / var(--a-09)) !important;
   animation: pulse-ring 1.2s ease infinite;
 }
 
 @keyframes pulse-ring {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.3);
+    box-shadow: 0 0 0 0 rgb(var(--accent-rgb) / var(--a-08));
   }
 
   50% {
-    box-shadow: 0 0 0 6px rgba(99, 102, 241, 0);
+    box-shadow: 0 0 0 6px rgb(var(--accent-rgb) / var(--a-01));
   }
 }

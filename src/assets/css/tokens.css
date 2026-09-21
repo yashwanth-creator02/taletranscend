@@ -1,143 +1,427 @@
-/* src/assets/css/tokens.css */
-/* Design token system for TaleTranscend.                              */
-/* This is the single file that defines the entire app's aesthetic.    */
-/* Changing values here updates every page simultaneously.             */
-/*                                                                     */
-/* Structure:                                                          */
-/*   1. Typography scale                                               */
-/*   2. Core palette — the "room" base layer                          */
-/*   3. Semantic surface tokens                                        */
-/*   4. Accent & glow palette                                         */
-/*   5. Spacing & shape                                                */
-/*   6. Motion                                                         */
-/*   7. Navigation constants                                           */
-/*   8. Shadow scale                                                   */
-/*   9. Reader-scoped tokens (overridden by reader themes in          */
-/*      reader.css, never affect other pages)                          */
+/* ══════════════════════════════════════════════════════════════════════════
+   src/assets/css/tokens.css
+   THE DESIGN SYSTEM — single source of truth
+   ══════════════════════════════════════════════════════════════════════════
+
+   Every colour, size, radius, duration and elevation in TaleTranscend is
+   defined here. Nothing else in the codebase may contain a raw colour
+   literal. The two deliberate exceptions are documented at the bottom.
+
+   ── How this file is built ───────────────────────────────────────────────
+
+   Tokens come in three layers, and each layer may only reference the one
+   above it:
+
+     1. PRIMITIVES   Raw channel triplets and scale steps. The only place a
+                     hex or an RGB triplet appears.
+     2. SEMANTIC     What a thing *means* — `--surface-2`, `--text-muted`,
+                     `--border-strong`. Built from primitives.
+     3. COMPONENT    Values a single component owns — `--nav-height`,
+                     `--reader-measure`. Built from semantics.
+
+   Components reference layers 2 and 3. They never reference layer 1, and
+   they never inline a colour.
+
+   ── Why channels instead of finished colours ─────────────────────────────
+
+   The accent appears in this app at fourteen different opacities — glows,
+   borders, focus rings, hover fills, scrollbars. Written as
+   `rgba(99, 102, 241, 0.12)` in 140 places, re-skinning means a
+   find-and-replace across 5,700 lines of CSS and getting all 140 right.
+
+   Written as `rgb(var(--accent-rgb) / 0.12)`, changing this one line:
+
+       --accent-rgb: 99 102 241;
+
+   re-skins every one of them at once. That is the difference between a
+   token file that documents the design and one that *is* the design.
+
+   The space-separated `rgb(R G B / A)` syntax is CSS Color 4, supported
+   everywhere this app runs.
+   ══════════════════════════════════════════════════════════════════════════ */
 
 :root {
-  /* ── 1. Typography ──────────────────────────────────────────────── */
+  /* ══ 1. PRIMITIVES ══════════════════════════════════════════════════════
+     The only place raw colour values exist. Change these to re-skin.
+     ══════════════════════════════════════════════════════════════════════ */
 
-  --font-serif: 'Cinzel', 'Cormorant Garamond', Georgia, serif;
-  --font-sans: 'Inter', 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-  --font-display: 'Cinzel', serif;
+  /* ── Brand channels ──────────────────────────────────────────────────── */
 
-  /* Type scale — fluid step sizes */
-  --text-xs: 0.75rem; /* 12px */
-  --text-sm: 0.875rem; /* 14px */
-  --text-base: 1rem; /* 16px */
-  --text-lg: 1.125rem; /* 18px */
-  --text-xl: 1.25rem; /* 20px */
-  --text-2xl: 1.5rem; /* 24px */
-  --text-3xl: 1.875rem; /* 30px */
-  --text-4xl: 2.25rem; /* 36px */
-  --text-5xl: 3rem; /* 48px */
-  --text-6xl: 3.75rem; /* 60px */
+  --accent-rgb: 99 102 241; /* Indigo — primary interactive        */
+  --accent-2-rgb: 139 92 246; /* Violet — secondary / gradient pair  */
+  --accent-3-rgb: 217 70 239; /* Fuchsia — gradient terminus         */
+  --rune-rgb: 245 158 11; /* Amber — achievements, highlights    */
 
-  /* ── 2. Core Palette — base "room" layer ───────────────────────── */
-  /* Change these to re-skin the entire app.                          */
+  /* ── Neutral channels ────────────────────────────────────────────────── */
 
-  --bg-base: #030305; /* Page background. Deepest layer.         */
-  --bg-elevated: #07070b; /* Slightly lifted surface (cards, panels) */
-  --bg-overlay: #0d0d14; /* Modals, dropdowns, floating layers       */
+  --light-rgb: 255 255 255; /* Every translucent light surface     */
+  --dark-rgb: 0 0 0; /* Every shadow and scrim              */
 
-  /* ── 3. Semantic Surface Tokens ────────────────────────────────── */
-  /* Built on top of the core palette.                                */
-  /* Components reference these, never the raw hex above.            */
+  /* ── Secondary channels ──────────────────────────────────────────────── */
+  /* Surfaced by the token audit: colours that were inlined across page
+     stylesheets and had no home. The near-blacks in particular were seven
+     separate values (#08080c, #0a0a0f, #0a0a12, #0a0a14, #0a0a18, #0f0f19,
+     #0d0d14) that no display can tell apart — all now resolve here. */
 
-  --surface-1: rgba(255, 255, 255, 0.025); /* Lowest surface (base glass) */
-  --surface-2: rgba(255, 255, 255, 0.04); /* Raised cards                */
-  --surface-3: rgba(255, 255, 255, 0.06); /* Elevated panels             */
-  --surface-overlay: rgba(13, 13, 20, 0.85); /* Backdrop for modals/drawers */
-  --surface-raised: rgba(255, 255, 255, 0.045); /* Hover/active state lift     */
+  --bg-base-rgb: 3 3 5;
+  --bg-overlay-rgb: 13 13 20;
+  --accent-light-rgb: 165 180 252; /* Tint used for accent text on dark  */
+  --reader-accent-rgb: 139 124 246; /* Reader default accent              */
+  --text-primary-rgb: 226 232 240;
+  --text-secondary-rgb: 148 163 184;
 
-  /* Text hierarchy */
+  /* ── Status channels ─────────────────────────────────────────────────── */
+
+  --success-rgb: 34 197 94;
+  --warning-rgb: 245 158 11;
+  --danger-rgb: 239 68 68;
+  --info-rgb: 56 189 248;
+
+  /* ── Base greys ──────────────────────────────────────────────────────── */
+  /* The "room" the interface sits in. Three depths, nothing more: going
+     finer than this produced the near-identical #07070b / #0a0a10 / #0d0d14
+     family the old stylesheets were full of, none of which are
+     distinguishable at 100% zoom. */
+
+  --grey-950: #030305; /* Page floor                          */
+  --grey-900: #07070b; /* Lifted surface                      */
+  --grey-850: #0d0d14; /* Floating layer (modals, dropdowns)  */
+
+  /* ── Alpha ladder ────────────────────────────────────────────────────── */
+  /* A fixed set of opacities, used everywhere. Before this existed the CSS
+     contained 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05, 0.06, 0.065 and
+     0.07 as separate values — ten steps no eye can tell apart, each one a
+     decision someone had to make again on the next component. */
+
+  --a-01: 0.02;
+  --a-02: 0.04;
+  --a-03: 0.06;
+  --a-04: 0.08;
+  --a-05: 0.1;
+  --a-06: 0.15;
+  --a-07: 0.2;
+  --a-08: 0.3;
+  --a-09: 0.4;
+  --a-10: 0.6;
+  --a-11: 0.8;
+
+  /* ══ 2. SEMANTIC ════════════════════════════════════════════════════════
+     What things mean. Components use these.
+     ══════════════════════════════════════════════════════════════════════ */
+
+  /* ── Backgrounds ─────────────────────────────────────────────────────── */
+
+  --bg-base: var(--grey-950);
+  --bg-elevated: var(--grey-900);
+  --bg-overlay: var(--grey-850);
+
+  /* ── Surfaces — translucent layers stacked on the background ─────────── */
+
+  --surface-1: rgb(var(--light-rgb) / var(--a-01)); /* Base glass      */
+  --surface-2: rgb(var(--light-rgb) / var(--a-02)); /* Raised card     */
+  --surface-3: rgb(var(--light-rgb) / var(--a-03)); /* Elevated panel  */
+  --surface-4: rgb(var(--light-rgb) / var(--a-04)); /* Hover / active  */
+  --surface-scrim: rgb(var(--dark-rgb) / var(--a-10)); /* Modal backdrop  */
+  --surface-veil: rgb(13 13 20 / 0.85); /* Drawer fill     */
+
+  /* Gradient fills for glass components — the two-stop wash that gives a
+     card the illusion of a light source above and to the left. */
+  --surface-gradient: linear-gradient(
+    135deg,
+    rgb(var(--light-rgb) / var(--a-02)) 0%,
+    rgb(var(--light-rgb) / var(--a-01)) 100%
+  );
+  --surface-gradient-strong: linear-gradient(
+    145deg,
+    rgb(var(--light-rgb) / var(--a-03)) 0%,
+    rgb(var(--light-rgb) / var(--a-01)) 100%
+  );
+
+  /* ── Text ────────────────────────────────────────────────────────────── */
+
   --text-primary: #e2e8f0;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
   --text-disabled: #334155;
+  --text-on-accent: #ffffff;
 
-  /* Legacy aliases — used by existing page CSS, kept for compatibility */
-  --text-main: var(--text-primary);
-  --paper-bg: var(--bg-base);
-  --glass: var(--surface-1);
-  --glass-strong: var(--surface-2);
-  --panel-bg: var(--surface-1);
-  --panel-bg-strong: var(--surface-2);
+  /* ── Borders ─────────────────────────────────────────────────────────── */
 
-  /* Borders */
-  --border: rgba(255, 255, 255, 0.06);
-  --border-strong: rgba(255, 255, 255, 0.1);
-  --border-subtle: rgba(255, 255, 255, 0.03);
+  --border-subtle: rgb(var(--light-rgb) / var(--a-01));
+  --border: rgb(var(--light-rgb) / var(--a-03));
+  --border-strong: rgb(var(--light-rgb) / var(--a-05));
+  --border-accent: rgb(var(--accent-rgb) / var(--a-08));
 
-  /* ── 4. Accent & Glow Palette ───────────────────────────────────── */
+  /* ── Accent ──────────────────────────────────────────────────────────── */
 
-  --accent: #6366f1; /* Indigo — primary interactive color */
+  --accent: rgb(var(--accent-rgb));
   --accent-hover: #7c7ff5;
-  --accent-muted: rgba(99, 102, 241, 0.15);
-  --accent-subtle: rgba(99, 102, 241, 0.08);
-  --accent-secondary: #8b5cf6; /* Violet — secondary accent          */
+  --accent-tint: rgb(var(--accent-light-rgb)); /* Accent as *text* on dark  */
+  --accent-secondary: rgb(var(--accent-2-rgb));
+  --rune: rgb(var(--rune-rgb));
 
-  --rune: #f59e0b; /* Amber — highlights, achievements   */
+  --accent-subtle: rgb(var(--accent-rgb) / var(--a-04));
+  --accent-muted: rgb(var(--accent-rgb) / var(--a-06));
+  --accent-active: rgb(var(--accent-rgb) / var(--a-08));
+  --accent-border: rgb(var(--accent-rgb) / var(--a-07));
 
-  /* Atmospheric glow backgrounds */
-  --glow-indigo: rgba(99, 102, 241, 0.1);
-  --glow-violet: rgba(139, 92, 246, 0.08);
-  --glow-amber: rgba(245, 158, 11, 0.1);
+  /* The signature gradient. Defined once; used by every primary button,
+     every heading wash, every progress bar. */
+  --accent-gradient: linear-gradient(
+    135deg,
+    rgb(var(--accent-rgb)) 0%,
+    rgb(var(--accent-2-rgb)) 100%
+  );
+  --accent-gradient-wide: linear-gradient(
+    90deg,
+    rgb(var(--accent-rgb)) 0%,
+    rgb(var(--accent-2-rgb)) 50%,
+    rgb(var(--accent-3-rgb)) 100%
+  );
 
-  /* ── 5. Spacing & Shape ─────────────────────────────────────────── */
+  /* ── Status ──────────────────────────────────────────────────────────── */
 
-  --radius-sm: 0.375rem; /* 6px  — tight chips, badges           */
-  --radius-md: 0.5rem; /* 8px  — buttons, inputs               */
-  --radius-lg: 0.75rem; /* 12px — cards, panels                 */
-  --radius-xl: 1.5rem; /* 24px — large cards                   */
-  --radius-2xl: 2rem; /* 32px — hero sections                 */
-  --radius-3xl: 2.5rem; /* 40px — full-rounded containers       */
-  --radius-full: 9999px; /* Pills, avatars                       */
+  --success: rgb(var(--success-rgb));
+  --warning: rgb(var(--warning-rgb));
+  --danger: rgb(var(--danger-rgb));
+  --info: rgb(var(--info-rgb));
 
-  /* ── 6. Motion ──────────────────────────────────────────────────── */
+  --success-subtle: rgb(var(--success-rgb) / var(--a-06));
+  --warning-subtle: rgb(var(--warning-rgb) / var(--a-06));
+  --danger-subtle: rgb(var(--danger-rgb) / var(--a-06));
+  --info-subtle: rgb(var(--info-rgb) / var(--a-06));
 
-  --transition-fast: 0.15s ease;
-  --transition-base: 0.25s ease;
-  --transition-slow: 0.4s ease;
-  --transition-spring: 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-  --transition-bounce: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* ── Atmospheric glow ────────────────────────────────────────────────── */
 
-  /* ── 7. Navigation Constants ────────────────────────────────────── */
+  --glow-indigo: rgb(var(--accent-rgb) / var(--a-05));
+  --glow-violet: rgb(var(--accent-2-rgb) / var(--a-04));
+  --glow-amber: rgb(var(--rune-rgb) / var(--a-05));
+
+  /* ══ 3. TYPOGRAPHY ══════════════════════════════════════════════════════ */
+
+  --font-display: 'Cinzel', 'Cormorant Garamond', Georgia, serif;
+  --font-serif: 'Cinzel', 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-reading: 'Merriweather', Georgia, 'Times New Roman', serif;
+
+  /* Fluid type scale. `clamp()` rather than breakpoint jumps: a headline
+     that steps from 36px to 60px at exactly 768px is why the old home page
+     had a dead zone at tablet widths where the hero did not fit. */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: clamp(1.375rem, 1.2rem + 0.75vw, 1.5rem);
+  --text-3xl: clamp(1.625rem, 1.35rem + 1.2vw, 1.875rem);
+  --text-4xl: clamp(1.875rem, 1.5rem + 1.8vw, 2.25rem);
+  --text-5xl: clamp(2.25rem, 1.7rem + 2.75vw, 3rem);
+  --text-6xl: clamp(2.75rem, 1.9rem + 4vw, 3.75rem);
+  --text-hero: clamp(3rem, 1.5rem + 7vw, 7rem);
+
+  /* Tracking — the uppercase micro-labels this design leans on need real
+     letter-spacing values, not a magic number re-guessed per component. */
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.08em;
+  --tracking-wider: 0.2em;
+  --tracking-widest: 0.32em;
+
+  --leading-tight: 1.15;
+  --leading-snug: 1.35;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.7;
+
+  /* ══ 4. SPACE & SHAPE ═══════════════════════════════════════════════════ */
+
+  /* 4px base grid. */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+  --space-10: 8rem;
+
+  /* The horizontal gutter every page aligns to, and the widest a content
+     column may get. Previously each page picked its own (`max-w-350`,
+     `max-w-425`, `max-w-440`, `1600px`), which is why the nav and the
+     content beneath it did not line up on any page. */
+  --page-gutter: clamp(1rem, 0.5rem + 2vw, 2.5rem);
+  --page-max: 1600px;
+  --content-max: 1200px;
+  --prose-max: 72ch;
+
+  --radius-xs: 0.375rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-3xl: 2.5rem;
+  --radius-full: 9999px;
+
+  /* ══ 5. ELEVATION ═══════════════════════════════════════════════════════ */
+
+  --shadow-sm: 0 2px 8px rgb(var(--dark-rgb) / 0.24);
+  --shadow-md: 0 8px 24px rgb(var(--dark-rgb) / 0.36);
+  --shadow-lg: 0 16px 48px rgb(var(--dark-rgb) / 0.48);
+  --shadow-xl: 0 24px 64px rgb(var(--dark-rgb) / 0.56);
+
+  /* The inset hairline that sells a glass edge. Paired with every shadow
+     on a translucent surface. */
+  --shadow-inset-hairline: inset 0 1px 0 rgb(var(--light-rgb) / var(--a-02));
+
+  --shadow-glow: 0 0 20px rgb(var(--accent-rgb) / var(--a-06));
+  --shadow-glow-lg: 0 18px 40px rgb(var(--accent-rgb) / var(--a-07));
+
+  --blur-sm: 12px;
+  --blur-md: 20px;
+  --blur-lg: 28px;
+  --blur-xl: 40px;
+
+  /* ══ 6. MOTION ══════════════════════════════════════════════════════════ */
+
+  /* Durations and easings are separate tokens so a component can mix them.
+     The old CSS bundled them (`--transition-fast: 0.15s ease`), which meant
+     any component wanting a different curve had to hardcode the duration
+     too — and then nav.styles.js redefined all three globally, with
+     different values, from a runtime-injected <style> tag. */
+
+  --dur-instant: 90ms;
+  --dur-fast: 150ms;
+  --dur-base: 240ms;
+  --dur-normal: 300ms; /* See --transition-normal below for why this exists */
+  --dur-slow: 400ms;
+  --dur-slower: 600ms;
+
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-spring: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Composed shorthands, for the common cases. */
+  --transition-fast: var(--dur-fast) var(--ease-standard);
+  --transition-base: var(--dur-base) var(--ease-standard);
+  /*
+   * Promoted from a page-local variable the profile page had independently
+   * invented (as --transition-normal: 300ms ease, declared on a duplicate
+   * :root block inside profile.css) and used 20 times. 300ms sits in a real
+   * gap in this scale — between --dur-base's 240ms and --dur-slow's 400ms —
+   * and profile.css's usage proves the gap is real, not hypothetical. Rather
+   * than force those 20 call sites onto an ill-fitting existing step, or
+   * leave them silently overriding this file's :root from a page
+   * stylesheet, the scale grew to fit the demonstrated need.
+   */
+  --transition-normal: var(--dur-normal) var(--ease-standard);
+  --transition-slow: var(--dur-slow) var(--ease-standard);
+  --transition-spring: var(--dur-slow) var(--ease-spring);
+  --transition-bounce: var(--dur-slower) var(--ease-bounce);
+
+  /* ══ 7. LAYERING ════════════════════════════════════════════════════════
+     A named z-index scale. The old code used 10, 50, 100, 200, 999, 1000
+     and 9999 scattered across nine stylesheets, which is how the toast
+     container ended up behind the command palette. */
+
+  --z-below: -1;
+  --z-base: 0;
+  --z-raised: 10;
+  --z-sticky: 100;
+  --z-nav: 200;
+  --z-dropdown: 300;
+  --z-overlay: 400;
+  --z-modal: 500;
+  --z-toast: 600;
+  --z-tooltip: 700;
+  --z-dev: 900;
+
+  /* ══ 8. COMPONENT TOKENS ════════════════════════════════════════════════ */
+
+  /* ── Navigation ──────────────────────────────────────────────────────── */
 
   --nav-height: 64px;
-  --nav-bg: rgba(3, 3, 5, 0.75);
-  --nav-bg-scrolled: rgba(3, 3, 5, 0.96);
-  --nav-border: rgba(255, 255, 255, 0.05);
+  --nav-dock-height: 68px; /* Mobile bottom dock  */
+  --nav-bg: rgb(3 3 5 / 0.75);
+  --nav-bg-scrolled: rgb(3 3 5 / 0.96);
+  --nav-border: rgb(var(--light-rgb) / var(--a-02));
   --nav-blur: 32px;
-  --nav-transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  --nav-transition: var(--transition-base);
 
-  /* ── 8. Shadow Scale ────────────────────────────────────────────── */
+  /* ── Focus ───────────────────────────────────────────────────────────── */
+  /* One ring, everywhere. Keyboard focus was previously invisible on most
+     interactive elements because `focus:outline-none` was applied without
+     a replacement — a WCAG 2.4.7 failure across the whole app. */
 
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.24);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.36);
-  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.48);
-  --shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.56);
-  --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
+  --focus-ring: 0 0 0 2px var(--bg-base), 0 0 0 4px rgb(var(--accent-rgb) / 0.9);
+  --focus-ring-inset: inset 0 0 0 2px rgb(var(--accent-rgb) / 0.9);
 
-  /* ── 9. Reader-scoped Tokens ────────────────────────────────────── */
-  /* These are the DEFAULTS for the reader surface.                   */
-  /* Reader theme overrides (in reader.css) set [data-reader-theme]   */
-  /* on the .reader-surface element — never on <html>.                */
-  /* Other pages are completely unaffected.                            */
+  /* ── Scrollbar ───────────────────────────────────────────────────────── */
 
-  --reader-bg: #030305;
+  --scrollbar-size: 6px;
+  --scrollbar-thumb: rgb(var(--accent-rgb) / 0.25);
+  --scrollbar-thumb-hover: rgb(var(--accent-rgb) / var(--a-09));
+
+  /* ══ 9. READER DEFAULTS ═════════════════════════════════════════════════
+     Starting values for the reading surface. Reader themes override these
+     on [data-reader-theme] in reader-themes.css — scoped to the reader
+     element, never to <html>, so no other page is affected.
+
+     Every id in config/theme.config.js READER_THEMES must have a matching
+     block there. */
+
+  --reader-bg: var(--grey-950);
   --reader-fg: #e6e7ee;
   --reader-muted: #8a8aa3;
   --reader-accent: #8b7cf6;
+  --reader-surface: rgb(var(--light-rgb) / var(--a-02));
+  --reader-border: rgb(var(--light-rgb) / var(--a-03));
 
   --reader-font-family: var(--font-serif);
   --reader-font-size: 18px;
   --reader-line-height: 1.75;
   --reader-measure: 68ch;
-
-  --reader-nav-height: 60px;
+  --reader-nav-height: 56px; /* Matches .top-bar in reader.css — see there */
 
   color-scheme: dark;
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Reduced motion
+
+   Honoured globally rather than per-component, so a new component cannot
+   forget it. Durations collapse to 1ms rather than 0 so that
+   `transitionend` / `animationend` listeners still fire — setting them to
+   zero silently breaks any code waiting on those events, which is a
+   genuinely nasty class of bug to track down.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-instant: 1ms;
+    --dur-fast: 1ms;
+    --dur-base: 1ms;
+    --dur-normal: 1ms;
+    --dur-slow: 1ms;
+    --dur-slower: 1ms;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   The two places a raw colour is still allowed, and why
+
+   1. reader-themes.css — each reader theme is by definition a complete
+      alternative palette. Expressing twelve palettes in terms of one
+      another would be indirection with no payoff.
+
+   2. theme.config.js `tint` values — the swatch previews in the reader's
+      theme picker. They must match their CSS theme exactly and are read by
+      JS, so they live beside the theme metadata that uses them.
+
+   Anywhere else, a hex or rgba() literal is a bug. `npm run lint:tokens`
+   fails on one.
+   ══════════════════════════════════════════════════════════════════════════ */

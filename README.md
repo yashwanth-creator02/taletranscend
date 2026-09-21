@@ -5,20 +5,19 @@
 ## What It Is
 
 TaleTranscend is a browser-based platform where:
-
 - **Readers** discover and read curated tales with a rich, customizable reader.
 - **Writers** draft multi-chapter stories, publish to a public library, and receive AI-assisted suggestions.
 - **Everyone** engages through bookmarks, comments, and reactions — no traditional account required (Anonymous Auth).
 
 ## Tech Stack
 
-| Layer      | Technology                                        |
-| ---------- | ------------------------------------------------- |
-| Frontend   | Vanilla JavaScript (ES2022 modules), Tailwind CSS |
-| Build      | Vite 7.x with PWA plugin                          |
-| Backend    | Firebase (Firestore, Anonymous Auth, Storage)     |
-| TypeScript | Utility modules (`src/utils/`)                    |
-| Testing    | Vitest (unit), Playwright (E2E)                   |
+| Layer | Technology |
+|-------|-----------|
+| Frontend | Vanilla JavaScript (ES2022 modules), Tailwind CSS |
+| Build | Vite 7.x with PWA plugin |
+| Backend | Firebase (Firestore, Anonymous Auth) |
+| TypeScript | Utility modules (`src/utils/`) |
+| Testing | Vitest (unit), Playwright (E2E) |
 
 ## Project Structure
 
@@ -28,9 +27,11 @@ src/
 ├── config/              # App constants, Firebase config, theme registry
 ├── firebase/            # Firebase SDK wrappers (auth, db, paths, refs)
 ├── pages/               # One directory per HTML page (MPA architecture)
+│   ├── 404/             # Not-found page
 │   ├── contribution/    # Editor, publish flow, chapter management
 │   ├── home/            # Landing page
 │   ├── library/         # Browse, filter, search tales
+│   ├── login/           # Sign-in flow
 │   ├── profile/         # User settings, reading stats
 │   ├── reader/          # Chapter reader (themes, TTS, progress)
 │   ├── shelf/           # Bookmarks and drafts dashboard
@@ -46,7 +47,7 @@ src/
 │   └── schemas/         # Data shape definitions (tale, user, progress, etc.)
 ├── ui/components/       # Shared components (cards, nav, toast, feedback)
 ├── utils/               # TypeScript utilities (dom, format, sanitize, etc.)
-└── views/               # HTML entry points (7 pages)
+└── views/               # HTML entry points (9 pages)
 ```
 
 ## Development
@@ -76,42 +77,25 @@ npm run e2e
 # Lint and format
 npm run lint
 npm run format
+
+# Verify no raw colour literals exist outside the design-token files
+npm run lint:tokens
+
+# Run every check CI would run (format, lint, tokens, types, tests)
+npm run verify
 ```
 
 ### Environment Setup
-
 1. Copy `.env.example` to `.env`
 2. Fill in your Firebase project credentials.
 3. Ensure Firestore composite index is deployed (see below).
 
-## CI/CD
-
-`.github/workflows/ci.yml` runs on every PR and push to `main`: lint, typecheck, unit tests,
-`functions/`'s own typecheck, the Firestore rules emulator tests, and E2E — each as a separate
-job so a failure in one doesn't block visibility into the others. A `ci-required` job
-aggregates all of them into a single status check, so branch protection only needs to point at
-one job instead of being updated every time a job is renamed or added.
-
-`.github/workflows/deploy.yml` deploys Hosting and Firestore rules/indexes —
-**deliberately not `functions/`**, since Cloud Functions require the Firebase Blaze plan and
-this project stays on the free Spark plan (see `functions/README.md`). It's triggered manually
-(`workflow_dispatch`), not automatically on push, until you're ready for continuous deployment.
-To use it, add a repository secret:
-
-- **`FIREBASE_SERVICE_ACCOUNT`** — a Firebase/GCP service account JSON key with Hosting Admin
-  and Cloud Datastore/Firestore permissions. Generate one from the
-  [Google Cloud Console](https://console.cloud.google.com/iam-admin/serviceaccounts) for the
-  `taletranscend` project, then paste the full JSON as the secret value.
-
 ## Firestore Configuration
 
 ### Database Path
-
-All data lives under: `v1/taletranscend/projects/v1/` (kept as-is by design — see
-`docs/MIGRATION_PLAN.md`).
+All data lives under: `v1/taletranscend/projects/v1/`
 
 ### Required Composite Index
-
 ```json
 {
   "collectionGroup": "tales",
@@ -122,33 +106,17 @@ All data lives under: `v1/taletranscend/projects/v1/` (kept as-is by design — 
   ]
 }
 ```
-
-**Deploy:** `firebase deploy --only firestore:indexes` (index file now lives at
-`firestore/firestore.indexes.json`)
+**Deploy:** `firebase deploy --only firestore:indexes`
 
 ### Security Rules
-
-Rules are defined in `firestore/firestore.rules` (moved from the repo root as of Phase 2 —
-see `docs/MIGRATION_PLAN.md`). As of Phase 2, the rules are nested under the same
-`v1/taletranscend/projects/v1/` prefix the app actually writes to, closing the mismatch that
-used to send every real read/write to the file's `deny all` fallback. Run `npm run test:rules`
-(requires a local Java runtime for the Firestore emulator) before deploying rule changes —
-that command runs `firestore/tests/rules.emulator.test.ts` against a real emulator, which is
-the only reliable way to verify rule behavior.
-
-> **Known gap:** `public/meta/featured` and `public/meta/stats` are defined in
-> `src/firebase/paths.js` with an odd number of path segments, but `refs.js` reads them with
-> `doc()`, which requires an even number — this likely throws a real runtime error today,
-> independent of the rules themselves. Not fixed as part of Phase 2, since it's a data-model
-> question rather than a rules question.
+Rules are defined in `firestore.rules`.
+> **Note:** Current rules use test-mode logic. Ensure production-ready rules are deployed before launch.
 
 ## Architecture Notes
-
 - **Multi-Page Application (MPA):** Each page is a separate HTML file bundled by Vite. No client-side SPA router.
 - **State Management:** Global mutable singleton (`appState`) + page-local state objects. No reactive framework (direct DOM manipulation).
 - **Firebase Anonymous Auth:** Every visitor gets a persistent, anonymous UID.
 - **Image Storage:** Cover images currently use external URLs.
 
 ## License
-
 MIT

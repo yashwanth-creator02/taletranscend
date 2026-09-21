@@ -1,34 +1,42 @@
 {
   "name": "taletranscend",
   "version": "1.0.0",
-  "description": "TaleTranscend is an initiative to protect the roots of our culture.",
-  "main": "index.js",
+  "description": "TaleTranscend — a reading and authoring archive for folklore, myth and oral tradition.",
   "scripts": {
-    "start": "npm run dev",
-    "format": "prettier . --write",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "check": "npm run format && npm run lint",
-    "type-check": "tsc --noEmit",
     "dev": "vite",
+    "start": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "analyze": "ANALYZE=true vite build",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "lint:tokens": "node scripts/lint-tokens.mjs",
+    "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
-    "prepare": "husky",
-    "test:rules": "firebase emulators:exec --only firestore \"vitest --config vitest.rules.config.js run\""
+    "verify": "npm run format:check && npm run lint && npm run lint:tokens && npm run type-check && npm run test",
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/yashwanth-creator02/taletranscend.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "folklore",
+    "mythology",
+    "reading",
+    "pwa",
+    "firebase",
+    "vite"
+  ],
+  "author": "TaleTranscend contributors",
+  "license": "MIT",
   "type": "module",
   "bugs": {
     "url": "https://github.com/yashwanth-creator02/taletranscend/issues"
@@ -45,7 +53,6 @@
     "@types/node": "^25.9.1",
     "@vitest/coverage-v8": "^4.1.8",
     "@vitest/ui": "^4.1.8",
-    "autoprefixer": "^10.4.24",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.2.0",
@@ -53,7 +60,6 @@
     "jsdom": "^29.1.1",
     "lint-staged": "^17.0.7",
     "msw": "^2.14.6",
-    "postcss": "^8.5.6",
     "prettier": "3.8.1",
     "rollup-plugin-visualizer": "^7.0.1",
     "tailwindcss": "^4.1.18",
@@ -63,14 +69,10 @@
     "vitest": "^4.1.8"
   },
   "dependencies": {
-    "@firebase/rules-unit-testing": "^5.0.1",
-    "firebase-tools": "^15.24.0",
-    "@tailwindcss/postcss": "^4.3.3",
     "@tailwindcss/vite": "^4.1.18",
     "dompurify": "^3.4.7",
     "dotenv": "^17.4.2",
     "firebase": "^12.8.0",
-    "firebase-admin": "^14.2.0",
     "idb": "^8.0.3",
     "lucide": "^1.14.0",
     "zod": "^4.4.3"
@@ -80,14 +82,11 @@
       "eslint --fix",
       "prettier --write"
     ],
-    "*.{css,html}": [
+    "*.{css,html,json,md}": [
       "prettier --write"
     ]
   },
-  "allowScripts": {
-    "@firebase/util@1.15.1": true,
-    "esbuild@0.28.1": true,
-    "msw@2.14.6": true,
-    "protobufjs@7.6.5": true
+  "engines": {
+    "node": ">=20"
   }
 }

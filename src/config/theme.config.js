@@ -10,6 +10,9 @@
 //   - Every theme id here must have a matching block in reader-themes.css.
 //   - The DARK_THEMES set drives atmosphere/particle visibility logic.
 //   - reader/theme.js imports from here — never defines its own lists.
+//   - This replaced ui/font.registry.js, which declared a second, smaller
+//     and incompatible font set under a different localStorage key. Both
+//     wrote --reader-font-family; whichever ran last won.
 
 import { createLogger } from '@/utils';
 const log = createLogger('ThemeConfig');
@@ -181,10 +184,58 @@ export const FONTS = {
     label: 'Manuscript',
     css: '"EB Garamond", "Palatino Linotype", serif',
   },
+
+  dyslexic: {
+    label: 'Dyslexic',
+    css: '"OpenDyslexic", "Comic Sans MS", sans-serif',
+  },
 };
 
 /** Default font applied when no preference is stored */
 export const DEFAULT_FONT = 'serif';
+
+/**
+ * Stylesheets that must be loaded for the FONTS above to actually render.
+ *
+ * This did not exist. The picker offered twelve families while the reader
+ * page linked three (Cinzel, Cormorant Garamond, Inter), so nine of the
+ * twelve silently fell back to Georgia — the user picked "Typewriter" and
+ * got a serif. Every family declared above is now in this list.
+ *
+ * Loaded lazily by the reader on first paint rather than blocking it: the
+ * reader only needs the *selected* family immediately, and the rest matter
+ * only once the font picker is opened.
+ */
+export const FONT_STYLESHEETS = [
+  'https://fonts.googleapis.com/css2' +
+    '?family=Playfair+Display:wght@400;600;700' +
+    '&family=Poppins:wght@300;400;500;600;700' +
+    '&family=Lora:ital,wght@0,400;0,600;0,700;1,400' +
+    '&family=Nunito+Sans:wght@300;400;600;700' +
+    '&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400' +
+    '&family=IM+Fell+English:ital@0;1' +
+    '&family=Special+Elite' +
+    '&family=Uncial+Antiqua' +
+    '&family=JetBrains+Mono:wght@400;500;700' +
+    '&display=swap',
+  'https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/open-dyslexic.min.css',
+];
+
+/**
+ * Injects the reader font stylesheets once, idempotently.
+ *
+ * Safe to call on every reader mount — subsequent calls are no-ops.
+ */
+export function loadReaderFontStylesheets(doc = document) {
+  for (const href of FONT_STYLESHEETS) {
+    if (doc.querySelector(`link[href="${href}"]`)) continue;
+    const link = doc.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    link.crossOrigin = 'anonymous';
+    doc.head.appendChild(link);
+  }
+}
 
 /* ─────────────────────────────────────────────
    Typography Bounds

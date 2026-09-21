@@ -4,20 +4,22 @@
    Login Page Styles - Glassmorphism & Atmosphere
    ============================================ */
 
-@import '../base.css';
+/* base.css is imported by login.js, which is the single mechanism every
+   other page uses. Importing it here as well meant the whole Tailwind layer
+   plus the token file were parsed twice on this page. */
 
 /* -------------------- */
 /*   Login Card         */
 /* -------------------- */
 .login-card {
   position: relative;
-  background: rgba(15, 15, 25, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgb(var(--bg-overlay-rgb) / var(--a-09));
+  border: 1px solid rgb(var(--light-rgb) / var(--a-05));
   border-radius: var(--radius-3xl);
   box-shadow:
-    0 0 30px rgba(99, 102, 241, 0.1),
-    0 0 60px rgba(139, 92, 246, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    0 0 30px rgb(var(--accent-rgb) / var(--a-05)),
+    0 0 60px rgb(var(--accent-2-rgb) / var(--a-03)),
+    inset 0 1px 0 rgb(var(--light-rgb) / var(--a-05));
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -25,9 +27,9 @@
 
 .login-card:hover {
   box-shadow:
-    0 0 50px rgba(99, 102, 241, 0.2),
-    0 0 80px rgba(139, 92, 246, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+    0 0 50px rgb(var(--accent-rgb) / var(--a-07)),
+    0 0 80px rgb(var(--accent-2-rgb) / var(--a-05));
+  border-color: rgb(var(--light-rgb) / var(--a-07));
 }
 
 /* -------------------- */
@@ -39,7 +41,7 @@
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.1) 50%,
+    rgb(var(--light-rgb) / var(--a-05)) 50%,
     transparent 100%
   );
   position: relative;
@@ -51,12 +53,12 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: rgba(15, 15, 25, 0.8);
+  background: rgb(var(--bg-overlay-rgb) / var(--a-11));
   padding: 0 1rem;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgb(var(--light-rgb) / var(--a-08));
   font-size: 0.75rem;
   letter-spacing: 0.3em;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgb(var(--light-rgb) / var(--a-05));
   border-radius: 50%;
   width: 2.5rem;
   height: 2.5rem;
@@ -64,17 +66,17 @@
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(10px);
-  box-shadow: 0 0 20px rgba(99, 102, 241, 0.1);
+  box-shadow: 0 0 20px rgb(var(--accent-rgb) / var(--a-05));
   animation: rune-glow 3s ease-in-out infinite;
 }
 
 @keyframes rune-glow {
   0%,
   100% {
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.1);
+    box-shadow: 0 0 20px rgb(var(--accent-rgb) / var(--a-05));
   }
   50% {
-    box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 0 30px rgb(var(--accent-rgb) / var(--a-08));
   }
 }
 
@@ -95,7 +97,7 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  background: linear-gradient(90deg, transparent, rgb(var(--light-rgb) / var(--a-05)), transparent);
   transition: left 0.5s ease;
 }
 
@@ -106,17 +108,17 @@
 #btn-google-login:hover {
   transform: translateY(-3px);
   box-shadow:
-    0 10px 40px rgba(99, 102, 241, 0.2),
-    0 0 20px rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.2);
+    0 10px 40px rgb(var(--accent-rgb) / var(--a-07)),
+    0 0 20px rgb(var(--light-rgb) / var(--a-03));
+  border-color: rgb(var(--light-rgb) / var(--a-07));
 }
 
 #btn-guest-login:hover {
   transform: translateY(-3px);
   box-shadow:
-    0 10px 40px rgba(139, 92, 246, 0.15),
-    0 0 20px rgba(255, 255, 255, 0.03);
-  border-color: rgba(255, 255, 255, 0.15);
+    0 10px 40px rgb(var(--accent-2-rgb) / var(--a-06)),
+    0 0 20px rgb(var(--light-rgb) / var(--a-01));
+  border-color: rgb(var(--light-rgb) / var(--a-06));
 }
 
 /* -------------------- */
@@ -126,8 +128,8 @@
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(circle at 20% 20%, #0a0a1a 0%, #030308 50%),
-    radial-gradient(circle at 80% 80%, #0f0f20 0%, #030305 50%);
+    radial-gradient(circle at 20% 20%, var(--bg-overlay) 0%, var(--bg-base) 50%),
+    radial-gradient(circle at 80% 80%, var(--bg-overlay) 0%, var(--bg-base) 50%);
   z-index: -2;
 }
 
@@ -135,12 +137,12 @@
   position: fixed;
   inset: 0;
   background-image:
-    radial-gradient(1px 1px at 20px 30px, rgba(255, 255, 255, 0.1), transparent),
-    radial-gradient(1.5px 1.5px at 40px 70px, rgba(255, 255, 255, 0.08), transparent),
-    radial-gradient(1px 1px at 10px 120px, rgba(255, 255, 255, 0.05), transparent),
-    radial-gradient(2px 2px at 90px 40px, rgba(255, 255, 255, 0.1), transparent),
-    radial-gradient(1px 1px at 130px 80px, rgba(255, 255, 255, 0.06), transparent),
-    radial-gradient(1.5px 1.5px at 160px 120px, rgba(255, 255, 255, 0.08), transparent);
+    radial-gradient(1px 1px at 20px 30px, rgb(var(--light-rgb) / var(--a-05)), transparent),
+    radial-gradient(1.5px 1.5px at 40px 70px, rgb(var(--light-rgb) / var(--a-04)), transparent),
+    radial-gradient(1px 1px at 10px 120px, rgb(var(--light-rgb) / var(--a-03)), transparent),
+    radial-gradient(2px 2px at 90px 40px, rgb(var(--light-rgb) / var(--a-05)), transparent),
+    radial-gradient(1px 1px at 130px 80px, rgb(var(--light-rgb) / var(--a-03)), transparent),
+    radial-gradient(1.5px 1.5px at 160px 120px, rgb(var(--light-rgb) / var(--a-04)), transparent);
   background-size: 200px 200px;
   opacity: 0.5;
   z-index: -1;
@@ -170,7 +172,7 @@
   position: absolute;
   width: 300px;
   height: 300px;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+  background: radial-gradient(circle, rgb(var(--accent-rgb) / var(--a-05)) 0%, transparent 70%);
   border-radius: 50%;
   animation: float 20s infinite ease-in-out;
 }

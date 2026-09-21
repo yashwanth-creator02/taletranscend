@@ -1,4 +1,5 @@
 .gitignore
+README.md
 *.min.js
 *.min.css
 # Ignore the lock file (it's auto-generated)

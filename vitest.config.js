@@ -1,5 +1,3 @@
-// vitest.config.js
-
 import { defineConfig } from 'vitest/config';
 import { resolve } from 'path';
 
@@ -8,21 +6,12 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.js'],
-
-    // Run only application/unit tests by default
     include: ['src/**/*.test.js', 'src/**/*.test.ts'],
-
-    // Exclude emulator tests from normal runs
-    exclude: ['**/node_modules/**', '**/.git/**', 'firestore/tests/**'],
-
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       all: true,
-
-      // Measure coverage for application source only
       include: ['src/**/*.js', 'src/**/*.ts'],
-
       exclude: [
         'node_modules/',
         'src/test/',
@@ -33,7 +22,6 @@ export default defineConfig({
         'src/**/*.test.ts',
         '**/*.d.ts',
       ],
-
       thresholds: {
         lines: 70,
         functions: 70,
@@ -42,7 +30,6 @@ export default defineConfig({
       },
     },
   },
-
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
@@ -50,10 +37,10 @@ export default defineConfig({
       '@fb': resolve(__dirname, 'src/firebase'),
       '@state': resolve(__dirname, 'src/state'),
       '@services': resolve(__dirname, 'src/services'),
-      '@shared': resolve(__dirname, 'src/shared'),
+      '@ui': resolve(__dirname, 'src/ui'),
       '@utils': resolve(__dirname, 'src/utils'),
       '@config': resolve(__dirname, 'src/config'),
-      '@features': resolve(__dirname, 'src/features'),
+      '@pages': resolve(__dirname, 'src/pages'),
     },
   },
 });

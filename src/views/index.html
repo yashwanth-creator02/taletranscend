@@ -1,226 +1,192 @@
-<!-- src/views/index.html -->
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <!-- @include: partials/_fade-in-guard.html -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Home | TaleTranscend</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Cinzel:wght@400;500;600;700;800&family=Merriweather:wght@300;400;700&display=swap"
-      rel="stylesheet"
+    <title>TaleTranscend — The Eternal Archive of Myth & Memory</title>
+    <meta
+      name="description"
+      content="Read, write and preserve folklore, myth and oral tradition. A living archive of the stories that made us."
+    />
+    <link rel="canonical" href="https://taletranscend.web.app/" />
+
+    <meta name="theme-color" content="#030305" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icon.svg" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="TaleTranscend" />
+    <meta property="og:url" content="https://taletranscend.web.app/" />
+    <meta property="og:title" content="TaleTranscend — The Eternal Archive of Myth & Memory" />
+    <meta
+      property="og:description"
+      content="Read, write and preserve folklore, myth and oral tradition. A living archive of the stories that made us."
+    />
+    <meta property="og:image" content="https://taletranscend.web.app/icon.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="TaleTranscend — The Eternal Archive of Myth & Memory" />
+    <meta
+      name="twitter:description"
+      content="Read, write and preserve folklore, myth and oral tradition. A living archive of the stories that made us."
     />
 
-    <!-- home.js handles initIcons() internally — no inline script needed -->
-    <script type="module" src="../features/home/home.js"></script>
+    <!-- One font request, identical on every page. Nine different Google
+         Fonts URLs across nine pages meant every navigation re-fetched a
+         slightly different family set and re-rendered the whole document. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cinzel:wght@500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap"
+    />
+
+    <script type="module" src="../pages/home/home.js"></script>
   </head>
 
-  <body
-    class="antialiased selection:bg-(--glow-indigo) selection:text-white page-fade-in flex flex-col h-screen overflow-hidden"
-  >
+  <body class="page-fade-in flex flex-col h-screen overflow-hidden">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+
     <div class="atmosphere-base"></div>
     <div class="particle-field"></div>
 
-    <main class="app-viewport scroll-container">
-      <!-- ── Hero Section ── -->
-      <section
-        class="hero-shell relative min-h-[90vh] flex items-center justify-center px-4 md:px-6 lg:px-8"
-      >
-        <div class="absolute inset-0 pointer-events-none">
-          <div
-            class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-350 h-full bg-[radial-gradient(circle_at_50%_0%,rgba(99,102,241,0.12),transparent_70%)]"
-          ></div>
-          <div
-            class="absolute bottom-0 left-0 w-full h-32 bg-linear-to-t from-[#030305] to-transparent"
-          ></div>
-        </div>
+    <main id="main-content" tabindex="-1" class="app-viewport scroll-container">
+      <!-- ══ Hero ══════════════════════════════════════════════════════ -->
+      <section class="home-hero">
+        <div class="home-hero__glow" aria-hidden="true"></div>
 
-        <div class="max-w-425 mx-auto relative z-10 w-full">
-          <div class="flex flex-col items-center text-center">
-            <div
-              class="inline-flex items-center gap-2.5 px-6 py-2 rounded-full border border-indigo-500/15 bg-indigo-500/5 text-indigo-400 text-[10px] uppercase tracking-[0.4em] font-black mb-12 animate-fade-in shadow-[0_0_20px_rgba(99,102,241,0.1)]"
-            >
-              <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
-              The Eternal Archive
-            </div>
+        <div class="page-shell home-hero__inner">
+          <p class="home-hero__badge">
+            <span class="home-hero__pulse" aria-hidden="true"></span>
+            The Eternal Archive
+          </p>
 
-            <h1
-              class="hero-title text-7xl md:text-9xl xl:text-[11rem] font-black text-white leading-[0.8] tracking-tighter mb-8"
-            >
-              MYTH &amp;
-              <span
-                class="block text-transparent bg-clip-text bg-linear-to-r from-indigo-400 via-violet-400 to-fuchsia-400 pb-4"
-              >
-                MEMORY.
-              </span>
-            </h1>
+          <h1 class="home-hero__title">
+            Myth &amp;
+            <span class="home-hero__title-accent">Memory.</span>
+          </h1>
 
-            <div class="flex items-center gap-4 mb-12 opacity-60">
-              <span class="h-px w-12 bg-linear-to-r from-transparent to-white/20"></span>
-              <p class="text-slate-400 text-sm md:text-base font-medium tracking-widest uppercase">
-                Cinematic Lore Preservation
-              </p>
-              <span class="h-px w-12 bg-linear-to-l from-transparent to-white/20"></span>
-            </div>
+          <p class="home-hero__rule" aria-hidden="true">
+            <span></span>
+            <span class="eyebrow">Living Lore, Preserved</span>
+            <span></span>
+          </p>
 
-            <p
-              class="max-w-3xl text-slate-400 text-xl md:text-2xl leading-relaxed font-merriweather italic mb-16 px-4"
-            >
-              "Where folklore breathes and sacred legends are preserved for the dreamers of the
-              future."
-            </p>
+          <p class="home-hero__lede">
+            Where folklore breathes and sacred legends are kept for the dreamers of the future.
+          </p>
 
-            <!-- Search Interface -->
-            <div class="w-full max-w-4xl relative group px-4">
-              <div
-                class="absolute -inset-2 bg-linear-to-r from-indigo-500 via-violet-600 to-fuchsia-600 rounded-[3rem] blur-2xl opacity-10 group-focus-within:opacity-40 transition duration-1000"
-              ></div>
+          <!-- ── Search ── -->
+          <form class="home-search input-glow" id="home-search-form" role="search">
+            <label class="sr-only" for="home-search-input">Search the archive</label>
+            <i data-lucide="search" class="home-search__icon" aria-hidden="true"></i>
+            <input
+              id="home-search-input"
+              name="q"
+              type="search"
+              autocomplete="off"
+              class="home-search__input"
+              placeholder="Search tales, tellers and traditions…"
+            />
+            <button type="submit" id="home-search-btn" class="btn btn-primary home-search__submit">
+              Search
+            </button>
+          </form>
 
-              <div
-                class="relative flex items-center p-2.5 bg-zinc-950/40 backdrop-blur-3xl border border-white/5 rounded-[2.75rem] shadow-2xl transition-all duration-500 group-focus-within:border-indigo-500/30"
-              >
-                <i
-                  data-lucide="search"
-                  class="absolute left-10 text-zinc-600 group-focus-within:text-indigo-400 w-7 h-7 transition-colors"
-                ></i>
-
-                <input
-                  id="home-search-input"
-                  type="text"
-                  placeholder="Decode the neural weave..."
-                  class="w-full py-7 pl-20 pr-48 bg-transparent border-none text-white text-xl placeholder:text-zinc-700 focus:outline-none focus:ring-0 transition-all font-medium"
-                />
-
-                <button
-                  id="home-search-btn"
-                  class="absolute right-4 bg-indigo-600 hover:bg-indigo-500 text-white px-12 py-5 rounded-4xl text-[11px] font-black uppercase tracking-[0.2em] shadow-xl shadow-indigo-600/20 transition-all active:scale-95 group/btn overflow-hidden"
-                >
-                  <span class="relative z-10">Initiate Search</span>
-                </button>
-              </div>
-
-              <!-- Discovery Tags -->
-              <div class="mt-10 flex flex-wrap justify-center gap-5">
-                <span class="discover-tag">Folklore</span>
-                <span class="discover-tag">Mythic Fiction</span>
-                <span class="discover-tag">Sacred Archives</span>
-                <span class="discover-tag">Oral Tradition</span>
-              </div>
-            </div>
-          </div>
+          <ul class="home-tags" aria-label="Suggested topics">
+            <li><a class="home-tag" href="/library.html?search=folklore">Folklore</a></li>
+            <li>
+              <a class="home-tag" href="/library.html?search=mythic%20fiction">Mythic Fiction</a>
+            </li>
+            <li><a class="home-tag" href="/library.html?search=sacred">Sacred Archives</a></li>
+            <li>
+              <a class="home-tag" href="/library.html?search=oral%20tradition">Oral Tradition</a>
+            </li>
+          </ul>
         </div>
       </section>
 
-      <!-- ── Trending Section ── -->
-      <section
-        id="trending-section"
-        class="max-w-425 mx-auto px-4 md:px-8 lg:px-12 py-32 border-t border-white/3"
-      >
-        <div class="flex flex-col md:flex-row justify-between items-end gap-8 mb-20">
-          <div class="max-w-2xl">
-            <div class="flex items-center gap-4 mb-6">
-              <span class="h-px w-16 bg-linear-to-r from-indigo-500 to-transparent"></span>
-              <span class="text-[11px] uppercase tracking-[0.4em] text-indigo-400 font-black"
-                >Featured Chronicles</span
-              >
-            </div>
-            <h2 class="text-5xl md:text-6xl font-black text-white tracking-tight leading-none mb-6">
-              Trending Tales
-            </h2>
-            <p class="text-slate-500 text-lg leading-relaxed">
+      <!-- ══ Trending ══════════════════════════════════════════════════ -->
+      <section id="trending-section" class="page-shell home-section">
+        <header class="home-section__head">
+          <div>
+            <p class="home-section__eyebrow">
+              <span class="section-divider home-section__dash" aria-hidden="true"></span>
+              <span class="eyebrow">Featured Chronicles</span>
+            </p>
+            <h2 class="section-title">Trending Tales</h2>
+            <p class="section-lede">
               Fragments of living memory currently surfacing from the deeper archive.
             </p>
           </div>
 
-          <a
-            href="library.html"
-            class="group flex items-center gap-4 text-indigo-400 font-black text-[11px] uppercase tracking-[0.3em] bg-indigo-500/5 px-8 py-4 rounded-2xl border border-indigo-500/10 hover:bg-indigo-500/10 transition-all"
-          >
-            Browse All Chronicles
-            <i
-              data-lucide="arrow-right"
-              class="w-4 h-4 group-hover:translate-x-2 transition-transform"
-            ></i>
+          <a href="/library.html" class="btn btn-ghost home-section__cta">
+            Browse all
+            <i data-lucide="arrow-right" class="home-section__cta-icon" aria-hidden="true"></i>
           </a>
-        </div>
+        </header>
 
-        <div id="trending-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
+        <div id="trending-grid" class="home-grid fade-in-stagger">
           <!-- Rendered by home.js -->
         </div>
       </section>
 
-      <!-- ── CTA Section ── -->
-      <section class="max-w-350 mx-auto px-4 md:px-6 lg:px-8 py-8 md:py-16">
-        <div class="glass-card-strong rounded-[3rem] p-6 md:p-10 lg:p-14 relative overflow-hidden">
-          <div
-            class="absolute inset-0 bg-linear-to-br from-indigo-500/6 via-transparent to-violet-500/6 pointer-events-none"
-          ></div>
+      <!-- ══ Call to action ════════════════════════════════════════════ -->
+      <section class="page-shell home-section home-section--tight">
+        <div class="home-cta glass-strong">
+          <div class="home-cta__wash" aria-hidden="true"></div>
 
-          <div class="relative z-10 grid grid-cols-1 xl:grid-cols-2 gap-10 items-center">
+          <div class="home-cta__grid">
             <div>
-              <div class="flex items-center gap-3 mb-4">
-                <span class="h-px w-10 section-divider"></span>
-                <span class="text-[10px] uppercase tracking-[0.28em] text-indigo-300 font-bold"
-                  >Join the circle</span
-                >
-              </div>
-              <h2 class="section-title text-4xl md:text-5xl font-black text-white leading-tight">
-                Receive the latest myths in your scroll.
-              </h2>
-              <p class="mt-6 text-slate-400 max-w-2xl leading-relaxed">
-                Subscribe to follow new stories, archive updates, and sacred releases from the
-                TaleTranscend library.
+              <p class="home-section__eyebrow">
+                <span class="section-divider home-section__dash" aria-hidden="true"></span>
+                <span class="eyebrow">Join the circle</span>
+              </p>
+              <h2 class="home-cta__title">Receive the latest myths as they are recovered.</h2>
+              <p class="section-lede home-cta__lede">
+                New stories, archive updates and restored fragments — occasionally, never noisily.
               </p>
 
-              <form id="newsletter-form" class="mt-8 flex flex-col sm:flex-row gap-3 max-w-2xl">
+              <form id="newsletter-form" class="home-cta__form">
+                <label class="sr-only" for="newsletter-email">Email address</label>
                 <input
                   id="newsletter-email"
+                  name="email"
                   type="email"
-                  placeholder="Your ancient email address"
-                  class="flex-1 px-6 py-4 rounded-2xl bg-black/35 border border-white/10 text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/40 transition-all"
+                  autocomplete="email"
+                  required
+                  class="input-mythic"
+                  placeholder="you@example.com"
                 />
-                <button
-                  type="submit"
-                  class="btn-mythic bg-white text-indigo-700 font-black px-8 py-4 rounded-2xl hover:bg-indigo-50 transition-all shadow-xl"
-                >
-                  Subscribe
-                </button>
+                <button type="submit" class="btn btn-primary">Subscribe</button>
               </form>
+              <p class="home-cta__note">No spam. Unsubscribe whenever you like.</p>
             </div>
 
-            <div class="grid gap-4">
-              <div class="glass-card rounded-4xl p-6 md:p-8">
-                <div
-                  class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mb-6"
-                >
-                  <i data-lucide="pen-tool" class="w-8 h-8 text-white"></i>
-                </div>
-                <h3 class="text-2xl font-bold text-white mb-3">Become a Chronicler</h3>
-                <p class="text-indigo-200 text-sm mb-8 max-w-lg">
-                  Got a legend to share? The archive is always open for new storytellers.
+            <div class="home-cta__aside">
+              <article class="glass home-write">
+                <span class="home-write__icon" aria-hidden="true">
+                  <i data-lucide="pen-tool"></i>
+                </span>
+                <h3 class="home-write__title">Become a Chronicler</h3>
+                <p class="home-write__body">
+                  Got a legend worth keeping? The archive is always open to new storytellers.
                 </p>
-                <button
-                  id="home-start-writing-btn"
-                  class="btn-mythic inline-flex items-center gap-3 bg-linear-to-r from-indigo-500 to-violet-600 text-white px-10 py-4 rounded-2xl font-extrabold"
-                >
-                  Start Writing
-                  <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                <button id="home-start-writing-btn" class="btn btn-primary btn--block">
+                  Start writing
+                  <i data-lucide="chevron-right" aria-hidden="true"></i>
                 </button>
-              </div>
+              </article>
 
-              <div class="grid grid-cols-2 gap-4">
-                <div class="glass-card rounded-3xl p-5">
-                  <p class="text-[9px] uppercase tracking-[0.24em] text-slate-500 font-bold mb-2">
-                    Daily Ritual
-                  </p>
-                  <p class="text-sm text-white font-semibold">Fresh stories every day</p>
+              <div class="home-facts">
+                <div class="glass home-fact">
+                  <p class="eyebrow">Daily ritual</p>
+                  <p class="home-fact__value">Fresh stories every day</p>
                 </div>
-                <div class="glass-card rounded-3xl p-5">
-                  <p class="text-[9px] uppercase tracking-[0.24em] text-slate-500 font-bold mb-2">
-                    Creator Path
-                  </p>
-                  <p class="text-sm text-white font-semibold">Write, publish, preserve</p>
+                <div class="glass home-fact">
+                  <p class="eyebrow">Creator path</p>
+                  <p class="home-fact__value">Write, publish, preserve</p>
                 </div>
               </div>
             </div>
@@ -228,78 +194,79 @@
         </div>
       </section>
 
-      <!-- ── Footer ── -->
-      <footer class="border-t border-white/6 pt-16 pb-10 px-4 md:px-6 lg:px-8">
-        <div class="max-w-425 mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-14">
-          <div>
-            <div class="flex items-center gap-2 mb-6">
-              <div class="w-7 h-7 bg-indigo-600/90 rounded-xl flex items-center justify-center">
-                <i data-lucide="sparkles" class="text-white w-4 h-4"></i>
-              </div>
-              <span class="font-bold text-white tracking-tight">TaleTranscend</span>
-            </div>
-            <p class="text-zinc-500 text-sm leading-relaxed">
+      <!-- ══ Footer ════════════════════════════════════════════════════ -->
+      <footer class="home-footer">
+        <div class="page-shell home-footer__grid">
+          <div class="home-footer__brand">
+            <a class="home-footer__logo" href="/index.html">
+              <span class="home-footer__mark" aria-hidden="true">
+                <i data-lucide="sparkles"></i>
+              </span>
+              <span>TaleTranscend</span>
+            </a>
+            <p class="home-footer__tagline">
               Preserving the myths of the past for the dreamers of the future.
             </p>
           </div>
 
-          <div>
-            <h4 class="text-white font-bold mb-6">Explore</h4>
-            <ul class="space-y-4 text-sm text-zinc-500">
-              <li><a href="#" class="footer-link">Greek Mythology</a></li>
-              <li><a href="#" class="footer-link">Norse Legends</a></li>
-              <li><a href="#" class="footer-link">Egyptian Lore</a></li>
-              <li><a href="#" class="footer-link">Urban Myths</a></li>
+          <nav class="home-footer__col" aria-labelledby="footer-explore">
+            <h2 class="home-footer__heading" id="footer-explore">Explore</h2>
+            <ul>
+              <li><a class="footer-link" href="/library.html?search=greek">Greek Mythology</a></li>
+              <li><a class="footer-link" href="/library.html?search=norse">Norse Legends</a></li>
+              <li><a class="footer-link" href="/library.html?search=egyptian">Egyptian Lore</a></li>
+              <li>
+                <a class="footer-link" href="/library.html?search=urban%20myth">Urban Myths</a>
+              </li>
             </ul>
-          </div>
+          </nav>
 
-          <div>
-            <h4 class="text-white font-bold mb-6">Community</h4>
-            <ul class="space-y-4 text-sm text-zinc-500">
-              <li><a href="#" class="footer-link">Join Our Discord</a></li>
-              <li><a href="#" class="footer-link">Submit a Story</a></li>
-              <li><a href="#" class="footer-link">Contribute to Archives</a></li>
-              <li><a href="#" class="footer-link">Report an Issue</a></li>
+          <nav class="home-footer__col" aria-labelledby="footer-community">
+            <h2 class="home-footer__heading" id="footer-community">Community</h2>
+            <ul>
+              <li><a class="footer-link" href="/contribution.html">Submit a story</a></li>
+              <li><a class="footer-link" href="/library.html">Browse the archive</a></li>
+              <li><a class="footer-link" href="/profile.html">Your profile</a></li>
+              <li>
+                <a
+                  class="footer-link"
+                  href="https://github.com/yashwanth-creator02/taletranscend/issues"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  >Report an issue</a
+                >
+              </li>
             </ul>
-          </div>
+          </nav>
 
-          <div>
-            <h4 class="text-white font-bold mb-6">Connect</h4>
-            <div class="flex gap-4">
+          <div class="home-footer__col">
+            <h2 class="home-footer__heading">Connect</h2>
+            <div class="home-footer__social">
               <a
-                href="#"
-                class="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center hover:text-indigo-400 transition-all"
+                class="home-social"
+                href="https://github.com/yashwanth-creator02/taletranscend"
+                rel="noopener noreferrer"
+                target="_blank"
+                aria-label="TaleTranscend on GitHub"
               >
-                <i data-lucide="badge-x" class="w-5 h-5"></i>
-              </a>
-              <a
-                href="#"
-                class="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center hover:text-indigo-400 transition-all"
-              >
-                <i data-lucide="instagram" class="w-5 h-5"></i>
-              </a>
-              <a
-                href="#"
-                class="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center hover:text-indigo-400 transition-all"
-              >
-                <i data-lucide="github" class="w-5 h-5"></i>
+                <i data-lucide="github" aria-hidden="true"></i>
               </a>
             </div>
           </div>
         </div>
 
-        <div
-          class="max-w-425 mx-auto border-t border-white/6 pt-8 flex flex-col md:flex-row justify-between items-center gap-4"
-        >
-          <p class="text-zinc-600 text-xs">
-            &copy; 2025 TaleTranscend. Built for the lovers of lore.
-          </p>
-          <div class="flex gap-6 text-zinc-600 text-xs">
-            <a href="#" class="footer-link">Privacy Policy</a>
-            <a href="#" class="footer-link">Terms of Service</a>
-          </div>
+        <div class="page-shell home-footer__base">
+          <p>&copy; 2025 TaleTranscend. Built for the lovers of lore.</p>
         </div>
       </footer>
     </main>
+
+    <div
+      id="reader-toast-container"
+      class="toast-region"
+      role="status"
+      aria-live="polite"
+      aria-atomic="false"
+    ></div>
   </body>
 </html>

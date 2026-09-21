@@ -1,22 +1,46 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <!-- @include: partials/_fade-in-guard.html -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Page Not Found | TaleTranscend</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
+    <title>Page Not Found | TaleTranscend</title>
+    <meta name="description" content="This path leads nowhere. Return to the archive." />
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href="https://taletranscend.web.app/404" />
+
+    <meta name="theme-color" content="#030305" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icon.svg" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="TaleTranscend" />
+    <meta property="og:url" content="https://taletranscend.web.app/404" />
+    <meta property="og:title" content="Page Not Found | TaleTranscend" />
+    <meta property="og:description" content="This path leads nowhere. Return to the archive." />
+    <meta property="og:image" content="https://taletranscend.web.app/icon.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Page Not Found | TaleTranscend" />
+    <meta name="twitter:description" content="This path leads nowhere. Return to the archive." />
+
+    <!-- One font request, identical on every page. Nine different Google
+         Fonts URLs across nine pages meant every navigation re-fetched a
+         slightly different family set and re-rendered the whole document. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Cinzel:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cinzel:wght@500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap"
     />
 
-    <script type="module" src="../features/404/404.js"></script>
+    <script type="module" src="../pages/404/404.js"></script>
   </head>
 
   <body
     class="text-slate-300 antialiased selection:bg-indigo-500/30 flex flex-col h-screen overflow-hidden"
   >
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <!-- Background (matches your existing pages) -->
     <div class="fixed inset-0 -z-10 bg-slate-950">
       <div
@@ -28,7 +52,7 @@
     </div>
 
     <!-- Content -->
-    <main class="flex-1 flex items-center justify-center px-6">
+    <main id="main-content" class="flex-1 flex items-center justify-center px-6">
       <div class="text-center max-w-md">
         <!-- 404 Number -->
         <h1
@@ -47,14 +71,14 @@
         <!-- Actions -->
         <div class="mt-8 flex items-center justify-center gap-4">
           <a
-            href="./index.html"
+            href="/index.html"
             class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 text-sm font-semibold hover:bg-indigo-600/30 hover:text-indigo-200 transition-all"
           >
             <i data-lucide="home" class="w-4 h-4"></i>
             Return Home
           </a>
           <a
-            href="./library.html"
+            href="/library.html"
             class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-slate-300 text-sm font-semibold hover:bg-white/10 hover:text-white transition-all"
           >
             <i data-lucide="library" class="w-4 h-4"></i>
