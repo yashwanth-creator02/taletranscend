@@ -53,45 +53,19 @@
   text-align: left;
 }
 
-.home-hero__badge {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-1) var(--space-4);
-  margin-bottom: var(--space-4);
-  border: 1px solid var(--accent-muted);
-  border-radius: var(--radius-full);
-  background: var(--accent-subtle);
-  color: var(--accent-tint);
+.home-hero__context,
+.home-section__context {
+  display: inline-block;
   font-size: var(--text-xs);
-  font-weight: 700;
-  letter-spacing: var(--tracking-wider);
-  text-transform: uppercase;
-}
-
-.home-hero__pulse {
-  width: 0.375rem;
-  height: 0.375rem;
-  border-radius: var(--radius-full);
-  background: var(--accent);
-  animation: home-pulse 2.4s var(--ease-standard) infinite;
-}
-
-@keyframes home-pulse {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.4;
-    transform: scale(0.75);
-  }
+  font-weight: 600;
+  color: var(--accent-tint);
+  margin-bottom: var(--space-2);
+  letter-spacing: var(--tracking-wide);
 }
 
 .home-hero__title {
   font-family: var(--font-display);
-  font-size: clamp(1.85rem, 1.5rem + 1.2vw, 2.65rem);
+  font-size: clamp(1.85rem, 1.5rem + 1.2vw, 2.5rem);
   font-weight: 700;
   line-height: var(--leading-tight);
   letter-spacing: var(--tracking-tight);
@@ -99,29 +73,6 @@
   margin-bottom: var(--space-3);
   text-align: left;
   text-wrap: balance;
-}
-
-.home-hero__title-accent {
-  display: inline;
-  background: var(--accent-gradient-wide);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  padding-bottom: 0.12em;
-}
-
-.home-hero__rule {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  margin-bottom: var(--space-3);
-}
-
-.home-hero__rule > span:first-child,
-.home-hero__rule > span:last-child {
-  width: clamp(1.25rem, 4vw, 2rem);
-  height: 1px;
-  background: var(--border-strong);
 }
 
 .home-hero__lede {
@@ -229,7 +180,7 @@
   align-items: center;
   padding: var(--space-1) var(--space-3);
   border: 1px solid var(--border);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-xs);
   background: var(--surface-1);
   color: var(--text-secondary);
   font-size: var(--text-xs);
@@ -258,9 +209,9 @@
 
 .home-hero__actions .btn-sm {
   min-height: 36px;
-  padding: var(--space-1) var(--space-3);
+  padding: var(--space-1) var(--space-4);
   font-size: var(--text-xs);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-xs);
 }
 
 .home-hero__actions .btn-icon {
@@ -288,7 +239,7 @@
   width: 100%;
   max-width: 24rem;
   padding: var(--space-5);
-  border-radius: var(--radius-2xl);
+  border-radius: var(--radius-lg);
   border: 1px solid var(--border-strong);
   background: var(--surface-2);
   box-shadow: var(--shadow-lg);
@@ -303,8 +254,8 @@
   left: 0;
   bottom: 0;
   width: 3px;
-  border-top-left-radius: var(--radius-2xl);
-  border-bottom-left-radius: var(--radius-2xl);
+  border-top-left-radius: var(--radius-lg);
+  border-bottom-left-radius: var(--radius-lg);
   background: var(--accent-gradient);
 }
 
@@ -315,26 +266,20 @@
   margin-bottom: var(--space-3);
 }
 
-.hero-showcase-card__eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  color: var(--rune);
+.hero-showcase-card__context {
   font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--rune);
 }
 
-.hero-showcase-card__icon {
-  width: 0.875rem;
-  height: 0.875rem;
-}
-
-.hero-showcase-card__tag {
+.hero-showcase-card__era-tag {
   font-size: 0.6875rem;
   font-weight: 600;
   padding: 2px var(--space-2);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-xs);
   background: var(--accent-subtle);
   color: var(--accent-tint);
+  border: 1px solid var(--accent-muted);
 }
 
 .hero-showcase-card__title {
@@ -426,18 +371,6 @@
 
 .home-section__head > div {
   max-width: 44rem;
-}
-
-.home-section__eyebrow {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-bottom: var(--space-2);
-}
-
-.home-section__dash {
-  width: 2rem;
-  flex: none;
 }
 
 .home-section__head .section-title {
