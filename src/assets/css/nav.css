@@ -395,7 +395,15 @@
 /* ── Mobile Bottom Dock ──────────────────────────────────────────── */
 
 #mobile-dock-container {
-  display: block;
+  display: flex;
+  flex-shrink: 0;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  z-index: 200;
+  padding: 8px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+  background: var(--bg-base);
+  border-top: 1px solid var(--border-subtle);
 }
 
 @media (min-width: 1024px) {
@@ -405,11 +413,10 @@
 }
 
 .mobile-dock {
-  position: fixed;
-  bottom: 20px;
-  left: 16px;
-  right: 16px;
-  height: 76px;
+  position: relative;
+  width: 100%;
+  max-width: 32rem;
+  height: 64px;
   background: rgb(var(--bg-overlay-rgb) / var(--a-11));
   backdrop-filter: blur(40px);
   -webkit-backdrop-filter: blur(40px);
@@ -419,10 +426,9 @@
   align-items: center;
   justify-content: space-around;
   padding: 0 10px;
-  z-index: 200; /* Hover over everything */
   box-shadow:
-    0 20px 50px rgb(var(--dark-rgb) / 0.6),
-    0 0 30px rgb(var(--accent-rgb) / var(--a-05));
+    0 10px 30px rgb(var(--dark-rgb) / 0.5),
+    0 0 20px rgb(var(--accent-rgb) / var(--a-05));
 }
 
 .mobile-dock__item {
