@@ -4,10 +4,10 @@
 
 import { ENABLE_DYNAMIC_TALE_ARTIFACTS } from '@config/app.config.js';
 
-// Centerpiece image assets
-import bookAsset from '@/assets/images/reliquary/book.jpg';
-import lampAsset from '@/assets/images/reliquary/lamp.jpg';
-import watchAsset from '@/assets/images/reliquary/watch.jpg';
+// Centerpiece SVG vector assets with transparent backgrounds
+import bookAsset from '@/assets/images/reliquary/book.svg';
+import lampAsset from '@/assets/images/reliquary/lamp.svg';
+import watchAsset from '@/assets/images/reliquary/watch.svg';
 import mapAsset from '@/assets/images/reliquary/map.svg';
 import quillAsset from '@/assets/images/reliquary/quill.svg';
 import spectaclesAsset from '@/assets/images/reliquary/spectacles.svg';

@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 440" width="100%" height="100%" fill="none">
+  <defs>
+    <!-- Warm golden bulb glow -->
+    <radialGradient id="bulbGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fffbeb" stop-opacity="1"/>
+      <stop offset="25%" stop-color="#fef08a" stop-opacity="0.9"/>
+      <stop offset="55%" stop-color="#f59e0b" stop-opacity="0.6"/>
+      <stop offset="85%" stop-color="#d97706" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#78350f" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Lamp outer aura -->
+    <radialGradient id="lampAura" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.5"/>
+      <stop offset="50%" stop-color="#d97706" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#b45309" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="lightBloom" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Ambient Light Bloom around bulb -->
+  <circle cx="160" cy="190" r="100" fill="url(#lampAura)"/>
+
+  <!-- Ornate Brass Top Finial -->
+  <g transform="translate(160, 25)">
+    <circle cx="0" cy="0" r="7" fill="#fbbf24" stroke="#d4af37" stroke-width="1.5"/>
+    <path d="M -9 7 C -9 7, 0 14, 9 7 L 12 18 L -12 18 Z" fill="#b45309" stroke="#fbbf24" stroke-width="1"/>
+    <!-- Vents / Louvre slits -->
+    <line x1="-8" y1="13" x2="8" y2="13" stroke="#f59e0b" stroke-width="1"/>
+    <line x1="-6" y1="16" x2="6" y2="16" stroke="#f59e0b" stroke-width="1"/>
+  </g>
+
+  <!-- Fluted Brass Lamp Shade (Vintage Archival Bell Shade) -->
+  <path d="M 148 43 L 172 43 L 265 130 C 265 140, 55 140, 55 130 Z" 
+        fill="#2e2014" stroke="#fbbf24" stroke-width="2.2"/>
+  <path d="M 55 130 Q 160 142, 265 130" stroke="#d4af37" stroke-width="2"/>
+
+  <!-- Shade Fluting Lines (Etching) -->
+  <g stroke="#d97706" stroke-width="1" stroke-opacity="0.8">
+    <line x1="160" y1="43" x2="160" y2="136"/>
+    <line x1="154" y1="43" x2="135" y2="134"/>
+    <line x1="166" y1="43" x2="185" y2="134"/>
+    <line x1="150" y1="43" x2="105" y2="132"/>
+    <line x1="170" y1="43" x2="215" y2="132"/>
+    <line x1="148" y1="43" x2="75" y2="130"/>
+    <line x1="172" y1="43" x2="245" y2="130"/>
+  </g>
+
+  <!-- Glowing Glass Bulb (Spherical incandescent) -->
+  <circle cx="160" cy="190" r="46" fill="url(#bulbGlow)" filter="url(#lightBloom)"/>
+  <circle cx="160" cy="190" r="46" stroke="#fbbf24" stroke-width="1.5" stroke-opacity="0.8"/>
+
+  <!-- Glowing Filament (Woven Edison filament coils) -->
+  <g stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" filter="url(#lightBloom)">
+    <line x1="154" y1="210" x2="154" y2="175"/>
+    <line x1="166" y1="210" x2="166" y2="175"/>
+    <path d="M 154 175 C 154 165, 160 160, 160 160 C 160 160, 166 165, 166 175" fill="none"/>
+    <path d="M 151 180 L 157 177 L 151 174 L 157 171" stroke="#fffbeb" stroke-width="1.2"/>
+    <path d="M 163 180 L 169 177 L 163 174 L 169 171" stroke="#fffbeb" stroke-width="1.2"/>
+  </g>
+
+  <!-- Bulb Socket & Rotary Switch Key -->
+  <rect x="146" y="236" width="28" height="22" rx="2" fill="#382516" stroke="#fbbf24" stroke-width="1.5"/>
+  <!-- Ridges on brass socket -->
+  <line x1="146" y1="242" x2="174" y2="242" stroke="#d97706" stroke-width="1"/>
+  <line x1="146" y1="248" x2="174" y2="248" stroke="#d97706" stroke-width="1"/>
+  <line x1="146" y1="254" x2="174" y2="254" stroke="#d97706" stroke-width="1"/>
+  <!-- Switch Key / Turn Thumb -->
+  <path d="M 174 247 L 188 247 L 192 243 L 192 251 L 188 247" stroke="#fbbf24" stroke-width="1.5" fill="#b45309"/>
+
+  <!-- Curved Gooseneck / Archival Brass Arm -->
+  <path d="M 160 258 C 160 300, 130 310, 100 280 C 70 250, 75 140, 110 100" 
+        stroke="#d4af37" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M 160 258 C 160 300, 130 310, 100 280 C 70 250, 75 140, 110 100" 
+        stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+
+  <!-- Ornate Cast Brass Pedestal & Base -->
+  <g transform="translate(160, 340)">
+    <!-- Central column stem -->
+    <rect x="-10" y="-82" width="20" height="82" fill="#2d1c10" stroke="#fbbf24" stroke-width="1.5"/>
+    <circle cx="0" cy="-40" r="14" fill="#3b2716" stroke="#d4af37" stroke-width="1.5"/>
+    <circle cx="0" cy="-40" r="6" fill="#fbbf24"/>
+
+    <!-- Bell plinth / Tiered Base -->
+    <path d="M -22 0 L 22 0 L 38 30 L -38 30 Z" fill="#2d1c10" stroke="#fbbf24" stroke-width="1.8"/>
+    <!-- Base Acanthus / Etching Details -->
+    <path d="M -38 30 L 38 30 L 52 48 C 52 54, -52 54, -52 48 Z" fill="#3b2716" stroke="#d4af37" stroke-width="2"/>
+    <line x1="-46" y1="44" x2="46" y2="44" stroke="#fbbf24" stroke-width="1" stroke-dasharray="3 3"/>
+  </g>
+</svg>

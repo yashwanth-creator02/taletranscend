@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 380" width="100%" height="100%" fill="none">
+  <defs>
+    <!-- Soft warm amber glow for runes -->
+    <filter id="runeGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1" stdDeviation="4" flood-color="#f59e0b" flood-opacity="0.35"/>
+    </filter>
+    <linearGradient id="parchmentPage" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2a241e" stop-opacity="0.95"/>
+      <stop offset="50%" stop-color="#1f1a15" stop-opacity="0.92"/>
+      <stop offset="100%" stop-color="#161310" stop-opacity="0.95"/>
+    </linearGradient>
+    <linearGradient id="leatherCover" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b2716"/>
+      <stop offset="100%" stop-color="#1a1109"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Leather Outer Binding & Metal Clasps (Base) -->
+  <path d="M 40 105 C 120 90, 240 98, 255 125 C 270 98, 390 90, 470 105 C 485 110, 495 285, 475 325 C 395 305, 275 315, 255 340 C 235 315, 115 305, 35 325 C 15 285, 25 110, 40 105 Z" 
+        fill="url(#leatherCover)" stroke="#d4af37" stroke-width="2.5"/>
+
+  <!-- Metal Corner Brackets & Clasp Hinges -->
+  <!-- Left Corner Top -->
+  <path d="M 40 105 L 65 102 L 68 128 L 52 132 L 40 105 Z" fill="#92400e" stroke="#fbbf24" stroke-width="1.2"/>
+  <circle cx="56" cy="116" r="2" fill="#fbbf24"/>
+  <!-- Left Corner Bottom -->
+  <path d="M 35 325 L 62 320 L 65 295 L 48 298 L 35 325 Z" fill="#92400e" stroke="#fbbf24" stroke-width="1.2"/>
+  <circle cx="53" cy="310" r="2" fill="#fbbf24"/>
+  <!-- Right Corner Top -->
+  <path d="M 470 105 L 445 102 L 442 128 L 458 132 L 470 105 Z" fill="#92400e" stroke="#fbbf24" stroke-width="1.2"/>
+  <circle cx="454" cy="116" r="2" fill="#fbbf24"/>
+  <!-- Right Corner Bottom -->
+  <path d="M 475 325 L 448 320 L 445 295 L 462 298 L 475 325 Z" fill="#92400e" stroke="#fbbf24" stroke-width="1.2"/>
+  <circle cx="457" cy="310" r="2" fill="#fbbf24"/>
+
+  <!-- Page Edges Stack (Lower Sheets) -->
+  <path d="M 45 115 C 120 102, 235 110, 255 132 C 275 110, 390 102, 465 115 C 475 140, 475 290, 465 315 C 390 298, 275 308, 255 330 C 235 308, 120 298, 45 315 C 35 290, 35 140, 45 115 Z" 
+        fill="#261f18" stroke="#92400e" stroke-width="1"/>
+  <path d="M 50 120 C 120 108, 235 116, 255 136 C 275 116, 390 108, 460 120" stroke="#78350f" stroke-width="1" stroke-dasharray="2 3"/>
+
+  <!-- Main Open Pages (Parchment Leafs) -->
+  <!-- Left Leaf -->
+  <path d="M 55 125 C 130 110, 235 120, 253 145 L 253 325 C 235 300, 130 295, 52 308 C 46 250, 48 180, 55 125 Z" 
+        fill="url(#parchmentPage)" stroke="#d4af37" stroke-width="1.8" filter="url(#runeGlow)"/>
+  
+  <!-- Left Page Ornate Border -->
+  <path d="M 70 140 C 130 128, 220 135, 238 155 L 238 308 C 220 290, 130 284, 68 295 Z" 
+        stroke="#d4af37" stroke-width="1" stroke-dasharray="8 2 2 2" stroke-opacity="0.7"/>
+
+  <!-- Left Page Celestial Mandala / Runic Circle -->
+  <g transform="translate(150, 220)">
+    <circle cx="0" cy="0" r="44" stroke="#fbbf24" stroke-width="1.4" stroke-opacity="0.8"/>
+    <circle cx="0" cy="0" r="38" stroke="#d97706" stroke-width="0.8" stroke-dasharray="3 3"/>
+    <!-- Celestial Hexagram / Astrological Star -->
+    <polygon points="0,-36 31,18 -31,18" stroke="#f59e0b" stroke-width="1.2" fill="none" stroke-opacity="0.85"/>
+    <polygon points="0,36 31,-18 -31,-18" stroke="#f59e0b" stroke-width="1.2" fill="none" stroke-opacity="0.85"/>
+    <circle cx="0" cy="0" r="14" stroke="#fbbf24" stroke-width="1"/>
+    <circle cx="0" cy="0" r="5" fill="#f59e0b"/>
+    <!-- Planetary Orbit Nodes -->
+    <circle cx="0" cy="-38" r="2.5" fill="#fbbf24"/>
+    <circle cx="33" cy="19" r="2.5" fill="#fbbf24"/>
+    <circle cx="-33" cy="19" r="2.5" fill="#fbbf24"/>
+    <circle cx="0" cy="38" r="2.5" fill="#d97706"/>
+    <circle cx="33" cy="-19" r="2.5" fill="#d97706"/>
+    <circle cx="-33" cy="-19" r="2.5" fill="#d97706"/>
+  </g>
+
+  <!-- Left Page Ancient Cuneiform / Script Lines -->
+  <g stroke="#fbbf24" stroke-opacity="0.65" stroke-width="1" stroke-linecap="round">
+    <line x1="80" y1="155" x2="225" y2="155"/>
+    <line x1="80" y1="165" x2="220" y2="165"/>
+    <line x1="80" y1="280" x2="225" y2="280"/>
+    <line x1="80" y1="290" x2="190" y2="290"/>
+  </g>
+
+  <!-- Book Spine Center Gutter & Ribbon Bookmark -->
+  <path d="M 253 145 C 255 180, 255 280, 255 330" stroke="#b45309" stroke-width="3"/>
+  <path d="M 255 140 C 265 200, 240 280, 258 355 L 268 350 L 265 335" fill="#b91c1c" stroke="#dc2626" stroke-width="1.2"/>
+
+  <!-- Right Leaf (Turned Page with slight curl) -->
+  <path d="M 257 145 C 275 120, 380 110, 455 125 C 462 180, 464 250, 458 308 C 380 295, 275 300, 257 325 Z" 
+        fill="url(#parchmentPage)" stroke="#d4af37" stroke-width="1.8" filter="url(#runeGlow)"/>
+
+  <!-- Right Page Ornate Border -->
+  <path d="M 272 155 C 290 135, 380 128, 440 140 L 442 295 C 380 284, 290 290, 272 308 Z" 
+        stroke="#d4af37" stroke-width="1" stroke-dasharray="8 2 2 2" stroke-opacity="0.7"/>
+
+  <!-- Right Page Illuminated Drop Cap 'T' -->
+  <rect x="280" y="165" width="34" height="34" fill="#312213" stroke="#fbbf24" stroke-width="1.5"/>
+  <text x="289" y="191" font-family="Cinzel, serif" font-size="24" font-weight="700" fill="#f59e0b">T</text>
+
+  <!-- Right Page Handwritten Script Lines -->
+  <g stroke="#fbbf24" stroke-opacity="0.6" stroke-width="1" stroke-linecap="round">
+    <line x1="322" y1="172" x2="430" y2="172"/>
+    <line x1="322" y1="184" x2="425" y2="184"/>
+    <line x1="322" y1="196" x2="415" y2="196"/>
+    <line x1="282" y1="212" x2="430" y2="212"/>
+    <line x1="282" y1="224" x2="428" y2="224"/>
+    <line x1="282" y1="236" x2="420" y2="236"/>
+    <line x1="282" y1="248" x2="430" y2="248"/>
+    <line x1="282" y1="260" x2="425" y2="260"/>
+    <line x1="282" y1="272" x2="410" y2="272"/>
+    <line x1="282" y1="284" x2="380" y2="284"/>
+  </g>
+</svg>

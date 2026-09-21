@@ -1,3 +1,8 @@
+// src/pages/home/reliquary.js
+// Interactive centerpiece for the hero section: The Archive Reliquary (Scholar's Tableau).
+// Renders individual, animated mythic artifacts (grimoire, lamp, watch, map, spectacles, quill, spirits).
+// Completely borderless, seamless blend with transparent SVGs and dynamic hover reveals.
+
 import { getReliquaryArtifacts } from './reliquary.data.js';
 import { escapeHtml, createLogger } from '@/utils';
 import { initIcons } from '@ui/components/icons.js';
@@ -33,7 +38,7 @@ export function initReliquary(containerId = 'archive-reliquary-container', tales
   _setupMotesCanvas(container);
   _setupParallax(container);
 
-  log.info(`Archive Reliquary initialized with ${artifacts.length} artifacts`);
+  log.info(`Archive Reliquary initialized with ${artifacts.length} transparent vector artifacts`);
 }
 
 /**
@@ -51,7 +56,7 @@ export function teardownReliquary() {
 }
 
 /**
- * Builds the HTML structure for the reliquary tableau.
+ * Builds the HTML structure for the borderless reliquary tableau.
  *
  * @param {import('./reliquary.data.js').ReliquaryArtifact[]} artifacts
  * @returns {string}
@@ -61,7 +66,7 @@ function _buildReliquaryMarkup(artifacts) {
 
   return `
     <div class="archive-reliquary" role="region" aria-label="The Archive Reliquary: Interactive Mythic Artifacts">
-      <!-- Ambient light aura (emanating from the lamp position) -->
+      <!-- Soft ambient warm glow behind lamp (seamless blend) -->
       <div class="reliquary-lamp-halo" aria-hidden="true"></div>
 
       <!-- Canvas for drifting memory spirit motes -->
@@ -72,43 +77,48 @@ function _buildReliquaryMarkup(artifacts) {
         ${artifacts.map((artifact) => _buildArtifactNode(artifact)).join('')}
       </div>
 
-      <!-- Relic Inspector HUD (displays active lore on hover/selection) -->
-      <div id="relic-inspector" class="relic-inspector glass-strong" role="status" aria-live="polite">
-        <div class="relic-inspector__header">
+      <!-- Discreet Hover Plaque (only appears when an artifact is hovered or focused) -->
+      <div id="relic-inspector" class="relic-inspector relic-inspector--hover-only" role="status" aria-live="polite">
+        <div class="relic-inspector__row">
           <span id="relic-inspector-era" class="relic-inspector__era">${escapeHtml(defaultItem.era)}</span>
-          <span class="relic-inspector__badge">Archive Relic</span>
-        </div>
-        <h4 id="relic-inspector-title" class="relic-inspector__title">${escapeHtml(defaultItem.title)}</h4>
-        <p id="relic-inspector-tale" class="relic-inspector__tale">
-          Chronicle: <strong class="text-accent-tint">${escapeHtml(defaultItem.taleTitle)}</strong>
-        </p>
-        <p id="relic-inspector-lore" class="relic-inspector__lore">${escapeHtml(defaultItem.lore)}</p>
-        <div class="relic-inspector__footer">
-          <a id="relic-inspector-link" href="${escapeHtml(defaultItem.readUrl)}" class="relic-inspector__cta btn btn-primary btn-sm">
-            <span>Explore Chronicle</span>
+          <span class="relic-inspector__divider" aria-hidden="true">&middot;</span>
+          <h4 id="relic-inspector-title" class="relic-inspector__title">${escapeHtml(defaultItem.title)}</h4>
+          <span class="relic-inspector__action">
+            <span class="relic-inspector__action-text">Explore chronicle</span>
             <i data-lucide="arrow-right"></i>
-          </a>
+          </span>
         </div>
+        <p id="relic-inspector-tale" class="sr-only">
+          Chronicle: ${escapeHtml(defaultItem.taleTitle)}
+        </p>
+        <p id="relic-inspector-lore" class="sr-only">${escapeHtml(defaultItem.lore)}</p>
+        <a id="relic-inspector-link" href="${escapeHtml(defaultItem.readUrl)}" class="sr-only">
+          Explore ${escapeHtml(defaultItem.title)}
+        </a>
       </div>
     </div>
   `;
 }
 
 /**
- * Builds an individual artifact DOM element.
+ * Builds an individual artifact DOM link node with attached floating hover badge.
  *
  * @param {import('./reliquary.data.js').ReliquaryArtifact} artifact
  * @returns {string}
  */
 function _buildArtifactNode(artifact) {
-  const { id, type, title, asset, position, zIndex, animation } = artifact;
+  const { id, type, title, era, taleTitle, asset, readUrl, position, zIndex, animation } = artifact;
   const isSelected = id === activeRelicId;
 
   return `
-    <div
+    <a
+      href="${escapeHtml(readUrl)}"
       class="reliquary-item ${animation} ${isSelected ? 'is-selected' : ''}"
       data-relic-id="${escapeHtml(id)}"
       data-relic-type="${escapeHtml(type)}"
+      data-relic-title="${escapeHtml(title)}"
+      data-relic-era="${escapeHtml(era)}"
+      data-relic-tale="${escapeHtml(taleTitle)}"
       style="
         left: ${position.left};
         top: ${position.top};
@@ -117,7 +127,7 @@ function _buildArtifactNode(artifact) {
       "
       role="button"
       tabindex="0"
-      aria-label="${escapeHtml(title)}: Select to inspect lore"
+      aria-label="${escapeHtml(title)}: ${escapeHtml(era)} &middot; Explore ${escapeHtml(taleTitle)}"
       aria-expanded="${isSelected ? 'true' : 'false'}"
     >
       <div class="reliquary-item__glow" aria-hidden="true"></div>
@@ -125,10 +135,15 @@ function _buildArtifactNode(artifact) {
         src="${asset}"
         alt="${escapeHtml(title)}"
         class="reliquary-item__asset reliquary-item__asset--${type}"
-        loading="lazy"
+        loading="eager"
         draggable="false"
       />
-    </div>
+      <!-- Contextual floating pill attached to each piece -->
+      <span class="reliquary-item__pill" aria-hidden="true">
+        <span class="reliquary-item__pill-text">${escapeHtml(title)}</span>
+        <span class="reliquary-item__pill-arrow">&rarr;</span>
+      </span>
+    </a>
   `;
 }
 
@@ -147,7 +162,9 @@ function _setupInteractivity(container, artifacts) {
   const loreEl = container.querySelector('#relic-inspector-lore');
   const linkEl = container.querySelector('#relic-inspector-link');
 
-  function selectArtifact(artifact) {
+  let hideTimer = null;
+
+  function selectArtifact(artifact, showInspector = true) {
     if (!artifact) return;
     activeRelicId = artifact.id;
 
@@ -160,37 +177,56 @@ function _setupInteractivity(container, artifacts) {
     if (eraEl) eraEl.textContent = artifact.era;
     if (titleEl) titleEl.textContent = artifact.title;
     if (taleEl) {
-      taleEl.innerHTML = `Chronicle: <strong class="text-accent-tint">${escapeHtml(artifact.taleTitle)}</strong>`;
+      taleEl.textContent = `Chronicle: ${artifact.taleTitle}`;
     }
     if (loreEl) loreEl.textContent = artifact.lore;
     if (linkEl) linkEl.setAttribute('href', artifact.readUrl);
 
-    if (inspector) {
-      inspector.classList.remove('relic-inspector--pulse');
-      void inspector.offsetWidth; // trigger reflow for pulse animation
-      inspector.classList.add('relic-inspector--pulse');
+    if (inspector && showInspector) {
+      if (hideTimer) clearTimeout(hideTimer);
+      inspector.classList.add('is-visible');
     }
+  }
+
+  function hideInspector() {
+    if (hideTimer) clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => {
+      if (inspector) inspector.classList.remove('is-visible');
+    }, 400);
   }
 
   items.forEach((item) => {
     const relicId = item.dataset.relicId;
     const artifact = artifacts.find((a) => a.id === relicId);
 
-    const onEnter = () => selectArtifact(artifact);
-    const onClick = () => selectArtifact(artifact);
+    const onEnter = () => selectArtifact(artifact, true);
+    const onLeave = () => hideInspector();
+    const onClick = () => {
+      // Allow link navigation while recording selection
+      selectArtifact(artifact, false);
+    };
     const onKey = (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        selectArtifact(artifact);
+        selectArtifact(artifact, true);
+        if (artifact?.readUrl) {
+          window.location.href = artifact.readUrl;
+        }
       }
     };
 
     item.addEventListener('mouseenter', onEnter);
+    item.addEventListener('mouseleave', onLeave);
+    item.addEventListener('focus', onEnter);
+    item.addEventListener('blur', onLeave);
     item.addEventListener('click', onClick);
     item.addEventListener('keydown', onKey);
 
     cleanupFns.push(() => {
       item.removeEventListener('mouseenter', onEnter);
+      item.removeEventListener('mouseleave', onLeave);
+      item.removeEventListener('focus', onEnter);
+      item.removeEventListener('blur', onLeave);
       item.removeEventListener('click', onClick);
       item.removeEventListener('keydown', onKey);
     });
