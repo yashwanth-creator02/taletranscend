@@ -159,6 +159,7 @@ function _renderTrendingCard(tale) {
           alt="${safeTitle}"
           class="home-tale-card__img"
           loading="lazy"
+          onerror="this.onerror=null;this.src='${DEFAULT_COVER_URL}';"
         />
       </div>
 

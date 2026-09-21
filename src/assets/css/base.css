@@ -276,12 +276,14 @@ select:focus-visible {
   padding-inline: var(--page-gutter);
 }
 
-/* Clears the fixed mobile dock so the last row of any list is reachable. */
+/* Clears the fixed mobile bottom dock so the last row or footer is fully reachable.
+   The mobile dock is 76px tall with a 20px bottom offset (96px total height)
+   and remains active on all viewports below 1024px. */
 .dock-clearance {
-  padding-bottom: calc(var(--nav-dock-height) + env(safe-area-inset-bottom, 0px) + var(--space-5));
+  padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px) + var(--space-7));
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
   .dock-clearance {
     padding-bottom: var(--space-6);
   }
