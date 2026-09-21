@@ -1,6 +1,6 @@
 import { getReliquaryArtifacts } from './reliquary.data.js';
-import { escapeHtml } from '@/utils/string.utils.ts';
-import { createLogger } from '@/utils/logger.ts';
+import { escapeHtml, createLogger } from '@/utils';
+import { initIcons } from '@ui/components/icons.js';
 
 const log = createLogger('Reliquary');
 
@@ -27,6 +27,7 @@ export function initReliquary(containerId = 'archive-reliquary-container', tales
   activeRelicId = artifacts[0]?.id || null;
 
   container.innerHTML = _buildReliquaryMarkup(artifacts);
+  initIcons();
 
   _setupInteractivity(container, artifacts);
   _setupMotesCanvas(container);

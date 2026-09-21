@@ -25,14 +25,20 @@ const log = createLogger('Home');
 initPageReveal();
 initNav();
 
-document.addEventListener('DOMContentLoaded', () => {
+function init() {
   log.info('Home page initialized');
   initIcons();
   initReliquary('archive-reliquary-container');
   _initInteractions();
   readyReveal();
   _loadTrendingTales();
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
 
 /* ─────────────────────────────────────────────
    Interactions

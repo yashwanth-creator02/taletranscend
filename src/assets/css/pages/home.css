@@ -266,6 +266,13 @@
   }
 }
 
+#archive-reliquary-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 /* ── Tableau Container ────────────────────────────────────────────────── */
 
 .archive-reliquary {
