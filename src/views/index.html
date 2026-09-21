@@ -57,53 +57,104 @@
         <div class="home-hero__glow" aria-hidden="true"></div>
 
         <div class="page-shell home-hero__inner">
-          <p class="home-hero__badge">
-            <span class="home-hero__pulse" aria-hidden="true"></span>
-            The Eternal Archive
-          </p>
+          <!-- ── Left Column: Editorial Info & Search ── -->
+          <div class="home-hero__content">
+            <p class="home-hero__badge">
+              <span class="home-hero__pulse" aria-hidden="true"></span>
+              The Eternal Archive
+            </p>
 
-          <h1 class="home-hero__title">
-            Myth &amp;
-            <span class="home-hero__title-accent">Memory.</span>
-          </h1>
+            <h1 class="home-hero__title">
+              Myth &amp;
+              <span class="home-hero__title-accent">Memory.</span>
+            </h1>
 
-          <p class="home-hero__rule" aria-hidden="true">
-            <span></span>
-            <span class="eyebrow">Living Lore, Preserved</span>
-            <span></span>
-          </p>
+            <p class="home-hero__rule" aria-hidden="true">
+              <span></span>
+              <span class="eyebrow">Living Lore, Preserved</span>
+              <span></span>
+            </p>
 
-          <p class="home-hero__lede">
-            Where folklore breathes and sacred legends are kept for the dreamers of the future.
-          </p>
+            <p class="home-hero__lede">
+              Where folklore breathes and sacred legends are kept for the dreamers of the future.
+            </p>
 
-          <!-- ── Search ── -->
-          <form class="home-search input-glow" id="home-search-form" role="search">
-            <label class="sr-only" for="home-search-input">Search the archive</label>
-            <i data-lucide="search" class="home-search__icon" aria-hidden="true"></i>
-            <input
-              id="home-search-input"
-              name="q"
-              type="search"
-              autocomplete="off"
-              class="home-search__input"
-              placeholder="Search tales, tellers and traditions…"
-            />
-            <button type="submit" id="home-search-btn" class="btn btn-primary home-search__submit">
-              Search
-            </button>
-          </form>
+            <!-- ── Search ── -->
+            <form class="home-search input-glow" id="home-search-form" role="search">
+              <label class="sr-only" for="home-search-input">Search the archive</label>
+              <i data-lucide="search" class="home-search__icon" aria-hidden="true"></i>
+              <input
+                id="home-search-input"
+                name="q"
+                type="search"
+                autocomplete="off"
+                class="home-search__input"
+                placeholder="Search tales, tellers and traditions…"
+              />
+              <button
+                type="submit"
+                id="home-search-btn"
+                class="btn btn-primary home-search__submit"
+              >
+                Search
+              </button>
+            </form>
 
-          <ul class="home-tags" aria-label="Suggested topics">
-            <li><a class="home-tag" href="/library.html?search=folklore">Folklore</a></li>
-            <li>
-              <a class="home-tag" href="/library.html?search=mythic%20fiction">Mythic Fiction</a>
-            </li>
-            <li><a class="home-tag" href="/library.html?search=sacred">Sacred Archives</a></li>
-            <li>
-              <a class="home-tag" href="/library.html?search=oral%20tradition">Oral Tradition</a>
-            </li>
-          </ul>
+            <ul class="home-tags" aria-label="Suggested topics">
+              <li><a class="home-tag" href="/library.html?search=folklore">Folklore</a></li>
+              <li>
+                <a class="home-tag" href="/library.html?search=mythic%20fiction">Mythic Fiction</a>
+              </li>
+              <li><a class="home-tag" href="/library.html?search=sacred">Sacred Archives</a></li>
+              <li>
+                <a class="home-tag" href="/library.html?search=oral%20tradition">Oral Tradition</a>
+              </li>
+            </ul>
+
+            <div class="home-hero__actions">
+              <a href="/library.html" class="btn btn-ghost btn-sm">
+                <i data-lucide="compass" class="btn-icon" aria-hidden="true"></i>
+                Browse Library
+              </a>
+              <a href="/contribution.html" class="btn btn-ghost btn-sm">
+                <i data-lucide="feather" class="btn-icon" aria-hidden="true"></i>
+                Inscribe Tale
+              </a>
+            </div>
+          </div>
+
+          <!-- ── Right Column: Editorial Visual Showcase ── -->
+          <div class="home-hero__showcase" aria-hidden="true">
+            <div class="hero-showcase-card glass-strong">
+              <div class="hero-showcase-card__header">
+                <span class="eyebrow hero-showcase-card__eyebrow">
+                  <i data-lucide="sparkles" class="hero-showcase-card__icon"></i>
+                  Featured Codex
+                </span>
+                <span class="hero-showcase-card__tag">Oral Tradition</span>
+              </div>
+              <h3 class="hero-showcase-card__title">The Song of Gilgamesh</h3>
+              <p class="hero-showcase-card__author">Mesopotamian Scribe &middot; 12 Tablets</p>
+              <blockquote class="hero-showcase-card__quote">
+                &ldquo;He who saw the deep, the country&rsquo;s foundation, who knew the ways, was
+                wise in all things&hellip;&rdquo;
+              </blockquote>
+              <div class="hero-showcase-card__footer">
+                <span class="hero-showcase-card__read-time">
+                  <i data-lucide="clock" class="hero-showcase-card__meta-icon"></i>
+                  8 min read
+                </span>
+                <a
+                  href="/library.html?search=gilgamesh"
+                  class="hero-showcase-card__link"
+                  tabindex="-1"
+                >
+                  <span>Explore Fragment</span>
+                  <i data-lucide="arrow-right"></i>
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -137,15 +188,16 @@
         <div class="home-cta glass-strong">
           <div class="home-cta__wash" aria-hidden="true"></div>
 
-          <div class="home-cta__grid">
-            <div>
+          <div class="home-cta__inner">
+            <div class="home-cta__newsletter">
               <p class="home-section__eyebrow">
                 <span class="section-divider home-section__dash" aria-hidden="true"></span>
                 <span class="eyebrow">Join the circle</span>
               </p>
               <h2 class="home-cta__title">Receive the latest myths as they are recovered.</h2>
               <p class="section-lede home-cta__lede">
-                New stories, archive updates and restored fragments — occasionally, never noisily.
+                New stories, archive updates and restored fragments &mdash; occasionally, never
+                noisily.
               </p>
 
               <form id="newsletter-form" class="home-cta__form">
@@ -164,30 +216,24 @@
               <p class="home-cta__note">No spam. Unsubscribe whenever you like.</p>
             </div>
 
-            <div class="home-cta__aside">
-              <article class="glass home-write">
-                <span class="home-write__icon" aria-hidden="true">
-                  <i data-lucide="pen-tool"></i>
-                </span>
-                <h3 class="home-write__title">Become a Chronicler</h3>
-                <p class="home-write__body">
-                  Got a legend worth keeping? The archive is always open to new storytellers.
-                </p>
-                <button id="home-start-writing-btn" class="btn btn-primary btn--block">
+            <div class="home-cta__scribe">
+              <div class="home-cta__scribe-box glass">
+                <div class="home-cta__scribe-icon">
+                  <i data-lucide="feather"></i>
+                </div>
+                <div>
+                  <h3 class="home-cta__scribe-title">Become a Chronicler</h3>
+                  <p class="home-cta__scribe-text">
+                    Got a legend worth keeping? Inscribe your tale.
+                  </p>
+                </div>
+                <button
+                  id="home-start-writing-btn"
+                  class="btn btn-primary btn-sm home-cta__scribe-btn"
+                >
                   Start writing
                   <i data-lucide="chevron-right" aria-hidden="true"></i>
                 </button>
-              </article>
-
-              <div class="home-facts">
-                <div class="glass home-fact">
-                  <p class="eyebrow">Daily ritual</p>
-                  <p class="home-fact__value">Fresh stories every day</p>
-                </div>
-                <div class="glass home-fact">
-                  <p class="eyebrow">Creator path</p>
-                  <p class="home-fact__value">Write, publish, preserve</p>
-                </div>
               </div>
             </div>
           </div>
