@@ -396,14 +396,17 @@
 
 #mobile-dock-container {
   display: flex;
-  flex-shrink: 0;
   justify-content: center;
   align-items: center;
-  position: relative;
-  z-index: 200;
-  padding: 8px 16px calc(10px + env(safe-area-inset-bottom, 0px));
-  background: var(--bg-base);
-  border-top: 1px solid var(--border-subtle);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-nav);
+  padding: 0 var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+  background: transparent;
+  border-top: none;
+  pointer-events: none;
 }
 
 @media (min-width: 1024px) {
@@ -414,6 +417,7 @@
 
 .mobile-dock {
   position: relative;
+  pointer-events: auto;
   width: 100%;
   max-width: 32rem;
   height: 64px;
@@ -421,11 +425,11 @@
   backdrop-filter: blur(40px);
   -webkit-backdrop-filter: blur(40px);
   border: 1px solid rgb(var(--light-rgb) / var(--a-05));
-  border-radius: 26px;
+  border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: 0 10px;
+  padding: 0 var(--space-3);
   box-shadow:
     0 10px 30px rgb(var(--dark-rgb) / 0.5),
     0 0 20px rgb(var(--accent-rgb) / var(--a-05));

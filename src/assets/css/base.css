@@ -281,6 +281,12 @@ select:focus-visible {
   padding-bottom: var(--space-6);
 }
 
+@media (max-width: 63.99rem) {
+  .dock-clearance {
+    padding-bottom: calc(var(--space-8) + 5rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 /* ── Scrollbar ─────────────────────────────────────────────────────────── */
 
 * {
