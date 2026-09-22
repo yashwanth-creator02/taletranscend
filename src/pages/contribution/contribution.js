@@ -27,13 +27,11 @@ import {
 } from './index.js';
 import { debounce } from '@/utils';
 import { setupAuthTimeout } from '@/utils';
-import { initNav } from '@ui/components/nav/nav.js';
 import { refineMythicText } from '@services/index.js';
 import { AI_API_KEY } from '@config/app.config.js';
 import { showToast } from '@ui/components/toast.js';
 
 initPageReveal();
-initNav();
 
 /* ── Draft ID ─────────────────────────────────────────────────────── */
 // Resolve ?draft=<id> from URL before auth resolves so loadDraft() has it.
@@ -56,11 +54,13 @@ initAuth(async () => {
  * @param {string} _userId - Authenticated user ID (unused directly — auth state used internally)
  */
 async function init() {
+  bindAtelierViewEvents();
   bindEditorEvents();
   bindMetadataEvents();
   bindVoiceEvents();
   bindCoverEvents();
   bindAIEvents();
+  bindPresetEvents();
 
   const hasDraft = await loadDraft();
 
@@ -80,6 +80,15 @@ async function init() {
 /* ── Editor Events ────────────────────────────────────────────────── */
 
 function bindEditorEvents() {
+  // Back navigation to previous visited page
+  document.getElementById('btn-back')?.addEventListener('click', () => {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = '/shelf.html';
+    }
+  });
+
   // Chapter controls
   document.getElementById('add-chapter-btn')?.addEventListener('click', addNewChapter);
 
@@ -385,4 +394,91 @@ export function setStatus(message, type) {
 
   status.classList.add(colors[type] ?? 'text-zinc-500');
   status.textContent = message;
+}
+
+/* ── Atelier Workspace Views & Presets ────────────────────────────── */
+
+function bindAtelierViewEvents() {
+  const main = document.getElementById('main-content');
+  const buttons = document.querySelectorAll('[data-atelier-view]');
+  if (!main || !buttons.length) return;
+
+  const setView = (view) => {
+    main.setAttribute('data-view', view);
+    buttons.forEach((btn) => {
+      btn.classList.toggle('atelier-nav-pill--active', btn.dataset.atelierView === view);
+    });
+    try {
+      localStorage.setItem('atelier_view_mode', view);
+    } catch {
+      // ignore storage errors
+    }
+  };
+
+  try {
+    const saved = localStorage.getItem('atelier_view_mode');
+    if (saved && (saved === 'manuscript' || saved === 'lore' || saved === 'split')) {
+      if (saved === 'split' && window.innerWidth < 1024) {
+        setView('manuscript');
+      } else {
+        setView(saved);
+      }
+    }
+  } catch {
+    // ignore storage errors
+  }
+
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      setView(btn.dataset.atelierView);
+    });
+  });
+}
+
+function bindPresetEvents() {
+  // Preset cover click
+  document.querySelectorAll('[data-preset-cover]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const url = btn.dataset.presetCover;
+      const urlInput = document.getElementById('cover-url');
+      const preview = document.getElementById('tale-cover-preview');
+      if (urlInput) urlInput.value = url;
+      if (preview) preview.src = url;
+      state.coverUrl = url;
+      state.isDirty = true;
+      showToast('Grimoire cover chosen.', 'info');
+      updateChecklist();
+    });
+  });
+
+  // Mythic Era pills click
+  document.querySelectorAll('[data-era-pill]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const era = btn.dataset.eraPill;
+      const eraInput = document.getElementById('tale-era');
+      if (eraInput) {
+        eraInput.value = era;
+        eraInput.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      state.era = era;
+      state.isDirty = true;
+      document.querySelectorAll('[data-era-pill]').forEach((p) => {
+        p.classList.toggle('era-pill--active', p.dataset.eraPill === era);
+      });
+      updateChecklist();
+    });
+  });
+
+  // Rune Divider button
+  document.getElementById('rune-divider-btn')?.addEventListener('click', () => {
+    const area = document.getElementById('chapter-content');
+    if (!area) return;
+    const divider = '\n\n✦ ✦ ✦\n\n';
+    const start = area.selectionStart ?? area.value.length;
+    const end = area.selectionEnd ?? area.value.length;
+    area.value = area.value.substring(0, start) + divider + area.value.substring(end);
+    area.dispatchEvent(new Event('input', { bubbles: true }));
+    area.focus();
+    area.selectionStart = area.selectionEnd = start + divider.length;
+  });
 }

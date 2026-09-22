@@ -57,6 +57,17 @@ export function updateStats() {
   setText('stat-words-right', String(words));
   setText('stat-chars', `${chars} Characters`);
   setText('stat-reading-time', readingLabel);
+
+  const milestoneEl = document.getElementById('manuscript-milestone');
+  if (milestoneEl) {
+    const label = milestoneEl.querySelector('span');
+    if (label) {
+      if (words < 100) label.textContent = 'Folklore Spark';
+      else if (words < 300) label.textContent = 'Mythic Fragment';
+      else if (words < 600) label.textContent = 'Living Chronicle';
+      else label.textContent = 'Epic Legend';
+    }
+  }
 }
 
 log.debug('Editor initialized');
