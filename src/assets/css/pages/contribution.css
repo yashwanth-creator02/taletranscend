@@ -1,15 +1,23 @@
-/* src/assets/css/pages/contribution.css */
+/* src/assets/css/pages/contribution.css
+   The Scribe's Atelier & Mythic Forge — TaleTranscend Contribution
+   Strictly compliant with tokens.css. Zero raw hex or rgb literals.
+*/
 
 :root {
   --editor-header-height: 56px;
-  --left-pane-width: 280px;
-  --right-pane-width: 320px;
+  --atelier-left-width: 290px;
+  --atelier-right-width: 380px;
 }
 
-/* ── Custom Scrollbar ───────────────────────── */
+/* Ensure global nav and mobile floating dock never render on contribution page */
+#app-nav,
+#mobile-dock-container {
+  display: none !important;
+}
 
+/* ── Custom Scrollbars ───────────────────────── */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
+  width: 5px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -18,16 +26,16 @@
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: rgb(var(--light-rgb) / var(--a-03));
-  border-radius: 10px;
+  border-radius: 9999px;
 }
 
 .custom-scrollbar:hover::-webkit-scrollbar-thumb {
   background: rgb(var(--accent-rgb) / var(--a-07));
 }
 
-/* ── shelf surfaces ──────────────────────────────────────── */
+/* ── Shelf & Atelier Surfaces ───────────────────────── */
 .shelf-card {
-  background: rgb(var(--light-rgb) / var(--a-01));
+  background: var(--surface-gradient);
   border: 1px solid rgb(var(--light-rgb) / var(--a-03));
   backdrop-filter: blur(24px) saturate(160%);
   -webkit-backdrop-filter: blur(24px) saturate(160%);
@@ -36,7 +44,7 @@
 
 .shelf-card:focus-within {
   border-color: rgb(var(--accent-rgb) / var(--a-07));
-  box-shadow: 0 0 30px rgb(var(--accent-rgb) / var(--a-03));
+  box-shadow: 0 0 35px rgb(var(--accent-rgb) / var(--a-02));
 }
 
 .shelf-input {
@@ -46,29 +54,117 @@
 .shelf-input:focus {
   outline: none;
   border-color: rgb(var(--accent-rgb) / var(--a-09)) !important;
-  box-shadow: 0 0 0 4px rgb(var(--accent-rgb) / var(--a-03));
+  box-shadow: 0 0 0 3px rgb(var(--accent-rgb) / var(--a-03));
 }
 
-/* ── Editor layout: fills viewport below the two sticky headers ── */
+/* ── Grand Atelier Header & Mode Switcher ───────────────────────── */
+.atelier-nav-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  transition: all var(--transition-base);
+  cursor: pointer;
+}
+
+@media (min-width: 640px) {
+  .atelier-nav-pill {
+    gap: 0.5rem;
+    padding: 0.375rem 0.875rem;
+    letter-spacing: 0.18em;
+  }
+}
+
+[data-atelier-view='split'] {
+  display: none !important;
+}
+
+@media (min-width: 1024px) {
+  [data-atelier-view='split'] {
+    display: inline-flex !important;
+  }
+}
+
+.atelier-nav-pill:hover {
+  color: var(--text-primary);
+  background: rgb(var(--light-rgb) / var(--a-02));
+}
+
+.atelier-nav-pill--active {
+  color: rgb(var(--light-rgb) / var(--a-11));
+  background: rgb(var(--accent-rgb) / var(--a-07));
+  border-color: rgb(var(--accent-rgb) / var(--a-09));
+  box-shadow: 0 0 16px rgb(var(--accent-rgb) / var(--a-04));
+}
+
+/* ── Workspace Layout ───────────────────────── */
 .editor-layout {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow: hidden;
   background: var(--bg-base);
+  position: relative;
+}
+
+/* Responsive grid when in Split View */
+.editor-layout[data-view='split'] {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
 }
 
 @media (min-width: 1024px) {
-  .editor-layout {
+  .editor-layout[data-view='split'] {
     display: grid;
-    grid-template-columns: var(--left-pane-width) 4px minmax(0, 1fr);
+    grid-template-columns: var(--atelier-left-width) 1fr var(--atelier-right-width);
     overflow: hidden;
   }
 }
 
-@media (min-width: 1280px) {
-  .editor-layout {
-    grid-template-columns: var(--left-pane-width) 4px minmax(0, 1fr) 4px var(--right-pane-width);
+/* Mode: Manuscript Focused */
+.editor-layout[data-view='manuscript'] {
+  display: flex;
+  flex-direction: column;
+}
+
+.editor-layout[data-view='manuscript'] .atelier-lore-pane {
+  display: none !important;
+}
+
+@media (min-width: 1024px) {
+  .editor-layout[data-view='manuscript'] {
+    display: grid;
+    grid-template-columns: var(--atelier-left-width) 1fr;
+    overflow: hidden;
+  }
+}
+
+/* Mode: Lore Focused */
+.editor-layout[data-view='lore'] {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.editor-layout[data-view='lore'] .atelier-manuscript-pane {
+  display: none !important;
+}
+
+@media (min-width: 1024px) {
+  .editor-layout[data-view='lore'] {
+    display: grid;
+    grid-template-columns: var(--atelier-left-width) 1fr;
+    overflow: hidden;
   }
 }
 
@@ -77,83 +173,175 @@
   overflow-y: auto;
 }
 
-/* Resize Handles — Desktop only */
-.resize-handle {
-  display: none;
+/* ── Scribe's Manuscript Canvas ───────────────────────── */
+.manuscript-card {
+  background: var(--surface-gradient-strong);
+  border: 1px solid rgb(var(--light-rgb) / var(--a-03));
+  border-radius: 1.75rem;
+  box-shadow:
+    0 10px 40px rgb(var(--dark-rgb) / var(--a-10)),
+    inset 0 1px 0 rgb(var(--light-rgb) / var(--a-03));
+  position: relative;
+  overflow: hidden;
 }
 
-@media (min-width: 1024px) {
-  .resize-handle-left {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 4px;
-    background: rgb(var(--light-rgb) / var(--a-01));
-    cursor: col-resize;
-    position: relative;
-    z-index: 50;
-    transition: background 150ms ease;
-    touch-action: none;
+.manuscript-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgb(var(--rune-rgb) / var(--a-06)) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.manuscript-card:focus-within {
+  border-color: rgb(var(--accent-rgb) / var(--a-06));
+  box-shadow:
+    0 15px 50px rgb(var(--dark-rgb) / var(--a-11)),
+    0 0 40px rgb(var(--accent-rgb) / var(--a-02));
+}
+
+/* Chapter Title in Cinzel */
+.manuscript-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  width: 100%;
+  outline: none;
+  transition: color var(--transition-base);
+}
+
+.manuscript-title:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.manuscript-title::placeholder {
+  color: rgb(var(--light-rgb) / var(--a-03));
+  font-style: italic;
+}
+
+@media (min-width: 640px) {
+  .manuscript-title {
+    font-size: 2.25rem;
   }
 }
 
-@media (min-width: 1280px) {
-  .resize-handle-right {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 4px;
-    background: rgb(var(--light-rgb) / var(--a-01));
-    cursor: col-resize;
-    position: relative;
-    z-index: 50;
-    transition: background 150ms ease;
-    touch-action: none;
-  }
+/* Chapter Textarea in Merriweather */
+.manuscript-textarea {
+  font-family: 'Merriweather', serif;
+  font-size: 1.0625rem;
+  line-height: 2.1;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  width: 100%;
+  outline: none;
+  resize: none;
+  min-height: 480px;
 }
 
-@media (min-width: 1024px) {
-  .resize-handle:hover,
-  .resize-handle:focus-visible,
-  body.resizing .resize-handle {
-    background: rgb(var(--accent-rgb) / var(--a-09));
-  }
-
-  .resize-handle::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 2px;
-    height: 32px;
-    background: rgb(var(--light-rgb) / var(--a-03));
-    border-radius: 1px;
-    transition: all 150ms ease;
-  }
-
-  .resize-handle:hover::after,
-  .resize-handle:focus-visible::after,
-  body.resizing .resize-handle::after {
-    background: rgb(var(--light-rgb) / var(--a-07));
-    height: 48px;
-  }
+.manuscript-textarea:focus {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
-/* ── Chapter list items ───────────────────────────────────── */
+.manuscript-textarea::placeholder {
+  color: rgb(var(--light-rgb) / var(--a-03));
+  font-style: italic;
+  font-family: 'Merriweather', serif;
+}
+
+/* ── Scribe's Alchemy Ribbon (Toolbar) ───────────────────────── */
+.scribe-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 1.25rem;
+  background: rgb(var(--dark-rgb) / var(--a-08));
+  border: 1px solid rgb(var(--light-rgb) / var(--a-03));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.scribe-tool-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--text-secondary);
+  background: rgb(var(--light-rgb) / var(--a-02));
+  border: 1px solid rgb(var(--light-rgb) / var(--a-03));
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.scribe-tool-btn:hover:not(:disabled) {
+  color: var(--text-primary);
+  background: rgb(var(--light-rgb) / var(--a-04));
+  border-color: rgb(var(--accent-rgb) / var(--a-07));
+  box-shadow: 0 0 12px rgb(var(--accent-rgb) / var(--a-03));
+}
+
+.scribe-tool-btn--oracle {
+  color: rgb(var(--accent-light-rgb) / var(--a-11));
+  border-color: rgb(var(--accent-rgb) / var(--a-05));
+  background: rgb(var(--accent-rgb) / var(--a-02));
+}
+
+.scribe-tool-btn--oracle:hover:not(:disabled) {
+  background: rgb(var(--accent-rgb) / var(--a-05));
+  border-color: rgb(var(--accent-rgb) / var(--a-08));
+}
+
+/* ── Inscription Milestone Badge ───────────────────────── */
+.milestone-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.625rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: rgb(var(--rune-rgb) / var(--a-11));
+  background: rgb(var(--rune-rgb) / var(--a-03));
+  border: 1px solid rgb(var(--rune-rgb) / var(--a-06));
+}
+
+/* ── Chapter List Items (Contract with chapters.js) ─────────────────── */
 .chapter-item {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   border-radius: 1rem;
   border: 1px solid transparent;
-  padding: 6px 6px 6px 12px;
-  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-  margin-bottom: 2px;
+  padding: 8px 10px;
+  transition: all var(--transition-base);
+  margin-bottom: 4px;
 }
 
 .chapter-item:hover {
-  background: rgb(var(--light-rgb) / var(--a-01));
+  background: rgb(var(--light-rgb) / var(--a-02));
+  border-color: rgb(var(--light-rgb) / var(--a-03));
 }
 
 .chapter-item--active {
@@ -165,25 +353,26 @@
 .chapter-item__select {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex: 1;
   min-width: 0;
   background: none;
   border: none;
   cursor: pointer;
   text-align: left;
-  padding: 6px 0;
+  padding: 4px 0;
 }
 
 .chapter-item__num {
-  font-size: 0.6rem;
+  font-size: 0.65rem;
   font-weight: 900;
-  letter-spacing: 0.1em;
-  color: var(--accent-tint);
+  letter-spacing: 0.12em;
+  color: var(--accent-light-rgb);
   background: rgb(var(--accent-rgb) / var(--a-05));
+  border: 1px solid rgb(var(--accent-rgb) / var(--a-06));
   border-radius: 8px;
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -192,13 +381,13 @@
 }
 
 .chapter-item--active .chapter-item__num {
-  background: var(--accent);
-  color: white;
-  box-shadow: 0 0 15px rgb(var(--accent-rgb) / var(--a-09));
+  background: rgb(var(--accent-rgb) / var(--a-11));
+  color: var(--text-on-accent);
+  box-shadow: 0 0 15px rgb(var(--accent-rgb) / var(--a-08));
 }
 
 .chapter-item__title {
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: var(--text-muted);
   white-space: nowrap;
@@ -209,11 +398,12 @@
 
 .chapter-item--active .chapter-item__title {
   color: var(--text-primary);
+  font-weight: 700;
 }
 
 .chapter-item__actions {
   display: flex;
-  gap: 2px;
+  gap: 3px;
   opacity: 0;
   transform: translateX(4px);
   transition: all var(--transition-base);
@@ -245,19 +435,109 @@
 }
 
 .chapter-item__action:disabled {
-  opacity: 0.1;
+  opacity: 0.15;
   cursor: not-allowed;
 }
 
 .chapter-item__action--danger:hover:not(:disabled) {
   background: rgb(var(--danger-rgb) / var(--a-05));
-  color: var(--danger);
+  color: rgb(var(--danger-rgb) / var(--a-11));
 }
 
-/* ── Voice button active state ────────────────────────────── */
+/* ── Grimoire Cover Card ───────────────────────── */
+.grimoire-cover-frame {
+  position: relative;
+  border-radius: 1.25rem;
+  overflow: hidden;
+  border: 1px solid rgb(var(--light-rgb) / var(--a-03));
+  background: var(--bg-overlay);
+  box-shadow:
+    0 15px 35px rgb(var(--dark-rgb) / var(--a-10)),
+    0 0 25px rgb(var(--accent-rgb) / var(--a-02));
+  transition: transform var(--transition-spring);
+}
+
+.grimoire-cover-frame:hover {
+  transform: translateY(-2px);
+}
+
+.cover-preset-chip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.625rem;
+  border-radius: 0.875rem;
+  border: 1px solid rgb(var(--light-rgb) / var(--a-03));
+  background: rgb(var(--light-rgb) / var(--a-02));
+  color: var(--text-secondary);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.cover-preset-chip:hover {
+  background: rgb(var(--light-rgb) / var(--a-04));
+  border-color: rgb(var(--accent-rgb) / var(--a-07));
+  color: var(--text-primary);
+}
+
+/* ── Mythic Era Pills ───────────────────────── */
+.era-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  background: rgb(var(--light-rgb) / var(--a-02));
+  border: 1px solid rgb(var(--light-rgb) / var(--a-03));
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.era-pill:hover {
+  color: var(--text-primary);
+  background: rgb(var(--light-rgb) / var(--a-04));
+  border-color: rgb(var(--rune-rgb) / var(--a-07));
+  box-shadow: 0 0 12px rgb(var(--rune-rgb) / var(--a-02));
+}
+
+.era-pill--active {
+  color: rgb(var(--rune-rgb) / var(--a-11));
+  background: rgb(var(--rune-rgb) / var(--a-04));
+  border-color: rgb(var(--rune-rgb) / var(--a-08));
+  box-shadow: 0 0 16px rgb(var(--rune-rgb) / var(--a-03));
+}
+
+/* ── Archive Readiness Seal Checklist ───────────────────────── */
+.readiness-seal-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgb(var(--light-rgb) / var(--a-03));
+  background: rgb(var(--light-rgb) / var(--a-01));
+  transition: all var(--transition-base);
+}
+
+.readiness-seal-card.passed {
+  border-color: rgb(var(--success-rgb) / var(--a-06));
+  background: rgb(var(--success-rgb) / var(--a-02));
+}
+
+/* ── Voice button active state ───────────────────────── */
 .voice-btn--active {
   background: rgb(var(--accent-rgb) / var(--a-07)) !important;
-  color: var(--accent-tint) !important;
+  color: var(--text-on-accent) !important;
   border-color: rgb(var(--accent-rgb) / var(--a-09)) !important;
   animation: pulse-ring 1.2s ease infinite;
 }
@@ -267,7 +547,6 @@
   100% {
     box-shadow: 0 0 0 0 rgb(var(--accent-rgb) / var(--a-08));
   }
-
   50% {
     box-shadow: 0 0 0 6px rgb(var(--accent-rgb) / var(--a-01));
   }

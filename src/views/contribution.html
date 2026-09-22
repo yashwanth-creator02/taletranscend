@@ -4,10 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
-    <title>Write | TaleTranscend</title>
+    <title>The Scribe's Atelier | TaleTranscend</title>
     <meta
       name="description"
-      content="Add your legend to the archive. Draft, structure and publish a tale chapter by chapter."
+      content="Inscribe your legend into the eternal archive. Shape, refine and publish mythical chronicles chapter by chapter."
     />
     <link rel="canonical" href="https://taletranscend.web.app/contribution" />
 
@@ -19,27 +19,25 @@
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="TaleTranscend" />
     <meta property="og:url" content="https://taletranscend.web.app/contribution" />
-    <meta property="og:title" content="Write | TaleTranscend" />
+    <meta property="og:title" content="The Scribe's Atelier | TaleTranscend" />
     <meta
       property="og:description"
-      content="Add your legend to the archive. Draft, structure and publish a tale chapter by chapter."
+      content="Inscribe your legend into the eternal archive. Shape, refine and publish mythical chronicles chapter by chapter."
     />
     <meta property="og:image" content="https://taletranscend.web.app/icon.svg" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Write | TaleTranscend" />
+    <meta name="twitter:title" content="The Scribe's Atelier | TaleTranscend" />
     <meta
       name="twitter:description"
-      content="Add your legend to the archive. Draft, structure and publish a tale chapter by chapter."
+      content="Inscribe your legend into the eternal archive. Shape, refine and publish mythical chronicles chapter by chapter."
     />
 
-    <!-- One font request, identical on every page. Nine different Google
-         Fonts URLs across nine pages meant every navigation re-fetched a
-         slightly different family set and re-rendered the whole document. -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cinzel:wght@500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cinzel:wght@500;600;700;800;900&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap"
     />
 
     <script type="module" src="../pages/contribution/contribution.js"></script>
@@ -50,53 +48,84 @@
     <div class="atmosphere-base"></div>
     <div class="particle-field"></div>
 
-    <!-- Background decorations -->
+    <!-- Background atmospheric nebulas -->
     <div
-      class="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_top,rgba(79,70,229,0.18),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(168,85,247,0.10),transparent_30%)]"
+      class="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.16),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(245,158,11,0.08),transparent_36%)]"
     ></div>
     <div
-      class="pointer-events-none fixed inset-0 -z-10 opacity-[0.07] bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-size-[44px_44px]"
+      class="pointer-events-none fixed inset-0 -z-10 opacity-[0.05] bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-size-[48px_48px]"
     ></div>
 
-    <!-- Shared nav — injected by initNav() in contribution.js -->
-
-    <!-- ── Editor-specific sticky header ─────────────────────────── -->
-    <!--
-    top: uses var(--nav-height) so it sits flush below the shared nav
-    regardless of nav height changes.
-  -->
+    <!-- ── Atelier Sticky Header ─────────────────────────── -->
     <header
-      class="sticky z-40 border-b border-white/7 bg-[#040406]/90 backdrop-blur-xl"
-      style="top: var(--nav-height, 64px); height: var(--editor-header-height)"
+      class="sticky top-0 z-40 border-b border-white/6 bg-[#030305]/95 backdrop-blur-2xl"
+      style="height: var(--editor-header-height)"
     >
-      <div class="mx-auto flex h-full max-w-400 items-center justify-between px-4 sm:px-6">
-        <!-- Left: back + title -->
-        <div class="flex min-w-0 items-center gap-3 sm:gap-5">
-          <a
-            href="/profile.html"
-            class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.24em] text-slate-500 transition hover:bg-white/5 hover:text-white"
+      <div class="mx-auto flex h-full max-w-7xl items-center justify-between px-3 sm:px-6">
+        <!-- Left: Back & Title -->
+        <div class="flex min-w-0 items-center gap-2 sm:gap-4">
+          <button
+            id="btn-back"
+            type="button"
+            class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 transition hover:bg-white/10 hover:text-white cursor-pointer"
+            aria-label="Go back to previous page"
           >
             <i data-lucide="chevron-left" class="h-3.5 w-3.5"></i>
-            <span class="hidden sm:inline">Exit shelf</span>
-          </a>
+            <span class="hidden sm:inline">Back</span>
+          </button>
 
-          <div class="hidden h-4 w-px bg-white/8 sm:block"></div>
+          <div class="hidden h-4 w-px bg-white/10 md:block"></div>
 
-          <div class="min-w-0 hidden sm:block">
-            <h1 class="text-[10px] font-black uppercase tracking-[0.36em] text-indigo-400">
-              Tale Architect
-            </h1>
-            <p class="mt-0.5 text-[10px] text-slate-600">
-              Shape your folklore, chapter by chapter.
-            </p>
+          <div class="min-w-0 hidden md:block">
+            <div class="flex items-center gap-2">
+              <span class="h-2 w-2 rounded-full bg-amber-400 animate-pulse"></span>
+              <h1
+                class="text-[11px] font-black uppercase tracking-[0.28em] text-white whitespace-nowrap"
+              >
+                Scribe's Atelier
+              </h1>
+            </div>
           </div>
         </div>
 
-        <!-- Right: status + save + publish -->
-        <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Center: Workspace Mode Switcher -->
+        <div class="flex items-center rounded-full border border-white/8 bg-white/2 p-0.5 sm:p-1">
+          <button
+            type="button"
+            class="atelier-nav-pill atelier-nav-pill--active"
+            data-atelier-view="manuscript"
+            aria-label="Switch to Manuscript View"
+          >
+            <i data-lucide="feather" class="h-3.5 w-3.5"></i>
+            <span class="hidden sm:inline">Manuscript</span>
+            <span class="sm:hidden">Write</span>
+          </button>
+          <button
+            type="button"
+            class="atelier-nav-pill"
+            data-atelier-view="lore"
+            aria-label="Switch to Lore and Codex View"
+          >
+            <i data-lucide="book-open" class="h-3.5 w-3.5"></i>
+            <span class="hidden sm:inline">Lore & Codex</span>
+            <span class="sm:hidden">Lore</span>
+          </button>
+          <button
+            type="button"
+            class="atelier-nav-pill"
+            data-atelier-view="split"
+            aria-label="Switch to Split View"
+          >
+            <i data-lucide="columns-2" class="h-3.5 w-3.5"></i>
+            <span>Split View</span>
+          </button>
+        </div>
+
+        <!-- Right: Status, Save & Publish -->
+        <div class="flex items-center gap-1.5 sm:gap-3">
           <span
             id="stat-status"
-            class="hidden text-[10px] uppercase tracking-[0.24em] text-zinc-500 md:block"
+            class="hidden text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-400 lg:block"
             aria-live="polite"
           >
             Ready
@@ -105,7 +134,7 @@
           <button
             id="save-draft-btn"
             type="button"
-            class="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/4 px-3 py-2 text-[10px] font-black uppercase tracking-[0.22em] text-slate-400 transition hover:border-white/20 hover:bg-white/7 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+            class="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/4 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-300 transition hover:border-white/20 hover:bg-white/8 hover:text-white"
           >
             <i data-lucide="cloud" class="h-3.5 w-3.5"></i>
             <span class="hidden sm:inline">Save Draft</span>
@@ -115,181 +144,455 @@
           <button
             id="publish-btn"
             type="button"
-            class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-3 py-2 text-[10px] font-black uppercase tracking-[0.22em] text-white shadow-lg shadow-indigo-900/30 transition hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+            class="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-white shadow-lg shadow-indigo-500/25 transition hover:brightness-110 hover:shadow-indigo-500/40 focus:outline-none"
           >
             <i data-lucide="send" class="h-3.5 w-3.5"></i>
-            <span class="hidden sm:inline" data-label="Publish">Publish</span>
-            <span class="sm:hidden" data-label="Post">Post</span>
+            <span class="hidden sm:inline" data-label="Inscribe to Archive"
+              >Inscribe to Archive</span
+            >
+            <span class="sm:hidden" data-label="Inscribe">Inscribe</span>
           </button>
         </div>
       </div>
     </header>
 
-    <!-- ── Main editor workspace ──────────────────────────────────── -->
-    <main id="main-content" class="editor-layout fade-in-stagger">
+    <!-- ── Main Workspace ──────────────────────────────────── -->
+    <main id="main-content" class="editor-layout fade-in-stagger" data-view="manuscript">
       <!-- ════════════════════════════════════════
-         LEFT PANE — Tale metadata + chapters
+         LEFT PANE — Chapter Codex Strip
          ════════════════════════════════════════ -->
       <aside
-        class="editor-pane custom-scrollbar hidden border-r border-slate-800/70 bg-slate-900/20 lg:block"
+        class="editor-pane custom-scrollbar hidden border-r border-white/6 bg-slate-950/40 p-4 lg:block"
       >
-        <div class="space-y-5 p-4">
-          <!-- Cover -->
-          <section class="shelf-card overflow-hidden rounded-3xl">
-            <div class="p-4">
-              <div class="mb-3 flex items-center justify-between gap-2">
-                <div>
-                  <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">
-                    Cover
-                  </p>
-                  <h2 class="mt-0.5 text-sm font-semibold text-white">Tale Cover</h2>
-                </div>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between pb-2 border-b border-white/6">
+            <div>
+              <p class="text-[9px] font-black uppercase tracking-[0.28em] text-indigo-400">
+                Manuscript Codex
+              </p>
+              <h2 class="mt-0.5 text-xs font-bold text-white uppercase tracking-wider">Chapters</h2>
+            </div>
+            <span
+              id="shelf-chapter-count"
+              class="rounded-full border border-white/8 bg-white/5 px-2.5 py-0.5 text-[9px] font-black text-slate-400"
+            >
+              0
+            </span>
+          </div>
+
+          <!-- Chapter list rendered by renderChapterList() -->
+          <div id="chapter-list" class="space-y-1"></div>
+
+          <button
+            id="add-chapter-btn"
+            type="button"
+            class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/10 bg-white/2 py-2.5 text-[11px] font-bold text-slate-400 transition hover:border-indigo-400/40 hover:bg-white/4 hover:text-white"
+          >
+            <i data-lucide="plus" class="h-3.5 w-3.5"></i>
+            Add New Chapter
+          </button>
+
+          <!-- Quick Metrics Card -->
+          <div class="mt-6 rounded-2xl border border-white/6 bg-black/30 p-3.5">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">
+                Live Inscription
+              </span>
+              <i data-lucide="sparkles" class="h-3 w-3 text-amber-400"></i>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-center">
+              <div class="rounded-lg bg-white/2 p-2 border border-white/4">
+                <p class="text-[8px] uppercase tracking-wider text-slate-500">Words</p>
+                <p id="stat-words-right" class="text-sm font-bold text-white mt-0.5">0</p>
+              </div>
+              <div class="rounded-lg bg-white/2 p-2 border border-white/4">
+                <p class="text-[8px] uppercase tracking-wider text-slate-500">Read Time</p>
+                <p id="stat-reading-time" class="text-sm font-bold text-white mt-0.5">&lt; 1m</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- ════════════════════════════════════════
+         CENTER PANE — The Grand Manuscript Canvas
+         ════════════════════════════════════════ -->
+      <section
+        class="editor-pane custom-scrollbar atelier-manuscript-pane flex-1 p-4 sm:p-6 lg:p-8"
+      >
+        <div class="mx-auto max-w-4xl space-y-6">
+          <div class="manuscript-card p-6 sm:p-8">
+            <!-- Manuscript Header & Alchemy Toolbar -->
+            <div
+              class="mb-6 flex flex-col gap-4 border-b border-white/6 pb-6 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div class="flex items-center gap-3">
+                <span class="text-[10px] font-black uppercase tracking-[0.24em] text-indigo-400">
+                  Fragment Inscription
+                </span>
+                <span id="manuscript-milestone" class="milestone-badge">
+                  <i data-lucide="feather" class="h-3 w-3"></i>
+                  <span>Folklore Fragment</span>
+                </span>
+              </div>
+
+              <!-- Scribe Alchemy Ribbon -->
+              <div class="scribe-toolbar flex-wrap">
                 <button
-                  id="btn-generate-cover"
+                  id="ai-enhance-btn"
                   type="button"
-                  class="inline-flex items-center gap-1.5 rounded-full border border-white/8 bg-white/5 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 transition hover:bg-white/10 hover:text-white"
+                  class="scribe-tool-btn scribe-tool-btn--oracle"
+                  title="Refine prose with mythic resonance"
                 >
                   <i data-lucide="sparkles" class="h-3 w-3"></i>
-                  Suggest
+                  <span>Oracle Refine</span>
+                </button>
+
+                <button
+                  id="ai-continue-btn"
+                  type="button"
+                  class="scribe-tool-btn"
+                  title="Forge the next sentence"
+                >
+                  <i data-lucide="wand-2" class="h-3 w-3"></i>
+                  <span class="hidden sm:inline">Continue</span>
+                </button>
+
+                <button
+                  id="voice-chapter-btn"
+                  type="button"
+                  data-voice-target="chapter-content"
+                  data-voice-label="Voice chapter"
+                  class="scribe-tool-btn"
+                  title="Dictate with voice"
+                >
+                  <i data-lucide="mic" class="h-3 w-3"></i>
+                  <span>Voice</span>
+                </button>
+
+                <button
+                  id="rune-divider-btn"
+                  type="button"
+                  class="scribe-tool-btn"
+                  title="Insert Mythic Divider"
+                >
+                  <span>✦ ✦ ✦</span>
                 </button>
               </div>
+            </div>
 
-              <!-- Cover preview -->
+            <!-- Chapter Title Input -->
+            <div class="mb-4">
+              <label class="sr-only" for="current-chapter-title">Chapter title</label>
+              <input
+                type="text"
+                id="current-chapter-title"
+                placeholder="Inscribe Chapter Title…"
+                class="manuscript-title"
+              />
+            </div>
+
+            <!-- Decorative Hairline Rune Accent -->
+            <div class="my-5 flex items-center gap-4 text-white/15">
               <div
-                class="relative overflow-hidden rounded-[1.2rem] border border-white/8 bg-zinc-950"
+                class="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+              ></div>
+              <span class="text-[10px] font-mono tracking-widest text-amber-400/40">✦ ✦ ✦</span>
+              <div
+                class="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+              ></div>
+            </div>
+
+            <!-- Main Chapter Manuscript Textarea -->
+            <label class="sr-only" for="chapter-content">Chapter content</label>
+            <textarea
+              id="chapter-content"
+              placeholder="Inscribe your legend here… Let destiny, folklore, and myth weave across the parchment."
+              class="manuscript-textarea custom-scrollbar"
+            ></textarea>
+
+            <!-- Manuscript HUD & Mobile Controls -->
+            <div
+              class="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-white/6 pt-5"
+            >
+              <div
+                class="flex flex-wrap items-center gap-4 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500"
               >
-                <div class="relative aspect-4/3 w-full">
-                  <img
-                    id="tale-cover-preview"
-                    src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200&auto=format&fit=crop"
-                    alt="Cover preview"
-                    class="h-full w-full object-cover opacity-75 transition duration-500 hover:opacity-100"
-                  />
-                  <div
-                    class="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent"
-                  ></div>
-                  <span
-                    class="absolute left-3 top-3 rounded-full border border-white/10 bg-black/50 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-white/70"
-                    >Preview</span
-                  >
-
-                  <!-- Voice: cover prompt -->
-                  <button
-                    type="button"
-                    class="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-black/50 text-white transition hover:bg-white/10"
-                    aria-label="Voice input for cover prompt"
-                    data-voice-target="cover-url"
-                    data-voice-label="Voice cover"
-                  >
-                    <i data-lucide="mic" class="h-3.5 w-3.5"></i>
-                  </button>
-                </div>
+                <span id="stat-words">0 Words</span>
+                <span class="h-3 w-px bg-white/10"></span>
+                <span id="stat-chars">0 Characters</span>
+                <span class="h-3 w-px bg-white/10"></span>
+                <span class="rounded-full bg-white/3 px-2 py-0.5 text-slate-400">
+                  Auto-saved locally
+                </span>
               </div>
 
-              <!-- Cover URL input -->
-              <div class="mt-3 space-y-1.5">
-                <label
-                  class="ml-1 text-[9px] font-bold uppercase tracking-[0.22em] text-indigo-400"
-                  for="cover-url"
+              <!-- Mobile save / publish controls -->
+              <div class="flex items-center gap-2 md:hidden">
+                <button
+                  id="save-draft-btn-mobile"
+                  type="button"
+                  class="rounded-xl border border-white/10 bg-white/4 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400"
                 >
-                  Cover URL
-                </label>
-                <input
-                  type="url"
-                  id="cover-url"
-                  placeholder="Paste image URL…"
-                  class="shelf-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-3 text-sm text-white placeholder:text-slate-700 focus:border-indigo-500/60"
-                />
+                  Save
+                </button>
+                <button
+                  id="publish-btn-mobile"
+                  type="button"
+                  class="rounded-xl bg-indigo-600 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-white"
+                >
+                  <span data-label="Post">Post</span>
+                </button>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════
+         RIGHT PANE — Lore & Codex Dossier
+         ════════════════════════════════════════ -->
+      <aside
+        class="editor-pane custom-scrollbar atelier-lore-pane border-l border-white/6 bg-slate-950/40 p-4 sm:p-6 lg:block"
+      >
+        <div class="mx-auto max-w-xl space-y-6">
+          <!-- Grimoire Cover Showcase -->
+          <section class="shelf-card rounded-3xl p-5">
+            <div class="mb-4 flex items-center justify-between">
+              <div>
+                <p class="text-[9px] font-black uppercase tracking-[0.28em] text-indigo-400">
+                  Grimoire Artwork
+                </p>
+                <h3 class="mt-0.5 text-sm font-semibold text-white">Tome Cover</h3>
+              </div>
+              <button
+                id="btn-generate-cover"
+                type="button"
+                class="inline-flex items-center gap-1.5 rounded-full border border-white/8 bg-white/5 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.18em] text-slate-300 transition hover:bg-white/10 hover:text-white"
+              >
+                <i data-lucide="sparkles" class="h-3 w-3 text-amber-400"></i>
+                Suggest
+              </button>
+            </div>
+
+            <!-- Cover Preview -->
+            <div class="grimoire-cover-frame relative aspect-4/3 w-full">
+              <img
+                id="tale-cover-preview"
+                src="/images/placeholders/mythic-temple.jpg"
+                alt="Cover preview"
+                class="h-full w-full object-cover opacity-90 transition duration-500 hover:opacity-100"
+              />
+              <div
+                class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none"
+              ></div>
+              <span
+                class="absolute left-3 top-3 rounded-full border border-white/10 bg-black/60 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-white/80"
+              >
+                Manuscript Cover
+              </span>
+
+              <!-- Voice Dictation for cover -->
+              <button
+                type="button"
+                class="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-black/60 text-white transition hover:bg-white/20"
+                aria-label="Voice input for cover prompt"
+                data-voice-target="cover-url"
+                data-voice-label="Voice cover"
+              >
+                <i data-lucide="mic" class="h-3.5 w-3.5"></i>
+              </button>
+            </div>
+
+            <!-- 1-Click Curated Mythic Placeholder Covers -->
+            <div class="mt-3">
+              <p class="mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">
+                1-Click Preset Covers
+              </p>
+              <div class="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  class="cover-preset-chip"
+                  data-preset-cover="/images/placeholders/mythic-temple.jpg"
+                >
+                  <i data-lucide="image" class="h-3 w-3 text-amber-400"></i>
+                  <span>Mythic Temple</span>
+                </button>
+                <button
+                  type="button"
+                  class="cover-preset-chip"
+                  data-preset-cover="/images/placeholders/celestial-spire.jpg"
+                >
+                  <i data-lucide="image" class="h-3 w-3 text-indigo-400"></i>
+                  <span>Celestial Spire</span>
+                </button>
+                <button
+                  type="button"
+                  class="cover-preset-chip"
+                  data-preset-cover="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200&auto=format&fit=crop"
+                >
+                  <i data-lucide="image" class="h-3 w-3 text-emerald-400"></i>
+                  <span>Castle Gate</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Cover URL input -->
+            <div class="mt-4 space-y-1.5">
+              <label
+                class="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-400"
+                for="cover-url"
+              >
+                Custom Cover URL
+              </label>
+              <input
+                type="url"
+                id="cover-url"
+                placeholder="Paste image URL or choose a preset above…"
+                class="shelf-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-700"
+              />
             </div>
           </section>
 
-          <!-- Story Core -->
-          <section class="shelf-card rounded-3xl p-4">
-            <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">
-              Manuscript
-            </p>
-            <h3 class="mt-0.5 text-sm font-semibold text-white">Story Core</h3>
+          <!-- Story Core (Title & Synopsis) -->
+          <section class="shelf-card rounded-3xl p-5 space-y-4">
+            <div>
+              <p class="text-[9px] font-black uppercase tracking-[0.28em] text-indigo-400">
+                Core Lore
+              </p>
+              <h3 class="mt-0.5 text-sm font-semibold text-white">Story Genesis</h3>
+            </div>
 
-            <div class="mt-3 space-y-3">
-              <div class="space-y-1.5">
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
                 <label
-                  class="ml-1 text-[9px] font-bold uppercase tracking-[0.22em] text-indigo-400"
+                  class="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-400"
                   for="tale-title"
                 >
-                  Title
+                  Tale Title
                 </label>
-                <input
-                  type="text"
-                  id="tale-title"
-                  placeholder="Enter tale title…"
-                  class="shelf-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-3 text-sm text-white placeholder:text-slate-700 focus:border-indigo-500/60"
-                />
+                <button
+                  id="voice-title-btn"
+                  type="button"
+                  data-voice-target="tale-title"
+                  data-voice-label="Dictate Title"
+                  class="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-[0.16em] text-slate-500 hover:text-white"
+                >
+                  <i data-lucide="mic" class="h-3 w-3"></i>
+                  <span>Dictate</span>
+                </button>
               </div>
+              <input
+                type="text"
+                id="tale-title"
+                placeholder="The Chronicles of the Sunken Citadel…"
+                class="shelf-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-700"
+              />
+            </div>
 
-              <div class="space-y-1.5">
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
                 <label
-                  class="ml-1 text-[9px] font-bold uppercase tracking-[0.22em] text-indigo-400"
+                  class="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-400"
                   for="tale-synopsis"
                 >
-                  Synopsis
+                  Synopsis & Legend Arc
                 </label>
-                <textarea
-                  id="tale-synopsis"
-                  rows="3"
-                  placeholder="The threads of destiny begin to fray…"
-                  class="shelf-input w-full resize-none rounded-xl border border-white/10 bg-black/30 px-3.5 py-3 text-sm leading-6 text-white placeholder:text-slate-700 focus:border-indigo-500/60"
-                ></textarea>
+                <button
+                  id="voice-synopsis-btn"
+                  type="button"
+                  data-voice-target="tale-synopsis"
+                  data-voice-label="Dictate Synopsis"
+                  class="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-[0.16em] text-slate-500 hover:text-white"
+                >
+                  <i data-lucide="mic" class="h-3 w-3"></i>
+                  <span>Dictate</span>
+                </button>
               </div>
+              <textarea
+                id="tale-synopsis"
+                rows="3"
+                placeholder="The ancient bells echo as the sky turns into molten brass…"
+                class="shelf-input w-full resize-none rounded-xl border border-white/10 bg-black/30 px-3.5 py-2.5 text-sm leading-6 text-white placeholder:text-slate-700"
+              ></textarea>
             </div>
           </section>
 
-          <!-- Classification -->
-          <section class="shelf-card rounded-3xl p-4">
-            <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">
-              Classification
-            </p>
-            <h3 class="mt-0.5 text-sm font-semibold text-white">Story Identity</h3>
+          <!-- Classification & World Setting -->
+          <section class="shelf-card rounded-3xl p-5 space-y-4">
+            <div>
+              <p class="text-[9px] font-black uppercase tracking-[0.28em] text-indigo-400">
+                Classification
+              </p>
+              <h3 class="mt-0.5 text-sm font-semibold text-white">Era & Mythic Identity</h3>
+            </div>
 
-            <div class="mt-3 space-y-3">
-              <div class="space-y-1.5">
-                <label
-                  class="ml-1 text-[9px] font-bold uppercase tracking-[0.22em] text-indigo-400"
-                  for="tale-era"
-                  >Era</label
-                >
-                <input
-                  type="text"
-                  id="tale-era"
-                  placeholder="Ancient, medieval, folk…"
-                  class="shelf-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-3 text-sm text-white placeholder:text-slate-700 focus:border-indigo-500/60"
-                />
+            <!-- Era with quick pills -->
+            <div class="space-y-2">
+              <label
+                class="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-400"
+                for="tale-era"
+              >
+                Mythic Era
+              </label>
+              <input
+                type="text"
+                id="tale-era"
+                placeholder="e.g. Ancient, Vedic, Norse…"
+                class="shelf-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-700"
+              />
+              <div class="flex flex-wrap gap-1.5 pt-1">
+                <button type="button" class="era-pill" data-era-pill="Ancient">Ancient</button>
+                <button type="button" class="era-pill" data-era-pill="Vedic">Vedic</button>
+                <button type="button" class="era-pill" data-era-pill="Norse">Norse</button>
+                <button type="button" class="era-pill" data-era-pill="Celtic">Celtic</button>
+                <button type="button" class="era-pill" data-era-pill="Feudal">Feudal</button>
+                <button type="button" class="era-pill" data-era-pill="Eldritch">Eldritch</button>
+                <button type="button" class="era-pill" data-era-pill="Folklore">Folklore</button>
               </div>
+            </div>
 
-              <div class="space-y-1.5">
+            <!-- Genre Tags -->
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
                 <label
-                  class="ml-1 text-[9px] font-bold uppercase tracking-[0.22em] text-indigo-400"
+                  class="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-400"
                   for="genre-tags"
-                  >Genre Tags</label
                 >
-                <input
-                  type="text"
-                  id="genre-tags"
-                  placeholder="Folklore, myth, romance…"
-                  class="shelf-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-3 text-sm text-white placeholder:text-slate-700 focus:border-indigo-500/60"
-                />
-                <p class="ml-1 text-[10px] text-slate-600">Comma-separated.</p>
+                  Genre Runes / Tags
+                </label>
+                <button
+                  id="voice-tags-btn"
+                  type="button"
+                  data-voice-target="genre-tags"
+                  data-voice-label="Dictate Tags"
+                  class="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-[0.16em] text-slate-500 hover:text-white"
+                >
+                  <i data-lucide="mic" class="h-3 w-3"></i>
+                  <span>Dictate</span>
+                </button>
               </div>
+              <input
+                type="text"
+                id="genre-tags"
+                placeholder="Folklore, myth, adventure, quest…"
+                class="shelf-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-700"
+              />
+              <p class="text-[10px] text-slate-600">Comma-separated tags.</p>
+            </div>
 
+            <!-- Tone & Language -->
+            <div class="grid grid-cols-2 gap-3">
               <div class="space-y-1.5">
                 <label
-                  class="ml-1 text-[9px] font-bold uppercase tracking-[0.22em] text-indigo-400"
+                  class="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-400"
                   for="story-tone"
-                  >Tone</label
                 >
+                  Tone
+                </label>
                 <select
                   id="story-tone"
-                  class="shelf-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-3 text-sm text-white focus:border-indigo-500/60"
+                  class="shelf-input w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm text-white"
                 >
                   <option>Mythic</option>
                   <option>Whimsical</option>
@@ -303,13 +606,14 @@
 
               <div class="space-y-1.5">
                 <label
-                  class="ml-1 text-[9px] font-bold uppercase tracking-[0.22em] text-indigo-400"
+                  class="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-400"
                   for="story-language"
-                  >Language</label
                 >
+                  Language
+                </label>
                 <select
                   id="story-language"
-                  class="shelf-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-3 text-sm text-white focus:border-indigo-500/60"
+                  class="shelf-input w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm text-white"
                 >
                   <option>English</option>
                   <option>Kannada</option>
@@ -320,16 +624,20 @@
                   <option>Other</option>
                 </select>
               </div>
+            </div>
 
+            <!-- Visibility & Audience -->
+            <div class="grid grid-cols-2 gap-3">
               <div class="space-y-1.5">
                 <label
-                  class="ml-1 text-[9px] font-bold uppercase tracking-[0.22em] text-indigo-400"
+                  class="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-400"
                   for="story-visibility"
-                  >Visibility</label
                 >
+                  Visibility
+                </label>
                 <select
                   id="story-visibility"
-                  class="shelf-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-3 text-sm text-white focus:border-indigo-500/60"
+                  class="shelf-input w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm text-white"
                 >
                   <option>Public</option>
                   <option>Unlisted</option>
@@ -339,13 +647,14 @@
 
               <div class="space-y-1.5">
                 <label
-                  class="ml-1 text-[9px] font-bold uppercase tracking-[0.22em] text-indigo-400"
+                  class="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-400"
                   for="target-audience"
-                  >Audience</label
                 >
+                  Audience
+                </label>
                 <select
                   id="target-audience"
-                  class="shelf-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-3 text-sm text-white focus:border-indigo-500/60"
+                  class="shelf-input w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm text-white"
                 >
                   <option>General</option>
                   <option>Young Adult</option>
@@ -355,536 +664,116 @@
                 </select>
               </div>
             </div>
-          </section>
 
-          <!-- Voice dictation -->
-          <section class="shelf-card rounded-3xl p-4">
-            <div class="mb-3 flex items-center justify-between gap-2">
-              <div>
-                <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">
-                  Voice Input
-                </p>
-                <h3 class="mt-0.5 text-sm font-semibold text-white">Quick Dictation</h3>
-              </div>
-              <span
-                class="rounded-full border border-white/8 bg-white/5 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-slate-500"
-                >Optional</span
-              >
-            </div>
-
-            <div class="grid gap-2">
-              <button
-                id="voice-title-btn"
-                type="button"
-                data-voice-target="tale-title"
-                data-voice-label="Dictate Title"
-                class="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/3 px-4 py-2.5 text-[9px] font-black uppercase tracking-[0.22em] text-slate-400 transition hover:bg-white/7 hover:text-white"
-              >
-                <i data-lucide="mic" class="h-3.5 w-3.5"></i>
-                Dictate Title
-              </button>
-
-              <button
-                id="voice-synopsis-btn"
-                type="button"
-                data-voice-target="tale-synopsis"
-                data-voice-label="Dictate Synopsis"
-                class="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/3 px-4 py-2.5 text-[9px] font-black uppercase tracking-[0.22em] text-slate-400 transition hover:bg-white/7 hover:text-white"
-              >
-                <i data-lucide="mic" class="h-3.5 w-3.5"></i>
-                Dictate Synopsis
-              </button>
-
-              <button
-                id="voice-tags-btn"
-                type="button"
-                data-voice-target="genre-tags"
-                data-voice-label="Dictate Tags"
-                class="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/3 px-4 py-2.5 text-[9px] font-black uppercase tracking-[0.22em] text-slate-400 transition hover:bg-white/7 hover:text-white"
-              >
-                <i data-lucide="mic" class="h-3.5 w-3.5"></i>
-                Dictate Tags
-              </button>
-            </div>
-
-            <p class="mt-3 text-[10px] leading-5 text-slate-600">
-              Great for capturing folklore names, chapter ideas, and synopsis drafts on the go.
-            </p>
-          </section>
-
-          <!-- Chapters -->
-          <section class="shelf-card rounded-3xl p-4">
-            <div class="mb-3 flex items-center justify-between gap-2">
-              <div>
-                <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">
-                  Chapters
-                </p>
-                <h3 class="mt-0.5 text-sm font-semibold text-white">Manuscript Flow</h3>
-              </div>
-              <span
-                id="shelf-chapter-count"
-                class="rounded-full border border-white/8 bg-white/5 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400"
-              >
-                0
-              </span>
-            </div>
-
-            <!-- Chapter list rendered by renderChapterList() -->
-            <div id="chapter-list" class="space-y-1"></div>
-
-            <button
-              id="add-chapter-btn"
-              type="button"
-              class="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-slate-800 px-4 py-2.5 text-[10px] font-medium text-slate-500 transition hover:border-indigo-400/40 hover:text-indigo-400"
-            >
-              <i data-lucide="plus" class="h-3.5 w-3.5"></i>
-              Add Chapter
-            </button>
-          </section>
-        </div>
-      </aside>
-
-      <!-- Left Resize Handle -->
-      <div
-        class="resize-handle resize-handle-left"
-        data-resize="left"
-        role="separator"
-        aria-label="Resize left panel"
-        tabindex="0"
-      ></div>
-
-      <!-- ════════════════════════════════════════
-         CENTER PANE — Chapter editor
-         ════════════════════════════════════════ -->
-      <section class="editor-pane custom-scrollbar min-w-0 flex-1 bg-slate-950/50">
-        <div class="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
-          <div class="space-y-6">
-            <!-- Chapter title + AI actions -->
-            <section class="shelf-card rounded-[1.75rem] p-5 sm:p-6">
-              <div class="mb-5 flex items-start justify-between gap-4">
-                <div>
-                  <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">
-                    Current Chapter
-                  </p>
-                  <h2 class="mt-0.5 text-sm font-semibold text-white">Write the living fragment</h2>
-                </div>
-
-                <div class="flex items-center gap-2 shrink-0">
-                  <button
-                    id="ai-continue-btn"
-                    type="button"
-                    class="inline-flex items-center gap-2 rounded-full border border-white/8 bg-white/5 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 transition hover:bg-white/10 hover:text-white"
-                  >
-                    <i data-lucide="wand-2" class="h-3 w-3"></i>
-                    <span class="hidden sm:inline">Continue</span>
-                  </button>
-                  <button
-                    id="ai-enhance-btn"
-                    type="button"
-                    class="inline-flex items-center gap-2 rounded-full border border-white/8 bg-white/5 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 transition hover:bg-white/10 hover:text-white"
-                  >
-                    <i data-lucide="sparkles" class="h-3 w-3"></i>
-                    <span class="hidden sm:inline">Enhance</span>
-                  </button>
-                </div>
-              </div>
-
-              <label class="sr-only" for="current-chapter-title">Chapter title</label>
-              <input
-                type="text"
-                id="current-chapter-title"
-                placeholder="Chapter Title…"
-                class="w-full bg-transparent text-2xl font-semibold tracking-tight text-white placeholder:text-zinc-800 focus:outline-none sm:text-3xl lg:text-4xl"
-              />
-
-              <p class="mt-2 text-sm leading-6 text-slate-600">
-                Write in a calm, distraction-free space. Build each fragment like part of a larger
-                legend.
-              </p>
-            </section>
-
-            <!-- Chapter body -->
-            <section class="shelf-card rounded-[1.75rem] p-5 sm:p-6">
-              <div
-                class="mb-4 flex items-center justify-between gap-3 border-b border-white/6 pb-4"
-              >
-                <div>
-                  <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">
-                    Chapter Body
-                  </p>
-                  <h3 class="mt-0.5 text-sm font-semibold text-white">The actual tale text</h3>
-                </div>
-
+            <!-- Visibility Toggle Buttons -->
+            <div class="space-y-1.5 pt-1">
+              <label class="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">
+                Archive Exposure
+              </label>
+              <div class="grid grid-cols-3 gap-1.5">
                 <button
-                  id="voice-chapter-btn"
                   type="button"
-                  data-voice-target="chapter-content"
-                  data-voice-label="Voice chapter"
-                  class="inline-flex items-center gap-2 rounded-full border border-white/8 bg-black/20 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 transition hover:bg-white/10 hover:text-white"
+                  data-visibility="Public"
+                  class="rounded-xl border border-indigo-500/50 bg-slate-800 px-2 py-2 text-[10px] font-bold text-white transition"
                 >
-                  <i data-lucide="mic" class="h-3 w-3"></i>
-                  Voice
+                  Public
+                </button>
+                <button
+                  type="button"
+                  data-visibility="Unlisted"
+                  class="rounded-xl border border-slate-800 bg-slate-900 px-2 py-2 text-[10px] font-bold text-slate-500 transition hover:text-slate-300"
+                >
+                  Unlisted
+                </button>
+                <button
+                  type="button"
+                  data-visibility="Draft"
+                  class="rounded-xl border border-slate-800 bg-slate-900 px-2 py-2 text-[10px] font-bold text-slate-500 transition hover:text-slate-300"
+                >
+                  Draft
                 </button>
               </div>
-
-              <label class="sr-only" for="chapter-content">Chapter content</label>
-              <textarea
-                id="chapter-content"
-                placeholder="Start writing your legend…"
-                class="w-full resize-none bg-transparent text-base leading-8 text-slate-300 placeholder:text-zinc-800 focus:outline-none sm:min-h-[calc(100vh-32rem)] sm:text-[17px]"
-              ></textarea>
-            </section>
-
-            <!-- Stats bar + mobile save/publish -->
-            <section class="shelf-card rounded-[1.75rem] p-5 sm:p-6">
-              <div
-                class="flex flex-col gap-3 border-b border-white/6 pb-4 sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div
-                  class="flex flex-wrap items-center gap-4 text-[9px] uppercase tracking-[0.22em] text-slate-600"
-                >
-                  <span id="stat-words">0 Words</span>
-                  <span class="hidden h-3 w-px bg-white/10 sm:block"></span>
-                  <span id="stat-chars">0 Characters</span>
-                </div>
-
-                <div
-                  class="flex flex-wrap items-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-slate-600"
-                >
-                  <span class="rounded-full border border-white/8 bg-white/3 px-2.5 py-1"
-                    >Keep writing</span
-                  >
-                  <span class="rounded-full border border-white/8 bg-white/3 px-2.5 py-1"
-                    >Auto-saved locally</span
-                  >
-                </div>
-              </div>
-
-              <!-- Mobile save + publish (hidden on md+) -->
-              <div class="mt-4 flex items-center justify-between gap-3 md:hidden">
-                <p class="text-[10px] leading-5 text-slate-600">All fields save together.</p>
-                <div class="flex items-center gap-2">
-                  <button
-                    id="save-draft-btn-mobile"
-                    type="button"
-                    class="rounded-xl border border-white/10 bg-white/4 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 transition hover:bg-white/7 hover:text-white"
-                  >
-                    Save
-                  </button>
-                  <button
-                    id="publish-btn-mobile"
-                    type="button"
-                    class="rounded-xl bg-indigo-600 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-white transition hover:bg-indigo-500"
-                  >
-                    <span data-label="Post">Post</span>
-                  </button>
-                </div>
-              </div>
-            </section>
-          </div>
-        </div>
-      </section>
-
-      <!-- Right Resize Handle -->
-      <div
-        class="resize-handle resize-handle-right"
-        data-resize="right"
-        role="separator"
-        aria-label="Resize right panel"
-        tabindex="0"
-      ></div>
-
-      <!-- ════════════════════════════════════════
-         RIGHT PANE — Analytics + settings + checklist
-         ════════════════════════════════════════ -->
-      <aside
-        class="editor-pane custom-scrollbar hidden border-l border-slate-800/70 bg-slate-900/20 xl:block"
-      >
-        <div class="space-y-5 p-4">
-          <!-- Writing metrics -->
-          <section class="shelf-card rounded-3xl p-4">
-            <div class="mb-3 flex items-center justify-between gap-2">
-              <div>
-                <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">
-                  Analytics
-                </p>
-                <h2 class="mt-0.5 text-sm font-semibold text-white">Writing Metrics</h2>
-              </div>
-              <i data-lucide="bar-chart-2" class="h-4 w-4 text-slate-700"></i>
             </div>
 
-            <div class="grid grid-cols-2 gap-2.5">
-              <div class="rounded-xl border border-white/6 bg-black/20 p-3">
-                <p class="text-[9px] text-slate-600">Words</p>
-                <p id="stat-words-right" class="mt-1 text-lg font-bold text-white">0</p>
-              </div>
-              <div class="rounded-xl border border-white/6 bg-black/20 p-3">
-                <p class="text-[9px] text-slate-600">Reading Time</p>
-                <p id="stat-reading-time" class="mt-1 text-lg font-bold text-white">0m</p>
-              </div>
-              <div class="rounded-xl border border-white/6 bg-black/20 p-3">
-                <p class="text-[9px] text-slate-600">Chapters</p>
-                <p id="shelf-chapter-count" class="mt-1 text-lg font-bold text-white">0</p>
-              </div>
-              <div class="rounded-xl border border-white/6 bg-black/20 p-3">
-                <p class="text-[9px] text-slate-600">Status</p>
-                <p class="mt-1 text-lg font-bold text-white">Draft</p>
-              </div>
-            </div>
-          </section>
-
-          <!-- Publishing settings -->
-          <section class="shelf-card rounded-3xl p-4">
-            <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">Settings</p>
-            <h3 class="mt-0.5 text-sm font-semibold text-white">Publishing & Identity</h3>
-
-            <div class="mt-3 space-y-3">
+            <!-- Content Warnings, World Setting, Author Notes -->
+            <div class="space-y-3 pt-2">
               <div class="space-y-1.5">
-                <label class="text-[10px] text-slate-500" for="content-warnings"
-                  >Content Warnings</label
+                <label
+                  class="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-400"
+                  for="content-warnings"
                 >
+                  Content Warnings
+                </label>
                 <input
                   type="text"
                   id="content-warnings"
-                  placeholder="Violence, grief, folklore horror…"
-                  class="shelf-input w-full rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-2.5 text-sm text-slate-300 placeholder:text-slate-700 focus:border-indigo-500/50"
+                  placeholder="e.g. Grief, battle violence…"
+                  class="shelf-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-700"
                 />
               </div>
 
               <div class="space-y-1.5">
-                <label class="text-[10px] text-slate-500" for="world-setting"
-                  >World / Setting</label
+                <label
+                  class="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-400"
+                  for="world-setting"
                 >
+                  World Setting
+                </label>
                 <textarea
                   id="world-setting"
                   rows="2"
-                  placeholder="The landscape, culture, or mythic world…"
-                  class="shelf-input w-full resize-none rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-2.5 text-sm text-slate-300 placeholder:text-slate-700 focus:border-indigo-500/50"
+                  placeholder="The mountain kingdom, the ancient forest realm…"
+                  class="shelf-input w-full resize-none rounded-xl border border-white/10 bg-black/30 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-700"
                 ></textarea>
               </div>
 
               <div class="space-y-1.5">
-                <label class="text-[10px] text-slate-500" for="story-notes">Author Notes</label>
+                <label
+                  class="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-400"
+                  for="story-notes"
+                >
+                  Author's Research Notes
+                </label>
                 <textarea
                   id="story-notes"
                   rows="2"
-                  placeholder="Motifs, symbolism, research references…"
-                  class="shelf-input w-full resize-none rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-2.5 text-sm text-slate-300 placeholder:text-slate-700 focus:border-indigo-500/50"
+                  placeholder="Historical references, mythic inspirations…"
+                  class="shelf-input w-full resize-none rounded-xl border border-white/10 bg-black/30 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-700"
                 ></textarea>
               </div>
-
-              <!-- Visibility toggle buttons — data-visibility wired by bindMetadataEvents() -->
-              <div class="space-y-1.5">
-                <label class="text-[10px] text-slate-500">Visibility</label>
-                <div class="grid grid-cols-3 gap-1.5">
-                  <button
-                    data-visibility="Public"
-                    class="rounded-xl border border-indigo-500/50 bg-slate-800 px-2 py-2 text-[10px] font-semibold text-white transition"
-                  >
-                    Public
-                  </button>
-                  <button
-                    data-visibility="Unlisted"
-                    class="rounded-xl border border-slate-800 bg-slate-900 px-2 py-2 text-[10px] font-semibold text-slate-500 transition hover:text-slate-300"
-                  >
-                    Unlisted
-                  </button>
-                  <button
-                    data-visibility="Draft"
-                    class="rounded-xl border border-slate-800 bg-slate-900 px-2 py-2 text-[10px] font-semibold text-slate-500 transition hover:text-slate-300"
-                  >
-                    Draft
-                  </button>
-                </div>
-              </div>
             </div>
           </section>
 
-          <!-- AI Companion stub -->
-          <section class="shelf-card rounded-3xl border border-indigo-500/15 bg-indigo-900/8 p-4">
-            <div class="mb-2 flex items-center gap-2 text-indigo-400">
-              <i data-lucide="sparkles" class="h-3.5 w-3.5"></i>
-              <span class="text-[9px] font-black uppercase tracking-[0.22em]">AI Companion</span>
-              <span
-                class="ml-auto rounded-full border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.2em] text-indigo-400"
-                >Soon</span
-              >
+          <!-- Archive Seal of Readiness (Checklist) -->
+          <section class="shelf-card rounded-3xl p-5 space-y-3">
+            <div>
+              <p class="text-[9px] font-black uppercase tracking-[0.28em] text-indigo-400">
+                Archive Verification
+              </p>
+              <h3 class="mt-0.5 text-sm font-semibold text-white">Seal of Readiness</h3>
             </div>
-            <p class="mb-3 text-[11px] leading-relaxed text-slate-500">
-              Expand world-building, refine prose, or generate stronger folklore motifs.
-            </p>
-            <button
-              type="button"
-              disabled
-              class="w-full cursor-not-allowed rounded-xl bg-indigo-700/50 px-4 py-2.5 text-[10px] font-bold text-indigo-300/50"
-            >
-              Generate Story Hook
-            </button>
-          </section>
 
-          <!-- Publish readiness checklist -->
-          <!--
-          IDs map to updateChecklist() in contribution.js:
-            check-title-synopsis → title + synopsis filled
-            check-cover-era      → era filled
-            check-chapter        → at least one chapter has content
-        -->
-          <section class="shelf-card rounded-3xl p-4">
-            <p class="text-[9px] font-black uppercase tracking-[0.28em] text-slate-600">
-              Checklist
-            </p>
-            <h3 class="mt-0.5 text-sm font-semibold text-white">Ready to publish?</h3>
-
-            <div class="mt-3 space-y-2">
-              <div
-                id="check-title-synopsis"
-                class="flex items-center gap-3 rounded-xl border border-white/6 bg-black/20 p-3 transition opacity-50"
-              >
+            <div class="space-y-2">
+              <div id="check-title-synopsis" class="readiness-seal-card opacity-50">
                 <i data-lucide="circle" class="h-4 w-4 text-zinc-600"></i>
-                <p class="text-sm text-slate-400">Title and synopsis are set</p>
+                <span class="text-xs font-semibold text-slate-300">Title & Synopsis forged</span>
               </div>
 
-              <div
-                id="check-cover-era"
-                class="flex items-center gap-3 rounded-xl border border-white/6 bg-black/20 p-3 transition opacity-50"
-              >
+              <div id="check-cover-era" class="readiness-seal-card opacity-50">
                 <i data-lucide="circle" class="h-4 w-4 text-zinc-600"></i>
-                <p class="text-sm text-slate-400">Era is defined</p>
+                <span class="text-xs font-semibold text-slate-300">Mythic Era defined</span>
               </div>
 
-              <div
-                id="check-chapter"
-                class="flex items-center gap-3 rounded-xl border border-white/6 bg-black/20 p-3 transition opacity-50"
-              >
+              <div id="check-chapter" class="readiness-seal-card opacity-50">
                 <i data-lucide="circle" class="h-4 w-4 text-zinc-600"></i>
-                <p class="text-sm text-slate-400">At least one chapter written</p>
+                <span class="text-xs font-semibold text-slate-300"
+                  >Manuscript chapter inscribed</span
+                >
               </div>
             </div>
           </section>
         </div>
       </aside>
     </main>
-
-    <script>
-      (function () {
-        'use strict';
-
-        const LEFT_MIN = 240;
-        const LEFT_MAX = 500;
-        const RIGHT_MIN = 260;
-        const RIGHT_MAX = 500;
-
-        const savedLeft = localStorage.getItem('contribution_left_width');
-        const savedRight = localStorage.getItem('contribution_right_width');
-
-        if (savedLeft) {
-          document.documentElement.style.setProperty(
-            '--left-pane-width',
-            Math.max(LEFT_MIN, Math.min(LEFT_MAX, parseInt(savedLeft))) + 'px'
-          );
-        }
-        if (savedRight) {
-          document.documentElement.style.setProperty(
-            '--right-pane-width',
-            Math.max(RIGHT_MIN, Math.min(RIGHT_MAX, parseInt(savedRight))) + 'px'
-          );
-        }
-
-        const handles = document.querySelectorAll('.resize-handle');
-        let activeHandle = null;
-        let startX = 0;
-        let startWidth = 0;
-
-        function onMouseDown(e, side) {
-          activeHandle = side;
-          const touch = e.touches && e.touches[0];
-          startX = touch ? touch.clientX : e.clientX;
-
-          const prop = side === 'left' ? '--left-pane-width' : '--right-pane-width';
-          const style = getComputedStyle(document.documentElement);
-          startWidth = parseInt(style.getPropertyValue(prop)) || (side === 'left' ? 280 : 320);
-
-          document.body.classList.add('resizing');
-
-          if (e.cancelable !== false) e.preventDefault();
-          e.stopPropagation();
-        }
-
-        function onMouseMove(e) {
-          if (!activeHandle) return;
-
-          const touch = e.touches && e.touches[0];
-          const clientX = touch ? touch.clientX : e.clientX;
-          if (clientX === undefined) return;
-
-          const delta = clientX - startX;
-          const prop = activeHandle === 'left' ? '--left-pane-width' : '--right-pane-width';
-          const min = activeHandle === 'left' ? LEFT_MIN : RIGHT_MIN;
-          const max = activeHandle === 'left' ? LEFT_MAX : RIGHT_MAX;
-
-          let newWidth;
-          if (activeHandle === 'left') {
-            newWidth = startWidth + delta;
-          } else {
-            newWidth = startWidth - delta;
-          }
-
-          newWidth = Math.max(min, Math.min(max, newWidth));
-          document.documentElement.style.setProperty(prop, newWidth + 'px');
-        }
-
-        function onMouseUp() {
-          if (!activeHandle) return;
-          const prop = activeHandle === 'left' ? '--left-pane-width' : '--right-pane-width';
-          const val = parseInt(getComputedStyle(document.documentElement).getPropertyValue(prop));
-          if (!isNaN(val)) {
-            localStorage.setItem('contribution_' + activeHandle + '_width', val);
-          }
-          activeHandle = null;
-          document.body.classList.remove('resizing');
-        }
-
-        handles.forEach((handle) => {
-          const side = handle.dataset.resize;
-          handle.addEventListener('mousedown', (e) => onMouseDown(e, side));
-          handle.addEventListener('touchstart', (e) => onMouseDown(e, side), {
-            passive: false,
-          });
-        });
-
-        window.addEventListener('mousemove', onMouseMove, { capture: true });
-        window.addEventListener('touchmove', onMouseMove, { passive: false, capture: true });
-        window.addEventListener('mouseup', onMouseUp, { capture: true });
-        window.addEventListener('touchend', onMouseUp, { capture: true });
-
-        /* Keyboard resize support */
-        handles.forEach((handle) => {
-          handle.addEventListener('keydown', (e) => {
-            const side = handle.dataset.resize;
-            if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
-            const prop = side === 'left' ? '--left-pane-width' : '--right-pane-width';
-            const current =
-              parseInt(getComputedStyle(document.documentElement).getPropertyValue(prop)) ||
-              (side === 'left' ? 280 : 320);
-            const step = 20;
-            let newWidth = current;
-
-            if (side === 'left') {
-              newWidth = e.key === 'ArrowRight' ? current + step : current - step;
-            } else {
-              newWidth = e.key === 'ArrowLeft' ? current + step : current - step;
-            }
-
-            const min = side === 'left' ? LEFT_MIN : RIGHT_MIN;
-            const max = side === 'left' ? LEFT_MAX : RIGHT_MAX;
-            newWidth = Math.max(min, Math.min(max, newWidth));
-
-            document.documentElement.style.setProperty(prop, newWidth + 'px');
-            localStorage.setItem('contribution_' + side + '_width', newWidth);
-            e.preventDefault();
-          });
-        });
-      })();
-    </script>
   </body>
 </html>
