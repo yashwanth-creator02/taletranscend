@@ -9,41 +9,15 @@
 
 .login-card {
   position: relative;
-  background: rgb(var(--bg-overlay-rgb) / var(--a-10));
-  border: 1px solid rgb(var(--light-rgb) / var(--a-05));
-  border-radius: var(--radius-3xl);
-  box-shadow:
-    0 25px 60px rgb(var(--dark-rgb) / 0.7),
-    0 0 50px rgb(var(--accent-rgb) / var(--a-05)),
-    inset 0 1px 0 rgb(var(--light-rgb) / var(--a-05));
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
+  background: transparent;
+  border-radius: var(--radius-2xl);
   transition:
     box-shadow var(--transition-base),
     border-color var(--transition-base);
 }
 
 .login-card:hover {
-  box-shadow:
-    0 30px 70px rgb(var(--dark-rgb) / 0.8),
-    0 0 60px rgb(var(--accent-rgb) / var(--a-07));
-  border-color: rgb(var(--light-rgb) / var(--a-07));
-}
-
-.login-card__accent-bar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgb(var(--accent-rgb) / 0.6) 35%,
-    rgb(var(--rune-rgb) / 0.7) 65%,
-    transparent 100%
-  );
-  z-index: 2;
+  /* Subtle depth */
 }
 
 /* ── 2. Left Visual: Boy Reading Under Lamp ──────────────────────────── */
@@ -96,7 +70,7 @@
 
 /* Auth Tabs */
 .auth-tabs {
-  gap: var(--space-2);
+  gap: var(--space-8);
 }
 
 .auth-tab {

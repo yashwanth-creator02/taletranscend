@@ -42,15 +42,12 @@
     <script type="module" src="../pages/login/login.js"></script>
   </head>
 
-  <body
-    class="antialiased page-fade-in flex items-center justify-center min-h-screen overflow-x-hidden overflow-y-auto py-6 px-4"
-  >
+  <body class="antialiased page-fade-in min-h-screen overflow-x-hidden overflow-y-auto">
     <a class="skip-link" href="#main-content">Skip to content</a>
 
     <!-- Atmosphere -->
     <div class="atmosphere-base" aria-hidden="true"></div>
     <div class="particle-field" aria-hidden="true"></div>
-    <div class="floating-orbs" aria-hidden="true"></div>
 
     <!-- Toast Container -->
     <div
@@ -59,65 +56,81 @@
       aria-live="polite"
     ></div>
 
-    <!-- Main Content Container -->
-    <main id="main-content" class="relative z-10 w-full max-w-5xl my-auto">
-      <div class="login-card w-full overflow-hidden" role="region" aria-labelledby="login-heading">
-        <!-- Decorative Ambient Light Strip -->
-        <div class="login-card__accent-bar" aria-hidden="true"></div>
+    <!-- Top-Left Header: Brand Logo matching reference layout -->
+    <header
+      class="relative lg:absolute top-0 left-0 w-full p-6 sm:p-8 z-30 flex items-center justify-between pointer-events-none"
+    >
+      <a
+        href="/index.html"
+        class="inline-flex items-center gap-3 pointer-events-auto group focus:outline-none focus:ring-2 focus:ring-indigo-400 rounded-xl"
+        aria-label="Return to TaleTranscend home"
+      >
+        <div
+          class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shadow-lg shadow-indigo-500/10 group-hover:scale-105 transition-transform"
+        >
+          <i data-lucide="sparkles" class="w-5 h-5 text-indigo-400"></i>
+        </div>
+        <span class="text-xl font-cinzel font-bold tracking-wider text-white">TaleTranscend</span>
+      </a>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 items-stretch">
-          <!-- ── Left Column: Boy Reading Under Lamp Illustration ── -->
-          <section
-            class="login-visual lg:col-span-6 flex flex-col items-center justify-center relative p-6 sm:p-10 lg:p-12 overflow-hidden border-b lg:border-b-0 lg:border-r border-white/5"
+      <!-- Quick Archive Link in header on desktop -->
+      <a
+        href="/index.html"
+        class="hidden sm:inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-indigo-300 font-semibold transition-colors pointer-events-auto group"
+      >
+        <i
+          data-lucide="arrow-left"
+          class="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform"
+        ></i>
+        Return to the Archives
+      </a>
+    </header>
+
+    <!-- Main Content Container: Full-Height Split Screen -->
+    <main id="main-content" class="relative z-10 w-full min-h-screen flex items-center">
+      <div class="w-full min-h-screen grid grid-cols-1 lg:grid-cols-12 items-stretch">
+        <!-- ── Left Column: Boy Reading Under Lamp Illustration ── -->
+        <section
+          class="login-visual lg:col-span-6 xl:col-span-7 flex flex-col items-center justify-center relative p-6 sm:p-10 lg:p-12 overflow-hidden border-b lg:border-b-0 lg:border-r border-white/5 pt-4 lg:pt-16"
+        >
+          <div class="login-visual__glow" aria-hidden="true"></div>
+
+          <div
+            class="login-visual__art relative z-10 w-full max-w-lg flex items-center justify-center"
           >
-            <div class="login-visual__glow" aria-hidden="true"></div>
+            <img
+              src="/images/auth/boy-reading.svg"
+              alt="A young scholar boy reading an open illuminated book under a warm brass lamp"
+              class="login-visual__img w-full max-w-[440px] h-auto object-contain select-none pointer-events-none drop-shadow-2xl"
+            />
+          </div>
 
-            <div
-              class="login-visual__art relative z-10 w-full max-w-md flex items-center justify-center"
+          <div class="login-visual__caption relative z-10 text-center mt-5">
+            <blockquote class="text-sm font-reading italic text-amber-200/80 max-w-sm mx-auto">
+              &ldquo;Every legend outlives an empire; every empire begins with a reader.&rdquo;
+            </blockquote>
+            <span
+              class="inline-block text-[10px] uppercase font-bold tracking-widest text-slate-500 mt-2"
             >
-              <img
-                src="/images/auth/boy-reading.svg"
-                alt="A young scholar boy reading an open illuminated book under a warm brass lamp"
-                class="login-visual__img w-full h-auto object-contain select-none pointer-events-none"
-              />
-            </div>
+              The Living Archive
+            </span>
+          </div>
+        </section>
 
-            <div class="login-visual__caption relative z-10 text-center mt-6">
-              <blockquote class="text-sm font-reading italic text-amber-200/80 max-w-xs mx-auto">
-                &ldquo;Every legend outlives an empire; every empire begins with a reader.&rdquo;
-              </blockquote>
-              <span
-                class="inline-block text-[10px] uppercase font-bold tracking-widest text-slate-500 mt-2"
-              >
-                The Living Archive
-              </span>
-            </div>
-          </section>
-
-          <!-- ── Right Column: Authentication Panel ── -->
-          <section
-            class="login-panel lg:col-span-6 flex flex-col justify-center p-6 sm:p-10 lg:p-12 relative z-10"
+        <!-- ── Right Column: Authentication Panel ── -->
+        <section
+          class="login-panel lg:col-span-6 xl:col-span-5 flex flex-col justify-center px-6 py-8 sm:px-12 lg:px-12 xl:px-16 relative z-10 lg:py-6"
+        >
+          <div
+            class="login-card w-full max-w-md mx-auto my-auto"
+            role="region"
+            aria-labelledby="login-heading"
           >
             <!-- Brand / Welcome Header -->
-            <div class="login-panel__header mb-6">
-              <a
-                href="/index.html"
-                class="inline-flex items-center gap-2.5 mb-3 group"
-                aria-label="Return to TaleTranscend home"
-              >
-                <div
-                  class="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shadow-lg shadow-indigo-500/10 group-hover:scale-105 transition-transform"
-                >
-                  <i data-lucide="sparkles" class="w-5 h-5 text-indigo-400"></i>
-                </div>
-                <span class="text-lg font-cinzel font-bold tracking-wider text-white"
-                  >TaleTranscend</span
-                >
-              </a>
-
+            <div class="login-panel__header mb-4">
               <h1
                 id="login-heading"
-                class="text-2xl sm:text-3xl font-cinzel font-bold text-white tracking-wide mb-2"
+                class="text-2xl sm:text-3xl font-cinzel font-bold text-white tracking-wide mb-1.5"
               >
                 Welcome to TaleTranscend !!
               </h1>
@@ -126,9 +139,9 @@
               </p>
             </div>
 
-            <!-- Auth Mode Tabs (Email | Phone) -->
+            <!-- Auth Mode Tabs (Email | Phone) — Centered horizontally matching reference -->
             <div
-              class="auth-tabs flex items-center border-b border-white/10 mb-6"
+              class="auth-tabs flex items-center justify-center border-b border-white/10 mb-5"
               role="tablist"
               aria-label="Sign in options"
             >
@@ -138,7 +151,7 @@
                 role="tab"
                 aria-selected="true"
                 aria-controls="panel-email"
-                class="auth-tab auth-tab--active pb-2.5 px-4 text-sm font-semibold transition-all relative"
+                class="auth-tab auth-tab--active pb-2.5 px-6 text-sm font-semibold transition-all relative"
               >
                 <span>Email</span>
                 <span class="auth-tab__indicator"></span>
@@ -149,7 +162,7 @@
                 role="tab"
                 aria-selected="false"
                 aria-controls="panel-phone"
-                class="auth-tab pb-2.5 px-4 text-sm font-semibold text-slate-400 hover:text-slate-200 transition-all relative"
+                class="auth-tab pb-2.5 px-6 text-sm font-semibold text-slate-400 hover:text-slate-200 transition-all relative"
               >
                 <span>Phone</span>
                 <span class="auth-tab__indicator"></span>
@@ -166,11 +179,8 @@
               <form id="email-login-form" class="space-y-4" novalidate>
                 <!-- Name field (revealed only in Create Account mode) -->
                 <div id="field-name-group" class="hidden">
-                  <label
-                    for="input-name"
-                    class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5"
-                  >
-                    Scribe / Reader Name
+                  <label for="input-name" class="block text-sm font-medium text-slate-200 mb-1.5">
+                    Scribe / Reader name
                   </label>
                   <div class="relative">
                     <input
@@ -186,10 +196,7 @@
 
                 <!-- Email address -->
                 <div>
-                  <label
-                    for="input-email"
-                    class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5"
-                  >
+                  <label for="input-email" class="block text-sm font-medium text-slate-200 mb-1.5">
                     Email address
                   </label>
                   <div class="relative">
@@ -209,7 +216,7 @@
                 <div>
                   <label
                     for="input-password"
-                    class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5"
+                    class="block text-sm font-medium text-slate-200 mb-1.5"
                   >
                     Password
                   </label>
@@ -305,10 +312,7 @@
             >
               <form id="phone-login-form" class="space-y-4" novalidate>
                 <div>
-                  <label
-                    for="input-phone"
-                    class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5"
-                  >
+                  <label for="input-phone" class="block text-sm font-medium text-slate-200 mb-1.5">
                     Phone number
                   </label>
                   <div class="relative flex items-center">
@@ -368,7 +372,7 @@
             </div>
 
             <!-- ── Social / Alternative Logins (Preserving Active Working Integrations) ── -->
-            <div class="auth-divider relative my-6">
+            <div class="auth-divider relative my-4">
               <div class="absolute inset-0 flex items-center" aria-hidden="true">
                 <div class="w-full border-t border-white/10"></div>
               </div>
@@ -384,7 +388,7 @@
               <button
                 id="btn-google-login"
                 type="button"
-                class="auth-alt-btn py-3 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-bold tracking-wider flex items-center justify-center gap-2 hover:bg-white/10 hover:border-white/20 transition-all active:scale-[0.98]"
+                class="auth-alt-btn py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-bold tracking-wider flex items-center justify-center gap-2 hover:bg-white/10 hover:border-white/20 transition-all active:scale-[0.98]"
                 aria-label="Sign in with Google"
               >
                 <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
@@ -429,7 +433,7 @@
               <button
                 id="btn-guest-login"
                 type="button"
-                class="auth-alt-btn py-3 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-300 text-xs font-bold tracking-wider flex items-center justify-center gap-2 hover:bg-white/10 hover:text-white hover:border-white/20 transition-all active:scale-[0.98]"
+                class="auth-alt-btn py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-300 text-xs font-bold tracking-wider flex items-center justify-center gap-2 hover:bg-white/10 hover:text-white hover:border-white/20 transition-all active:scale-[0.98]"
                 aria-label="Enter as Guest"
               >
                 <i data-lucide="user" class="w-4 h-4 shrink-0"></i>
@@ -455,7 +459,7 @@
             </div>
 
             <!-- Return to Archives Link -->
-            <div class="mt-6 pt-4 border-t border-white/5 text-center">
+            <div class="mt-4 pt-3 border-t border-white/5 text-center">
               <a
                 href="/index.html"
                 class="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-indigo-300 font-semibold transition-colors group"
@@ -468,8 +472,8 @@
                 Return to the Archives
               </a>
             </div>
-          </section>
-        </div>
+          </div>
+        </section>
       </div>
     </main>
   </body>
