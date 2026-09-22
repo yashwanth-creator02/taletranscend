@@ -27,12 +27,27 @@ const log = createLogger('ShelfInteractions');
  * Call once after DOMContentLoaded.
  */
 export function initShelfInteractions() {
+  _bindBackNavigation();
   _bindTabs();
   _bindFilter();
   _bindSort();
   _bindCardActions();
   _bindRightRail();
   buildSortPanel();
+}
+
+/* ─────────────────────────────────────────────
+   Back Navigation
+   ───────────────────────────────────────────── */
+
+function _bindBackNavigation() {
+  document.getElementById('btn-back')?.addEventListener('click', () => {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = '/library.html';
+    }
+  });
 }
 
 /* ─────────────────────────────────────────────

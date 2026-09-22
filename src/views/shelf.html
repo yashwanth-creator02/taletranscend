@@ -4,10 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
-    <title>My Shelf | TaleTranscend</title>
+    <title>The Scribe's Vault | TaleTranscend</title>
     <meta
       name="description"
-      content="Your saved tales, reading progress and bookmarks, synced across every device."
+      content="Your sacred archive of unfinished manuscripts, preserved fragments, and living chronicles."
     />
     <link rel="canonical" href="https://taletranscend.web.app/shelf" />
 
@@ -19,22 +19,20 @@
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="TaleTranscend" />
     <meta property="og:url" content="https://taletranscend.web.app/shelf" />
-    <meta property="og:title" content="My Shelf | TaleTranscend" />
+    <meta property="og:title" content="The Scribe's Vault | TaleTranscend" />
     <meta
       property="og:description"
-      content="Your saved tales, reading progress and bookmarks, synced across every device."
+      content="Your sacred archive of unfinished manuscripts, preserved fragments, and living chronicles."
     />
     <meta property="og:image" content="https://taletranscend.web.app/icon.svg" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="My Shelf | TaleTranscend" />
+    <meta name="twitter:title" content="The Scribe's Vault | TaleTranscend" />
     <meta
       name="twitter:description"
-      content="Your saved tales, reading progress and bookmarks, synced across every device."
+      content="Your sacred archive of unfinished manuscripts, preserved fragments, and living chronicles."
     />
 
-    <!-- One font request, identical on every page. Nine different Google
-         Fonts URLs across nine pages meant every navigation re-fetched a
-         slightly different family set and re-rendered the whole document. -->
+    <!-- Google Fonts identical on all pages -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -46,252 +44,265 @@
   </head>
 
   <body
-    class="antialiased selection:bg-indigo-500/30 selection:text-white page-fade-in flex flex-col h-screen overflow-hidden"
+    class="antialiased selection:bg-amber-500/30 selection:text-white page-fade-in flex flex-col h-screen overflow-hidden bg-slate-950 text-slate-100"
   >
     <a class="skip-link" href="#main-content">Skip to content</a>
     <div class="atmosphere-base"></div>
     <div class="particle-field"></div>
 
-    <div class="ambient-orb w-100 h-100 bg-indigo-500 -top-25 -right-25"></div>
-    <div class="ambient-orb w-75 h-75 bg-violet-500 -bottom-25 -left-25"></div>
+    <div class="ambient-orb w-96 h-96 bg-amber-500/10 -top-20 -right-20"></div>
+    <div class="ambient-orb w-96 h-96 bg-indigo-500/10 -bottom-20 -left-20"></div>
 
+    <!-- ── Vault Sticky Header (Replaces global nav & floating dock) ─────────────────────────── -->
+    <header class="sticky top-0 z-40 border-b border-white/6 bg-slate-950/90 backdrop-blur-2xl">
+      <div
+        class="mx-auto flex h-16 max-w-7xl items-center justify-between px-3 sm:px-6 lg:px-8 gap-3 sm:gap-6"
+      >
+        <!-- Left: Back button & Scribe's Vault badge -->
+        <div class="flex items-center gap-3 shrink-0">
+          <button
+            id="btn-back"
+            type="button"
+            class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/4 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white cursor-pointer shadow-sm"
+            aria-label="Go back to previous page"
+          >
+            <i data-lucide="chevron-left" class="h-4 w-4"></i>
+            <span class="hidden sm:inline">Back</span>
+          </button>
+
+          <div
+            class="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full border border-amber-500/20 bg-amber-500/10"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+            <span
+              class="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-300 font-cinzel"
+              >The Scribe's Vault</span
+            >
+          </div>
+        </div>
+
+        <!-- Center: Vault Tabs (Bookmarks, Drafts, Recent) -->
+        <div
+          class="flex items-center rounded-full border border-white/10 bg-slate-900/80 backdrop-blur-xl p-1 shadow-inner shrink-0 gap-1 overflow-x-auto no-scrollbar"
+        >
+          <button
+            id="tab-bookmarked"
+            data-tab="bookmarked"
+            type="button"
+            class="shelf-tab shelf-tab-active inline-flex items-center gap-2 rounded-full px-3.5 sm:px-4 py-1.5 text-xs font-semibold transition cursor-pointer"
+          >
+            <i data-lucide="bookmark" class="h-3.5 w-3.5"></i>
+            <span class="hidden sm:inline">Bookmarks</span>
+            <span class="sm:hidden">Saved</span>
+          </button>
+
+          <button
+            id="tab-drafts"
+            data-tab="drafts"
+            type="button"
+            class="shelf-tab inline-flex items-center gap-2 rounded-full px-3.5 sm:px-4 py-1.5 text-xs font-semibold transition text-slate-400 hover:text-white cursor-pointer"
+          >
+            <i data-lucide="scroll-text" class="h-3.5 w-3.5"></i>
+            <span>Drafts</span>
+          </button>
+
+          <button
+            id="tab-recent"
+            data-tab="recent"
+            type="button"
+            class="shelf-tab inline-flex items-center gap-2 rounded-full px-3.5 sm:px-4 py-1.5 text-xs font-semibold transition text-slate-400 hover:text-white cursor-pointer"
+          >
+            <i data-lucide="clock-3" class="h-3.5 w-3.5"></i>
+            <span class="hidden sm:inline">Recent</span>
+            <span class="sm:hidden">Past</span>
+          </button>
+        </div>
+
+        <!-- Right: Action Buttons -->
+        <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+          <button
+            id="hero-voice-btn"
+            type="button"
+            class="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/4 px-3 sm:px-3.5 py-1.5 text-xs font-semibold text-slate-300 transition hover:border-white/20 hover:bg-white/8 hover:text-white shadow-sm cursor-pointer"
+          >
+            <i data-lucide="mic" class="h-3.5 w-3.5 text-amber-400"></i>
+            <span class="hidden md:inline">Voice Note</span>
+          </button>
+
+          <button
+            id="hero-new-tale-btn"
+            type="button"
+            class="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-indigo-600 px-3.5 sm:px-4 py-1.5 text-xs font-bold text-white shadow-md shadow-amber-500/20 transition hover:brightness-110 hover:shadow-amber-500/35 focus:outline-none cursor-pointer"
+          >
+            <i data-lucide="feather" class="h-3.5 w-3.5"></i>
+            <span>New Tale</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── Main Viewport ─────────────────────────── -->
     <main
       id="main-content"
-      class="app-viewport scroll-container relative max-w-440 mx-auto px-4 md:px-6 lg:px-8 xl:px-10 pt-8 pb-24"
+      class="flex-1 overflow-y-auto scroll-container relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8"
     >
-      <!-- Hero -->
-      <section class="mb-10">
+      <!-- Hero Banner -->
+      <section class="relative">
         <div
-          class="glass-panel-elevated rounded-[2.75rem] p-6 md:p-10 lg:p-12 overflow-hidden relative border border-white/6"
+          class="glass-panel-elevated vault-hero-card rounded-[2.5rem] p-6 sm:p-8 md:p-10 lg:p-12 overflow-hidden relative border border-white/8 bg-gradient-to-b from-white/[0.03] to-white/[0.01]"
         >
+          <!-- Top Amber filigree line -->
           <div
-            class="absolute inset-0 bg-linear-to-br from-indigo-500/3 via-transparent to-violet-500/3 pointer-events-none"
+            class="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-px bg-gradient-to-r from-transparent via-amber-500/50 to-transparent"
           ></div>
 
           <div
-            class="absolute top-0 left-1/2 -translate-x-1/2 w-[72%] h-px bg-linear-to-r from-transparent via-indigo-500/40 to-transparent"
-          ></div>
-
-          <div
-            class="relative z-10 flex flex-col xl:flex-row xl:items-end xl:justify-between gap-10"
+            class="relative z-10 flex flex-col xl:flex-row xl:items-end xl:justify-between gap-8"
           >
             <div class="max-w-3xl">
-              <h1
-                class="archive-title mt-8 text-5xl md:text-6xl xl:text-7xl font-cinzel font-black text-white tracking-tight leading-none"
+              <div
+                class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-500/25 bg-amber-500/10 text-amber-300 text-[11px] font-semibold tracking-wider uppercase mb-4"
               >
-                My Shelf
+                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
+                Sanctuary of Living Lore
+              </div>
+
+              <h1
+                class="archive-title text-4xl sm:text-5xl md:text-6xl font-cinzel font-black text-white tracking-tight leading-tight"
+              >
+                The Scribe's Vault
               </h1>
 
-              <p class="mt-8 text-slate-400 max-w-2xl leading-relaxed text-sm md:text-base">
-                A sacred chamber of unfinished manuscripts, preserved fragments, forgotten drafts,
-                and mythic chronicles waiting to awaken.
+              <p class="mt-4 text-slate-400 max-w-2xl leading-relaxed text-sm md:text-base">
+                A sanctuary of unfinished manuscripts, preserved fragments, forgotten drafts, and
+                mythic chronicles waiting to awaken.
               </p>
 
-              <div class="mt-10 flex flex-wrap gap-4">
-                <div class="glass-panel rounded-2xl px-5 py-4 min-w-35">
-                  <!-- id used by shelf/ui.js renderHeroStats() -->
-                  <p id="hero-stat-drafts" class="text-2xl font-bold text-white">—</p>
-                  <p class="text-[10px] uppercase tracking-[0.2em] text-slate-500 mt-1">Drafts</p>
+              <!-- Stat Chips -->
+              <div class="mt-8 flex flex-wrap gap-4">
+                <div
+                  class="glass-panel rounded-2xl px-5 py-4 min-w-[130px] border border-white/6 bg-white/[0.02]"
+                >
+                  <p
+                    id="hero-stat-drafts"
+                    class="text-2xl sm:text-3xl font-bold font-cinzel text-white"
+                  >
+                    —
+                  </p>
+                  <p class="text-[10px] uppercase tracking-[0.2em] text-slate-400 mt-1">Drafts</p>
                 </div>
 
-                <div class="glass-panel rounded-2xl px-5 py-4 min-w-35">
-                  <!-- id used by shelf/ui.js renderHeroStats() -->
-                  <p id="hero-stat-bookmarks" class="text-2xl font-bold text-white">—</p>
-                  <p class="text-[10px] uppercase tracking-[0.2em] text-slate-500 mt-1">
+                <div
+                  class="glass-panel rounded-2xl px-5 py-4 min-w-[130px] border border-white/6 bg-white/[0.02]"
+                >
+                  <p
+                    id="hero-stat-bookmarks"
+                    class="text-2xl sm:text-3xl font-bold font-cinzel text-white"
+                  >
+                    —
+                  </p>
+                  <p class="text-[10px] uppercase tracking-[0.2em] text-slate-400 mt-1">
                     Saved Fragments
                   </p>
                 </div>
 
-                <div class="glass-panel rounded-2xl px-5 py-4 min-w-35">
-                  <!-- id used by shelf/ui.js renderHeroStats() -->
-                  <p id="hero-stat-words" class="text-2xl font-bold text-white">—</p>
-                  <p class="text-[10px] uppercase tracking-[0.2em] text-slate-500 mt-1">
+                <div
+                  class="glass-panel rounded-2xl px-5 py-4 min-w-[130px] border border-white/6 bg-white/[0.02]"
+                >
+                  <p
+                    id="hero-stat-words"
+                    class="text-2xl sm:text-3xl font-bold font-cinzel text-white"
+                  >
+                    —
+                  </p>
+                  <p class="text-[10px] uppercase tracking-[0.2em] text-slate-400 mt-1">
                     Words Preserved
                   </p>
                 </div>
               </div>
             </div>
 
-            <div class="flex flex-col sm:flex-row gap-4 xl:min-w-105">
-              <!-- id used by shelf/interactions.js _bindRightRail() -->
-              <button
-                id="hero-voice-btn"
-                type="button"
-                class="group glass-panel px-6 py-4 rounded-2xl flex items-center gap-3 hover:border-indigo-500/20 transition-all"
+            <!-- Quick Navigation Actions -->
+            <div class="flex flex-col sm:flex-row gap-3 xl:min-w-[340px]">
+              <a
+                href="library.html"
+                class="glass-panel px-5 py-3.5 rounded-2xl flex items-center justify-center gap-2.5 border border-white/10 hover:border-white/20 text-slate-300 hover:text-white transition text-xs font-semibold"
               >
-                <i
-                  data-lucide="mic"
-                  class="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform"
-                ></i>
-                <div class="text-left">
-                  <p class="text-sm font-semibold text-white">Voice Chronicle</p>
-                  <p class="text-[10px] text-slate-500 uppercase tracking-wider">Record orally</p>
-                </div>
-              </button>
-
-              <!-- id used by shelf/interactions.js _bindRightRail() -->
-              <button
-                id="hero-new-tale-btn"
-                type="button"
-                class="group bg-linear-to-br from-indigo-500 to-violet-600 hover:shadow-[0_0_30px_rgba(99,102,241,0.45)] transition-all px-7 py-4 rounded-2xl flex items-center gap-3 text-white"
+                <i data-lucide="compass" class="w-4 h-4 text-slate-400"></i>
+                <span>Explore Library</span>
+              </a>
+              <a
+                href="contribution.html"
+                class="bg-gradient-to-r from-amber-500 via-amber-600 to-indigo-600 hover:brightness-110 px-5 py-3.5 rounded-2xl flex items-center justify-center gap-2.5 text-white shadow-lg shadow-amber-500/20 transition text-xs font-bold"
               >
-                <i
-                  data-lucide="feather"
-                  class="w-4 h-4 group-hover:-translate-y-0.5 transition-transform"
-                ></i>
-                <div class="text-left">
-                  <p class="text-sm font-semibold">Begin New Tale</p>
-                  <p class="text-[10px] text-indigo-100/70 uppercase tracking-wider">
-                    Open manuscript
-                  </p>
-                </div>
-              </button>
+                <i data-lucide="pen-tool" class="w-4 h-4"></i>
+                <span>Craft Manuscript</span>
+              </a>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Tabs + Controls -->
-      <section class="mb-10 relative z-20">
-        <div class="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-6 items-start">
-          <div class="glass-panel rounded-4xl p-2 overflow-x-auto no-scrollbar">
-            <div class="flex items-center gap-2 min-w-max">
-              <button
-                id="tab-bookmarked"
-                data-tab="bookmarked"
-                class="shelf-tab shelf-tab-active rounded-2xl px-6 py-4 text-[11px] uppercase tracking-[0.22em] font-black transition-all"
-              >
-                <span class="flex items-center gap-3">
-                  <i data-lucide="bookmark" class="w-4 h-4"></i>
-                  Bookmarked Fragments
-                </span>
-              </button>
-
-              <button
-                id="tab-drafts"
-                data-tab="drafts"
-                class="shelf-tab rounded-2xl px-6 py-4 text-zinc-500 hover:text-white hover:bg-white/3 text-[11px] uppercase tracking-[0.22em] font-black transition-all"
-              >
-                <span class="flex items-center gap-3">
-                  <i data-lucide="scroll-text" class="w-4 h-4"></i>
-                  Active Drafts
-                </span>
-              </button>
-
-              <button
-                id="tab-recent"
-                data-tab="recent"
-                class="shelf-tab rounded-2xl px-6 py-4 text-zinc-600 hover:text-slate-300 hover:bg-white/3 text-[11px] uppercase tracking-[0.22em] font-black transition-all"
-              >
-                <span class="flex items-center gap-3">
-                  <i data-lucide="clock-3" class="w-4 h-4"></i>
-                  Recently Opened
-                </span>
-              </button>
-            </div>
+      <!-- Filter & Sort Controls -->
+      <section class="relative z-20">
+        <div
+          class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 glass-panel rounded-3xl p-3 sm:p-4 border border-white/8 bg-white/[0.02]"
+        >
+          <div class="flex-1 relative">
+            <i
+              data-lucide="search"
+              class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500"
+            ></i>
+            <input
+              id="shelf-filter-input"
+              type="text"
+              placeholder="Filter fragments, drafts, or notes..."
+              class="w-full pl-11 pr-4 py-2.5 sm:py-3 rounded-2xl bg-black/40 border border-white/8 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/30 transition"
+            />
           </div>
 
-          <div class="glass-panel rounded-4xl p-4 md:p-5">
-            <div class="flex items-center gap-3">
-              <div class="flex-1 relative">
-                <i
-                  data-lucide="filter"
-                  class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500"
-                ></i>
-                <input
-                  id="shelf-filter-input"
-                  type="text"
-                  placeholder="Filter fragments, drafts, or notes..."
-                  class="w-full pl-11 pr-4 py-3 rounded-2xl bg-black/35 border border-white/8 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/40 transition-all"
-                />
-              </div>
-              <!-- id used by shelf/interactions.js _bindSort() -->
-              <div class="relative">
-                <button
-                  id="sort-btn"
-                  type="button"
-                  aria-haspopup="listbox"
-                  aria-expanded="false"
-                  class="control-chip px-4 py-3 rounded-2xl text-[11px] uppercase tracking-[0.2em] text-slate-400 font-bold flex items-center gap-2"
-                >
-                  <i data-lucide="arrow-up-down" class="w-4 h-4"></i>
-                  Sort
-                </button>
-                <!-- id used by shelf/interactions.js _bindSort() -->
-                <div
-                  id="sort-panel"
-                  hidden
-                  class="absolute right-0 top-full mt-2 w-52 z-50 animate-in fade-in slide-in-from-top-2 duration-300"
-                  role="listbox"
-                ></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Section Header -->
-      <section class="mb-8">
-        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
-          <div>
-            <div class="flex items-center gap-4 mb-4">
-              <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-indigo-400">
-                Archive Contents
-              </p>
-              <div class="flex-1 sacred-divider"></div>
-            </div>
-
-            <h2 class="section-heading text-3xl md:text-4xl font-cinzel font-bold text-white">
-              Preserved Manuscripts
-            </h2>
-
-            <p class="mt-3 text-slate-500 max-w-2xl">
-              Every fragment carries echoes of forgotten worlds and living myths.
-            </p>
-          </div>
-
-          <div class="flex flex-wrap items-center gap-3">
+          <div class="relative flex items-center gap-2">
             <button
-              class="glass-panel rounded-2xl px-5 py-3 text-[11px] uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-all flex items-center gap-2"
+              id="sort-btn"
+              type="button"
+              aria-haspopup="listbox"
+              aria-expanded="false"
+              class="control-chip px-4 py-2.5 sm:py-3 rounded-2xl text-[11px] uppercase tracking-[0.2em] text-slate-300 font-bold flex items-center gap-2 hover:text-white cursor-pointer"
             >
-              <i data-lucide="layout-grid" class="w-4 h-4"></i>
-              Grid View
+              <i data-lucide="arrow-up-down" class="w-4 h-4 text-amber-400"></i>
+              Sort
             </button>
-
-            <button
-              class="glass-panel rounded-2xl px-5 py-3 text-[11px] uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-all flex items-center gap-2"
-            >
-              <i data-lucide="search" class="w-4 h-4"></i>
-              Discover
-            </button>
+            <div
+              id="sort-panel"
+              hidden
+              class="absolute right-0 top-full mt-2 w-56 z-50 animate-in fade-in slide-in-from-top-2 duration-300"
+              role="listbox"
+            ></div>
           </div>
         </div>
       </section>
 
-      <!-- Workspace -->
-      <section class="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-8 items-start">
+      <!-- Main Workspace (Grid + Right Rail) -->
+      <section class="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-8 items-start">
         <div class="min-w-0">
-          <div
-            id="shelf-grid"
-            class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 md:gap-8"
-          >
-            <!-- loading -->
+          <div id="shelf-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Loading State -->
             <div class="col-span-full">
               <div
-                class="glass-panel-elevated rounded-4xl py-24 px-8 text-center border border-white/4"
+                class="glass-panel-elevated rounded-3xl py-20 px-8 text-center border border-white/6"
               >
                 <div class="relative inline-flex items-center justify-center">
                   <div
-                    class="absolute inset-0 rounded-full blur-2xl bg-indigo-500/20 animate-pulse"
+                    class="absolute inset-0 rounded-full blur-2xl bg-amber-500/20 animate-pulse"
                   ></div>
                   <div
-                    class="relative w-16 h-16 rounded-full border-2 border-indigo-500/20 border-t-indigo-400 animate-spin"
+                    class="relative w-14 h-14 rounded-full border-2 border-amber-500/20 border-t-amber-400 animate-spin"
                   ></div>
                 </div>
 
-                <h3 class="mt-8 text-xl font-cinzel font-bold text-white">Accessing the Archive</h3>
+                <h3 class="mt-6 text-xl font-cinzel font-bold text-white">Accessing the Archive</h3>
 
-                <p class="mt-3 text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
+                <p class="mt-2 text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
                   Gathering preserved fragments, unfinished chronicles, and sacred manuscripts from
                   your private collection.
                 </p>
@@ -300,64 +311,85 @@
           </div>
         </div>
 
-        <!-- Right rail -->
-        <aside class="sticky top-6 space-y-6">
-          <div class="glass-panel-elevated rounded-4xl p-6 md:p-8">
-            <div class="flex items-center gap-2 text-indigo-300 mb-5">
-              <i data-lucide="wand-sparkles" class="w-4 h-4"></i>
-              <span class="text-[9px] font-black uppercase tracking-[0.3em]">Shelf Rituals</span>
+        <!-- Right Rail: Vault Rituals & Notes -->
+        <aside class="sticky top-20 space-y-6">
+          <div class="glass-panel-elevated rounded-3xl p-6 border border-white/8 bg-white/[0.02]">
+            <div class="flex items-center gap-2 text-amber-400 mb-5">
+              <i data-lucide="sparkles" class="w-4 h-4"></i>
+              <span class="text-[10px] font-bold uppercase tracking-[0.25em]">Vault Rituals</span>
             </div>
 
             <div class="space-y-3">
-              <div class="control-chip rounded-2xl p-4 flex items-center justify-between">
+              <button
+                id="ritual-new-draft"
+                type="button"
+                class="w-full control-chip rounded-2xl p-3.5 flex items-center justify-between text-left transition hover:border-amber-500/30 group cursor-pointer"
+              >
                 <div>
-                  <p class="text-sm font-semibold text-white">Fresh draft</p>
-                  <p class="text-[10px] text-slate-500 mt-1">Future hook placeholder</p>
+                  <p class="text-xs font-semibold text-white group-hover:text-amber-300 transition">
+                    Start New Tale
+                  </p>
+                  <p class="text-[10px] text-slate-500 mt-0.5">Open fresh manuscript</p>
                 </div>
-                <i data-lucide="plus" class="w-4 h-4 text-slate-500"></i>
-              </div>
+                <i
+                  data-lucide="plus"
+                  class="w-4 h-4 text-slate-500 group-hover:text-amber-400 transition"
+                ></i>
+              </button>
 
-              <div class="control-chip rounded-2xl p-4 flex items-center justify-between">
+              <button
+                id="ritual-voice-note"
+                type="button"
+                class="w-full control-chip rounded-2xl p-3.5 flex items-center justify-between text-left transition hover:border-amber-500/30 group cursor-pointer"
+              >
                 <div>
-                  <p class="text-sm font-semibold text-white">Voice note</p>
-                  <p class="text-[10px] text-slate-500 mt-1">Future hook placeholder</p>
+                  <p class="text-xs font-semibold text-white group-hover:text-amber-300 transition">
+                    Oral Chronicle
+                  </p>
+                  <p class="text-[10px] text-slate-500 mt-0.5">Voice recording hook</p>
                 </div>
-                <i data-lucide="mic" class="w-4 h-4 text-slate-500"></i>
-              </div>
+                <i
+                  data-lucide="mic"
+                  class="w-4 h-4 text-slate-500 group-hover:text-amber-400 transition"
+                ></i>
+              </button>
 
-              <div class="control-chip rounded-2xl p-4 flex items-center justify-between">
+              <button
+                id="ritual-publish"
+                type="button"
+                class="w-full control-chip rounded-2xl p-3.5 flex items-center justify-between text-left transition hover:border-amber-500/30 group cursor-pointer"
+              >
                 <div>
-                  <p class="text-sm font-semibold text-white">Publishing flow</p>
-                  <p class="text-[10px] text-slate-500 mt-1">Future hook placeholder</p>
+                  <p class="text-xs font-semibold text-white group-hover:text-amber-300 transition">
+                    Publishing Chamber
+                  </p>
+                  <p class="text-[10px] text-slate-500 mt-0.5">Prepare for lore release</p>
                 </div>
-                <i data-lucide="send" class="w-4 h-4 text-slate-500"></i>
-              </div>
+                <i
+                  data-lucide="send"
+                  class="w-4 h-4 text-slate-500 group-hover:text-amber-400 transition"
+                ></i>
+              </button>
             </div>
           </div>
 
-          <div class="glass-panel rounded-4xl p-6 md:p-8">
-            <div class="flex items-center gap-2 text-indigo-300 mb-5">
-              <i data-lucide="scroll-text" class="w-4 h-4"></i>
-              <span class="text-[9px] font-black uppercase tracking-[0.3em]">Recent Notes</span>
+          <div class="glass-panel rounded-3xl p-6 border border-white/6 bg-white/[0.01]">
+            <div class="flex items-center gap-2 text-indigo-400 mb-4">
+              <i data-lucide="scroll" class="w-4 h-4"></i>
+              <span class="text-[10px] font-bold uppercase tracking-[0.25em]">Archival Notes</span>
             </div>
 
-            <div class="space-y-3">
-              <div class="panel-note rounded-2xl p-4">
-                <p class="text-sm text-white font-semibold">Empty shelf placeholder</p>
-                <p class="text-xs text-slate-500 mt-1">
-                  Use this rail for drafts, saved states, or recent activity later.
+            <div class="space-y-3 text-xs">
+              <div class="p-3.5 rounded-2xl border border-white/6 bg-white/[0.01]">
+                <p class="text-slate-300 font-medium">Automatic Synchronization</p>
+                <p class="text-slate-500 text-[11px] mt-1 leading-relaxed">
+                  Drafts and bookmarks sync continuously across devices via your scribe profile.
                 </p>
               </div>
-              <div class="panel-note rounded-2xl p-4">
-                <p class="text-sm text-white font-semibold">Autosave placeholder</p>
-                <p class="text-xs text-slate-500 mt-1">
-                  Independent scroll area for quick context and future hooks.
-                </p>
-              </div>
-              <div class="panel-note rounded-2xl p-4">
-                <p class="text-sm text-white font-semibold">Editor placeholder</p>
-                <p class="text-xs text-slate-500 mt-1">
-                  This rail stays visually separate from the main archive grid.
+              <div class="p-3.5 rounded-2xl border border-white/6 bg-white/[0.01]">
+                <p class="text-slate-300 font-medium">Mythic Resonances</p>
+                <p class="text-slate-500 text-[11px] mt-1 leading-relaxed">
+                  Read chapters record dynamic scroll progress directly into your personal vault.
                 </p>
               </div>
             </div>
