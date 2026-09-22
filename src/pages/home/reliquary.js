@@ -29,7 +29,7 @@ export function initReliquary(containerId = 'archive-reliquary-container', tales
   teardownReliquary();
 
   const artifacts = getReliquaryArtifacts(tales);
-  activeRelicId = artifacts[0]?.id || null;
+  activeRelicId = null;
 
   container.innerHTML = _buildReliquaryMarkup(artifacts);
   initIcons();
@@ -356,8 +356,9 @@ function _setupInteractivity(container, artifacts) {
     }
     const hitArtifact = identifyArtifactAtPoint(e.clientX, e.clientY);
     if (hitArtifact) {
-      selectArtifact(hitArtifact, true);
-      if (hitArtifact.readUrl) {
+      if (activeRelicId !== hitArtifact.id) {
+        selectArtifact(hitArtifact, true);
+      } else if (hitArtifact.readUrl) {
         window.location.href = hitArtifact.readUrl;
       }
     }
@@ -472,8 +473,9 @@ function _setupMotesCanvas(container) {
   let height = 0;
 
   function resize() {
-    width = canvas.width = container.clientWidth || 400;
-    height = canvas.height = container.clientHeight || 340;
+    const parent = canvas.parentElement;
+    width = canvas.width = parent?.clientWidth || container.clientWidth || 400;
+    height = canvas.height = parent?.clientHeight || container.clientHeight || 340;
   }
 
   resize();

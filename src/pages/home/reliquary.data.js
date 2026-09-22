@@ -8,7 +8,7 @@ import { ENABLE_DYNAMIC_TALE_ARTIFACTS } from '@config/app.config.js';
 import bookAsset from '@/assets/images/reliquary/book.svg';
 import lampAsset from '@/assets/images/reliquary/lamp.svg';
 import watchAsset from '@/assets/images/reliquary/watch.svg';
-import mapAsset from '@/assets/images/reliquary/map.svg';
+import mapAsset from '@/assets/images/reliquary/map.svg?v=2';
 import quillAsset from '@/assets/images/reliquary/quill.svg';
 import spectaclesAsset from '@/assets/images/reliquary/spectacles.svg';
 

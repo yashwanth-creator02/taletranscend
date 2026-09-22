@@ -66,6 +66,18 @@ function _initInteractions() {
     e.preventDefault();
     _performSearch();
   });
+
+  // Preserve clean viewport positioning when resizing across responsive breakpoints
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    if (resizeTimer) clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      const main = document.getElementById('main-content');
+      if (main && main.scrollTop < 60) {
+        main.scrollTop = 0;
+      }
+    }, 100);
+  });
 }
 
 /**

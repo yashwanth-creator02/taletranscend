@@ -10,24 +10,14 @@
 .home-hero {
   position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  width: 100%;
   min-height: min(78svh, 720px);
   padding-block: var(--space-8) var(--space-7);
-  overflow: hidden;
-}
-
-@media (max-width: 64rem) {
-  .home-hero {
-    min-height: auto;
-    padding-block: var(--space-7) var(--space-6);
-  }
-}
-
-@media (max-width: 48rem) {
-  .home-hero {
-    padding-block: var(--space-6) var(--space-5);
-  }
+  overflow-x: clip;
 }
 
 .home-hero__glow {
@@ -44,23 +34,11 @@
   position: relative;
   z-index: var(--z-raised);
   display: grid;
-  grid-template-columns: 1.18fr 0.82fr;
+  grid-template-columns: 1.15fr 0.85fr;
   align-items: center;
   gap: var(--space-8);
   width: 100%;
-}
-
-@media (max-width: 52rem) {
-  .home-hero__inner {
-    grid-template-columns: 1fr;
-    gap: var(--space-6);
-  }
-}
-
-@media (max-width: 48rem) {
-  .home-hero__inner {
-    gap: var(--space-5);
-  }
+  overflow-anchor: none;
 }
 
 .home-hero__content {
@@ -259,13 +237,6 @@
   width: 100%;
 }
 
-@media (max-width: 52rem) {
-  .home-hero__showcase {
-    justify-content: center;
-    margin-top: var(--space-4);
-  }
-}
-
 #archive-reliquary-container {
   width: 100%;
   display: flex;
@@ -284,15 +255,7 @@
   border: none;
   overflow: visible;
   user-select: none;
-  margin-bottom: var(--space-8);
-}
-
-@media (max-width: 40rem) {
-  .archive-reliquary {
-    max-width: 100%;
-    aspect-ratio: 16 / 14;
-    margin-bottom: var(--space-7);
-  }
+  margin-bottom: 0;
 }
 
 /* Ambient warm lamp light bleeding seamlessly into the dark atmosphere */
@@ -632,6 +595,119 @@
 .relic-inspector__action i {
   width: 0.6875rem;
   height: 0.6875rem;
+}
+
+/* ── Hero & Reliquary Responsive Layout & Balance ─────────────────────── */
+
+@media (max-width: 64rem) {
+  .home-hero {
+    min-height: auto;
+    padding-block: var(--space-7) var(--space-6);
+  }
+
+  .home-hero__inner {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-6);
+  }
+
+  .home-hero__title {
+    font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.35rem);
+  }
+
+  .archive-reliquary {
+    max-width: 25rem;
+    margin-bottom: 0;
+  }
+}
+
+@media (max-width: 48rem) {
+  .home-hero {
+    padding-block: var(--space-5) var(--space-4);
+  }
+
+  .home-hero__inner {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+    text-align: center;
+  }
+
+  .home-hero__content {
+    align-items: center;
+    text-align: center;
+  }
+
+  .home-hero__context {
+    font-size: var(--text-xs);
+    margin-bottom: var(--space-1);
+  }
+
+  .home-hero__title {
+    text-align: center;
+    max-width: 24ch;
+    margin-inline: auto;
+    margin-bottom: var(--space-2);
+    font-size: clamp(1.6rem, 1.2rem + 1.8vw, 2.05rem);
+  }
+
+  .home-hero__lede {
+    text-align: center;
+    max-width: 38ch;
+    margin-inline: auto;
+    margin-bottom: var(--space-3);
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+  }
+
+  .home-search {
+    margin-inline: auto;
+    margin-bottom: var(--space-3);
+    max-width: 26rem;
+  }
+
+  .home-tags {
+    justify-content: center;
+    gap: var(--space-1);
+    margin-bottom: var(--space-3);
+  }
+
+  .home-hero__actions {
+    justify-content: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+  }
+
+  .home-hero__showcase {
+    justify-content: center;
+    margin-top: 0;
+  }
+
+  .archive-reliquary {
+    max-width: min(100%, 20.5rem);
+    aspect-ratio: 16 / 12;
+    margin-inline: auto;
+    margin-bottom: var(--space-3);
+  }
+
+  .relic-inspector--hover-only {
+    bottom: -36px;
+    padding: 2px var(--space-3);
+    font-size: 0.625rem;
+  }
+
+  .reliquary-item__pill {
+    font-size: 0.625rem;
+    padding: 2px var(--space-2);
+  }
+}
+
+@media (max-width: 24rem) {
+  .home-hero__title {
+    font-size: clamp(1.4rem, 1.1rem + 1.5vw, 1.7rem);
+  }
+
+  .archive-reliquary {
+    max-width: 17rem;
+  }
 }
 
 /* ══ 4. SECTIONS ══════════════════════════════════════════════════════════ */
