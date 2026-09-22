@@ -1,0 +1,238 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 500" width="100%" height="100%" fill="none">
+  <defs>
+    <!-- Warm amber glow filters and gradients -->
+    <filter id="amber-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <filter id="soft-blur" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="16" />
+    </filter>
+
+    <!-- Radial Lamp Light Glow -->
+    <radialGradient id="lamp-halo-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.45" />
+      <stop offset="35%" stop-color="#f59e0b" stop-opacity="0.2" />
+      <stop offset="70%" stop-color="#d97706" stop-opacity="0.08" />
+      <stop offset="100%" stop-color="#030305" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Conical Desk Light Beam -->
+    <linearGradient id="lamp-beam" x1="0%" y1="0%" x2="40%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.32" />
+      <stop offset="40%" stop-color="#f59e0b" stop-opacity="0.16" />
+      <stop offset="85%" stop-color="#f59e0b" stop-opacity="0.04" />
+      <stop offset="100%" stop-color="#030305" stop-opacity="0" />
+    </linearGradient>
+
+    <!-- Filament Glow -->
+    <radialGradient id="bulb-filament" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="25%" stop-color="#fef08a" />
+      <stop offset="60%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#d97706" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Brass Gradient for Lamp -->
+    <linearGradient id="brass-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde68a" />
+      <stop offset="50%" stop-color="#d97706" />
+      <stop offset="100%" stop-color="#78350f" />
+    </linearGradient>
+
+    <!-- Wood Desk Gradient -->
+    <linearGradient id="desk-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e1e24" />
+      <stop offset="100%" stop-color="#121216" />
+    </linearGradient>
+
+    <!-- Open Book Page Glow -->
+    <linearGradient id="page-glow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2a2214" />
+      <stop offset="50%" stop-color="#45341a" />
+      <stop offset="100%" stop-color="#2a2214" />
+    </linearGradient>
+  </defs>
+
+  <!-- ══ 1. AMBIENT ATMOSPHERE & LIGHT CONE ═══════════════════════════════ -->
+  <!-- Ambient Lamp Light Halo -->
+  <circle cx="380" cy="140" r="180" fill="url(#lamp-halo-glow)" filter="url(#soft-blur)" />
+  <circle cx="380" cy="140" r="90" fill="url(#lamp-halo-glow)" />
+
+  <!-- Radiating Light Beam onto the Desk -->
+  <polygon points="370,145 130,420 460,420 395,145" fill="url(#lamp-beam)" />
+
+  <!-- ══ 2. BACKGROUND ARCHIVAL STUDY ELEMENTS ═══════════════════════════ -->
+  <!-- Background Bookcase Silhouette -->
+  <rect x="50" y="70" width="130" height="210" rx="4" fill="#0d0d12" stroke="#1f1f28" stroke-width="1.5" />
+  <line x1="50" y1="140" x2="180" y2="140" stroke="#262632" stroke-width="2" />
+  <line x1="50" y1="210" x2="180" y2="210" stroke="#262632" stroke-width="2" />
+
+  <!-- Books on shelves -->
+  <rect x="58" y="90" width="14" height="48" rx="2" fill="#181820" stroke="#d97706" stroke-opacity="0.3" stroke-width="1" />
+  <rect x="74" y="82" width="18" height="56" rx="2" fill="#14141c" stroke="#818cf8" stroke-opacity="0.3" stroke-width="1" />
+  <rect x="94" y="96" width="12" height="42" rx="2" fill="#1b1b26" stroke="#f59e0b" stroke-opacity="0.3" stroke-width="1" />
+  <rect x="108" y="86" width="16" height="52" rx="2" fill="#121218" stroke="#a78bfa" stroke-opacity="0.3" stroke-width="1" />
+  <rect x="126" y="92" width="15" height="46" rx="2" fill="#191924" stroke="#d97706" stroke-opacity="0.3" stroke-width="1" />
+  <path d="M144,138 L160,94 L170,97 L154,140 Z" fill="#14141c" stroke="#f59e0b" stroke-opacity="0.3" stroke-width="1" />
+
+  <!-- Second Shelf Books -->
+  <rect x="58" y="160" width="20" height="48" rx="2" fill="#171722" stroke="#d97706" stroke-opacity="0.25" stroke-width="1" />
+  <rect x="80" y="152" width="16" height="56" rx="2" fill="#13131c" stroke="#818cf8" stroke-opacity="0.25" stroke-width="1" />
+  <rect x="98" y="166" width="22" height="42" rx="2" fill="#1b1b24" stroke="#f59e0b" stroke-opacity="0.25" stroke-width="1" />
+  <rect x="122" y="156" width="14" height="52" rx="2" fill="#15151e" stroke="#a78bfa" stroke-opacity="0.25" stroke-width="1" />
+  <rect x="138" y="162" width="18" height="46" rx="2" fill="#181824" stroke="#d97706" stroke-opacity="0.25" stroke-width="1" />
+
+  <!-- ══ 3. STUDY DESK & ENVIRONMENT ═════════════════════════════════════ -->
+  <!-- Stool / Chair Back -->
+  <path d="M155,270 Q130,285 130,340 L145,395" stroke="#2c2c38" stroke-width="5" stroke-linecap="round" fill="none" />
+  <path d="M142,305 C155,305 170,305 185,305" stroke="#363646" stroke-width="6" stroke-linecap="round" />
+
+  <!-- Main Archive Table Top -->
+  <polygon points="70,380 480,380 460,420 50,420" fill="url(#desk-grad)" stroke="#2f2f3e" stroke-width="1.5" />
+  <polygon points="50,420 460,420 460,432 50,432" fill="#0b0b0f" stroke="#1f1f28" stroke-width="1" />
+  <!-- Table Legs -->
+  <line x1="85" y1="432" x2="85" y2="480" stroke="#1c1c24" stroke-width="6" stroke-linecap="round" />
+  <line x1="435" y1="432" x2="435" y2="480" stroke="#1c1c24" stroke-width="6" stroke-linecap="round" />
+
+  <!-- Stack of Ancient Folios on Left Desk -->
+  <g id="desk-books">
+    <!-- Bottom Folio -->
+    <rect x="95" y="365" width="70" height="15" rx="2" fill="#191512" stroke="#78350f" stroke-width="1" />
+    <line x1="97" y1="372" x2="163" y2="372" stroke="#b45309" stroke-width="0.8" stroke-opacity="0.6" />
+    <!-- Middle Folio -->
+    <rect x="100" y="352" width="62" height="14" rx="2" fill="#151821" stroke="#3730a3" stroke-width="1" />
+    <!-- Top Folio -->
+    <rect x="104" y="340" width="54" height="13" rx="2" fill="#1c1410" stroke="#d97706" stroke-width="1" />
+  </g>
+
+  <!-- Inkpot & Feather Quill on Desk -->
+  <g id="inkpot-quill">
+    <!-- Inkpot -->
+    <path d="M185,375 L195,375 L197,363 L183,363 Z" fill="#1e1b2e" stroke="#818cf8" stroke-width="1" />
+    <ellipse cx="190" cy="363" rx="7" ry="2" fill="#312e81" />
+    <!-- Quill Feather -->
+    <path d="M190,363 Q196,330 205,310 Q202,335 192,363" fill="#fde68a" stroke="#d97706" stroke-width="1" />
+    <path d="M190,363 Q197,330 205,310" stroke="#78350f" stroke-width="0.8" />
+  </g>
+
+  <!-- ══ 4. THE BOY READING ═══════════════════════════════════════════════ -->
+  <g id="reading-boy">
+    <!-- Lower Body / Trousers / Legs -->
+    <path d="M150,380 L185,380 L195,430 L160,430 Z" fill="#181822" stroke="#252535" stroke-width="1.5" />
+    <path d="M170,430 L170,470 L195,470 L190,430 Z" fill="#14141c" stroke="#222230" stroke-width="1.5" />
+
+    <!-- Torso / Archival Cardigan / Sweater (leaning forward in wonder) -->
+    <!-- Shadow Side (Left) -->
+    <path d="M175,290 Q155,320 160,385 L225,385 Q220,330 200,290 Z" fill="#1a1c26" stroke="#2e3244" stroke-width="1.5" />
+    <!-- Warm Illuminated Front Side (Right - lit by the lamp) -->
+    <path d="M190,295 Q208,325 212,380 L226,380 Q220,330 200,290 Z" fill="#2d2820" stroke="#78350f" stroke-opacity="0.4" stroke-width="1" />
+
+    <!-- Arms resting on the desk holding the page -->
+    <!-- Left Arm -->
+    <path d="M175,305 Q190,345 220,365 L245,365" stroke="#1f2230" stroke-width="13" stroke-linecap="round" fill="none" />
+    <!-- Right Arm (Illuminated by desk lamp) -->
+    <path d="M198,300 Q225,335 250,358 L280,362" stroke="#2d2417" stroke-width="13" stroke-linecap="round" fill="none" />
+    <path d="M198,300 Q225,335 250,358 L280,362" stroke="#f59e0b" stroke-opacity="0.25" stroke-width="2" stroke-linecap="round" fill="none" />
+
+    <!-- Hands on the Book Edge -->
+    <circle cx="240" cy="365" r="7" fill="#d4a373" />
+    <circle cx="282" cy="362" r="7" fill="#e2b182" stroke="#f59e0b" stroke-width="0.8" />
+
+    <!-- Head and Hair (Leaning down intently reading) -->
+    <!-- Neck -->
+    <path d="M192,275 L204,295 L190,295 Z" fill="#c68b59" />
+
+    <!-- Face Silhouette -->
+    <path d="M196,252 C208,252 216,262 216,274 C216,284 206,290 196,290 C186,290 180,282 180,272 C180,260 186,252 196,252 Z" fill="#d4a373" />
+    <!-- Cheek / Jaw contour illuminated by amber lamplight -->
+    <path d="M204,264 Q215,274 208,284" stroke="#fef08a" stroke-width="1.5" stroke-linecap="round" fill="none" />
+    <!-- Closed/focused eye looking downward at page -->
+    <path d="M200,270 Q205,273 208,271" stroke="#451a03" stroke-width="1.8" stroke-linecap="round" fill="none" />
+    <path d="M199,266 Q205,264 210,266" stroke="#291809" stroke-width="1.2" stroke-linecap="round" fill="none" />
+
+    <!-- Hair (Youthful tousled locks) -->
+    <path d="M178,266 C174,250 186,238 198,238 C212,238 222,246 220,260 C216,252 208,248 198,248 C188,248 180,256 178,266 Z" fill="#1c1613" />
+    <path d="M194,238 Q208,234 218,246 Q214,240 202,240 Z" fill="#2d221c" />
+    <!-- Amber Rim Highlight on Hair from Lamp -->
+    <path d="M204,239 Q216,242 220,256" stroke="#fbbf24" stroke-width="1.8" stroke-linecap="round" fill="none" />
+  </g>
+
+  <!-- ══ 5. THE OPEN ILLUMINATED GRIMOIRE ON DESK ════════════════════════ -->
+  <g id="open-grimoire">
+    <!-- Book Shadow -->
+    <ellipse cx="270" cy="384" rx="72" ry="12" fill="#050508" fill-opacity="0.8" />
+
+    <!-- Leather Book Cover Base -->
+    <path d="M198,378 Q268,388 338,375 L346,380 Q268,394 192,384 Z" fill="#451a03" stroke="#78350f" stroke-width="1.5" />
+
+    <!-- Open Pages (Left Page & Right Page) -->
+    <!-- Left Page (Facing slightly away from lamp) -->
+    <path d="M268,382 C240,378 214,370 200,375 L204,360 C218,356 244,366 268,368 Z" fill="#261e14" stroke="#d97706" stroke-opacity="0.4" stroke-width="1" />
+    <!-- Right Page (Directly glowing beneath the lamp beam) -->
+    <path d="M268,382 C296,378 322,368 338,372 L334,357 C318,354 294,366 268,368 Z" fill="url(#page-glow)" stroke="#f59e0b" stroke-width="1.5" />
+
+    <!-- Spine Ribbon Bookmark -->
+    <path d="M268,382 Q272,398 266,410" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" fill="none" />
+
+    <!-- Runes & Ancient Manuscript Script on Glowing Page -->
+    <line x1="278" y1="368" x2="322" y2="365" stroke="#fef08a" stroke-width="1" stroke-linecap="round" stroke-dasharray="3,2" />
+    <line x1="277" y1="372" x2="326" y2="369" stroke="#f59e0b" stroke-width="1" stroke-linecap="round" stroke-dasharray="4,2" />
+    <line x1="276" y1="376" x2="318" y2="373" stroke="#d97706" stroke-width="1" stroke-linecap="round" stroke-dasharray="2,2" />
+
+    <!-- Mystic Central Sigil (gently glowing on manuscript) -->
+    <circle cx="298" cy="369" r="4" stroke="#fbbf24" stroke-width="0.8" fill="none" />
+    <polygon points="298,366 301,371 295,371" stroke="#fef08a" stroke-width="0.6" fill="none" />
+  </g>
+
+  <!-- ══ 6. THE SCHOLAR'S ANTIQUE DESK LAMP ══════════════════════════════ -->
+  <g id="scholar-lamp">
+    <!-- Lamp Base on Table -->
+    <ellipse cx="400" cy="386" rx="28" ry="8" fill="#1c1307" stroke="url(#brass-grad)" stroke-width="1.5" />
+    <ellipse cx="400" cy="383" rx="22" ry="5" fill="#382209" stroke="#f59e0b" stroke-width="1" />
+    <rect x="396" y="365" width="8" height="18" fill="url(#brass-grad)" />
+
+    <!-- Elegant Curved Brass Neck -->
+    <path d="M400,365 C400,280 435,210 405,155 C396,140 388,142 382,146" stroke="url(#brass-grad)" stroke-width="5" stroke-linecap="round" fill="none" />
+    <!-- Decorative Adjuster Screws/Nodes -->
+    <circle cx="402" cy="270" r="4.5" fill="#fde68a" stroke="#78350f" stroke-width="1" />
+    <circle cx="398" cy="180" r="4" fill="#fde68a" stroke="#78350f" stroke-width="1" />
+
+    <!-- Conical Fluted Lamp Shade -->
+    <path d="M342,150 L418,150 L435,178 L325,178 Z" fill="#2e1a06" stroke="url(#brass-grad)" stroke-width="1.5" />
+    <ellipse cx="380" cy="178" rx="55" ry="12" fill="#1c0f03" stroke="#f59e0b" stroke-width="1.5" />
+
+    <!-- Inner Golden Lamp Glow & Bulb -->
+    <ellipse cx="380" cy="176" rx="42" ry="9" fill="url(#bulb-filament)" />
+    <!-- Glowing Filament Core -->
+    <ellipse cx="380" cy="173" rx="14" ry="14" fill="#ffffff" filter="url(#amber-glow)" />
+    <path d="M376,170 Q380,165 384,170 Q380,176 376,170" stroke="#fef08a" stroke-width="2" fill="none" />
+
+    <!-- Pull Chain with Brass Acorn Finial -->
+    <path d="M410,178 L410,230" stroke="#d97706" stroke-width="1" stroke-dasharray="1.5,1.5" />
+    <circle cx="410" cy="233" r="2.5" fill="#fde68a" stroke="#78350f" stroke-width="0.8" />
+  </g>
+
+  <!-- ══ 7. DRIFTING CELESTIAL DUST MOTES & SPARKLES ══════════════════════ -->
+  <g id="ethereal-motes" opacity="0.85">
+    <!-- Mote 1 -->
+    <circle cx="280" cy="330" r="1.8" fill="#fef08a" filter="url(#amber-glow)" />
+    <!-- Mote 2 -->
+    <circle cx="310" cy="290" r="2.2" fill="#fbbf24" filter="url(#amber-glow)" />
+    <!-- Mote 3 -->
+    <circle cx="340" cy="250" r="1.5" fill="#f59e0b" />
+    <!-- Mote 4 -->
+    <circle cx="260" cy="280" r="2.0" fill="#fde68a" />
+    <!-- Mote 5 -->
+    <circle cx="320" cy="200" r="1.8" fill="#fbbf24" filter="url(#amber-glow)" />
+    <!-- Mote 6 -->
+    <circle cx="360" cy="230" r="1.2" fill="#fef08a" />
+    <!-- Mote 7 -->
+    <circle cx="240" cy="320" r="1.5" fill="#fde68a" />
+
+    <!-- Mythic Sparkle Rune 1 -->
+    <path d="M305,240 L308,245 L313,248 L308,251 L305,256 L302,251 L297,248 L302,245 Z" fill="#fef08a" opacity="0.75" />
+    <!-- Mythic Sparkle Rune 2 -->
+    <path d="M355,300 L357,303 L360,305 L357,307 L355,310 L353,307 L350,305 L353,303 Z" fill="#fbbf24" opacity="0.6" />
+  </g>
+</svg>

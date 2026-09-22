@@ -32,9 +32,6 @@
       content="Sign in to TaleTranscend to preserve your legends and sync your reading across devices."
     />
 
-    <!-- One font request, identical on every page. Nine different Google
-         Fonts URLs across nine pages meant every navigation re-fetched a
-         slightly different family set and re-rendered the whole document. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -46,13 +43,14 @@
   </head>
 
   <body
-    class="antialiased selection:bg-indigo-500/30 page-fade-in flex items-center justify-center min-h-screen overflow-hidden"
+    class="antialiased page-fade-in flex items-center justify-center min-h-screen overflow-x-hidden overflow-y-auto py-6 px-4"
   >
     <a class="skip-link" href="#main-content">Skip to content</a>
+
     <!-- Atmosphere -->
-    <div class="atmosphere-base"></div>
-    <div class="particle-field"></div>
-    <div class="floating-orbs"></div>
+    <div class="atmosphere-base" aria-hidden="true"></div>
+    <div class="particle-field" aria-hidden="true"></div>
+    <div class="floating-orbs" aria-hidden="true"></div>
 
     <!-- Toast Container -->
     <div
@@ -61,62 +59,335 @@
       aria-live="polite"
     ></div>
 
-    <!-- Main Content -->
-    <main id="main-content" class="relative z-10 w-full max-w-lg px-6">
-      <div
-        class="login-card p-10 md:p-14 relative overflow-hidden group"
-        role="region"
-        aria-labelledby="login-heading"
-      >
-        <!-- Decorative Elements -->
-        <div
-          class="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-indigo-500/30 to-transparent"
-        ></div>
-        <div
-          class="absolute -top-28 -right-28 w-72 h-72 bg-indigo-500/5 blur-3xl rounded-full group-hover:scale-110 transition-transform duration-1000"
-        ></div>
-        <div
-          class="absolute -bottom-28 -left-28 w-72 h-72 bg-purple-500/5 blur-3xl rounded-full group-hover:scale-110 transition-transform duration-1000"
-        ></div>
+    <!-- Main Content Container -->
+    <main id="main-content" class="relative z-10 w-full max-w-5xl my-auto">
+      <div class="login-card w-full overflow-hidden" role="region" aria-labelledby="login-heading">
+        <!-- Decorative Ambient Light Strip -->
+        <div class="login-card__accent-bar" aria-hidden="true"></div>
 
-        <!-- Content -->
-        <div class="relative z-10 flex flex-col items-center text-center">
-          <!-- Logo -->
-          <div
-            class="w-20 h-20 bg-zinc-900/20 border border-white/10 rounded-3xl flex items-center justify-center mb-8 shadow-2xl shadow-indigo-500/10 backdrop-blur-lg"
+        <div class="grid grid-cols-1 lg:grid-cols-12 items-stretch">
+          <!-- ── Left Column: Boy Reading Under Lamp Illustration ── -->
+          <section
+            class="login-visual lg:col-span-6 flex flex-col items-center justify-center relative p-6 sm:p-10 lg:p-12 overflow-hidden border-b lg:border-b-0 lg:border-r border-white/5"
           >
-            <i data-lucide="sparkles" class="text-indigo-400 w-10 h-10 animate-pulse-slow"></i>
-          </div>
+            <div class="login-visual__glow" aria-hidden="true"></div>
 
-          <!-- Heading -->
-          <h1
-            id="login-heading"
-            class="text-4xl md:text-5xl font-cinzel font-bold text-white tracking-wide mb-4 bg-clip-text text-transparent bg-linear-to-br from-white via-indigo-300 to-purple-200"
-          >
-            Cross the Threshold
-          </h1>
-
-          <!-- Divider -->
-          <div class="rune-divider mb-8">
-            <span class="rune-symbol">✦</span>
-          </div>
-
-          <!-- Subheading -->
-          <p class="text-slate-400 text-sm md:text-base leading-relaxed mb-12 max-w-xs">
-            Enter the archive to preserve your legends and sync your journey across the neural
-            weave.
-          </p>
-
-          <!-- Login Actions -->
-          <div class="w-full space-y-4">
-            <!-- Google Login Button -->
-            <button
-              id="btn-google-login"
-              class="w-full py-5 rounded-2xl bg-white/5 border border-white/10 text-white text-sm font-black uppercase tracking-[0.2em] flex items-center justify-center gap-4 hover:bg-white/10 hover:border-white/20 transition-all active:scale-[0.98] shadow-xl shadow-white/5 backdrop-blur-sm"
-              aria-label="Sign in with Google"
+            <div
+              class="login-visual__art relative z-10 w-full max-w-md flex items-center justify-center"
             >
-              <span class="google-icon">
-                <svg class="w-5 h-5" viewBox="0 0 24 24">
+              <img
+                src="/images/auth/boy-reading.svg"
+                alt="A young scholar boy reading an open illuminated book under a warm brass lamp"
+                class="login-visual__img w-full h-auto object-contain select-none pointer-events-none"
+              />
+            </div>
+
+            <div class="login-visual__caption relative z-10 text-center mt-6">
+              <blockquote class="text-sm font-reading italic text-amber-200/80 max-w-xs mx-auto">
+                &ldquo;Every legend outlives an empire; every empire begins with a reader.&rdquo;
+              </blockquote>
+              <span
+                class="inline-block text-[10px] uppercase font-bold tracking-widest text-slate-500 mt-2"
+              >
+                The Living Archive
+              </span>
+            </div>
+          </section>
+
+          <!-- ── Right Column: Authentication Panel ── -->
+          <section
+            class="login-panel lg:col-span-6 flex flex-col justify-center p-6 sm:p-10 lg:p-12 relative z-10"
+          >
+            <!-- Brand / Welcome Header -->
+            <div class="login-panel__header mb-6">
+              <a
+                href="/index.html"
+                class="inline-flex items-center gap-2.5 mb-3 group"
+                aria-label="Return to TaleTranscend home"
+              >
+                <div
+                  class="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shadow-lg shadow-indigo-500/10 group-hover:scale-105 transition-transform"
+                >
+                  <i data-lucide="sparkles" class="w-5 h-5 text-indigo-400"></i>
+                </div>
+                <span class="text-lg font-cinzel font-bold tracking-wider text-white"
+                  >TaleTranscend</span
+                >
+              </a>
+
+              <h1
+                id="login-heading"
+                class="text-2xl sm:text-3xl font-cinzel font-bold text-white tracking-wide mb-2"
+              >
+                Welcome to TaleTranscend !!
+              </h1>
+              <p id="login-subheading" class="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                An embedded mythic archive and storytelling platform for seekers and scribes.
+              </p>
+            </div>
+
+            <!-- Auth Mode Tabs (Email | Phone) -->
+            <div
+              class="auth-tabs flex items-center border-b border-white/10 mb-6"
+              role="tablist"
+              aria-label="Sign in options"
+            >
+              <button
+                type="button"
+                id="tab-btn-email"
+                role="tab"
+                aria-selected="true"
+                aria-controls="panel-email"
+                class="auth-tab auth-tab--active pb-2.5 px-4 text-sm font-semibold transition-all relative"
+              >
+                <span>Email</span>
+                <span class="auth-tab__indicator"></span>
+              </button>
+              <button
+                type="button"
+                id="tab-btn-phone"
+                role="tab"
+                aria-selected="false"
+                aria-controls="panel-phone"
+                class="auth-tab pb-2.5 px-4 text-sm font-semibold text-slate-400 hover:text-slate-200 transition-all relative"
+              >
+                <span>Phone</span>
+                <span class="auth-tab__indicator"></span>
+              </button>
+            </div>
+
+            <!-- ── Email Tab Panel ── -->
+            <div
+              id="panel-email"
+              role="tabpanel"
+              aria-labelledby="tab-btn-email"
+              class="auth-panel auth-panel--active"
+            >
+              <form id="email-login-form" class="space-y-4" novalidate>
+                <!-- Name field (revealed only in Create Account mode) -->
+                <div id="field-name-group" class="hidden">
+                  <label
+                    for="input-name"
+                    class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5"
+                  >
+                    Scribe / Reader Name
+                  </label>
+                  <div class="relative">
+                    <input
+                      id="input-name"
+                      name="name"
+                      type="text"
+                      autocomplete="name"
+                      placeholder="E.g. Enkidu of Uruk"
+                      class="auth-input w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all"
+                    />
+                  </div>
+                </div>
+
+                <!-- Email address -->
+                <div>
+                  <label
+                    for="input-email"
+                    class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5"
+                  >
+                    Email address
+                  </label>
+                  <div class="relative">
+                    <input
+                      id="input-email"
+                      name="email"
+                      type="email"
+                      autocomplete="email"
+                      required
+                      placeholder="scribe@taletranscend.org"
+                      class="auth-input w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all"
+                    />
+                  </div>
+                </div>
+
+                <!-- Password with Show/Hide toggle -->
+                <div>
+                  <label
+                    for="input-password"
+                    class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5"
+                  >
+                    Password
+                  </label>
+                  <div class="relative flex items-center">
+                    <input
+                      id="input-password"
+                      name="password"
+                      type="password"
+                      autocomplete="current-password"
+                      required
+                      placeholder="••••••••••••"
+                      class="auth-input w-full px-4 py-3 pr-11 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all"
+                    />
+                    <button
+                      type="button"
+                      id="btn-toggle-password"
+                      class="btn-toggle-password absolute right-3 p-1.5 text-slate-400 hover:text-white transition-colors focus:outline-none"
+                      aria-label="Toggle password visibility"
+                    >
+                      <i data-lucide="eye" id="icon-password-toggle" class="w-4 h-4"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Options row: Keep me signed in & Forgot password? -->
+                <div class="flex items-center justify-between text-xs pt-1">
+                  <label
+                    class="inline-flex items-center gap-2 cursor-pointer select-none text-slate-300 hover:text-white transition-colors"
+                  >
+                    <input
+                      id="checkbox-remember"
+                      type="checkbox"
+                      checked
+                      class="auth-checkbox rounded border-white/20 bg-white/5 text-indigo-500 focus:ring-indigo-400 focus:ring-offset-0"
+                    />
+                    <span>Keep me signed in</span>
+                  </label>
+                  <button
+                    type="button"
+                    id="btn-forgot-password"
+                    class="text-indigo-400 hover:text-indigo-300 underline underline-offset-2 transition-colors focus:outline-none"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+
+                <!-- Switch prompt: First time here? Sign up instead -->
+                <div class="text-xs text-slate-400 pt-1">
+                  <span id="auth-switch-label">First time here?</span>
+                  <button
+                    type="button"
+                    id="btn-toggle-auth-mode"
+                    class="text-indigo-400 hover:text-indigo-300 font-semibold underline underline-offset-2 ml-1 transition-colors focus:outline-none"
+                  >
+                    Sign up instead.
+                  </button>
+                </div>
+
+                <!-- Primary Action Button -->
+                <button
+                  type="submit"
+                  id="btn-email-submit"
+                  class="auth-primary-btn w-full py-3.5 px-6 rounded-xl font-bold text-sm text-white tracking-wide flex items-center justify-center gap-2 transition-all mt-3"
+                >
+                  <span id="btn-email-submit-text">Sign in</span>
+                  <span id="btn-email-submit-loading" class="hidden">
+                    <svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24">
+                      <circle
+                        class="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="4"
+                      ></circle>
+                      <path
+                        class="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                  </span>
+                </button>
+              </form>
+            </div>
+
+            <!-- ── Phone Tab Panel ── -->
+            <div
+              id="panel-phone"
+              role="tabpanel"
+              aria-labelledby="tab-btn-phone"
+              class="auth-panel hidden"
+            >
+              <form id="phone-login-form" class="space-y-4" novalidate>
+                <div>
+                  <label
+                    for="input-phone"
+                    class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5"
+                  >
+                    Phone number
+                  </label>
+                  <div class="relative flex items-center">
+                    <div
+                      class="absolute left-3.5 flex items-center gap-1.5 text-xs font-semibold text-slate-400 pointer-events-none"
+                    >
+                      <span>+1</span>
+                      <span class="text-slate-600">|</span>
+                    </div>
+                    <input
+                      id="input-phone"
+                      name="phone"
+                      type="tel"
+                      autocomplete="tel"
+                      placeholder="(555) 000-0000"
+                      class="auth-input w-full pl-12 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div
+                  class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-200/90 leading-relaxed flex items-start gap-2.5"
+                >
+                  <i data-lucide="info" class="w-4 h-4 text-amber-400 shrink-0 mt-0.5"></i>
+                  <span
+                    >Phone verification is currently in preservation for the next archive
+                    cycle.</span
+                  >
+                </div>
+
+                <!-- Phone Submit Button -->
+                <button
+                  type="submit"
+                  id="btn-phone-submit"
+                  class="auth-primary-btn w-full py-3.5 px-6 rounded-xl font-bold text-sm text-white tracking-wide flex items-center justify-center gap-2 transition-all mt-2"
+                >
+                  <span id="btn-phone-submit-text">Send Verification Code</span>
+                  <span id="btn-phone-submit-loading" class="hidden">
+                    <svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24">
+                      <circle
+                        class="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="4"
+                      ></circle>
+                      <path
+                        class="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                  </span>
+                </button>
+              </form>
+            </div>
+
+            <!-- ── Social / Alternative Logins (Preserving Active Working Integrations) ── -->
+            <div class="auth-divider relative my-6">
+              <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                <div class="w-full border-t border-white/10"></div>
+              </div>
+              <div class="relative flex justify-center text-xs uppercase">
+                <span class="auth-divider__text px-3 text-slate-400 font-semibold tracking-wider"
+                  >Or continue with</span
+                >
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <!-- Google Login Button (Active Integration) -->
+              <button
+                id="btn-google-login"
+                type="button"
+                class="auth-alt-btn py-3 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-bold tracking-wider flex items-center justify-center gap-2 hover:bg-white/10 hover:border-white/20 transition-all active:scale-[0.98]"
+                aria-label="Sign in with Google"
+              >
+                <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                   <path
                     fill="currentColor"
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -134,69 +405,70 @@
                     d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                   />
                 </svg>
-              </span>
-              <span>Sign In with Google</span>
-              <span id="btn-google-login-loading" class="hidden">
-                <svg class="w-5 h-5 animate-spin" viewBox="0 0 24 24">
-                  <circle
-                    class="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    stroke-width="4"
-                  ></circle>
-                  <path
-                    class="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-              </span>
-            </button>
+                <span>Google</span>
+                <span id="btn-google-login-loading" class="hidden">
+                  <svg class="w-3.5 h-3.5 animate-spin" viewBox="0 0 24 24">
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                </span>
+              </button>
 
-            <!-- Guest Login Button -->
-            <button
-              id="btn-guest-login"
-              class="w-full py-5 rounded-2xl bg-white/5 border border-white/10 text-slate-300 text-sm font-black uppercase tracking-[0.2em] flex items-center justify-center gap-4 hover:bg-white/10 hover:text-white hover:border-white/20 transition-all active:scale-[0.98] backdrop-blur-sm"
-              aria-label="Enter as Guest"
-            >
-              <i data-lucide="user" class="w-5 h-5"></i>
-              <span>Enter as Guest</span>
-              <span id="btn-guest-login-loading" class="hidden">
-                <svg class="w-5 h-5 animate-spin" viewBox="0 0 24 24">
-                  <circle
-                    class="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    stroke-width="4"
-                  ></circle>
-                  <path
-                    class="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-              </span>
-            </button>
-          </div>
+              <!-- Guest Login Button (Active Integration) -->
+              <button
+                id="btn-guest-login"
+                type="button"
+                class="auth-alt-btn py-3 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-300 text-xs font-bold tracking-wider flex items-center justify-center gap-2 hover:bg-white/10 hover:text-white hover:border-white/20 transition-all active:scale-[0.98]"
+                aria-label="Enter as Guest"
+              >
+                <i data-lucide="user" class="w-4 h-4 shrink-0"></i>
+                <span>Guest</span>
+                <span id="btn-guest-login-loading" class="hidden">
+                  <svg class="w-3.5 h-3.5 animate-spin" viewBox="0 0 24 24">
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    ></circle>
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                </span>
+              </button>
+            </div>
 
-          <!-- Footer -->
-          <div class="mt-16 pt-8 border-t border-white/5 w-full">
-            <a
-              href="/index.html"
-              class="inline-flex items-center gap-2 text-[10px] text-slate-600 font-bold uppercase tracking-[0.2em] hover:text-indigo-400 transition-colors group"
-              aria-label="Return to the Archives"
-            >
-              <i
-                data-lucide="arrow-left"
-                class="w-3 h-3 group-hover:-translate-x-1 transition-transform"
-              ></i>
-              Return to the Archives
-            </a>
-          </div>
+            <!-- Return to Archives Link -->
+            <div class="mt-6 pt-4 border-t border-white/5 text-center">
+              <a
+                href="/index.html"
+                class="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-indigo-300 font-semibold transition-colors group"
+                aria-label="Return to the Archives"
+              >
+                <i
+                  data-lucide="arrow-left"
+                  class="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform"
+                ></i>
+                Return to the Archives
+              </a>
+            </div>
+          </section>
         </div>
       </div>
     </main>
