@@ -76,17 +76,6 @@
             <i data-lucide="chevron-left" class="h-4 w-4"></i>
             <span class="hidden sm:inline">Back</span>
           </button>
-
-          <div class="hidden xl:block h-4 w-px bg-white/10"></div>
-
-          <div class="hidden xl:flex items-center gap-2.5">
-            <span
-              class="h-2 w-2 rounded-full bg-amber-400 animate-pulse shadow-sm shadow-amber-400/50"
-            ></span>
-            <h1 class="text-xs font-black uppercase tracking-[0.25em] text-white whitespace-nowrap">
-              Scribe's Atelier
-            </h1>
-          </div>
         </div>
 
         <!-- Center: Workspace Mode Switcher -->
@@ -224,130 +213,144 @@
         class="editor-pane custom-scrollbar atelier-manuscript-pane flex-1 p-3 sm:p-6 lg:p-8"
       >
         <div class="mx-auto max-w-3xl space-y-6">
-          <div class="manuscript-card p-5 sm:p-8 lg:p-10">
-            <!-- Manuscript Header & Alchemy Toolbar -->
-            <div
-              class="mb-6 flex flex-col gap-4 border-b border-white/6 pb-6 sm:flex-row sm:items-center sm:justify-between"
+          <div class="manuscript-card flex flex-col md:flex-row overflow-hidden">
+            <!-- Attached Manuscript Tool Sidebar -->
+            <aside
+              class="manuscript-tools-sidebar flex flex-row md:flex-col items-center justify-between md:justify-start gap-1 sm:gap-2 p-2.5 sm:p-3 border-b md:border-b-0 md:border-r border-white/6 shrink-0"
+              aria-label="Manuscript Inscription Tools"
             >
-              <div class="flex items-center gap-3">
-                <span class="text-[10px] font-black uppercase tracking-[0.24em] text-indigo-400">
-                  Fragment Inscription
-                </span>
-                <span id="manuscript-milestone" class="milestone-badge">
-                  <i data-lucide="feather" class="h-3 w-3"></i>
-                  <span>Folklore Fragment</span>
+              <div
+                class="hidden md:flex flex-col items-center py-1.5 border-b border-white/6 w-full mb-1"
+              >
+                <span class="text-[9px] font-black uppercase tracking-[0.22em] text-slate-500">
+                  Tools
                 </span>
               </div>
 
-              <!-- Scribe Alchemy Ribbon -->
-              <div class="scribe-toolbar flex-wrap">
+              <!-- Tools Group -->
+              <div class="flex flex-row md:flex-col items-center gap-1 sm:gap-1.5 w-full">
+                <!-- Oracle Refine -->
                 <button
                   id="ai-enhance-btn"
                   type="button"
-                  class="scribe-tool-btn scribe-tool-btn--oracle"
-                  title="Refine prose with mythic resonance"
+                  class="scribe-sidebar-btn scribe-sidebar-btn--oracle"
+                  title="Oracle Refine — Polish prose with mythic resonance"
+                  aria-label="Oracle Refine"
                 >
-                  <i data-lucide="sparkles" class="h-3 w-3"></i>
-                  <span>Oracle Refine</span>
+                  <i data-lucide="sparkles" class="h-4 w-4"></i>
+                  <span class="scribe-sidebar-btn__label">Refine</span>
                 </button>
 
+                <!-- AI Continue -->
                 <button
                   id="ai-continue-btn"
                   type="button"
-                  class="scribe-tool-btn"
-                  title="Forge the next sentence"
+                  class="scribe-sidebar-btn"
+                  title="Continue — Weave next sentence"
+                  aria-label="Continue writing"
                 >
-                  <i data-lucide="wand-2" class="h-3 w-3"></i>
-                  <span class="hidden sm:inline">Continue</span>
+                  <i data-lucide="wand-2" class="h-4 w-4"></i>
+                  <span class="scribe-sidebar-btn__label">Continue</span>
                 </button>
 
+                <!-- Voice Dictation -->
                 <button
                   id="voice-chapter-btn"
                   type="button"
                   data-voice-target="chapter-content"
                   data-voice-label="Voice chapter"
-                  class="scribe-tool-btn"
-                  title="Dictate with voice"
+                  class="scribe-sidebar-btn"
+                  title="Voice Dictation"
+                  aria-label="Voice dictation"
                 >
-                  <i data-lucide="mic" class="h-3 w-3"></i>
-                  <span>Voice</span>
+                  <i data-lucide="mic" class="h-4 w-4"></i>
+                  <span class="scribe-sidebar-btn__label">Voice</span>
                 </button>
 
+                <!-- Rune Divider -->
                 <button
                   id="rune-divider-btn"
                   type="button"
-                  class="scribe-tool-btn"
+                  class="scribe-sidebar-btn scribe-sidebar-btn--rune"
                   title="Insert Mythic Divider"
+                  aria-label="Insert Mythic Divider"
                 >
-                  <span>✦ ✦ ✦</span>
+                  <span class="text-xs font-mono font-bold tracking-tight">✦✦✦</span>
+                  <span class="scribe-sidebar-btn__label">Rune</span>
                 </button>
               </div>
-            </div>
+            </aside>
 
-            <!-- Chapter Title Input -->
-            <div class="mb-4">
-              <label class="sr-only" for="current-chapter-title">Chapter title</label>
-              <input
-                type="text"
-                id="current-chapter-title"
-                placeholder="Inscribe Chapter Title…"
-                class="manuscript-title"
-              />
-            </div>
+            <!-- Main Manuscript Canvas -->
+            <div class="manuscript-body flex-1 p-5 sm:p-8 lg:p-10 flex flex-col min-w-0">
+              <!-- Hidden milestone element for script compatibility -->
+              <span id="manuscript-milestone" class="hidden"></span>
 
-            <!-- Decorative Hairline Rune Accent -->
-            <div class="my-5 flex items-center gap-4 text-white/15">
+              <!-- Chapter Title Input -->
+              <div class="mb-4">
+                <label class="sr-only" for="current-chapter-title">Chapter title</label>
+                <input
+                  type="text"
+                  id="current-chapter-title"
+                  placeholder="Inscribe Chapter Title…"
+                  class="manuscript-title"
+                />
+              </div>
+
+              <!-- Decorative Hairline Rune Accent -->
+              <div class="my-5 flex items-center gap-4 text-white/15">
+                <div
+                  class="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+                ></div>
+                <span class="text-[10px] font-mono tracking-widest text-amber-400/40">✦ ✦ ✦</span>
+                <div
+                  class="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+                ></div>
+              </div>
+
+              <!-- Main Chapter Manuscript Textarea in Velvet Frame -->
+              <div class="manuscript-parchment-frame">
+                <label class="sr-only" for="chapter-content">Chapter content</label>
+                <textarea
+                  id="chapter-content"
+                  placeholder="Inscribe your legend here… Let destiny, folklore, and myth weave across the parchment."
+                  class="manuscript-textarea custom-scrollbar"
+                ></textarea>
+              </div>
+
+              <!-- Manuscript HUD & Mobile Controls -->
               <div
-                class="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent"
-              ></div>
-              <span class="text-[10px] font-mono tracking-widest text-amber-400/40">✦ ✦ ✦</span>
-              <div
-                class="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent"
-              ></div>
-            </div>
-
-            <!-- Main Chapter Manuscript Textarea in Velvet Frame -->
-            <div class="manuscript-parchment-frame">
-              <label class="sr-only" for="chapter-content">Chapter content</label>
-              <textarea
-                id="chapter-content"
-                placeholder="Inscribe your legend here… Let destiny, folklore, and myth weave across the parchment."
-                class="manuscript-textarea custom-scrollbar"
-              ></textarea>
-            </div>
-
-            <!-- Manuscript HUD & Mobile Controls -->
-            <div
-              class="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-white/6 pt-5"
-            >
-              <div
-                class="flex flex-wrap items-center gap-4 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500"
+                class="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-white/6 pt-5"
               >
-                <span id="stat-words">0 Words</span>
-                <span class="h-3 w-px bg-white/10"></span>
-                <span id="stat-chars">0 Characters</span>
-                <span class="h-3 w-px bg-white/10"></span>
-                <span class="rounded-full bg-white/3 px-2 py-0.5 text-slate-400">
-                  Auto-saved locally
-                </span>
-              </div>
+                <div
+                  class="flex flex-wrap items-center gap-4 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500"
+                >
+                  <span id="stat-words">0 Words</span>
+                  <span class="h-3 w-px bg-white/10"></span>
+                  <span id="stat-chars">0 Characters</span>
+                  <span class="h-3 w-px bg-white/10"></span>
+                  <span class="rounded-full bg-white/3 px-2 py-0.5 text-slate-400">
+                    Auto-saved locally
+                  </span>
+                </div>
 
-              <!-- Mobile save / publish controls -->
-              <div class="flex items-center gap-2 md:hidden">
-                <button
-                  id="save-draft-btn-mobile"
-                  type="button"
-                  class="rounded-xl border border-white/10 bg-white/4 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400"
-                >
-                  Save
-                </button>
-                <button
-                  id="publish-btn-mobile"
-                  type="button"
-                  class="rounded-xl bg-indigo-600 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-white"
-                >
-                  <span data-label="Post">Post</span>
-                </button>
+                <!-- Mobile save / publish controls -->
+                <div class="flex items-center gap-2 md:hidden">
+                  <button
+                    id="save-draft-btn-mobile"
+                    type="button"
+                    class="rounded-xl border border-white/10 bg-white/4 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400"
+                  >
+                    Save
+                  </button>
+                  <button
+                    id="publish-btn-mobile"
+                    type="button"
+                    class="rounded-xl bg-indigo-600 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-white"
+                  >
+                    <span data-label="Post">Post</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
