@@ -1,135 +1,193 @@
-/* src/assets/css/pages/login.css */
+/* ══════════════════════════════════════════════════════════════════════════
+   src/assets/css/pages/login.css
+   TaleTranscend — Authentication & Portal Stylesheet
+   Split-screen architecture featuring the Scholar's Reading Vignette,
+   interactive tabbed authentication (Email / Phone), and ambient glassmorphism.
+   ══════════════════════════════════════════════════════════════════════════ */
 
-/* ============================================
-   Login Page Styles - Glassmorphism & Atmosphere
-   ============================================ */
+/* ── 1. Card Container & Ambient Stage ───────────────────────────────── */
 
-/* base.css is imported by login.js, which is the single mechanism every
-   other page uses. Importing it here as well meant the whole Tailwind layer
-   plus the token file were parsed twice on this page. */
-
-/* -------------------- */
-/*   Login Card         */
-/* -------------------- */
 .login-card {
   position: relative;
-  background: rgb(var(--bg-overlay-rgb) / var(--a-09));
-  border: 1px solid rgb(var(--light-rgb) / var(--a-05));
-  border-radius: var(--radius-3xl);
-  box-shadow:
-    0 0 30px rgb(var(--accent-rgb) / var(--a-05)),
-    0 0 60px rgb(var(--accent-2-rgb) / var(--a-03)),
-    inset 0 1px 0 rgb(var(--light-rgb) / var(--a-05));
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  background: transparent;
+  border-radius: var(--radius-2xl);
+  transition:
+    box-shadow var(--transition-base),
+    border-color var(--transition-base);
 }
 
 .login-card:hover {
-  box-shadow:
-    0 0 50px rgb(var(--accent-rgb) / var(--a-07)),
-    0 0 80px rgb(var(--accent-2-rgb) / var(--a-05));
-  border-color: rgb(var(--light-rgb) / var(--a-07));
+  /* Subtle depth */
 }
 
-/* -------------------- */
-/*   Rune Divider       */
-/* -------------------- */
-.rune-divider {
-  width: 100%;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgb(var(--light-rgb) / var(--a-05)) 50%,
-    transparent 100%
+/* ── 2. Left Visual: Boy Reading Under Lamp ──────────────────────────── */
+
+.login-visual {
+  background: radial-gradient(
+    ellipse at 60% 40%,
+    rgb(var(--rune-rgb) / 0.08) 0%,
+    rgb(var(--bg-overlay-rgb) / var(--a-08)) 60%,
+    rgb(var(--bg-base-rgb) / 0.9) 100%
   );
-  position: relative;
-  margin: 1.5rem 0;
 }
 
-.rune-symbol {
+.login-visual__glow {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgb(var(--bg-overlay-rgb) / var(--a-11));
-  padding: 0 1rem;
-  color: rgb(var(--light-rgb) / var(--a-08));
-  font-size: 0.75rem;
-  letter-spacing: 0.3em;
-  border: 1px solid rgb(var(--light-rgb) / var(--a-05));
-  border-radius: 50%;
-  width: 2.5rem;
-  height: 2.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 0 20px rgb(var(--accent-rgb) / var(--a-05));
-  animation: rune-glow 3s ease-in-out infinite;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 65% 35%, rgb(var(--rune-rgb) / 0.12) 0%, transparent 55%),
+    radial-gradient(circle at 25% 75%, rgb(var(--accent-rgb) / 0.08) 0%, transparent 60%);
+  animation: visual-glow-pulse 8s ease-in-out infinite alternate;
 }
 
-@keyframes rune-glow {
-  0%,
+@keyframes visual-glow-pulse {
+  0% {
+    opacity: 0.7;
+    transform: scale(0.98);
+  }
   100% {
-    box-shadow: 0 0 20px rgb(var(--accent-rgb) / var(--a-05));
-  }
-  50% {
-    box-shadow: 0 0 30px rgb(var(--accent-rgb) / var(--a-08));
+    opacity: 1;
+    transform: scale(1.02);
   }
 }
 
-/* -------------------- */
-/*   Buttons            */
-/* -------------------- */
-#btn-google-login,
-#btn-guest-login {
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+.login-visual__img {
+  filter: drop-shadow(0 12px 28px rgb(var(--dark-rgb) / 0.6))
+    drop-shadow(0 0 24px rgb(var(--rune-rgb) / 0.18));
+  transition: transform var(--transition-slow);
 }
 
-#btn-google-login::before {
-  content: '';
+.login-card:hover .login-visual__img {
+  transform: translateY(-4px) scale(1.01);
+}
+
+/* ── 3. Right Panel: Authentication Form ─────────────────────────────── */
+
+.login-panel {
+  background: rgb(var(--bg-overlay-rgb) / var(--a-05));
+}
+
+/* Auth Tabs */
+.auth-tabs {
+  gap: var(--space-8);
+}
+
+.auth-tab {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  transition: color var(--transition-fast);
+}
+
+.auth-tab:hover {
+  color: var(--text-secondary);
+}
+
+.auth-tab--active {
+  color: var(--text-primary);
+}
+
+.auth-tab__indicator {
   position: absolute;
-  top: 0;
-  left: -100%;
+  bottom: -1px;
+  left: 0;
   width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgb(var(--light-rgb) / var(--a-05)), transparent);
-  transition: left 0.5s ease;
+  height: 2px;
+  background: var(--accent);
+  border-radius: var(--radius-full);
+  box-shadow: 0 0 10px var(--accent);
+  opacity: 0;
+  transform: scaleX(0.7);
+  transition:
+    opacity var(--transition-fast),
+    transform var(--transition-fast);
 }
 
-#btn-google-login:hover::before {
-  left: 100%;
+.auth-tab--active .auth-tab__indicator {
+  opacity: 1;
+  transform: scaleX(1);
 }
 
-#btn-google-login:hover {
-  transform: translateY(-3px);
+/* Form Inputs */
+.auth-input {
+  font-family: var(--font-body);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.auth-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgb(var(--accent-rgb) / 0.2);
+}
+
+.btn-toggle-password {
+  cursor: pointer;
+}
+
+/* Checkbox */
+.auth-checkbox {
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+}
+
+/* Primary Submit Button */
+.auth-primary-btn {
+  background: var(--accent);
+  border: 1px solid rgb(var(--light-rgb) / var(--a-07));
+  cursor: pointer;
   box-shadow:
-    0 10px 40px rgb(var(--accent-rgb) / var(--a-07)),
-    0 0 20px rgb(var(--light-rgb) / var(--a-03));
-  border-color: rgb(var(--light-rgb) / var(--a-07));
+    0 4px 16px rgb(var(--accent-rgb) / 0.35),
+    0 0 20px rgb(var(--accent-rgb) / 0.1);
+  transition:
+    transform var(--transition-fast),
+    background-color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
-#btn-guest-login:hover {
-  transform: translateY(-3px);
+.auth-primary-btn:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
   box-shadow:
-    0 10px 40px rgb(var(--accent-2-rgb) / var(--a-06)),
-    0 0 20px rgb(var(--light-rgb) / var(--a-01));
-  border-color: rgb(var(--light-rgb) / var(--a-06));
+    0 8px 24px rgb(var(--accent-rgb) / 0.45),
+    0 0 25px rgb(var(--accent-rgb) / 0.2);
 }
 
-/* -------------------- */
-/*   Atmosphere         */
-/* -------------------- */
+.auth-primary-btn:active {
+  background: var(--accent-active);
+  transform: translateY(0);
+}
+
+/* Alternative Social Login Buttons */
+.auth-divider__text {
+  background: rgb(var(--bg-overlay-rgb) / var(--a-10));
+}
+
+.auth-alt-btn {
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgb(var(--dark-rgb) / 0.3);
+  backdrop-filter: blur(var(--blur-sm));
+  -webkit-backdrop-filter: blur(var(--blur-sm));
+}
+
+.auth-alt-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgb(var(--dark-rgb) / 0.4);
+}
+
+/* ── 4. Atmosphere Background Layers ─────────────────────────────────── */
+
 .atmosphere-base {
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(circle at 20% 20%, var(--bg-overlay) 0%, var(--bg-base) 50%),
-    radial-gradient(circle at 80% 80%, var(--bg-overlay) 0%, var(--bg-base) 50%);
+    radial-gradient(circle at 20% 20%, var(--bg-overlay) 0%, var(--bg-base) 55%),
+    radial-gradient(circle at 80% 80%, var(--bg-overlay) 0%, var(--bg-base) 55%);
   z-index: -2;
 }
 
@@ -141,99 +199,49 @@
     radial-gradient(1.5px 1.5px at 40px 70px, rgb(var(--light-rgb) / var(--a-04)), transparent),
     radial-gradient(1px 1px at 10px 120px, rgb(var(--light-rgb) / var(--a-03)), transparent),
     radial-gradient(2px 2px at 90px 40px, rgb(var(--light-rgb) / var(--a-05)), transparent),
-    radial-gradient(1px 1px at 130px 80px, rgb(var(--light-rgb) / var(--a-03)), transparent),
-    radial-gradient(1.5px 1.5px at 160px 120px, rgb(var(--light-rgb) / var(--a-04)), transparent);
+    radial-gradient(1px 1px at 130px 80px, rgb(var(--light-rgb) / var(--a-03)), transparent);
   background-size: 200px 200px;
-  opacity: 0.5;
+  opacity: 0.4;
   z-index: -1;
-  animation: drift 120s linear infinite;
+  pointer-events: none;
 }
 
-@keyframes drift {
-  0% {
-    background-position: 0 0;
-  }
-  100% {
-    background-position: 200px 200px;
-  }
-}
+/* ── 5. Responsive Overrides ─────────────────────────────────────────── */
 
-/* Floating Orbs */
-.floating-orbs {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  overflow: hidden;
-}
-
-.floating-orbs::before,
-.floating-orbs::after {
-  content: '';
-  position: absolute;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgb(var(--accent-rgb) / var(--a-05)) 0%, transparent 70%);
-  border-radius: 50%;
-  animation: float 20s infinite ease-in-out;
-}
-
-.floating-orbs::before {
-  top: -50px;
-  left: -50px;
-  animation-delay: 0s;
-}
-
-.floating-orbs::after {
-  bottom: -50px;
-  right: -50px;
-  animation-delay: -10s;
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translate(0, 0) rotate(0deg);
-    opacity: 0.3;
-  }
-  25% {
-    transform: translate(30px, -30px) rotate(5deg);
-    opacity: 0.5;
-  }
-  50% {
-    transform: translate(0, 0) rotate(0deg);
-    opacity: 0.3;
-  }
-  75% {
-    transform: translate(-30px, 30px) rotate(-5deg);
-    opacity: 0.5;
+@media (max-width: 64rem) {
+  .login-visual__img {
+    max-height: 320px;
   }
 }
 
-/* -------------------- */
-/*   Animations         */
-/* -------------------- */
-@keyframes pulse-slow {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
+@media (max-width: 48rem) {
+  .login-visual {
+    padding: var(--space-6) var(--space-4) var(--space-4);
   }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.1);
+
+  .login-visual__img {
+    max-height: 220px;
+  }
+
+  .login-visual__caption {
+    margin-top: var(--space-3);
+  }
+
+  .login-panel {
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .auth-tabs {
+    margin-bottom: var(--space-4);
   }
 }
 
-.animate-pulse-slow {
-  animation: pulse-slow 3s ease-in-out infinite;
-}
+@media (max-width: 24rem) {
+  .login-visual__img {
+    max-height: 170px;
+  }
 
-/* Page Fade In */
-.page-fade-in {
-  opacity: 0;
-  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.page-fade-in.ready {
-  opacity: 1;
+  .login-visual blockquote {
+    font-size: var(--text-xs);
+  }
 }
