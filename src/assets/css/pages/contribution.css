@@ -4,9 +4,15 @@
 */
 
 :root {
-  --editor-header-height: 56px;
+  --editor-header-height: 64px;
   --atelier-left-width: 290px;
   --atelier-right-width: 380px;
+}
+
+@media (max-width: 639px) {
+  :root {
+    --editor-header-height: 58px;
+  }
 }
 
 /* Ensure global nav and mobile floating dock never render on contribution page */
@@ -63,24 +69,24 @@
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  padding: 0.375rem 0.625rem;
+  padding: 0.375rem 0.75rem;
   border-radius: 9999px;
-  font-size: 0.6875rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
   background: transparent;
   border: 1px solid transparent;
   transition: all var(--transition-base);
   cursor: pointer;
+  white-space: nowrap;
 }
 
 @media (min-width: 640px) {
   .atelier-nav-pill {
     gap: 0.5rem;
-    padding: 0.375rem 0.875rem;
-    letter-spacing: 0.18em;
+    padding: 0.4375rem 1rem;
+    letter-spacing: 0.05em;
   }
 }
 
@@ -96,13 +102,13 @@
 
 .atelier-nav-pill:hover {
   color: var(--text-primary);
-  background: rgb(var(--light-rgb) / var(--a-02));
+  background: rgb(var(--light-rgb) / var(--a-03));
 }
 
 .atelier-nav-pill--active {
   color: rgb(var(--light-rgb) / var(--a-11));
-  background: rgb(var(--accent-rgb) / var(--a-07));
-  border-color: rgb(var(--accent-rgb) / var(--a-09));
+  background: rgb(var(--accent-rgb) / var(--a-08));
+  border-color: rgb(var(--accent-rgb) / var(--a-10));
   box-shadow: 0 0 16px rgb(var(--accent-rgb) / var(--a-04));
 }
 
@@ -173,29 +179,48 @@
   overflow-y: auto;
 }
 
-/* ── Scribe's Manuscript Canvas ───────────────────────── */
+/* ── Scribe's Manuscript Canvas & Velvet Parchment ───────────────────────── */
+.atelier-manuscript-pane {
+  background:
+    radial-gradient(
+      ellipse 60% 40% at 50% 0%,
+      rgb(var(--accent-rgb) / var(--a-03)),
+      transparent 70%
+    ),
+    radial-gradient(circle at 85% 85%, rgb(var(--rune-rgb) / var(--a-02)), transparent 50%),
+    var(--bg-base);
+}
+
 .manuscript-card {
-  background: var(--surface-gradient-strong);
-  border: 1px solid rgb(var(--light-rgb) / var(--a-03));
-  border-radius: 1.75rem;
+  /* Velvet Obsidian Desk surface with subtle warm depth, eliminating stark black halation */
+  background: linear-gradient(
+    180deg,
+    rgb(var(--bg-overlay-rgb) / var(--a-11)) 0%,
+    rgb(var(--bg-base-rgb) / var(--a-11)) 100%
+  );
+  border: 1px solid rgb(var(--light-rgb) / var(--a-04));
+  border-radius: 1.5rem;
   box-shadow:
-    0 10px 40px rgb(var(--dark-rgb) / var(--a-10)),
-    inset 0 1px 0 rgb(var(--light-rgb) / var(--a-03));
+    0 24px 60px -15px rgb(var(--dark-rgb) / var(--a-11)),
+    0 0 0 1px rgb(var(--light-rgb) / var(--a-02)),
+    inset 0 1px 0 rgb(var(--light-rgb) / var(--a-05));
   position: relative;
-  overflow: hidden;
+  transition:
+    border-color var(--transition-base),
+    box-shadow var(--transition-base);
 }
 
 .manuscript-card::before {
   content: '';
   position: absolute;
   top: 0;
-  left: 10%;
-  right: 10%;
+  left: 8%;
+  right: 8%;
   height: 1px;
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgb(var(--rune-rgb) / var(--a-06)) 50%,
+    rgb(var(--rune-rgb) / var(--a-07)) 50%,
     transparent 100%
   );
   pointer-events: none;
@@ -204,22 +229,45 @@
 .manuscript-card:focus-within {
   border-color: rgb(var(--accent-rgb) / var(--a-06));
   box-shadow:
-    0 15px 50px rgb(var(--dark-rgb) / var(--a-11)),
-    0 0 40px rgb(var(--accent-rgb) / var(--a-02));
+    0 25px 65px -15px rgb(var(--dark-rgb) / var(--a-11)),
+    0 0 35px rgb(var(--accent-rgb) / var(--a-03)),
+    inset 0 1px 0 rgb(var(--light-rgb) / var(--a-06));
 }
 
-/* Chapter Title in Cinzel */
+/* Parchment writing frame - focused, comfortable interior with soft inset depth */
+.manuscript-parchment-frame {
+  position: relative;
+  border-radius: 1rem;
+  background: rgb(var(--dark-rgb) / var(--a-03));
+  border: 1px solid rgb(var(--light-rgb) / var(--a-02));
+  padding: 1.25rem 1.5rem;
+  transition: all var(--transition-base);
+}
+
+@media (min-width: 640px) {
+  .manuscript-parchment-frame {
+    padding: 1.75rem 2rem;
+  }
+}
+
+.manuscript-card:focus-within .manuscript-parchment-frame {
+  border-color: rgb(var(--light-rgb) / var(--a-04));
+  background: rgb(var(--dark-rgb) / var(--a-04));
+}
+
+/* Chapter Title - refined, soothing editorial serif */
 .manuscript-title {
   font-family: 'Cinzel', serif;
-  font-size: 1.75rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgb(var(--light-rgb) / var(--a-11));
   background: transparent;
   border: none;
   width: 100%;
   outline: none;
   transition: color var(--transition-base);
+  text-shadow: 0 2px 10px rgb(var(--dark-rgb) / var(--a-06));
 }
 
 .manuscript-title:focus {
@@ -228,28 +276,35 @@
 }
 
 .manuscript-title::placeholder {
-  color: rgb(var(--light-rgb) / var(--a-03));
+  color: rgb(var(--text-secondary-rgb) / var(--a-05));
   font-style: italic;
+  font-weight: 400;
 }
 
 @media (min-width: 640px) {
   .manuscript-title {
-    font-size: 2.25rem;
+    font-size: 1.875rem;
   }
 }
 
-/* Chapter Textarea in Merriweather */
+/* Chapter Textarea - soothing, eye-friendly editorial typography */
 .manuscript-textarea {
-  font-family: 'Merriweather', serif;
+  font-family: 'Merriweather', 'Georgia', serif;
   font-size: 1.0625rem;
-  line-height: 2.1;
-  color: var(--text-primary);
+  line-height: 1.8;
+  letter-spacing: 0.005em;
+  color: rgb(var(--text-primary-rgb) / var(--a-11));
   background: transparent;
   border: none;
   width: 100%;
   outline: none;
   resize: none;
-  min-height: 480px;
+  min-height: 340px;
+  max-width: 100%;
+  caret-color: rgb(var(--rune-rgb));
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .manuscript-textarea:focus {
@@ -258,19 +313,26 @@
 }
 
 .manuscript-textarea::placeholder {
-  color: rgb(var(--light-rgb) / var(--a-03));
+  color: rgb(var(--text-secondary-rgb) / var(--a-06));
   font-style: italic;
-  font-family: 'Merriweather', serif;
+  font-family: 'Merriweather', 'Georgia', serif;
+  line-height: 1.8;
+  letter-spacing: 0.01em;
+}
+
+.manuscript-textarea::selection {
+  background: rgb(var(--accent-rgb) / var(--a-07));
+  color: rgb(var(--light-rgb) / var(--a-11));
 }
 
 /* ── Scribe's Alchemy Ribbon (Toolbar) ───────────────────────── */
 .scribe-toolbar {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  border-radius: 1.25rem;
-  background: rgb(var(--dark-rgb) / var(--a-08));
+  gap: 0.375rem;
+  padding: 0.375rem 0.5rem;
+  border-radius: 9999px;
+  background: rgb(var(--dark-rgb) / var(--a-06));
   border: 1px solid rgb(var(--light-rgb) / var(--a-03));
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -280,30 +342,29 @@
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  padding: 0.375rem 0.75rem;
+  padding: 0.3125rem 0.625rem;
   border-radius: 9999px;
   font-size: 0.6875rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.12em;
   color: var(--text-secondary);
-  background: rgb(var(--light-rgb) / var(--a-02));
-  border: 1px solid rgb(var(--light-rgb) / var(--a-03));
+  background: transparent;
+  border: 1px solid transparent;
   transition: all var(--transition-fast);
   cursor: pointer;
 }
 
 .scribe-tool-btn:hover:not(:disabled) {
   color: var(--text-primary);
-  background: rgb(var(--light-rgb) / var(--a-04));
-  border-color: rgb(var(--accent-rgb) / var(--a-07));
-  box-shadow: 0 0 12px rgb(var(--accent-rgb) / var(--a-03));
+  background: rgb(var(--light-rgb) / var(--a-03));
+  border-color: rgb(var(--light-rgb) / var(--a-04));
 }
 
 .scribe-tool-btn--oracle {
   color: rgb(var(--accent-light-rgb) / var(--a-11));
   border-color: rgb(var(--accent-rgb) / var(--a-05));
-  background: rgb(var(--accent-rgb) / var(--a-02));
+  background: rgb(var(--accent-rgb) / var(--a-03));
 }
 
 .scribe-tool-btn--oracle:hover:not(:disabled) {
@@ -321,7 +382,7 @@
   font-size: 0.625rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.16em;
   color: rgb(var(--rune-rgb) / var(--a-11));
   background: rgb(var(--rune-rgb) / var(--a-03));
   border: 1px solid rgb(var(--rune-rgb) / var(--a-06));

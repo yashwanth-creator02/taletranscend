@@ -57,39 +57,42 @@
     ></div>
 
     <!-- ── Atelier Sticky Header ─────────────────────────── -->
+    <!-- ── Atelier Sticky Header ─────────────────────────── -->
     <header
-      class="sticky top-0 z-40 border-b border-white/6 bg-[#030305]/95 backdrop-blur-2xl"
+      class="sticky top-0 z-40 border-b border-white/6 bg-slate-950/90 backdrop-blur-2xl"
       style="height: var(--editor-header-height)"
     >
-      <div class="mx-auto flex h-full max-w-7xl items-center justify-between px-3 sm:px-6">
+      <div
+        class="mx-auto flex h-full max-w-7xl items-center justify-between px-3 sm:px-6 lg:px-8 gap-3 sm:gap-6"
+      >
         <!-- Left: Back & Title -->
-        <div class="flex min-w-0 items-center gap-2 sm:gap-4">
+        <div class="flex items-center gap-3 shrink-0">
           <button
             id="btn-back"
             type="button"
-            class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 transition hover:bg-white/10 hover:text-white cursor-pointer"
+            class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/4 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white cursor-pointer shadow-sm"
             aria-label="Go back to previous page"
           >
-            <i data-lucide="chevron-left" class="h-3.5 w-3.5"></i>
+            <i data-lucide="chevron-left" class="h-4 w-4"></i>
             <span class="hidden sm:inline">Back</span>
           </button>
 
-          <div class="hidden h-4 w-px bg-white/10 md:block"></div>
+          <div class="hidden xl:block h-4 w-px bg-white/10"></div>
 
-          <div class="min-w-0 hidden md:block">
-            <div class="flex items-center gap-2">
-              <span class="h-2 w-2 rounded-full bg-amber-400 animate-pulse"></span>
-              <h1
-                class="text-[11px] font-black uppercase tracking-[0.28em] text-white whitespace-nowrap"
-              >
-                Scribe's Atelier
-              </h1>
-            </div>
+          <div class="hidden xl:flex items-center gap-2.5">
+            <span
+              class="h-2 w-2 rounded-full bg-amber-400 animate-pulse shadow-sm shadow-amber-400/50"
+            ></span>
+            <h1 class="text-xs font-black uppercase tracking-[0.25em] text-white whitespace-nowrap">
+              Scribe's Atelier
+            </h1>
           </div>
         </div>
 
         <!-- Center: Workspace Mode Switcher -->
-        <div class="flex items-center rounded-full border border-white/8 bg-white/2 p-0.5 sm:p-1">
+        <div
+          class="flex items-center rounded-full border border-white/10 bg-slate-900/80 backdrop-blur-xl p-1 shadow-inner shrink-0 gap-1"
+        >
           <button
             type="button"
             class="atelier-nav-pill atelier-nav-pill--active"
@@ -107,7 +110,7 @@
             aria-label="Switch to Lore and Codex View"
           >
             <i data-lucide="book-open" class="h-3.5 w-3.5"></i>
-            <span class="hidden sm:inline">Lore & Codex</span>
+            <span class="hidden sm:inline">Lore &amp; Codex</span>
             <span class="sm:hidden">Lore</span>
           </button>
           <button
@@ -122,10 +125,10 @@
         </div>
 
         <!-- Right: Status, Save & Publish -->
-        <div class="flex items-center gap-1.5 sm:gap-3">
+        <div class="flex items-center gap-2 sm:gap-3 shrink-0">
           <span
             id="stat-status"
-            class="hidden text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-400 lg:block"
+            class="hidden 2xl:inline-block text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-400"
             aria-live="polite"
           >
             Ready
@@ -134,7 +137,7 @@
           <button
             id="save-draft-btn"
             type="button"
-            class="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/4 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-300 transition hover:border-white/20 hover:bg-white/8 hover:text-white"
+            class="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/4 px-3 sm:px-3.5 py-1.5 text-xs font-semibold text-slate-300 transition hover:border-white/20 hover:bg-white/8 hover:text-white shadow-sm"
           >
             <i data-lucide="cloud" class="h-3.5 w-3.5"></i>
             <span class="hidden sm:inline">Save Draft</span>
@@ -144,13 +147,13 @@
           <button
             id="publish-btn"
             type="button"
-            class="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-white shadow-lg shadow-indigo-500/25 transition hover:brightness-110 hover:shadow-indigo-500/40 focus:outline-none"
+            class="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-purple-600 px-3.5 sm:px-4 py-1.5 text-xs font-bold text-white shadow-md shadow-indigo-500/25 transition hover:brightness-110 hover:shadow-indigo-500/40 focus:outline-none"
           >
             <i data-lucide="send" class="h-3.5 w-3.5"></i>
-            <span class="hidden sm:inline" data-label="Inscribe to Archive"
+            <span class="hidden md:inline" data-label="Inscribe to Archive"
               >Inscribe to Archive</span
             >
-            <span class="sm:hidden" data-label="Inscribe">Inscribe</span>
+            <span class="md:hidden" data-label="Inscribe">Inscribe</span>
           </button>
         </div>
       </div>
@@ -218,10 +221,10 @@
          CENTER PANE — The Grand Manuscript Canvas
          ════════════════════════════════════════ -->
       <section
-        class="editor-pane custom-scrollbar atelier-manuscript-pane flex-1 p-4 sm:p-6 lg:p-8"
+        class="editor-pane custom-scrollbar atelier-manuscript-pane flex-1 p-3 sm:p-6 lg:p-8"
       >
-        <div class="mx-auto max-w-4xl space-y-6">
-          <div class="manuscript-card p-6 sm:p-8">
+        <div class="mx-auto max-w-3xl space-y-6">
+          <div class="manuscript-card p-5 sm:p-8 lg:p-10">
             <!-- Manuscript Header & Alchemy Toolbar -->
             <div
               class="mb-6 flex flex-col gap-4 border-b border-white/6 pb-6 sm:flex-row sm:items-center sm:justify-between"
@@ -303,13 +306,15 @@
               ></div>
             </div>
 
-            <!-- Main Chapter Manuscript Textarea -->
-            <label class="sr-only" for="chapter-content">Chapter content</label>
-            <textarea
-              id="chapter-content"
-              placeholder="Inscribe your legend here… Let destiny, folklore, and myth weave across the parchment."
-              class="manuscript-textarea custom-scrollbar"
-            ></textarea>
+            <!-- Main Chapter Manuscript Textarea in Velvet Frame -->
+            <div class="manuscript-parchment-frame">
+              <label class="sr-only" for="chapter-content">Chapter content</label>
+              <textarea
+                id="chapter-content"
+                placeholder="Inscribe your legend here… Let destiny, folklore, and myth weave across the parchment."
+                class="manuscript-textarea custom-scrollbar"
+              ></textarea>
+            </div>
 
             <!-- Manuscript HUD & Mobile Controls -->
             <div
