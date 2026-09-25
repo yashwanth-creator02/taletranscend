@@ -50,8 +50,12 @@
   >
     <a class="skip-link" href="#main-content">Skip to content</a>
     <!-- Atmosphere -->
-    <div class="atmosphere-base"></div>
-    <div class="particle-field"></div>
+    <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10" aria-hidden="true">
+      <div class="atmosphere-base"></div>
+      <div class="particle-field"></div>
+      <div class="ambient-orb w-96 h-96 bg-indigo-500/10 -top-20 -left-20"></div>
+      <div class="ambient-orb w-96 h-96 bg-amber-500/10 -bottom-20 -right-20"></div>
+    </div>
 
     <!-- Toast container -->
     <div
@@ -64,133 +68,153 @@
            LEFT PANEL: Identity Pillar
            ══════════════════════════════════════════════ -->
       <aside id="column-identity" class="pillar-left scroll-container no-scrollbar">
-        <div class="p-6 lg:p-8 space-y-8">
+        <div class="p-4 sm:p-6 lg:p-7 space-y-6">
           <!-- Identity card -->
-          <div class="identity-card p-8 relative">
-            <div class="flex flex-col items-center text-center relative z-10">
-              <!-- Avatar -->
-              <div class="avatar-container w-28 h-28 mb-6">
+          <div class="identity-card p-4 sm:p-6 lg:p-7 relative">
+            <div class="flex flex-col items-center text-center relative z-10 w-full">
+              <!-- Top identity cluster -->
+              <div class="identity-cluster-top w-full flex flex-col items-center text-center">
+                <!-- Avatar -->
                 <div
-                  class="relative z-10 w-full h-full bg-zinc-900 rounded-4xl flex items-center justify-center overflow-hidden border border-white/10"
+                  class="avatar-container w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 mb-3 sm:mb-4 lg:mb-5 shrink-0"
                 >
-                  <i data-lucide="user" class="w-12 h-12 text-slate-700 avatar-placeholder"></i>
-                  <img
-                    id="profile-avatar-desktop"
-                    src=""
-                    alt="Avatar"
-                    class="avatar-img w-full h-full object-cover hidden"
-                  />
+                  <div
+                    class="relative z-10 w-full h-full bg-zinc-900 rounded-2xl sm:rounded-3xl lg:rounded-4xl flex items-center justify-center overflow-hidden border border-white/10"
+                  >
+                    <i
+                      data-lucide="user"
+                      class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-slate-700 avatar-placeholder"
+                    ></i>
+                    <img
+                      id="profile-avatar-desktop"
+                      src=""
+                      alt="Avatar"
+                      class="avatar-img w-full h-full object-cover hidden"
+                    />
+                    <!-- Hidden alias for mobile script sync -->
+                    <img id="profile-avatar-mobile" src="" alt="Mobile avatar" class="hidden" />
+                  </div>
+                  <!-- Online indicator -->
+                  <div
+                    class="absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5 bg-emerald-500 border-2 sm:border-3 lg:border-4 border-[var(--bg-base)] rounded-full shadow-[0_0_12px_rgb(var(--success-rgb)/var(--a-08))] z-20"
+                  ></div>
                 </div>
-                <!-- Online indicator -->
+
+                <!-- Identity text info -->
+                <div class="identity-info-block flex-1 min-w-0">
+                  <div class="flex items-center justify-center gap-2 flex-wrap mb-1">
+                    <h1
+                      id="desktop-display-name"
+                      class="text-lg sm:text-xl xl:text-2xl font-cinzel font-bold text-white tracking-wide truncate"
+                    >
+                      User_Name
+                    </h1>
+                    <span id="mobile-display-name" class="hidden"></span>
+                    <div class="mythic-badge text-[8.5px] px-2 py-0.5">
+                      <i data-lucide="sparkles" class="w-3 h-3"></i>
+                      Explorer
+                    </div>
+                  </div>
+                  <p
+                    id="profile-pronouns"
+                    class="text-[9px] sm:text-[9.5px] text-indigo-400 font-bold uppercase tracking-[0.2em] mb-1"
+                  ></p>
+                  <p
+                    id="desktop-display-bio"
+                    class="text-slate-400 text-xs sm:text-sm leading-relaxed font-medium line-clamp-1 lg:line-clamp-none"
+                  >
+                    Whispering stories to the stars…
+                  </p>
+                  <span id="mobile-display-bio" class="hidden"></span>
+                </div>
+
+                <!-- Edit Action -->
+                <button
+                  id="btn-edit-desktop"
+                  class="identity-edit-btn mt-4 lg:mt-6 w-full py-3 sm:py-3.5 rounded-xl sm:rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] hover:bg-indigo-500/20 hover:text-indigo-300 transition-all group btn-secondary cursor-pointer shrink-0"
+                >
+                  <span class="flex items-center justify-center gap-2">
+                    <i
+                      data-lucide="settings"
+                      class="w-3.5 h-3.5 group-hover:rotate-90 transition-transform duration-500"
+                    ></i>
+                    <span class="edit-btn-text">Customise Identity</span>
+                  </span>
+                </button>
+                <button id="btn-edit-mobile" type="button" class="hidden"></button>
+              </div>
+
+              <!-- Metadata & details (Desktop or tablet drawer) -->
+              <div class="identity-details-drawer w-full mt-4 space-y-3 hidden sm:block">
+                <!-- Metadata -->
                 <div
-                  class="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-4 border-[#030305] rounded-full shadow-[0_0_15px_rgba(16,185,129,0.4)] z-20"
-                ></div>
-              </div>
-
-              <!-- Rank badge -->
-              <div class="mythic-badge">
-                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-                Explorer
-              </div>
-
-              <!-- Name & Bio -->
-              <div class="mt-6">
-                <h1
-                  id="desktop-display-name"
-                  class="text-2xl xl:text-3xl font-cinzel font-bold text-white tracking-wide"
+                  class="flex flex-wrap items-center justify-center gap-3 text-[9.5px] text-slate-500 font-bold uppercase tracking-wider"
                 >
-                  User_Name
-                </h1>
-                <p
-                  id="profile-pronouns"
-                  class="text-[10px] text-indigo-400 font-bold uppercase tracking-[0.2em] mt-1.5"
-                ></p>
-                <p
-                  id="desktop-display-bio"
-                  class="mt-4 text-slate-400 text-sm leading-relaxed font-medium"
-                >
-                  Whispering stories to the stars…
-                </p>
-              </div>
-
-              <!-- Metadata -->
-              <div
-                class="mt-6 flex flex-wrap items-center justify-center gap-4 text-[10px] text-slate-500 font-bold uppercase tracking-wider"
-              >
-                <span id="profile-location" class="flex items-center gap-1.5"></span>
-                <span id="profile-joined" class="flex items-center gap-1.5"></span>
-              </div>
-
-              <!-- Genres -->
-              <div id="profile-genres" class="mt-6 flex flex-wrap justify-center gap-2">
-                <span class="text-xs text-slate-600 italic">No genres set</span>
-              </div>
-
-              <!-- Socials -->
-              <div class="mt-8 flex items-center gap-4">
-                <div data-social-wrap class="hidden">
-                  <a
-                    id="social-link-twitter"
-                    target="_blank"
-                    rel="noopener"
-                    class="w-10 h-10 rounded-2xl bg-white/3 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/8 hover:border-white/20 transition-all"
-                  >
-                    <i data-lucide="badge-x" class="w-4 h-4"></i>
-                  </a>
+                  <span id="profile-location" class="flex items-center gap-1.5"></span>
+                  <span id="profile-joined" class="flex items-center gap-1.5"></span>
                 </div>
-                <div data-social-wrap class="hidden">
-                  <a
-                    id="social-link-instagram"
-                    target="_blank"
-                    rel="noopener"
-                    class="w-10 h-10 rounded-2xl bg-white/3 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/8 hover:border-white/20 transition-all"
-                  >
-                    <i data-lucide="instagram" class="w-4 h-4"></i>
-                  </a>
+
+                <!-- Genres -->
+                <div id="profile-genres" class="flex flex-wrap justify-center gap-1.5">
+                  <span class="text-xs text-slate-600 italic">No genres set</span>
                 </div>
-                <div data-social-wrap class="hidden">
-                  <a
-                    id="social-link-website"
-                    target="_blank"
-                    rel="noopener"
-                    class="w-10 h-10 rounded-2xl bg-white/3 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/8 hover:border-white/20 transition-all"
-                  >
-                    <i data-lucide="globe" class="w-4 h-4"></i>
-                  </a>
+
+                <!-- Socials -->
+                <div class="flex items-center justify-center gap-3">
+                  <div data-social-wrap class="hidden">
+                    <a
+                      id="social-link-twitter"
+                      target="_blank"
+                      rel="noopener"
+                      aria-label="Twitter profile"
+                      class="w-9 h-9 rounded-xl bg-white/3 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/8 hover:border-white/20 transition-all"
+                    >
+                      <i data-lucide="badge-x" class="w-4 h-4"></i>
+                    </a>
+                  </div>
+                  <div data-social-wrap class="hidden">
+                    <a
+                      id="social-link-instagram"
+                      target="_blank"
+                      rel="noopener"
+                      aria-label="Instagram profile"
+                      class="w-9 h-9 rounded-xl bg-white/3 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/8 hover:border-white/20 transition-all"
+                    >
+                      <i data-lucide="instagram" class="w-4 h-4"></i>
+                    </a>
+                  </div>
+                  <div data-social-wrap class="hidden">
+                    <a
+                      id="social-link-website"
+                      target="_blank"
+                      rel="noopener"
+                      aria-label="Personal website"
+                      class="w-9 h-9 rounded-xl bg-white/3 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/8 hover:border-white/20 transition-all"
+                    >
+                      <i data-lucide="globe" class="w-4 h-4"></i>
+                    </a>
+                  </div>
                 </div>
               </div>
-
-              <!-- Edit Action -->
-              <button
-                id="btn-edit-desktop"
-                class="mt-8 w-full py-4 rounded-[1.25rem] bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[11px] font-black uppercase tracking-[0.25em] hover:bg-indigo-500/20 hover:text-indigo-300 transition-all group btn-secondary"
-              >
-                <span class="flex items-center justify-center gap-3">
-                  <i
-                    data-lucide="settings"
-                    class="w-3.5 h-3.5 group-hover:rotate-90 transition-transform duration-500"
-                  ></i>
-                  Customise Identity
-                </span>
-              </button>
 
               <!-- Upgrade Account — visible for anonymous users -->
               <button
                 type="button"
                 id="btn-upgrade-account"
-                class="hidden items-center justify-between w-full p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/20 hover:bg-indigo-500/10 hover:border-indigo-500/30 transition-all group !mt-6"
+                class="hidden items-center justify-between w-full p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-indigo-500/5 border border-indigo-500/20 hover:bg-indigo-500/10 hover:border-indigo-500/30 transition-all group !mt-3 cursor-pointer"
               >
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
                   <div
-                    class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center group-hover:bg-indigo-500/20 transition-colors"
+                    class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-indigo-500/10 flex items-center justify-center group-hover:bg-indigo-500/20 transition-colors"
                   >
                     <i data-lucide="shield-check" class="w-4 h-4 text-indigo-400"></i>
                   </div>
                   <div class="flex flex-col items-start">
-                    <span class="text-sm font-bold text-indigo-300 group-hover:text-white"
+                    <span
+                      class="text-xs sm:text-sm font-bold text-indigo-300 group-hover:text-white"
                       >Secure Account</span
                     >
-                    <span class="text-[9px] text-indigo-500/70 font-bold uppercase tracking-wider"
+                    <span class="text-[8.5px] text-indigo-500/70 font-bold uppercase tracking-wider"
                       >Link to Google</span
                     >
                   </div>
@@ -204,18 +228,18 @@
           </div>
 
           <!-- Navigation Links -->
-          <div class="space-y-3">
+          <div class="pillar-nav-links space-y-2.5 sm:space-y-3">
             <a
               href="/library.html"
-              class="flex items-center justify-between p-4 rounded-2xl bg-white/2 border border-white/5 hover:bg-white/5 hover:border-white/10 transition-all group"
+              class="flex items-center justify-between p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white/2 border border-white/5 hover:bg-white/5 hover:border-white/10 transition-all group"
             >
-              <div class="flex items-center gap-4">
+              <div class="flex items-center gap-3.5">
                 <div
-                  class="w-10 h-10 rounded-xl bg-indigo-500/5 flex items-center justify-center group-hover:bg-indigo-500/10 transition-colors"
+                  class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-500/5 flex items-center justify-center group-hover:bg-indigo-500/10 transition-colors"
                 >
                   <i data-lucide="book-open" class="w-4 h-4 text-indigo-400"></i>
                 </div>
-                <span class="text-sm font-bold text-slate-300 group-hover:text-white"
+                <span class="text-xs sm:text-sm font-bold text-slate-300 group-hover:text-white"
                   >Great Library</span
                 >
               </div>
@@ -226,15 +250,15 @@
             </a>
             <a
               href="/shelf.html"
-              class="flex items-center justify-between p-4 rounded-2xl bg-white/2 border border-white/5 hover:bg-white/5 hover:border-white/10 transition-all group"
+              class="flex items-center justify-between p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white/2 border border-white/5 hover:bg-white/5 hover:border-white/10 transition-all group"
             >
-              <div class="flex items-center gap-4">
+              <div class="flex items-center gap-3.5">
                 <div
-                  class="w-10 h-10 rounded-xl bg-violet-500/5 flex items-center justify-center group-hover:bg-violet-500/10 transition-colors"
+                  class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-violet-500/5 flex items-center justify-center group-hover:bg-violet-500/10 transition-colors"
                 >
                   <i data-lucide="bookmark" class="w-4 h-4 text-violet-400"></i>
                 </div>
-                <span class="text-sm font-bold text-slate-300 group-hover:text-white"
+                <span class="text-xs sm:text-sm font-bold text-slate-300 group-hover:text-white"
                   >Saved Fragments</span
                 >
               </div>
@@ -244,15 +268,15 @@
               ></i>
             </a>
 
-            <!-- Sign Out — desktop identity pillar (TODO #2) -->
+            <!-- Sign Out — desktop identity pillar -->
             <button
               type="button"
               id="btn-sign-out"
-              class="flex items-center justify-between w-full p-4 rounded-2xl bg-white/2 border border-white/5 hover:bg-red-500/5 hover:border-red-500/20 transition-all group"
+              class="flex items-center justify-between w-full p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white/2 border border-white/5 hover:bg-red-500/5 hover:border-red-500/20 transition-all group cursor-pointer"
             >
-              <div class="flex items-center gap-4">
+              <div class="flex items-center gap-3.5">
                 <div
-                  class="w-10 h-10 rounded-xl bg-red-500/5 flex items-center justify-center group-hover:bg-red-500/10 transition-colors"
+                  class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-red-500/5 flex items-center justify-center group-hover:bg-red-500/10 transition-colors"
                 >
                   <i
                     data-lucide="log-out"
@@ -260,7 +284,7 @@
                   ></i>
                 </div>
                 <span
-                  class="text-sm font-bold text-slate-500 group-hover:text-red-400 transition-colors"
+                  class="text-xs sm:text-sm font-bold text-slate-500 group-hover:text-red-400 transition-colors"
                   >Sign Out</span
                 >
               </div>
@@ -285,22 +309,21 @@
       <!-- ══════════════════════════════════════════════
            CENTER COLUMN: Chronicle Flow
            ══════════════════════════════════════════════ -->
-      <section
-        id="column-chronicles"
-        class="dashboard-column scroll-container no-scrollbar border-r border-white/3"
-      >
-        <div class="p-8 md:p-12 xl:p-14 max-w-4xl mx-auto w-full">
+      <section id="column-chronicles" class="dashboard-column scroll-container no-scrollbar">
+        <div class="p-4 sm:p-6 md:p-8 xl:p-10 max-w-4xl mx-auto w-full space-y-10 sm:space-y-12">
           <!-- ── Continue Reading ───────────────────── -->
-          <section class="mb-20">
+          <section>
             <header
-              class="section-header flex flex-col md:flex-row md:items-end justify-between gap-6"
+              class="section-header flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-6 mb-4 sm:mb-6"
             >
               <div>
-                <h2 class="text-3xl md:text-4xl font-cinzel font-bold text-white tracking-wide">
+                <h2
+                  class="text-xl sm:text-2xl md:text-3xl font-cinzel font-bold text-white tracking-wide"
+                >
                   Continue Reading
                 </h2>
                 <div class="rune-divider"></div>
-                <p class="text-slate-500 text-sm mt-4 max-w-md font-medium">
+                <p class="text-slate-500 text-xs sm:text-sm mt-2 max-w-md font-medium">
                   Resume your journey through the woven memories.
                 </p>
               </div>
@@ -308,29 +331,33 @@
 
             <div
               id="continue-reading-list"
-              class="flex gap-6 overflow-x-auto pb-6 no-scrollbar -mx-4 px-4"
+              class="flex gap-4 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0"
             >
-              <div class="text-sm text-slate-600 italic py-10">Consulting the oracle…</div>
+              <div class="text-xs sm:text-sm text-slate-500 italic py-6">
+                Consulting the oracle…
+              </div>
             </div>
           </section>
 
           <!-- ── Contributions ─────────────────────── -->
-          <section class="mb-20">
+          <section>
             <header
-              class="section-header flex flex-col md:flex-row md:items-end justify-between gap-8"
+              class="section-header flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-6 mb-5 sm:mb-6"
             >
               <div>
-                <h2 class="text-3xl md:text-4xl font-cinzel font-bold text-white tracking-wide">
+                <h2
+                  class="text-xl sm:text-2xl md:text-3xl font-cinzel font-bold text-white tracking-wide"
+                >
                   The Archive
                 </h2>
                 <div class="rune-divider"></div>
-                <p class="text-slate-500 text-sm mt-4 max-w-md font-medium">
+                <p class="text-slate-500 text-xs sm:text-sm mt-2 max-w-md font-medium">
                   The legends you've preserved for eternity.
                 </p>
               </div>
 
               <!-- Tab Switcher -->
-              <div class="tab-nav min-w-60">
+              <div class="tab-nav shrink-0">
                 <button
                   data-contrib-tab="published"
                   class="tab-trigger tab-trigger--active"
@@ -350,28 +377,28 @@
 
             <!-- Published -->
             <div id="contrib-panel-published">
-              <div id="contributions-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div id="contributions-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                 <!-- New Tale CTA -->
                 <button
                   id="btn-new-story"
-                  class="group relative bg-white/2 border-2 border-dashed border-white/10 hover:border-indigo-500/40 rounded-[2.5rem] flex flex-col items-center justify-center p-8 transition-all min-h-70 overflow-hidden"
+                  class="group relative bg-white/2 border-2 border-dashed border-white/10 hover:border-indigo-500/40 rounded-2xl sm:rounded-3xl flex flex-col items-center justify-center p-6 transition-all min-h-[190px] h-[200px] overflow-hidden cursor-pointer"
                 >
                   <div
-                    class="absolute inset-0 bg-linear-to-br from-indigo-500/0 to-violet-500/0 group-hover:from-indigo-500/3 group-hover:to-violet-500/3 transition-all duration-700"
+                    class="absolute inset-0 bg-linear-to-br from-indigo-500/0 to-violet-500/0 group-hover:from-indigo-500/4 group-hover:to-violet-500/4 transition-all duration-500"
                   ></div>
-                  <div class="relative z-10 flex flex-col items-center gap-4">
+                  <div class="relative z-10 flex flex-col items-center gap-3">
                     <div
-                      class="w-16 h-16 bg-indigo-500/5 rounded-3xl flex items-center justify-center border border-indigo-500/10 group-hover:scale-110 group-hover:bg-indigo-500/15 transition-all duration-500"
+                      class="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center border border-indigo-500/20 group-hover:scale-110 group-hover:bg-indigo-500/20 transition-all duration-300"
                     >
-                      <i data-lucide="feather" class="text-indigo-400 w-7 h-7"></i>
+                      <i data-lucide="feather" class="text-indigo-400 w-5 h-5"></i>
                     </div>
                     <div class="text-center">
                       <span
-                        class="block font-cinzel text-lg text-white font-bold group-hover:text-indigo-200 transition-colors"
+                        class="block font-cinzel text-sm sm:text-base text-white font-bold group-hover:text-indigo-200 transition-colors"
                         >Record a New Legend</span
                       >
                       <span
-                        class="block text-[9px] text-slate-500 mt-2 font-black uppercase tracking-[0.3em]"
+                        class="block text-[9px] text-slate-500 mt-1 font-black uppercase tracking-[0.25em]"
                         >Expand the Archive</span
                       >
                     </div>
@@ -382,7 +409,7 @@
 
             <!-- Drafts -->
             <div id="contrib-panel-drafts" hidden>
-              <div id="drafts-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+              <div id="drafts-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5"></div>
             </div>
           </section>
         </div>
@@ -400,26 +427,26 @@
       <!-- ══════════════════════════════════════════════
            RIGHT COLUMN: Runic Insights
            ══════════════════════════════════════════════ -->
-      <aside id="column-insights" class="dashboard-column scroll-container no-scrollbar bg-white/1">
-        <div class="p-8 space-y-10">
+      <aside id="column-insights" class="dashboard-column scroll-container no-scrollbar">
+        <div class="p-4 sm:p-6 lg:p-7 space-y-7 sm:space-y-8">
           <!-- ── Statistics ────────────────────────── -->
           <section>
-            <header class="mb-8">
-              <h3 class="text-xs font-black text-slate-500 uppercase tracking-[0.4em]">
+            <header class="mb-5 sm:mb-6">
+              <h3 class="text-xs font-black text-slate-500 uppercase tracking-[0.3em]">
                 Legacy Metrics
               </h3>
-              <div class="h-px w-10 bg-indigo-500/30 mt-3"></div>
+              <div class="h-px w-8 bg-indigo-500/30 mt-2"></div>
             </header>
 
-            <div class="space-y-4">
+            <div class="insights-metric-grid space-y-3 sm:space-y-4">
               <div class="stat-card-mythic">
-                <div class="flex items-center justify-between mb-4">
-                  <div
-                    class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center"
-                  >
-                    <i data-lucide="scroll-text" class="w-5 h-5 text-indigo-400"></i>
+                <div class="flex items-center justify-between mb-2 sm:mb-3">
+                  <div class="w-9 h-9 rounded-xl bg-indigo-500/10 flex items-center justify-center">
+                    <i data-lucide="scroll-text" class="w-4 h-4 text-indigo-400"></i>
                   </div>
-                  <span id="stat-words-written" class="text-2xl font-bold text-white tracking-tight"
+                  <span
+                    id="stat-words-written"
+                    class="text-xl sm:text-2xl font-bold text-white tracking-tight"
                     >—</span
                   >
                 </div>
@@ -429,13 +456,13 @@
               </div>
 
               <div class="stat-card-mythic">
-                <div class="flex items-center justify-between mb-4">
-                  <div
-                    class="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center"
-                  >
-                    <i data-lucide="users-2" class="w-5 h-5 text-violet-400"></i>
+                <div class="flex items-center justify-between mb-2 sm:mb-3">
+                  <div class="w-9 h-9 rounded-xl bg-violet-500/10 flex items-center justify-center">
+                    <i data-lucide="users-2" class="w-4 h-4 text-violet-400"></i>
                   </div>
-                  <span id="stat-total-readers" class="text-2xl font-bold text-white tracking-tight"
+                  <span
+                    id="stat-total-readers"
+                    class="text-xl sm:text-2xl font-bold text-white tracking-tight"
                     >—</span
                   >
                 </div>
@@ -445,15 +472,15 @@
               </div>
 
               <div class="stat-card-mythic">
-                <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center justify-between mb-2 sm:mb-3">
                   <div
-                    class="w-10 h-10 rounded-xl bg-fuchsia-500/10 flex items-center justify-center"
+                    class="w-9 h-9 rounded-xl bg-fuchsia-500/10 flex items-center justify-center"
                   >
-                    <i data-lucide="clock-4" class="w-5 h-5 text-fuchsia-400"></i>
+                    <i data-lucide="clock-4" class="w-4 h-4 text-fuchsia-400"></i>
                   </div>
                   <span
                     id="stat-reading-time-given"
-                    class="text-2xl font-bold text-white tracking-tight"
+                    class="text-xl sm:text-2xl font-bold text-white tracking-tight"
                     >—</span
                   >
                 </div>
@@ -463,13 +490,15 @@
               </div>
 
               <div class="stat-card-mythic">
-                <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center justify-between mb-2 sm:mb-3">
                   <div
-                    class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center"
+                    class="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center"
                   >
-                    <i data-lucide="flame" class="w-5 h-5 text-emerald-400"></i>
+                    <i data-lucide="flame" class="w-4 h-4 text-emerald-400"></i>
                   </div>
-                  <span id="stat-streak" class="text-2xl font-bold text-white tracking-tight"
+                  <span
+                    id="stat-streak"
+                    class="text-xl sm:text-2xl font-bold text-white tracking-tight"
                     >—</span
                   >
                 </div>
@@ -482,21 +511,21 @@
 
           <!-- ── Reading Progress ───────────────────── -->
           <section>
-            <header class="mb-8">
-              <h3 class="text-xs font-black text-slate-500 uppercase tracking-[0.4em]">
+            <header class="mb-5 sm:mb-6">
+              <h3 class="text-xs font-black text-slate-500 uppercase tracking-[0.3em]">
                 Chronicle Goal
               </h3>
-              <div class="h-px w-10 bg-violet-500/30 mt-3"></div>
+              <div class="h-px w-8 bg-violet-500/30 mt-2"></div>
             </header>
 
             <div
-              class="p-6 rounded-4xl bg-white/2 border border-white/5 relative overflow-hidden group"
+              class="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-white/2 border border-white/5 relative overflow-hidden group"
             >
               <div
                 class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-3xl pointer-events-none group-hover:bg-indigo-500/10 transition-colors"
               ></div>
-              <div class="flex items-center justify-between mb-4">
-                <span class="text-[9px] font-black uppercase tracking-[0.3em] text-slate-500"
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-[9px] font-black uppercase tracking-[0.25em] text-slate-500"
                   >Annual Path</span
                 >
                 <span
@@ -505,10 +534,10 @@
                   >12 TALES</span
                 >
               </div>
-              <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden mb-3">
+              <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden mb-2.5">
                 <div
                   id="reading-goal-bar"
-                  class="h-full bg-linear-to-r from-indigo-500 to-violet-600 shadow-[0_0_10px_rgba(99,102,241,0.5)]"
+                  class="h-full bg-linear-to-r from-indigo-500 to-violet-600 shadow-[0_0_10px_rgb(var(--accent-rgb)/var(--a-08))]"
                   style="--progress: 0.25"
                 ></div>
               </div>
@@ -519,22 +548,28 @@
           </section>
 
           <!-- Quick Stats (Legacy) -->
-          <div class="pt-8 border-t border-white/5 grid grid-cols-3 gap-2">
+          <div class="pt-6 border-t border-white/5 grid grid-cols-3 gap-2">
             <div class="text-center">
-              <span id="sidebar-tale-count" class="block text-xl font-bold text-white">—</span>
-              <span class="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1"
+              <span id="sidebar-tale-count" class="block text-lg sm:text-xl font-bold text-white"
+                >—</span
+              >
+              <span class="text-[8.5px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1"
                 >Tales</span
               >
             </div>
             <div class="text-center border-x border-white/5">
-              <span id="sidebar-reader-count" class="block text-xl font-bold text-white">—</span>
-              <span class="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1"
+              <span id="sidebar-reader-count" class="block text-lg sm:text-xl font-bold text-white"
+                >—</span
+              >
+              <span class="text-[8.5px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1"
                 >Readers</span
               >
             </div>
             <div class="text-center">
-              <span id="sidebar-saved-count" class="block text-xl font-bold text-white">—</span>
-              <span class="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1"
+              <span id="sidebar-saved-count" class="block text-lg sm:text-xl font-bold text-white"
+                >—</span
+              >
+              <span class="text-[8.5px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1"
                 >Saved</span
               >
             </div>
@@ -546,8 +581,13 @@
     <!-- ══════════════════════════════════════════════
        EDIT PROFILE MODAL — Tabbed
        ══════════════════════════════════════════════ -->
-    <div id="edit-modal" class="fixed inset-0 z-100 hidden items-center justify-center px-4">
-      <div class="absolute inset-0 bg-black/65 backdrop-blur-xl"></div>
+    <div
+      id="edit-modal"
+      class="fixed inset-0 z-[300] hidden items-start justify-center pt-6 sm:pt-10 md:pt-12 px-3 sm:px-4 pb-6 overflow-y-auto"
+    >
+      <div
+        class="fixed inset-0 bg-black/65 backdrop-blur-xl modal-backdrop pointer-events-none"
+      ></div>
 
       <div
         class="relative profile-panel-elevated w-full max-w-[480px] rounded-4xl overflow-hidden shadow-2xl shadow-black/60 flex flex-col max-h-[90vh]"
@@ -842,16 +882,6 @@
                 Save Changes
               </button>
             </div>
-
-            <!-- Sign Out — mobile modal footer (TODO #2) -->
-            <button
-              type="button"
-              id="btn-sign-out-mobile"
-              class="mt-3 w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-red-500/15 bg-red-500/4 text-red-400/70 hover:text-red-400 hover:bg-red-500/8 hover:border-red-500/25 transition-all text-[10px] font-black uppercase tracking-[0.25em]"
-            >
-              <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-              Sign Out
-            </button>
           </div>
         </form>
       </div>
