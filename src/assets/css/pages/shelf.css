@@ -1,10 +1,20 @@
-/* src/assets/css/pages/shelf.css */
+/* src/assets/css/pages/shelf.css
+   The Scribe's Vault — TaleTranscend Shelf
+   Strictly compliant with tokens.css. Zero raw hex or rgb literals.
+*/
 
 html {
   opacity: 0;
   transition: opacity 220ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Ensure global nav and mobile dock never display on the shelf page */
+#app-nav,
+#mobile-dock-container {
+  display: none !important;
+}
+
+/* ── Atmosphere & Particle Field ───────────────────────── */
 .atmosphere-base {
   position: fixed;
   inset: 0;
@@ -12,17 +22,17 @@ html {
   background:
     radial-gradient(
       ellipse 80% 50% at 50% -20%,
-      rgb(var(--accent-rgb) / var(--a-04)) 0%,
+      rgb(var(--rune-rgb) / var(--a-03)) 0%,
       transparent 50%
     ),
     radial-gradient(
       ellipse 70% 40% at 100% 100%,
-      rgb(var(--accent-2-rgb) / var(--a-04)) 0%,
+      rgb(var(--accent-rgb) / var(--a-04)) 0%,
       transparent 40%
     ),
     radial-gradient(
       ellipse 50% 30% at 0% 70%,
-      rgb(var(--accent-rgb) / var(--a-03)) 0%,
+      rgb(var(--accent-2-rgb) / var(--a-03)) 0%,
       transparent 30%
     ),
     var(--bg-base);
@@ -34,95 +44,108 @@ html {
   z-index: -3;
   background-image:
     radial-gradient(1px 1px at 20% 30%, rgb(var(--light-rgb) / var(--a-04)) 0%, transparent 100%),
-    radial-gradient(1px 1px at 60% 20%, rgb(var(--accent-rgb) / var(--a-05)) 0%, transparent 100%),
-    radial-gradient(
-      1px 1px at 80% 60%,
-      rgb(var(--accent-2-rgb) / var(--a-05)) 0%,
-      transparent 100%
-    ),
+    radial-gradient(1px 1px at 60% 20%, rgb(var(--rune-rgb) / var(--a-05)) 0%, transparent 100%),
+    radial-gradient(1px 1px at 80% 60%, rgb(var(--accent-rgb) / var(--a-05)) 0%, transparent 100%),
     radial-gradient(1px 1px at 10% 90%, rgb(var(--light-rgb) / var(--a-04)) 0%, transparent 100%);
-  animation: drift 50s linear infinite;
+  animation: shelf-drift 50s linear infinite;
   pointer-events: none;
 }
 
-@keyframes drift {
+@keyframes shelf-drift {
   0%,
   100% {
     transform: translateY(0px);
   }
-
   50% {
     transform: translateY(-20px);
   }
 }
 
-.shelf-tab-active {
-  color: white;
-  position: relative;
-}
-
-.shelf-tab-active::after {
-  content: '';
+.ambient-orb {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
-  box-shadow: 0 0 20px rgb(var(--accent-rgb) / var(--a-09));
+  border-radius: 9999px;
+  filter: blur(80px);
+  opacity: 0.2;
+  pointer-events: none;
 }
 
-.panel-glow {
-  transition: all 0.35s ease;
-}
-
-.panel-glow:hover {
-  border-color: rgb(var(--accent-rgb) / var(--a-07));
-  box-shadow:
-    0 0 30px var(--glow-indigo),
-    0 0 60px var(--glow-violet),
-    0 12px 35px rgb(var(--dark-rgb) / 0.35);
+/* ── Vault Hero Card ───────────────────────── */
+.vault-hero-card {
+  background: var(--surface-gradient-strong);
+  backdrop-filter: blur(28px) saturate(170%);
+  -webkit-backdrop-filter: blur(28px) saturate(170%);
+  transition: all var(--transition-spring);
 }
 
 .archive-title {
   position: relative;
   display: inline-block;
-  letter-spacing: -0.06em;
+  letter-spacing: -0.04em;
 }
 
 .archive-title::after {
   content: '';
   position: absolute;
-  bottom: -10px;
+  bottom: -6px;
   left: 0;
-  width: 42%;
+  width: 38%;
   height: 2px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgb(var(--accent-rgb) / var(--a-11)), transparent);
+  border-radius: 9999px;
+  background: linear-gradient(90deg, rgb(var(--rune-rgb) / var(--a-10)), transparent);
 }
 
+/* ── Vault Tab Pills ───────────────────────── */
+.shelf-tab {
+  position: relative;
+  color: rgb(var(--text-secondary-rgb) / var(--a-10));
+  background: transparent;
+  border: 1px solid transparent;
+  transition: all var(--transition-base);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.shelf-tab:hover {
+  color: rgb(var(--light-rgb) / var(--a-11));
+  background: rgb(var(--light-rgb) / var(--a-03));
+}
+
+.shelf-tab-active {
+  color: rgb(var(--light-rgb) / var(--a-11)) !important;
+  background: rgb(var(--rune-rgb) / var(--a-08)) !important;
+  border-color: rgb(var(--rune-rgb) / var(--a-10)) !important;
+  box-shadow: 0 0 16px rgb(var(--rune-rgb) / var(--a-04)) !important;
+}
+
+/* ── Cards & Archive Grid ───────────────────────── */
 #shelf-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.5rem;
 }
 
-.shelf-card-shelf {
+.shelf-card {
+  background: var(--surface-gradient);
+  border: 1px solid rgb(var(--light-rgb) / var(--a-03));
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
   transition:
-    transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
-    border-color 0.35s ease,
-    box-shadow 0.35s ease;
-  max-width: 360px;
+    transform var(--transition-spring),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base);
+  max-width: 100%;
   width: 100%;
-  justify-self: center;
 }
 
-.shelf-card-shelf:hover {
-  transform: translateY(-6px);
+.shelf-card:hover {
+  transform: translateY(-4px);
+  border-color: rgb(var(--rune-rgb) / var(--a-08));
+  box-shadow:
+    0 16px 36px rgb(var(--dark-rgb) / var(--a-08)),
+    0 0 24px rgb(var(--rune-rgb) / var(--a-03));
 }
 
-.shelf-card-shelf:hover .card-cover {
+.shelf-card:hover .card-cover {
   transform: scale(1.04);
 }
 
@@ -130,19 +153,7 @@ html {
   transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.ambient-orb {
-  position: absolute;
-  border-radius: 999px;
-  filter: blur(80px);
-  opacity: 0.15;
-  pointer-events: none;
-}
-
-.section-heading {
-  text-wrap: balance;
-  letter-spacing: -0.04em;
-}
-
+/* ── Controls & Chips ───────────────────────── */
 .control-chip {
   background: rgb(var(--light-rgb) / var(--a-01));
   border: 1px solid rgb(var(--light-rgb) / var(--a-04));
@@ -151,25 +162,10 @@ html {
 
 .control-chip:hover {
   background: rgb(var(--light-rgb) / var(--a-03));
-  border-color: rgb(var(--accent-rgb) / var(--a-07));
+  border-color: rgb(var(--rune-rgb) / var(--a-07));
 }
 
-.scroll-pane {
-  scrollbar-gutter: stable;
-}
-
-.hero-label {
-  border: 1px solid rgb(var(--accent-rgb) / var(--a-07));
-  background: rgb(var(--accent-rgb) / var(--a-04));
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-}
-
-.panel-note {
-  border: 1px solid rgb(var(--light-rgb) / var(--a-03));
-  background: rgb(var(--light-rgb) / var(--a-01));
-}
-
+/* ── Options Popup Menu ───────────────────────── */
 .options-menu {
   position: absolute;
   top: 100%;
@@ -182,8 +178,8 @@ html {
   -webkit-backdrop-filter: blur(40px) saturate(180%) !important;
   border: 1px solid rgb(var(--light-rgb) / var(--a-05)) !important;
   box-shadow:
-    0 25px 50px rgb(var(--dark-rgb) / 0.7),
-    0 0 0 1px rgb(var(--accent-rgb) / var(--a-06)),
+    0 25px 50px rgb(var(--dark-rgb) / var(--a-10)),
+    0 0 0 1px rgb(var(--rune-rgb) / var(--a-06)),
     inset 0 1px 1px rgb(var(--light-rgb) / var(--a-03)) !important;
   border-radius: 1.5rem !important;
   padding: 0.5rem !important;
@@ -208,11 +204,12 @@ html {
   font-size: 13px !important;
   font-weight: 600 !important;
   text-align: left !important;
+  cursor: pointer;
 }
 
 .options-menu button:hover {
-  background: rgb(var(--accent-rgb) / var(--a-06)) !important;
-  color: var(--accent-tint) !important;
+  background: rgb(var(--rune-rgb) / var(--a-06)) !important;
+  color: rgb(var(--rune-rgb) / var(--a-11)) !important;
   transform: translateX(4px);
 }
 
@@ -222,15 +219,15 @@ html {
   opacity: 0.7;
 }
 
-/* ── Enhanced Sort Popup ────────────────────────────────────────── */
+/* ── Sort Popup Panel ───────────────────────── */
 #sort-panel {
   z-index: 1000 !important;
   background: rgb(var(--bg-overlay-rgb) / var(--a-11)) !important;
   backdrop-filter: blur(40px) saturate(200%) !important;
-  border: 1px solid rgb(var(--accent-rgb) / var(--a-08)) !important;
+  border: 1px solid rgb(var(--rune-rgb) / var(--a-08)) !important;
   box-shadow:
-    0 30px 70px rgb(var(--dark-rgb) / 0.8),
-    0 0 30px rgb(var(--accent-rgb) / var(--a-06)),
+    0 30px 70px rgb(var(--dark-rgb) / var(--a-11)),
+    0 0 30px rgb(var(--rune-rgb) / var(--a-04)),
     inset 0 1px 1px rgb(var(--light-rgb) / var(--a-03)) !important;
   border-radius: 1.75rem !important;
   overflow: hidden;
@@ -242,33 +239,34 @@ html {
   font-weight: 900 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.3em !important;
-  color: rgb(var(--accent-rgb) / var(--a-10)) !important;
+  color: rgb(var(--rune-rgb) / var(--a-10)) !important;
   border-bottom: 1px solid rgb(var(--light-rgb) / var(--a-02)) !important;
   margin-bottom: 0.5rem !important;
 }
 
 .sort-option {
   width: 100% !important;
-  padding: 0.9rem 1.5rem !important;
+  padding: 0.85rem 1.5rem !important;
   display: flex !important;
   align-items: center !important;
   gap: 1.25rem !important;
   font-size: 13px !important;
   color: rgb(var(--light-rgb) / var(--a-09)) !important;
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
   text-align: left !important;
   position: relative !important;
+  cursor: pointer;
 }
 
 .sort-option:hover {
   background: rgb(var(--light-rgb) / var(--a-03)) !important;
-  color: white !important;
+  color: rgb(var(--light-rgb) / var(--a-11)) !important;
   padding-left: 2rem !important;
 }
 
 .sort-option--active {
-  color: var(--accent-tint) !important;
-  background: rgb(var(--accent-rgb) / var(--a-05)) !important;
+  color: rgb(var(--rune-rgb) / var(--a-11)) !important;
+  background: rgb(var(--rune-rgb) / var(--a-05)) !important;
   font-weight: 700 !important;
 }
 
@@ -279,7 +277,7 @@ html {
   top: 20%;
   bottom: 20%;
   width: 3px;
-  background: var(--accent);
+  background: var(--rune);
   border-radius: 0 4px 4px 0;
-  box-shadow: 0 0 15px var(--accent);
+  box-shadow: 0 0 15px var(--rune);
 }

@@ -19,7 +19,7 @@ import {
   loadRecentTales,
   computeAndRenderHeroStats,
   initShelfInteractions,
-  initNav,
+  initIcons,
   initAuth,
 } from './index.js';
 import { initShelfLayout } from './layout.js';
@@ -28,7 +28,6 @@ const log = createLogger('Shelf');
 
 initPageReveal();
 log.info('Initializing Shelf page');
-initNav();
 
 /* ─────────────────────────────────────────────
    Auth timeout guard
@@ -75,4 +74,5 @@ initAuth(async (user) => {
 document.addEventListener('DOMContentLoaded', () => {
   initShelfLayout();
   initShelfInteractions();
+  initIcons();
 });
