@@ -155,6 +155,10 @@ function openPanel(toolId) {
   panel.classList.add('visible');
   panel.style.display = 'flex';
 
+  if (window.innerWidth < 1024) {
+    document.getElementById('tool-panel-backdrop')?.classList.add('visible');
+  }
+
   document.querySelectorAll('[data-tool]').forEach((btn) => {
     btn.dataset.active = btn.dataset.tool === toolId;
   });
@@ -209,6 +213,8 @@ function closePanel() {
     panel.style.display = 'none';
   }
 
+  document.getElementById('tool-panel-backdrop')?.classList.remove('visible');
+
   readerState.openTool = null;
   readerState.isCollapsed = true;
 
@@ -222,12 +228,15 @@ function toggleFocusMode() {
 
   document.getElementById('sidebar')?.classList.toggle('hidden', readerState.focusMode);
   document.getElementById('top-bar')?.classList.toggle('hidden', readerState.focusMode);
+  document.getElementById('mobile-toolbar')?.classList.toggle('hidden', readerState.focusMode);
   document.getElementById('focus-exit')?.classList.toggle('hidden', !readerState.focusMode);
 
   if (readerState.focusMode) closePanel();
 
   const focusBtn = document.getElementById('sidebar-focus');
   if (focusBtn) focusBtn.dataset.active = String(readerState.focusMode);
+  const mobileFocusBtn = document.getElementById('sidebar-focus-mobile');
+  if (mobileFocusBtn) mobileFocusBtn.dataset.active = String(readerState.focusMode);
 }
 
 function _isPanelVisible() {
@@ -517,7 +526,9 @@ async function _handleBookmark() {
   readerState.bookmarked = !readerState.bookmarked;
 
   document
-    .querySelectorAll('#sidebarBookmark, #engBookmark')
+    .querySelectorAll(
+      '#sidebar-bookmark, #eng-bookmark, #eng-bookmark-mobile, #sidebarBookmark, #engBookmark'
+    )
     .forEach((b) => (b.dataset.active = String(readerState.bookmarked)));
 
   try {
@@ -659,11 +670,17 @@ initAuth(async (user) => {
   document.getElementById('sidebar-bookmark')?.addEventListener('click', _handleBookmark);
   document.getElementById('eng-bookmark')?.addEventListener('click', _handleBookmark);
   document.getElementById('eng-bookmark-mobile')?.addEventListener('click', _handleBookmark);
+  document.getElementById('sidebar-focus-mobile')?.addEventListener('click', toggleFocusMode);
   document.getElementById('close-panel')?.addEventListener('click', closePanel);
+  document.getElementById('tool-panel-backdrop')?.addEventListener('click', closePanel);
   document.getElementById('back-to-top')?.addEventListener('click', () => {
     document.getElementById('scroller')?.scrollTo({ top: 0, behavior: 'smooth' });
   });
   document.getElementById('back-btn')?.addEventListener('click', () => goBackToTale());
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && _isPanelVisible()) closePanel();
+  });
 
   initIcons();
 });

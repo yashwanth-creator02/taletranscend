@@ -27,7 +27,7 @@ export function applyNavigation(nav) {
   const prev = nav.hasPrev
     ? `
     <button class="chapter-nav-btn glass hover-lift group" data-nav-index="${nav.prevIndex}" type="button">
-      <i data-lucide="chevron-left" class="shrink-0" style="width:20px;height:20px;color:#c4b5fd;transition:transform 200ms"></i>
+      <i data-lucide="chevron-left" class="shrink-0" style="width:20px;height:20px;color:var(--accent-tint);transition:transform 200ms"></i>
       <div class="min-w-0">
         <div class="chapter-nav-label">Previous &middot; Fragment ${nav.prevIndex + 1}</div>
         <div class="chapter-nav-title">${escapeHtml(nav.prevTitle || 'Untitled')}</div>
@@ -42,9 +42,9 @@ export function applyNavigation(nav) {
         <div class="chapter-nav-label">Next &middot; Fragment ${nav.nextIndex + 1}</div>
         <div class="chapter-nav-title">${escapeHtml(nav.nextTitle || 'Untitled')}</div>
       </div>
-      <i data-lucide="chevron-right" class="shrink-0" style="width:20px;height:20px;color:#c4b5fd;transition:transform 200ms"></i>
+      <i data-lucide="chevron-right" class="shrink-0" style="width:20px;height:20px;color:var(--accent-tint);transition:transform 200ms"></i>
     </button>`
-    : `<div class="glass flex items-center justify-center rounded-2xl p-4 text-xs" style="color:rgba(255,255,255,0.4)">End of ${escapeHtml(readerState.taleTitle)}</div>`;
+    : `<div class="glass flex items-center justify-center rounded-2xl p-4 text-xs" style="color:var(--text-muted)">End of ${escapeHtml(readerState.taleTitle)}</div>`;
 
   container.innerHTML = prev + next;
 
