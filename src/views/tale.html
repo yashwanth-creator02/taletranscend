@@ -55,8 +55,6 @@
       <div class="ambient-orb w-96 h-96 bg-amber-500/5 -bottom-20 -left-20"></div>
     </div>
 
-    <!-- ── Global Navigation (injected by initNav) ── -->
-
     <main
       id="main-content"
       class="app-viewport scroll-container overflow-y-auto flex-1 focus:outline-none"
@@ -75,15 +73,7 @@
             ></i>
             <span>Library</span>
           </a>
-
-          <div class="flex items-center gap-2">
-            <span
-              class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-indigo-500/20 bg-indigo-500/10 text-[10px] font-bold uppercase tracking-[0.2em] text-indigo-300"
-            >
-              <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
-              <span id="loading-indicator">Synchronising...</span>
-            </span>
-          </div>
+          <span id="loading-indicator" class="hidden" aria-hidden="true"></span>
         </div>
       </div>
 
@@ -222,7 +212,7 @@
       </section>
 
       <!-- ── Main Grid ── -->
-      <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pb-32">
+      <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pb-20 sm:pb-24">
         <div
           class="grid grid-cols-1 lg:grid-cols-[1fr_360px] xl:grid-cols-[1fr_400px] gap-8 xl:gap-12 items-start"
         >

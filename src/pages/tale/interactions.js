@@ -366,8 +366,12 @@ export function initHeaderScroll() {
   const onScroll = () => {
     if (!hero) return;
     const scrollY = main ? main.scrollTop : window.scrollY;
-    const heroBottom = hero.offsetTop + hero.offsetHeight - 80;
-    bar?.classList.toggle('is-hidden', scrollY < heroBottom);
+    const heroBtn = hero.querySelector('#start-btn');
+    const threshold =
+      heroBtn && window.innerWidth < 1024
+        ? heroBtn.offsetTop + heroBtn.offsetHeight + 30
+        : Math.max(180, hero.offsetTop + hero.offsetHeight - 80);
+    bar?.classList.toggle('is-hidden', scrollY < threshold);
   };
 
   window.addEventListener('scroll', onScroll, { passive: true });

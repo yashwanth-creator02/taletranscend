@@ -159,7 +159,7 @@
 
 .sidebar-sticky {
   position: sticky;
-  top: calc(var(--nav-height, 64px) + var(--space-4));
+  top: var(--space-6);
 }
 
 /* ── Shared components ──────────────────────────────────────── */
@@ -208,7 +208,7 @@
   }
 
   .floating-bar {
-    bottom: calc(var(--nav-height, 64px) + var(--space-3));
+    bottom: var(--space-4);
     width: calc(100% - var(--space-4));
   }
 

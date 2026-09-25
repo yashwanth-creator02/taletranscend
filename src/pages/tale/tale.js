@@ -28,7 +28,6 @@ import {
   initIcons,
 } from './index.js';
 import { addToBookmarks, removeFromBookmarks, isBookmarked } from '@services/index.js';
-import { initNav } from '@ui/components/nav/nav.js';
 
 const log = createLogger('TaleArchive');
 
@@ -49,8 +48,6 @@ if (!taleId) {
 /* ─────────────────────────────────────────────
    Bootstrap
    ───────────────────────────────────────────── */
-
-initNav();
 
 const authTimeout = setupAuthTimeout(
   'display-description',
