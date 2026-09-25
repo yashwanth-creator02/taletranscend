@@ -46,8 +46,16 @@ initNav();
 const authTimeout = setupAuthTimeout(
   'continue-reading-list',
   'Connection timed out. Please refresh.',
-  15000
+  12000
 );
+
+const contribTimeout = setTimeout(() => {
+  const contribGrid = document.getElementById('contributions-grid');
+  if (contribGrid && contribGrid.querySelector('.skeleton-card')) {
+    renderPublishedTales([]);
+  }
+  readyReveal();
+}, 12000);
 
 /* ─────────────────────────────────────────────
    Auth + Data
@@ -55,6 +63,7 @@ const authTimeout = setupAuthTimeout(
 
 initAuth(async (user) => {
   clearTimeout(authTimeout);
+  clearTimeout(contribTimeout);
   const uid = user.uid;
   log.info('Auth resolved', { uid, isAnonymous: user.isAnonymous });
 
@@ -74,25 +83,45 @@ initAuth(async (user) => {
   showContributionsSkeleton();
 
   log.debug('Fetching profile data subsets...');
-  const [continueReading, publishedTales, drafts, stats] = await Promise.all([
-    getContinueReading(uid),
-    getUserPublishedTales(uid),
-    getUserDrafts(uid),
-    computeAndSyncStats(uid),
-  ]);
+  try {
+    const [continueReading, publishedTales, drafts, stats] = await Promise.all([
+      getContinueReading(uid).catch((err) => {
+        log.warn('Failed to fetch continue reading', err);
+        return [];
+      }),
+      getUserPublishedTales(uid).catch((err) => {
+        log.warn('Failed to fetch published tales', err);
+        return [];
+      }),
+      getUserDrafts(uid).catch((err) => {
+        log.warn('Failed to fetch drafts', err);
+        return [];
+      }),
+      computeAndSyncStats(uid).catch((err) => {
+        log.warn('Failed to compute stats', err);
+        return 0;
+      }),
+    ]);
 
-  log.info('Data fetch complete', {
-    continueReadingCount: continueReading.length,
-    publishedCount: publishedTales.length,
-    draftsCount: drafts.length,
-  });
+    log.info('Data fetch complete', {
+      continueReadingCount: continueReading?.length ?? 0,
+      publishedCount: publishedTales?.length ?? 0,
+      draftsCount: drafts?.length ?? 0,
+    });
 
-  renderContinueReading(continueReading);
-  renderPublishedTales(publishedTales);
-  renderDrafts(drafts);
-  updateStatsUI(stats);
-  readyReveal();
-  initIcons();
+    renderContinueReading(continueReading || []);
+    renderPublishedTales(publishedTales || []);
+    renderDrafts(drafts || []);
+    updateStatsUI(stats);
+  } catch (err) {
+    log.error('Unexpected error fetching profile subsets', err);
+    renderContinueReading([]);
+    renderPublishedTales([]);
+    renderDrafts([]);
+  } finally {
+    readyReveal();
+    initIcons();
+  }
 });
 
 /* ─────────────────────────────────────────────
@@ -151,27 +180,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // ── Sign Out (TODO #2) ──────────────────────────────────────────
-  // Wires both the desktop and mobile sign-out buttons.
+  // ── Sign Out ────────────────────────────────────────────────────
   // Stops the profile listener before signing out to prevent orphaned
   // Firestore listeners on a signed-out user.
-  ['btn-sign-out', 'btn-sign-out-mobile'].forEach((id) => {
-    document.getElementById(id)?.addEventListener('click', async () => {
-      log.info('Sign-out requested', { source: id });
-      try {
-        stopProfileSync();
-        await signOut(auth);
-        log.info('Sign-out successful');
-        showToast('Signed out. Neural link severed.', 'success');
-        setTimeout(() => {
-          navigateTo('index.html');
-        }, 800);
-      } catch (err) {
-        log.error('Sign-out failed:', err);
-        showToast('Sign-out failed. Try again.', 'error');
-        // Restart sync if sign-out failed
-        if (auth.currentUser) startProfileSync(auth.currentUser.uid);
-      }
-    });
+  document.getElementById('btn-sign-out')?.addEventListener('click', async () => {
+    log.info('Sign-out requested', { source: 'btn-sign-out' });
+    try {
+      stopProfileSync();
+      await signOut(auth);
+      log.info('Sign-out successful');
+      showToast('Signed out. Neural link severed.', 'success');
+      setTimeout(() => {
+        navigateTo('index.html');
+      }, 800);
+    } catch (err) {
+      log.error('Sign-out failed:', err);
+      showToast('Sign-out failed. Try again.', 'error');
+      // Restart sync if sign-out failed
+      if (auth.currentUser) startProfileSync(auth.currentUser.uid);
+    }
   });
 });

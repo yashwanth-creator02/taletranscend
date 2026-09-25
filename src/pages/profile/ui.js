@@ -68,7 +68,9 @@ export function closeModal() {
 
 function _bindBackdropClose() {
   document.getElementById('edit-modal')?.addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) closeModal();
+    if (e.target === e.currentTarget || e.target.classList?.contains('modal-backdrop')) {
+      closeModal();
+    }
   });
   // Escape key
   document.addEventListener('keydown', (e) => {
@@ -305,8 +307,8 @@ export function updateProfileUI(data) {
 }
 
 function _renderRank(wordCount) {
-  const badge = document.querySelector('.mythic-badge');
-  if (!badge) return;
+  const badges = document.querySelectorAll('.mythic-badge');
+  if (!badges.length) return;
 
   let rank = 'Explorer';
   let colorCls = 'text-indigo-300';
@@ -330,9 +332,11 @@ function _renderRank(wordCount) {
     borderCls = 'border-violet-500/40';
   }
 
-  badge.className = `mythic-badge ${bgCls} ${borderCls} ${colorCls}`;
-  badge.innerHTML = `<i data-lucide="sparkles" class="w-3.5 h-3.5"></i> ${rank}`;
-  initIcons(badge);
+  badges.forEach((badge) => {
+    badge.className = `mythic-badge ${bgCls} ${borderCls} ${colorCls}`;
+    badge.innerHTML = `<i data-lucide="sparkles" class="w-3.5 h-3.5"></i> ${rank}`;
+    initIcons(badge);
+  });
 }
 
 function _renderGenrePills(genres) {
@@ -372,10 +376,15 @@ function _setSocialLink(id, href) {
  * @param {{ wordsWritten: number, readers: number, readingTime: number, streak: number }} stats
  */
 export function updateStatsUI(stats) {
-  setText('stat-words-written', formatNumber(stats.wordsWritten ?? 0));
-  setText('stat-total-readers', formatNumber(stats.readers ?? 0));
-  setText('stat-reading-time-given', `${Math.round((stats.readingTime ?? 0) / 60)}h`);
-  setText('stat-streak', String(stats.streak ?? 0));
+  const words = typeof stats === 'number' ? stats : (stats?.wordsWritten ?? 0);
+  const readers = typeof stats === 'object' ? (stats?.readers ?? 0) : 0;
+  const readingTime = typeof stats === 'object' ? (stats?.readingTime ?? 0) : 0;
+  const streak = typeof stats === 'object' ? (stats?.streak ?? 0) : 0;
+
+  setText('stat-words-written', formatNumber(words));
+  setText('stat-total-readers', formatNumber(readers));
+  setText('stat-reading-time-given', `${Math.round(readingTime / 60)}h`);
+  setText('stat-streak', String(streak));
 }
 
 /* ─────────────────────────────────────────────
@@ -405,18 +414,20 @@ export function renderContinueReading(tales) {
   const container = document.getElementById('continue-reading-list');
   if (!container) return;
 
-  if (!tales.length) {
+  if (!tales || !tales.length) {
     container.innerHTML = `
-      <div class="flex items-center gap-3 py-8 px-4 text-sm text-slate-600 italic">
-        No tales in progress.
+      <div class="flex items-center gap-3 py-6 px-4 text-xs sm:text-sm text-slate-400 italic bg-white/1 rounded-2xl border border-white/5 w-full">
+        <i data-lucide="book-open-check" class="w-4 h-4 text-slate-500 not-italic shrink-0"></i>
+        <span>No tales in progress.</span>
         <a href="library.html" class="text-indigo-400 hover:text-indigo-300 font-semibold not-italic ml-1">Browse Library →</a>
       </div>
     `;
+    initIcons(container);
     return;
   }
 
   container.innerHTML = tales.map(_buildContinueReadingCard).join('');
-  initIcons();
+  initIcons(container);
 }
 
 function _buildContinueReadingCard(tale) {
@@ -430,39 +441,39 @@ function _buildContinueReadingCard(tale) {
   return `
     <a
       href="reader.html?taleId=${tale.id}&chapterId=${tale.lastChapterIndex}"
-      class="continue-card group snap-start shrink-0"
+      class="continue-card group snap-start shrink-0 w-60 sm:w-64 bg-white/2 border border-white/5 rounded-2xl overflow-hidden hover:bg-white/4 hover:border-white/10 transition-all duration-300"
     >
-      <div class="card-image-wrap mb-4">
+      <div class="relative h-28 w-full bg-zinc-950 overflow-hidden">
         <img
           src="${cover}"
           alt="${safeTitle}"
-          class="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-all duration-700"
+          class="w-full h-full object-cover opacity-60 group-hover:opacity-85 group-hover:scale-105 transition-all duration-500"
           loading="lazy"
         />
         <div class="card-overlay"></div>
-        <div class="absolute bottom-4 left-4">
-          <span class="px-2.5 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-lg text-[9px] font-black text-white/90 uppercase tracking-widest">
+        <div class="absolute bottom-2.5 left-2.5">
+          <span class="px-2 py-0.5 bg-black/70 backdrop-blur-md border border-white/10 rounded-md text-[8.5px] font-black text-white/90 uppercase tracking-widest">
             ${escapeHtml(tale.era || 'Mythic Era')}
           </span>
         </div>
       </div>
 
-      <div class="px-1">
-        <h3 class="text-base font-bold text-white group-hover:text-indigo-400 transition-colors truncate">
+      <div class="p-3 sm:p-3.5 space-y-2">
+        <h3 class="font-cinzel text-sm sm:text-base font-bold text-white group-hover:text-indigo-400 transition-colors truncate">
           ${safeTitle}
         </h3>
-        <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed mt-1 font-medium">
+        <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed font-medium">
           ${safeDescription}
         </p>
 
-        <div class="mt-4 space-y-2">
-          <div class="flex items-center justify-between text-[9px] font-black text-slate-600 uppercase tracking-[0.2em]">
+        <div class="pt-1.5 space-y-1.5 border-t border-white/5">
+          <div class="flex items-center justify-between text-[9px] font-black text-slate-500 uppercase tracking-[0.15em]">
             <span>Progress</span>
-            <span class="text-indigo-500">${tale.percent}%</span>
+            <span class="text-indigo-400">${tale.percent}%</span>
           </div>
           <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
             <div
-              class="h-full bg-linear-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-1000"
+              class="h-full bg-linear-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-700"
               style="width: ${Math.max(3, tale.percent)}%"
             ></div>
           </div>
@@ -485,14 +496,44 @@ export function renderPublishedTales(tales) {
   const container = document.getElementById('contributions-grid');
   if (!container) return;
 
-  // Remove any previously injected cards (not the New Tale button)
-  container.querySelectorAll('.contribution-card').forEach((el) => el.remove());
+  // Always remove any previously injected cards, skeletons, and empty state
+  container
+    .querySelectorAll('.skeleton-card, .contribution-card, .contribution-empty-state')
+    .forEach((el) => el.remove());
 
-  if (!tales.length) return;
+  const newBtn = document.getElementById('btn-new-story');
+
+  if (!tales || !tales.length) {
+    const emptyHtml = `
+      <div class="contribution-empty-state flex flex-col justify-center p-5 sm:p-6 rounded-2xl bg-white/2 border border-white/5 text-slate-400">
+        <div class="flex items-center gap-2.5 text-white font-cinzel font-bold text-sm mb-1.5">
+          <i data-lucide="scroll" class="w-4 h-4 text-indigo-400"></i>
+          <span>No Published Legends Yet</span>
+        </div>
+        <p class="text-xs text-slate-500 leading-relaxed mb-3">
+          Your chronicles have not yet been woven into the Great Library.
+        </p>
+        <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest flex items-center gap-1">
+          Record a new story to publish <i data-lucide="arrow-right" class="w-3 h-3"></i>
+        </span>
+      </div>
+    `;
+    if (newBtn) {
+      newBtn.insertAdjacentHTML('beforebegin', emptyHtml);
+    } else {
+      container.insertAdjacentHTML('afterbegin', emptyHtml);
+    }
+    initIcons(container);
+    return;
+  }
 
   const cards = tales.map(_buildPublishedCard).join('');
-  container.insertAdjacentHTML('afterbegin', cards);
-  initIcons();
+  if (newBtn) {
+    newBtn.insertAdjacentHTML('beforebegin', cards);
+  } else {
+    container.insertAdjacentHTML('afterbegin', cards);
+  }
+  initIcons(container);
 }
 
 function _buildPublishedCard(tale) {
@@ -504,33 +545,35 @@ function _buildPublishedCard(tale) {
     'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=400';
 
   return `
-    <a href="tale.html?id=${tale.id}" class="contribution-card group block bg-white/1 border border-white/5 rounded-4xl overflow-hidden hover:bg-white/3 hover:border-white/10 hover:-translate-y-1.5 transition-all duration-500">
-      <div class="relative aspect-video bg-zinc-950 overflow-hidden">
+    <a href="tale.html?id=${tale.id}" class="contribution-card group block bg-white/2 border border-white/5 rounded-2xl sm:rounded-3xl overflow-hidden hover:bg-white/4 hover:border-indigo-500/30 hover:-translate-y-1 transition-all duration-300">
+      <div class="relative h-28 sm:h-32 bg-zinc-950 overflow-hidden">
         <img src="${cover}" alt="${safeTitle}"
-          class="w-full h-full object-cover opacity-50 group-hover:opacity-70 group-hover:scale-105 transition-all duration-700" loading="lazy" />
-        <div class="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent"></div>
-        <div class="absolute top-4 left-4">
-          <span class="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-[9px] font-black uppercase tracking-widest rounded-full border border-emerald-500/20 backdrop-blur-md">
+          class="w-full h-full object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-500" loading="lazy" />
+        <div class="absolute inset-0 bg-linear-to-t from-black/90 via-black/30 to-transparent"></div>
+        <div class="absolute top-2.5 left-2.5">
+          <span class="px-2.5 py-0.5 bg-emerald-500/15 text-emerald-400 text-[8.5px] font-black uppercase tracking-widest rounded-full border border-emerald-500/25 backdrop-blur-md">
             Published
           </span>
         </div>
-        <div class="absolute bottom-4 left-5 right-5">
-          <h3 class="font-cinzel font-bold text-white text-lg leading-snug group-hover:text-indigo-300 transition-colors line-clamp-2">
+        <div class="absolute bottom-2.5 left-3 right-3">
+          <h3 class="font-cinzel font-bold text-white text-sm sm:text-base leading-snug group-hover:text-indigo-300 transition-colors truncate">
             ${safeTitle}
           </h3>
         </div>
       </div>
-      <div class="p-6 space-y-4">
-        <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed font-medium">${safeDescription}</p>
+      <div class="p-3.5 sm:p-4 space-y-2.5">
+        <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed font-medium">${safeDescription}</p>
         <div class="flex items-center justify-between pt-2 border-t border-white/5">
-          <div class="flex items-center gap-4 text-[10px] font-bold text-slate-600 uppercase tracking-widest">
+          <div class="flex items-center gap-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
             <span class="flex items-center gap-1.5">
-              <i data-lucide="layers" class="w-3.5 h-3.5 text-slate-700"></i>
-              ${tale.chapterCount || 0}
+              <i data-lucide="layers" class="w-3.5 h-3.5 text-slate-600"></i>
+              ${tale.chapterCount || 0} ch
             </span>
-            ${tale.readCount ? `<span class="flex items-center gap-1.5"><i data-lucide="eye" class="w-3.5 h-3.5 text-slate-700"></i>${formatNumber(tale.readCount)}</span>` : ''}
+            ${tale.readCount ? `<span class="flex items-center gap-1.5"><i data-lucide="eye" class="w-3.5 h-3.5 text-slate-600"></i>${formatNumber(tale.readCount)}</span>` : ''}
           </div>
-          <i data-lucide="arrow-right" class="w-4 h-4 text-indigo-500 group-hover:translate-x-1.5 transition-transform"></i>
+          <span class="flex items-center gap-1 text-[10px] font-bold text-indigo-400 group-hover:text-indigo-300">
+            Read <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i>
+          </span>
         </div>
       </div>
     </a>
@@ -546,15 +589,20 @@ export function renderDrafts(drafts) {
   const container = document.getElementById('drafts-grid');
   if (!container) return;
 
-  if (!drafts.length) {
+  if (!drafts || !drafts.length) {
     container.innerHTML = `
-      <div class="col-span-full text-sm text-slate-600 italic py-8 font-medium">No drafts awaiting preservation.</div>
+      <div class="col-span-full flex items-center gap-3 py-6 px-4 text-xs sm:text-sm text-slate-400 italic bg-white/1 rounded-2xl border border-white/5 font-medium">
+        <i data-lucide="feather" class="w-4 h-4 text-slate-500 not-italic shrink-0"></i>
+        <span>No drafts awaiting preservation.</span>
+        <a href="contribution.html" class="text-indigo-400 hover:text-indigo-300 font-semibold not-italic ml-1">Begin a Draft →</a>
+      </div>
     `;
+    initIcons(container);
     return;
   }
 
   container.innerHTML = drafts.map(_buildDraftCard).join('');
-  initIcons();
+  initIcons(container);
 }
 
 function _buildDraftCard(draft) {
@@ -568,26 +616,26 @@ function _buildDraftCard(draft) {
   return `
     <a
       href="contribution.html?draft=${draft.id}"
-      class="group block bg-white/2 border border-white/5 rounded-[1.75rem] p-6 hover:bg-white/4 hover:border-indigo-500/20 transition-all duration-400"
+      class="group block bg-white/2 border border-white/5 rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 hover:bg-white/4 hover:border-amber-500/30 hover:-translate-y-1 transition-all duration-300"
     >
-      <div class="flex items-start justify-between gap-3 mb-4">
-        <span class="px-2.5 py-1 bg-amber-500/10 text-amber-500 text-[9px] font-black uppercase tracking-widest rounded-full border border-amber-500/10">
+      <div class="flex items-center justify-between gap-2 mb-2.5">
+        <span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 text-[8.5px] font-black uppercase tracking-widest rounded-full border border-amber-500/20">
           Draft
         </span>
-        <span class="text-[10px] font-bold text-slate-600 uppercase tracking-wider">${updated}</span>
+        <span class="text-[9.5px] font-medium text-slate-500 uppercase tracking-wider">${updated}</span>
       </div>
-      <h3 class="font-cinzel font-bold text-white text-base group-hover:text-indigo-400 transition-colors truncate mb-2">
+      <h3 class="font-cinzel font-bold text-white text-sm sm:text-base group-hover:text-amber-300 transition-colors truncate mb-1">
         ${safeTitle}
       </h3>
-      <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed mb-6 font-medium">
+      <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed mb-3 font-medium">
         ${safeSynopsis}
       </p>
-      <div class="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-600">
-        <span class="flex items-center gap-2">
-          <i data-lucide="book-type" class="w-3.5 h-3.5"></i>
-          ${draft.chapterCount || 0} Chapters
+      <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-slate-500 pt-2 border-t border-white/5">
+        <span class="flex items-center gap-1.5">
+          <i data-lucide="book-type" class="w-3.5 h-3.5 text-slate-600"></i>
+          ${draft.chapterCount || 0} ch
         </span>
-        <span class="flex items-center gap-2 text-indigo-500 group-hover:gap-3 transition-all">
+        <span class="flex items-center gap-1 text-amber-400 group-hover:gap-1.5 transition-all">
           Resume <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
         </span>
       </div>
@@ -627,12 +675,12 @@ export function showContinueReadingSkeleton() {
   container.innerHTML = Array.from(
     { length: 3 },
     () => `
-    <div class="shrink-0 w-80 rounded-4xl overflow-hidden">
-      <div class="aspect-video skeleton rounded-2xl mb-4"></div>
-      <div class="space-y-3 px-1">
-        <div class="skeleton h-5 w-3/4 rounded-lg"></div>
-        <div class="skeleton h-3.5 w-full rounded-md"></div>
-        <div class="skeleton h-3.5 w-2/3 rounded-md"></div>
+    <div class="shrink-0 w-60 sm:w-64 rounded-2xl overflow-hidden bg-white/2 border border-white/5 p-3">
+      <div class="h-28 skeleton rounded-xl mb-3"></div>
+      <div class="space-y-2">
+        <div class="skeleton h-4 w-3/4 rounded-md"></div>
+        <div class="skeleton h-3 w-full rounded-md"></div>
+        <div class="skeleton h-1.5 w-full rounded-full mt-2"></div>
       </div>
     </div>
   `
@@ -643,15 +691,18 @@ export function showContributionsSkeleton() {
   const container = document.getElementById('contributions-grid');
   if (!container) return;
   const newBtn = document.getElementById('btn-new-story');
-  container.querySelectorAll('.skeleton-card').forEach((el) => el.remove());
+  container
+    .querySelectorAll('.skeleton-card, .contribution-empty-state')
+    .forEach((el) => el.remove());
   const skeletons = Array.from(
     { length: 2 },
     () => `
-    <div class="skeleton-card rounded-4xl overflow-hidden hidden">
-      <div class="aspect-video skeleton"></div>
-      <div class="p-6 space-y-3">
-        <div class="skeleton h-5 w-2/3 rounded-lg"></div>
-        <div class="skeleton h-3.5 w-full rounded-md"></div>
+    <div class="skeleton-card rounded-2xl sm:rounded-3xl overflow-hidden bg-white/2 border border-white/5">
+      <div class="h-28 sm:h-32 skeleton"></div>
+      <div class="p-3.5 sm:p-4 space-y-2.5">
+        <div class="skeleton h-4 w-2/3 rounded-md"></div>
+        <div class="skeleton h-3 w-full rounded-md"></div>
+        <div class="skeleton h-3 w-1/3 rounded-md"></div>
       </div>
     </div>
   `

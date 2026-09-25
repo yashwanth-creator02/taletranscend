@@ -143,13 +143,14 @@ async function _loadIcons() {
     // Social Platforms
     Github: L.Github,
     Twitter: L.Twitter,
-    Instagram: L.Instagram,
+    Instagram: L.Instagram || L.Camera,
     Linkedin: L.Linkedin,
     // Auth
     LogIn: L.LogIn,
     LogOut: L.LogOut,
     // Library / Achievements
     Library: L.Library,
+    ShieldCheck: L.ShieldCheck,
     // createIcons function — stored alongside the icon map
     _createIcons: L.createIcons,
   };

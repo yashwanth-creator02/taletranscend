@@ -107,6 +107,14 @@ describe('ProfileUI', () => {
       expect(list.innerHTML).toContain('Tale 1');
       expect(list.innerHTML).toContain('45%');
     });
+
+    it('removes skeletons and displays empty message when no tales are in progress', () => {
+      const list = document.getElementById('continue-reading-list');
+      list.innerHTML = '<div class="skeleton-card">Loading...</div>';
+      renderContinueReading([]);
+      expect(list.querySelector('.skeleton-card')).toBeNull();
+      expect(list.textContent).toContain('No tales in progress');
+    });
   });
 
   describe('renderPublishedTales', () => {
@@ -115,6 +123,23 @@ describe('ProfileUI', () => {
       renderPublishedTales(tales);
       const grid = document.getElementById('contributions-grid');
       expect(grid.innerHTML).toContain('Published 1');
+    });
+
+    it('removes skeletons and displays empty state message when tales array is empty', () => {
+      const grid = document.getElementById('contributions-grid');
+      grid.innerHTML = '<div class="skeleton-card"></div><button id="btn-new-story"></button>';
+      renderPublishedTales([]);
+      expect(grid.querySelector('.skeleton-card')).toBeNull();
+      expect(grid.querySelector('.contribution-empty-state')).not.toBeNull();
+      expect(grid.textContent).toContain('No Published Legends Yet');
+    });
+  });
+
+  describe('renderDrafts', () => {
+    it('renders empty message when drafts array is empty', () => {
+      const grid = document.getElementById('drafts-grid');
+      renderDrafts([]);
+      expect(grid.textContent).toContain('No drafts awaiting preservation');
     });
   });
 });
