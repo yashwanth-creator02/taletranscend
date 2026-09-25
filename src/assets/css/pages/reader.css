@@ -166,6 +166,113 @@ body {
   height: var(--reader-nav-height);
 }
 
+.reader-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(
+    135deg,
+    rgb(var(--accent-rgb) / var(--a-07)),
+    rgb(var(--accent-2-rgb) / var(--a-07))
+  );
+  border: 1px solid rgb(var(--light-rgb) / var(--a-04));
+  color: var(--text-primary);
+  box-shadow: 0 0 16px -4px rgb(var(--accent-rgb) / var(--a-08));
+  cursor: pointer;
+  transition: all var(--dur-base) ease;
+}
+
+.reader-back-btn:hover {
+  transform: translateY(-1px);
+  background: linear-gradient(
+    135deg,
+    rgb(var(--accent-rgb) / var(--a-08)),
+    rgb(var(--accent-2-rgb) / var(--a-08))
+  );
+  border-color: rgb(var(--light-rgb) / var(--a-06));
+  box-shadow: 0 0 24px -4px rgb(var(--accent-rgb) / var(--a-10));
+}
+
+.reader-back-btn:active {
+  transform: translateY(0);
+}
+
+.back-btn-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+@media (max-width: 639px) {
+  .back-btn-text {
+    display: none !important;
+  }
+}
+
+.top-bar-center {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+@media (max-width: 767px) {
+  .top-bar-center {
+    display: none !important;
+  }
+}
+
+.top-bar-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--accent-tint);
+  flex-shrink: 0;
+}
+
+.top-bar-ch-count {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.top-bar-sep {
+  height: 12px;
+  width: 1px;
+  background: rgb(var(--light-rgb) / var(--a-03));
+}
+
+.top-bar-ch-title {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.top-bar-stats {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.top-bar-read-time {
+  align-items: center;
+  gap: 0.375rem;
+}
+
+@media (max-width: 639px) {
+  .top-bar-read-time {
+    display: none !important;
+  }
+}
+
 .main-layout {
   position: relative;
   z-index: 10;
@@ -173,16 +280,6 @@ body {
   width: 100%;
 }
 
-/*
- * Always 60px wide. "collapsed" (toggled elsewhere via .sidebar.collapsed)
- * names whether the adjacent .tool-panel is open, not the icon rail's own
- * width — the rail itself never resizes. Two near-identical rules used to
- * set this width once per state (.collapsed and :not(.collapsed), both
- * hard-coded to 60px), which read as if a wider "expanded" rail was
- * intended and never finished. It wasn't: this is the only width the rail
- * has ever had, and .sidebar's own width transition (which nothing ever
- * triggered) has been removed along with the duplicate rule.
- */
 .sidebar {
   position: sticky;
   top: var(--reader-nav-height);
@@ -194,6 +291,13 @@ body {
   border-right: 1px solid rgb(var(--light-rgb) / var(--a-05));
   padding: 1rem 0;
   height: calc(100dvh - var(--reader-nav-height));
+}
+
+.sidebar-divider {
+  margin: 0.5rem 0;
+  height: 1px;
+  width: 32px;
+  background: rgb(var(--light-rgb) / var(--a-03));
 }
 
 .sidebar-tools {
@@ -230,6 +334,23 @@ body {
   opacity: 1;
 }
 
+.tool-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgb(var(--dark-rgb) / var(--a-10));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 45;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-base) ease;
+}
+
+.tool-panel-backdrop.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 .tool-panel {
   position: sticky;
   top: var(--reader-nav-height);
@@ -253,12 +374,70 @@ body {
   padding: 1rem 1.25rem;
 }
 
+.panel-eyebrow {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--text-muted);
+}
+
+.panel-heading {
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
 .tool-panel-content {
   flex: 1;
   overflow-y: auto;
   padding: 1.25rem;
   font-size: 0.875rem;
   color: rgb(var(--light-rgb) / var(--a-11));
+}
+
+@keyframes drawerSlideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0.8;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 1023px) {
+  .sidebar {
+    display: none !important;
+  }
+
+  .tool-panel {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100vw;
+    height: auto;
+    max-height: 82vh;
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+    border-left: none;
+    border-right: none;
+    border-top: 1px solid rgb(var(--light-rgb) / var(--a-04));
+    z-index: 50;
+    box-shadow: 0 -12px 48px rgb(var(--dark-rgb) / 0.7);
+    display: none;
+    flex-direction: column;
+    animation: drawerSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .tool-panel.visible {
+    display: flex;
+  }
+
+  .tool-panel-content {
+    padding-bottom: max(2rem, env(safe-area-inset-bottom));
+  }
 }
 
 .main-scroll {
@@ -366,6 +545,12 @@ body {
   padding: 0.25rem 0.75rem;
   font-size: 0.75rem;
   color: var(--reader-muted);
+}
+
+.article-divider {
+  margin: 2.5rem 0;
+  border: none;
+  border-top: 1px solid rgb(var(--light-rgb) / var(--a-04));
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -689,6 +874,14 @@ body {
   gap: 0.5rem;
 }
 
+.author-card-name {
+  color: var(--text-primary);
+}
+
+.author-card-handle {
+  color: var(--text-muted);
+}
+
 .author-bio {
   margin-top: 0.375rem;
   font-size: 0.875rem;
@@ -723,6 +916,23 @@ body {
     rgb(var(--accent-rgb) / var(--a-05)),
     rgb(var(--accent-2-rgb) / var(--a-04))
   );
+}
+
+.newsletter-eyebrow {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--accent-tint);
+}
+
+.newsletter-title {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  color: var(--text-primary);
+}
+
+.newsletter-desc {
+  color: var(--text-secondary);
 }
 
 .newsletter-form {
@@ -802,6 +1012,18 @@ body {
 
 .highlight-btn:hover {
   transform: scale(1.1);
+}
+
+.highlight-btn[data-color='yellow'] {
+  background: rgb(var(--rune-rgb) / var(--a-10));
+}
+
+.highlight-btn[data-color='violet'] {
+  background: rgb(var(--accent-2-rgb) / var(--a-10));
+}
+
+.highlight-btn[data-color='mint'] {
+  background: rgb(var(--success-rgb) / var(--a-10));
 }
 
 .toolbar-divider {
@@ -1305,6 +1527,80 @@ body {
   border: none;
   background: rgb(var(--light-rgb) / var(--a-03));
   backdrop-filter: blur(12px);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Mobile Reader Toolbar
+   ────────────────────────────────────────────────────────────────────────── */
+
+.mobile-reader-toolbar {
+  display: flex;
+  background: rgb(var(--bg-overlay-rgb) / var(--a-11));
+  border-top: 1px solid rgb(var(--light-rgb) / var(--a-06));
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  box-shadow: 0 -4px 24px rgb(var(--dark-rgb) / 0.5);
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
+@media (min-width: 1024px) {
+  .mobile-reader-toolbar {
+    display: none !important;
+  }
+}
+
+.mobile-tool-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.375rem 0.5rem;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--dur-base) ease;
+  border-radius: var(--radius-lg);
+}
+
+.mobile-tool-btn:hover {
+  color: var(--text-primary);
+}
+
+.mobile-tool-btn[data-active='true'] {
+  color: var(--accent-tint);
+}
+
+.mobile-tool-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  transition: all var(--dur-base) ease;
+}
+
+.mobile-tool-btn:active .mobile-tool-icon-wrap {
+  transform: scale(0.92);
+}
+
+.mobile-tool-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.mobile-tool-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+@media (max-width: 1023px) {
+  .back-to-top {
+    bottom: calc(4.75rem + env(safe-area-inset-bottom));
+  }
 }
 
 .figure-placeholder {

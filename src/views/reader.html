@@ -68,64 +68,30 @@
 
       <!-- Header / Top Bar -->
       <header class="top-bar glass-strong" id="top-bar">
-        <div
-          class="transition-all duration-200 hover:scale-105 hover:shadow-xl"
-          id="back-btn"
-          style="
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.45), rgba(168, 85, 247, 0.45));
-            box-shadow: 0 0 24px -6px rgba(139, 124, 246, 0.6);
-            cursor: pointer;
-          "
-        >
-          <i data-lucide="arrow-left" style="width: 16px; height: 16px; color: #fff"></i>
-        </div>
+        <button type="button" id="back-btn" class="reader-back-btn" aria-label="Return to Tale">
+          <i data-lucide="arrow-left" style="width: 16px; height: 16px"></i>
+          <span class="back-btn-text">Back</span>
+        </button>
 
         <!-- Desktop Navigation Meta -->
-        <div
-          class="md:flex"
-          id="top-bar-center"
-          style="min-width: 0; flex: 1; align-items: center; justify-content: center; gap: 0.5rem"
-        >
-          <i
-            data-lucide="book-open"
-            style="width: 14px; height: 14px; color: rgba(196, 181, 253, 0.7)"
-          ></i>
-          <span
-            style="
-              font-size: 10px;
-              text-transform: uppercase;
-              letter-spacing: 0.22em;
-              color: rgba(255, 255, 255, 0.4);
-            "
-          >
+        <div class="top-bar-center" id="top-bar-center">
+          <i data-lucide="book-open" class="top-bar-icon"></i>
+          <span class="top-bar-ch-count">
             Ch. <span id="top-bar-ch-num">1</span>/<span id="top-bar-ch-total">5</span>
           </span>
-          <span style="height: 12px; width: 1px; background: rgba(255, 255, 255, 0.15)"></span>
-          <span
-            class="rune-text truncate"
-            style="font-size: 13px; color: rgba(255, 255, 255, 0.85)"
-            id="top-bar-ch-title"
-          >
+          <span class="top-bar-sep"></span>
+          <span class="rune-text top-bar-ch-title truncate" id="top-bar-ch-title">
             Loading...
           </span>
         </div>
 
         <!-- Right Side Stats -->
-        <div
-          class="flex items-center gap-5"
-          style="flex-shrink: 0; font-size: 0.75rem; color: rgba(255, 255, 255, 0.6)"
-        >
-          <span id="top-bar-read-time" class="hidden" style="align-items: center; gap: 0.375rem">
+        <div class="top-bar-stats">
+          <span id="top-bar-read-time" class="hidden top-bar-read-time items-center gap-1.5">
             <i data-lucide="clock" style="width: 14px; height: 14px"></i>
             <span id="top-bar-min">0</span> min
           </span>
-          <span class="tabular-nums" id="top-bar-pct">0%</span>
+          <span class="tabular-nums font-medium" id="top-bar-pct">0%</span>
         </div>
       </header>
 
@@ -135,23 +101,14 @@
           <button class="glyph-btn" id="collapse-btn" aria-label="Collapse sidebar">
             <i data-lucide="chevron-left" style="width: 16px; height: 16px" id="collapse-icon"></i>
           </button>
-          <div
-            style="margin: 0.5rem 0; height: 1px; width: 32px; background: rgba(255, 255, 255, 0.1)"
-          ></div>
+          <div class="sidebar-divider"></div>
 
           <div class="sidebar-tools" id="sidebar-tools">
             <!-- Populated by JS -->
           </div>
 
           <div class="sidebar-bottom">
-            <div
-              style="
-                margin: 0.25rem 0;
-                height: 1px;
-                width: 32px;
-                background: rgba(255, 255, 255, 0.1);
-              "
-            ></div>
+            <div class="sidebar-divider"></div>
             <button
               class="glyph-btn"
               id="sidebar-bookmark"
@@ -171,27 +128,15 @@
           </div>
         </aside>
 
+        <!-- Tool Panel Backdrop (Mobile drawer overlay) -->
+        <div id="tool-panel-backdrop" class="tool-panel-backdrop" aria-hidden="true"></div>
+
         <!-- Tool Panel -->
         <div class="tool-panel glass-strong" id="tool-panel">
           <div class="tool-panel-header">
             <div>
-              <div
-                style="
-                  font-size: 10px;
-                  text-transform: uppercase;
-                  letter-spacing: 0.22em;
-                  color: rgba(255, 255, 255, 0.4);
-                "
-              >
-                Panel
-              </div>
-              <div
-                class="rune-text"
-                style="font-size: 15px; color: rgba(255, 255, 255, 0.9)"
-                id="panel-title"
-              >
-                Table of Contents
-              </div>
+              <div class="panel-eyebrow">Panel</div>
+              <div class="rune-text panel-heading" id="panel-title">Table of Contents</div>
             </div>
             <button
               class="glyph-btn"
@@ -242,13 +187,7 @@
                   Updated <span id="updated-at"></span>
                 </span>
               </div>
-              <hr
-                style="
-                  margin-top: 2.5rem;
-                  border: none;
-                  border-top: 1px solid rgba(255, 255, 255, 0.1);
-                "
-              />
+              <hr class="article-divider" />
             </header>
 
             <article class="reader-article materialize materialize-delay-3" id="article-body">
@@ -295,16 +234,8 @@
                 <div id="author-card-avatar"></div>
                 <div class="author-info">
                   <div class="author-name-row">
-                    <h3
-                      id="author-heading"
-                      class="rune-text text-lg"
-                      style="color: rgba(255, 255, 255, 0.95)"
-                    ></h3>
-                    <span
-                      class="text-xs"
-                      style="color: rgba(255, 255, 255, 0.4)"
-                      id="author-handle"
-                    ></span>
+                    <h3 id="author-heading" class="rune-text text-lg author-card-name"></h3>
+                    <span class="text-xs author-card-handle" id="author-handle"></span>
                   </div>
                   <p class="author-bio" id="author-card-bio"></p>
                 </div>
@@ -314,28 +245,9 @@
 
             <!-- Newsletter -->
             <section class="newsletter-card" id="newsletter">
-              <div
-                class="rune-text"
-                style="
-                  font-size: 11px;
-                  text-transform: uppercase;
-                  letter-spacing: 0.22em;
-                  color: #ddd6fe;
-                "
-              >
-                The Chronicler's Letter
-              </div>
-              <h3
-                class="mt-2"
-                style="
-                  font-family: var(--font-serif);
-                  font-size: 1.5rem;
-                  color: rgba(255, 255, 255, 0.95);
-                "
-              >
-                Receive a new fragment each Sunday.
-              </h3>
-              <p class="mt-2 text-sm" style="color: rgba(255, 255, 255, 0.55)">
+              <div class="rune-text newsletter-eyebrow">The Chronicler's Letter</div>
+              <h3 class="newsletter-title mt-2">Receive a new fragment each Sunday.</h3>
+              <p class="newsletter-desc mt-2 text-sm">
                 One essay. No tracking. Unsubscribe with a single click.
               </p>
               <form class="newsletter-form" id="newsletter-form">
@@ -367,24 +279,9 @@
 
       <!-- Selection Toolbar -->
       <div class="selection-toolbar glass-strong hidden" id="selection-toolbar">
-        <button
-          class="highlight-btn"
-          style="background: rgba(250, 204, 21, 0.6)"
-          data-color="yellow"
-          aria-label="Highlight yellow"
-        ></button>
-        <button
-          class="highlight-btn"
-          style="background: rgba(168, 85, 247, 0.6)"
-          data-color="violet"
-          aria-label="Highlight violet"
-        ></button>
-        <button
-          class="highlight-btn"
-          style="background: rgba(52, 211, 153, 0.6)"
-          data-color="mint"
-          aria-label="Highlight mint"
-        ></button>
+        <button class="highlight-btn" data-color="yellow" aria-label="Highlight yellow"></button>
+        <button class="highlight-btn" data-color="violet" aria-label="Highlight violet"></button>
+        <button class="highlight-btn" data-color="mint" aria-label="Highlight mint"></button>
         <div class="toolbar-divider"></div>
         <button
           class="glyph-btn"
@@ -401,49 +298,75 @@
     </div>
 
     <!-- Mobile Bottom Toolbar -->
-    <!-- id="mobile-toolbar" used by reader/mobile.js initToolbarAutoHide() -->
-    <div
+    <nav
       id="mobile-toolbar"
-      class="hidden fixed bottom-0 inset-x-0 z-40 flex lg:hidden items-center justify-around px-4 py-3 border-t border-white/[0.06] transition-transform duration-300"
-      style="background: rgba(3, 3, 5, 0.92); backdrop-filter: blur(24px)"
+      class="mobile-reader-toolbar fixed bottom-0 inset-x-0 z-40 items-center justify-around px-3 py-2 transition-transform duration-300"
+      aria-label="Reader tools"
     >
       <button
-        id="reader-settings-btn"
         type="button"
-        class="flex flex-col items-center gap-1 text-slate-500 hover:text-indigo-400 transition-colors"
-        aria-label="Open reader settings"
-      >
-        <i data-lucide="settings" style="width: 20px; height: 20px"></i>
-        <span class="text-[8px] font-bold uppercase tracking-widest">Settings</span>
-      </button>
-      <button
-        type="button"
-        class="flex flex-col items-center gap-1 text-slate-500 hover:text-indigo-400 transition-colors"
+        class="mobile-tool-btn group"
         data-tool="toc"
         aria-label="Table of contents"
       >
-        <i data-lucide="list" style="width: 20px; height: 20px"></i>
-        <span class="text-[8px] font-bold uppercase tracking-widest">Contents</span>
+        <span class="mobile-tool-icon-wrap">
+          <i data-lucide="list" class="mobile-tool-icon"></i>
+        </span>
+        <span class="mobile-tool-label">Contents</span>
       </button>
+
       <button
         type="button"
-        class="flex flex-col items-center gap-1 text-slate-500 hover:text-indigo-400 transition-colors"
-        data-tool="theme"
-        aria-label="Change theme"
+        class="mobile-tool-btn group"
+        data-tool="type"
+        aria-label="Typography settings"
       >
-        <i data-lucide="palette" style="width: 20px; height: 20px"></i>
-        <span class="text-[8px] font-bold uppercase tracking-widest">Theme</span>
+        <span class="mobile-tool-icon-wrap">
+          <i data-lucide="type" class="mobile-tool-icon"></i>
+        </span>
+        <span class="mobile-tool-label">Type</span>
       </button>
+
+      <button
+        type="button"
+        class="mobile-tool-btn group"
+        data-tool="theme"
+        aria-label="Color themes"
+      >
+        <span class="mobile-tool-icon-wrap">
+          <i data-lucide="palette" class="mobile-tool-icon"></i>
+        </span>
+        <span class="mobile-tool-label">Theme</span>
+      </button>
+
       <button
         id="eng-bookmark-mobile"
         type="button"
-        class="flex flex-col items-center gap-1 text-slate-500 hover:text-indigo-400 transition-colors"
-        aria-label="Bookmark"
+        class="mobile-tool-btn group"
+        data-active="false"
+        aria-label="Bookmark tale"
       >
-        <i data-lucide="bookmark" style="width: 20px; height: 20px"></i>
-        <span class="text-[8px] font-bold uppercase tracking-widest">Save</span>
+        <span class="mobile-tool-icon-wrap">
+          <i data-lucide="bookmark" class="mobile-tool-icon"></i>
+        </span>
+        <span class="mobile-tool-label">Save</span>
       </button>
-    </div>
+
+      <button
+        id="sidebar-focus-mobile"
+        type="button"
+        class="mobile-tool-btn group"
+        data-active="false"
+        aria-label="Focus mode"
+      >
+        <span class="mobile-tool-icon-wrap">
+          <i data-lucide="maximize-2" class="mobile-tool-icon"></i>
+        </span>
+        <span class="mobile-tool-label">Focus</span>
+      </button>
+
+      <button id="reader-settings-btn" type="button" class="hidden" aria-hidden="true"></button>
+    </nav>
 
     <!-- Mobile Settings Drawer -->
     <!-- id="reader-settings-panel" used by reader/mobile.js initMobileDrawer() -->
