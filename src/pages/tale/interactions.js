@@ -50,7 +50,7 @@ export async function setupResonance(taleId) {
         if (result.status === 'rate-limited') {
           const rateLimitKey = `resonance:${auth.currentUser?.uid}:${taleId}`;
           btns.forEach((b) => {
-            const label = b.querySelector('span');
+            const label = b.querySelector('.resonance-label') || b.querySelector('span');
             const currentText = label?.textContent || 'Align Souls';
             applyButtonCooldown(b, RESONANCE_COOLDOWN_MS, currentText, () =>
               getRemainingTime(rateLimitKey, RESONANCE_COOLDOWN_MS)
@@ -67,7 +67,7 @@ export async function setupResonance(taleId) {
         // Start cooldown after success
         const rateLimitKey = `resonance:${auth.currentUser?.uid}:${taleId}`;
         btns.forEach((b) => {
-          const label = b.querySelector('span');
+          const label = b.querySelector('.resonance-label') || b.querySelector('span');
           const currentText = label?.textContent || 'Align Souls';
           applyButtonCooldown(b, RESONANCE_COOLDOWN_MS, currentText, () =>
             getRemainingTime(rateLimitKey, RESONANCE_COOLDOWN_MS)
@@ -88,7 +88,7 @@ function _updateResonanceUI(btn, countEls, active, count) {
   }
 
   const icon = btn.querySelector('i');
-  const label = btn.querySelector('span');
+  const label = btn.querySelector('.resonance-label') || btn.querySelector('span');
 
   if (active) {
     btn.classList.add('border-orange-500/40', 'bg-orange-500/10', 'text-orange-300');
