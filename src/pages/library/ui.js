@@ -1,6 +1,6 @@
 // src/pages/library/ui.js
 // UI helpers for the library page:
-//   - Sidebar toggle with localStorage persistence
+//   - Sidebar toggle with localStorage persistence (desktop collapsed + mobile drawer)
 //   - Era chip builder
 //   - Active state management for sidebar and era buttons
 //   - Auth user display in sidebar
@@ -14,25 +14,68 @@ const log = createLogger('LibraryUI');
 log.debug('Module initialized');
 
 /* ─────────────────────────────────────────────
-   Sidebar Toggle
+   Sidebar Toggle (Desktop Collapse & Mobile Drawer)
    ───────────────────────────────────────────── */
 
 /**
- * Initialises the sidebar collapse/expand toggle.
+ * Initialises the sidebar collapse/expand toggle and mobile drawer controls.
  * Persists collapsed state to localStorage.
  * Applies initial state from libraryState.sidebarCollapsed.
  */
 export function setupSidebarToggle() {
   const sidebar = document.getElementById('sidebar');
+  if (!sidebar) return;
+
   const toggleBtn = document.getElementById('toggle-sidebar');
-  if (!sidebar || !toggleBtn) return;
-
-  _applySidebarState(sidebar, libraryState.sidebarCollapsed);
-
-  toggleBtn.addEventListener('click', () => {
-    libraryState.sidebarCollapsed = !libraryState.sidebarCollapsed;
-    localStorage.setItem('tt-lib-sidebar-collapsed', JSON.stringify(libraryState.sidebarCollapsed));
+  if (toggleBtn) {
     _applySidebarState(sidebar, libraryState.sidebarCollapsed);
+
+    toggleBtn.addEventListener('click', () => {
+      libraryState.sidebarCollapsed = !libraryState.sidebarCollapsed;
+      localStorage.setItem(
+        'tt-lib-sidebar-collapsed',
+        JSON.stringify(libraryState.sidebarCollapsed)
+      );
+      _applySidebarState(sidebar, libraryState.sidebarCollapsed);
+    });
+  }
+
+  // Mobile Drawer Controls
+  const mobileToggleBtn = document.getElementById('mobile-filter-toggle');
+  const mobileCloseBtn = document.getElementById('close-sidebar-mobile');
+  const backdrop = document.getElementById('sidebar-backdrop');
+
+  const openMobileDrawer = () => {
+    sidebar.classList.add('sidebar--mobile-open');
+    if (backdrop) backdrop.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+  };
+
+  const closeMobileDrawer = () => {
+    sidebar.classList.remove('sidebar--mobile-open');
+    if (backdrop) backdrop.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+  };
+
+  if (mobileToggleBtn) {
+    mobileToggleBtn.addEventListener('click', openMobileDrawer);
+  }
+
+  if (mobileCloseBtn) {
+    mobileCloseBtn.addEventListener('click', closeMobileDrawer);
+  }
+
+  if (backdrop) {
+    backdrop.addEventListener('click', closeMobileDrawer);
+  }
+
+  // Close drawer when a filter or action is clicked on mobile
+  sidebar.querySelectorAll('.sidebar-filter, #btn-submit-tale').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      if (window.innerWidth < 768) {
+        closeMobileDrawer();
+      }
+    });
   });
 }
 
@@ -136,22 +179,22 @@ export function showGridSkeleton(count = 8) {
   grid.innerHTML = Array.from(
     { length: count },
     () => `
-    <div class="rounded-[2.5rem] overflow-hidden border border-white/4 bg-white/1">
-      <div class="aspect-16/10 skeleton"></div>
-      <div class="p-6 space-y-4">
-        <div class="skeleton h-4 w-1/4 rounded-lg"></div>
-        <div class="skeleton h-6 w-3/4 rounded-lg"></div>
-        <div class="space-y-2">
-          <div class="skeleton h-3.5 w-full rounded-md"></div>
-          <div class="skeleton h-3.5 w-2/3 rounded-md"></div>
+    <div class="rounded-2xl overflow-hidden border border-white/5 bg-white/2 p-4 flex flex-col justify-between">
+      <div class="aspect-16/9 skeleton rounded-xl mb-3"></div>
+      <div class="space-y-2 flex-1">
+        <div class="skeleton h-3 w-1/4 rounded"></div>
+        <div class="skeleton h-5 w-3/4 rounded"></div>
+        <div class="space-y-1.5">
+          <div class="skeleton h-3 w-full rounded"></div>
+          <div class="skeleton h-3 w-2/3 rounded"></div>
         </div>
-        <div class="flex items-center justify-between pt-4 border-t border-white/5">
-          <div class="flex gap-3">
-            <div class="skeleton h-3 w-16 rounded-md"></div>
-            <div class="skeleton h-3 w-16 rounded-md"></div>
-          </div>
-          <div class="skeleton h-4 w-4 rounded-full"></div>
+      </div>
+      <div class="flex items-center justify-between pt-3 mt-4 border-t border-white/5">
+        <div class="flex gap-2">
+          <div class="skeleton h-3 w-12 rounded"></div>
+          <div class="skeleton h-3 w-12 rounded"></div>
         </div>
+        <div class="skeleton h-6 w-16 rounded-lg"></div>
       </div>
     </div>
   `
@@ -166,25 +209,24 @@ export function showGridEmpty(message = 'No tales found in the archives.') {
   if (!grid) return;
 
   grid.innerHTML = `
-    <div class="col-span-full flex flex-col items-center gap-6 py-32 text-center animate-fade-in">
-      <div class="w-20 h-20 rounded-4xl bg-indigo-500/5 border border-indigo-500/10 flex items-center justify-center shadow-2xl">
-        <i data-lucide="scroll-text" class="w-8 h-8 text-indigo-500/30"></i>
+    <div class="col-span-full flex flex-col items-center gap-6 py-28 text-center animate-fade-in">
+      <div class="w-16 h-16 rounded-3xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shadow-2xl">
+        <i data-lucide="scroll-text" class="w-7 h-7 text-indigo-400"></i>
       </div>
-      <div class="space-y-2">
+      <div class="space-y-1.5">
         <h3 class="text-xl font-cinzel font-bold text-white tracking-tight">The Weave is Silent</h3>
-        <p class="text-sm text-slate-500 max-w-xs mx-auto leading-relaxed font-medium italic">${escapeHtml(message)}</p>
+        <p class="text-xs text-zinc-400 max-w-xs mx-auto leading-relaxed font-medium italic">${escapeHtml(message)}</p>
       </div>
       <button
         id="empty-search-focus-btn"
-        class="group inline-flex items-center gap-3 px-8 py-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[11px] font-black uppercase tracking-[0.25em] hover:bg-indigo-500/20 hover:text-indigo-300 transition-all shadow-xl shadow-indigo-500/10"
+        class="group inline-flex items-center gap-2.5 px-6 py-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-bold uppercase tracking-wider hover:bg-indigo-500/20 hover:text-white transition-all shadow-lg shadow-indigo-500/10"
       >
-        <i data-lucide="search" class="w-4 h-4 group-hover:scale-110 transition-transform"></i>
+        <i data-lucide="search" class="w-3.5 h-3.5 group-hover:scale-110 transition-transform"></i>
         Consult the Oracle
       </button>
     </div>
   `;
 
-  // Wire button via event listener — no onclick attribute
   document.getElementById('empty-search-focus-btn')?.addEventListener('click', () => {
     document.getElementById('search-input')?.focus();
   });
@@ -198,17 +240,17 @@ export function showGridError() {
 
   grid.innerHTML = `
     <div class="col-span-full text-center py-24 animate-fade-in">
-      <div class="inline-flex flex-col items-center gap-4 px-10 py-10 rounded-[2.5rem] bg-rose-500/3 border border-rose-500/15">
-        <div class="w-14 h-14 rounded-2xl bg-rose-500/10 flex items-center justify-center mb-2">
-          <i data-lucide="alert-triangle" class="w-6 h-6 text-rose-500/60"></i>
+      <div class="inline-flex flex-col items-center gap-4 px-8 py-8 rounded-3xl bg-rose-500/5 border border-rose-500/15">
+        <div class="w-12 h-12 rounded-2xl bg-rose-500/10 flex items-center justify-center mb-1">
+          <i data-lucide="alert-triangle" class="w-6 h-6 text-rose-400"></i>
         </div>
         <div class="space-y-1">
-          <h3 class="text-lg font-bold text-rose-400">Neural Link Severed</h3>
-          <p class="text-xs text-rose-500/70 font-medium uppercase tracking-widest">Database connection failed</p>
+          <h3 class="text-base font-bold text-rose-400">Neural Link Severed</h3>
+          <p class="text-xs text-rose-400/70 font-medium uppercase tracking-wider">Database connection failed</p>
         </div>
         <button
           id="grid-error-reload-btn"
-          class="mt-4 px-6 py-2.5 rounded-xl bg-rose-500/10 text-rose-400 text-[10px] font-black uppercase tracking-widest border border-rose-500/20 hover:bg-rose-500/20 transition-all"
+          class="mt-3 px-5 py-2 rounded-xl bg-rose-500/10 text-rose-300 text-[10px] font-bold uppercase tracking-wider border border-rose-500/20 hover:bg-rose-500/20 transition-all"
         >
           Re-establish Connection
         </button>
@@ -216,7 +258,6 @@ export function showGridError() {
     </div>
   `;
 
-  // Wire button via event listener — no onclick attribute
   document.getElementById('grid-error-reload-btn')?.addEventListener('click', () => {
     window.location.reload();
   });

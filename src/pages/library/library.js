@@ -9,7 +9,7 @@ import '@css/pages/library.css';
 import { initAuth } from '@fb/index.js';
 import { initNav } from '@ui/components/nav/nav.js';
 import { initIcons } from '@ui/components/icons.js';
-import { initPageReveal, readyReveal, createLogger } from '@/utils';
+import { initPageReveal, readyReveal, createLogger, navigateTo } from '@/utils';
 
 const log = createLogger('Library');
 
@@ -39,6 +39,13 @@ document.addEventListener('DOMContentLoaded', () => {
   showGridSkeleton();
   initIcons();
   setupPagination();
+
+  const submitBtn = document.getElementById('btn-submit-tale');
+  if (submitBtn) {
+    submitBtn.addEventListener('click', () => {
+      navigateTo('contribution.html');
+    });
+  }
 });
 
 initAuth(async (user) => {

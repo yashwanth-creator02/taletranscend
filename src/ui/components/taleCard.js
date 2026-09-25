@@ -252,17 +252,15 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
 
   return `
     <article
-      class="tale-card group relative overflow-hidden"
+      class="tale-card group relative overflow-hidden flex flex-col justify-between"
       data-id="${escapeHtml(id)}"
       aria-label="${safeTitle}"
     >
-      <div class="absolute -inset-px bg-gradient-to-b from-indigo-500/0 via-indigo-500/0 to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
-
-      <div class="p-6">
-        <!-- Header: Badges & Actions -->
-        <div class="mb-6 flex items-start justify-between gap-3 relative z-10">
-          <div class="flex flex-wrap items-center gap-2">
-            ${_badge(safeEra, 'bg-indigo-500/5 text-indigo-300')}
+      <div class="p-4 flex flex-col flex-1">
+        <!-- Top: Badges & Menu Trigger -->
+        <div class="mb-3 flex items-center justify-between gap-2 relative z-20">
+          <div class="flex items-center gap-1.5 flex-wrap min-w-0">
+            ${_badge(safeEra, 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20')}
             ${isFinished ? _badge('Finished', statusBadgeClasses) : ''}
           </div>
 
@@ -271,28 +269,29 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
               type="button"
               data-action="options"
               data-menu-id="${escapeHtml(menuId)}"
-              class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-zinc-500 transition-all hover:bg-indigo-500/10 hover:border-indigo-500/30 hover:text-white"
+              class="w-7 h-7 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 text-zinc-400 transition-all hover:bg-white/10 hover:text-white"
+              aria-label="Archive Operations"
             >
-              <i data-lucide="more-horizontal" class="h-4 w-4"></i>
+              <i data-lucide="more-horizontal" class="h-3.5 w-3.5"></i>
             </button>
 
             <div
               id="${escapeHtml(menuId)}"
-              class="options-menu hidden absolute right-0 z-[60] mt-2 w-60 overflow-hidden rounded-2xl p-2"
+              class="options-menu hidden absolute right-0 z-50 mt-1 w-52 overflow-hidden rounded-xl p-1.5 shadow-2xl"
               role="menu"
             >
-              <div class="px-3 py-2 border-b border-white/5 mb-1">
-                <span class="text-[8px] font-black uppercase tracking-widest text-zinc-600">Archive Operations</span>
+              <div class="px-2.5 py-1.5 border-b border-white/5 mb-1">
+                <span class="text-[8px] font-black uppercase tracking-widest text-zinc-500">Archive Operations</span>
               </div>
 
               <button type="button" data-action="copy-link" data-id="${escapeHtml(id)}"
-                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400 transition-colors hover:bg-white/5 hover:text-white">
+                class="menu-btn flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[9px] font-bold uppercase tracking-wider text-zinc-300 transition-colors hover:bg-white/10 hover:text-white">
                 <i data-lucide="link" class="h-3.5 w-3.5"></i>
                 <span>Copy Access Link</span>
               </button>
 
               <button type="button"
-                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400 transition-colors hover:bg-white/5 hover:text-white">
+                class="menu-btn flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[9px] font-bold uppercase tracking-wider text-zinc-300 transition-colors hover:bg-white/10 hover:text-white">
                 <i data-lucide="download" class="h-3.5 w-3.5"></i>
                 <span>Neural Download</span>
               </button>
@@ -300,7 +299,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
               <div class="h-px bg-white/5 my-1"></div>
 
               <button type="button"
-                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] transition-colors ${isFinished ? 'opacity-40 text-zinc-600' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
+                class="menu-btn flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[9px] font-bold uppercase tracking-wider transition-colors ${isFinished ? 'opacity-40 text-zinc-600' : 'text-zinc-300 hover:bg-white/10 hover:text-white'}"
                 data-action="${isFinished ? '' : 'mark-finished'}" data-id="${escapeHtml(id)}">
                 <i data-lucide="check-circle" class="h-3.5 w-3.5"></i>
                 <span>${isFinished ? 'Already Sealed' : 'Seal Chronicle'}</span>
@@ -309,7 +308,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
               <div class="h-px bg-white/5 my-1"></div>
 
               <button type="button"
-                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] transition-colors ${isBookmarked ? 'text-rose-400 hover:bg-rose-500/10' : 'text-emerald-400 hover:bg-emerald-500/10'}"
+                class="menu-btn flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[9px] font-bold uppercase tracking-wider transition-colors ${isBookmarked ? 'text-rose-400 hover:bg-rose-500/10' : 'text-emerald-400 hover:bg-emerald-500/10'}"
                 data-action="${bookmarkedAction}" data-id="${escapeHtml(id)}">
                 <i data-lucide="${bookmarkedIcon}" class="h-3.5 w-3.5"></i>
                 <span>${bookmarkedLabel}</span>
@@ -319,19 +318,22 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
         </div>
 
         <!-- Cover Image with Progress Overlay -->
-        <div class="card-image-wrap mb-6 group-hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-all duration-500">
-          <div class="aspect-[16/10] w-full relative">
+        <div class="card-image-wrap mb-3.5 relative overflow-hidden rounded-xl">
+          <div class="aspect-16/9 w-full relative bg-zinc-900">
             <img
               src="${escapeHtml(cover)}"
               alt="${safeTitle}"
-              class="h-full w-full object-cover opacity-60 transition duration-700 group-hover:scale-110 group-hover:opacity-100"
+              class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
               loading="lazy"
+              onerror="this.onerror=null;this.src='${escapeHtml(_defaultCover())}'"
             />
-            <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent opacity-60"></div>
-            <div class="absolute inset-x-0 bottom-0 p-4 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-[9px] font-black uppercase tracking-widest text-white/50">Neural Progress</span>
-                <span class="text-[10px] font-black text-indigo-400">${_progressLabel(progress)}</span>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+
+            <!-- Bottom of Image: Progress Bar & Label -->
+            <div class="absolute inset-x-0 bottom-0 p-2.5 z-10">
+              <div class="flex items-center justify-between mb-1 text-[8px] font-black uppercase tracking-wider">
+                <span class="text-zinc-400">Progress</span>
+                <span class="text-indigo-300">${_progressLabel(progress)}</span>
               </div>
               <div class="progress-bar">
                 <div class="progress-fill" style="width: ${progress}%"></div>
@@ -340,37 +342,37 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
           </div>
         </div>
 
-        <!-- Content -->
-        <div class="relative z-10 px-1">
-          <div class="flex items-center gap-3 mb-3">
-            <span class="h-px w-8 bg-indigo-500/30"></span>
-            <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Fragment ${id.slice(-4)}</span>
+        <!-- Middle: Title & Description -->
+        <div class="flex-1 flex flex-col justify-start">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="h-px w-4 bg-indigo-500/40"></span>
+            <span class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Fragment #${id.slice(-4)}</span>
           </div>
 
-          <h3 class="mb-3 line-clamp-1 text-2xl font-black tracking-tight text-white group-hover:text-indigo-300 transition-colors duration-300">
+          <h3 class="mb-1.5 line-clamp-1 text-base font-bold font-cinzel text-white group-hover:text-indigo-300 transition-colors">
             ${safeTitle}
           </h3>
 
-          <p class="mb-6 line-clamp-2 text-sm leading-relaxed text-zinc-400 group-hover:text-zinc-300 transition-colors duration-300">
+          <p class="line-clamp-2 text-xs leading-relaxed text-zinc-400 group-hover:text-zinc-300 transition-colors mb-3">
             ${safeDescription}
           </p>
+        </div>
 
-          <!-- Footer Metadata -->
-          <div class="flex items-center justify-between pt-5 border-t border-white/5">
-            <div class="flex items-center gap-5">
-              ${_metaItem('layers', `${chapterCount} Frags`)}
-              ${timeBadge}
-            </div>
-            <button
-              type="button"
-              data-action="resume"
-              data-id="${escapeHtml(id)}"
-              class="card-button"
-            >
-              <span>${isFinished ? 'Archive' : 'Engage'}</span>
-              <i data-lucide="chevron-right" class="h-3.5 w-3.5"></i>
-            </button>
+        <!-- Footer: Metadata & Action -->
+        <div class="flex items-center justify-between pt-3 mt-auto border-t border-white/5">
+          <div class="flex items-center gap-3">
+            ${_metaItem('layers', `${chapterCount} Frags`)}
+            ${timeBadge}
           </div>
+          <button
+            type="button"
+            data-action="resume"
+            data-id="${escapeHtml(id)}"
+            class="card-button"
+          >
+            <span>${isFinished ? 'Archive' : 'Engage'}</span>
+            <i data-lucide="chevron-right" class="h-3 w-3"></i>
+          </button>
         </div>
       </div>
     </article>
