@@ -1,7 +1,19 @@
-/* src/assets/css/pages/tale.css */
+/* src/assets/css/pages/tale.css
+ * Chronicle Codex Page Styles
+ * 100% compliant with tokens.css
+ */
 
 :root {
-  --action-bar-height: 84px;
+  --action-bar-height: 72px;
+}
+
+/* ── Atmospheric Orb ────────────────────────────────────────── */
+
+.ambient-orb {
+  position: absolute;
+  border-radius: var(--radius-full);
+  filter: blur(80px);
+  pointer-events: none;
 }
 
 /* ── Hero Section ────────────────────────────────────────────── */
@@ -9,103 +21,74 @@
 .hero-gradient {
   position: relative;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
   background:
-    linear-gradient(
-      180deg,
-      rgb(var(--bg-base-rgb) / var(--a-01)) 0%,
-      rgb(var(--bg-base-rgb) / var(--a-09)) 50%,
-      rgb(var(--bg-base-rgb) / var(--a-11)) 100%
-    ),
-    var(--bg-url) center/cover no-repeat;
-  transition: background 1s ease-in-out;
-  margin-top: -1px; /* Overlap with nav to prevent line */
-}
-
-.hero-gradient::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    circle at 50% 0%,
-    rgb(var(--accent-rgb) / var(--a-06)),
-    transparent 70%
-  );
-  pointer-events: none;
+    radial-gradient(circle at 25% 20%, rgb(var(--accent-rgb) / var(--a-05)), transparent 65%),
+    radial-gradient(circle at 85% 60%, rgb(var(--accent-2-rgb) / var(--a-04)), transparent 60%),
+    rgb(var(--bg-overlay-rgb) / var(--a-08));
+  border-radius: var(--radius-3xl);
+  border: 1px solid rgb(var(--light-rgb) / var(--a-03));
 }
 
 .hero-title {
   text-wrap: balance;
-  letter-spacing: -0.05em;
-  text-transform: uppercase;
+  letter-spacing: -0.02em;
 }
 
 /* ── Floating Action Bar (Viewport Bottom) ───────────────────── */
 
 .floating-bar {
   position: fixed;
-  bottom: 24px;
+  bottom: var(--space-6);
   left: 50%;
   transform: translateX(-50%);
-  width: calc(100% - 32px);
-  max-width: 1200px;
+  width: calc(100% - var(--space-8));
+  max-width: 860px;
   z-index: 100;
-  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  animation: barSlideUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) backwards 0.5s;
+  transition:
+    transform var(--dur-normal) var(--ease-bounce),
+    opacity var(--dur-normal) ease,
+    visibility var(--dur-normal) ease;
 }
 
-@keyframes barSlideUp {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
+.floating-bar.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(32px);
 }
 
 .floating-bar__inner {
-  background: rgb(var(--bg-overlay-rgb) / var(--a-11));
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
+  background: rgb(var(--bg-overlay-rgb) / var(--a-12));
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
   border: 1px solid rgb(var(--light-rgb) / var(--a-04));
-  border-radius: 24px;
-  padding: 12px 20px;
+  border-radius: var(--radius-2xl);
+  padding: var(--space-2) var(--space-4);
   box-shadow:
-    0 20px 50px rgb(var(--dark-rgb) / 0.6),
+    0 16px 40px rgb(var(--dark-rgb) / 0.6),
     0 0 0 1px rgb(var(--light-rgb) / var(--a-01)) inset;
 }
 
 /* ── Tabs ────────────────────────────────────────────────────── */
 
 .tab-btn {
-  transition: all var(--transition-base);
+  transition: all var(--dur-fast) ease;
   color: var(--text-muted);
-  position: relative;
+  border: 1px solid transparent;
+  cursor: pointer;
   white-space: nowrap;
 }
 
 .tab-btn:hover {
   color: white;
+  background: rgb(var(--light-rgb) / var(--a-02));
 }
 
 .tab-btn.active {
   color: white;
-}
-
-.tab-btn.active::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
-  height: 2px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
-  box-shadow: 0 0 20px rgb(var(--accent-rgb) / var(--a-09));
+  background: rgb(var(--accent-rgb) / var(--a-06));
+  border-color: rgb(var(--accent-rgb) / var(--a-09));
+  box-shadow: 0 0 16px rgb(var(--accent-rgb) / var(--a-05));
 }
 
 /* ── Content Panes ───────────────────────────────────────────── */
@@ -116,24 +99,20 @@
   overflow-y: auto;
 }
 
-.detail-pane {
-  max-height: 18rem;
-  overflow-y: auto;
-}
-
 /* ── Chapter Item ───────────────────────────────────────────── */
 
 .chapter-item {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all var(--dur-base) ease;
   background: rgb(var(--light-rgb) / var(--a-01));
   border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
 }
 
 .chapter-item:hover {
-  transform: translateX(6px);
+  transform: translateY(-2px);
   border-color: rgb(var(--accent-rgb) / var(--a-07));
   background: rgb(var(--accent-rgb) / var(--a-02));
-  box-shadow: 0 10px 30px rgb(var(--dark-rgb) / 0.2);
+  box-shadow: 0 8px 24px rgb(var(--dark-rgb) / 0.3);
 }
 
 .chapter-item.completed {
@@ -147,47 +126,51 @@
 /* ── Comments ───────────────────────────────────────────────── */
 
 .comment-input {
-  resize: none;
-  background: rgb(var(--dark-rgb) / 0.3);
+  background: rgb(var(--dark-rgb) / 0.4);
   border: 1px solid rgb(var(--light-rgb) / var(--a-03));
   color: white;
-  transition: all var(--transition-base);
+  transition: all var(--dur-base) ease;
+  resize: none;
 }
 
 .comment-input:focus {
   outline: none;
   border-color: rgb(var(--accent-rgb) / var(--a-09));
-  background: rgb(var(--dark-rgb) / 0.5);
-  box-shadow: 0 0 0 4px rgb(var(--accent-rgb) / var(--a-03));
+  background: rgb(var(--dark-rgb) / 0.6);
+  box-shadow: 0 0 0 3px rgb(var(--accent-rgb) / var(--a-03));
 }
 
 .comment-card {
-  animation: fadeIn 0.5s ease-out forwards;
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ── Sticky Sidebar ─────────────────────────────────────────── */
 
 .sidebar-sticky {
   position: sticky;
-  top: calc(var(--tale-header-height) + 40px);
+  top: var(--space-6);
 }
 
 /* ── Shared components ──────────────────────────────────────── */
 
-.meta-pill {
-  background: rgb(var(--light-rgb) / var(--a-02));
-  border: 1px solid rgb(var(--light-rgb) / var(--a-04));
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-}
-
 .action-btn {
-  transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all var(--dur-fast) ease;
 }
 
 .action-btn:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.1);
+  transform: translateY(-1px);
+  filter: brightness(1.08);
 }
 
 .action-btn:active {
@@ -217,14 +200,20 @@
   transform: translateX(100%);
 }
 
-/* .sacred-divider is defined once in components.css — used here at its
-   shared value rather than the page's own, slightly fainter (a-03 vs a-05)
-   one-off copy. */
-
 /* ── Mobile Overrides ───────────────────────────────────────── */
 
-@media (max-width: 1023px) {
-  .hero-title {
-    font-size: clamp(2.5rem, 8vw, 4rem);
+@media (max-width: 767px) {
+  .hero-gradient {
+    border-radius: var(--radius-2xl);
+  }
+
+  .floating-bar {
+    bottom: var(--space-4);
+    width: calc(100% - var(--space-4));
+  }
+
+  .floating-bar__inner {
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-xl);
   }
 }

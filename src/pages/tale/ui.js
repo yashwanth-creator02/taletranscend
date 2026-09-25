@@ -1,6 +1,5 @@
 // src/pages/tale/ui.js
-// Presentation layer for the tale summary page.
-// Keeps the v2 rendering logic, but maps output to the older DOM IDs used by v1.
+// Presentation layer for the tale summary page (Chronicle Codex).
 
 import { initIcons } from '@ui/components/icons.js';
 import { setText, escapeHtml, createLogger } from '@/utils';
@@ -9,6 +8,8 @@ import { getChapterProgress } from '@services/reader/localProgress.service.js';
 import { MS_PER_MINUTE } from '@config/app.config.js';
 
 const log = createLogger('TaleUI');
+
+const FALLBACK_COVER = 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=800';
 
 /* ─────────────────────────────────────────────
    Small DOM helpers
@@ -24,11 +25,15 @@ function setTextIfExists(id, value) {
 }
 
 function setCoverImage(url, title) {
-  const coverEls = document.querySelectorAll('#display-cover');
+  const coverEls = document.querySelectorAll('img[id^="display-cover"]');
   if (coverEls.length) {
     coverEls.forEach((img) => {
       img.src = url;
       img.alt = title || 'Tale cover';
+      img.onerror = () => {
+        img.onerror = null;
+        img.src = FALLBACK_COVER;
+      };
     });
   }
 }
@@ -44,26 +49,26 @@ function getChapterState(progress) {
    ───────────────────────────────────────────── */
 
 /**
- * Shows skeleton loaders for the existing Archive page layout.
+ * Shows skeleton loaders for the Archive page layout.
  */
 export function showArchiveSkeletons() {
   const list = getEl('chapter-list');
   if (list) {
     list.innerHTML = Array.from(
-      { length: 5 },
+      { length: 4 },
       () => `
-        <div class="h-24 rounded-[2rem] skeleton mb-4"></div>
+        <div class="h-16 rounded-2xl skeleton mb-3"></div>
       `
     ).join('');
   }
 
   const title = getEl('display-title');
-  if (title) title.innerHTML = '<div class="skeleton h-12 w-3/4 rounded-2xl mb-4"></div>';
+  if (title) title.innerHTML = '<div class="skeleton h-10 sm:h-12 w-3/4 rounded-2xl mb-2"></div>';
 
   const desc = getEl('display-description');
   if (desc) {
     desc.innerHTML = `
-      <div class="space-y-3">
+      <div class="space-y-2">
         <div class="skeleton h-4 w-full rounded-md"></div>
         <div class="skeleton h-4 w-5/6 rounded-md"></div>
       </div>
@@ -77,8 +82,6 @@ export function showArchiveSkeletons() {
 
 /**
  * Populates the tale metadata into the UI.
- *
- * Uses v2 data logic, but writes into the older v1 DOM IDs.
  *
  * @param {string} userId
  * @param {import('@state/schemas/tale.schema.js').Tale} tale
@@ -121,12 +124,10 @@ export async function renderTale(userId, tale, taleId) {
   setTextIfExists('tale-language', languageName);
   setTextIfExists('sidebar-creation', eraName);
 
-  const resumeText = getEl('resume-text');
-  if (resumeText) {
-    const lastChapter = null;
-    resumeText.innerText =
-      lastChapter != null ? `Resume Fragment ${lastChapter + 1}` : 'Resume Reading';
-  }
+  const resumeTexts = document.querySelectorAll('[id^="resume-text"]');
+  resumeTexts.forEach((el) => {
+    el.innerText = 'Resume Reading';
+  });
 
   const authorAvatar = getEl('author-avatar-hero');
   if (authorAvatar) {
@@ -135,8 +136,7 @@ export async function renderTale(userId, tale, taleId) {
     authorAvatar.alt = authorName;
   }
 
-  const coverUrl =
-    tale.coverUrl || 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=800';
+  const coverUrl = tale.coverUrl || FALLBACK_COVER;
   setCoverImage(coverUrl, title);
 
   const heroSection = getEl('hero-section');
@@ -150,14 +150,15 @@ export async function renderTale(userId, tale, taleId) {
       tagList.innerHTML = tale.tags
         .map(
           (t) => `
-            <span class="px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 text-[9px] font-black uppercase tracking-widest text-slate-400">
+            <span class="px-2.5 py-1 rounded-lg bg-white/4 border border-white/6 text-[10px] font-bold uppercase tracking-wider text-slate-300">
               ${escapeHtml(t)}
             </span>
           `
         )
         .join('');
     } else {
-      tagList.innerHTML = '';
+      tagList.innerHTML =
+        '<span class="text-xs text-slate-500 italic">No lore tags designated.</span>';
     }
   }
 
@@ -182,7 +183,7 @@ export function renderChapters(userId, chapters, taleId) {
 
   if (!chapters.length) {
     log.info('No chapters found to render');
-    list.innerHTML = `<div class="glass p-12 rounded-[2rem] text-center text-slate-600 text-[10px] font-black uppercase tracking-widest">No chronicles detected in this archive.</div>`;
+    list.innerHTML = `<div class="glass p-8 sm:p-12 rounded-2xl text-center text-slate-500 text-[11px] font-bold uppercase tracking-widest">No chronicles detected in this archive.</div>`;
     return;
   }
 
@@ -192,32 +193,32 @@ export function renderChapters(userId, chapters, taleId) {
       const state = getChapterState(progress);
 
       let icon = 'circle';
-      let iconCls = 'text-slate-700';
+      let iconCls = 'text-slate-600';
 
       if (state === 'in_progress') {
         icon = 'clock';
-        iconCls = 'text-indigo-400';
+        iconCls = 'text-amber-400';
       }
 
       if (state === 'completed') {
         icon = 'check-circle-2';
-        iconCls = 'text-emerald-500';
+        iconCls = 'text-emerald-400';
       }
 
       return `
-        <div data-chapter-index="${idx}" class="chapter-item ${state} glass-card p-6 md:p-8 rounded-[2rem] flex justify-between items-center group cursor-pointer">
-          <div class="flex items-center gap-6">
-            <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-xs font-black text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-all">
+        <div data-chapter-index="${idx}" class="chapter-item ${state} glass-card p-4 sm:p-5 rounded-2xl flex justify-between items-center group cursor-pointer hover:border-indigo-500/30 transition-all">
+          <div class="flex items-center gap-3.5 sm:gap-4 min-w-0">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/4 border border-white/6 flex items-center justify-center text-xs font-bold text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-all shrink-0">
               ${String(idx + 1).padStart(2, '0')}
             </div>
-            <div>
-              <span class="text-[9px] font-black text-indigo-500/60 uppercase tracking-[0.3em] block mb-1">Fragment</span>
-              <h4 class="text-base md:text-lg font-bold text-white uppercase tracking-tight">${escapeHtml(ch.title || 'Untitled')}</h4>
+            <div class="min-w-0">
+              <span class="text-[9px] font-black text-indigo-400/70 uppercase tracking-[0.25em] block mb-0.5">Fragment</span>
+              <h4 class="text-sm sm:text-base font-bold text-white uppercase tracking-tight truncate">${escapeHtml(ch.title || 'Untitled')}</h4>
             </div>
           </div>
-          <div class="flex items-center gap-4">
-            <span class="hidden md:block text-[9px] font-black uppercase tracking-widest text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity">Access Fragment</span>
-            <i data-lucide="${icon}" class="w-5 h-5 ${iconCls}"></i>
+          <div class="flex items-center gap-3 shrink-0">
+            <span class="hidden sm:inline-block text-[9px] font-bold uppercase tracking-wider text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity">Read</span>
+            <i data-lucide="${icon}" class="w-4 h-4 ${iconCls}"></i>
           </div>
         </div>
       `;
