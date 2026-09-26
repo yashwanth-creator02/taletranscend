@@ -46,28 +46,31 @@ function _progressLabel(percent) {
 export function renderCardsSkeleton(container, count = 6) {
   if (!container) return;
   container.innerHTML = `
-    <div class="col-span-full grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+    <div class="col-span-full grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
       ${Array.from({ length: count })
         .map(
           () => `
         <div class="tale-card animate-pulse">
-          <div class="p-6">
-            <div class="mb-6 flex items-start justify-between gap-3">
-              <div class="space-y-2">
-                <div class="h-4 w-20 rounded-full bg-white/6"></div>
-                <div class="h-3 w-28 rounded-full bg-white/5"></div>
-              </div>
-              <div class="h-9 w-9 rounded-full bg-white/5"></div>
+          <div class="p-3.5 sm:p-4 flex flex-col">
+            <div class="mb-3 flex items-center justify-between gap-2">
+              <div class="h-5 w-20 rounded-full bg-white/6"></div>
+              <div class="h-7 w-7 rounded-lg bg-white/5"></div>
             </div>
-            <div class="mb-5 h-56 rounded-[1.7rem] bg-white/6"></div>
-            <div class="space-y-3">
-              <div class="h-5 w-3/4 rounded-full bg-white/6"></div>
-              <div class="h-4 w-full rounded-full bg-white/5"></div>
-              <div class="h-4 w-5/6 rounded-full bg-white/5"></div>
-              <div class="mt-4 flex gap-4">
-                <div class="h-4 w-24 rounded-full bg-white/5"></div>
-                <div class="h-4 w-20 rounded-full bg-white/5"></div>
+            <div class="card-image-wrap mb-3.5 bg-white/6"></div>
+            <div class="space-y-2 flex-1">
+              <div class="h-3 w-1/3 rounded bg-white/5"></div>
+              <div class="h-5 w-3/4 rounded bg-white/6"></div>
+              <div class="space-y-1.5 mt-2">
+                <div class="h-3 w-full rounded bg-white/5"></div>
+                <div class="h-3 w-5/6 rounded bg-white/5"></div>
               </div>
+            </div>
+            <div class="mt-4 flex items-center justify-between pt-3 border-t border-white/5">
+              <div class="flex gap-2">
+                <div class="h-3 w-14 rounded bg-white/5"></div>
+                <div class="h-3 w-12 rounded bg-white/5"></div>
+              </div>
+              <div class="h-6 w-16 rounded-lg bg-white/5"></div>
             </div>
           </div>
         </div>
@@ -233,7 +236,8 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
 
   const safeTitle = escapeHtml(title);
   const safeDescription = escapeHtml(description);
-  const safeEra = escapeHtml(era);
+  const trimmedEra = typeof era === 'string' ? era.trim() : '';
+  const safeEra = trimmedEra ? escapeHtml(trimmedEra) : '';
   const isBookmarked = !!bookmarkMap[id];
   const isFinished = tale?.status === 'finished';
   const totalMs = readTimeMap[id] || 0;
@@ -252,15 +256,15 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
 
   return `
     <article
-      class="tale-card group relative overflow-hidden flex flex-col justify-between"
+      class="tale-card group relative flex flex-col justify-between"
       data-id="${escapeHtml(id)}"
       aria-label="${safeTitle}"
     >
-      <div class="p-4 flex flex-col flex-1">
-        <!-- Top: Badges & Menu Trigger -->
-        <div class="mb-3 flex items-center justify-between gap-2 relative z-20">
+      <div class="p-3.5 sm:p-4 flex flex-col flex-1">
+        <!-- Top Bar: Era Badges & Options Menu -->
+        <div class="mb-3 flex items-center justify-between gap-2 relative z-20 min-h-7">
           <div class="flex items-center gap-1.5 flex-wrap min-w-0">
-            ${_badge(safeEra, 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20')}
+            ${safeEra ? _badge(safeEra, 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20') : ''}
             ${isFinished ? _badge('Finished', statusBadgeClasses) : ''}
           </div>
 
@@ -290,7 +294,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
                 <span>Copy Access Link</span>
               </button>
 
-              <button type="button"
+              <button type="button" data-action="save-offline" data-id="${escapeHtml(id)}"
                 class="menu-btn flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[9px] font-bold uppercase tracking-wider text-zinc-300 transition-colors hover:bg-white/10 hover:text-white">
                 <i data-lucide="download" class="h-3.5 w-3.5"></i>
                 <span>Neural Download</span>
@@ -317,32 +321,30 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
           </div>
         </div>
 
-        <!-- Cover Image with Progress Overlay -->
-        <div class="card-image-wrap mb-3.5 relative overflow-hidden rounded-xl">
-          <div class="aspect-16/9 w-full relative bg-zinc-900">
-            <img
-              src="${escapeHtml(cover)}"
-              alt="${safeTitle}"
-              class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-              loading="lazy"
-              onerror="this.onerror=null;this.src='${escapeHtml(_defaultCover())}'"
-            />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+        <!-- Dedicated Portrait Book Cover (3:4 ratio) -->
+        <div class="card-image-wrap mb-3.5">
+          <img
+            src="${escapeHtml(cover)}"
+            alt="${safeTitle}"
+            class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+            loading="lazy"
+            onerror="this.onerror=null;this.src='${escapeHtml(_defaultCover())}'"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80 pointer-events-none"></div>
 
-            <!-- Bottom of Image: Progress Bar & Label -->
-            <div class="absolute inset-x-0 bottom-0 p-2.5 z-10">
-              <div class="flex items-center justify-between mb-1 text-[8px] font-black uppercase tracking-wider">
-                <span class="text-zinc-400">Progress</span>
-                <span class="text-indigo-300">${_progressLabel(progress)}</span>
-              </div>
-              <div class="progress-bar">
-                <div class="progress-fill" style="width: ${progress}%"></div>
-              </div>
+          <!-- Bottom of Cover: Progress Bar & Percentage -->
+          <div class="absolute inset-x-0 bottom-0 p-2.5 z-10">
+            <div class="flex items-center justify-between mb-1 text-[8px] font-black uppercase tracking-wider">
+              <span class="text-zinc-400">Progress</span>
+              <span class="text-indigo-300">${_progressLabel(progress)}</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: ${progress}%"></div>
             </div>
           </div>
         </div>
 
-        <!-- Middle: Title & Description -->
+        <!-- Middle: Fragment Tag, Title, and Description -->
         <div class="flex-1 flex flex-col justify-start">
           <div class="flex items-center gap-2 mb-1">
             <span class="h-px w-4 bg-indigo-500/40"></span>

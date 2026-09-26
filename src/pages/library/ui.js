@@ -179,17 +179,21 @@ export function showGridSkeleton(count = 8) {
   grid.innerHTML = Array.from(
     { length: count },
     () => `
-    <div class="rounded-2xl overflow-hidden border border-white/5 bg-white/2 p-4 flex flex-col justify-between">
-      <div class="aspect-16/9 skeleton rounded-xl mb-3"></div>
+    <div class="tale-card animate-pulse rounded-2xl overflow-hidden border border-white/5 bg-white/2 p-3.5 sm:p-4 flex flex-col justify-between">
+      <div class="mb-3 flex items-center justify-between gap-2">
+        <div class="skeleton h-5 w-20 rounded-full"></div>
+        <div class="skeleton h-7 w-7 rounded-lg"></div>
+      </div>
+      <div class="card-image-wrap skeleton rounded-xl mb-3.5"></div>
       <div class="space-y-2 flex-1">
-        <div class="skeleton h-3 w-1/4 rounded"></div>
+        <div class="skeleton h-3 w-1/3 rounded"></div>
         <div class="skeleton h-5 w-3/4 rounded"></div>
-        <div class="space-y-1.5">
+        <div class="space-y-1.5 mt-2">
           <div class="skeleton h-3 w-full rounded"></div>
           <div class="skeleton h-3 w-2/3 rounded"></div>
         </div>
       </div>
-      <div class="flex items-center justify-between pt-3 mt-4 border-t border-white/5">
+      <div class="flex items-center justify-between pt-3 mt-auto border-t border-white/5">
         <div class="flex gap-2">
           <div class="skeleton h-3 w-12 rounded"></div>
           <div class="skeleton h-3 w-12 rounded"></div>
