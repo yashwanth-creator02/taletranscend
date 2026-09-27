@@ -118,12 +118,13 @@ export function setupSearch() {
 
   input.addEventListener('input', onSearch);
 
-  document.addEventListener('keydown', (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-      e.preventDefault();
-      input.focus();
+  input.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'a') {
       input.select();
     }
+  });
+
+  document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && document.activeElement === input) {
       input.value = '';
       libraryState.searchQuery = '';

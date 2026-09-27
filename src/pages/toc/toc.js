@@ -112,6 +112,18 @@ function _bindFilterEvents() {
         _applyFiltersAndRender();
       }, 200)
     );
+
+    searchInput.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'a') {
+        searchInput.select();
+      }
+      if (e.key === 'Escape') {
+        searchInput.value = '';
+        searchQuery = '';
+        _applyFiltersAndRender();
+        searchInput.blur();
+      }
+    });
   }
 }
 

@@ -58,6 +58,9 @@ export function openModal() {
   // Switch to basic tab on open
   switchTab('basic');
   document.body.style.overflow = 'hidden';
+  window.requestAnimationFrame(() => {
+    document.getElementById('input-name')?.focus();
+  });
 }
 
 export function closeModal() {
@@ -66,6 +69,9 @@ export function closeModal() {
   modal.classList.add('hidden');
   modal.classList.remove('flex');
   document.body.style.overflow = '';
+  const trigger =
+    document.getElementById('btn-edit-desktop') || document.getElementById('btn-edit-mobile');
+  trigger?.focus?.();
 }
 
 function _bindBackdropClose() {

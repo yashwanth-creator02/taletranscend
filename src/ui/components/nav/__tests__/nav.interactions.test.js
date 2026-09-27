@@ -40,6 +40,8 @@ describe('Nav Interactions', () => {
     vi.clearAllMocks();
     vi.useFakeTimers();
     navState.listenersAttached = false;
+    navState.commandPaletteOpen = false;
+    navState.commandFocusedIndex = -1;
     document.body.innerHTML = `
       <header id="app-nav">
         <button id="avatar-btn" aria-expanded="false"></button>
@@ -47,6 +49,7 @@ describe('Nav Interactions', () => {
         <div id="nav-user"></div>
         <div id="mobile-dock-container"></div>
         <button id="nav-command-button"></button>
+        <input id="nav-command-input" />
         <button id="btn-upgrade-account"></button>
         <button id="btn-sign-out"></button>
       </header>
@@ -57,6 +60,8 @@ describe('Nav Interactions', () => {
       dropdown: document.getElementById('user-dropdown'),
       nav: document.getElementById('app-nav'),
       navUser: document.getElementById('nav-user'),
+      commandInput: document.getElementById('nav-command-input'),
+      commandButton: document.getElementById('nav-command-button'),
     });
   });
 
@@ -126,6 +131,87 @@ describe('Nav Interactions', () => {
     it('renders guest UI when user is null', () => {
       updateNavUser(null);
       expect(document.body.innerHTML).toContain('Sign In');
+    });
+  });
+
+  describe('Keyboard Shortcuts & Focus Navigation', () => {
+    beforeEach(() => {
+      attachGlobalListeners();
+    });
+
+    afterEach(() => {
+      detachGlobalListeners();
+    });
+
+    it('selects all text on Ctrl+A inside input', () => {
+      const input = document.createElement('input');
+      input.value = 'Tale of the Stars';
+      document.body.appendChild(input);
+      input.focus();
+
+      const selectSpy = vi.spyOn(input, 'select');
+      const event = new KeyboardEvent('keydown', {
+        key: 'a',
+        ctrlKey: true,
+        bubbles: true,
+      });
+      input.dispatchEvent(event);
+
+      expect(selectSpy).toHaveBeenCalled();
+      input.remove();
+    });
+
+    it('toggles command palette on Ctrl+K', () => {
+      const event = new KeyboardEvent('keydown', {
+        key: 'k',
+        ctrlKey: true,
+        bubbles: true,
+      });
+      document.dispatchEvent(event);
+
+      expect(openCommandPalette).toHaveBeenCalled();
+    });
+
+    it('clears command input on first Escape if value exists', () => {
+      navState.commandPaletteOpen = true;
+      const input = document.getElementById('nav-command-input');
+      input.value = 'search query';
+      input.focus();
+
+      const event = new KeyboardEvent('keydown', {
+        key: 'Escape',
+        bubbles: true,
+      });
+      document.dispatchEvent(event);
+
+      expect(input.value).toBe('');
+    });
+
+    it('navigates dropdown menu items with ArrowDown and ArrowUp', () => {
+      openDropdown();
+      const dropdown = document.getElementById('user-dropdown');
+      dropdown.innerHTML = `
+        <a role="menuitem" id="item-1" href="#1">Item 1</a>
+        <a role="menuitem" id="item-2" href="#2">Item 2</a>
+      `;
+
+      const item1 = document.getElementById('item-1');
+      const item2 = document.getElementById('item-2');
+      item1.focus();
+
+      const downEvent = new KeyboardEvent('keydown', {
+        key: 'ArrowDown',
+        bubbles: true,
+      });
+      document.dispatchEvent(downEvent);
+      expect(document.activeElement).toBe(item2);
+
+      const upEvent = new KeyboardEvent('keydown', {
+        key: 'ArrowUp',
+        bubbles: true,
+      });
+      document.dispatchEvent(upEvent);
+      expect(document.activeElement).toBe(item1);
     });
   });
 });

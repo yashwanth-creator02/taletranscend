@@ -97,6 +97,9 @@ function _bindFilter() {
   input.addEventListener('input', onFilter);
 
   input.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'a') {
+      input.select();
+    }
     if (e.key === 'Escape') {
       input.value = '';
       shelfState.filterQuery = '';

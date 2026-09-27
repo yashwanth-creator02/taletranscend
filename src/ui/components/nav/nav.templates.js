@@ -26,6 +26,7 @@ export function buildPrimaryLink({ href, icon, label }, current) {
     <a
       href="${targetHref}"
       class="nav-link${isActive ? ' nav-link--active' : ''}"
+      aria-label="${label}"
       ${isActive ? 'aria-current="page"' : ''}
     >
       <i data-lucide="${icon}" class="nav-link__icon" aria-hidden="true"></i>
@@ -49,6 +50,8 @@ export function buildDropdownLink({ href, icon, label }, current) {
       href="${targetHref}"
       class="dropdown-link${isActive ? ' dropdown-link--active' : ''}"
       role="menuitem"
+      aria-label="${label}"
+      tabindex="-1"
       ${isActive ? 'aria-current="page"' : ''}
     >
       <i data-lucide="${icon}" class="dropdown-link__icon" aria-hidden="true"></i>
@@ -130,6 +133,8 @@ export function buildAuthenticatedUser(user, current, userLinks) {
               id="nav-upgrade-btn"
               type="button"
               role="menuitem"
+              aria-label="Secure Account with Google"
+              tabindex="-1"
             >
               <i data-lucide="shield-check" class="dropdown-link__icon" aria-hidden="true"></i>
               <span>Secure Account</span>
@@ -146,6 +151,8 @@ export function buildAuthenticatedUser(user, current, userLinks) {
           id="signout-btn"
           type="button"
           role="menuitem"
+          aria-label="Sign out of account"
+          tabindex="-1"
         >
           <i data-lucide="log-out" class="dropdown-link__icon" aria-hidden="true"></i>
           <span>Sign Out</span>
@@ -200,6 +207,7 @@ export function buildDockItem({ href, icon, label, active, primary = false }) {
     <a
       href="${targetHref}"
       class="mobile-dock__item${primary ? ' mobile-dock__item--primary' : ''}${active ? ' mobile-dock__item--active' : ''}"
+      aria-label="${label}"
       ${active ? 'aria-current="page"' : ''}
     >
       <div class="mobile-dock__icon-wrap">
@@ -309,7 +317,7 @@ export function buildCommandPalette() {
             type="button"
             class="command-close"
             id="nav-command-close"
-            aria-label="Close command palette"
+            aria-label="Close command palette (Escape)"
           >
             <i data-lucide="x" class="command-close__icon" aria-hidden="true"></i>
           </button>
@@ -321,6 +329,9 @@ export function buildCommandPalette() {
             id="nav-command-input"
             class="command-input"
             type="text"
+            role="combobox"
+            aria-expanded="true"
+            aria-haspopup="listbox"
             autocomplete="off"
             spellcheck="false"
             placeholder="Search pages and actions…"
@@ -348,7 +359,10 @@ export function buildCommandPalette() {
             <kbd>Esc</kbd> Close
           </span>
           <span class="command-footer__hint">
-            <kbd>⌘K</kbd> Toggle
+            <kbd>⌘K / Ctrl+K</kbd> Toggle
+          </span>
+          <span class="command-footer__hint">
+            <kbd>Ctrl+A</kbd> Select All
           </span>
         </div>
       </section>
@@ -377,27 +391,42 @@ export function buildNav() {
       <header id="app-nav" class="app-nav">
         <div class="nav-inner">
           <div class="flex items-center gap-10">
-            <a href="${resolveHref('index.html')}" class="nav-logo">
+            <a href="${resolveHref('index.html')}" class="nav-logo" aria-label="TaleTranscend home">
               <div class="nav-logo__mark">
-                <i data-lucide="sparkles" class="nav-logo__icon"></i>
+                <i data-lucide="sparkles" class="nav-logo__icon" aria-hidden="true"></i>
               </div>
               <span class="nav-logo__wordmark">TaleTranscend</span>
             </a>
 
-            <nav class="nav-primary desktop-shell">
+            <nav class="nav-primary desktop-shell" aria-label="Primary navigation">
               ${primaryLinks}
             </nav>
           </div>
 
           <div class="nav-actions">
-            <button type="button" class="command-trigger desktop-shell" id="nav-command-button">
-              <i data-lucide="search" class="w-4 h-4"></i>
+            <button
+              type="button"
+              class="command-trigger desktop-shell"
+              id="nav-command-button"
+              aria-label="Search pages and actions (Ctrl+K)"
+              aria-haspopup="dialog"
+              aria-expanded="false"
+              aria-keyshortcuts="Control+K Meta+K"
+            >
+              <i data-lucide="search" class="w-4 h-4" aria-hidden="true"></i>
               <span class="text-xs font-bold uppercase tracking-widest">Search</span>
-              <kbd class="command-trigger__hint">⌘K</kbd>
+              <kbd class="command-trigger__hint" aria-hidden="true">⌘K</kbd>
             </button>
 
-            <button type="button" class="command-trigger mobile-shell p-3 rounded-xl bg-white/5 border border-white/10" id="nav-command-button-mobile">
-              <i data-lucide="search" class="w-4 h-4"></i>
+            <button
+              type="button"
+              class="command-trigger mobile-shell p-3 rounded-xl bg-white/5 border border-white/10"
+              id="nav-command-button-mobile"
+              aria-label="Search pages and actions"
+              aria-haspopup="dialog"
+              aria-expanded="false"
+            >
+              <i data-lucide="search" class="w-4 h-4" aria-hidden="true"></i>
             </button>
 
             <div id="nav-user" class="flex items-center">

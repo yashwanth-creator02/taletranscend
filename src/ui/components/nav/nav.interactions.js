@@ -170,11 +170,25 @@ function handleDocumentClick(event) {
 
 /**
  * Global keydown handler.
- * Handles: Cmd/Ctrl+K (toggle palette), Escape, Arrow keys, Enter.
+ * Handles:
+ *   - Cmd/Ctrl+K (toggle palette)
+ *   - Cmd/Ctrl+A (select all in focused inputs/textareas)
+ *   - Slash "/" (quick search jump when not typing)
+ *   - Tab (focus trapping in active dialogs)
+ *   - Escape (clear search query / close modals & dropdown)
+ *   - Arrow keys, Home, End, Enter (palette & dropdown navigation)
  *
  * @param {KeyboardEvent} event
  */
 function handleDocumentKeydown(event) {
+  // ── Cmd/Ctrl + A — select all in focused input/textarea ──
+  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'a') {
+    const target = event.target;
+    if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) {
+      target.select();
+    }
+  }
+
   // ── Cmd/Ctrl + K — toggle command palette ──────
   if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
     event.preventDefault();
@@ -182,16 +196,54 @@ function handleDocumentKeydown(event) {
     return;
   }
 
+  // ── Focus Trap for Command Palette ────────────
+  if (navState.commandPaletteOpen && event.key === 'Tab') {
+    const { commandPalette } = getNavElements();
+    if (commandPalette) {
+      const focusables = Array.from(
+        commandPalette.querySelectorAll(
+          'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((el) => el instanceof HTMLElement && el.offsetParent !== null);
+
+      if (focusables.length > 0) {
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (event.shiftKey) {
+          if (document.activeElement === first) {
+            last.focus();
+            event.preventDefault();
+          }
+        } else {
+          if (document.activeElement === last) {
+            first.focus();
+            event.preventDefault();
+          }
+        }
+      }
+    }
+    return;
+  }
+
   // ── Escape ─────────────────────────────────────
   if (event.key === 'Escape') {
     if (navState.commandPaletteOpen) {
+      const { commandInput } = getNavElements();
+      // If search box has text, first Escape clears it
+      if (commandInput && document.activeElement === commandInput && commandInput.value) {
+        event.preventDefault();
+        commandInput.value = '';
+        renderCommandList('');
+        return;
+      }
       closeCommandPalette(true);
       return;
     }
 
     const { avatarButton } = getNavElements();
     if (avatarButton?.getAttribute('aria-expanded') === 'true') {
-      closeDropdown();
+      closeDropdown(true);
+      return;
     }
     return;
   }
@@ -213,6 +265,70 @@ function handleDocumentKeydown(event) {
       executeActiveFocusedItem();
       return;
     }
+  }
+
+  // ── Arrow navigation inside user dropdown ──────
+  const { avatarButton, dropdown } = getNavElements();
+  const isDropdownOpen = avatarButton?.getAttribute('aria-expanded') === 'true';
+
+  if (isDropdownOpen && dropdown && !dropdown.hidden) {
+    const menuItems = Array.from(
+      dropdown.querySelectorAll('a[role="menuitem"], button[role="menuitem"]')
+    ).filter((el) => el instanceof HTMLElement && !el.hasAttribute('disabled'));
+
+    if (menuItems.length > 0) {
+      const currentIndex = menuItems.indexOf(document.activeElement);
+
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        const nextIndex = currentIndex < menuItems.length - 1 ? currentIndex + 1 : 0;
+        menuItems[nextIndex].focus();
+        return;
+      }
+      if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        const prevIndex = currentIndex > 0 ? currentIndex - 1 : menuItems.length - 1;
+        menuItems[prevIndex].focus();
+        return;
+      }
+      if (event.key === 'Home') {
+        event.preventDefault();
+        menuItems[0].focus();
+        return;
+      }
+      if (event.key === 'End') {
+        event.preventDefault();
+        menuItems[menuItems.length - 1].focus();
+        return;
+      }
+    }
+  }
+
+  // ── Quick search shortcut: "/" ─────────────────
+  if (
+    event.key === '/' &&
+    !event.ctrlKey &&
+    !event.metaKey &&
+    !event.altKey &&
+    !(
+      event.target instanceof HTMLInputElement ||
+      event.target instanceof HTMLTextAreaElement ||
+      (event.target instanceof HTMLElement && event.target.isContentEditable)
+    )
+  ) {
+    event.preventDefault();
+    const pageSearch =
+      document.getElementById('library-search-input') ||
+      document.getElementById('shelf-filter-input') ||
+      document.getElementById('toc-search');
+
+    if (pageSearch instanceof HTMLInputElement) {
+      pageSearch.focus();
+      pageSearch.select();
+    } else {
+      openCommandPalette(true);
+    }
+    return;
   }
 }
 

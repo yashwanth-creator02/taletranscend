@@ -118,32 +118,80 @@ function _handleCopyLink(taleId) {
   const input = document.getElementById('copy-link-input');
   if (!modal || !input) return;
 
+  const previousActiveElement = document.activeElement;
   input.value = url;
   modal.classList.remove('hidden');
   modal.classList.add('flex');
 
+  window.requestAnimationFrame(() => {
+    input.focus();
+    input.select();
+  });
+
+  const confirmBtn = document.getElementById('copy-link-confirm');
+  const closeBtn = document.getElementById('copy-link-close');
+
   const close = () => {
     modal.classList.add('hidden');
     modal.classList.remove('flex');
+    modal.removeEventListener('keydown', onModalKeydown);
+    confirmBtn?.removeEventListener('click', onConfirm);
+    closeBtn?.removeEventListener('click', close);
+    if (previousActiveElement instanceof HTMLElement) {
+      previousActiveElement.focus();
+    }
   };
-
-  // Wire modal buttons via event listeners — no onclick attributes
-  const confirmBtn = document.getElementById('copy-link-confirm');
-  const closeBtn = document.getElementById('copy-link-close');
 
   const onConfirm = async () => {
     await navigator.clipboard.writeText(url);
     close();
     showToast('Link copied.', 'success');
-    confirmBtn?.removeEventListener('click', onConfirm);
-    closeBtn?.removeEventListener('click', close);
   };
 
+  const onModalKeydown = (e) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      close();
+      return;
+    }
+
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      onConfirm();
+      return;
+    }
+
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'a') {
+      input.select();
+    }
+
+    if (e.key === 'Tab') {
+      const focusables = Array.from(
+        modal.querySelectorAll('button:not([disabled]), input:not([disabled])')
+      ).filter((el) => el instanceof HTMLElement && el.offsetParent !== null);
+
+      if (focusables.length > 0) {
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
+    }
+  };
+
+  modal.addEventListener('keydown', onModalKeydown);
   confirmBtn?.addEventListener('click', onConfirm);
-  closeBtn?.addEventListener('click', () => {
-    close();
-    confirmBtn?.removeEventListener('click', onConfirm);
-  });
+  closeBtn?.addEventListener('click', close);
 }
 
 function _confirmMarkFinished(onConfirm) {
@@ -152,14 +200,23 @@ function _confirmMarkFinished(onConfirm) {
   const accept = document.getElementById('confirm-accept');
   if (!modal || !cancel || !accept) return;
 
+  const previousActiveElement = document.activeElement;
   modal.classList.remove('hidden');
   modal.classList.add('flex');
+
+  window.requestAnimationFrame(() => {
+    accept.focus();
+  });
 
   const cleanup = () => {
     modal.classList.add('hidden');
     modal.classList.remove('flex');
     cancel.removeEventListener('click', onCancel);
     accept.removeEventListener('click', onAccept);
+    modal.removeEventListener('keydown', onModalKeydown);
+    if (previousActiveElement instanceof HTMLElement) {
+      previousActiveElement.focus();
+    }
   };
 
   const onCancel = () => cleanup();
@@ -172,6 +229,41 @@ function _confirmMarkFinished(onConfirm) {
     }
   };
 
+  const onModalKeydown = (e) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      onCancel();
+      return;
+    }
+
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      onAccept();
+      return;
+    }
+
+    if (e.key === 'Tab') {
+      const focusables = [accept, cancel].filter((el) => el.offsetParent !== null);
+      if (focusables.length > 0) {
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
+    }
+  };
+
+  modal.addEventListener('keydown', onModalKeydown);
   cancel.addEventListener('click', onCancel);
   accept.addEventListener('click', onAccept);
 }

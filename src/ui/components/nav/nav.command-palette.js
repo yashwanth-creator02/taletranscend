@@ -57,7 +57,7 @@ function getCommandItems() {
  * @param {boolean} isFocused - Whether this item has keyboard focus
  * @returns {string}
  */
-function buildCommandItem(item, current, isFocused = false) {
+function buildCommandItem(item, current, isFocused = false, index = 0) {
   const isActive = item.href ? item.href === current : false;
   const hrefAttr = item.href ? `data-href="${item.href}"` : '';
   const actionAttr = item.action ? `data-action="${item.action}"` : '';
@@ -69,9 +69,10 @@ function buildCommandItem(item, current, isFocused = false) {
   return `
     <button
       type="button"
+      id="command-item-${index}"
       class="${classes}"
       role="option"
-      aria-selected="${isActive ? 'true' : 'false'}"
+      aria-selected="${isFocused ? 'true' : 'false'}"
       ${hrefAttr}
       ${actionAttr}
       tabindex="-1"
@@ -97,7 +98,7 @@ function buildCommandItem(item, current, isFocused = false) {
  * @param {string} [query='']
  */
 export function renderCommandList(query = '') {
-  const { commandList } = getNavElements();
+  const { commandList, commandInput } = getNavElements();
   if (!commandList) return;
 
   const current = getCurrentPage();
@@ -118,13 +119,22 @@ export function renderCommandList(query = '') {
         No results for "<strong>${escapeHtml(query)}</strong>"
       </div>
     `;
+    commandInput?.removeAttribute('aria-activedescendant');
     renderIcons(commandList);
     return;
   }
 
   commandList.innerHTML = filtered
-    .map((item, i) => buildCommandItem(item, current, i === focusedIndex))
+    .map((item, i) => buildCommandItem(item, current, i === focusedIndex, i))
     .join('');
+
+  if (commandInput) {
+    if (focusedIndex >= 0 && filtered[focusedIndex]) {
+      commandInput.setAttribute('aria-activedescendant', `command-item-${focusedIndex}`);
+    } else {
+      commandInput.removeAttribute('aria-activedescendant');
+    }
+  }
 
   renderIcons(commandList);
 }
@@ -140,7 +150,7 @@ export function renderCommandList(query = '') {
  * @param {boolean} [focusInput=true]
  */
 export function openCommandPalette(focusInput = true) {
-  const { commandPalette, commandInput } = getNavElements();
+  const { commandPalette, commandInput, commandButton, commandButtonMobile } = getNavElements();
   if (!commandPalette) return;
 
   navState.commandPaletteOpen = true;
@@ -149,13 +159,18 @@ export function openCommandPalette(focusInput = true) {
 
   commandPalette.hidden = false;
   commandPalette.setAttribute('aria-hidden', 'false');
+  commandButton?.setAttribute('aria-expanded', 'true');
+  commandButtonMobile?.setAttribute('aria-expanded', 'true');
   document.body.style.overflow = 'hidden'; // Prevent background scroll
 
   if (commandInput) commandInput.value = '';
   renderCommandList('');
 
   if (focusInput && commandInput) {
-    window.requestAnimationFrame(() => commandInput.focus());
+    window.requestAnimationFrame(() => {
+      commandInput.focus();
+      commandInput.select();
+    });
   }
 }
 
@@ -165,7 +180,7 @@ export function openCommandPalette(focusInput = true) {
  * @param {boolean} [returnFocus=true]
  */
 export function closeCommandPalette(returnFocus = true) {
-  const { commandPalette, commandButton, commandButtonMobile } = getNavElements();
+  const { commandPalette, commandInput, commandButton, commandButtonMobile } = getNavElements();
   if (!commandPalette) return;
 
   navState.commandPaletteOpen = false;
@@ -173,6 +188,9 @@ export function closeCommandPalette(returnFocus = true) {
 
   commandPalette.hidden = true;
   commandPalette.setAttribute('aria-hidden', 'true');
+  commandButton?.setAttribute('aria-expanded', 'false');
+  commandButtonMobile?.setAttribute('aria-expanded', 'false');
+  commandInput?.removeAttribute('aria-activedescendant');
   document.body.style.overflow = '';
 
   if (returnFocus) {

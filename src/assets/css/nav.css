@@ -337,10 +337,13 @@
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.dropdown-link:hover {
+.dropdown-link:hover,
+.dropdown-link:focus-visible,
+.dropdown-link.is-focused {
   background: rgb(var(--light-rgb) / var(--a-03));
   color: white;
   transform: translateX(4px);
+  outline: none;
 }
 
 .dropdown-link--active {
@@ -353,7 +356,8 @@
   margin-top: 4px;
 }
 
-.dropdown-link--danger:hover {
+.dropdown-link--danger:hover,
+.dropdown-link--danger:focus-visible {
   background: rgb(var(--danger-rgb) / var(--a-04));
   color: var(--danger);
 }
@@ -696,10 +700,18 @@
 }
 
 .command-item:hover,
+.command-item.is-focused,
+.command-item:focus-visible,
 .command-item--active {
   background: rgb(var(--light-rgb) / var(--a-02));
   color: white;
   border-color: rgb(var(--light-rgb) / var(--a-03));
+}
+
+.command-item.is-focused,
+.command-item:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
 }
 
 .command-item--active {
@@ -719,6 +731,8 @@
 }
 
 .command-item:hover .command-item__icon-wrap,
+.command-item.is-focused .command-item__icon-wrap,
+.command-item:focus-visible .command-item__icon-wrap,
 .command-item--active .command-item__icon-wrap {
   background: rgb(var(--accent-rgb) / var(--a-06));
   color: var(--accent);
