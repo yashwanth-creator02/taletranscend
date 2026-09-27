@@ -463,6 +463,12 @@ select:focus-visible {
   }
 }
 
+/* ── Cross-Document Transitions ────────────────────────────────────────── */
+
+@view-transition {
+  navigation: auto;
+}
+
 /* ── Entrance animation ────────────────────────────────────────────────── */
 
 .page-fade-in {

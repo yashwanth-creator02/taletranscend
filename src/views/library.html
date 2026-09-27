@@ -32,9 +32,7 @@
       content="Browse the full archive — folklore, mythic fiction, sacred texts and oral tradition from every corner of the world."
     />
 
-    <!-- One font request, identical on every page. Nine different Google
-         Fonts URLs across nine pages meant every navigation re-fetched a
-         slightly different family set and re-rendered the whole document. -->
+    <!-- One font request, identical on every page. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -42,12 +40,116 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cinzel:wght@500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap"
     />
 
+    <style>
+      /* Critical Anti-FOUC Gate */
+      html {
+        background-color: #030305;
+        color: #e2e8f0;
+      }
+      body {
+        background-color: #030305;
+        color: #e2e8f0;
+        font-family:
+          'Inter',
+          system-ui,
+          -apple-system,
+          sans-serif;
+      }
+      body:not(.booted) > *:not(#app-boot-curtain) {
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
+      #app-boot-curtain {
+        position: fixed;
+        inset: 0;
+        background-color: #030305;
+        z-index: 999999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          opacity 0.3s cubic-bezier(0, 0, 0.2, 1),
+          visibility 0.3s cubic-bezier(0, 0, 0.2, 1);
+        pointer-events: none;
+      }
+      body.booted #app-boot-curtain {
+        opacity: 0;
+        visibility: hidden;
+      }
+      .boot-crest {
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        background: rgba(99, 102, 241, 0.08);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        box-shadow: 0 0 25px rgba(99, 102, 241, 0.2);
+        animation: boot-pulse 1.4s ease-in-out infinite;
+      }
+      @keyframes boot-pulse {
+        0%,
+        100% {
+          transform: scale(0.96);
+          opacity: 0.6;
+        }
+        50% {
+          transform: scale(1.04);
+          opacity: 1;
+        }
+      }
+    </style>
+    <script>
+      setTimeout(function () {
+        if (document.body && !document.body.classList.contains('booted')) {
+          document.body.classList.add('booted');
+        }
+      }, 3500);
+    </script>
+    <noscript>
+      <style>
+        body:not(.booted) > *:not(#app-boot-curtain) {
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+        #app-boot-curtain {
+          display: none !important;
+        }
+      </style>
+    </noscript>
+
+    <link rel="stylesheet" href="../assets/css/base.css" />
+    <link rel="stylesheet" href="../assets/css/nav.css" />
+    <link rel="stylesheet" href="../assets/css/components.css" />
+    <link rel="stylesheet" href="../assets/css/pages/library.css" />
+
     <script type="module" src="../pages/library/library.js"></script>
   </head>
 
   <body
     class="text-slate-300 antialiased selection:bg-indigo-500/30 page-fade-in flex flex-col h-screen overflow-hidden"
   >
+    <!-- App Boot Curtain (Prevents FOUC on slower networks) -->
+    <div id="app-boot-curtain" aria-hidden="true">
+      <div class="boot-crest">
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#818cf8"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"
+          />
+        </svg>
+      </div>
+    </div>
+
     <a class="skip-link" href="#library-main">Skip to content</a>
     <!-- Global Atmosphere -->
     <div class="atmosphere-base"></div>
@@ -55,31 +157,45 @@
 
     <!-- Main Layout -->
     <div class="library-layout flex-1 overflow-hidden">
+      <!-- Mobile Drawer Backdrop -->
+      <div id="sidebar-backdrop" class="sidebar-backdrop hidden md:hidden" aria-hidden="true"></div>
+
       <!-- ══════════════════════════════════════════
-         SIDEBAR (Sticky)
+         SIDEBAR (Sticky on desktop, off-canvas drawer on mobile)
          ══════════════════════════════════════════ -->
-      <aside id="sidebar" class="h-full overflow-hidden">
+      <aside id="sidebar" class="h-full overflow-hidden" aria-label="Library Navigation">
         <div class="sidebar-inner scroll-container">
-          <!-- Toggle button -->
-          <div class="flex items-center gap-3 px-2 pb-4 border-b border-white/5 mb-4">
+          <!-- Header & Toggle button -->
+          <div class="flex items-center justify-between px-2 pb-4 border-b border-white/5 mb-4">
+            <div class="flex items-center gap-3">
+              <button
+                id="toggle-sidebar"
+                type="button"
+                class="shrink-0 w-10 h-10 flex items-center justify-center rounded-xl hover:bg-white/5 text-slate-500 hover:text-white transition-colors"
+                aria-label="Toggle sidebar"
+              >
+                <i data-lucide="panel-left-close" class="w-4 h-4"></i>
+              </button>
+              <span
+                class="sidebar-label text-[10px] font-black uppercase tracking-widest text-white transition-all"
+                >Navigation</span
+              >
+            </div>
+            <!-- Close button for mobile drawer -->
             <button
-              id="toggle-sidebar"
+              id="close-sidebar-mobile"
               type="button"
-              class="shrink-0 w-10 h-10 flex items-center justify-center rounded-xl hover:bg-white/5 text-slate-500 hover:text-white transition-colors"
-              aria-label="Toggle sidebar"
+              class="md:hidden w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+              aria-label="Close navigation"
             >
-              <i data-lucide="panel-left-close" class="w-4 h-4"></i>
+              <i data-lucide="x" class="w-4 h-4"></i>
             </button>
-            <span
-              class="sidebar-label text-[10px] font-black uppercase tracking-widest text-white transition-all"
-              >Navigation</span
-            >
           </div>
 
           <!-- Browse By -->
-          <div class="mb-8">
+          <div class="mb-6">
             <p
-              class="sidebar-section-heading px-3 mb-3 text-[9px] font-black uppercase tracking-[0.25em] text-slate-700"
+              class="sidebar-section-heading px-3 mb-2 text-[9px] font-black uppercase tracking-[0.25em] text-slate-500"
             >
               Browse
             </p>
@@ -108,9 +224,9 @@
           </div>
 
           <!-- Personal -->
-          <div class="mb-8">
+          <div class="mb-6">
             <p
-              class="sidebar-section-heading px-3 mb-3 text-[9px] font-black uppercase tracking-[0.25em] text-slate-700"
+              class="sidebar-section-heading px-3 mb-2 text-[9px] font-black uppercase tracking-[0.25em] text-slate-500"
             >
               Personal
             </p>
@@ -142,7 +258,7 @@
             <button
               id="btn-submit-tale"
               type="button"
-              class="w-full h-12 flex items-center justify-center gap-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-indigo-600/20 active:scale-95"
+              class="w-full h-11 flex items-center justify-center gap-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-indigo-600/20 active:scale-95"
             >
               <i data-lucide="plus" class="w-4 h-4 shrink-0"></i>
               <span class="sidebar-label">Submit Tale</span>
@@ -150,19 +266,19 @@
           </div>
 
           <!-- Auth user -->
-          <div class="pt-4 border-t border-white/5">
+          <div class="pt-3 border-t border-white/5">
             <div class="flex items-center gap-3 px-2 py-2">
               <div class="relative shrink-0">
                 <img
                   id="sidebar-user-avatar"
                   src="https://api.dicebear.com/7.x/avataaars/svg?seed=guest"
                   alt="Avatar"
-                  class="w-9 h-9 rounded-xl bg-zinc-800 border border-white/8 object-cover"
-                  width="36"
-                  height="36"
+                  class="w-8 h-8 rounded-xl bg-zinc-800 border border-white/8 object-cover"
+                  width="32"
+                  height="32"
                 />
                 <div
-                  class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-[#030305] rounded-full"
+                  class="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-emerald-500 border border-[#030305] rounded-full"
                 ></div>
               </div>
               <div class="sidebar-user-text min-w-0 transition-all">
@@ -180,147 +296,188 @@
       </aside>
 
       <!-- ══════════════════════════════════════════
-         MAIN CONTENT
+         MAIN CONTENT (The Grand Archive)
          ══════════════════════════════════════════ -->
-      <main id="library-main" class="scroll-container" tabindex="-1">
-        <div class="max-w-375 mx-auto">
+      <main id="library-main" class="scroll-container dock-clearance" tabindex="-1">
+        <div class="max-w-7xl mx-auto w-full">
           <!-- Page header -->
-          <header class="flex flex-col lg:flex-row lg:items-end justify-between gap-10 mb-16">
-            <div class="space-y-4">
-              <div class="flex items-center gap-4">
-                <span class="h-px w-12 bg-indigo-500/60"></span>
-                <p class="text-indigo-400 text-[10px] font-black uppercase tracking-[0.6em]">
-                  Neural Fragment Repository
+          <header
+            class="library-header flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8"
+          >
+            <div class="space-y-2">
+              <div class="flex items-center gap-3">
+                <span class="h-px w-8 bg-indigo-500/60"></span>
+                <p class="text-indigo-400 text-[10px] font-black uppercase tracking-[0.4em]">
+                  The Grand Archive
                 </p>
               </div>
               <h1
-                class="text-5xl md:text-6xl lg:text-7xl font-black text-white tracking-tighter uppercase leading-none"
+                class="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight uppercase leading-none font-cinzel"
               >
-                The
+                Chronicle
                 <span
-                  class="text-transparent bg-clip-text bg-linear-to-r from-indigo-400 to-violet-400"
-                  >Archives</span
+                  class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-300 to-indigo-200"
+                  >Repository</span
                 >
               </h1>
+              <p class="text-xs text-zinc-400 max-w-lg leading-relaxed">
+                Explore ancient myths, timeless folklore, and cosmic fragments woven across all
+                eras.
+              </p>
             </div>
 
-            <!-- Search -->
-            <div class="relative group w-full lg:w-115">
-              <div class="absolute inset-y-0 left-5 flex items-center pointer-events-none">
-                <i
-                  data-lucide="search"
-                  class="w-4 h-4 text-slate-600 group-focus-within:text-indigo-400 transition-colors"
-                ></i>
-              </div>
-              <input
-                type="text"
-                id="search-input"
-                placeholder="Search the neural weave…"
-                autocomplete="off"
-                class="w-full h-14 rounded-2xl bg-white/5 border border-white/10 px-14 text-sm text-white placeholder:text-slate-700 transition-all focus:bg-white/10 focus:border-indigo-500/30"
-              />
-              <div class="absolute inset-y-0 right-5 flex items-center pointer-events-none">
-                <kbd
-                  class="px-2.5 py-1.5 rounded-lg bg-black/50 border border-white/8 text-[10px] font-black text-slate-600"
-                >
-                  ⌘ K
-                </kbd>
+            <!-- Search + Mobile Filter Trigger -->
+            <div class="flex items-center gap-3 w-full md:w-auto">
+              <!-- Mobile Filters Button (Only visible on < md) -->
+              <button
+                id="mobile-filter-toggle"
+                type="button"
+                class="md:hidden flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-zinc-300 hover:text-white hover:bg-white/10 transition-all shrink-0"
+                aria-label="Open Archive Filters"
+              >
+                <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
+                <span class="text-xs font-bold uppercase tracking-wider">Filters</span>
+              </button>
+
+              <!-- Search -->
+              <div class="relative group w-full md:w-80 lg:w-96">
+                <div class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
+                  <i
+                    data-lucide="search"
+                    class="w-4 h-4 text-zinc-500 group-focus-within:text-indigo-400 transition-colors"
+                  ></i>
+                </div>
+                <input
+                  type="text"
+                  id="search-input"
+                  placeholder="Search the neural weave…"
+                  autocomplete="off"
+                  class="w-full h-11 rounded-xl bg-white/5 border border-white/10 pl-10 pr-14 text-xs text-white placeholder:text-zinc-500 transition-all focus:bg-white/10 focus:border-indigo-500/40"
+                />
+                <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                  <kbd
+                    class="px-2 py-0.5 rounded bg-black/40 border border-white/8 text-[9px] font-bold text-zinc-500"
+                  >
+                    ⌘ K
+                  </kbd>
+                </div>
               </div>
             </div>
           </header>
 
-          <!-- Era filter bar -->
+          <!-- Filter Command Bar -->
           <div
-            id="era-filter-bar"
-            class="flex gap-3 overflow-x-auto no-scrollbar pb-2 mb-8"
-            role="group"
-            aria-label="Filter by era"
+            class="archive-filter-panel mb-8 p-4 rounded-2xl border border-white/8 bg-white/2 backdrop-blur-xl"
           >
-            <!-- Chips built by ui.js buildEraChips() after tales load -->
-            <button data-era="all" class="era-chip era-chip--active">All Neural Links</button>
-          </div>
-
-          <!-- Secondary Filters -->
-          <div class="flex flex-col md:flex-row gap-6 mb-12">
-            <!-- Tone -->
-            <div class="flex-1">
-              <p class="text-[9px] font-black uppercase tracking-[0.3em] text-slate-700 mb-4 ml-1">
-                Archive Tone
-              </p>
-              <div id="tone-filter-bar" class="flex gap-2 overflow-x-auto no-scrollbar pb-2">
-                <button
-                  data-tone="all"
-                  class="filter-pill filter-pill--active"
-                  aria-label="Show all tones"
-                >
-                  All Echoes
-                </button>
-                <button data-tone="Mythic" class="filter-pill" aria-label="Filter by Mythic tone">
-                  Mythic
-                </button>
-                <button data-tone="Dark" class="filter-pill" aria-label="Filter by Dark tone">
-                  Dark
-                </button>
-                <button
-                  data-tone="Whimsical"
-                  class="filter-pill"
-                  aria-label="Filter by Whimsical tone"
-                >
-                  Whimsical
-                </button>
-                <button
-                  data-tone="Melancholic"
-                  class="filter-pill"
-                  aria-label="Filter by Melancholic tone"
-                >
-                  Melancholic
-                </button>
+            <!-- Era row -->
+            <div class="flex items-center gap-3 mb-3">
+              <span
+                class="text-[9px] font-black uppercase tracking-[0.25em] text-zinc-500 shrink-0 flex items-center gap-1.5"
+              >
+                <i data-lucide="compass" class="w-3.5 h-3.5 text-indigo-400"></i>
+                Eras
+              </span>
+              <div
+                id="era-filter-bar"
+                class="flex gap-2 overflow-x-auto no-scrollbar py-1"
+                role="group"
+                aria-label="Filter by era"
+              >
+                <!-- Chips built by ui.js buildEraChips() after tales load -->
+                <button data-era="all" class="era-chip era-chip--active">All Scrolls</button>
               </div>
             </div>
 
-            <!-- Length -->
-            <div class="w-full md:w-70">
-              <p class="text-[9px] font-black uppercase tracking-[0.3em] text-slate-700 mb-4 ml-1">
-                Echo Depth
-              </p>
-              <div id="length-filter-bar" class="flex gap-2">
-                <button
-                  data-length="all"
-                  class="filter-pill flex-1 filter-pill--active"
-                  aria-label="Show all lengths"
+            <div class="h-px bg-white/5 my-2.5"></div>
+
+            <!-- Tone and Depth row -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <!-- Tone -->
+              <div class="flex items-center gap-2 overflow-hidden">
+                <span
+                  class="text-[9px] font-black uppercase tracking-[0.25em] text-zinc-500 shrink-0 flex items-center gap-1.5"
                 >
-                  All
-                </button>
-                <button
-                  data-length="short"
-                  class="filter-pill flex-1"
-                  aria-label="Filter by Short stories"
+                  <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-400"></i>
+                  Tone
+                </span>
+                <div id="tone-filter-bar" class="flex gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+                  <button
+                    data-tone="all"
+                    class="filter-pill filter-pill--active"
+                    aria-label="Show all tones"
+                  >
+                    All
+                  </button>
+                  <button data-tone="Mythic" class="filter-pill" aria-label="Filter by Mythic tone">
+                    Mythic
+                  </button>
+                  <button data-tone="Dark" class="filter-pill" aria-label="Filter by Dark tone">
+                    Dark
+                  </button>
+                  <button
+                    data-tone="Whimsical"
+                    class="filter-pill"
+                    aria-label="Filter by Whimsical tone"
+                  >
+                    Whimsical
+                  </button>
+                  <button
+                    data-tone="Melancholic"
+                    class="filter-pill"
+                    aria-label="Filter by Melancholic tone"
+                  >
+                    Melancholic
+                  </button>
+                </div>
+              </div>
+
+              <!-- Depth / Length -->
+              <div class="flex items-center gap-2 shrink-0">
+                <span
+                  class="text-[9px] font-black uppercase tracking-[0.25em] text-zinc-500 shrink-0 flex items-center gap-1.5"
                 >
-                  Short
-                </button>
-                <button
-                  data-length="medium"
-                  class="filter-pill flex-1"
-                  aria-label="Filter by Mid-length stories"
-                >
-                  Mid
-                </button>
-                <button
-                  data-length="long"
-                  class="filter-pill flex-1"
-                  aria-label="Filter by Epic-length stories"
-                >
-                  Epic
-                </button>
+                  <i data-lucide="hourglass" class="w-3.5 h-3.5 text-indigo-400"></i>
+                  Depth
+                </span>
+                <div id="length-filter-bar" class="flex gap-1.5">
+                  <button
+                    data-length="all"
+                    class="filter-pill filter-pill--active"
+                    aria-label="Show all lengths"
+                  >
+                    All
+                  </button>
+                  <button
+                    data-length="short"
+                    class="filter-pill"
+                    aria-label="Filter by Short stories"
+                  >
+                    Short
+                  </button>
+                  <button
+                    data-length="medium"
+                    class="filter-pill"
+                    aria-label="Filter by Mid-length stories"
+                  >
+                    Mid
+                  </button>
+                  <button
+                    data-length="long"
+                    class="filter-pill"
+                    aria-label="Filter by Epic-length stories"
+                  >
+                    Epic
+                  </button>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Cards grid and button wrapper-->
-          <div class="flex flex-col gap-8">
+          <!-- Cards grid and pagination wrapper -->
+          <div class="flex flex-col gap-6">
             <section
               id="cards-grid"
-              class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8 md:gap-10"
+              class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3.5 sm:gap-6"
               aria-live="polite"
               aria-label="Tale cards"
             >
@@ -328,11 +485,11 @@
             </section>
 
             <!-- Pagination -->
-            <div id="pagination-wrap" class="flex items-center justify-center gap-4 py-10">
+            <div id="pagination-wrap" class="flex items-center justify-center gap-4 py-8">
               <button
                 id="pagination-prev"
                 type="button"
-                class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/10 bg-white/5 text-zinc-400 text-xs font-black uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                class="flex items-center gap-2 px-4 py-2 rounded-xl border border-white/10 bg-white/5 text-zinc-400 text-xs font-bold uppercase tracking-wider hover:bg-white/10 hover:text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <i data-lucide="chevron-left" class="w-4 h-4"></i>
                 Previous
@@ -340,7 +497,7 @@
 
               <span
                 id="pagination-info"
-                class="text-xs font-medium text-zinc-500 tracking-wide min-w-35 text-center"
+                class="text-xs font-semibold text-zinc-400 tracking-wide min-w-32 text-center"
               >
                 Page 1 of 1
               </span>
@@ -348,7 +505,7 @@
               <button
                 id="pagination-next"
                 type="button"
-                class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/10 bg-white/5 text-zinc-400 text-xs font-black uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                class="flex items-center gap-2 px-4 py-2 rounded-xl border border-white/10 bg-white/5 text-zinc-400 text-xs font-bold uppercase tracking-wider hover:bg-white/10 hover:text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Next
                 <i data-lucide="chevron-right" class="w-4 h-4"></i>
@@ -362,34 +519,39 @@
     <!-- Modals -->
     <div
       id="confirm-modal"
-      class="modal-overlay"
+      class="modal-overlay hidden"
       role="dialog"
       aria-modal="true"
       aria-labelledby="confirm-title"
     >
-      <div class="glass-card-strong p-10 w-full max-w-sm text-center shadow-2xl">
+      <div
+        class="glass-card-strong p-8 w-full max-w-sm text-center shadow-2xl rounded-3xl border border-white/10"
+      >
         <div
-          class="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-8"
+          class="w-14 h-14 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 flex items-center justify-center mx-auto mb-6"
         >
-          <i data-lucide="check-circle" class="w-8 h-8 text-emerald-400"></i>
+          <i data-lucide="check-circle" class="w-7 h-7 text-emerald-400"></i>
         </div>
-        <h3 id="confirm-title" class="text-xl font-bold text-white uppercase tracking-tight mb-4">
+        <h3
+          id="confirm-title"
+          class="text-lg font-cinzel font-bold text-white uppercase tracking-tight mb-3"
+        >
           Seal this <span class="text-emerald-400">Chronicle?</span>
         </h3>
-        <p class="text-xs text-slate-500 leading-relaxed mb-10 italic">
+        <p class="text-xs text-zinc-400 leading-relaxed mb-8 italic">
           Once a tale is marked as finished, its path is permanently recorded in the Eternal
           Archives.
         </p>
-        <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-3">
           <button
             id="confirm-accept"
-            class="w-full h-14 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all shadow-xl shadow-emerald-600/20"
+            class="w-full h-12 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-lg shadow-emerald-950/40"
           >
             Confirm Completion
           </button>
           <button
             id="confirm-cancel"
-            class="w-full py-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 hover:text-white transition-colors"
+            class="w-full py-3 text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors"
           >
             Return to Weave
           </button>
@@ -399,47 +561,49 @@
 
     <div
       id="copy-link-modal"
-      class="modal-overlay"
+      class="modal-overlay hidden"
       role="dialog"
       aria-modal="true"
       aria-labelledby="copy-link-title"
     >
-      <div class="glass-card-strong p-10 w-full max-w-sm shadow-2xl">
-        <div class="flex items-center gap-4 mb-8">
+      <div
+        class="glass-card-strong p-8 w-full max-w-sm shadow-2xl rounded-3xl border border-white/10"
+      >
+        <div class="flex items-center gap-4 mb-6">
           <div
-            class="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center shrink-0"
+            class="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0"
           >
             <i data-lucide="share-2" class="w-6 h-6 text-indigo-400"></i>
           </div>
           <div>
             <h3
               id="copy-link-title"
-              class="text-sm font-black uppercase tracking-[0.2em] text-white"
+              class="text-sm font-bold uppercase tracking-wider text-white font-cinzel"
             >
               Share Fragment
             </h3>
-            <p class="text-[10px] text-slate-600 uppercase tracking-widest mt-1">
-              Generate neural access link
+            <p class="text-[10px] text-zinc-500 uppercase tracking-widest mt-0.5">
+              Neural access link
             </p>
           </div>
         </div>
-        <div class="relative mb-8">
+        <div class="relative mb-6">
           <input
             id="copy-link-input"
             readonly
-            class="w-full h-12 bg-black/40 border border-white/10 rounded-xl px-4 text-xs font-mono text-indigo-300 focus:outline-none"
+            class="w-full h-11 bg-black/40 border border-white/10 rounded-xl px-3.5 text-xs font-mono text-indigo-300 focus:outline-none focus:border-indigo-500/40 select-all"
           />
         </div>
-        <div class="flex items-center justify-end gap-6">
+        <div class="flex items-center justify-end gap-4">
           <button
             id="copy-link-close"
-            class="text-[10px] font-black uppercase tracking-widest text-slate-600 hover:text-white transition-colors"
+            class="text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors"
           >
             Dismiss
           </button>
           <button
             id="copy-link-confirm"
-            class="h-12 px-8 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-indigo-600/20"
+            class="h-11 px-6 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-indigo-950/40"
           >
             Copy Link
           </button>

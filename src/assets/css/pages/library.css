@@ -1,13 +1,12 @@
-/* Fonts are declared once in the page <head>, not per-stylesheet. A font
-   @import inside a bundled CSS file is fetched *after* the bundle parses,
-   which is the slowest possible way to load a webfont — and Plus Jakarta
-   Sans was being pulled in for this page alone while every other page used
-   Inter, so the sidebar and the nav above it were set in different faces. */
+/* src/assets/css/pages/library.css
+   The Grand Archive — Library Page Styles
+   Strictly Token Compliant (tokens.css)
+*/
 
 :root {
-  --sidebar-width: 17rem;
+  --sidebar-width: 16rem;
   --sidebar-width-collapsed: 4.5rem;
-  --sidebar-transition: 320ms cubic-bezier(0.4, 0, 0.2, 1);
+  --sidebar-transition: 280ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ── Layout ──────────────────────────────────── */
@@ -15,23 +14,67 @@
   display: flex;
   position: relative;
   z-index: 1;
+  height: 100%;
 }
 
 /* ── Sidebar ─────────────────────────────────── */
 #sidebar {
   width: var(--sidebar-width);
   flex-shrink: 0;
-  transition: width var(--sidebar-transition);
+  transition:
+    width var(--sidebar-transition),
+    transform var(--sidebar-transition);
   position: sticky;
   top: var(--nav-height);
   height: calc(100vh - var(--nav-height));
-  display: none; /* Mobile hidden */
+  z-index: 50;
+  display: none;
 }
 
 @media (min-width: 768px) {
   #sidebar {
     display: block;
+    transform: none !important;
   }
+}
+
+/* Mobile Off-canvas Drawer */
+@media (max-width: 767px) {
+  .library-layout {
+    z-index: 60;
+  }
+
+  #sidebar {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    max-width: 85vw;
+    width: 18rem;
+    z-index: 75;
+    transform: translateX(-100%);
+    box-shadow: 16px 0 50px rgb(var(--dark-rgb) / 0.85);
+  }
+
+  #sidebar.sidebar--mobile-open {
+    transform: translateX(0);
+  }
+
+  #sidebar .sidebar-inner {
+    background: rgb(var(--bg-overlay-rgb));
+    border-right: 1px solid rgb(var(--light-rgb) / var(--a-04));
+  }
+}
+
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgb(var(--dark-rgb) / 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 70;
+  transition: opacity 250ms ease;
 }
 
 #sidebar.sidebar--collapsed {
@@ -42,11 +85,11 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: rgb(var(--bg-base-rgb) / var(--a-09));
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgb(var(--bg-base-rgb) / var(--a-10));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-right: 1px solid rgb(var(--light-rgb) / var(--a-03));
-  padding: 16px 8px;
+  padding: 16px 10px;
   overflow: hidden;
 }
 
@@ -58,6 +101,7 @@
   pointer-events: none;
   width: 0;
   overflow: hidden;
+  display: none;
 }
 
 /* ── Sidebar filter buttons ──────────────────── */
@@ -66,17 +110,17 @@
   align-items: center;
   gap: 12px;
   width: 100%;
-  padding: 10px 14px;
-  border-radius: 14px;
+  padding: 9px 12px;
+  border-radius: 12px;
   border: 1px solid transparent;
   background: none;
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   cursor: pointer;
   text-align: left;
   white-space: nowrap;
-  transition: all 200ms ease;
+  transition: all 180ms ease;
 }
 
 .sidebar-filter:hover {
@@ -85,26 +129,33 @@
 }
 
 .sidebar-filter svg {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   flex-shrink: 0;
 }
 
 .sidebar-filter--active {
   color: white;
-  background: rgb(var(--accent-rgb) / var(--a-05));
-  border-color: rgb(var(--accent-rgb) / var(--a-07));
-  box-shadow: 0 4px 15px rgb(var(--dark-rgb) / 0.2);
+  background: rgb(var(--accent-rgb) / var(--a-06));
+  border-color: rgb(var(--accent-rgb) / var(--a-08));
+  box-shadow: 0 2px 10px rgb(var(--dark-rgb) / 0.3);
+}
+
+/* ── Filter Command Bar ──────────────────────── */
+.archive-filter-panel {
+  background: rgb(var(--light-rgb) / var(--a-01));
+  border: 1px solid rgb(var(--light-rgb) / var(--a-03));
+  box-shadow: 0 8px 30px rgb(var(--dark-rgb) / 0.2);
 }
 
 /* ── Era chips ───────────────────────────────── */
 .era-chip {
   flex-shrink: 0;
-  padding: 8px 18px;
-  border-radius: 12px;
+  padding: 6px 14px;
+  border-radius: 999px;
   font-size: 10px;
   font-weight: 800;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
   border: 1px solid transparent;
@@ -115,13 +166,13 @@
 .era-chip--active {
   background: var(--accent);
   color: white;
-  box-shadow: 0 4px 16px rgb(var(--accent-rgb) / var(--a-08));
+  box-shadow: 0 2px 12px rgb(var(--accent-rgb) / var(--a-07));
 }
 
 .era-chip--inactive {
   background: rgb(var(--light-rgb) / var(--a-01));
-  border-color: rgb(var(--light-rgb) / var(--a-04));
-  color: var(--text-disabled);
+  border-color: rgb(var(--light-rgb) / var(--a-03));
+  color: var(--text-muted);
 }
 
 .era-chip--inactive:hover {
@@ -132,11 +183,11 @@
 
 /* ── Filter Pills ───────────────────────────── */
 .filter-pill {
-  padding: 6px 14px;
+  padding: 5px 12px;
   border-radius: 999px;
   font-size: 10px;
   font-weight: 700;
-  color: var(--text-disabled);
+  color: var(--text-muted);
   background: rgb(var(--light-rgb) / var(--a-01));
   border: 1px solid rgb(var(--light-rgb) / var(--a-03));
   white-space: nowrap;
@@ -150,92 +201,28 @@
 }
 
 .filter-pill--active {
-  background: rgb(var(--accent-rgb) / var(--a-05));
+  background: rgb(var(--accent-rgb) / var(--a-06));
   border-color: rgb(var(--accent-rgb) / var(--a-08));
   color: var(--accent-tint);
-  box-shadow: 0 0 15px rgb(var(--accent-rgb) / var(--a-03));
-}
-
-/* ── Tale Cards ──────────────────────────────── */
-.tale-card {
-  will-change: transform;
-  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-  position: relative;
-  z-index: 1;
-}
-
-.tale-card:hover {
-  transform: translateY(-12px) scale(1.02);
-  z-index: 10;
-  box-shadow: 0 25px 50px -12px rgb(var(--accent-rgb) / var(--a-07));
-  border-color: rgb(var(--accent-rgb) / var(--a-09));
-}
-
-.tale-card::after {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  background: linear-gradient(
-    45deg,
-    transparent,
-    rgb(var(--accent-rgb) / var(--a-08)),
-    transparent
-  );
-  border-radius: 2rem;
-  z-index: -1;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-}
-.tale-card:hover::after {
-  opacity: 1;
-}
-
-.shine-layer {
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(
-    to right,
-    transparent,
-    rgb(var(--light-rgb) / var(--a-03)),
-    transparent
-  );
-  transform: skewX(-25deg);
-  transition: 0.7s ease;
-}
-.tale-card:hover .shine-layer {
-  left: 150%;
-}
-
-.tale-image {
-  transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
-}
-.tale-card:hover .tale-image {
-  transform: scale(1.1);
-}
-
-.tale-card-glow:hover {
-  box-shadow: 0 0 30px rgb(var(--accent-rgb) / var(--a-05));
+  box-shadow: 0 0 10px rgb(var(--accent-rgb) / var(--a-03));
 }
 
 /* ── Main content ────────────────────────────── */
 #library-main {
   flex: 1;
   min-width: 0;
-  padding: 32px 16px 140px; /* Large bottom space for mobile dock */
+  padding: 24px 16px 80px;
 }
 
 @media (min-width: 768px) {
   #library-main {
-    padding: 48px 32px 60px;
+    padding: 32px 32px 60px;
   }
 }
 
 @media (min-width: 1024px) {
   #library-main {
-    padding: 60px 48px 60px;
+    padding: 40px 48px 60px;
   }
 }
 
@@ -251,7 +238,7 @@
 #search-input:focus {
   outline: none;
   border-color: rgb(var(--accent-rgb) / var(--a-09));
-  box-shadow: 0 0 0 3px rgb(var(--accent-rgb) / var(--a-05));
+  box-shadow: 0 0 0 2px rgb(var(--accent-rgb) / var(--a-04));
 }
 
 /* ── Modals ──────────────────────────────────── */
@@ -259,8 +246,8 @@
   position: fixed;
   inset: 0;
   background: rgb(var(--dark-rgb) / 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   z-index: 100;
   display: none;
   align-items: center;
@@ -272,9 +259,33 @@
   display: flex;
 }
 
+/* ── Skeletons ───────────────────────────────── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgb(var(--light-rgb) / var(--a-02)) 25%,
+    rgb(var(--light-rgb) / var(--a-05)) 50%,
+    rgb(var(--light-rgb) / var(--a-02)) 75%
+  );
+  background-size: 200% 100%;
+  animation: pulse-skeleton 2s ease-in-out infinite;
+}
+
+@keyframes pulse-skeleton {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
 /* ── Reduce motion ───────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  #sidebar {
+  #sidebar,
+  .sidebar-backdrop,
+  .skeleton {
     transition: none;
+    animation: none;
   }
 }

@@ -110,6 +110,8 @@ async function _loadIcons() {
     Search: L.Search,
     Compass: L.Compass,
     Filter: L.Filter,
+    SlidersHorizontal: L.SlidersHorizontal,
+    Hourglass: L.Hourglass,
     Tags: L.Tags,
     Tag: L.Tag,
     MapPin: L.MapPin,
