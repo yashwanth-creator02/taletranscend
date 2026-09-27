@@ -464,10 +464,7 @@ select:focus-visible {
 }
 
 /* ── Cross-Document Transitions ────────────────────────────────────────── */
-
-@view-transition {
-  navigation: auto;
-}
+/* Handled via #app-boot-curtain and navigation.ts page reveal */
 
 /* ── Entrance animation ────────────────────────────────────────────────── */
 

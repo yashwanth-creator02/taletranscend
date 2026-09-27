@@ -106,6 +106,7 @@ async function _loadIcons() {
     Clock: L.Clock,
     Clock3: L.Clock3,
     Clock4: L.Clock4,
+    Calendar: L.Calendar,
     // Discovery
     Search: L.Search,
     Compass: L.Compass,
