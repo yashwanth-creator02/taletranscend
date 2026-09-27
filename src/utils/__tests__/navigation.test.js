@@ -91,6 +91,13 @@ describe('Navigation Utils', () => {
       expect(VIEWS_PATH).toBe('/');
       expect(resolveHref('profile')).not.toContain('src/views');
     });
+
+    it('does not append .html to static assets', () => {
+      expect(resolveHref('logo.png')).toBe('/logo.png');
+      expect(resolveHref('/logo.png')).toBe('/logo.png');
+      expect(resolveHref('icon.svg')).toBe('/icon.svg');
+      expect(resolveHref('./logo.png')).toBe('/logo.png');
+    });
   });
 
   describe('navigateTo', () => {

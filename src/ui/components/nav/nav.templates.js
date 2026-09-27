@@ -393,7 +393,7 @@ export function buildNav() {
           <div class="flex items-center gap-10">
             <a href="${resolveHref('index.html')}" class="nav-logo" aria-label="TaleTranscend home">
               <div class="nav-logo__mark">
-                <i data-lucide="sparkles" class="nav-logo__icon" aria-hidden="true"></i>
+                <img src="${resolveHref('/logo.png')}" alt="" class="nav-logo__img" aria-hidden="true" width="28" height="28" />
               </div>
               <span class="nav-logo__wordmark">TaleTranscend</span>
             </a>

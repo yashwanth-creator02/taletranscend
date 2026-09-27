@@ -491,10 +491,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 1.85rem;
+  height: 1.85rem;
   border-radius: var(--radius-md);
-  background: var(--accent-gradient);
+  background: rgb(var(--light-rgb) / var(--a-04));
+  border: 1px solid rgb(var(--accent-rgb) / var(--a-07));
+  box-shadow: 0 0 12px rgb(var(--accent-rgb) / var(--a-07));
   color: var(--text-on-accent);
 }
 
@@ -502,6 +504,15 @@
 .home-footer__mark i {
   width: 1rem;
   height: 1rem;
+}
+
+.site-footer__mark img,
+.home-footer__mark img,
+.home-footer__logo-img {
+  width: 1.4rem;
+  height: 1.4rem;
+  object-fit: contain;
+  display: block;
 }
 
 .site-footer__tagline,

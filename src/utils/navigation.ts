@@ -91,7 +91,8 @@ export function resolveHref(target: string): string {
 
   const cleaned = value.replace(/^\.?\//, '');
   const [path, query = ''] = cleaned.split(/(?=[?#])/, 2);
-  const withExtension = path.endsWith('.html') ? path : `${path}.html`;
+  const isAsset = /\.(png|jpe?g|svg|webp|ico|gif|avif|css|js|json|xml|txt)$/i.test(path);
+  const withExtension = isAsset || path.endsWith('.html') ? path : `${path}.html`;
 
   return `${VIEWS_PATH}${withExtension}${query}`;
 }

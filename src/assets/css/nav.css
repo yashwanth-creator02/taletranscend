@@ -50,26 +50,44 @@
 }
 
 .nav-logo__mark {
-  width: 32px;
-  height: 32px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+  width: 34px;
+  height: 34px;
+  background: rgb(var(--light-rgb) / var(--a-03));
+  border: 1px solid rgb(var(--accent-rgb) / var(--a-07));
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 20px rgb(var(--accent-rgb) / var(--a-07));
+  box-shadow: 0 0 16px rgb(var(--accent-rgb) / var(--a-07));
   transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
 }
 
 .nav-logo:hover .nav-logo__mark {
-  box-shadow: 0 0 30px rgb(var(--accent-rgb) / var(--a-09));
-  transform: rotate(5deg);
+  background: rgb(var(--light-rgb) / var(--a-06));
+  border-color: rgb(var(--accent-rgb) / var(--a-09));
+  box-shadow: 0 0 24px rgb(var(--accent-rgb) / var(--a-08));
+  transform: rotate(4deg) scale(1.04);
+}
+
+.nav-logo__img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 4px rgb(var(--accent-rgb) / var(--a-08)));
+  transition: transform var(--transition-base);
+  display: block;
+}
+
+.nav-logo:hover .nav-logo__img {
+  transform: scale(1.08);
 }
 
 .nav-logo__icon {
   width: 16px;
   height: 16px;
-  color: white;
+  color: var(--text-primary);
 }
 
 .nav-logo__wordmark {
