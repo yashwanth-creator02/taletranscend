@@ -198,7 +198,9 @@ export function buildDockItem({ href, icon, label, active, primary = false }) {
       class="mobile-dock__item${primary ? ' mobile-dock__item--primary' : ''}${active ? ' mobile-dock__item--active' : ''}"
       ${active ? 'aria-current="page"' : ''}
     >
-      <i data-lucide="${icon}" class="mobile-dock__icon" aria-hidden="true"></i>
+      <div class="mobile-dock__icon-wrap">
+        <i data-lucide="${icon}" class="mobile-dock__icon" aria-hidden="true"></i>
+      </div>
       <span class="mobile-dock__label">${label}</span>
     </a>
   `;
