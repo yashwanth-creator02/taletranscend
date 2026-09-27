@@ -39,17 +39,27 @@ export const VIEWS_PATH = '/';
  */
 export function initPageReveal(): void {
   initDevMode();
+  if (typeof document !== 'undefined') {
+    const reveal = () => {
+      if (document.body) {
+        document.body.classList.add('booted');
+      }
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', reveal, { once: true });
+    } else {
+      reveal();
+    }
+  }
 }
 
 /**
- * Retained for the page entry points that call it. The reveal is handled by
- * CSS now, so this is a no-op kept to avoid a breaking change across nine
- * entry files for no behavioural gain.
- *
- * @deprecated The boot fade is CSS-driven — see `boot-reveal` in base.css.
+ * Marks the document body as booted to reveal styled content and fade the boot curtain.
  */
 export function readyReveal(): void {
-  /* intentionally empty */
+  if (typeof document !== 'undefined' && document.body) {
+    document.body.classList.add('booted');
+  }
 }
 
 /**

@@ -35,7 +35,11 @@
     />
 
     <style>
-      html,
+      /* Critical Anti-FOUC Gate */
+      html {
+        background-color: #030305;
+        color: #e2e8f0;
+      }
       body {
         background-color: #030305;
         color: #e2e8f0;
@@ -45,7 +49,69 @@
           -apple-system,
           sans-serif;
       }
+      body:not(.booted) > *:not(#app-boot-curtain) {
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
+      #app-boot-curtain {
+        position: fixed;
+        inset: 0;
+        background-color: #030305;
+        z-index: 999999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          opacity 0.3s cubic-bezier(0, 0, 0.2, 1),
+          visibility 0.3s cubic-bezier(0, 0, 0.2, 1);
+        pointer-events: none;
+      }
+      body.booted #app-boot-curtain {
+        opacity: 0;
+        visibility: hidden;
+      }
+      .boot-crest {
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        background: rgba(99, 102, 241, 0.08);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        box-shadow: 0 0 25px rgba(99, 102, 241, 0.2);
+        animation: boot-pulse 1.4s ease-in-out infinite;
+      }
+      @keyframes boot-pulse {
+        0%,
+        100% {
+          transform: scale(0.96);
+          opacity: 0.6;
+        }
+        50% {
+          transform: scale(1.04);
+          opacity: 1;
+        }
+      }
     </style>
+    <script>
+      setTimeout(function () {
+        if (document.body && !document.body.classList.contains('booted')) {
+          document.body.classList.add('booted');
+        }
+      }, 3500);
+    </script>
+    <noscript>
+      <style>
+        body:not(.booted) > *:not(#app-boot-curtain) {
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+        #app-boot-curtain {
+          display: none !important;
+        }
+      </style>
+    </noscript>
 
     <link rel="stylesheet" href="../assets/css/base.css" />
 
@@ -55,6 +121,26 @@
   <body
     class="text-slate-300 antialiased selection:bg-indigo-500/30 page-fade-in flex flex-col h-screen overflow-hidden"
   >
+    <!-- App Boot Curtain (Prevents FOUC on slower networks) -->
+    <div id="app-boot-curtain" aria-hidden="true">
+      <div class="boot-crest">
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#818cf8"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"
+          />
+        </svg>
+      </div>
+    </div>
+
     <a class="skip-link" href="#main-content">Skip to content</a>
     <!-- Background (matches your existing pages) -->
     <div class="fixed inset-0 -z-10 bg-slate-950">

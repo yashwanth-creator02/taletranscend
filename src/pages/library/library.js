@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
   showGridSkeleton();
   initIcons();
   setupPagination();
+  readyReveal();
 
   const submitBtn = document.getElementById('btn-submit-tale');
   if (submitBtn) {
