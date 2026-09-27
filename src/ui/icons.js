@@ -143,7 +143,6 @@ async function _loadIcons() {
     Palette: L.Palette,
     Highlighter: L.Highlighter,
     // Social Platforms
-    Github: L.Github,
     Twitter: L.Twitter,
     Instagram: L.Instagram || L.Camera,
     Linkedin: L.Linkedin,

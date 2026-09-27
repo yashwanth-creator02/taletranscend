@@ -1050,6 +1050,7 @@
 
 .home-cta__form .input-mythic {
   flex: 1 1 12rem;
+  height: 42px;
   border-radius: var(--radius-full);
   padding: var(--space-2) var(--space-4);
   font-size: var(--text-base); /* 1rem prevents iOS Safari auto-zoom */
@@ -1058,7 +1059,7 @@
 .home-cta__form .btn {
   flex: none;
   border-radius: var(--radius-full);
-  min-height: 38px;
+  min-height: 42px;
   padding: var(--space-1) var(--space-4);
   font-size: var(--text-xs);
 }
@@ -1070,7 +1071,13 @@
     width: 100%;
   }
 
-  .home-cta__form .input-mythic,
+  .home-cta__form .input-mythic {
+    flex: none;
+    width: 100%;
+    height: 44px;
+    min-height: 44px;
+  }
+
   .home-cta__form .btn {
     width: 100%;
     min-height: 44px;
