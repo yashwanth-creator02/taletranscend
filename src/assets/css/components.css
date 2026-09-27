@@ -566,3 +566,248 @@
   font-size: var(--text-xs);
   color: var(--text-muted);
 }
+
+/* ══ 13. TOAST NOTIFICATIONS ═════════════════════════════════════════════
+   Floating feedback hub with glassmorphic cards, countdown progress bar,
+   pause-on-hover, action support, and smooth collapse exit transition.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.toast-region {
+  position: fixed;
+  top: calc(var(--nav-height) + var(--space-4));
+  right: var(--space-5);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  pointer-events: none;
+  width: 100%;
+  max-width: min(24rem, calc(100vw - var(--space-8)));
+}
+
+@media (max-width: 48rem) {
+  .toast-region {
+    top: calc(var(--nav-height) + var(--space-2));
+    left: var(--space-3);
+    right: var(--space-3);
+    max-width: none;
+    width: auto;
+    align-items: center;
+  }
+}
+
+.toast-card {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  width: 100%;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
+  background: var(--surface-gradient-strong);
+  backdrop-filter: blur(var(--blur-xl));
+  -webkit-backdrop-filter: blur(var(--blur-xl));
+  box-shadow: var(--shadow-lg), var(--shadow-inset-hairline);
+  pointer-events: auto;
+  overflow: hidden;
+  user-select: none;
+  touch-action: pan-y;
+  transition:
+    opacity var(--dur-normal) var(--ease-standard),
+    transform var(--dur-normal) var(--ease-spring),
+    box-shadow var(--dur-base) var(--ease-standard),
+    border-color var(--dur-base) var(--ease-standard),
+    max-height var(--dur-slow) var(--ease-standard),
+    margin var(--dur-slow) var(--ease-standard),
+    padding var(--dur-slow) var(--ease-standard);
+}
+
+.toast-card--success {
+  border-color: rgb(var(--success-rgb) / var(--a-07));
+  box-shadow:
+    var(--shadow-lg),
+    0 0 20px rgb(var(--success-rgb) / var(--a-04)),
+    var(--shadow-inset-hairline);
+}
+
+.toast-card--error {
+  border-color: rgb(var(--danger-rgb) / var(--a-07));
+  box-shadow:
+    var(--shadow-lg),
+    0 0 20px rgb(var(--danger-rgb) / var(--a-04)),
+    var(--shadow-inset-hairline);
+}
+
+.toast-card--warning {
+  border-color: rgb(var(--warning-rgb) / var(--a-07));
+  box-shadow:
+    var(--shadow-lg),
+    0 0 20px rgb(var(--warning-rgb) / var(--a-04)),
+    var(--shadow-inset-hairline);
+}
+
+.toast-card--info {
+  border-color: rgb(var(--accent-rgb) / var(--a-07));
+  box-shadow:
+    var(--shadow-lg),
+    0 0 20px rgb(var(--accent-rgb) / var(--a-04)),
+    var(--shadow-inset-hairline);
+}
+
+.toast-card__icon-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.toast-card__content {
+  flex: 1 1 0%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-top: 1px;
+}
+
+.toast-card__message {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: var(--leading-snug);
+  word-break: break-word;
+}
+
+.toast-card__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.toast-card__action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-accent);
+  background: var(--surface-3);
+  color: var(--accent-tint);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background var(--dur-fast) var(--ease-standard),
+    border-color var(--dur-fast) var(--ease-standard),
+    color var(--dur-fast) var(--ease-standard);
+}
+
+.toast-card__action-btn:hover {
+  background: var(--accent-subtle);
+  border-color: var(--accent-tint);
+  color: var(--text-on-accent);
+}
+
+.toast-card__close-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-md);
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  opacity: 0.6;
+  transition:
+    opacity var(--dur-fast) var(--ease-standard),
+    color var(--dur-fast) var(--ease-standard),
+    background var(--dur-fast) var(--ease-standard);
+}
+
+.toast-card__close-btn:hover {
+  opacity: 1;
+  color: var(--text-primary);
+  background: var(--surface-3);
+}
+
+/* Progress bar along the bottom */
+.toast-card__progress-track {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--surface-2);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.toast-card__progress-bar {
+  height: 100%;
+  width: 100%;
+  transform-origin: left center;
+  transform: scaleX(1);
+}
+
+@keyframes toastCountdown {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+.toast-card--success .toast-card__progress-bar {
+  background: var(--success);
+}
+.toast-card--error .toast-card__progress-bar {
+  background: var(--danger);
+}
+.toast-card--warning .toast-card__progress-bar {
+  background: var(--warning);
+}
+.toast-card--info .toast-card__progress-bar {
+  background: var(--info);
+}
+
+/* Dismissing state for smooth accordion/slide collapse */
+.toast-card.toast-dismissing {
+  opacity: 0 !important;
+  transform: translateX(1.5rem) scale(0.95) !important;
+  max-height: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  border-top-width: 0 !important;
+  border-bottom-width: 0 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast-card {
+    transition: opacity var(--dur-fast) var(--ease-standard) !important;
+    transform: none !important;
+  }
+  .toast-card.toast-dismissing {
+    opacity: 0 !important;
+    transform: none !important;
+  }
+  .toast-card__progress-bar {
+    animation: none !important;
+    display: none !important;
+  }
+}

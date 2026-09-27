@@ -1156,15 +1156,4 @@
 /* Shared .site-footer / .home-footer styles are defined in components.css */
 
 /* ══ 8. TOASTS ═══════════════════════════════════════════════════════════ */
-
-.toast-region {
-  position: fixed;
-  top: calc(var(--nav-height) + var(--space-4));
-  right: var(--space-5);
-  z-index: var(--z-toast);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  pointer-events: none;
-  max-width: min(24rem, calc(100vw - var(--space-8)));
-}
+/* Shared .toast-region and .toast-card styles are defined in components.css */
