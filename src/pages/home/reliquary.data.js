@@ -3,6 +3,7 @@
 // Supports curated default artifacts and dynamic generation from published tales.
 
 import { ENABLE_DYNAMIC_TALE_ARTIFACTS } from '@config/app.config.js';
+import { taleUrl } from '@/utils';
 
 // Centerpiece SVG vector assets with transparent backgrounds
 import bookAsset from '@/assets/images/reliquary/book.svg';
@@ -149,7 +150,7 @@ export function generateArtifactForTale(tale, index = 0) {
       era: tale.era || 'Archival Era',
       lore: tale.artifact.lore || tale.description || 'A preserved fragment from the oral archive.',
       asset: tale.artifact.asset || bookAsset,
-      readUrl: `tale.html?id=${tale.id}`,
+      readUrl: taleUrl(tale.id),
       position:
         tale.artifact.position || DEFAULT_ARTIFACTS[index % DEFAULT_ARTIFACTS.length].position,
       zIndex: 5,
@@ -181,7 +182,7 @@ export function generateArtifactForTale(tale, index = 0) {
       ? `${tale.description.slice(0, 110)}...`
       : 'A newly discovered fragment preserved in the archive.',
     asset: matched.asset,
-    readUrl: `tale.html?id=${tale.id}`,
+    readUrl: taleUrl(tale.id),
     position: templatePosition,
     zIndex: 5,
     animation: matched.animation,

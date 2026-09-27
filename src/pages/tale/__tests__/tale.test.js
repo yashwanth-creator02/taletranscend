@@ -69,7 +69,7 @@ describe('Tale Page Controller', () => {
 
     // It will throw "No taleId in URL" but we want to check replace call
     await expect(initPage()).rejects.toThrow('No taleId in URL');
-    expect(window.location.replace).toHaveBeenCalledWith('library.html');
+    expect(window.location.replace).toHaveBeenCalledWith('/library.html');
   });
 
   it('hydrates data on auth resolve', async () => {

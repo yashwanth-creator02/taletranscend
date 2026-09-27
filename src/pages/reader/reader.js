@@ -64,11 +64,18 @@ initPageReveal();
 
 /* ─────────────────────────────────────────────
    URL Params
+   ─────────────────────────────────────────────
+   Supports both:
+     /tales/{taleId}/read/{chapterIndex}   (hierarchical — canonical)
+     /reader?taleId={id}&chapterId={ch}    (legacy query-string — backwards compat)
    ───────────────────────────────────────────── */
 
-const params = new URLSearchParams(window.location.search);
-const taleId = params.get('taleId') || '';
-const chapterIndex = parseInt(params.get('chapterId')) || 0;
+const _params = new URLSearchParams(window.location.search);
+const _readerPathMatch = window.location.pathname.match(/\/tales\/([^/]+)\/read\/(\d+)/);
+const taleId =
+  (_readerPathMatch && decodeURIComponent(_readerPathMatch[1])) || _params.get('taleId') || '';
+const chapterIndex =
+  (_readerPathMatch && parseInt(_readerPathMatch[2])) || parseInt(_params.get('chapterId')) || 0;
 
 readerState.taleId = taleId;
 readerState.chapterIndex = chapterIndex;

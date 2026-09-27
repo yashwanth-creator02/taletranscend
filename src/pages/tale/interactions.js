@@ -3,7 +3,8 @@
 
 import {
   navigateTo,
-  resolveHref,
+  taleUrl,
+  readerUrl,
   createLogger,
   getRemainingTime,
   applyButtonCooldown,
@@ -124,7 +125,7 @@ export function bindChapterClicks(taleId) {
 
     // chapterIndex is the zero-based index stored on the element — use it directly
     const chapterId = item.dataset.chapterIndex ?? '0';
-    _fadeAndGo(`reader.html?taleId=${taleId}&chapterId=${chapterId}`);
+    _fadeAndGo(readerUrl(taleId, chapterId));
   });
 }
 
@@ -180,7 +181,7 @@ export function setupStartReading(taleId, chapters) {
         showToast('No chronicles available to read yet.', 'info');
         return;
       }
-      _fadeAndGo(`reader.html?taleId=${taleId}&chapterId=0`);
+      _fadeAndGo(readerUrl(taleId, 0));
     });
   });
 }
@@ -203,7 +204,7 @@ export function setupResumeReading(userId, taleId) {
     btn.addEventListener('click', async () => {
       const resume = await resolveResumePoint({ userId, taleId });
       const chapterId = resume?.chapterIndex ?? 0;
-      _fadeAndGo(`reader.html?taleId=${taleId}&chapterId=${chapterId}`);
+      _fadeAndGo(readerUrl(taleId, chapterId));
     });
   });
 }
@@ -327,8 +328,7 @@ export function setupShareButton(taleId) {
 
   btns.forEach((btn) => {
     btn.addEventListener('click', async () => {
-      const url = `${window.location.origin}${resolveHref(`tale.html?id=${taleId}`)}`;
-
+      const url = taleUrl(taleId, window.location.origin);
       if (navigator.share) {
         try {
           await navigator.share({ title: document.title, url });

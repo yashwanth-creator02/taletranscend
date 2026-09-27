@@ -25,7 +25,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const r = (p) => path.resolve(__dirname, p);
 
-/** The nine entry points. Adding a page means adding one line here. */
+/** The ten entry points. Adding a page means adding one line here. */
 const PAGES = [
   'index',
   'library',
@@ -35,8 +35,29 @@ const PAGES = [
   'contribution',
   'profile',
   'login',
+  'toc',
   '404',
 ];
+
+function hierarchicalRoutesPlugin() {
+  return {
+    name: 'hierarchical-routes-dev-rewrites',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const url = (req.url || '').split('?')[0];
+        const query = (req.url || '').includes('?') ? '?' + (req.url || '').split('?')[1] : '';
+        if (/^\/tales\/[^/]+\/read(\/.*)?$/.test(url)) {
+          req.url = '/reader.html' + query;
+        } else if (/^\/tales\/[^/]+/.test(url)) {
+          req.url = '/tale.html' + query;
+        } else if (url === '/toc' || url === '/sitemap') {
+          req.url = '/toc.html' + query;
+        }
+        next();
+      });
+    },
+  };
+}
 
 export default defineConfig({
   root: r('src/views'),
@@ -99,6 +120,7 @@ export default defineConfig({
   },
 
   plugins: [
+    hierarchicalRoutesPlugin(),
     tailwindcss(),
 
     VitePWA({

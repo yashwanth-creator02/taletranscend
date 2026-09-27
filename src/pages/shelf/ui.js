@@ -83,7 +83,7 @@ export function setGridEmpty(message) {
           <h3 class="text-base font-cinzel font-bold text-white mb-2">Nothing here yet</h3>
           <p class="text-sm text-slate-600 max-w-sm leading-relaxed">${escapeHtml(message)}</p>
         </div>
-        <a href="library.html"
+        <a href="/library.html"
           class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold uppercase tracking-[0.15em] hover:bg-indigo-500/20 transition-colors">
           <i data-lucide="compass" class="w-3.5 h-3.5"></i>
           Browse Library
@@ -372,7 +372,7 @@ export function buildDraftCard(draft) {
         <div class="flex items-center justify-between">
           <span class="text-[9px] text-slate-700">Last updated ${updated}</span>
           <a
-            href="contribution.html?draft=${id}"
+            href="/contribution.html?draft=${id}"
             class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-indigo-400 hover:text-indigo-300 transition-colors group/btn"
           >
             Edit

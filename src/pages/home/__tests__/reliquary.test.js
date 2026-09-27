@@ -52,7 +52,7 @@ describe('Archive Reliquary (Scholar’s Tableau)', () => {
       const artifact = generateArtifactForTale(mockTale, 0);
       expect(artifact.taleId).toBe('tale-atlantis');
       expect(artifact.taleTitle).toBe('Atlantis: The Drowned Kingdom');
-      expect(artifact.readUrl).toContain('tale.html?id=tale-atlantis');
+      expect(artifact.readUrl).toBe('/tales/tale-atlantis');
       expect(artifact.asset).toBeDefined();
     });
 

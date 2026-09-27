@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+    <title>Table of Contents — Archive Codex | TaleTranscend</title>
+    <meta
+      name="description"
+      content="Comprehensive HTML sitemap and Table of Contents for TaleTranscend — index of all mythic chronicles, oral traditions, and chapters."
+    />
+    <link rel="canonical" href="https://taletranscend.web.app/toc" />
+
+    <meta name="theme-color" content="#030305" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icon.svg" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="TaleTranscend" />
+    <meta property="og:url" content="https://taletranscend.web.app/toc" />
+    <meta property="og:title" content="Table of Contents — Archive Codex | TaleTranscend" />
+    <meta
+      property="og:description"
+      content="Comprehensive HTML sitemap and Table of Contents for TaleTranscend — index of all mythic chronicles, oral traditions, and chapters."
+    />
+    <meta property="og:image" content="https://taletranscend.web.app/icon.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Table of Contents — Archive Codex | TaleTranscend" />
+    <meta
+      name="twitter:description"
+      content="Comprehensive HTML sitemap and Table of Contents for TaleTranscend — index of all mythic chronicles, oral traditions, and chapters."
+    />
+
+    <!-- One font request, identical on every page -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cinzel:wght@500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap"
+    />
+
+    <style>
+      /* Critical Anti-FOUC Gate */
+      html {
+        background-color: #030305;
+        color: #e2e8f0;
+      }
+      body {
+        background-color: #030305;
+        color: #e2e8f0;
+        font-family:
+          'Inter',
+          system-ui,
+          -apple-system,
+          sans-serif;
+      }
+      body:not(.booted) > *:not(#app-boot-curtain) {
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
+      #app-boot-curtain {
+        position: fixed;
+        inset: 0;
+        background-color: #030305;
+        z-index: 999999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          opacity 0.3s cubic-bezier(0, 0, 0.2, 1),
+          visibility 0.3s cubic-bezier(0, 0, 0.2, 1);
+        pointer-events: none;
+      }
+      body.booted #app-boot-curtain {
+        opacity: 0;
+        visibility: hidden;
+      }
+      .boot-crest {
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        background: rgba(99, 102, 241, 0.08);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        box-shadow: 0 0 25px rgba(99, 102, 241, 0.2);
+        animation: boot-pulse 1.4s ease-in-out infinite;
+      }
+      @keyframes boot-pulse {
+        0%,
+        100% {
+          transform: scale(0.96);
+          opacity: 0.6;
+        }
+        50% {
+          transform: scale(1.04);
+          opacity: 1;
+        }
+      }
+    </style>
+    <script>
+      setTimeout(function () {
+        if (document.body && !document.body.classList.contains('booted')) {
+          document.body.classList.add('booted');
+        }
+      }, 3500);
+    </script>
+    <noscript>
+      <style>
+        body:not(.booted) > *:not(#app-boot-curtain) {
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+        #app-boot-curtain {
+          display: none !important;
+        }
+      </style>
+    </noscript>
+
+    <link rel="stylesheet" href="../assets/css/base.css" />
+    <link rel="stylesheet" href="../assets/css/nav.css" />
+    <link rel="stylesheet" href="../assets/css/components.css" />
+    <link rel="stylesheet" href="../assets/css/pages/toc.css" />
+
+    <script type="module" src="../pages/toc/toc.js"></script>
+  </head>
+
+  <body
+    class="text-slate-300 antialiased selection:bg-indigo-500/30 page-fade-in min-h-screen bg-[#030305]"
+  >
+    <!-- App Boot Curtain -->
+    <div id="app-boot-curtain" aria-hidden="true">
+      <div class="boot-crest">
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#818cf8"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"
+          />
+        </svg>
+      </div>
+    </div>
+
+    <a class="skip-link" href="#toc-main">Skip to content</a>
+    <div class="atmosphere-base"></div>
+    <div class="particle-field"></div>
+
+    <main id="toc-main" class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20">
+      <!-- Breadcrumb -->
+      <nav aria-label="Breadcrumb" class="mb-6">
+        <ol class="flex items-center space-x-2 text-xs text-slate-400">
+          <li><a href="/" class="hover:text-indigo-400 transition-colors">Home</a></li>
+          <li><span>/</span></li>
+          <li class="text-indigo-300 font-medium">Table of Contents</li>
+        </ol>
+      </nav>
+
+      <!-- Header Section -->
+      <header class="toc-header border-b border-white/10 pb-8 mb-10">
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-3">
+          <span
+            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold tracking-wider uppercase bg-indigo-500/10 text-indigo-300 border border-indigo-500/20"
+          >
+            <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+            Archival Hierarchy & Sitemap
+          </span>
+          <a
+            href="/sitemap.xml"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-1.5 text-xs text-amber-400/90 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 px-3 py-1.5 rounded-lg transition-all"
+            title="Raw XML Sitemap for search engines"
+          >
+            <i data-lucide="rss" class="w-3.5 h-3.5"></i>
+            <span>View XML Sitemap</span>
+          </a>
+        </div>
+
+        <h1
+          class="font-cinzel text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight mb-4"
+        >
+          Table of Contents
+        </h1>
+        <p class="text-slate-400 text-sm sm:text-base max-w-3xl leading-relaxed">
+          The comprehensive living codex of TaleTranscend. Explore all preserved folklore, mythic
+          fiction, sacred oral traditions, and direct chapter links organized chronologically and by
+          cultural pantheon.
+        </p>
+
+        <!-- Stats Overview Row -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-8">
+          <div class="toc-stat-card">
+            <span class="toc-stat-card__number text-indigo-400" id="stat-total-tales">—</span>
+            <span class="toc-stat-card__label">Preserved Chronicles</span>
+          </div>
+          <div class="toc-stat-card">
+            <span class="toc-stat-card__number text-amber-400" id="stat-total-chapters">—</span>
+            <span class="toc-stat-card__label">Total Chapters</span>
+          </div>
+          <div class="toc-stat-card">
+            <span class="toc-stat-card__number text-emerald-400" id="stat-total-eras">—</span>
+            <span class="toc-stat-card__label">Mythic Eras</span>
+          </div>
+          <div class="toc-stat-card">
+            <span class="toc-stat-card__number text-rose-400" id="stat-total-words">—</span>
+            <span class="toc-stat-card__label">Archive Words</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Section: Core Portals -->
+      <section class="mb-14" aria-labelledby="heading-core-portals">
+        <h2
+          id="heading-core-portals"
+          class="font-cinzel text-xl font-bold text-white mb-4 flex items-center gap-2"
+        >
+          <i data-lucide="compass" class="w-5 h-5 text-indigo-400"></i>
+          Core Sanctuaries & Portals
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <a href="/" class="toc-portal-card group">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="toc-portal-icon group-hover:bg-indigo-500/20 text-indigo-400">
+                <i data-lucide="home" class="w-4 h-4"></i>
+              </span>
+              <h3
+                class="font-cinzel font-semibold text-white group-hover:text-indigo-300 transition-colors"
+              >
+                Home Portal
+              </h3>
+            </div>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Featured myths, trending chronicles, and the archive reliquary.
+            </p>
+          </a>
+
+          <a href="/library.html" class="toc-portal-card group">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="toc-portal-icon group-hover:bg-indigo-500/20 text-indigo-400">
+                <i data-lucide="library" class="w-4 h-4"></i>
+              </span>
+              <h3
+                class="font-cinzel font-semibold text-white group-hover:text-indigo-300 transition-colors"
+              >
+                Grand Library
+              </h3>
+            </div>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Faceted filtering, sorting, genre tags, and deep text search.
+            </p>
+          </a>
+
+          <a href="/shelf.html" class="toc-portal-card group">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="toc-portal-icon group-hover:bg-indigo-500/20 text-indigo-400">
+                <i data-lucide="bookmark" class="w-4 h-4"></i>
+              </span>
+              <h3
+                class="font-cinzel font-semibold text-white group-hover:text-indigo-300 transition-colors"
+              >
+                Your Shelf
+              </h3>
+            </div>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Bookmarked scriptures, unfinished reads, and personalized reading progress.
+            </p>
+          </a>
+
+          <a href="/contribution.html" class="toc-portal-card group">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="toc-portal-icon group-hover:bg-indigo-500/20 text-indigo-400">
+                <i data-lucide="feather" class="w-4 h-4"></i>
+              </span>
+              <h3
+                class="font-cinzel font-semibold text-white group-hover:text-indigo-300 transition-colors"
+              >
+                Scribe Sanctuary
+              </h3>
+            </div>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Transcribe new legends, draft mythic chapters, and publish into the canon.
+            </p>
+          </a>
+        </div>
+      </section>
+
+      <!-- Filter & Search Controls -->
+      <section class="mb-8" aria-label="Codex Filtering">
+        <div
+          class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between bg-white/[0.02] border border-white/5 p-4 rounded-xl"
+        >
+          <div class="relative flex-1">
+            <i
+              data-lucide="search"
+              class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
+            ></i>
+            <input
+              type="search"
+              id="toc-search"
+              placeholder="Search chronicles, authors, or eras..."
+              class="w-full pl-10 pr-4 py-2 bg-black/40 border border-white/10 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500/50"
+            />
+          </div>
+          <div
+            class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0"
+            id="era-filter-container"
+          >
+            <button class="era-pill active" data-era="all">All Eras</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: The Chronicles Codex -->
+      <section aria-labelledby="heading-chronicles">
+        <div class="flex items-center justify-between mb-6">
+          <h2
+            id="heading-chronicles"
+            class="font-cinzel text-xl font-bold text-white flex items-center gap-2"
+          >
+            <i data-lucide="scroll" class="w-5 h-5 text-indigo-400"></i>
+            Chronicles & Chapter Hierarchies
+          </h2>
+          <span id="toc-count-label" class="text-xs text-slate-400">Loading chronicles...</span>
+        </div>
+
+        <!-- Dynamic Container -->
+        <div id="toc-list" class="space-y-6">
+          <div class="p-8 text-center bg-white/[0.02] border border-white/5 rounded-2xl">
+            <div
+              class="inline-block w-8 h-8 border-2 border-indigo-400/30 border-t-indigo-400 rounded-full animate-spin mb-3"
+            ></div>
+            <p class="text-sm text-slate-400">Unrolling archival manuscripts...</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

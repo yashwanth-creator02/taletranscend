@@ -104,7 +104,7 @@ describe('Nav Command Palette', () => {
       window.location = { href: '' };
 
       executeCommand(btn);
-      expect(window.location.href).toBe('test.html');
+      expect(window.location.href).toBe('/test.html');
     });
   });
 });

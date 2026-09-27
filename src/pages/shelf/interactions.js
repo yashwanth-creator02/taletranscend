@@ -14,7 +14,7 @@ import {
 import { setActiveTab, buildSortPanel, refreshSortPanel } from './ui.js';
 import { showToast } from '@ui/components/toast.js';
 import { removeFromBookmarks, getTaleMeta, getChapters } from '@services/index.js';
-import { debounce, navigateTo, resolveHref, createLogger } from '@/utils';
+import { debounce, navigateTo, taleUrl, createLogger } from '@/utils';
 
 const log = createLogger('ShelfInteractions');
 
@@ -182,7 +182,7 @@ function _bindCardActions() {
     const card = target.closest('[data-id]');
     if (card && !target.closest('.options-menu') && !target.closest('[data-action="options"]')) {
       const id = card.dataset.id;
-      if (id) navigateTo(`tale.html?id=${id}`);
+      if (id) navigateTo(taleUrl(id));
     }
   });
 
@@ -223,11 +223,11 @@ async function _handleCardAction(action, id, e) {
 
   switch (action) {
     case 'resume':
-      navigateTo(`tale.html?id=${id}`);
+      navigateTo(taleUrl(id));
       break;
 
     case 'copy-link': {
-      const url = `${window.location.origin}${resolveHref(`tale.html?id=${id}`)}`;
+      const url = taleUrl(id, window.location.origin);
       await navigator.clipboard?.writeText(url);
       showToast('Link copied to clipboard.', 'success');
       break;

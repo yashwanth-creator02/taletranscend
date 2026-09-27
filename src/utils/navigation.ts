@@ -97,6 +97,38 @@ export function resolveHref(target: string): string {
 }
 
 /**
+ * Returns the canonical hierarchical URL for a tale detail page.
+ * Produces `/tales/{taleId}` which Firebase rewrites to `/tale.html`.
+ *
+ * All internal navigation to a tale page should go through this helper so that
+ * the URL scheme is a single decision rather than scattered string literals.
+ *
+ * @param taleId - Firestore document ID of the tale
+ * @param origin - Optional base origin for absolute URLs (e.g. window.location.origin)
+ */
+export function taleUrl(taleId: string, origin?: string): string {
+  const path = `/tales/${encodeURIComponent(taleId)}`;
+  return origin ? `${origin}${path}` : path;
+}
+
+/**
+ * Returns the canonical hierarchical URL for a reader chapter page.
+ * Produces `/tales/{taleId}/read/{chapterIndex}` which Firebase rewrites to `/reader.html`.
+ *
+ * @param taleId       - Firestore document ID of the tale
+ * @param chapterIndex - 0-based chapter index (defaults to 0)
+ * @param origin       - Optional base origin for absolute URLs
+ */
+export function readerUrl(
+  taleId: string,
+  chapterIndex: number | string = 0,
+  origin?: string
+): string {
+  const path = `/tales/${encodeURIComponent(taleId)}/read/${chapterIndex}`;
+  return origin ? `${origin}${path}` : path;
+}
+
+/**
  * Navigates with a fade-out transition.
  *
  * @param target - Destination view name or URL

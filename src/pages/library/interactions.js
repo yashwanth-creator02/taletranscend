@@ -5,7 +5,7 @@
 
 import { showToast } from '@ui/components/toast.js';
 import { initIcons } from '@ui/components/icons.js';
-import { navigateTo, resolveHref, createLogger } from '@/utils';
+import { navigateTo, taleUrl, readerUrl, createLogger } from '@/utils';
 
 const log = createLogger('LibraryInteractions');
 log.debug('Module initialized');
@@ -76,7 +76,7 @@ export function setupCardInteractions(userId) {
     if (!e.target.closest('.options-menu')) {
       // Card body click → navigate to tale detail page
       if (!e.target.closest('.options-menu')) {
-        navigateTo(`tale.html?id=${encodeURIComponent(taleId)}`);
+        navigateTo(taleUrl(taleId));
       }
     }
   });
@@ -103,7 +103,7 @@ async function _handleResume(userId, taleId) {
     const resume = await resolveResumePoint({ userId, taleId });
     const chapterId = resume?.chapterIndex ?? 0;
     log.info('Resume point resolved', { chapterId });
-    navigateTo(`reader.html?taleId=${encodeURIComponent(taleId)}&chapterId=${chapterId}`);
+    navigateTo(readerUrl(taleId, chapterId));
   } catch (err) {
     log.error('Resume failed:', err);
   }
@@ -112,7 +112,7 @@ async function _handleResume(userId, taleId) {
 function _handleCopyLink(taleId) {
   log.info('Copy link requested', { taleId });
   // Use resolveHref for cross-environment compatibility
-  const url = `${window.location.origin}${resolveHref(`tale.html?id=${encodeURIComponent(taleId)}`)}`;
+  const url = taleUrl(taleId, window.location.origin);
   log.debug('Link built', { url });
   const modal = document.getElementById('copy-link-modal');
   const input = document.getElementById('copy-link-input');

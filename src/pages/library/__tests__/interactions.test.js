@@ -14,6 +14,8 @@ vi.mock('@services/index.js', () => ({
 vi.mock('@/utils', () => ({
   navigateTo: vi.fn(),
   resolveHref: vi.fn((href) => href),
+  taleUrl: vi.fn((id, origin) => (origin ? `${origin}/tales/${id}` : `/tales/${id}`)),
+  readerUrl: vi.fn((id, ch) => `/tales/${id}/read/${ch}`),
   createLogger: vi.fn(() => ({
     info: vi.fn(),
     debug: vi.fn(),
@@ -60,7 +62,7 @@ describe('LibraryInteractions', () => {
     setupCardInteractions('u1');
     const card = document.querySelector('.tale-card');
     card.click();
-    expect(utils.navigateTo).toHaveBeenCalledWith('tale.html?id=t1');
+    expect(utils.navigateTo).toHaveBeenCalledWith('/tales/t1');
   });
 
   it('toggles options menu', () => {
@@ -80,7 +82,7 @@ describe('LibraryInteractions', () => {
     await resumeBtn.click();
 
     expect(services.resolveResumePoint).toHaveBeenCalled();
-    expect(utils.navigateTo).toHaveBeenCalledWith(expect.stringContaining('chapterId=3'));
+    expect(utils.navigateTo).toHaveBeenCalledWith('/tales/t1/read/3');
   });
 
   it('handles couple action (bookmark)', async () => {

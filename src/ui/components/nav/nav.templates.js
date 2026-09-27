@@ -6,6 +6,7 @@
 
 import { PRIMARY_LINKS, DOCK_ITEMS } from './nav.config.js';
 import { getCurrentPage, escapeText, getAvatarSeed } from './nav.utils.js';
+import { resolveHref } from '@/utils';
 
 /* ─────────────────────────────────────────────
    Desktop Header Templates
@@ -19,10 +20,11 @@ import { getCurrentPage, escapeText, getAvatarSeed } from './nav.utils.js';
  * @returns {string}
  */
 export function buildPrimaryLink({ href, icon, label }, current) {
-  const isActive = current === href;
+  const targetHref = resolveHref(href);
+  const isActive = current === href || current === targetHref || targetHref === `/${current}`;
   return `
     <a
-      href="${href}"
+      href="${targetHref}"
       class="nav-link${isActive ? ' nav-link--active' : ''}"
       ${isActive ? 'aria-current="page"' : ''}
     >
@@ -40,10 +42,11 @@ export function buildPrimaryLink({ href, icon, label }, current) {
  * @returns {string}
  */
 export function buildDropdownLink({ href, icon, label }, current) {
-  const isActive = current === href;
+  const targetHref = resolveHref(href);
+  const isActive = current === href || current === targetHref || targetHref === `/${current}`;
   return `
     <a
-      href="${href}"
+      href="${targetHref}"
       class="dropdown-link${isActive ? ' dropdown-link--active' : ''}"
       role="menuitem"
       ${isActive ? 'aria-current="page"' : ''}
@@ -160,7 +163,7 @@ export function buildAuthenticatedUser(user, current, userLinks) {
 export function buildGuestUser() {
   return `
     <div id="nav-user">
-      <a href="login.html" class="signin-btn">
+      <a href="${resolveHref('login.html')}" class="signin-btn">
         <i data-lucide="log-in" class="signin-btn__icon" aria-hidden="true"></i>
         <span>Sign In</span>
       </a>
@@ -192,9 +195,10 @@ export function buildUserSkeleton() {
  * @returns {string}
  */
 export function buildDockItem({ href, icon, label, active, primary = false }) {
+  const targetHref = resolveHref(href);
   return `
     <a
-      href="${href}"
+      href="${targetHref}"
       class="mobile-dock__item${primary ? ' mobile-dock__item--primary' : ''}${active ? ' mobile-dock__item--active' : ''}"
       ${active ? 'aria-current="page"' : ''}
     >
@@ -373,7 +377,7 @@ export function buildNav() {
       <header id="app-nav" class="app-nav">
         <div class="nav-inner">
           <div class="flex items-center gap-10">
-            <a href="index.html" class="nav-logo">
+            <a href="${resolveHref('index.html')}" class="nav-logo">
               <div class="nav-logo__mark">
                 <i data-lucide="sparkles" class="nav-logo__icon"></i>
               </div>

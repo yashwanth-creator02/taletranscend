@@ -14,6 +14,8 @@ import {
   formatJoinDate,
   timeAgo,
   escapeHtml as escapeHtml,
+  taleUrl,
+  readerUrl,
 } from '@/utils';
 
 /* ─────────────────────────────────────────────
@@ -419,7 +421,7 @@ export function renderContinueReading(tales) {
       <div class="flex items-center gap-3 py-6 px-4 text-xs sm:text-sm text-slate-400 italic bg-white/1 rounded-2xl border border-white/5 w-full">
         <i data-lucide="book-open-check" class="w-4 h-4 text-slate-500 not-italic shrink-0"></i>
         <span>No tales in progress.</span>
-        <a href="library.html" class="text-indigo-400 hover:text-indigo-300 font-semibold not-italic ml-1">Browse Library →</a>
+        <a href="/library.html" class="text-indigo-400 hover:text-indigo-300 font-semibold not-italic ml-1">Browse Library →</a>
       </div>
     `;
     initIcons(container);
@@ -440,7 +442,7 @@ function _buildContinueReadingCard(tale) {
 
   return `
     <a
-      href="reader.html?taleId=${tale.id}&chapterId=${tale.lastChapterIndex}"
+      href="${readerUrl(tale.id, tale.lastChapterIndex)}"
       class="continue-card group snap-start shrink-0 w-60 sm:w-64 bg-white/2 border border-white/5 rounded-2xl overflow-hidden hover:bg-white/4 hover:border-white/10 transition-all duration-300"
     >
       <div class="relative h-28 w-full bg-zinc-950 overflow-hidden">
@@ -545,7 +547,7 @@ function _buildPublishedCard(tale) {
     'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=400';
 
   return `
-    <a href="tale.html?id=${tale.id}" class="contribution-card group block bg-white/2 border border-white/5 rounded-2xl sm:rounded-3xl overflow-hidden hover:bg-white/4 hover:border-indigo-500/30 hover:-translate-y-1 transition-all duration-300">
+    <a href="${taleUrl(tale.id)}" class="contribution-card group block bg-white/2 border border-white/5 rounded-2xl sm:rounded-3xl overflow-hidden hover:bg-white/4 hover:border-indigo-500/30 hover:-translate-y-1 transition-all duration-300">
       <div class="relative h-28 sm:h-32 bg-zinc-950 overflow-hidden">
         <img src="${cover}" alt="${safeTitle}"
           class="w-full h-full object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-500" loading="lazy" />
@@ -594,7 +596,7 @@ export function renderDrafts(drafts) {
       <div class="col-span-full flex items-center gap-3 py-6 px-4 text-xs sm:text-sm text-slate-400 italic bg-white/1 rounded-2xl border border-white/5 font-medium">
         <i data-lucide="feather" class="w-4 h-4 text-slate-500 not-italic shrink-0"></i>
         <span>No drafts awaiting preservation.</span>
-        <a href="contribution.html" class="text-indigo-400 hover:text-indigo-300 font-semibold not-italic ml-1">Begin a Draft →</a>
+        <a href="/contribution.html" class="text-indigo-400 hover:text-indigo-300 font-semibold not-italic ml-1">Begin a Draft →</a>
       </div>
     `;
     initIcons(container);
@@ -615,7 +617,7 @@ function _buildDraftCard(draft) {
 
   return `
     <a
-      href="contribution.html?draft=${draft.id}"
+      href="/contribution.html?draft=${draft.id}"
       class="group block bg-white/2 border border-white/5 rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 hover:bg-white/4 hover:border-amber-500/30 hover:-translate-y-1 transition-all duration-300"
     >
       <div class="flex items-center justify-between gap-2 mb-2.5">

@@ -11,6 +11,10 @@
     "cleanUrls": true,
     "trailingSlash": false,
     "rewrites": [
+      { "source": "/tales/*/read/**", "destination": "/reader.html" },
+      { "source": "/tales/**", "destination": "/tale.html" },
+      { "source": "/toc/**", "destination": "/toc.html" },
+      { "source": "/sitemap.xml", "function": "sitemap" },
       { "source": "/library/**", "destination": "/library.html" },
       { "source": "/shelf/**", "destination": "/shelf.html" },
       { "source": "/reader/**", "destination": "/reader.html" },

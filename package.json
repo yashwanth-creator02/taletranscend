@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "vite",
     "start": "vite",
-    "build": "vite build",
+    "build": "node scripts/generate-sitemap.js && vite build",
+    "build:sitemap": "node scripts/generate-sitemap.js",
     "preview": "vite preview",
     "analyze": "ANALYZE=true vite build",
     "format": "prettier . --write",

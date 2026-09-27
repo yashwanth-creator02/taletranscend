@@ -17,6 +17,7 @@ import { auth, setDoc, updateDoc, serverTimestamp, refs } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
 import {
   navigateTo,
+  taleUrl,
   countWords,
   estimateReadMins,
   safeAsync,
@@ -89,7 +90,7 @@ export async function publishFullTale() {
     _setPublishStatus('Published successfully!', 'success');
 
     setTimeout(() => {
-      navigateTo(`tale.html?id=${taleId}`);
+      navigateTo(taleUrl(taleId));
     }, 1500);
   } else {
     _setPublishStatus('Publish failed. Please try again.', 'error');

@@ -13,6 +13,7 @@ import {
   initPageReveal,
   readyReveal,
   escapeHtml as escapeHtml,
+  taleUrl,
   createLogger,
 } from '@/utils';
 import { initIcons } from '@ui/components/icons.js';
@@ -171,7 +172,7 @@ function _renderTrendingCard(tale) {
 
   return `
     <a
-      href="tale.html?id=${tale.id}"
+      href="${taleUrl(tale.id)}"
       class="home-tale-card group"
     >
       <div class="home-tale-card__media">

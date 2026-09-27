@@ -61,13 +61,14 @@ describe('ReaderNavigation', () => {
     });
 
     it('updates URL on button click', () => {
+      readerState.taleId = 't1';
       const nav = { hasNext: true, nextIndex: 1, nextTitle: 'Next' };
       applyNavigation(nav);
 
       const btn = document.querySelector('[data-nav-index="1"]');
       btn.click();
 
-      expect(window.location.href).toContain('chapterId=1');
+      expect(utils.navigateTo).toHaveBeenCalledWith('/tales/t1/read/1');
     });
   });
 
@@ -75,7 +76,7 @@ describe('ReaderNavigation', () => {
     it('navigates to tale page if taleId exists', () => {
       readerState.taleId = 'tale-123';
       goBackToTale();
-      expect(utils.navigateTo).toHaveBeenCalledWith('tale.html?id=tale-123');
+      expect(utils.navigateTo).toHaveBeenCalledWith('/tales/tale-123');
     });
 
     it('navigates to library if no taleId', () => {

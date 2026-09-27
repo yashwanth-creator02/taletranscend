@@ -20,6 +20,8 @@ vi.mock('@services/index.js', () => ({
 
 vi.mock('@/utils', () => ({
   navigateTo: vi.fn(),
+  readerUrl: vi.fn((id, ch) => `/tales/${id}/read/${ch}`),
+  taleUrl: vi.fn((id) => `/tales/${id}`),
   createLogger: vi.fn(() => ({
     info: vi.fn(),
     debug: vi.fn(),
@@ -92,7 +94,7 @@ describe('TaleInteractions', () => {
       bindChapterClicks('t1');
       const item = document.querySelector('.chapter-item');
       item.click();
-      expect(utils.navigateTo).toHaveBeenCalledWith('reader.html?taleId=t1&chapterId=5');
+      expect(utils.navigateTo).toHaveBeenCalledWith('/tales/t1/read/5');
     });
   });
 
@@ -112,7 +114,7 @@ describe('TaleInteractions', () => {
     it('navigates to chapter 0', () => {
       setupStartReading('t1', [{ id: 'c1' }]);
       document.getElementById('start-btn').click();
-      expect(utils.navigateTo).toHaveBeenCalledWith('reader.html?taleId=t1&chapterId=0');
+      expect(utils.navigateTo).toHaveBeenCalledWith('/tales/t1/read/0');
     });
   });
 

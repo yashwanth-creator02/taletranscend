@@ -36,12 +36,19 @@ log.info('Initializing Tale Archive page');
 
 /* ─────────────────────────────────────────────
    URL Parameters
+   ─────────────────────────────────────────────
+   Supports both:
+     /tales/{taleId}        (hierarchical — canonical)
+     /tale?id={taleId}      (legacy query-string — backwards compat)
    ───────────────────────────────────────────── */
 
-const taleId = new URLSearchParams(window.location.search).get('id');
+const _pathMatch = window.location.pathname.match(/\/tales\/([^/]+)/);
+const taleId =
+  (_pathMatch && decodeURIComponent(_pathMatch[1])) ||
+  new URLSearchParams(window.location.search).get('id');
 
 if (!taleId) {
-  location.replace('library.html');
+  location.replace('/library.html');
   throw new Error('No taleId in URL');
 }
 

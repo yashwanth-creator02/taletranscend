@@ -7,3 +7,4 @@ initializeApp();
 export { onReactionWrite } from './triggers/onReactionWrite.js';
 export { onCommentWrite } from './triggers/onCommentWrite.js';
 export { setModeratorClaim } from './admin/setModeratorClaim.js';
+export { sitemap } from './sitemap.js';

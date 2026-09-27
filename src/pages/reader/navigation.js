@@ -3,7 +3,7 @@
 
 import { readerState } from './state.js';
 import { initIcons } from '@ui/components/icons.js';
-import { navigateTo, escapeHtml as escapeHtml, createLogger } from '@/utils';
+import { navigateTo, escapeHtml as escapeHtml, taleUrl, readerUrl, createLogger } from '@/utils';
 
 const log = createLogger('ReaderNavigation');
 
@@ -50,9 +50,8 @@ export function applyNavigation(nav) {
 
   container.querySelectorAll('[data-nav-index]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const url = new URL(window.location.href);
-      url.searchParams.set('chapterId', btn.dataset.navIndex);
-      window.location.href = url.toString();
+      const nextIndex = Number(btn.dataset.navIndex);
+      navigateTo(readerUrl(readerState.taleId, nextIndex));
     });
   });
 
@@ -66,7 +65,7 @@ export function applyNavigation(nav) {
  */
 export function goBackToTale() {
   if (readerState.taleId) {
-    navigateTo(`tale.html?id=${readerState.taleId}`);
+    navigateTo(taleUrl(readerState.taleId));
   } else {
     navigateTo('library.html');
   }
