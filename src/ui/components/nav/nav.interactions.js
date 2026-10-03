@@ -97,6 +97,18 @@ function handleDocumentClick(event) {
     return;
   }
 
+  // ── Command palette clear button ──────────────
+  if (target.closest('#nav-command-clear')) {
+    event.preventDefault();
+    const { commandInput } = getNavElements();
+    if (commandInput) {
+      commandInput.value = '';
+      renderCommandList('');
+      commandInput.focus();
+    }
+    return;
+  }
+
   // ── Command palette close triggers ────────────
   if (target.closest('#nav-command-close') || target.closest('[data-command-close]')) {
     event.preventDefault();

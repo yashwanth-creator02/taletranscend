@@ -260,26 +260,38 @@ export function buildMobileDock(current, user) {
  * @param {string} current
  * @returns {string}
  */
-export function buildCommandItem(item, current) {
+export function buildCommandItem(item, current, isFocused = false, index = 0) {
   const isActive = item.href ? item.href === current : false;
   const hrefAttr = item.href ? `data-href="${item.href}"` : '';
   const actionAttr = item.action ? `data-action="${item.action}"` : '';
 
+  let classes = 'command-item';
+  if (isActive) classes += ' command-item--active';
+  if (isFocused) classes += ' is-focused';
+
   return `
     <button
       type="button"
-      class="command-item${isActive ? ' command-item--active' : ''}"
+      id="command-item-${index}"
+      class="${classes}"
       role="option"
-      aria-selected="${isActive ? 'true' : 'false'}"
+      aria-selected="${isFocused ? 'true' : 'false'}"
       ${hrefAttr}
       ${actionAttr}
+      tabindex="-1"
     >
       <span class="command-item__icon-wrap" aria-hidden="true">
         <i data-lucide="${item.icon}" class="command-item__icon"></i>
       </span>
-      <span class="command-item__label">${escapeText(item.label)}</span>
+      <span class="command-item__content">
+        <span class="command-item__label">${escapeText(item.label)}</span>
+        ${item.description ? `<span class="command-item__desc">${escapeText(item.description)}</span>` : ''}
+      </span>
       ${item.shortcut ? `<span class="command-item__shortcut" aria-label="Shortcut: ${item.shortcut}">${item.shortcut}</span>` : ''}
-      ${isActive ? '<span class="command-item__badge">Current page</span>' : ''}
+      ${isActive ? '<span class="command-item__badge">Current</span>' : ''}
+      <span class="command-item__arrow" aria-hidden="true">
+        <i data-lucide="arrow-right" class="command-item__arrow-icon"></i>
+      </span>
     </button>
   `;
 }
@@ -308,9 +320,16 @@ export function buildCommandPalette() {
         aria-labelledby="nav-command-title"
       >
         <div class="command-header">
-          <div class="command-header__text">
-            <h2 id="nav-command-title" class="command-title">Quick Navigation</h2>
-            <p class="command-subtitle">Jump anywhere — type or use arrow keys.</p>
+          <div class="command-header__badge-wrap">
+            <span class="command-header__badge" aria-hidden="true">
+              <i data-lucide="compass" class="command-header__badge-icon"></i>
+            </span>
+            <div class="command-header__text">
+              <div class="command-header__title-row">
+                <h2 id="nav-command-title" class="command-title">Quick Navigation</h2>
+              </div>
+              <p class="command-subtitle">Jump directly to chronicles, archives & scribe tools</p>
+            </div>
           </div>
 
           <button
@@ -319,12 +338,15 @@ export function buildCommandPalette() {
             id="nav-command-close"
             aria-label="Close command palette (Escape)"
           >
+            <span class="command-close__kbd" aria-hidden="true">Esc</span>
             <i data-lucide="x" class="command-close__icon" aria-hidden="true"></i>
           </button>
         </div>
 
         <div class="command-search" role="search">
-          <i data-lucide="search" class="command-search__icon" aria-hidden="true"></i>
+          <div class="command-search__icon-wrap" aria-hidden="true">
+            <i data-lucide="search" class="command-search__icon"></i>
+          </div>
           <input
             id="nav-command-input"
             class="command-input"
@@ -334,11 +356,21 @@ export function buildCommandPalette() {
             aria-haspopup="listbox"
             autocomplete="off"
             spellcheck="false"
-            placeholder="Search pages and actions…"
+            placeholder="Type a chronicle, page, or action…"
             aria-label="Search pages and actions"
             aria-autocomplete="list"
             aria-controls="nav-command-list"
           />
+          <button
+            type="button"
+            class="command-search__clear"
+            id="nav-command-clear"
+            aria-label="Clear search query"
+            tabindex="-1"
+            hidden
+          >
+            <i data-lucide="x" class="command-search__clear-icon" aria-hidden="true"></i>
+          </button>
         </div>
 
         <div
@@ -349,21 +381,21 @@ export function buildCommandPalette() {
         ></div>
 
         <div class="command-footer" aria-hidden="true">
-          <span class="command-footer__hint">
-            <kbd>↑</kbd><kbd>↓</kbd> Navigate
-          </span>
-          <span class="command-footer__hint">
-            <kbd>↵</kbd> Select
-          </span>
-          <span class="command-footer__hint">
-            <kbd>Esc</kbd> Close
-          </span>
-          <span class="command-footer__hint">
-            <kbd>⌘K / Ctrl+K</kbd> Toggle
-          </span>
-          <span class="command-footer__hint">
-            <kbd>Ctrl+A</kbd> Select All
-          </span>
+          <div class="command-footer__hints">
+            <span class="command-footer__hint">
+              <kbd>↑</kbd><kbd>↓</kbd> <span>Navigate</span>
+            </span>
+            <span class="command-footer__hint">
+              <kbd>↵</kbd> <span>Select</span>
+            </span>
+            <span class="command-footer__hint">
+              <kbd>Esc</kbd> <span>Close</span>
+            </span>
+          </div>
+          <div class="command-footer__brand">
+            <i data-lucide="sparkles" class="command-footer__brand-icon"></i>
+            <span>TaleTranscend</span>
+          </div>
         </div>
       </section>
     </div>

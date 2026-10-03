@@ -35,6 +35,8 @@ function getCommandItems() {
       action: 'signout',
       icon: 'log-out',
       label: 'Sign Out',
+      description: 'End your current session',
+      category: 'Session',
       keywords: ['logout', 'sign out', 'exit', 'leave'],
     });
   } else {
@@ -42,6 +44,8 @@ function getCommandItems() {
       href: 'login.html',
       icon: 'log-in',
       label: 'Sign In',
+      description: 'Access your scribe ledger and saved tales',
+      category: 'Session',
       keywords: ['login', 'sign in', 'account'],
     });
   }
@@ -52,9 +56,10 @@ function getCommandItems() {
 /**
  * Builds the HTML for a single command palette item.
  *
- * @param {{ href?: string, action?: string, icon: string, label: string, shortcut?: string }} item
+ * @param {{ href?: string, action?: string, icon: string, label: string, shortcut?: string, description?: string }} item
  * @param {string} current - Current page filename
  * @param {boolean} isFocused - Whether this item has keyboard focus
+ * @param {number} index - Index for aria-activedescendant
  * @returns {string}
  */
 function buildCommandItem(item, current, isFocused = false, index = 0) {
@@ -80,9 +85,15 @@ function buildCommandItem(item, current, isFocused = false, index = 0) {
       <span class="command-item__icon-wrap" aria-hidden="true">
         <i data-lucide="${item.icon}" class="command-item__icon"></i>
       </span>
-      <span class="command-item__label">${escapeHtml(item.label)}</span>
+      <span class="command-item__content">
+        <span class="command-item__label">${escapeHtml(item.label)}</span>
+        ${item.description ? `<span class="command-item__desc">${escapeHtml(item.description)}</span>` : ''}
+      </span>
       ${item.shortcut ? `<span class="command-item__shortcut" aria-label="Shortcut: ${item.shortcut}">${item.shortcut}</span>` : ''}
       ${isActive ? '<span class="command-item__badge">Current</span>' : ''}
+      <span class="command-item__arrow" aria-hidden="true">
+        <i data-lucide="arrow-right" class="command-item__arrow-icon"></i>
+      </span>
     </button>
   `;
 }
@@ -105,9 +116,16 @@ export function renderCommandList(query = '') {
   const normalized = query.trim().toLowerCase();
   const focusedIndex = navState.commandFocusedIndex;
 
+  const clearBtn = document.getElementById('nav-command-clear');
+  if (clearBtn) {
+    clearBtn.hidden = !normalized;
+  }
+
   const filtered = getCommandItems().filter((item) => {
     if (!normalized) return true;
-    const searchable = [item.label, ...(item.keywords || [])].join(' ').toLowerCase();
+    const searchable = [item.label, item.description || '', ...(item.keywords || [])]
+      .join(' ')
+      .toLowerCase();
     return searchable.includes(normalized);
   });
 
@@ -116,7 +134,13 @@ export function renderCommandList(query = '') {
   if (!filtered.length) {
     commandList.innerHTML = `
       <div class="command-empty" role="status" aria-live="polite">
-        No results for "<strong>${escapeHtml(query)}</strong>"
+        <div class="command-empty__icon-wrap" aria-hidden="true">
+          <i data-lucide="search" class="command-empty__icon"></i>
+        </div>
+        <p class="command-empty__title">No results found</p>
+        <p class="command-empty__desc">
+          No results for "<strong>${escapeHtml(query)}</strong>". Try searching for archives, shelf, or actions.
+        </p>
       </div>
     `;
     commandInput?.removeAttribute('aria-activedescendant');
@@ -124,9 +148,23 @@ export function renderCommandList(query = '') {
     return;
   }
 
-  commandList.innerHTML = filtered
-    .map((item, i) => buildCommandItem(item, current, i === focusedIndex, i))
-    .join('');
+  let html = '';
+  let lastCategory = null;
+
+  filtered.forEach((item, i) => {
+    const category = item.category || 'Navigation';
+    if (category !== lastCategory) {
+      html += `
+        <div class="command-group-heading" role="presentation" aria-hidden="true">
+          <span>${escapeHtml(category)}</span>
+        </div>
+      `;
+      lastCategory = category;
+    }
+    html += buildCommandItem(item, current, i === focusedIndex, i);
+  });
+
+  commandList.innerHTML = html;
 
   if (commandInput) {
     if (focusedIndex >= 0 && filtered[focusedIndex]) {
