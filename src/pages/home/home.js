@@ -114,12 +114,7 @@ async function _loadTrendingTales() {
   if (!container) return;
 
   container.classList.add('fade-in-stagger');
-
-  const isFirst =
-    typeof window !== 'undefined' ? cacheService.isFirstVisit(window.location.href) : true;
-  if (isFirst) {
-    _showSkeletons(container);
-  }
+  _showSkeletons(container);
 
   try {
     let currentTales = [];

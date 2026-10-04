@@ -214,6 +214,73 @@ async function runPageInitializer(targetUrl) {
 let _isNavigating = false;
 
 /**
+ * Triggers a full browser navigation while fading out document body to prevent jarring flashes.
+ *
+ * @param {string} targetUrl
+ */
+function executeFullReload(targetUrl) {
+  if (typeof document !== 'undefined' && document.body) {
+    const reduced =
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reduced) {
+      document.body.style.transition = 'opacity 220ms var(--ease-standard, ease)';
+      document.body.style.opacity = '0';
+      document.body.style.pointerEvents = 'none';
+    }
+  }
+  window.location.href = targetUrl;
+}
+
+/**
+ * Displays an illuminated gradient progress bar at the top of the viewport during transitions.
+ */
+export function showNavigationProgressBar() {
+  if (typeof document === 'undefined' || !document.body) return;
+  let bar = document.getElementById('router-progress-bar');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'router-progress-bar';
+    bar.setAttribute('aria-hidden', 'true');
+    bar.style.position = 'fixed';
+    bar.style.top = '0';
+    bar.style.left = '0';
+    bar.style.height = '3px';
+    bar.style.width = '0%';
+    bar.style.background = 'linear-gradient(90deg, #6366f1, #a855f7, #ec4899)';
+    bar.style.boxShadow = '0 0 10px rgba(99, 102, 241, 0.7), 0 0 5px rgba(168, 85, 247, 0.5)';
+    bar.style.zIndex = '9999999';
+    bar.style.transition = 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease';
+    bar.style.pointerEvents = 'none';
+    document.body.appendChild(bar);
+  }
+  bar.style.opacity = '1';
+  bar.style.width = '35%';
+  setTimeout(() => {
+    if (bar && bar.style.opacity === '1') {
+      bar.style.width = '75%';
+    }
+  }, 100);
+}
+
+/**
+ * Finishes and fades out the top progress bar.
+ */
+export function hideNavigationProgressBar() {
+  if (typeof document === 'undefined') return;
+  const bar = document.getElementById('router-progress-bar');
+  if (bar) {
+    bar.style.width = '100%';
+    setTimeout(() => {
+      bar.style.opacity = '0';
+      setTimeout(() => {
+        bar.style.width = '0%';
+      }, 250);
+    }, 150);
+  }
+}
+
+/**
  * Performs client-side navigation.
  * If small change: swaps respective div (#main-content) with view transition.
  * If large change: executes full browser reload.
@@ -234,7 +301,7 @@ export async function softNavigate(targetUrl, { isPopState = false, forceReload 
     log.info('First visit to page in this session — loading page fully', {
       target: fullTargetUrl,
     });
-    window.location.href = fullTargetUrl;
+    executeFullReload(fullTargetUrl);
     return;
   }
 
@@ -244,12 +311,14 @@ export async function softNavigate(targetUrl, { isPopState = false, forceReload 
       from: currentUrl,
       to: fullTargetUrl,
     });
-    window.location.href = fullTargetUrl;
+    executeFullReload(fullTargetUrl);
     return;
   }
 
   if (_isNavigating) return;
   _isNavigating = true;
+
+  showNavigationProgressBar();
 
   log.info('Small change detected — performing soft respective div swap', {
     from: currentUrl,
@@ -260,7 +329,7 @@ export async function softNavigate(targetUrl, { isPopState = false, forceReload 
     const html = await fetchPageHtml(fullTargetUrl);
     if (!html) {
       // Fall back to full reload if fetch failed
-      window.location.href = fullTargetUrl;
+      executeFullReload(fullTargetUrl);
       return;
     }
 
@@ -271,7 +340,7 @@ export async function softNavigate(targetUrl, { isPopState = false, forceReload 
 
     if (!newMain || !currentMain) {
       log.warn('Missing #main-content container in target document — reloading');
-      window.location.href = fullTargetUrl;
+      executeFullReload(fullTargetUrl);
       return;
     }
 
@@ -341,8 +410,9 @@ export async function softNavigate(targetUrl, { isPopState = false, forceReload 
     await runPageInitializer(fullTargetUrl);
   } catch (err) {
     log.error('Soft navigation error, falling back to full reload', err);
-    window.location.href = fullTargetUrl;
+    executeFullReload(fullTargetUrl);
   } finally {
+    hideNavigationProgressBar();
     _isNavigating = false;
   }
 }

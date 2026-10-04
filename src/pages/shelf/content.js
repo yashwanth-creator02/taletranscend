@@ -54,11 +54,7 @@ export async function loadBookmarkedTales(userId, force = false) {
   }
 
   shelfState.isLoading = true;
-  const isFirst =
-    typeof window !== 'undefined' ? cacheService.isFirstVisit(window.location.href) : true;
-  if (isFirst) {
-    setGridLoading();
-  }
+  setGridLoading();
 
   try {
     const onBackgroundUpdate = (freshBookmarks) => {

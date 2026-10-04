@@ -26,7 +26,6 @@ import { setupSidebarToggle, updateSidebarUser, showGridSkeleton, showGridError 
 import { setupCardInteractions } from './interactions.js';
 import { libraryState } from './state.js';
 import { appState } from '@state/index.js';
-import { cacheService } from '@services/cache.service.js';
 
 initNav();
 initPageReveal();
@@ -39,11 +38,7 @@ export async function initLibraryPage() {
   setupLengthFilter();
   setupSidebarFilter();
 
-  const isFirst =
-    typeof window !== 'undefined' ? cacheService.isFirstVisit(window.location.href) : true;
-  if (isFirst) {
-    showGridSkeleton();
-  }
+  showGridSkeleton();
 
   initIcons();
   setupPagination();
