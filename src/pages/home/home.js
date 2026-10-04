@@ -18,6 +18,7 @@ import {
 } from '@/utils';
 import { initIcons } from '@ui/components/icons.js';
 import { getTales } from '@services/index.js';
+import { cacheService } from '@services/cache.service.js';
 import { DEFAULT_COVER_URL } from '@config/app.config.js';
 import { initReliquary } from './reliquary.js';
 
@@ -113,10 +114,48 @@ async function _loadTrendingTales() {
   if (!container) return;
 
   container.classList.add('fade-in-stagger');
-  _showSkeletons(container);
+
+  const isFirst =
+    typeof window !== 'undefined' ? cacheService.isFirstVisit(window.location.href) : true;
+  if (isFirst) {
+    _showSkeletons(container);
+  }
 
   try {
-    const tales = await getTales({ status: 'published', count: 3 });
+    let currentTales = [];
+    const tales = await getTales({
+      status: 'published',
+      count: 3,
+      onBackgroundUpdate: (freshTales) => {
+        log.info('Background update for trending tales received', { count: freshTales.length });
+        cacheService.reconcileOrReload({
+          cached: currentTales,
+          fresh: freshTales,
+          updateDiv: (freshTale, id) => {
+            log.info('Updating specific trending tale card div', { id });
+            const cardEl = container.querySelector(`[data-tale-id="${id}"]`);
+            if (cardEl) {
+              const temp = document.createElement('div');
+              temp.innerHTML = _renderTrendingCard(freshTale);
+              const newCard = temp.firstElementChild;
+              if (newCard) {
+                cardEl.replaceWith(newCard);
+                initIcons();
+              }
+            }
+          },
+          onReload: () => {
+            log.info('Changes too many in trending tales — re-rendering section');
+            currentTales = freshTales;
+            container.innerHTML = freshTales.map(_renderTrendingCard).join('');
+            initReliquary('archive-reliquary-container', freshTales);
+            initIcons();
+          },
+        });
+      },
+    });
+
+    currentTales = tales;
 
     if (!tales.length) {
       log.info('No trending tales found');
@@ -183,6 +222,7 @@ function _renderTrendingCard(tale) {
     <a
       href="${taleUrl(tale.id)}"
       class="home-tale-card group"
+      data-tale-id="${escapeHtml(tale.id)}"
     >
       <div class="home-tale-card__media">
         <img

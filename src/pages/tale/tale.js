@@ -29,6 +29,7 @@ import {
   initIcons,
 } from './index.js';
 import { addToBookmarks, removeFromBookmarks, isBookmarked } from '@services/index.js';
+import { cacheService } from '@services/cache.service.js';
 import { appState } from '@state/index.js';
 
 const log = createLogger('TaleArchive');
@@ -72,8 +73,12 @@ export async function initTalePage(authUser = null) {
     return;
   }
 
-  // 0. Skeleton loaders & icons
-  showArchiveSkeletons();
+  // 0. Skeleton loaders & icons (only on first session visit)
+  const isFirst =
+    typeof window !== 'undefined' ? cacheService.isFirstVisit(window.location.href) : true;
+  if (isFirst) {
+    showArchiveSkeletons();
+  }
 
   const user = authUser;
   const userId = user?.uid || appState.userId || 'anonymous';

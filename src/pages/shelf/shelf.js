@@ -25,6 +25,7 @@ import {
 import { initShelfLayout } from './layout.js';
 
 import { appState } from '@state/index.js';
+import { cacheService } from '@services/cache.service.js';
 
 const log = createLogger('Shelf');
 
@@ -50,7 +51,12 @@ export async function initShelfPage() {
   const uid = appState.userId || shelfState.userId;
   if (uid) {
     shelfState.userId = uid;
-    setGridLoading();
+
+    const isFirst =
+      typeof window !== 'undefined' ? cacheService.isFirstVisit(window.location.href) : true;
+    if (isFirst) {
+      setGridLoading();
+    }
 
     log.debug('Loading bookmarks, drafts, and recent tales...');
     await Promise.all([loadBookmarkedTales(uid), loadDrafts(uid), loadRecentTales(uid)]);

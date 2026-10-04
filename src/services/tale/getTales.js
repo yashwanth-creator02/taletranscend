@@ -29,7 +29,12 @@ const log = createLogger('GetTalesService');
  * @param {any}      [options.after=null]            - Firestore cursor for pagination (lastVisible snap)
  * @returns {Promise<import('@state/schemas/tale.schema.js').Tale[]>}
  */
-export async function getTales({ status = 'published', count = 50, after = null } = {}) {
+export async function getTales({
+  status = 'published',
+  count = 50,
+  after = null,
+  onBackgroundUpdate = null,
+} = {}) {
   log.debug('Fetching tales', { status, count, afterId: after?.id });
 
   const fetcher = async () => {
@@ -63,6 +68,8 @@ export async function getTales({ status = 'published', count = 50, after = null 
   if (!after) {
     return cacheService.fetchWithCache(`tales:list:${status}:${count}`, fetcher, {
       ttl: 5 * 60 * 1000,
+      pageUrl: typeof window !== 'undefined' ? window.location.href : null,
+      onBackgroundUpdate,
     });
   }
 
@@ -119,7 +126,11 @@ export async function getTalesPage({ count = 20, after = null } = {}) {
  * @param {number} [options.perPage=8] - Items per page
  * @returns {Promise<{tales: Tale[], total: number, hasMore: boolean}>}
  */
-export async function getTalesPageNumbered({ page = 1, perPage = 8 } = {}) {
+export async function getTalesPageNumbered({
+  page = 1,
+  perPage = 8,
+  onBackgroundUpdate = null,
+} = {}) {
   return cacheService.fetchWithCache(
     `tales:page:${page}:${perPage}`,
     async () => {
@@ -177,7 +188,11 @@ export async function getTalesPageNumbered({ page = 1, perPage = 8 } = {}) {
         hasMore: page * perPage < total,
       };
     },
-    { ttl: 5 * 60 * 1000 }
+    {
+      ttl: 5 * 60 * 1000,
+      pageUrl: typeof window !== 'undefined' ? window.location.href : null,
+      onBackgroundUpdate,
+    }
   );
 }
 

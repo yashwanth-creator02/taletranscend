@@ -34,6 +34,7 @@ import {
 import { initProfileLayout } from './layout.js';
 
 import { getContinueReading, getUserPublishedTales, getUserDrafts } from '@services/index.js';
+import { cacheService } from '@services/cache.service.js';
 
 log.info('Initializing Profile page');
 initPageReveal();
@@ -124,8 +125,13 @@ export async function initProfilePage(currentUser = auth?.currentUser) {
     }
 
     startProfileSync(uid);
-    showContinueReadingSkeleton();
-    showContributionsSkeleton();
+
+    const isFirst =
+      typeof window !== 'undefined' ? cacheService.isFirstVisit(window.location.href) : true;
+    if (isFirst) {
+      showContinueReadingSkeleton();
+      showContributionsSkeleton();
+    }
 
     try {
       const [continueReading, publishedTales, drafts, stats] = await Promise.all([

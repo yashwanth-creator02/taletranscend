@@ -12,6 +12,7 @@
 import { createLogger } from './logger.ts';
 import { resolveHref } from './navigation.ts';
 import { initIcons } from '@ui/components/icons.js';
+import { cacheService } from '@services/cache.service.js';
 
 const log = createLogger('Router');
 
@@ -227,7 +228,17 @@ export async function softNavigate(targetUrl, { isPopState = false, forceReload 
   const fullTargetUrl = new URL(resolved, window.location.origin).href;
   const currentUrl = window.location.href;
 
-  // 1. If large change or forced reload, perform full page reload
+  // 1. If page is being visited for the first time in this browser session:
+  // "like for evry browser session, if the page is being visited for the first time, then load the page fully, no chacheing here."
+  if (cacheService.isFirstVisit(fullTargetUrl)) {
+    log.info('First visit to page in this session — loading page fully', {
+      target: fullTargetUrl,
+    });
+    window.location.href = fullTargetUrl;
+    return;
+  }
+
+  // 2. If large change or forced reload, perform full page reload
   if (forceReload || !isSmallChange(currentUrl, fullTargetUrl)) {
     log.info('Large change detected — performing full page reload', {
       from: currentUrl,
@@ -368,6 +379,15 @@ export function initRouter() {
     const href = link.getAttribute('href');
     if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) {
       return;
+    }
+
+    const resolved = resolveHref(href);
+    const fullTargetUrl = new URL(resolved, window.location.origin).href;
+
+    // RULE: For every browser session, if the page is being visited for the first time,
+    // load the page fully, no caching here!
+    if (cacheService.isFirstVisit(fullTargetUrl)) {
+      return; // Do NOT preventDefault! Let browser navigate normally and load fully.
     }
 
     if (isSmallChange(window.location.href, href)) {

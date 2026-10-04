@@ -6,9 +6,16 @@ import {
   softNavigate,
   initRouter,
 } from '../router.js';
+import { cacheService } from '@services/index.js';
 
 describe('Router & Soft Navigation', () => {
   beforeEach(() => {
+    cacheService.enableForTests();
+    cacheService.markPageVisited('/library.html');
+    cacheService.markPageVisited('/shelf.html');
+    cacheService.markPageVisited('/profile.html');
+    cacheService.markPageVisited('/');
+
     document.body.innerHTML = `
       <div id="app-nav">
         <a href="/index.html" class="nav-link nav-link--active">Home</a>
@@ -138,6 +145,21 @@ describe('Router & Soft Navigation', () => {
         href: originalLocation,
         origin: 'http://localhost:3000',
         pathname: '/library.html',
+      };
+
+      await softNavigate(target);
+      expect(window.location.href).toBe(target);
+    });
+
+    it('forces full page reload on first visit in session', async () => {
+      cacheService.resetVisitedPages();
+      const target = `${window.location.origin}/unvisited.html`;
+
+      delete window.location;
+      window.location = {
+        href: 'http://localhost:3000/',
+        origin: 'http://localhost:3000',
+        pathname: '/',
       };
 
       await softNavigate(target);

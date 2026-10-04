@@ -9,6 +9,7 @@
 import { initDevMode } from './dev.utils.ts';
 import { createLogger } from './logger.ts';
 import { initRouter, softNavigate, isSmallChange } from './router.js';
+import { cacheService } from '@services/cache.service.js';
 
 const log = createLogger('Navigation');
 
@@ -149,12 +150,17 @@ export function navigateTo(target: string, delay = 0): void {
   const href = resolveHref(target);
   log.info('Navigating to', { target, resolvedHref: href });
 
-  if (typeof window !== 'undefined' && isSmallChange(window.location.href, href)) {
+  // If repeat visit in this session and small change: soft navigate
+  if (
+    typeof window !== 'undefined' &&
+    !cacheService.isFirstVisit(href) &&
+    isSmallChange(window.location.href, href)
+  ) {
     softNavigate(href);
     return;
   }
 
-  // Large change: respect motion preference and reload page
+  // First visit or large change: respect motion preference and reload page fully
   const reduced =
     typeof window.matchMedia === 'function' &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;

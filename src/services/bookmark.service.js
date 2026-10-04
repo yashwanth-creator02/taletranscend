@@ -109,7 +109,7 @@ export async function removeFromBookmarks({ userId, taleId }) {
  * @param {string} params.userId
  * @returns {Promise<import('@state/schemas/bookmark.schema.js').Bookmark[]>}
  */
-export async function getBookmarks({ userId }) {
+export async function getBookmarks({ userId, onBackgroundUpdate = null } = {}) {
   if (!userId) return [];
 
   // If offline, return local cache
@@ -157,7 +157,11 @@ export async function getBookmarks({ userId }) {
         }
       );
     },
-    { ttl: 2 * 60 * 1000 }
+    {
+      ttl: 2 * 60 * 1000,
+      pageUrl: typeof window !== 'undefined' ? window.location.href : null,
+      onBackgroundUpdate,
+    }
   );
 }
 

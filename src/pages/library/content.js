@@ -1,9 +1,10 @@
-// src/pages/library/content.js
-// Page-based pagination with Firestore.
-
 import { getTalesPageNumbered } from '@services/index.js';
+import { cacheService } from '@services/cache.service.js';
 import { libraryState } from './state.js';
 import { safeCall, createLogger } from '@/utils';
+import { fetchTalesMetadata, renderTaleCards } from '@ui/components/taleCard.js';
+import { initIcons } from '@ui/components/icons.js';
+import { applyAllFilters } from './filters.js';
 
 const log = createLogger('LibraryContent');
 
@@ -23,8 +24,43 @@ export async function loadTalesPage(page) {
   log.info(`Loading page ${page}...`, { perPage: libraryState.talesPerPage });
   libraryState.isLoading = true;
 
+  const onBackgroundUpdate = async (freshResult) => {
+    log.info('Background update for library page received', { count: freshResult.tales?.length });
+    const cachedTales = libraryState.allTales;
+    const freshTales = freshResult.tales || [];
+
+    cacheService.reconcileOrReload({
+      cached: cachedTales,
+      fresh: freshTales,
+      updateDiv: async (freshTale, id) => {
+        log.info('Updating specific library tale card div', { id });
+        const cardEl = document.querySelector(`#cards-grid article[data-id="${id}"]`);
+        if (cardEl) {
+          const metadata = await fetchTalesMetadata(libraryState.userId, [freshTale]);
+          const temp = document.createElement('div');
+          renderTaleCards(temp, [freshTale], metadata);
+          const newCard = temp.firstElementChild;
+          if (newCard) {
+            cardEl.replaceWith(newCard);
+            initIcons();
+          }
+        }
+      },
+      onReload: async () => {
+        log.info('Changes too many in library page — re-rendering full grid');
+        libraryState.allTales = freshTales;
+        libraryState.totalTales = freshResult.total;
+        await applyAllFilters();
+      },
+    });
+  };
+
   const result = await safeCall(
-    getTalesPageNumbered({ page, perPage: libraryState.talesPerPage }),
+    getTalesPageNumbered({
+      page,
+      perPage: libraryState.talesPerPage,
+      onBackgroundUpdate,
+    }),
     { tales: [], total: 0, hasMore: false },
     'Failed to load tales from the archive.'
   );

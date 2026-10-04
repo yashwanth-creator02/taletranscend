@@ -132,4 +132,139 @@ describe('CacheService', () => {
     expect(cacheService.has('user:continue-reading:u1')).toBe(false);
     expect(cacheService.has('user:drafts:u1')).toBe(false);
   });
+
+  describe('Session Visited Pages & First Visit Rule', () => {
+    beforeEach(() => {
+      cacheService.resetVisitedPages();
+    });
+
+    it('identifies first visit and marks page visited', () => {
+      expect(cacheService.isFirstVisit('/library.html')).toBe(true);
+      cacheService.markPageVisited('/library.html');
+      expect(cacheService.isFirstVisit('/library.html')).toBe(false);
+
+      // Normalization: /index.html and / map to the same page
+      expect(cacheService.isFirstVisit('/index.html')).toBe(true);
+      cacheService.markPageVisited('/index.html');
+      expect(cacheService.isFirstVisit('/')).toBe(false);
+    });
+
+    it('bypasses cache on first visit when pageUrl is provided', async () => {
+      cacheService.set('pageDataKey', 'cachedValue');
+
+      let fetchCount = 0;
+      const fetcher = async () => {
+        fetchCount++;
+        return 'freshValue';
+      };
+
+      // First visit to /shelf.html -> must bypass cache!
+      const firstResult = await cacheService.fetchWithCache('pageDataKey', fetcher, {
+        pageUrl: '/shelf.html',
+      });
+      expect(firstResult).toBe('freshValue');
+      expect(fetchCount).toBe(1);
+
+      // Subsequent visit to /shelf.html -> should use cached value!
+      const secondResult = await cacheService.fetchWithCache('pageDataKey', fetcher, {
+        pageUrl: '/shelf.html',
+      });
+      expect(secondResult).toBe('freshValue');
+      expect(fetchCount).toBe(1); // Not fetched again
+    });
+
+    it('clears session and resets visited pages', () => {
+      cacheService.set('k1', 'v1');
+      cacheService.markPageVisited('/test.html');
+      expect(cacheService.isFirstVisit('/test.html')).toBe(false);
+
+      cacheService.clearSession();
+      expect(cacheService.has('k1')).toBe(false);
+      expect(cacheService.isFirstVisit('/test.html')).toBe(true);
+    });
+  });
+
+  describe('reconcileOrReload (Diffing & Fine-Grained Div Updates)', () => {
+    it('returns "uptodate" and does nothing if cached and fresh data are identical', () => {
+      const cached = [{ id: 't1', title: 'Tale 1' }];
+      const fresh = [{ id: 't1', title: 'Tale 1' }];
+
+      let updated = false;
+      let reloaded = false;
+
+      const result = cacheService.reconcileOrReload({
+        cached,
+        fresh,
+        updateDiv: () => {
+          updated = true;
+        },
+        onReload: () => {
+          reloaded = true;
+        },
+      });
+
+      expect(result).toBe('uptodate');
+      expect(updated).toBe(false);
+      expect(reloaded).toBe(false);
+    });
+
+    it('updates specific div when changes are small (<= threshold)', () => {
+      const cached = [
+        { id: 't1', title: 'Tale 1' },
+        { id: 't2', title: 'Tale 2' },
+      ];
+      const fresh = [
+        { id: 't1', title: 'Tale 1 (Edited)' },
+        { id: 't2', title: 'Tale 2' },
+      ];
+
+      const updatedIds = [];
+      let reloaded = false;
+
+      const result = cacheService.reconcileOrReload({
+        cached,
+        fresh,
+        updateDiv: (item, id) => {
+          updatedIds.push(id);
+        },
+        onReload: () => {
+          reloaded = true;
+        },
+        maxChangeThreshold: 2,
+      });
+
+      expect(result).toBe('partial');
+      expect(updatedIds).toEqual(['t1']);
+      expect(reloaded).toBe(false);
+    });
+
+    it('calls onReload when changes are too many', () => {
+      const cached = [
+        { id: 't1', title: 'Tale 1' },
+        { id: 't2', title: 'Tale 2' },
+        { id: 't3', title: 'Tale 3' },
+      ];
+      const fresh = [
+        { id: 't1', title: 'Tale 1 (New)' },
+        { id: 't2', title: 'Tale 2 (New)' },
+        { id: 't3', title: 'Tale 3 (New)' },
+        { id: 't4', title: 'Tale 4' },
+      ];
+
+      let reloaded = false;
+
+      const result = cacheService.reconcileOrReload({
+        cached,
+        fresh,
+        updateDiv: () => {},
+        onReload: () => {
+          reloaded = true;
+        },
+        maxChangeThreshold: 2,
+      });
+
+      expect(result).toBe('reloaded');
+      expect(reloaded).toBe(true);
+    });
+  });
 });

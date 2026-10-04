@@ -14,10 +14,19 @@ import {
   getOverallProgress,
   getAllLocalChapters,
 } from '@services/index.js';
+import { cacheService } from '@services/cache.service.js';
 import { createBookmark } from '@state/index.js';
 import { createLogger } from '@/utils';
 import { shelfState } from './state.js';
-import { renderGrid, renderHeroStats, setGridLoading, setGridEmpty, setGridError } from './ui.js';
+import {
+  renderGrid,
+  renderHeroStats,
+  setGridLoading,
+  setGridEmpty,
+  setGridError,
+  buildBookmarkCard,
+} from './ui.js';
+import { initIcons } from '@ui/components/icons.js';
 
 const log = createLogger('ShelfContent');
 
@@ -45,10 +54,62 @@ export async function loadBookmarkedTales(userId, force = false) {
   }
 
   shelfState.isLoading = true;
-  setGridLoading();
+  const isFirst =
+    typeof window !== 'undefined' ? cacheService.isFirstVisit(window.location.href) : true;
+  if (isFirst) {
+    setGridLoading();
+  }
 
   try {
-    const bookmarks = await getBookmarks({ userId });
+    const onBackgroundUpdate = (freshBookmarks) => {
+      log.info('Background bookmarks update received', { count: freshBookmarks.length });
+      const cachedTales = shelfState.bookmarkedTales;
+      const freshTales = freshBookmarks.map((bm) => {
+        const localChapters = getAllLocalChapters({ userId, taleId: bm.taleId });
+        const overall = getOverallProgress({
+          chapterCount: bm.chapterCount || 1,
+          chaptersProgress: localChapters,
+        });
+
+        return {
+          id: bm.taleId,
+          title: bm.taleTitle,
+          coverUrl: bm.coverUrl,
+          authorName: bm.authorName,
+          chapterCount: bm.chapterCount,
+          era: bm.era,
+          description: bm.synopsis || '',
+          progress: overall.percent,
+          bookmarkedAt: bm.bookmarkedAt,
+        };
+      });
+
+      cacheService.reconcileOrReload({
+        cached: cachedTales,
+        fresh: freshTales,
+        updateDiv: (freshTale, id) => {
+          log.info('Updating specific shelf card div', { id });
+          const cardEl = document.querySelector(`#shelf-grid article[data-id="${id}"]`);
+          if (cardEl) {
+            const temp = document.createElement('div');
+            temp.innerHTML = buildBookmarkCard(freshTale);
+            const newCard = temp.firstElementChild;
+            if (newCard) {
+              cardEl.replaceWith(newCard);
+              initIcons();
+            }
+          }
+        },
+        onReload: () => {
+          log.info('Changes too many in bookmarks — re-rendering shelf grid');
+          shelfState.bookmarkedTales = freshTales;
+          renderGrid(applyFilterSort(freshTales), 'bookmarked');
+          renderHeroStats();
+        },
+      });
+    };
+
+    const bookmarks = await getBookmarks({ userId, onBackgroundUpdate });
     log.info(`Found ${bookmarks.length} bookmarks`);
 
     // Normalize through schema — ensures every field has a safe default
