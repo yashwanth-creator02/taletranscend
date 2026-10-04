@@ -22,11 +22,16 @@ const log = createLogger('ShelfInteractions');
    Public Init
    ───────────────────────────────────────────── */
 
+let _shelfInteractionsInitialized = false;
+
 /**
  * Wires all shelf interactions.
- * Call once after DOMContentLoaded.
+ * Call once after DOMContentLoaded. Idempotent.
  */
 export function initShelfInteractions() {
+  if (_shelfInteractionsInitialized) return;
+  _shelfInteractionsInitialized = true;
+
   _bindBackNavigation();
   _bindTabs();
   _bindFilter();
@@ -34,6 +39,13 @@ export function initShelfInteractions() {
   _bindCardActions();
   _bindRightRail();
   buildSortPanel();
+}
+
+/**
+ * Resets the initialization state (primarily for unit test isolation).
+ */
+export function resetShelfInteractions() {
+  _shelfInteractionsInitialized = false;
 }
 
 /* ─────────────────────────────────────────────
@@ -126,7 +138,7 @@ function _bindSort() {
   });
 
   document.addEventListener('click', (e) => {
-    if (!panel.hidden && !panel.contains(e.target) && e.target !== btn) {
+    if (!panel.hidden && !panel.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
       panel.hidden = true;
       btn.setAttribute('aria-expanded', 'false');
     }

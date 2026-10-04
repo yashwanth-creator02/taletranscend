@@ -41,11 +41,16 @@ const authTimeout = setupAuthTimeout('shelf-grid');
    Page Lifecycle
    ───────────────────────────────────────────── */
 
+let _pageInitialized = false;
+
 export async function initShelfPage() {
-  initShelfLayout();
-  initShelfInteractions();
-  initIcons();
-  readyReveal();
+  if (!_pageInitialized) {
+    initShelfLayout();
+    initShelfInteractions();
+    initIcons();
+    readyReveal();
+    _pageInitialized = true;
+  }
 
   const uid = appState.userId || shelfState.userId;
   if (uid) {

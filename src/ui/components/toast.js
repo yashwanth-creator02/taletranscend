@@ -93,6 +93,16 @@ export function showToast(message, typeOrOptions = 'success', extraOptions = {})
   const container = _getContainer();
   _enforceLimit(container);
 
+  // Prevent duplicate concurrent toasts with identical message
+  const existingToast = Array.from(container.children).find(
+    (el) =>
+      !el.classList.contains('toast-dismissing') &&
+      el.querySelector('.toast-card__message')?.textContent?.trim() === String(message).trim()
+  );
+  if (existingToast) {
+    return existingToast;
+  }
+
   const duration =
     options.duration !== undefined ? options.duration : options.persistent ? 0 : TOAST_DURATION;
 

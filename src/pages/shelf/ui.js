@@ -52,15 +52,15 @@ export function setGridLoading() {
   grid.innerHTML = Array.from(
     { length: 6 },
     () => `
-    <div class="rounded-[2rem] overflow-hidden border border-white/[0.04]">
-      <div class="aspect-[4/3] skeleton"></div>
-      <div class="p-5 space-y-3">
-        <div class="skeleton h-4 w-2/3 rounded-lg"></div>
-        <div class="skeleton h-3 w-full rounded-lg"></div>
-        <div class="skeleton h-3 w-3/4 rounded-lg"></div>
-        <div class="flex gap-3 pt-2">
-          <div class="skeleton h-3 w-16 rounded-lg"></div>
-          <div class="skeleton h-3 w-16 rounded-lg"></div>
+    <div class="rounded-2xl overflow-hidden border border-white/[0.04]">
+      <div class="aspect-[16/10] max-h-36 skeleton"></div>
+      <div class="p-3 sm:p-3.5 space-y-2.5">
+        <div class="skeleton h-3.5 w-2/3 rounded-lg"></div>
+        <div class="skeleton h-2.5 w-full rounded-lg"></div>
+        <div class="skeleton h-2.5 w-3/4 rounded-lg"></div>
+        <div class="flex gap-2 pt-1.5">
+          <div class="skeleton h-2.5 w-12 rounded-lg"></div>
+          <div class="skeleton h-2.5 w-12 rounded-lg"></div>
         </div>
       </div>
     </div>
@@ -156,10 +156,10 @@ export function buildBookmarkCard(tale) {
 
   return `
     <article
-      class="shelf-card group relative rounded-[2rem] overflow-hidden border border-white/[0.05] bg-white/[0.025] hover:border-indigo-500/25 transition-all duration-400 cursor-pointer"
+      class="shelf-card group relative rounded-2xl overflow-hidden border border-white/[0.05] bg-white/[0.025] hover:border-indigo-500/25 transition-all duration-400 cursor-pointer"
       data-id="${id}"
     >
-      <div class="relative aspect-[16/10] bg-zinc-900 overflow-hidden">
+      <div class="relative aspect-[16/10] max-h-44 bg-zinc-900 overflow-hidden">
         <img
           src="${cover}"
           alt="${safeTitle}"
@@ -169,10 +169,10 @@ export function buildBookmarkCard(tale) {
         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
 
         <!-- Header: Badges & Actions -->
-        <div class="absolute top-0 left-0 right-0 p-4 flex items-start justify-between gap-3 z-10">
-          <div class="flex flex-wrap items-center gap-2">
-            ${_badge(safeEra, 'bg-indigo-500/5 text-indigo-300')}
-            ${isFinished ? _badge('Finished', statusBadgeClasses) : ''}
+        <div class="absolute top-0 left-0 right-0 p-2.5 sm:p-3 flex items-start justify-between gap-2 z-10">
+          <div class="flex flex-wrap items-center gap-1.5">
+            ${_badge(safeEra, 'bg-indigo-500/5 text-indigo-300 text-[8px] sm:text-[9px] px-2 py-0.5')}
+            ${isFinished ? _badge('Finished', `${statusBadgeClasses} text-[8px] sm:text-[9px] px-2 py-0.5`) : ''}
           </div>
 
           <div class="relative shrink-0">
@@ -180,14 +180,14 @@ export function buildBookmarkCard(tale) {
               type="button"
               data-action="options"
               data-menu-id="${escapeHtml(menuId)}"
-              class="w-9 h-9 flex items-center justify-center rounded-xl bg-black/40 backdrop-blur-md border border-white/10 text-zinc-400 transition-all hover:bg-indigo-500/20 hover:border-indigo-500/40 hover:text-white"
+              class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg bg-black/40 backdrop-blur-md border border-white/10 text-zinc-400 transition-all hover:bg-indigo-500/20 hover:border-indigo-500/40 hover:text-white"
             >
-              <i data-lucide="more-horizontal" class="h-4 w-4"></i>
+              <i data-lucide="more-horizontal" class="h-3.5 w-3.5"></i>
             </button>
 
             <div
               id="${escapeHtml(menuId)}"
-              class="options-menu hidden absolute right-0 z-[60] mt-2 w-60 overflow-hidden rounded-2xl p-2"
+              class="options-menu hidden absolute right-0 z-[60] mt-2 w-56 overflow-hidden rounded-2xl p-2"
               role="menu"
             >
               <div class="px-3 py-2 border-b border-white/5 mb-1">
@@ -227,10 +227,10 @@ export function buildBookmarkCard(tale) {
           </div>
         </div>
 
-        <div class="absolute bottom-0 left-0 right-0 px-4 pb-4 pt-6 bg-gradient-to-t from-black/70 to-transparent">
-          <div class="flex items-center justify-between mb-1.5">
-            <span class="text-[9px] font-bold uppercase tracking-wider text-white/40">Progress</span>
-            <span class="text-[9px] font-bold text-indigo-400">${isFinished ? 'Done' : `${progressPercent}%`}</span>
+        <div class="absolute bottom-0 left-0 right-0 px-2.5 sm:px-3 pb-2 pt-4 bg-gradient-to-t from-black/70 to-transparent">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-[8px] sm:text-[9px] font-bold uppercase tracking-wider text-white/40">Progress</span>
+            <span class="text-[8px] sm:text-[9px] font-bold text-indigo-400">${isFinished ? 'Done' : `${progressPercent}%`}</span>
           </div>
           <div class="h-1 w-full bg-white/10 rounded-full overflow-hidden">
             <div
@@ -241,30 +241,30 @@ export function buildBookmarkCard(tale) {
         </div>
       </div>
 
-      <div class="p-4">
-        <p class="text-[9px] font-bold uppercase tracking-[0.2em] text-indigo-500/60 mb-1.5">${safeAuthor}</p>
-        <h3 class="font-bold text-white text-sm leading-snug mb-1.5 group-hover:text-indigo-300 transition-colors line-clamp-2">
+      <div class="p-3 sm:p-3.5">
+        <p class="text-[8px] sm:text-[9px] font-bold uppercase tracking-[0.16em] text-indigo-500/60 mb-1 truncate">${safeAuthor}</p>
+        <h3 class="font-bold text-white text-xs sm:text-sm leading-snug mb-1 group-hover:text-indigo-300 transition-colors line-clamp-1">
           ${safeTitle}
         </h3>
-        <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed mb-3">
+        <p class="text-[11px] text-slate-400 line-clamp-2 leading-relaxed mb-2.5">
           ${safeDescription}
         </p>
 
-        <div class="flex items-center justify-between pt-3 border-t border-white/[0.04]">
-          <div class="flex items-center gap-3 text-[10px] text-slate-400">
-            <span class="flex items-center gap-1.5">
-              <i data-lucide="layers" class="w-3 h-3"></i>
+        <div class="flex items-center justify-between pt-2 border-t border-white/[0.04]">
+          <div class="flex items-center gap-2 text-[9px] sm:text-[10px] text-slate-400">
+            <span class="flex items-center gap-1">
+              <i data-lucide="layers" class="w-2.5 h-2.5 sm:w-3 sm:h-3"></i>
               ${chapterCount} ch
             </span>
           </div>
           <button
-            class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 hover:text-indigo-400 transition-colors group/btn"
+            class="flex items-center gap-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-500 hover:text-indigo-400 transition-colors group/btn"
             type="button"
             data-action="resume"
             data-id="${id}"
           >
             ${isFinished ? 'Re-read' : 'Continue'}
-            <i data-lucide="arrow-right" class="w-3 h-3 group-hover/btn:translate-x-0.5 transition-transform"></i>
+            <i data-lucide="arrow-right" class="w-2.5 h-2.5 sm:w-3 sm:h-3 group-hover/btn:translate-x-0.5 transition-transform"></i>
           </button>
         </div>
       </div>
@@ -303,15 +303,15 @@ export function buildDraftCard(draft) {
 
   return `
     <article
-      class="shelf-card group relative rounded-[2rem] border border-white/[0.05] bg-white/[0.025] hover:border-indigo-500/25 transition-all duration-400 overflow-hidden cursor-pointer"
+      class="shelf-card group relative rounded-2xl border border-white/[0.05] bg-white/[0.025] hover:border-indigo-500/25 transition-all duration-400 overflow-hidden cursor-pointer"
       data-id="${id}"
     >
-      <div class="relative p-5">
+      <div class="relative p-3 sm:p-3.5">
         <!-- Header: Badges & Actions -->
-        <div class="flex items-start justify-between gap-3 mb-4">
-          <div class="flex flex-wrap items-center gap-2">
-            ${_badge('Draft', 'bg-amber-500/10 text-amber-400 border-amber-500/20')}
-            ${safeEra ? _badge(safeEra, 'bg-indigo-500/5 text-indigo-300') : ''}
+        <div class="flex items-start justify-between gap-2 mb-2.5">
+          <div class="flex flex-wrap items-center gap-1.5">
+            ${_badge('Draft', 'bg-amber-500/10 text-amber-400 border-amber-500/20 text-[8px] sm:text-[9px] px-2 py-0.5')}
+            ${safeEra ? _badge(safeEra, 'bg-indigo-500/5 text-indigo-300 text-[8px] sm:text-[9px] px-2 py-0.5') : ''}
           </div>
 
           <div class="relative shrink-0">
@@ -319,9 +319,9 @@ export function buildDraftCard(draft) {
               type="button"
               data-action="options"
               data-menu-id="${escapeHtml(menuId)}"
-              class="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 text-zinc-500 transition-all hover:bg-indigo-500/10 hover:border-indigo-500/30 hover:text-white"
+              class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 text-zinc-500 transition-all hover:bg-indigo-500/10 hover:border-indigo-500/30 hover:text-white"
             >
-              <i data-lucide="more-horizontal" class="h-4 w-4"></i>
+              <i data-lucide="more-horizontal" class="h-3.5 w-3.5"></i>
             </button>
 
             <div
@@ -350,33 +350,33 @@ export function buildDraftCard(draft) {
           </div>
         </div>
 
-        <h3 class="font-bold text-white text-base leading-snug mb-2 group-hover:text-indigo-300 transition-colors">
+        <h3 class="font-bold text-white text-xs sm:text-sm leading-snug mb-1 group-hover:text-indigo-300 transition-colors line-clamp-1">
           ${safeTitle}
         </h3>
 
-        <p class="text-xs text-slate-400 line-clamp-3 leading-relaxed mb-4">
+        <p class="text-[11px] text-slate-400 line-clamp-2 leading-relaxed mb-2">
           ${safeSynopsis || 'No synopsis yet. Open the editor to add one.'}
         </p>
 
-        <div class="grid grid-cols-2 gap-3 py-3 border-t border-white/[0.04] mb-4">
-          <div class="flex items-center gap-2 text-[10px] text-slate-400">
-            <i data-lucide="layers" class="w-3 h-3 text-slate-500"></i>
-            ${chapterCount} ${chapterCount === 1 ? 'chapter' : 'chapters'}
+        <div class="grid grid-cols-2 gap-2 py-2 border-t border-white/[0.04] mb-2 text-[9px] sm:text-[10px]">
+          <div class="flex items-center gap-1.5 text-slate-400 truncate">
+            <i data-lucide="layers" class="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-500 shrink-0"></i>
+            <span class="truncate">${chapterCount} ${chapterCount === 1 ? 'chapter' : 'chapters'}</span>
           </div>
-          <div class="flex items-center gap-2 text-[10px] text-slate-400">
-            <i data-lucide="file-text" class="w-3 h-3 text-slate-500"></i>
-            ${wordLabel}
+          <div class="flex items-center gap-1.5 text-slate-400 truncate">
+            <i data-lucide="file-text" class="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-500 shrink-0"></i>
+            <span class="truncate">${wordLabel}</span>
           </div>
         </div>
 
-        <div class="flex items-center justify-between">
-          <span class="text-[9px] text-slate-400">Last updated ${updated}</span>
+        <div class="flex items-center justify-between pt-1">
+          <span class="text-[8px] sm:text-[9px] text-slate-400 truncate">Last updated ${updated}</span>
           <a
             href="/contribution.html?draft=${id}"
-            class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-indigo-400 hover:text-indigo-300 transition-colors group/btn"
+            class="flex items-center gap-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-indigo-400 hover:text-indigo-300 transition-colors group/btn shrink-0"
           >
             Edit
-            <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform"></i>
+            <i data-lucide="arrow-right" class="w-2.5 h-2.5 sm:w-3 sm:h-3 group-hover/btn:translate-x-0.5 transition-transform"></i>
           </a>
         </div>
       </div>

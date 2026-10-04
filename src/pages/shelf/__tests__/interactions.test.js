@@ -1,6 +1,6 @@
 // src/pages/shelf/__tests__/interactions.test.js
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { initShelfInteractions } from '../interactions.js';
+import { initShelfInteractions, resetShelfInteractions } from '../interactions.js';
 import { shelfState } from '../state.js';
 import * as content from '../content.js';
 import * as ui from '../ui.js';
@@ -42,6 +42,7 @@ vi.mock('@ui/components/toast.js', () => ({
 describe('ShelfInteractions', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetShelfInteractions();
     shelfState.userId = 'u1';
     shelfState.activeTab = 'bookmarked';
     document.body.innerHTML = `

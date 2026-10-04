@@ -120,13 +120,21 @@ html {
 /* ── Cards & Archive Grid ───────────────────────── */
 #shelf-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  #shelf-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.25rem;
+  }
 }
 
 .shelf-card {
   background: var(--surface-gradient);
   border: 1px solid rgb(var(--light-rgb) / var(--a-03));
+  border-radius: 1rem;
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
   transition:
