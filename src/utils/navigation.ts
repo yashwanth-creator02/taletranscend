@@ -11,6 +11,7 @@ import { createLogger } from './logger.ts';
 import { initRouter, softNavigate, isSmallChange } from './router.js';
 import { cacheService } from '@services/cache.service.js';
 import { initGlobalPaletteShortcut } from '@ui/components/nav/nav.global.js';
+import { initScrollToTop } from '@ui/components/scrollToTop.js';
 
 const log = createLogger('Navigation');
 
@@ -127,6 +128,7 @@ export function initPageReveal(): void {
     }
     initRouter();
     initGlobalPaletteShortcut();
+    initScrollToTop();
   }
 }
 
