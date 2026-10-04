@@ -30,6 +30,10 @@ let searchQuery = '';
 
 initPageReveal();
 
+export async function initTOCPage() {
+  return initTOC();
+}
+
 /**
  * Initializes Table of Contents
  */

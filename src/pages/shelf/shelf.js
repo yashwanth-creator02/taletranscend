@@ -24,6 +24,8 @@ import {
 } from './index.js';
 import { initShelfLayout } from './layout.js';
 
+import { appState } from '@state/index.js';
+
 const log = createLogger('Shelf');
 
 initPageReveal();
@@ -36,44 +38,43 @@ log.info('Initializing Shelf page');
 const authTimeout = setupAuthTimeout('shelf-grid');
 
 /* ─────────────────────────────────────────────
-   Auth + Data
+   Page Lifecycle
+   ───────────────────────────────────────────── */
+
+export async function initShelfPage() {
+  initShelfLayout();
+  initShelfInteractions();
+  initIcons();
+  readyReveal();
+
+  const uid = appState.userId || shelfState.userId;
+  if (uid) {
+    shelfState.userId = uid;
+    setGridLoading();
+
+    log.debug('Loading bookmarks, drafts, and recent tales...');
+    await Promise.all([loadBookmarkedTales(uid), loadDrafts(uid), loadRecentTales(uid)]);
+
+    setActiveTab('bookmarked');
+    shelfState.activeTab = 'bookmarked';
+
+    computeAndRenderHeroStats();
+    readyReveal();
+    initShelfLayout();
+  }
+}
+
+/* ─────────────────────────────────────────────
+   Auth + DOM Ready
    ───────────────────────────────────────────── */
 
 initAuth(async (user) => {
   clearTimeout(authTimeout);
   shelfState.userId = user.uid;
   log.info('Auth resolved', { userId: user.uid });
-
-  setGridLoading();
-
-  // Load both data sets in parallel — bookmarks for the default tab view,
-  // drafts in the background so hero stats can be computed immediately.
-  // Bug fix: was calling loadBookmarkedTales twice (once in parallel, once after)
-  // which caused two Firestore reads for no reason.
-  log.debug('Loading bookmarks, drafts, and recent tales...');
-  await Promise.all([
-    loadBookmarkedTales(user.uid),
-    loadDrafts(user.uid),
-    loadRecentTales(user.uid),
-  ]);
-
-  // Default view — bookmarks tab
-  setActiveTab('bookmarked');
-  shelfState.activeTab = 'bookmarked';
-
-  // Compute hero stats now that both data sets are cached
-  computeAndRenderHeroStats();
-  readyReveal();
-  initShelfLayout();
+  await initShelfPage();
 });
 
-/* ─────────────────────────────────────────────
-   DOM Ready
-   ───────────────────────────────────────────── */
-
 document.addEventListener('DOMContentLoaded', () => {
-  initShelfLayout();
-  initShelfInteractions();
-  initIcons();
-  readyReveal();
+  initShelfPage();
 });

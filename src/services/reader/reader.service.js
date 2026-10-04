@@ -5,6 +5,7 @@
 import { refs, getDoc, getDocs } from '@fb/index.js';
 import { createTale, createChapter } from '@state/index.js';
 import { safeCall, createLogger, saveTaleOffline, getTaleOffline } from '@/utils';
+import { cacheService } from '../cache.service.js';
 
 const log = createLogger('ReaderService');
 log.debug('Module initialized');
@@ -25,34 +26,40 @@ export async function getTaleMeta(taleId) {
     if (local) return createTale(local.id, local);
   }
 
-  log.debug('Fetching tale meta', { taleId });
-  return safeCall(
-    (async () => {
-      const snap = await getDoc(refs.tale(taleId));
-      if (!snap.exists()) {
-        log.error(`Tale not found: ${taleId}`);
-        throw new Error(`Tale not found: ${taleId}`);
-      }
-      log.info('Loaded tale meta', { taleId, title: snap.data()?.title });
-      const tale = createTale(snap.id, snap.data());
+  return cacheService.fetchWithCache(
+    `tale:meta:${taleId}`,
+    async () => {
+      log.debug('Fetching tale meta', { taleId });
+      return safeCall(
+        (async () => {
+          const snap = await getDoc(refs.tale(taleId));
+          if (!snap.exists()) {
+            log.error(`Tale not found: ${taleId}`);
+            throw new Error(`Tale not found: ${taleId}`);
+          }
+          log.info('Loaded tale meta', { taleId, title: snap.data()?.title });
+          const tale = createTale(snap.id, snap.data());
 
-      // Update offline cache partially
-      const existing = await getTaleOffline(taleId);
-      await saveTaleOffline({
-        ...(existing || {}),
-        id: tale.id,
-        title: tale.title,
-        authorName: tale.authorName,
-        coverUrl: tale.coverUrl,
-        synopsis: tale.synopsis,
-        lastReadAt: Date.now(),
-        chapters: existing?.chapters || [],
-      });
+          // Update offline cache partially
+          const existing = await getTaleOffline(taleId);
+          await saveTaleOffline({
+            ...(existing || {}),
+            id: tale.id,
+            title: tale.title,
+            authorName: tale.authorName,
+            coverUrl: tale.coverUrl,
+            synopsis: tale.synopsis,
+            lastReadAt: Date.now(),
+            chapters: existing?.chapters || [],
+          });
 
-      return tale;
-    })(),
-    null,
-    'Failed to load tale.'
+          return tale;
+        })(),
+        null,
+        'Failed to load tale.'
+      );
+    },
+    { ttl: 10 * 60 * 1000 }
   );
 }
 
@@ -73,32 +80,38 @@ export async function getChapters(taleId) {
     return local?.chapters || [];
   }
 
-  log.debug('Fetching chapter list', { taleId });
-  return safeCall(
-    (async () => {
-      const snap = await getDocs(refs.chapters(taleId));
-      const chapters = snap.docs
-        .map((d) => createChapter(d.id, d.data()))
-        .sort((a, b) => a.chapterNum - b.chapterNum);
+  return cacheService.fetchWithCache(
+    `tale:chapters:${taleId}`,
+    async () => {
+      log.debug('Fetching chapter list', { taleId });
+      return safeCall(
+        (async () => {
+          const snap = await getDocs(refs.chapters(taleId));
+          const chapters = snap.docs
+            .map((d) => createChapter(d.id, d.data()))
+            .sort((a, b) => a.chapterNum - b.chapterNum);
 
-      // Update offline cache with full chapter list
-      const existing = await getTaleOffline(taleId);
-      await saveTaleOffline({
-        ...(existing || {
-          id: taleId,
-          title: '',
-          authorName: '',
-          coverUrl: '',
-          synopsis: '',
-        }),
-        lastReadAt: Date.now(),
-        chapters: chapters,
-      });
+          // Update offline cache with full chapter list
+          const existing = await getTaleOffline(taleId);
+          await saveTaleOffline({
+            ...(existing || {
+              id: taleId,
+              title: '',
+              authorName: '',
+              coverUrl: '',
+              synopsis: '',
+            }),
+            lastReadAt: Date.now(),
+            chapters: chapters,
+          });
 
-      return chapters;
-    })(),
-    [],
-    'Failed to load chapters.'
+          return chapters;
+        })(),
+        [],
+        'Failed to load chapters.'
+      );
+    },
+    { ttl: 10 * 60 * 1000 }
   );
 }
 
@@ -138,35 +151,23 @@ export async function getChapter({ taleId, chapterIndex }) {
     }
   }
 
-  log.debug('Fetching chapter list', { taleId, chapterIndex });
-  return safeCall(
-    (async () => {
-      const snap = await getDocs(refs.chapters(taleId));
-
-      const chapters = snap.docs
-        .map((d) => createChapter(d.id, d.data()))
-        .sort((a, b) => a.chapterNum - b.chapterNum);
-
-      const total = chapters.length;
-      log.info(`Tale has ${total} chapters. Resolving index ${chapterIndex}...`);
-
-      const chapter = chapters[chapterIndex];
-
-      if (!chapter) {
-        log.error(`Chapter not found at index ${chapterIndex}`, { total });
-        throw new Error(`Chapter not found at index ${chapterIndex}`);
+  return cacheService.fetchWithCache(
+    `tale:chapter:${taleId}:${chapterIndex}`,
+    async () => {
+      log.debug('Fetching chapter from Firestore', { taleId, chapterIndex });
+      const chapters = await getChapters(taleId);
+      if (!chapters || !chapters.length) {
+        log.warn('No chapters returned from getChapters', { taleId });
+        return null;
       }
 
-      log.info('Chapter resolved', { title: chapter.title });
+      const chapter = chapters[chapterIndex];
+      if (!chapter) {
+        log.warn(`Chapter index ${chapterIndex} out of bounds (total: ${chapters.length})`);
+        return null;
+      }
 
-      // Update offline cache with full chapter list
-      const existing = await getTaleOffline(taleId);
-      await saveTaleOffline({
-        ...(existing || { id: taleId, title: '', authorName: '', coverUrl: '', synopsis: '' }),
-        lastReadAt: Date.now(),
-        chapters: chapters,
-      });
-
+      const total = chapters.length;
       return {
         chapter,
         navigation: {
@@ -179,8 +180,7 @@ export async function getChapter({ taleId, chapterIndex }) {
           totalChapters: total,
         },
       };
-    })(),
-    null,
-    'Failed to load chapter.'
+    },
+    { ttl: 10 * 60 * 1000 }
   );
 }

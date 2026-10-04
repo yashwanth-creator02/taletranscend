@@ -25,12 +25,13 @@ import {
 import { setupSidebarToggle, updateSidebarUser, showGridSkeleton, showGridError } from './ui.js';
 import { setupCardInteractions } from './interactions.js';
 import { libraryState } from './state.js';
+import { appState } from '@state/index.js';
 
 initNav();
 initPageReveal();
 log.debug('Module initialized');
 
-document.addEventListener('DOMContentLoaded', () => {
+export async function initLibraryPage() {
   setupSidebarToggle();
   setupSearch();
   setupToneFilter();
@@ -47,6 +48,34 @@ document.addEventListener('DOMContentLoaded', () => {
       navigateTo('contribution.html');
     });
   }
+
+  const currentUid = appState.userId || libraryState.userId;
+  if (currentUid) {
+    libraryState.userId = currentUid;
+    updateSidebarUser(appState.profile || { uid: currentUid });
+    setupCardInteractions(currentUid);
+  }
+
+  try {
+    await loadTalesPage(1);
+
+    if (!libraryState.eraChipsBuilt) {
+      setupEraFilter(libraryState.allTales);
+      libraryState.eraChipsBuilt = true;
+    }
+
+    await applyAllFilters();
+    updatePaginationUI();
+    readyReveal();
+    initIcons();
+  } catch (err) {
+    log.error('Init failed:', err);
+    showGridError();
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initLibraryPage();
 });
 
 initAuth(async (user) => {

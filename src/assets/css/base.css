@@ -628,3 +628,31 @@ select:focus-visible {
   transform: none;
   text-align: left;
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   View Transitions for Instant Soft Navigation
+   ══════════════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root) {
+    animation: 160ms cubic-bezier(0.4, 0, 0.2, 1) both tt-nav-fade-out;
+  }
+  ::view-transition-new(root) {
+    animation: 200ms cubic-bezier(0, 0, 0.2, 1) both tt-nav-fade-in;
+  }
+  @keyframes tt-nav-fade-out {
+    to {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
+  @keyframes tt-nav-fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}

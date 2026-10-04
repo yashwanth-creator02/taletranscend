@@ -41,10 +41,16 @@ initDraftId();
 
 const authTimeout = setupAuthTimeout('stat-status', 'Connection timed out. Please refresh.');
 
-initAuth(async () => {
-  clearTimeout(authTimeout);
+export async function initContributionPage() {
+  initDraftId();
   await init();
   readyReveal();
+  initIcons();
+}
+
+initAuth(async () => {
+  clearTimeout(authTimeout);
+  await initContributionPage();
 });
 
 /**

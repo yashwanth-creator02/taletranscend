@@ -26,6 +26,12 @@ const log = createLogger('Home');
 initPageReveal();
 initNav();
 
+let _resizeBound = false;
+
+export function initHomePage() {
+  init();
+}
+
 function init() {
   log.info('Home page initialized');
   initIcons();
@@ -69,16 +75,19 @@ function _initInteractions() {
   });
 
   // Preserve clean viewport positioning when resizing across responsive breakpoints
-  let resizeTimer = null;
-  window.addEventListener('resize', () => {
-    if (resizeTimer) clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-      const main = document.getElementById('main-content');
-      if (main && main.scrollTop < 60) {
-        main.scrollTop = 0;
-      }
-    }, 100);
-  });
+  if (!_resizeBound) {
+    _resizeBound = true;
+    let resizeTimer = null;
+    window.addEventListener('resize', () => {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        const main = document.getElementById('main-content');
+        if (main && main.scrollTop < 60) {
+          main.scrollTop = 0;
+        }
+      }, 100);
+    });
+  }
 }
 
 /**
