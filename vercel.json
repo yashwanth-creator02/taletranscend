@@ -6,17 +6,18 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/tales/:id/read/:path*", "destination": "/reader.html" },
-    { "source": "/tales/:path*", "destination": "/tale.html" },
-    { "source": "/toc/:path*", "destination": "/toc.html" },
-    { "source": "/sitemap", "destination": "/toc.html" },
-    { "source": "/library/:path*", "destination": "/library.html" },
-    { "source": "/shelf/:path*", "destination": "/shelf.html" },
-    { "source": "/reader/:path*", "destination": "/reader.html" },
-    { "source": "/tale/:path*", "destination": "/tale.html" },
-    { "source": "/contribution/:path*", "destination": "/contribution.html" },
-    { "source": "/profile/:path*", "destination": "/profile.html" },
-    { "source": "/login/:path*", "destination": "/login.html" }
+    { "source": "/tales/:id/read/:path*", "destination": "/reader" },
+    { "source": "/tales/:id/read", "destination": "/reader" },
+    { "source": "/tales/:path*", "destination": "/tale" },
+    { "source": "/toc/:path*", "destination": "/toc" },
+    { "source": "/sitemap", "destination": "/toc" },
+    { "source": "/library/:path*", "destination": "/library" },
+    { "source": "/shelf/:path*", "destination": "/shelf" },
+    { "source": "/reader/:path*", "destination": "/reader" },
+    { "source": "/tale/:path*", "destination": "/tale" },
+    { "source": "/contribution/:path*", "destination": "/contribution" },
+    { "source": "/profile/:path*", "destination": "/profile" },
+    { "source": "/login/:path*", "destination": "/login" }
   ],
   "headers": [
     {

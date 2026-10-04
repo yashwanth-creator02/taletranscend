@@ -29,6 +29,85 @@ const TRANSITION_DURATION_MS = 220;
  */
 export const VIEWS_PATH = '/';
 
+export const HAS_VISITED_KEY = 'tt_has_visited';
+
+/**
+ * Checks if the current visitor is a new user (has not logged in or previously visited the app).
+ * In unit testing (Vitest), returns false by default unless ignoreTestEnv is set to true.
+ */
+export function isNewUser(ignoreTestEnv = false): boolean {
+  if (typeof window === 'undefined') return false;
+  if (!ignoreTestEnv && typeof process !== 'undefined' && process.env?.NODE_ENV === 'test') {
+    return false;
+  }
+
+  try {
+    if (localStorage.getItem(HAS_VISITED_KEY)) return false;
+
+    // Check if Firebase Auth has existing session stored in localStorage
+    const hasFirebaseUser = Object.keys(localStorage).some((k) =>
+      k.startsWith('firebase:authUser')
+    );
+    if (hasFirebaseUser) {
+      localStorage.setItem(HAS_VISITED_KEY, 'true');
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Marks the current user as having visited/onboarded so future sessions navigate normally.
+ */
+export function markUserVisited(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(HAS_VISITED_KEY, 'true');
+  } catch {
+    // Ignore storage restrictions
+  }
+}
+
+/**
+ * Gatekeeper for new users: redirects any first-time visitor to the Login page.
+ * Preserves the intended destination via `returnUrl` query parameter.
+ *
+ * @returns {boolean} True if redirected, false if allowed through.
+ */
+export function checkNewUserGate(ignoreTestEnv = false): boolean {
+  if (!isNewUser(ignoreTestEnv)) return false;
+  if (typeof window === 'undefined') return false;
+
+  const pathname = window.location.pathname;
+  if (pathname === '/login' || pathname === '/login.html' || pathname.startsWith('/login')) {
+    return false;
+  }
+
+  const currentPathWithSearch =
+    (window.location.pathname || '') +
+    (window.location.search || '') +
+    (window.location.hash || '');
+  const returnParam =
+    currentPathWithSearch &&
+    currentPathWithSearch !== '/' &&
+    currentPathWithSearch !== '/index.html'
+      ? `?returnUrl=${encodeURIComponent(currentPathWithSearch)}`
+      : '';
+
+  log.info('New user detected — redirecting first visit to login page', {
+    from: currentPathWithSearch,
+  });
+
+  if (typeof window.location.replace === 'function') {
+    window.location.replace(`/login.html${returnParam}`);
+  } else {
+    window.location.href = `/login.html${returnParam}`;
+  }
+  return true;
+}
+
 /**
  * Initialises per-page boot behaviour.
  *
@@ -42,6 +121,9 @@ export const VIEWS_PATH = '/';
 export function initPageReveal(): void {
   initDevMode();
   if (typeof document !== 'undefined') {
+    if (checkNewUserGate()) {
+      return;
+    }
     initRouter();
     const reveal = () => {
       if (document.body) {

@@ -1,6 +1,16 @@
 // src/utils/__tests__/navigation.test.js
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { initPageReveal, readyReveal, navigateTo, resolveHref, VIEWS_PATH } from '../navigation.ts';
+import {
+  initPageReveal,
+  readyReveal,
+  navigateTo,
+  resolveHref,
+  VIEWS_PATH,
+  isNewUser,
+  markUserVisited,
+  checkNewUserGate,
+  HAS_VISITED_KEY,
+} from '../navigation.ts';
 import { initDevMode } from '../dev.utils.ts';
 
 vi.mock('../dev.utils.ts', () => ({ initDevMode: vi.fn() }));
@@ -151,6 +161,84 @@ describe('Navigation Utils', () => {
       expect(document.body.style.opacity).toBe('');
       expect(document.body.style.pointerEvents).toBe('');
       expect(document.body.classList.contains('booted')).toBe(true);
+    });
+  });
+
+  describe('isNewUser', () => {
+    beforeEach(() => {
+      localStorage.clear();
+    });
+
+    it('returns false by default in test environment', () => {
+      expect(isNewUser()).toBe(false);
+    });
+
+    it('returns true when ignoreTestEnv is true and no prior visits or auth exist', () => {
+      expect(isNewUser(true)).toBe(true);
+    });
+
+    it('returns false when HAS_VISITED_KEY exists', () => {
+      localStorage.setItem(HAS_VISITED_KEY, 'true');
+      expect(isNewUser(true)).toBe(false);
+    });
+
+    it('returns false and sets HAS_VISITED_KEY if firebase:authUser exists', () => {
+      localStorage.setItem('firebase:authUser:apiKey:[DEFAULT]', JSON.stringify({ uid: '123' }));
+      expect(isNewUser(true)).toBe(false);
+      expect(localStorage.getItem(HAS_VISITED_KEY)).toBe('true');
+    });
+  });
+
+  describe('markUserVisited', () => {
+    it('sets HAS_VISITED_KEY in localStorage', () => {
+      localStorage.clear();
+      markUserVisited();
+      expect(localStorage.getItem(HAS_VISITED_KEY)).toBe('true');
+    });
+  });
+
+  describe('checkNewUserGate', () => {
+    beforeEach(() => {
+      localStorage.clear();
+      delete window.location;
+      window.location = {
+        pathname: '/',
+        search: '',
+        hash: '',
+        replace: vi.fn(),
+        href: '',
+      };
+    });
+
+    it('returns false if not a new user', () => {
+      localStorage.setItem(HAS_VISITED_KEY, 'true');
+      const redirected = checkNewUserGate(true);
+      expect(redirected).toBe(false);
+      expect(window.location.replace).not.toHaveBeenCalled();
+    });
+
+    it('does not redirect if already on login page', () => {
+      window.location.pathname = '/login.html';
+      const redirected = checkNewUserGate(true);
+      expect(redirected).toBe(false);
+      expect(window.location.replace).not.toHaveBeenCalled();
+    });
+
+    it('redirects new user on home page to /login.html without returnUrl', () => {
+      window.location.pathname = '/';
+      const redirected = checkNewUserGate(true);
+      expect(redirected).toBe(true);
+      expect(window.location.replace).toHaveBeenCalledWith('/login.html');
+    });
+
+    it('redirects new user with returnUrl if visiting deep link', () => {
+      window.location.pathname = '/library.html';
+      window.location.search = '?filter=myth';
+      const redirected = checkNewUserGate(true);
+      expect(redirected).toBe(true);
+      expect(window.location.replace).toHaveBeenCalledWith(
+        '/login.html?returnUrl=%2Flibrary.html%3Ffilter%3Dmyth'
+      );
     });
   });
 });

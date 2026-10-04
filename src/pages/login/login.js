@@ -6,7 +6,7 @@ import '@css/base.css';
 import '@css/pages/login.css';
 
 import { auth, signInAnonymously, signInWithGoogle, onAuthStateChanged } from '@fb/index.js';
-import { navigateTo, initPageReveal, readyReveal, createLogger } from '@/utils';
+import { navigateTo, initPageReveal, readyReveal, createLogger, markUserVisited } from '@/utils';
 import { initIcons } from '@ui/components/icons.js';
 import { showToast } from '@ui/components/toast.js';
 
@@ -47,9 +47,12 @@ export function toggleButtonLoading(buttonId, isLoading) {
  * Handles the redirection logic after a successful login.
  */
 export function handleAuthSuccess() {
+  markUserVisited();
   showToast('Welcome to the Living Archive.', 'success');
+  const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const returnUrl = params?.get('returnUrl') || params?.get('redirect') || 'profile.html';
   setTimeout(() => {
-    navigateTo('profile.html');
+    navigateTo(returnUrl);
   }, 900);
 }
 
@@ -276,6 +279,17 @@ function _setupSocialLogins() {
 }
 
 /**
+ * Ensures any navigation away from login marks the user as visited.
+ */
+function _setupDismissLinks() {
+  document.querySelectorAll('a[href]').forEach((link) => {
+    link.addEventListener('click', () => {
+      markUserVisited();
+    });
+  });
+}
+
+/**
  * Initializes all login page components, tabs, forms, and auth listeners.
  */
 export function initLoginPage() {
@@ -288,6 +302,7 @@ export function initLoginPage() {
   _setupAuthModeToggle();
   _setupFormSubmissions();
   _setupSocialLogins();
+  _setupDismissLinks();
 
   // If already signed in (non-anonymously), redirect to profile
   const unsubscribe = onAuthStateChanged(auth, (user) => {

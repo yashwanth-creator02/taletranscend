@@ -21,6 +21,7 @@ vi.mock('@/utils', async (importOriginal) => {
     navigateTo: vi.fn(),
     initPageReveal: vi.fn(),
     readyReveal: vi.fn(),
+    markUserVisited: vi.fn(),
   };
 });
 
@@ -221,5 +222,17 @@ describe('Login Page', () => {
       expect.stringContaining('Preserved credentials recognized'),
       'success'
     );
+  });
+
+  it('calls markUserVisited when clicking a return/navigation link', async () => {
+    const link = document.createElement('a');
+    link.href = '/index.html';
+    link.textContent = 'Return to the Archives';
+    document.body.appendChild(link);
+
+    await initPage();
+
+    link.click();
+    expect(utils.markUserVisited).toHaveBeenCalled();
   });
 });

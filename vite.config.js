@@ -60,6 +60,7 @@ function hierarchicalRoutesPlugin() {
 }
 
 export default defineConfig({
+  appType: 'mpa',
   root: r('src/views'),
   publicDir: r('public'),
   envDir: __dirname,
@@ -148,6 +149,7 @@ export default defineConfig({
         // silently drops files above it from the precache manifest.
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         cleanupOutdatedCaches: true,
+        navigateFallback: null,
         navigateFallbackDenylist: [/^\/__/, /\/[^/?]+\.[^/]+$/],
         runtimeCaching: [
           {
