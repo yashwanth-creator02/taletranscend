@@ -43,10 +43,10 @@ function _progressLabel(percent) {
    Skeleton
    ───────────────────────────────────────────── */
 
-export function renderCardsSkeleton(container, count = 6) {
+export function renderCardsSkeleton(container, count = 8) {
   if (!container) return;
   container.innerHTML = `
-    <div class="col-span-full grid gap-3.5 sm:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
+    <div class="col-span-full grid gap-3.5 sm:gap-6 grid-cols-2 md:grid-cols-4 lg:grid-cols-4 2xl:grid-cols-4">
       ${Array.from({ length: count })
         .map(
           () => `
@@ -205,7 +205,7 @@ export async function renderCardsGrid(userId, tales) {
     return;
   }
 
-  renderCardsSkeleton(container, Math.min(6, safeTales.length));
+  renderCardsSkeleton(container, Math.min(8, safeTales.length));
 
   try {
     const metadata = await fetchTalesMetadata(userId, safeTales);

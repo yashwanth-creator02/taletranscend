@@ -280,6 +280,13 @@
   }
 }
 
+/* ── Cards Grid Columns (Multiples of 4) ──────── */
+@media (min-width: 768px) {
+  #cards-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
 /* ── Reduce motion ───────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   #sidebar,

@@ -7,14 +7,7 @@ dotenv.config();
 
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously } from 'firebase/auth';
-import {
-  getFirestore,
-  doc,
-  setDoc,
-  collection,
-  getDocs,
-  Timestamp,
-} from 'firebase/firestore';
+import { getFirestore, doc, setDoc, collection, getDocs, Timestamp } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.VITE_FIREBASE_API_KEY,
@@ -36,13 +29,17 @@ const SEED_TALES = [
     id: 'tale-008',
     title: 'The Song of the Obsidian Weaver',
     authorName: 'Kaelen Morrow',
-    description: 'A mythic artisan threads the celestial dark to stitch fallen constellations back to life.',
-    synopsis: 'Before the light had a name, a weaver sat at the lip of the glass chasm, drawing thread from obsidian stones. When the seventh moon cracked, only her needle could mend the sky before shadow engulfed the continents.',
-    coverUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200&auto=format&fit=crop',
+    description:
+      'A mythic artisan threads the celestial dark to stitch fallen constellations back to life.',
+    synopsis:
+      'Before the light had a name, a weaver sat at the lip of the glass chasm, drawing thread from obsidian stones. When the seventh moon cracked, only her needle could mend the sky before shadow engulfed the continents.',
+    coverUrl:
+      'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200&auto=format&fit=crop',
     era: 'First Dawn',
     tags: ['myth', 'creation', 'stars', 'magic', 'fantasy'],
     tone: 'poetic',
-    worldSetting: 'A primordial archipelago suspended above an endless ocean of liquid obsidian and stardust.',
+    worldSetting:
+      'A primordial archipelago suspended above an endless ocean of liquid obsidian and stardust.',
     authorNotes: 'Dedicated to the ancient oral songs of the night sky weavers.',
     isFeatured: true,
     isEditorsPick: true,
@@ -61,7 +58,7 @@ Kaelen remembered the first hum of the shuttle. It sounded like ice snapping on 
 
 "Sky is memory," she replied, and cast her silver shuttle across the abyss.
 
-With each pass, a streak of violet fire caught in the warp. The needle pierced the void, pulling taut the severed threads of Orion's belt. Beneath her hanging scaffold, the world turned in silence—a blue marble trembling in a cradle of pitch.`
+With each pass, a streak of violet fire caught in the warp. The needle pierced the void, pulling taut the severed threads of Orion's belt. Beneath her hanging scaffold, the world turned in silence—a blue marble trembling in a cradle of pitch.`,
       },
       {
         title: 'The Fracture at Noon',
@@ -71,17 +68,20 @@ Kaelen knelt on the obsidian precipice, her breathe pluming into cold starlight.
 
 She tied off the zenith knot with her teeth, tasting salt and old iron. If the stitch held until dawn, the people of the river basins would look upward and see only unbroken blue. If it failed, the dark would pour into their grain silos and freeze their rivers to stone.
 
-She drew the last thread tight. The horizon sighed, and light broke like glass against the world's eastern edge.`
-      }
-    ]
+She drew the last thread tight. The horizon sighed, and light broke like glass against the world's eastern edge.`,
+      },
+    ],
   },
   {
     id: 'tale-009',
     title: 'The Whisper of Ironwood Peak',
     authorName: 'Thyra Stonecipher',
-    description: 'High in the glacial ranges, colossal stone sentinels awaken whenever a promise is broken.',
-    synopsis: 'The folk of the high valleys keep no written treaties; they swear their vows facing Ironwood Peak. But when an imperial commander breaks an ancient non-aggression oath, the mountain itself begins to speak in tremors.',
-    coverUrl: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1200&auto=format&fit=crop',
+    description:
+      'High in the glacial ranges, colossal stone sentinels awaken whenever a promise is broken.',
+    synopsis:
+      'The folk of the high valleys keep no written treaties; they swear their vows facing Ironwood Peak. But when an imperial commander breaks an ancient non-aggression oath, the mountain itself begins to speak in tremors.',
+    coverUrl:
+      'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1200&auto=format&fit=crop',
     era: 'Age of Heroes',
     tags: ['mountains', 'spirits', 'legend', 'oaths', 'epic'],
     tone: 'solemn',
@@ -104,7 +104,7 @@ Thyra tightened the wool straps around her snowshoes and listened. For three day
 
 "The mountain does not read ink," she told the chimney smoke. "The mountain remembers blood on the stone."
 
-When she reached the tree line where the dwarf pines grew twisted like clenched fists, she saw the first crack in the glacier. It was twenty cubits across, yawning black, and from its depths rose the scent of crushed lichen and ozone.`
+When she reached the tree line where the dwarf pines grew twisted like clenched fists, she saw the first crack in the glacier. It was twenty cubits across, yawning black, and from its depths rose the scent of crushed lichen and ozone.`,
       },
       {
         title: 'The Avalanche of Voices',
@@ -116,21 +116,25 @@ Thyra knelt in the snow and uncorked the horn of unpasteurized goat milk she car
 
 "I am Thyra of the Seventh Hearth," she called into the rift. "The timber men will leave before the new moon. Let the passes sleep."
 
-The mountain was silent for the span of forty heartbeats. Then a single boulder rolled down the scree, stopping three inches from her right knee—a boundary stone marked with three parallel grooves, ancient as the sea.`
-      }
-    ]
+The mountain was silent for the span of forty heartbeats. Then a single boulder rolled down the scree, stopping three inches from her right knee—a boundary stone marked with three parallel grooves, ancient as the sea.`,
+      },
+    ],
   },
   {
     id: 'tale-010',
     title: 'Lament of the Sunken Citadel',
     authorName: 'Caspian Vance',
-    description: 'Beneath the calm waters of the Azure Gulf lie the sapphire spires of a drowned kingdom.',
-    synopsis: 'Divers in the Azure Gulf have long spoken of bells tolling under the tides. When an oceanographer recovers a bronze sextant untouched by corrosion, the lost empire of Oakhaven begins to reveal its tragic demise.',
-    coverUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop',
+    description:
+      'Beneath the calm waters of the Azure Gulf lie the sapphire spires of a drowned kingdom.',
+    synopsis:
+      'Divers in the Azure Gulf have long spoken of bells tolling under the tides. When an oceanographer recovers a bronze sextant untouched by corrosion, the lost empire of Oakhaven begins to reveal its tragic demise.',
+    coverUrl:
+      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop',
     era: 'Drowned Epoch',
     tags: ['sea', 'ruins', 'ocean', 'mystery', 'lost-civilization'],
     tone: 'melancholic',
-    worldSetting: 'An ancient undersea metropolis discovered inside the calm eye of a perpetual tidal vortex.',
+    worldSetting:
+      'An ancient undersea metropolis discovered inside the calm eye of a perpetual tidal vortex.',
     authorNotes: 'Explores the Atlantean myth from the perspective of coastal pearl divers.',
     isFeatured: false,
     isEditorsPick: true,
@@ -147,7 +151,7 @@ It does not come from the bell tower of Saint Jude on the bluff. It comes from e
 
 Caspian pulled his diving mask over his eyes, checked the brass regulator on his twin tanks, and rolled backward over the gunwale of the skiff.
 
-The water was turquoise at twenty feet, cobalt at sixty, and by one hundred feet it had turned the bruised black of crushed plums. Then his lantern beam struck something that had no business existing on a coral bed: fluted marble columns, their capitals carved with acanthus leaves and leaping dolphins, perfectly intact beneath a shroud of golden sea fans.`
+The water was turquoise at twenty feet, cobalt at sixty, and by one hundred feet it had turned the bruised black of crushed plums. Then his lantern beam struck something that had no business existing on a coral bed: fluted marble columns, their capitals carved with acanthus leaves and leaping dolphins, perfectly intact beneath a shroud of golden sea fans.`,
       },
       {
         title: 'The Inscription of Queen Thalassa',
@@ -161,21 +165,25 @@ WE SOUGHT THE MOON IN HER REFLECTION
 AND FORGOT THAT THE TIDE IS HER HAND.
 REMEMBER US WHEN THE SHORE RETREATS.
 
-He took three photographs, his strobe lighting the stone in brilliant flashes of cyan and gold. When he looked up, the shadows between the columns seemed to sway in cadence with the distant, muffled chime of the sunken bell.`
-      }
-    ]
+He took three photographs, his strobe lighting the stone in brilliant flashes of cyan and gold. When he looked up, the shadows between the columns seemed to sway in cadence with the distant, muffled chime of the sunken bell.`,
+      },
+    ],
   },
   {
     id: 'tale-011',
     title: 'The Alchemist’s Celestial Clock',
     authorName: 'Elora Vance',
-    description: 'An alpine tower clockwork mechanism that calculates the precise hour when forgotten gods walk.',
-    synopsis: 'Master Horologist Valerius spent forty-two years inside the bell tower of Oberwald building a clock of celestial bronze. Its twelve dials do not track minutes or hours, but the shifting alignments of dormant astral beings.',
-    coverUrl: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=1200&auto=format&fit=crop',
+    description:
+      'An alpine tower clockwork mechanism that calculates the precise hour when forgotten gods walk.',
+    synopsis:
+      'Master Horologist Valerius spent forty-two years inside the bell tower of Oberwald building a clock of celestial bronze. Its twelve dials do not track minutes or hours, but the shifting alignments of dormant astral beings.',
+    coverUrl:
+      'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=1200&auto=format&fit=crop',
     era: 'Renaissance of Brass',
     tags: ['clockwork', 'alchemy', 'astronomy', 'steampunk', 'invention'],
     tone: 'mysterious',
-    worldSetting: 'A towering observatory perched on the ridge of an alpine canyon measuring cosmic cycles.',
+    worldSetting:
+      'A towering observatory perched on the ridge of an alpine canyon measuring cosmic cycles.',
     authorNotes: 'Inspired by Prague astronomical clock and mechanical Renaissance treatises.',
     isFeatured: false,
     isEditorsPick: false,
@@ -194,17 +202,20 @@ Master Valerius wiped whale oil from his thumb and adjusted the escapement lever
 
 "You are going blind, uncle," Elora said, climbing the spiral wooden stairs with a basket of dark bread and smoked trout. "The glassmakers in Venice cannot grind lenses small enough for what you are trying to see."
 
-"I do not need eyes to see the orbit of the Iron Sovereign, child," the old man rasped without looking up. "Listen to the chime of gear seventeen. That is not friction. That is the gravity of Saturn tugging at the axle."`
-      }
-    ]
+"I do not need eyes to see the orbit of the Iron Sovereign, child," the old man rasped without looking up. "Listen to the chime of gear seventeen. That is not friction. That is the gravity of Saturn tugging at the axle."`,
+      },
+    ],
   },
   {
     id: 'tale-012',
     title: 'Chronicles of the Silk Horizon',
     authorName: 'Li Wei-Lin',
-    description: 'A merchant caravan journeys across crimson desert dunes guided by songs preserved in jade flutes.',
-    synopsis: 'Across the Great Shifting Sea, ordinary maps are useless because the dunes migrate ten leagues every sandstorm. Only the Flute Keepers can navigate the desert, playing notes that resonate with the subterranean mineral veins.',
-    coverUrl: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=1200&auto=format&fit=crop',
+    description:
+      'A merchant caravan journeys across crimson desert dunes guided by songs preserved in jade flutes.',
+    synopsis:
+      'Across the Great Shifting Sea, ordinary maps are useless because the dunes migrate ten leagues every sandstorm. Only the Flute Keepers can navigate the desert, playing notes that resonate with the subterranean mineral veins.',
+    coverUrl:
+      'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=1200&auto=format&fit=crop',
     era: 'Golden Dynasty',
     tags: ['desert', 'trade', 'caravan', 'folklore', 'travel'],
     tone: 'epic',
@@ -227,7 +238,7 @@ Ahead, the desert turned the color of dried cinnabar.
 
 "Halt the line!" he signaled with two sharp blasts of his bone whistle.
 
-The apprentices scrambled to drop anchor pegs into the packed crust. Old Master Shen unrolled his bamboo sleeve, revealing the white jade flute that had been handed down through nine generations of imperial guides.`
+The apprentices scrambled to drop anchor pegs into the packed crust. Old Master Shen unrolled his bamboo sleeve, revealing the white jade flute that had been handed down through nine generations of imperial guides.`,
       },
       {
         title: 'The Sand That Answers',
@@ -237,21 +248,25 @@ The note was low and hollow, vibrating in the chest cavity like a bronze gong st
 
 Then, fifty yards ahead, the crimson dune began to tremble. A ridge of hard slate emerged from the shifting sand—a submerged spine of rock left by a river that had dried ten thousand years ago.
 
-"The road is open," Master Shen whispered, wiping fine grit from the mouthpiece. "Follow the spine until the evening star touches the third ridge. Tread softly; the salt worms sleep three cubits below."`
-      }
-    ]
+"The road is open," Master Shen whispered, wiping fine grit from the mouthpiece. "Follow the spine until the evening star touches the third ridge. Tread softly; the salt worms sleep three cubits below."`,
+      },
+    ],
   },
   {
     id: 'tale-013',
     title: 'The Forest That Forgot Its Roots',
     authorName: 'Rowan Thorne',
-    description: 'A primeval woodland where centuries-old moss groves wander across valleys during heavy mists.',
-    synopsis: 'Woodcutters in the Glen of Oakhaven know never to sleep beneath the same willow twice. The trees of the Shrouded Wood untangle their roots at dusk, roaming the highland valleys in search of rainwater.',
-    coverUrl: 'https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=1200&auto=format&fit=crop',
+    description:
+      'A primeval woodland where centuries-old moss groves wander across valleys during heavy mists.',
+    synopsis:
+      'Woodcutters in the Glen of Oakhaven know never to sleep beneath the same willow twice. The trees of the Shrouded Wood untangle their roots at dusk, roaming the highland valleys in search of rainwater.',
+    coverUrl:
+      'https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=1200&auto=format&fit=crop',
     era: 'Verdant Age',
     tags: ['forest', 'fae', 'nature', 'spirits', 'folklore'],
     tone: 'enchanting',
-    worldSetting: 'A sentient primeval woodland where centuries-old moss groves shift positions during mist.',
+    worldSetting:
+      'A sentient primeval woodland where centuries-old moss groves shift positions during mist.',
     authorNotes: 'Celtic nature mythology reimagined as a moving ecosystem.',
     isFeatured: false,
     isEditorsPick: false,
@@ -270,21 +285,25 @@ He dropped his snares and walked to the base of the trunk.
 
 Where the roots entered the black earth, there were no broken sods. The soil flowed like dark porridge around thick, gnarly taproots that flexed and curled with deliberate slowness, testing the bank for stability.
 
-"Hungry, old grandfather?" Rowan murmured, resting his palm against the lichen-crusted bark. A tremor coursed through the heartwood—slow, steady, beating once for every ten of a man's heartbeats.`
-      }
-    ]
+"Hungry, old grandfather?" Rowan murmured, resting his palm against the lichen-crusted bark. A tremor coursed through the heartwood—slow, steady, beating once for every ten of a man's heartbeats.`,
+      },
+    ],
   },
   {
     id: 'tale-014',
     title: 'Vessel of the Starlit Dunes',
     authorName: 'Zahra Al-Miraj',
-    description: 'Sand-skiffs skimming the desert wastes by aligning brass sextants with forgotten constellations.',
-    synopsis: 'When the monsoon winds fail, the trade guilds take to the Sand Ships. With outriggers of polished cedar and sails of woven spun glass, they cross four hundred miles of dunes in three days of breathless flight.',
-    coverUrl: 'https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?q=80&w=1200&auto=format&fit=crop',
+    description:
+      'Sand-skiffs skimming the desert wastes by aligning brass sextants with forgotten constellations.',
+    synopsis:
+      'When the monsoon winds fail, the trade guilds take to the Sand Ships. With outriggers of polished cedar and sails of woven spun glass, they cross four hundred miles of dunes in three days of breathless flight.',
+    coverUrl:
+      'https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?q=80&w=1200&auto=format&fit=crop',
     era: 'Nomad Sovereign',
     tags: ['desert', 'stars', 'astral', 'voyage', 'adventure'],
     tone: 'mystical',
-    worldSetting: 'Sand-skiffs navigating the night wastes by aligning bronze sextants with dead constellations.',
+    worldSetting:
+      'Sand-skiffs navigating the night wastes by aligning bronze sextants with dead constellations.',
     authorNotes: 'Bedouin astronomical lore blended with speculative nautical fantasy.',
     isFeatured: true,
     isEditorsPick: false,
@@ -301,17 +320,20 @@ Zahra checked the tension on the mainsheet. The skiff was called *The North Falc
 
 "Wind rising from the south-southeast!" her lookout cried from the rope basket.
 
-She threw her weight against the tiller. The keel caught the crest of a forty-foot barchan dune, and the ship went airborne for two dizzying seconds, sailing through cold starlight before touching down on the leeward slope with a hiss like silk on velvet.`
-      }
-    ]
+She threw her weight against the tiller. The keel caught the crest of a forty-foot barchan dune, and the ship went airborne for two dizzying seconds, sailing through cold starlight before touching down on the leeward slope with a hiss like silk on velvet.`,
+      },
+    ],
   },
   {
     id: 'tale-015',
     title: 'The Bell of Hundred Echoes',
     authorName: 'Tenzin Norbu',
-    description: 'A monastic bell carved from meteoric iron whose tolling reveals forgotten memories.',
-    synopsis: 'Atop Mount Kailash stands a monastery with no gates. In its courtyard hangs a bronze bell that was struck only once every fifty years. Pilgrims come seeking not absolution, but the return of things they forgot they had lost.',
-    coverUrl: 'https://images.unsplash.com/photo-1519817650390-64a93db51149?q=80&w=1200&auto=format&fit=crop',
+    description:
+      'A monastic bell carved from meteoric iron whose tolling reveals forgotten memories.',
+    synopsis:
+      'Atop Mount Kailash stands a monastery with no gates. In its courtyard hangs a bronze bell that was struck only once every fifty years. Pilgrims come seeking not absolution, but the return of things they forgot they had lost.',
+    coverUrl:
+      'https://images.unsplash.com/photo-1519817650390-64a93db51149?q=80&w=1200&auto=format&fit=crop',
     era: 'Monastic Silence',
     tags: ['monastery', 'philosophy', 'sound', 'peace', 'meditation'],
     tone: 'peaceful',
@@ -334,17 +356,20 @@ Tenzin stood barefoot on the flagstones, the frost numbing his heels. Behind him
 
 Tenzin swung the mallet.
 
-The iron bell did not scream. It groaned like a glacier calving into a mountain tarn. The wave of sound rippled through the courtyard, passing through their ribs, their temples, their teeth. And in that ringing resonance, Tenzin saw his mother's smile from forty winters ago, vivid as yesterday's snow.`
-      }
-    ]
+The iron bell did not scream. It groaned like a glacier calving into a mountain tarn. The wave of sound rippled through the courtyard, passing through their ribs, their temples, their teeth. And in that ringing resonance, Tenzin saw his mother's smile from forty winters ago, vivid as yesterday's snow.`,
+      },
+    ],
   },
   {
     id: 'tale-016',
     title: 'The Last Cartographer of Ashfall',
     authorName: 'Ignis Barov',
-    description: 'Mapping an ever-shifting volcanic archipelago where every sunrise reshapes the coastline.',
-    synopsis: 'On the volcanic edge of the world, maps are rendered in charcoal on vellum made from cured manta ray skins. Ignis must map the smoking Caldera of Saint Elmo before the magma dome collapses into the boiling sea.',
-    coverUrl: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=1200&auto=format&fit=crop',
+    description:
+      'Mapping an ever-shifting volcanic archipelago where every sunrise reshapes the coastline.',
+    synopsis:
+      'On the volcanic edge of the world, maps are rendered in charcoal on vellum made from cured manta ray skins. Ignis must map the smoking Caldera of Saint Elmo before the magma dome collapses into the boiling sea.',
+    coverUrl:
+      'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=1200&auto=format&fit=crop',
     era: 'Cinder Wastes',
     tags: ['volcano', 'maps', 'exploration', 'survival', 'grit'],
     tone: 'gritty',
@@ -365,21 +390,25 @@ He planted the brass tripod in the black pumice gravel and leveled the compass p
 
 "Three degrees east of yesterday's benchmark," he muttered, scratching a line into the ray-skin chart with a bone stylus.
 
-The ground shuddered. A flock of ash gulls burst from the crags, screaming their harsh warnings as a new lava tongue began to creep into the northern bay.`
-      }
-    ]
+The ground shuddered. A flock of ash gulls burst from the crags, screaming their harsh warnings as a new lava tongue began to creep into the northern bay.`,
+      },
+    ],
   },
   {
     id: 'tale-017',
     title: 'The Garden of Silver Serpents',
     authorName: 'Mei-Xing Chen',
-    description: 'In the Forbidden Courtyard of the Empress, sleeping serpents weave illusions into blossom trees.',
-    synopsis: 'Legend says the silver serpents of Chang’an were not beasts of poison, but guardians of dreams. Every spring, as cherry blossoms carpet the imperial tiles, they awaken to harvest the unuttered wishes of the palace poets.',
-    coverUrl: 'https://images.unsplash.com/photo-1528164344705-475426879c0d?q=80&w=1200&auto=format&fit=crop',
+    description:
+      'In the Forbidden Courtyard of the Empress, sleeping serpents weave illusions into blossom trees.',
+    synopsis:
+      'Legend says the silver serpents of Chang’an were not beasts of poison, but guardians of dreams. Every spring, as cherry blossoms carpet the imperial tiles, they awaken to harvest the unuttered wishes of the palace poets.',
+    coverUrl:
+      'https://images.unsplash.com/photo-1528164344705-475426879c0d?q=80&w=1200&auto=format&fit=crop',
     era: 'Jade Empire',
     tags: ['folklore', 'dragons', 'palace', 'intrigue', 'poetry'],
     tone: 'lyrical',
-    worldSetting: 'The hidden courtyards of the Empress of Rain, guarded by slumbering silver basilisks.',
+    worldSetting:
+      'The hidden courtyards of the Empress of Rain, guarded by slumbering silver basilisks.',
     authorNotes: 'Tribute to classical Tang and Song dynasty court poetry and dragon lore.',
     isFeatured: true,
     isEditorsPick: true,
@@ -396,17 +425,20 @@ Mei-Xing stepped quietly along the veranda, holding her lantern low so the oiled
 
 It was neither dragon nor viper. Its scales were thin as beaten silver foil, overlapping with mathematical perfection, and its eyes were two polished pieces of green jade.
 
-"Speak your poem, scholar," the serpent breathed, its tongue tasting the scent of ink on her silk sleeves. "The Empress sleeps, but the garden remembers."`
-      }
-    ]
+"Speak your poem, scholar," the serpent breathed, its tongue tasting the scent of ink on her silk sleeves. "The Empress sleeps, but the garden remembers."`,
+      },
+    ],
   },
   {
     id: 'tale-018',
     title: 'Waltz of the Winter Solstice',
     authorName: 'Freja Lindholm',
-    description: 'A royal ball held inside a palace of fjord ice where guests dance to melodies played on icicles.',
-    synopsis: 'Once every hundred years, the northern fjord freezes solid to a depth of fifty fathoms. The Ice Queen opens the doors of the Frost Citadel for one solitary night of music, where mortals may dance with the spirits of the aurora.',
-    coverUrl: 'https://images.unsplash.com/photo-1483921020237-2ff51e8e4b22?q=80&w=1200&auto=format&fit=crop',
+    description:
+      'A royal ball held inside a palace of fjord ice where guests dance to melodies played on icicles.',
+    synopsis:
+      'Once every hundred years, the northern fjord freezes solid to a depth of fifty fathoms. The Ice Queen opens the doors of the Frost Citadel for one solitary night of music, where mortals may dance with the spirits of the aurora.',
+    coverUrl:
+      'https://images.unsplash.com/photo-1483921020237-2ff51e8e4b22?q=80&w=1200&auto=format&fit=crop',
     era: 'Boreal Crown',
     tags: ['winter', 'snow', 'royalty', 'ballad', 'romance'],
     tone: 'nostalgic',
@@ -427,21 +459,25 @@ Freja took the gloved hand of the stranger. Through the white velvet of his palm
 
 "Do you know the steps to the Northbound Reel, lady?" he asked, his voice chiming like crystal wine glasses tapped together.
 
-"My grandmother taught me by the woodstove," she smiled, curtsying as the fiddlers struck up the opening cadence. Around them, two hundred couples spun in circles of fur and velvet, their breath rising like silver clouds toward the vaulted glacial ceiling.`
-      }
-    ]
+"My grandmother taught me by the woodstove," she smiled, curtsying as the fiddlers struck up the opening cadence. Around them, two hundred couples spun in circles of fur and velvet, their breath rising like silver clouds toward the vaulted glacial ceiling.`,
+      },
+    ],
   },
   {
     id: 'tale-019',
     title: 'The Book of Forgotten Skies',
     authorName: 'Julian Sterling',
-    description: 'Sky-captains sail between floating islands, documenting weather patterns from eras that never were.',
-    synopsis: 'When the Zephyr Archipelago was unmoored from the earth during the Great Upheaval, its navigators realized the clouds held historical records. By analyzing rain patterns, they could read the lost histories of cities long turned to dust.',
-    coverUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1200&auto=format&fit=crop',
+    description:
+      'Sky-captains sail between floating islands, documenting weather patterns from eras that never were.',
+    synopsis:
+      'When the Zephyr Archipelago was unmoored from the earth during the Great Upheaval, its navigators realized the clouds held historical records. By analyzing rain patterns, they could read the lost histories of cities long turned to dust.',
+    coverUrl:
+      'https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1200&auto=format&fit=crop',
     era: 'Zephyr Isles',
     tags: ['sky', 'airships', 'library', 'adventure', 'clouds'],
     tone: 'wonder',
-    worldSetting: 'Floating islands anchored by magnetized iron chains amidst turquoise cloud rivers.',
+    worldSetting:
+      'Floating islands anchored by magnetized iron chains amidst turquoise cloud rivers.',
     authorNotes: 'Sky fantasy paying homage to Jules Verne and Ghibli aeronaval aesthetics.',
     isFeatured: true,
     isEditorsPick: false,
@@ -458,21 +494,25 @@ Julian leaned over the mahogany railing of the *Zephyr Queen*, his goggles fogge
 
 "Drop the sounding lead!" he shouted into the speaking tube.
 
-Thirty fathoms below their gondola, the copper weight penetrated a layer of cerulean vapor. When the winch crew hauled it back up, the wax cylinder attached to the lead was etched with delicate frost patterns—not random crystals, but geometric cuneiform formed by ancient barometric memory.`
-      }
-    ]
+Thirty fathoms below their gondola, the copper weight penetrated a layer of cerulean vapor. When the winch crew hauled it back up, the wax cylinder attached to the lead was etched with delicate frost patterns—not random crystals, but geometric cuneiform formed by ancient barometric memory.`,
+      },
+    ],
   },
   {
     id: 'tale-020',
     title: 'Shadows Across the Amber Gate',
     authorName: 'Soran Khouri',
-    description: 'Nine merchant empires negotiate a desperate truce under the golden arch of the Amber Gate.',
-    synopsis: 'The Amber Gate is forty feet high and cast from solid fossilized resin. It stands at the border where the dry desert plains meet the lush river delta. When a murdered diplomat is found embedded inside the amber, the peace of nine realms fractures.',
-    coverUrl: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1200&auto=format&fit=crop',
+    description:
+      'Nine merchant empires negotiate a desperate truce under the golden arch of the Amber Gate.',
+    synopsis:
+      'The Amber Gate is forty feet high and cast from solid fossilized resin. It stands at the border where the dry desert plains meet the lush river delta. When a murdered diplomat is found embedded inside the amber, the peace of nine realms fractures.',
+    coverUrl:
+      'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1200&auto=format&fit=crop',
     era: 'Silk & Shadow',
     tags: ['intrigue', 'bazaar', 'assassins', 'politics', 'mystery'],
     tone: 'tense',
-    worldSetting: 'A crossroad citadel where nine trade routes collide and spies trade in stolen dialects.',
+    worldSetting:
+      'A crossroad citadel where nine trade routes collide and spies trade in stolen dialects.',
     authorNotes: 'Levantine political intrigue and historical noir.',
     isFeatured: false,
     isEditorsPick: false,
@@ -489,17 +529,20 @@ Soran knelt on the marble flagstones, holding his oil lamp close to the vertical
 
 "How long has he been inside?" the Grand Vizier whispered from behind a veil of gold thread.
 
-"The gate was cast six hundred years ago, Excellency," Soran replied, pressing his thumb against the warm, fragrant resin. "Yet his pocket watch is still ticking."`
-      }
-    ]
+"The gate was cast six hundred years ago, Excellency," Soran replied, pressing his thumb against the warm, fragrant resin. "Yet his pocket watch is still ticking."`,
+      },
+    ],
   },
   {
     id: 'tale-021',
     title: 'The Golem of the Clay Keep',
     authorName: 'Dara O’Connell',
-    description: 'An ancient guardian made of river silt and inscribed stones maintains a lonely watchtower.',
-    synopsis: 'Generations of villagers have brought loaves of fresh soda bread and clay pots of elderberry wine to the watchtower of Ballycarra. Inside sits Boru, a creature of loam and river boulders, who has never uttered a word yet guards their valley against all wolves.',
-    coverUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200&auto=format&fit=crop',
+    description:
+      'An ancient guardian made of river silt and inscribed stones maintains a lonely watchtower.',
+    synopsis:
+      'Generations of villagers have brought loaves of fresh soda bread and clay pots of elderberry wine to the watchtower of Ballycarra. Inside sits Boru, a creature of loam and river boulders, who has never uttered a word yet guards their valley against all wolves.',
+    coverUrl:
+      'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200&auto=format&fit=crop',
     era: 'Old River Kingdoms',
     tags: ['folklore', 'constructs', 'guardians', 'ireland', 'heartfelt'],
     tone: 'tender',
@@ -520,17 +563,20 @@ Little Dara climbed up onto the golem's broad shoulder, perching between two rou
 
 "Read the word again, Boru," the boy pleaded, tracing the worn Hebrew letter etched into the creature's clay forehead.
 
-The golem did not speak, but he raised one massive hand—fingers shaped like loaves of unbaked rye—and gently shielded the boy from the draft blowing through the arrow slits.`
-      }
-    ]
+The golem did not speak, but he raised one massive hand—fingers shaped like loaves of unbaked rye—and gently shielded the boy from the draft blowing through the arrow slits.`,
+      },
+    ],
   },
   {
     id: 'tale-022',
     title: 'Tide of the Phosphor Coast',
     authorName: 'Narelle Blue',
-    description: 'Emerald bioluminescence transforms an isolated reef into a glowing map of the night sky.',
-    synopsis: 'During the vernal equinox, the coral reefs of the Southern Atoll glow with a brilliance that can be seen from high orbit. Pearl divers believe that swimming through the green phosphorescence allows one to speak with the ancestors who charted the ocean before the moon was born.',
-    coverUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop',
+    description:
+      'Emerald bioluminescence transforms an isolated reef into a glowing map of the night sky.',
+    synopsis:
+      'During the vernal equinox, the coral reefs of the Southern Atoll glow with a brilliance that can be seen from high orbit. Pearl divers believe that swimming through the green phosphorescence allows one to speak with the ancestors who charted the ocean before the moon was born.',
+    coverUrl:
+      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop',
     era: 'Luminescent Age',
     tags: ['bioluminescence', 'coast', 'secrets', 'night', 'ocean'],
     tone: 'eerie',
@@ -549,22 +595,27 @@ The golem did not speak, but he raised one massive hand—fingers shaped like lo
 
 Beneath the canoe, the reef was ablaze. Staghorn corals glowed like neon trees, and manta rays glided through the phosphorescence like living jade kites.
 
-"Do not look down too long," her grandfather warned, paddling with rhythmic strokes from the stern. "The sea has eyes tonight, little fish, and she is looking for ones who forget the shore."`
-      }
-    ]
+"Do not look down too long," her grandfather warned, paddling with rhythmic strokes from the stern. "The sea has eyes tonight, little fish, and she is looking for ones who forget the shore."`,
+      },
+    ],
   },
   {
     id: 'tale-023',
     title: 'The Mirror Merchant of Samara',
     authorName: 'Harun Qasimi',
-    description: 'A bazaar merchant sells hand-blown glass mirrors that reveal past deeds and future vows.',
-    synopsis: 'In the bazaar of Samara, Master Harun keeps thirty mirrors wrapped in embroidered goat hair. One mirror shows your face as your mother saw you; another shows your face as your enemy dreams of you. But the third mirror is never uncovered without a blood price.',
-    coverUrl: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=1200&auto=format&fit=crop',
+    description:
+      'A bazaar merchant sells hand-blown glass mirrors that reveal past deeds and future vows.',
+    synopsis:
+      'In the bazaar of Samara, Master Harun keeps thirty mirrors wrapped in embroidered goat hair. One mirror shows your face as your mother saw you; another shows your face as your enemy dreams of you. But the third mirror is never uncovered without a blood price.',
+    coverUrl:
+      'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=1200&auto=format&fit=crop',
     era: 'Age of Caravans',
     tags: ['fable', 'mirrors', 'merchant', 'morality', 'bazaar'],
     tone: 'whimsical',
-    worldSetting: 'An ancient bazaar stall selling mirrors that reflect who you were seven years ago.',
-    authorNotes: 'Middle Eastern fable storytelling in the tradition of One Thousand and One Nights.',
+    worldSetting:
+      'An ancient bazaar stall selling mirrors that reflect who you were seven years ago.',
+    authorNotes:
+      'Middle Eastern fable storytelling in the tradition of One Thousand and One Nights.',
     isFeatured: true,
     isEditorsPick: true,
     readCount: 1490,
@@ -580,21 +631,25 @@ The vizier's captain tossed a pouch of twenty gold dinars onto the cedar table. 
 
 Harun picked up the purse, weighed it in his lean palm, and tossed it back.
 
-"Gold buys silvered glass, captain. It does not buy the nerve to look into it. The mirror does not show the assassin's face; it shows the face of the man who hired him. Are you certain your master wishes you to bring that answer back to the palace?"`
-      }
-    ]
+"Gold buys silvered glass, captain. It does not buy the nerve to look into it. The mirror does not show the assassin's face; it shows the face of the man who hired him. Are you certain your master wishes you to bring that answer back to the palace?"`,
+      },
+    ],
   },
   {
     id: 'tale-024',
     title: 'Covenant of the Hearth Keepers',
     authorName: 'Asha Ndiaye',
-    description: 'A sacred fire that has burned for forty generations guards a peaceful savannah village.',
-    synopsis: 'Since the time of the Great Drought, the women of the Baobab Circle have tended the central embers of Koro. If the flame should ever die, legend holds that the lion spirits of the grassland will reclaim the houses and return the soil to wild scrub.',
-    coverUrl: 'https://images.unsplash.com/photo-1492571350019-22de08371fd3?q=80&w=1200&auto=format&fit=crop',
+    description:
+      'A sacred fire that has burned for forty generations guards a peaceful savannah village.',
+    synopsis:
+      'Since the time of the Great Drought, the women of the Baobab Circle have tended the central embers of Koro. If the flame should ever die, legend holds that the lion spirits of the grassland will reclaim the houses and return the soil to wild scrub.',
+    coverUrl:
+      'https://images.unsplash.com/photo-1492571350019-22de08371fd3?q=80&w=1200&auto=format&fit=crop',
     era: 'Tribal Fire',
     tags: ['hearth', 'oral-tradition', 'elders', 'fire', 'community'],
     tone: 'cozy',
-    worldSetting: 'A savannah compound gathered around a sacred fire that has burned for forty generations.',
+    worldSetting:
+      'A savannah compound gathered around a sacred fire that has burned for forty generations.',
     authorNotes: 'West African griot oral narrative celebrating communal preservation.',
     isFeatured: false,
     isEditorsPick: false,
@@ -611,17 +666,20 @@ Asha added three thumb-sized chunks to the hearth with iron tongs. The fire did 
 
 "Tell the story of the elephant mother," the children chorused, wrapping their cotton blankets tight against the savannah chill.
 
-Asha smiled, the glow of the embers painting copper lights in her eyes. "Listen then, small ones, to how the first drum was hollowed from a fallen star..."`
-      }
-    ]
+Asha smiled, the glow of the embers painting copper lights in her eyes. "Listen then, small ones, to how the first drum was hollowed from a fallen star..."`,
+      },
+    ],
   },
   {
     id: 'tale-025',
     title: 'The Brass Sparrow’s Flight',
     authorName: 'Matteo Rossi',
-    description: 'A clockmaker’s mechanical bird escapes its cage to deliver a forgotten love letter across war-torn Venice.',
-    synopsis: 'Crafted with spring-loaded brass wings and a ruby escapement gear, the mechanical sparrow was intended as a novelty for the Doge. Instead, it was wound with a secret clockwork message that could stop an impending fleet siege.',
-    coverUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200&auto=format&fit=crop',
+    description:
+      'A clockmaker’s mechanical bird escapes its cage to deliver a forgotten love letter across war-torn Venice.',
+    synopsis:
+      'Crafted with spring-loaded brass wings and a ruby escapement gear, the mechanical sparrow was intended as a novelty for the Doge. Instead, it was wound with a secret clockwork message that could stop an impending fleet siege.',
+    coverUrl:
+      'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200&auto=format&fit=crop',
     era: 'Mechanical Renaissance',
     tags: ['automata', 'invention', 'hope', 'venice', 'steampunk'],
     tone: 'inspiring',
@@ -642,17 +700,20 @@ The tiny bird tilted its head forty-five degrees, its two emerald eyes catching 
 
 "Fly to the balcony with the blue wisteria, little friend," he whispered through trembling lips.
 
-The bird spread its articulated brass feathers, the miniature gears whirring with the precision of a Swiss pocket watch. It launched from his open window into the damp Venetian night, banking gracefully over the dark waters of the Grand Canal as church bells tolled two in the morning.`
-      }
-    ]
+The bird spread its articulated brass feathers, the miniature gears whirring with the precision of a Swiss pocket watch. It launched from his open window into the damp Venetian night, banking gracefully over the dark waters of the Grand Canal as church bells tolled two in the morning.`,
+      },
+    ],
   },
   {
     id: 'tale-026',
     title: 'Whispering Wells of Qumran',
     authorName: 'Malik Thorne',
-    description: 'Subterranean limestone wells that echo ancient prophecies when spring waters fill the aquifers.',
-    synopsis: 'Beneath the desert cliffs of the Dead Sea lie forty-two rock-cut cisterns. When the flash floods cascade from the Judean hills, the rushing water turns the cistern air shafts into massive organ pipes playing chords of ancient prophecy.',
-    coverUrl: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=1200&auto=format&fit=crop',
+    description:
+      'Subterranean limestone wells that echo ancient prophecies when spring waters fill the aquifers.',
+    synopsis:
+      'Beneath the desert cliffs of the Dead Sea lie forty-two rock-cut cisterns. When the flash floods cascade from the Judean hills, the rushing water turns the cistern air shafts into massive organ pipes playing chords of ancient prophecy.',
+    coverUrl:
+      'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=1200&auto=format&fit=crop',
     era: 'Desert Hermits',
     tags: ['desert', 'water', 'prophecy', 'mystery', 'caves'],
     tone: 'reverent',
@@ -671,21 +732,25 @@ The bird spread its articulated brass feathers, the miniature gears whirring wit
 
 The water was three hundred feet down, dripping rhythmically onto a limestone bell: *Plink. Plop. Resound.*
 
-Each drop produced a resonant overtone that bounced between the carved Hebrew letters covering the limestone walls. For twelve centuries, the order of the Listeners had transcribed these acoustic patterns, charting floods, droughts, and the rise and fall of empires.`
-      }
-    ]
+Each drop produced a resonant overtone that bounced between the carved Hebrew letters covering the limestone walls. For twelve centuries, the order of the Listeners had transcribed these acoustic patterns, charting floods, droughts, and the rise and fall of empires.`,
+      },
+    ],
   },
   {
     id: 'tale-027',
     title: 'The King Who Counted Leaves',
     authorName: 'Barnaby Finch',
-    description: 'A gentle monarch abdicates his golden throne to catalog every oak leaf in his enchanted forest.',
-    synopsis: 'King Aldous XVIII was declared mad by his chancellors when he traded his crown of rubies for a leatherbound folio and a wooden magnifying lens. Thirty years later, the chancellors found that his leaf catalog had prevented the Great Blight from starving the realm.',
-    coverUrl: 'https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=1200&auto=format&fit=crop',
+    description:
+      'A gentle monarch abdicates his golden throne to catalog every oak leaf in his enchanted forest.',
+    synopsis:
+      'King Aldous XVIII was declared mad by his chancellors when he traded his crown of rubies for a leatherbound folio and a wooden magnifying lens. Thirty years later, the chancellors found that his leaf catalog had prevented the Great Blight from starving the realm.',
+    coverUrl:
+      'https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=1200&auto=format&fit=crop',
     era: 'Fable of the Crown',
     tags: ['fable', 'monarch', 'folklore', 'nature', 'wit'],
     tone: 'satirical',
-    worldSetting: 'A small overgrown kingdom whose ruler spent thirty years cataloging every oak leaf.',
+    worldSetting:
+      'A small overgrown kingdom whose ruler spent thirty years cataloging every oak leaf.',
     authorNotes: 'Gentle satirical fable celebrating botanical science over imperial conquest.',
     isFeatured: false,
     isEditorsPick: false,
@@ -700,17 +765,20 @@ Each drop produced a resonant overtone that bounced between the carved Hebrew le
 
 The Prime Minister stood in the mud, his ermine robes splattered with damp moss. "Sire! The Duke of Alençon has mobilized forty thousand pikes on the border! You must return to the war room!"
 
-"Tell the Duke that his pikes are made of ash wood," the King replied without raising his head, "and that three of his ash groves have already developed the black gall. If he marches his men in the autumn rain, his spears will snap before they reach the river. Now hand me that bottle of gum arabic, will you?"`
-      }
-    ]
+"Tell the Duke that his pikes are made of ash wood," the King replied without raising his head, "and that three of his ash groves have already developed the black gall. If he marches his men in the autumn rain, his spears will snap before they reach the river. Now hand me that bottle of gum arabic, will you?"`,
+      },
+    ],
   },
   {
     id: 'tale-028',
     title: 'Runes of the Midnight Aurora',
     authorName: 'Astrid Skov',
-    description: 'A blind skald interprets glowing celestial ribbons written across arctic winter skies.',
-    synopsis: 'In the northern fjord lands, the aurora borealis is not considered light, but the living calligraphy of the sky gods. Only those without mortal vision can perceive the true geometric prophecies spelled out in the emerald curtains.',
-    coverUrl: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?q=80&w=1200&auto=format&fit=crop',
+    description:
+      'A blind skald interprets glowing celestial ribbons written across arctic winter skies.',
+    synopsis:
+      'In the northern fjord lands, the aurora borealis is not considered light, but the living calligraphy of the sky gods. Only those without mortal vision can perceive the true geometric prophecies spelled out in the emerald curtains.',
+    coverUrl:
+      'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?q=80&w=1200&auto=format&fit=crop',
     era: 'Glacial Runes',
     tags: ['aurora', 'runes', 'magic', 'northern', 'prophecy'],
     tone: 'epic',
@@ -729,21 +797,25 @@ The Prime Minister stood in the mud, his ermine robes splattered with damp moss.
 
 She wore a linen band over her sightless eyes, her hands resting flat on a drumhead made of dried halibut skin. When the aurora flared green above the peaks, the electrical charge in the cold air caused the skin of the drum to hum like a tuning fork.
 
-"The dragon rune is turning," she announced to the silent clan gathered around the peat fire. "The ice will hold until the fourth moon. Prepare the sealing boats."`
-      }
-    ]
+"The dragon rune is turning," she announced to the silent clan gathered around the peat fire. "The ice will hold until the fourth moon. Prepare the sealing boats."`,
+      },
+    ],
   },
   {
     id: 'tale-029',
     title: 'The Weaver of Falling Leaves',
     authorName: 'Chiyo Takahashi',
-    description: 'An elderly artisan creates exquisite tapestries woven purely from autumn maple leaves.',
-    synopsis: 'Deep in the cedar mountains of Yoshino, Master Chiyo gathers scarlet momiji leaves preserved in sweet rice vinegar. Her tapestries survive centuries without fading, holding within their fibers the exact warmth of the autumn sun under which they fell.',
-    coverUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop',
+    description:
+      'An elderly artisan creates exquisite tapestries woven purely from autumn maple leaves.',
+    synopsis:
+      'Deep in the cedar mountains of Yoshino, Master Chiyo gathers scarlet momiji leaves preserved in sweet rice vinegar. Her tapestries survive centuries without fading, holding within their fibers the exact warmth of the autumn sun under which they fell.',
+    coverUrl:
+      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop',
     era: 'Autumn Moon',
     tags: ['autumn', 'poetry', 'spirits', 'loss', 'japan'],
     tone: 'wistful',
-    worldSetting: 'A tranquil temple in the red maple hills where an artisan weaves tapestries from frost-brittle leaves.',
+    worldSetting:
+      'A tranquil temple in the red maple hills where an artisan weaves tapestries from frost-brittle leaves.',
     authorNotes: 'Explores wabi-sabi aesthetics and Japanese textile preservation.',
     isFeatured: false,
     isEditorsPick: true,
@@ -760,17 +832,20 @@ Chiyo picked up a leaf of deep vermilion, its five points sharp as an eagle's ta
 
 "Why do you work so hard on something that rots, grandmother?" the novice asked, sweeping fallen needles from the veranda.
 
-"Nothing rots if it is remembered with reverence, child," Chiyo murmured, sliding the comb downward to lock the crimson leaf into eternity.`
-      }
-    ]
+"Nothing rots if it is remembered with reverence, child," Chiyo murmured, sliding the comb downward to lock the crimson leaf into eternity.`,
+      },
+    ],
   },
   {
     id: 'tale-030',
     title: 'Voyage of the Solar Moth',
     authorName: 'Orion Vance',
-    description: 'A gilded galleon with gossamer sails rides the solar winds to the border of the known universe.',
-    synopsis: 'When the terrestrial seas were exhausted, the Astromancers of Alexandria constructed the *Solaris*—a three-masted schooner fitted with sails of woven gossamer that catch the photons streaming from the heart of the sun.',
-    coverUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop',
+    description:
+      'A gilded galleon with gossamer sails rides the solar winds to the border of the known universe.',
+    synopsis:
+      'When the terrestrial seas were exhausted, the Astromancers of Alexandria constructed the *Solaris*—a three-masted schooner fitted with sails of woven gossamer that catch the photons streaming from the heart of the sun.',
+    coverUrl:
+      'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop',
     era: 'Aetherial Age',
     tags: ['space', 'celestial', 'voyage', 'myth', 'sun'],
     tone: 'grand',
@@ -789,17 +864,20 @@ Chiyo picked up a leaf of deep vermilion, its five points sharp as an eagle's ta
 
 Captain Orion stood at the helm of the *Solaris*, adjusting the solar rudder by three arcseconds. Ahead lay the orbit of Mars, glowing like a blood ruby against the velvet tapestry of deep space.
 
-"All hands prepare for the Jupiter slingshot!" he commanded through the brass trumpet. "Check your magnetic boots; we enter the zero-gravity channel in three bell strikes."`
-      }
-    ]
+"All hands prepare for the Jupiter slingshot!" he commanded through the brass trumpet. "Check your magnetic boots; we enter the zero-gravity channel in three bell strikes."`,
+      },
+    ],
   },
   {
     id: 'tale-031',
     title: 'The Ghost of the Gilded Lyre',
     authorName: 'Daphne Vane',
-    description: 'An ancient Greek amphitheater where the shade of a legendary poet still plays for the evening tide.',
-    synopsis: 'On the sun-baked cliffs of Delos stands a half-ruined marble stage overlooking the Aegean. When the offshore evening breeze blows through the fluted columns, the spectral notes of a gilded lyre drift across the waves, calming even the most violent tempests.',
-    coverUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200&auto=format&fit=crop',
+    description:
+      'An ancient Greek amphitheater where the shade of a legendary poet still plays for the evening tide.',
+    synopsis:
+      'On the sun-baked cliffs of Delos stands a half-ruined marble stage overlooking the Aegean. When the offshore evening breeze blows through the fluted columns, the spectral notes of a gilded lyre drift across the waves, calming even the most violent tempests.',
+    coverUrl:
+      'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200&auto=format&fit=crop',
     era: 'Hellenic Mythos',
     tags: ['music', 'tragedy', 'ghosts', 'greek', 'sea'],
     tone: 'haunting',
@@ -820,10 +898,10 @@ In the center of the ring, where the altar of Dionysus had stood two thousand ye
 
 Then came the chord.
 
-Seven strings of bronze and gut, tuned to the Dorian mode. The sound was so pure, so resonant, that the sea gulls circling above ceased their cries, gliding motionless on the rising evening thermal.`
-      }
-    ]
-  }
+Seven strings of bronze and gut, tuned to the Dorian mode. The sound was so pure, so resonant, that the sea gulls circling above ceased their cries, gliding motionless on the rising evening thermal.`,
+      },
+    ],
+  },
 ];
 
 function buildSearchKeywords(title, tags) {
