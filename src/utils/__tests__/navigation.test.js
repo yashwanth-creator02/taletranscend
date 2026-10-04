@@ -141,5 +141,16 @@ describe('Navigation Utils', () => {
       expect(window.location.href).toBe('/profile.html');
       expect(document.body.style.opacity).toBe('1');
     });
+
+    it('restores body opacity and pointerEvents when pageshow event fires', () => {
+      document.body.style.opacity = '0';
+      document.body.style.pointerEvents = 'none';
+
+      window.dispatchEvent(new Event('pageshow'));
+
+      expect(document.body.style.opacity).toBe('');
+      expect(document.body.style.pointerEvents).toBe('');
+      expect(document.body.classList.contains('booted')).toBe(true);
+    });
   });
 });

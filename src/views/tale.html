@@ -220,173 +220,156 @@
           <!-- Author & Metadata Row (with Ongoing / Completed / Hiatus / Stopped Status) -->
           <div
             id="hero-meta"
-            class="flex flex-wrap items-center gap-2.5 sm:gap-3.5 transition-all duration-700"
+            class="flex flex-wrap items-center gap-2 sm:gap-2.5 transition-all duration-700"
           >
             <div
-              class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-white/4 border border-white/8 shadow-md"
+              class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/4 border border-white/8 shadow-sm backdrop-blur-xs"
             >
               <img
                 id="author-avatar-hero"
                 src=""
-                class="w-6 h-6 rounded-lg bg-zinc-800 object-cover"
+                class="w-5 h-5 rounded-md bg-zinc-800 object-cover"
                 alt="Author"
               />
-              <span id="display-author" class="text-xs font-bold text-slate-200"> ... </span>
+              <span id="display-author" class="text-xs font-semibold text-slate-200"> ... </span>
             </div>
 
             <div
               id="display-status-pill"
-              class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/4 border border-white/8 shadow-md text-xs text-slate-200"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/4 border border-white/8 shadow-sm backdrop-blur-xs text-xs text-slate-200"
             >
               <span
+                id="display-status-dot"
+                class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"
+              ></span>
+              <span
                 id="display-status"
-                class="font-bold uppercase tracking-wider text-[11px] text-slate-200"
+                class="font-bold uppercase tracking-wider text-[10px] text-slate-200"
                 >Ongoing</span
               >
             </div>
 
             <div
-              class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/3 border border-white/6 text-xs text-slate-300"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/3 border border-white/6 shadow-sm backdrop-blur-xs text-xs text-slate-300"
             >
               <i data-lucide="layers" class="w-3.5 h-3.5 text-indigo-400"></i>
-              <span id="display-chapters" class="font-semibold text-slate-300">0 Fragments</span>
+              <span id="display-chapters" class="font-medium text-slate-300">0 Fragments</span>
             </div>
 
             <div
-              class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/3 border border-white/6 text-xs text-slate-300"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/3 border border-white/6 shadow-sm backdrop-blur-xs text-xs text-slate-300"
             >
               <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-400"></i>
-              <span id="read-time" class="font-semibold text-slate-300">0 min read</span>
+              <span id="read-time" class="font-medium text-slate-300">0 min read</span>
             </div>
           </div>
 
           <!-- Mobile Quick Actions (Visible on screens < lg) -->
-          <div class="grid grid-cols-2 gap-2.5 pt-2 lg:hidden w-full">
+          <div class="space-y-2 pt-2 lg:hidden w-full">
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                id="start-btn"
+                class="action-btn h-11 px-4 bg-linear-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer"
+              >
+                <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+                <span>Initiate</span>
+              </button>
+
+              <button
+                id="resume-btn"
+                class="action-btn h-11 px-4 glass-strong border border-white/10 hover:border-indigo-500/30 text-indigo-300 hover:text-white rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer"
+              >
+                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                <span id="resume-text">Resume</span>
+              </button>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2">
+              <button
+                id="resonance-btn-mobile"
+                class="action-btn h-10 px-2 glass border border-white/10 hover:border-red-500/40 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer group"
+                title="Soul Resonance"
+                aria-label="Soul Resonance"
+              >
+                <i
+                  data-lucide="heart"
+                  class="w-3.5 h-3.5 text-slate-400 group-hover:text-red-400 transition-colors"
+                ></i>
+                <span id="resonance-count-mobile" class="font-bold tracking-wide">0</span>
+              </button>
+
+              <button
+                id="shelf-btn"
+                class="action-btn h-10 px-2 glass border border-white/10 hover:border-indigo-500/30 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                title="Save to Shelf"
+                aria-label="Save to Shelf"
+              >
+                <i data-lucide="bookmark-plus" class="w-3.5 h-3.5"></i>
+                <span>Shelf</span>
+              </button>
+
+              <button
+                id="share-btn"
+                class="action-btn h-10 px-2 glass border border-white/10 hover:border-indigo-500/30 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                title="Share Tale"
+                aria-label="Share Tale"
+              >
+                <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+                <span>Share</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Desktop Command Hub (Visible on lg+) -->
+          <div class="hidden lg:flex flex-wrap items-center gap-3 pt-2">
             <button
-              id="start-btn"
-              class="action-btn h-11 px-4 bg-linear-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer"
+              id="start-btn-desktop"
+              class="action-btn py-3 px-6 bg-linear-to-r from-indigo-500 via-indigo-600 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
             >
-              <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
-              <span>Initiate</span>
+              <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+              <span>Initiate Reading</span>
             </button>
 
             <button
-              id="resume-btn"
-              class="action-btn h-11 px-4 glass-strong border border-white/10 hover:border-indigo-500/30 text-indigo-300 hover:text-white rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer"
+              id="resume-btn-desktop"
+              class="action-btn py-3 px-5 glass-strong border border-white/10 hover:border-indigo-500/30 text-indigo-300 hover:text-white rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
             >
               <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-              <span id="resume-text">Resume</span>
+              <span id="resume-text-desktop">Resume</span>
             </button>
 
             <button
-              id="shelf-btn"
-              class="action-btn h-10 px-3 glass border border-white/10 hover:border-indigo-500/30 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
+              id="resonance-btn-desktop"
+              class="action-btn py-3 px-4.5 glass border border-white/8 hover:border-red-500/40 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0 group"
+              title="Soul Resonance"
+              aria-label="Soul Resonance"
+            >
+              <i
+                data-lucide="heart"
+                class="w-4 h-4 text-slate-400 group-hover:text-red-400 transition-colors"
+              ></i>
+              <span id="resonance-count" class="font-bold tracking-wide">0</span>
+            </button>
+
+            <button
+              id="shelf-btn-desktop"
+              class="action-btn py-3 px-4 glass border border-white/8 hover:border-indigo-500/30 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
               title="Save to Shelf"
+              aria-label="Save to Shelf"
             >
               <i data-lucide="bookmark-plus" class="w-3.5 h-3.5"></i>
               <span>Save to Shelf</span>
             </button>
 
             <button
-              id="share-btn"
-              class="action-btn h-10 px-3 glass border border-white/10 hover:border-indigo-500/30 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
+              id="share-btn-desktop"
+              class="action-btn py-3 px-4 glass border border-white/8 hover:border-indigo-500/30 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
               title="Share Tale"
+              aria-label="Share Tale"
             >
               <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
-              <span>Share Tale</span>
+              <span>Share</span>
             </button>
-
-            <button
-              id="resonance-btn-mobile"
-              class="col-span-2 w-full h-10 rounded-xl border border-white/10 glass hover:border-orange-500/40 text-slate-300 hover:text-white transition-all flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider cursor-pointer group"
-            >
-              <i
-                data-lucide="heart"
-                class="w-3.5 h-3.5 text-slate-500 group-hover:text-orange-500 transition-colors"
-              ></i>
-              <span class="resonance-label">Align Souls</span>
-              <span class="text-white/20">•</span>
-              <span
-                id="resonance-count-mobile"
-                class="text-orange-400 font-extrabold tracking-wider"
-                >0</span
-              >
-            </button>
-          </div>
-
-          <!-- Desktop Command Hub (Visible on lg+) -->
-          <div class="hidden lg:flex flex-col gap-4 pt-1">
-            <!-- Desktop Action Hub -->
-            <div class="flex flex-wrap items-center gap-3">
-              <button
-                id="start-btn-desktop"
-                class="action-btn py-3 px-6 bg-linear-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
-              >
-                <i data-lucide="play" class="w-4 h-4 fill-current"></i>
-                <span>Initiate Reading</span>
-              </button>
-
-              <button
-                id="resume-btn-desktop"
-                class="action-btn py-3 px-5 glass-strong border border-white/10 hover:border-indigo-500/30 text-indigo-300 hover:text-white rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
-              >
-                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-                <span id="resume-text-desktop">Resume</span>
-              </button>
-
-              <button
-                id="shelf-btn-desktop"
-                class="action-btn py-3 px-4 glass border border-white/8 hover:border-indigo-500/30 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
-                title="Save to Shelf"
-              >
-                <i data-lucide="bookmark-plus" class="w-3.5 h-3.5"></i>
-                <span>Save to Shelf</span>
-              </button>
-
-              <button
-                id="share-btn-desktop"
-                class="action-btn py-3 px-4 glass border border-white/8 hover:border-indigo-500/30 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
-                title="Share Tale"
-              >
-                <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
-                <span>Share</span>
-              </button>
-            </div>
-
-            <!-- Soul Resonance Hearth (Archive Status Removed) -->
-            <div class="flex items-center gap-4">
-              <div
-                class="glass-card p-3.5 rounded-2xl border border-white/6 flex items-center justify-between gap-6 max-w-md w-full"
-              >
-                <div class="flex items-center gap-3">
-                  <div
-                    class="w-9 h-9 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center shrink-0"
-                  >
-                    <i data-lucide="flame" class="w-4 h-4 text-orange-400"></i>
-                  </div>
-                  <div>
-                    <span
-                      class="text-[9px] font-black uppercase tracking-[0.2em] text-orange-300 block"
-                    >
-                      Soul Resonance
-                    </span>
-                    <span id="resonance-count" class="text-sm font-bold text-white tracking-wider"
-                      >0</span
-                    >
-                  </div>
-                </div>
-                <button
-                  id="resonance-btn-desktop"
-                  class="py-2 px-4 rounded-xl border border-white/10 glass hover:border-orange-500/40 text-slate-300 hover:text-white transition-all flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-wider cursor-pointer group shrink-0"
-                >
-                  <i
-                    data-lucide="heart"
-                    class="w-3.5 h-3.5 text-slate-500 group-hover:text-orange-500 transition-colors"
-                  ></i>
-                  <span class="resonance-label">Align Souls</span>
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </section>

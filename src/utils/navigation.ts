@@ -43,6 +43,8 @@ export function initPageReveal(): void {
     const reveal = () => {
       if (document.body) {
         document.body.classList.add('booted');
+        document.body.style.opacity = '';
+        document.body.style.pointerEvents = '';
       }
     };
     if (document.readyState === 'loading') {
@@ -59,6 +61,8 @@ export function initPageReveal(): void {
 export function readyReveal(): void {
   if (typeof document !== 'undefined' && document.body) {
     document.body.classList.add('booted');
+    document.body.style.opacity = '';
+    document.body.style.pointerEvents = '';
   }
 }
 
@@ -164,6 +168,17 @@ export function navigateTo(target: string, delay = 0): void {
   window.setTimeout(() => {
     window.location.href = href;
   }, TRANSITION_DURATION_MS + delay);
+}
+
+// Reset body pointer-events and opacity when navigating via browser back/forward buttons (bfcache)
+if (typeof window !== 'undefined') {
+  window.addEventListener('pageshow', () => {
+    if (typeof document !== 'undefined' && document.body) {
+      document.body.style.opacity = '';
+      document.body.style.pointerEvents = '';
+      document.body.classList.add('booted');
+    }
+  });
 }
 
 log.debug('Navigation initialized');

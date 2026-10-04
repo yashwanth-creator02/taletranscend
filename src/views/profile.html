@@ -409,11 +409,25 @@
               class="section-header flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-6 mb-4 sm:mb-6"
             >
               <div>
-                <h2
-                  class="text-xl sm:text-2xl md:text-3xl font-cinzel font-bold text-white tracking-wide"
-                >
-                  Continue Reading
-                </h2>
+                <div class="flex items-center gap-2.5">
+                  <h2
+                    class="text-xl sm:text-2xl md:text-3xl font-cinzel font-bold text-white tracking-wide"
+                  >
+                    Continue Reading
+                  </h2>
+                  <div class="info-tooltip-wrap">
+                    <button
+                      type="button"
+                      class="p-1 text-slate-500 hover:text-indigo-400 transition-colors cursor-help"
+                      aria-label="Continue reading section info"
+                    >
+                      <i data-lucide="info" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <div class="info-tooltip-box">
+                      Resume reading your ongoing chronicles right from where you left off.
+                    </div>
+                  </div>
+                </div>
                 <div class="rune-divider"></div>
                 <p class="text-slate-500 text-xs sm:text-sm mt-2 max-w-md font-medium">
                   Resume your journey through the woven memories.
@@ -437,11 +451,25 @@
               class="section-header flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-6 mb-5 sm:mb-6"
             >
               <div>
-                <h2
-                  class="text-xl sm:text-2xl md:text-3xl font-cinzel font-bold text-white tracking-wide"
-                >
-                  The Archive
-                </h2>
+                <div class="flex items-center gap-2.5">
+                  <h2
+                    class="text-xl sm:text-2xl md:text-3xl font-cinzel font-bold text-white tracking-wide"
+                  >
+                    The Archive
+                  </h2>
+                  <div class="info-tooltip-wrap">
+                    <button
+                      type="button"
+                      class="p-1 text-slate-500 hover:text-indigo-400 transition-colors cursor-help"
+                      aria-label="Archive section info"
+                    >
+                      <i data-lucide="info" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <div class="info-tooltip-box">
+                      Chronicles you have authored, published, or currently hold in draft form.
+                    </div>
+                  </div>
+                </div>
                 <div class="rune-divider"></div>
                 <p class="text-slate-500 text-xs sm:text-sm mt-2 max-w-md font-medium">
                   The legends you've preserved for eternity.
@@ -524,9 +552,24 @@
           <!-- ── Statistics ────────────────────────── -->
           <section>
             <header class="mb-5 sm:mb-6">
-              <h3 class="text-xs font-black text-slate-500 uppercase tracking-[0.3em]">
-                Legacy Metrics
-              </h3>
+              <div class="flex items-center gap-2">
+                <h3 class="text-xs font-black text-slate-500 uppercase tracking-[0.3em]">
+                  Legacy Metrics
+                </h3>
+                <div class="info-tooltip-wrap">
+                  <button
+                    type="button"
+                    class="p-0.5 text-slate-500 hover:text-indigo-400 transition-colors cursor-help"
+                    aria-label="Legacy metrics info"
+                  >
+                    <i data-lucide="info" class="w-3 h-3"></i>
+                  </button>
+                  <div class="info-tooltip-box info-tooltip-box--left">
+                    Your cumulative writing output, audience engagement, reading time, and active
+                    chronicler streak.
+                  </div>
+                </div>
+              </div>
               <div class="h-px w-8 bg-indigo-500/30 mt-2"></div>
             </header>
 
@@ -604,9 +647,24 @@
           <!-- ── Reading Progress ───────────────────── -->
           <section>
             <header class="mb-5 sm:mb-6">
-              <h3 class="text-xs font-black text-slate-500 uppercase tracking-[0.3em]">
-                Chronicle Goal
-              </h3>
+              <div class="flex items-center gap-2">
+                <h3 class="text-xs font-black text-slate-500 uppercase tracking-[0.3em]">
+                  Chronicle Goal
+                </h3>
+                <div class="info-tooltip-wrap">
+                  <button
+                    type="button"
+                    class="p-0.5 text-slate-500 hover:text-indigo-400 transition-colors cursor-help"
+                    aria-label="Chronicle goal info"
+                  >
+                    <i data-lucide="info" class="w-3 h-3"></i>
+                  </button>
+                  <div class="info-tooltip-box info-tooltip-box--left">
+                    Your reading target for the current calendar year and your progress towards
+                    completing it.
+                  </div>
+                </div>
+              </div>
               <div class="h-px w-8 bg-violet-500/30 mt-2"></div>
             </header>
 
@@ -768,13 +826,27 @@
               <!-- Display name -->
               <div class="space-y-1.5 mb-4">
                 <div class="flex items-center justify-between">
-                  <label
-                    for="input-name"
-                    class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
-                  >
-                    <i data-lucide="signature" class="w-3 h-3"></i>
-                    Display Name
-                  </label>
+                  <div class="flex items-center gap-2">
+                    <label
+                      for="input-name"
+                      class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
+                    >
+                      <i data-lucide="signature" class="w-3 h-3"></i>
+                      Display Name
+                    </label>
+                    <div class="info-tooltip-wrap">
+                      <button
+                        type="button"
+                        class="p-0.5 text-slate-500 hover:text-indigo-400 transition-colors cursor-help"
+                        aria-label="Display name info"
+                      >
+                        <i data-lucide="info" class="w-3 h-3"></i>
+                      </button>
+                      <div class="info-tooltip-box">
+                        Your public moniker displayed across the living archive and reflections.
+                      </div>
+                    </div>
+                  </div>
                   <button
                     type="button"
                     id="btn-suggest-name"
@@ -795,13 +867,28 @@
 
               <!-- Bio -->
               <div class="space-y-1.5 mb-4">
-                <label
-                  for="input-bio"
-                  class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
-                >
-                  <i data-lucide="scroll" class="w-3 h-3"></i>
-                  Short Bio
-                </label>
+                <div class="flex items-center gap-2">
+                  <label
+                    for="input-bio"
+                    class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
+                  >
+                    <i data-lucide="scroll" class="w-3 h-3"></i>
+                    Short Bio
+                  </label>
+                  <div class="info-tooltip-wrap">
+                    <button
+                      type="button"
+                      class="p-0.5 text-slate-500 hover:text-indigo-400 transition-colors cursor-help"
+                      aria-label="Bio info"
+                    >
+                      <i data-lucide="info" class="w-3 h-3"></i>
+                    </button>
+                    <div class="info-tooltip-box">
+                      A short story or lore about you. Used by the Oracle to conjure mythic name
+                      suggestions.
+                    </div>
+                  </div>
+                </div>
                 <textarea
                   id="input-bio"
                   aria-label="Short Bio"
@@ -814,13 +901,27 @@
 
               <!-- Pronouns -->
               <div class="space-y-1.5">
-                <label
-                  for="input-pronouns"
-                  class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
-                >
-                  <i data-lucide="user-check" class="w-3 h-3"></i>
-                  Pronouns
-                </label>
+                <div class="flex items-center gap-2">
+                  <label
+                    for="input-pronouns"
+                    class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
+                  >
+                    <i data-lucide="user-check" class="w-3 h-3"></i>
+                    Pronouns
+                  </label>
+                  <div class="info-tooltip-wrap">
+                    <button
+                      type="button"
+                      class="p-0.5 text-slate-500 hover:text-indigo-400 transition-colors cursor-help"
+                      aria-label="Pronouns info"
+                    >
+                      <i data-lucide="info" class="w-3 h-3"></i>
+                    </button>
+                    <div class="info-tooltip-box">
+                      How other chroniclers and readers address your spirit.
+                    </div>
+                  </div>
+                </div>
                 <input
                   type="text"
                   id="input-pronouns"
@@ -833,13 +934,28 @@
               <!-- Oracle AI / Gemini API Key -->
               <div class="space-y-1.5 pt-3 border-t border-white/5">
                 <div class="flex items-center justify-between ml-1">
-                  <label
-                    for="input-gemini-key"
-                    class="flex items-center gap-2 text-[10px] font-bold text-amber-400 uppercase tracking-[0.15em]"
-                  >
-                    <i data-lucide="sparkles" class="w-3 h-3 text-amber-400"></i>
-                    Gemini API Key
-                  </label>
+                  <div class="flex items-center gap-2">
+                    <label
+                      for="input-gemini-key"
+                      class="flex items-center gap-2 text-[10px] font-bold text-amber-400 uppercase tracking-[0.15em]"
+                    >
+                      <i data-lucide="sparkles" class="w-3 h-3 text-amber-400"></i>
+                      Gemini API Key
+                    </label>
+                    <div class="info-tooltip-wrap">
+                      <button
+                        type="button"
+                        class="p-0.5 text-slate-500 hover:text-amber-400 transition-colors cursor-help"
+                        aria-label="Gemini API Key info"
+                      >
+                        <i data-lucide="info" class="w-3 h-3"></i>
+                      </button>
+                      <div class="info-tooltip-box">
+                        Personal Google AI Studio API key used to generate AI name suggestions and
+                        mythic lore refinements without limits.
+                      </div>
+                    </div>
+                  </div>
                   <a
                     href="https://aistudio.google.com/app/apikey"
                     target="_blank"
@@ -856,10 +972,10 @@
                     id="input-gemini-key"
                     aria-label="Gemini API Key"
                     autocomplete="off"
-                    class="input-mythic w-full rounded-xl px-4 py-3 text-xs pr-20 font-mono placeholder:font-sans placeholder:text-sm"
+                    class="input-mythic w-full rounded-xl px-4 py-3 text-xs pr-28 font-mono placeholder:font-sans placeholder:text-sm"
                     placeholder="Enter your Gemini API key (AIzaSy…)"
                   />
-                  <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                  <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
                     <button
                       type="button"
                       id="btn-toggle-gemini-key"
@@ -867,6 +983,14 @@
                       class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 text-[10px] font-medium transition-colors cursor-pointer"
                     >
                       Show
+                    </button>
+                    <button
+                      type="button"
+                      id="btn-save-gemini-key"
+                      aria-label="Save Gemini API key"
+                      class="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 hover:bg-amber-500/25 hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer active:scale-95 shadow-sm"
+                    >
+                      Save
                     </button>
                   </div>
                 </div>
@@ -881,13 +1005,27 @@
             <div id="tab-panel-identity" hidden>
               <!-- Location -->
               <div class="space-y-1.5 mb-4">
-                <label
-                  for="input-location"
-                  class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
-                >
-                  <i data-lucide="map-pin" class="w-3 h-3"></i>
-                  Location
-                </label>
+                <div class="flex items-center gap-2">
+                  <label
+                    for="input-location"
+                    class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
+                  >
+                    <i data-lucide="map-pin" class="w-3 h-3"></i>
+                    Location
+                  </label>
+                  <div class="info-tooltip-wrap">
+                    <button
+                      type="button"
+                      class="p-0.5 text-slate-500 hover:text-indigo-400 transition-colors cursor-help"
+                      aria-label="Location info"
+                    >
+                      <i data-lucide="info" class="w-3 h-3"></i>
+                    </button>
+                    <div class="info-tooltip-box">
+                      Your real-world city, country, or mythic realm.
+                    </div>
+                  </div>
+                </div>
                 <input
                   type="text"
                   id="input-location"
@@ -899,12 +1037,26 @@
 
               <!-- Favourite Genres -->
               <div class="space-y-2">
-                <label
-                  class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
-                >
-                  <i data-lucide="tags" class="w-3 h-3"></i>
-                  Favourite Genres
-                </label>
+                <div class="flex items-center gap-2">
+                  <label
+                    class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
+                  >
+                    <i data-lucide="tags" class="w-3 h-3"></i>
+                    Favourite Genres
+                  </label>
+                  <div class="info-tooltip-wrap">
+                    <button
+                      type="button"
+                      class="p-0.5 text-slate-500 hover:text-indigo-400 transition-colors cursor-help"
+                      aria-label="Favourite genres info"
+                    >
+                      <i data-lucide="info" class="w-3 h-3"></i>
+                    </button>
+                    <div class="info-tooltip-box">
+                      Genres you enjoy reading or writing, used to tailor chronicles in your feed.
+                    </div>
+                  </div>
+                </div>
                 <p class="text-[10px] text-slate-400 ml-1 mb-2">Select all that apply.</p>
                 <div id="genre-selector" class="flex flex-wrap gap-2">
                   <!-- Chips built by _buildGenreSelector() in ui.js -->
@@ -916,13 +1068,27 @@
             <div id="tab-panel-social" hidden>
               <div class="space-y-4">
                 <div class="space-y-1.5">
-                  <label
-                    for="input-website"
-                    class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
-                  >
-                    <i data-lucide="globe" class="w-3 h-3"></i>
-                    Website
-                  </label>
+                  <div class="flex items-center gap-2">
+                    <label
+                      for="input-website"
+                      class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
+                    >
+                      <i data-lucide="globe" class="w-3 h-3"></i>
+                      Website
+                    </label>
+                    <div class="info-tooltip-wrap">
+                      <button
+                        type="button"
+                        class="p-0.5 text-slate-500 hover:text-indigo-400 transition-colors cursor-help"
+                        aria-label="Website info"
+                      >
+                        <i data-lucide="info" class="w-3 h-3"></i>
+                      </button>
+                      <div class="info-tooltip-box">
+                        Link to your personal website, portfolio, or blog.
+                      </div>
+                    </div>
+                  </div>
                   <input
                     type="url"
                     id="input-website"
@@ -933,13 +1099,27 @@
                 </div>
 
                 <div class="space-y-1.5">
-                  <label
-                    for="input-twitter"
-                    class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
-                  >
-                    <i data-lucide="badge-x" class="w-3 h-3"></i>
-                    Twitter / X
-                  </label>
+                  <div class="flex items-center gap-2">
+                    <label
+                      for="input-twitter"
+                      class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
+                    >
+                      <i data-lucide="badge-x" class="w-3 h-3"></i>
+                      Twitter / X
+                    </label>
+                    <div class="info-tooltip-wrap">
+                      <button
+                        type="button"
+                        class="p-0.5 text-slate-500 hover:text-indigo-400 transition-colors cursor-help"
+                        aria-label="Twitter info"
+                      >
+                        <i data-lucide="info" class="w-3 h-3"></i>
+                      </button>
+                      <div class="info-tooltip-box">
+                        Your X/Twitter handle for social connection.
+                      </div>
+                    </div>
+                  </div>
                   <div class="relative">
                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"
                       >@</span
@@ -955,13 +1135,25 @@
                 </div>
 
                 <div class="space-y-1.5">
-                  <label
-                    for="input-instagram"
-                    class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
-                  >
-                    <i data-lucide="instagram" class="w-3 h-3"></i>
-                    Instagram
-                  </label>
+                  <div class="flex items-center gap-2">
+                    <label
+                      for="input-instagram"
+                      class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
+                    >
+                      <i data-lucide="instagram" class="w-3 h-3"></i>
+                      Instagram
+                    </label>
+                    <div class="info-tooltip-wrap">
+                      <button
+                        type="button"
+                        class="p-0.5 text-slate-500 hover:text-indigo-400 transition-colors cursor-help"
+                        aria-label="Instagram info"
+                      >
+                        <i data-lucide="info" class="w-3 h-3"></i>
+                      </button>
+                      <div class="info-tooltip-box">Your Instagram profile handle.</div>
+                    </div>
+                  </div>
                   <div class="relative">
                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"
                       >@</span
@@ -982,13 +1174,27 @@
             <div id="tab-panel-goals" hidden>
               <div class="space-y-5">
                 <div class="space-y-1.5">
-                  <label
-                    for="input-reading-goal"
-                    class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
-                  >
-                    <i data-lucide="target" class="w-3 h-3"></i>
-                    Yearly Reading Goal
-                  </label>
+                  <div class="flex items-center gap-2">
+                    <label
+                      for="input-reading-goal"
+                      class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
+                    >
+                      <i data-lucide="target" class="w-3 h-3"></i>
+                      Yearly Reading Goal
+                    </label>
+                    <div class="info-tooltip-wrap">
+                      <button
+                        type="button"
+                        class="p-0.5 text-slate-500 hover:text-indigo-400 transition-colors cursor-help"
+                        aria-label="Yearly reading goal info"
+                      >
+                        <i data-lucide="info" class="w-3 h-3"></i>
+                      </button>
+                      <div class="info-tooltip-box">
+                        Your personal milestone for chronicles read this year.
+                      </div>
+                    </div>
+                  </div>
                   <p class="text-[10px] text-slate-400 ml-1">
                     How many tales do you want to read this year?
                   </p>

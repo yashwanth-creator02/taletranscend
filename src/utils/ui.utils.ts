@@ -54,12 +54,16 @@ export function applyButtonCooldown(
 ): void {
   if (!btn) return;
 
-  // Prefer a visible span for the label, fall back to any span, then the button itself
-  const label = btn.querySelector('span:not(.sr-only)') || btn.querySelector('span') || btn;
+  // Prefer an explicit label or text span (excluding counter elements), fall back to span or button if no icons/counters exist
+  const label =
+    btn.querySelector('.cooldown-label, .btn-label, .resonance-label, [data-cooldown-label]') ||
+    btn.querySelector('span:not([id*="count"]):not(.sr-only)') ||
+    btn.querySelector('span:not([id*="count"])') ||
+    (btn.querySelector('i, svg, [id*="count"]') ? null : btn);
 
   // If it's an icon button with sr-only text (like our shelf button),
   // we might want to show the timer even if it was hidden.
-  const isSrOnly = label.classList.contains('sr-only');
+  const isSrOnly = label?.classList.contains('sr-only') ?? false;
 
   const updateUI = () => {
     const remaining = getRemaining();
@@ -69,8 +73,10 @@ export function applyButtonCooldown(
       if (btn instanceof HTMLButtonElement) btn.disabled = false;
       btn.classList.remove('cooldown-active');
 
-      label.textContent = originalText;
-      if (isSrOnly) label.classList.add('sr-only'); // Put it back to hidden
+      if (label) {
+        label.textContent = originalText;
+        if (isSrOnly) label.classList.add('sr-only'); // Put it back to hidden
+      }
       return;
     }
 
@@ -80,15 +86,15 @@ export function applyButtonCooldown(
 
     const seconds = Math.ceil(remaining / 1000);
 
-    // For sr-only labels on small buttons, we might want to briefly show the timer
-    // but that could break layout. Let's just update the text for screen readers
-    // and maybe the button title.
-    label.textContent = `${originalText} (${seconds}s)`;
+    if (label && originalText) {
+      label.textContent = `${originalText} (${seconds}s)`;
+    }
 
-    if (btn.hasAttribute('title')) {
-      const originalTitle = btn.getAttribute('data-original-title') || btn.getAttribute('title');
+    if (btn.hasAttribute('title') || !label) {
+      const originalTitle =
+        btn.getAttribute('data-original-title') || btn.getAttribute('title') || 'Action';
       if (!btn.hasAttribute('data-original-title')) {
-        btn.setAttribute('data-original-title', originalTitle!);
+        btn.setAttribute('data-original-title', originalTitle);
       }
       btn.setAttribute('title', `${originalTitle} (${seconds}s)`);
     }

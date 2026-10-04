@@ -39,12 +39,12 @@
 
 .hero-cover-backdrop-img {
   position: absolute;
-  inset: -32px;
+  inset: -12px;
   background-image: var(--bg-url);
   background-size: cover;
   background-position: center 30%;
-  filter: blur(32px) brightness(0.38) saturate(1.5);
-  transform: scale(1.15);
+  filter: blur(8px) brightness(0.42) saturate(1.25);
+  transform: scale(1.05);
   transition: opacity var(--dur-normal) ease;
 }
 
@@ -53,7 +53,7 @@
   inset: 0;
   background:
     radial-gradient(circle at 25% 20%, rgb(var(--accent-rgb) / var(--a-06)), transparent 65%),
-    linear-gradient(180deg, rgb(var(--dark-rgb) / 0.45) 0%, rgb(var(--dark-rgb) / 0.85) 100%);
+    linear-gradient(180deg, rgb(var(--dark-rgb) / 0.4) 0%, rgb(var(--dark-rgb) / 0.82) 100%);
 }
 
 .hero-title {
@@ -249,6 +249,22 @@
 
 .shine-container:hover .shine-layer {
   transform: translateX(100%);
+}
+
+/* ── Aligned Soul Resonance ─────────────────────────────────── */
+
+#resonance-btn-desktop.is-aligned,
+#resonance-btn-mobile.is-aligned {
+  background: rgb(var(--danger-rgb) / var(--a-16));
+  border-color: rgb(var(--danger-rgb) / var(--a-60));
+  color: rgb(var(--danger-rgb));
+  box-shadow: 0 0 16px rgb(var(--danger-rgb) / var(--a-24));
+}
+
+#resonance-btn-desktop.is-aligned svg,
+#resonance-btn-mobile.is-aligned svg {
+  fill: rgb(var(--danger-rgb));
+  color: rgb(var(--danger-rgb));
 }
 
 /* ── Mobile Overrides ───────────────────────────────────────── */

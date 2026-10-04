@@ -279,15 +279,24 @@ function _bindApiKeyInput() {
     keyInput.value = storedKey;
   }
 
-  keyInput.addEventListener('change', () => {
+  const saveBtn = document.getElementById('btn-save-gemini-key');
+
+  const saveKey = () => {
     const val = keyInput.value.trim();
     if (val) {
       setStoredApiKey(val);
       showToast('Gemini API key saved.', 'success');
     } else {
       clearStoredApiKey();
+      showToast('Gemini API key cleared.', 'info');
     }
-  });
+  };
+
+  keyInput.addEventListener('change', saveKey);
+
+  if (saveBtn) {
+    saveBtn.addEventListener('click', saveKey);
+  }
 
   if (toggleBtn) {
     toggleBtn.addEventListener('click', () => {
