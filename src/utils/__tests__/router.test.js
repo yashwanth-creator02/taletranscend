@@ -38,34 +38,44 @@ describe('Router & Soft Navigation', () => {
       expect(isStandalonePage('/tales/tale1/read/0')).toBe(true);
       expect(isStandalonePage('/login.html')).toBe(true);
       expect(isStandalonePage('/404.html')).toBe(true);
+      expect(isStandalonePage('/shelf.html')).toBe(true);
+      expect(isStandalonePage('/tales/tale1')).toBe(true);
+      expect(isStandalonePage('/contribution.html')).toBe(true);
 
       expect(isStandalonePage('/library.html')).toBe(false);
-      expect(isStandalonePage('/shelf.html')).toBe(false);
-      expect(isStandalonePage('/tales/tale1')).toBe(false);
+      expect(isStandalonePage('/profile.html')).toBe(false);
+      expect(isStandalonePage('/toc.html')).toBe(false);
       expect(isStandalonePage('/')).toBe(false);
     });
   });
 
   describe('isSmallChange', () => {
-    it('returns true for shell-to-shell navigations', () => {
+    it('returns true for app-shell to app-shell navigations', () => {
       expect(isSmallChange('http://localhost:5173/', 'http://localhost:5173/library.html')).toBe(
         true
       );
       expect(
-        isSmallChange('http://localhost:5173/library.html', 'http://localhost:5173/shelf.html')
+        isSmallChange('http://localhost:5173/library.html', 'http://localhost:5173/profile.html')
       ).toBe(true);
       expect(
-        isSmallChange('http://localhost:5173/shelf.html', 'http://localhost:5173/profile.html')
+        isSmallChange('http://localhost:5173/profile.html', 'http://localhost:5173/toc.html')
       ).toBe(true);
+      expect(
+        isSmallChange('http://localhost:5173/toc.html', 'http://localhost:5173/index.html')
+      ).toBe(true);
+    });
+
+    it('returns false for standalone views (shelf, tale, reader, login, 404, assets, external)', () => {
+      // Shelf & Tale Detail (standalone layouts to prevent dock/nav leaks)
+      expect(
+        isSmallChange('http://localhost:5173/library.html', 'http://localhost:5173/shelf.html')
+      ).toBe(false);
       expect(
         isSmallChange(
           'http://localhost:5173/library.html',
           'http://localhost:5173/tales/my-tale-123'
         )
-      ).toBe(true);
-    });
-
-    it('returns false for large changes (reader, login, 404, assets, external)', () => {
+      ).toBe(false);
       // Reader (large change: immersive reading experience)
       expect(
         isSmallChange('http://localhost:5173/library.html', 'http://localhost:5173/reader.html')

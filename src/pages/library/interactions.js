@@ -21,14 +21,19 @@ import {
    Card Interactions — single delegated handler
    ───────────────────────────────────────────── */
 
+let _activeUserId = null;
+let _lastBoundGrid = null;
+
 /**
  * Sets up all card interactions via a single delegated click handler on #cards-grid.
  *
  * @param {string} userId
  */
 export function setupCardInteractions(userId) {
+  _activeUserId = userId;
   const grid = document.getElementById('cards-grid');
-  if (!grid) return;
+  if (!grid || _lastBoundGrid === grid) return;
+  _lastBoundGrid = grid;
 
   grid.addEventListener('click', async (e) => {
     const actionEl = e.target.closest('[data-action]');
@@ -48,7 +53,7 @@ export function setupCardInteractions(userId) {
           return;
 
         case 'resume':
-          await _handleResume(userId, taleId);
+          await _handleResume(_activeUserId, taleId);
           return;
 
         case 'copy-link':
@@ -62,15 +67,15 @@ export function setupCardInteractions(userId) {
 
         case 'mark-finished':
           if (actionEl.hasAttribute('disabled')) return;
-          _confirmMarkFinished(() => _handleMarkFinished(userId, taleId));
+          _confirmMarkFinished(() => _handleMarkFinished(_activeUserId, taleId));
           return;
 
         case 'couple':
-          await _handleCouple(userId, taleId, actionEl);
+          await _handleCouple(_activeUserId, taleId, actionEl);
           return;
 
         case 'decouple':
-          await _handleDecouple(userId, taleId, actionEl);
+          await _handleDecouple(_activeUserId, taleId, actionEl);
           return;
 
         default:
@@ -79,11 +84,8 @@ export function setupCardInteractions(userId) {
     }
 
     // Card body click → tale detail page
-    if (!e.target.closest('.options-menu')) {
-      // Card body click → navigate to tale detail page
-      if (!e.target.closest('.options-menu')) {
-        navigateTo(taleUrl(taleId));
-      }
+    if (!e.target.closest('.options-menu') && !e.target.closest('[data-action="options"]')) {
+      navigateTo(taleUrl(taleId));
     }
   });
 
@@ -327,13 +329,22 @@ function _toggleMenu(menuId) {
   const menu = document.getElementById(menuId);
   if (!menu) return;
 
-  document.querySelectorAll('.options-menu:not(.hidden)').forEach((m) => {
-    if (m !== menu) m.classList.add('hidden');
-  });
+  const card = menu.closest('.tale-card');
+  const willOpen = menu.classList.contains('hidden');
 
-  menu.classList.toggle('hidden');
+  _closeAllMenus();
+
+  if (willOpen) {
+    menu.classList.remove('hidden');
+    card?.classList.add('menu-open');
+  }
 }
 
 function _closeAllMenus() {
-  document.querySelectorAll('.options-menu:not(.hidden)').forEach((m) => m.classList.add('hidden'));
+  document.querySelectorAll('.options-menu:not(.hidden)').forEach((m) => {
+    m.classList.add('hidden');
+  });
+  document.querySelectorAll('.tale-card.menu-open').forEach((c) => {
+    c.classList.remove('menu-open');
+  });
 }

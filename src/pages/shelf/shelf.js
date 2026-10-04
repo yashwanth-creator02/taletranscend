@@ -48,7 +48,6 @@ export async function initShelfPage() {
     initShelfLayout();
     initShelfInteractions();
     initIcons();
-    readyReveal();
     _pageInitialized = true;
   }
 
@@ -66,6 +65,8 @@ export async function initShelfPage() {
     computeAndRenderHeroStats();
     readyReveal();
     initShelfLayout();
+  } else {
+    readyReveal();
   }
 }
 

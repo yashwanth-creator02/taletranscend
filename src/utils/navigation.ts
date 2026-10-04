@@ -10,6 +10,7 @@ import { initDevMode } from './dev.utils.ts';
 import { createLogger } from './logger.ts';
 import { initRouter, softNavigate, isSmallChange } from './router.js';
 import { cacheService } from '@services/cache.service.js';
+import { initGlobalPaletteShortcut } from '@ui/components/nav/nav.global.js';
 
 const log = createLogger('Navigation');
 
@@ -125,18 +126,7 @@ export function initPageReveal(): void {
       return;
     }
     initRouter();
-    const reveal = () => {
-      if (document.body) {
-        document.body.classList.add('booted');
-        document.body.style.opacity = '';
-        document.body.style.pointerEvents = '';
-      }
-    };
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', reveal, { once: true });
-    } else {
-      reveal();
-    }
+    initGlobalPaletteShortcut();
   }
 }
 

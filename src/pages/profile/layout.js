@@ -3,7 +3,10 @@
  * Handles the visual layout, resizing, and modal accessibility for the profile page.
  */
 
+import { initIcons } from '@ui/components/icons.js';
+
 export function initProfileLayout() {
+  initIcons();
   /* ── LocalStorage Panel Widths ── */
   const LEFT_MIN = 280;
   const LEFT_MAX = 500;

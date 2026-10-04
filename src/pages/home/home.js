@@ -38,7 +38,6 @@ function init() {
   initIcons();
   initReliquary('archive-reliquary-container');
   _initInteractions();
-  readyReveal();
   _loadTrendingTales();
 }
 
@@ -165,6 +164,8 @@ async function _loadTrendingTales() {
   } catch (err) {
     log.error('Failed to load trending tales:', err);
     _hideTrendingSection();
+  } finally {
+    readyReveal();
   }
 }
 

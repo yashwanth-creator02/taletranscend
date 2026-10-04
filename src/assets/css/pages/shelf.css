@@ -9,9 +9,26 @@ html {
 }
 
 /* Ensure global nav and mobile dock never display on the shelf page */
-#app-nav,
-#mobile-dock-container {
+body.page-shelf #app-nav,
+body.page-shelf #mobile-dock-container {
   display: none !important;
+}
+
+.shelf-card {
+  position: relative;
+  overflow: visible !important;
+}
+
+.shelf-card.menu-open {
+  z-index: 50;
+}
+
+.shelf-card .options-menu {
+  background: rgb(var(--dark-rgb) / 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgb(var(--light-rgb) / var(--a-04));
+  box-shadow: 0 16px 40px rgb(var(--dark-rgb) / 0.8);
 }
 
 /* ── Atmosphere & Particle Field ───────────────────────── */

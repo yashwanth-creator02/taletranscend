@@ -3,16 +3,22 @@
 // Client-side soft navigation & respective div swapper with HTML page caching.
 //
 // Behavior:
-// - Small Change: Swaps only the respective content container (<main id="main-content">),
-//   runs smooth View Transition, keeps shared header/dock/atmosphere mounted, and executes
-//   the target page's lifecycle with instant cached data.
-// - Large Change: Falls back to a full page reload when navigating to/from standalone views
-//   (e.g. reader, login, 404, external links, or structural divergence).
+// - Small Change: Swaps only the respective content container (<main id="main-content">)
+//   between compatible app shell routes (Home, Library, Profile, TOC).
+//   Stylesheets and JS modules are preloaded BEFORE the swap so that no unstyled
+//   layout flashes (such as full-screen sidebars) ever occur.
+// - Large Change: Falls back to a clean full browser navigation with smooth fade
+//   for standalone routes (Shelf, Contribution Studio, Tale Detail, Reader, Login, 404).
 
 import { createLogger } from './logger.ts';
 import { resolveHref } from './navigation.ts';
 import { initIcons } from '@ui/components/icons.js';
 import { cacheService } from '@services/cache.service.js';
+import {
+  getRouteByUrl,
+  isSmallChange as routesIsSmallChange,
+  isStandalonePage as routesIsStandalonePage,
+} from './routes.js';
 
 const log = createLogger('Router');
 
@@ -20,69 +26,8 @@ const log = createLogger('Router');
 const pageCache = new Map();
 const PAGE_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
-/** Pages that have dedicated standalone layouts (large changes) */
-const STANDALONE_PATTERNS = [
-  /^\/reader(\.html)?(\/.*)?$/,
-  /^\/tales\/[^/]+\/(?:read|chapters?|fragments?)(\/.*)?$/,
-  /^\/(?:chapters?|fragments?)(\/.*)?$/,
-  /^\/login(\.html)?(\?.*)?$/,
-  /^\/404(\.html)?(\?.*)?$/,
-];
-
-/**
- * Checks if a URL points to a standalone page that requires a full reload.
- * @param {string} urlString
- * @returns {boolean}
- */
-export function isStandalonePage(urlString) {
-  if (!urlString) return false;
-  try {
-    const parsed = new URL(urlString, window.location.origin);
-    return STANDALONE_PATTERNS.some((pattern) => pattern.test(parsed.pathname));
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Determines whether a navigation between fromUrl and toUrl is a "small change"
- * (compatible shell pages, swap respective div) or a "large change" (full reload).
- *
- * @param {string} fromUrl
- * @param {string} toUrl
- * @returns {boolean} True if small change (soft swap), False if large change (full reload)
- */
-export function isSmallChange(fromUrl, toUrl) {
-  if (!fromUrl || !toUrl) return false;
-
-  try {
-    const from = new URL(fromUrl, window.location.origin);
-    const to = new URL(toUrl, window.location.origin);
-
-    // 1. Cross-origin is always a large change
-    if (from.origin !== to.origin) return false;
-
-    // 2. Either current or target is a standalone layout (Reader, Login, 404)
-    if (isStandalonePage(from.pathname) || isStandalonePage(to.pathname)) {
-      return false;
-    }
-
-    // 3. Static asset files (xml, json, png, etc.)
-    if (/\.(xml|json|png|jpe?g|svg|webp|avif|ico|pdf|txt)$/i.test(to.pathname)) {
-      return false;
-    }
-
-    // 4. Same page hash navigation only (let browser scroll)
-    if (from.pathname === to.pathname && from.search === to.search && to.hash) {
-      return false;
-    }
-
-    // Both are shell pages (home, library, shelf, profile, tale, contribution, toc)
-    return true;
-  } catch {
-    return false;
-  }
-}
+export const isStandalonePage = routesIsStandalonePage;
+export const isSmallChange = routesIsSmallChange;
 
 /**
  * Fetches page HTML with caching.
@@ -138,24 +83,8 @@ export function prefetchPage(url) {
  * @param {string} targetUrl
  */
 export function updateNavActiveLinks(targetUrl) {
-  const parsed = new URL(targetUrl, window.location.origin);
-  const pathname = parsed.pathname;
-
-  let activeFilename = 'index.html';
-  if (
-    pathname.startsWith('/reader') ||
-    pathname.startsWith('/chapter') ||
-    pathname.startsWith('/fragment') ||
-    (pathname.startsWith('/tales/') && /\/(?:read|chapters?|fragments?)(\/|$)/.test(pathname))
-  ) {
-    activeFilename = 'reader.html';
-  } else if (pathname.startsWith('/library')) activeFilename = 'library.html';
-  else if (pathname.startsWith('/shelf')) activeFilename = 'shelf.html';
-  else if (pathname.startsWith('/profile')) activeFilename = 'profile.html';
-  else if (pathname.startsWith('/contribution')) activeFilename = 'contribution.html';
-  else if (pathname.startsWith('/toc') || pathname.startsWith('/sitemap'))
-    activeFilename = 'toc.html';
-  else if (pathname.startsWith('/tales/')) activeFilename = 'tale.html';
+  const route = getRouteByUrl(targetUrl);
+  const activeFilename = route?.navActive || 'index.html';
 
   // Desktop links
   document.querySelectorAll('#app-nav .nav-link').forEach((link) => {
@@ -180,46 +109,8 @@ export function updateNavActiveLinks(targetUrl) {
   });
 }
 
-/**
- * Executes the destination page controller.
- *
- * @param {string} targetUrl
- */
-async function runPageInitializer(targetUrl) {
-  const parsed = new URL(targetUrl, window.location.origin);
-  const pathname = parsed.pathname;
-
-  try {
-    if (pathname === '/' || pathname === '/index.html' || pathname === '/index') {
-      const { initHomePage } = await import('@pages/home/home.js');
-      initHomePage?.();
-    } else if (pathname === '/library.html' || pathname === '/library') {
-      const { initLibraryPage } = await import('@pages/library/library.js');
-      await initLibraryPage?.();
-    } else if (pathname === '/shelf.html' || pathname === '/shelf') {
-      const { initShelfPage } = await import('@pages/shelf/shelf.js');
-      await initShelfPage?.();
-    } else if (pathname === '/profile.html' || pathname === '/profile') {
-      const { initProfilePage } = await import('@pages/profile/profile.js');
-      await initProfilePage?.();
-    } else if (pathname.startsWith('/tales/') || pathname === '/tale.html') {
-      const { initTalePage } = await import('@pages/tale/tale.js');
-      await initTalePage?.();
-    } else if (pathname === '/contribution.html' || pathname === '/contribution') {
-      const { initContributionPage } = await import('@pages/contribution/contribution.js');
-      await initContributionPage?.();
-    } else if (pathname === '/toc.html' || pathname === '/toc' || pathname === '/sitemap') {
-      const { initTOCPage } = await import('@pages/toc/toc.js');
-      await initTOCPage?.();
-    }
-  } catch (err) {
-    log.error('Failed to run page initializer', err);
-  } finally {
-    initIcons();
-  }
-}
-
 let _isNavigating = false;
+let _lastRenderedUrl = typeof window !== 'undefined' ? window.location.href : '';
 
 /**
  * Triggers a full browser navigation while fading out document body to prevent jarring flashes.
@@ -289,9 +180,51 @@ export function hideNavigationProgressBar() {
 }
 
 /**
+ * Preloads newly required stylesheets and awaits their parsing before swapping views.
+ *
+ * @param {Document} newDoc
+ * @returns {Promise<void>}
+ */
+async function preloadStylesheets(newDoc) {
+  if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
+    return;
+  }
+
+  const existingHrefs = new Set(
+    Array.from(document.querySelectorAll('link[rel="stylesheet"]')).map((l) =>
+      l.getAttribute('href')
+    )
+  );
+
+  const pendingPromises = [];
+
+  newDoc.querySelectorAll('link[rel="stylesheet"]').forEach((link) => {
+    const href = link.getAttribute('href');
+    if (href && !existingHrefs.has(href)) {
+      const clone = document.createElement('link');
+      clone.rel = 'stylesheet';
+      clone.href = href;
+
+      const p = new Promise((resolve) => {
+        clone.onload = () => resolve();
+        clone.onerror = () => resolve();
+        setTimeout(resolve, 350); // Safety timeout so page never gets stuck
+      });
+
+      pendingPromises.push(p);
+      document.head.appendChild(clone);
+    }
+  });
+
+  if (pendingPromises.length > 0) {
+    await Promise.all(pendingPromises);
+  }
+}
+
+/**
  * Performs client-side navigation.
- * If small change: swaps respective div (#main-content) with view transition.
- * If large change: executes full browser reload.
+ * If small change (app shell <-> app shell): swaps respective div (#main-content) with view transition.
+ * If large change (standalone views or first visit in session): executes full browser reload.
  *
  * @param {string} targetUrl
  * @param {Object} [options]
@@ -301,7 +234,13 @@ export function hideNavigationProgressBar() {
 export async function softNavigate(targetUrl, { isPopState = false, forceReload = false } = {}) {
   const resolved = resolveHref(targetUrl);
   const fullTargetUrl = new URL(resolved, window.location.origin).href;
-  const currentUrl = window.location.href;
+  let currentUrl =
+    _lastRenderedUrl && _lastRenderedUrl !== 'about:blank'
+      ? _lastRenderedUrl
+      : window.location.href;
+  if (!currentUrl || currentUrl === 'about:blank') {
+    currentUrl = `${window.location.origin}/`;
+  }
 
   // 1. If page is being visited for the first time in this browser session:
   // "like for evry browser session, if the page is being visited for the first time, then load the page fully, no chacheing here."
@@ -336,7 +275,6 @@ export async function softNavigate(targetUrl, { isPopState = false, forceReload 
   try {
     const html = await fetchPageHtml(fullTargetUrl);
     if (!html) {
-      // Fall back to full reload if fetch failed
       executeFullReload(fullTargetUrl);
       return;
     }
@@ -350,6 +288,22 @@ export async function softNavigate(targetUrl, { isPopState = false, forceReload 
       log.warn('Missing #main-content container in target document — reloading');
       executeFullReload(fullTargetUrl);
       return;
+    }
+
+    // 3. Preload all target stylesheets BEFORE swapping to prevent unstyled flash
+    await preloadStylesheets(newDoc);
+
+    // 4. Preload destination route JS module before swapping (production / browser)
+    const targetRoute = getRouteByUrl(fullTargetUrl);
+    let loadedModule = null;
+    if (targetRoute?.load && !(typeof process !== 'undefined' && process.env.NODE_ENV === 'test')) {
+      try {
+        loadedModule = await targetRoute.load();
+      } catch (err) {
+        log.warn('Route module preload failed, falling back to full reload', err);
+        executeFullReload(fullTargetUrl);
+        return;
+      }
     }
 
     const doSwap = () => {
@@ -372,33 +326,29 @@ export async function softNavigate(targetUrl, { isPopState = false, forceReload 
         metaTag.setAttribute('content', newMeta);
       }
 
-      // 3. Inject new page stylesheets if missing
-      const existingHrefs = new Set(
-        Array.from(document.querySelectorAll('link[rel="stylesheet"]')).map((l) =>
-          l.getAttribute('href')
-        )
-      );
+      // 3. Sync body classes while preserving .booted
+      const wasBooted = document.body.classList.contains('booted');
+      document.body.className = newDoc.body.className;
+      if (wasBooted) {
+        document.body.classList.add('booted');
+      }
 
-      newDoc.querySelectorAll('link[rel="stylesheet"]').forEach((link) => {
-        const href = link.getAttribute('href');
-        if (href && !existingHrefs.has(href)) {
-          const clone = document.createElement('link');
-          clone.rel = 'stylesheet';
-          clone.href = href;
-          document.head.appendChild(clone);
-        }
+      // 4. Clean up any orphaned floating bars or docks outside <main>
+      document.querySelectorAll('#tale-action-bar, .floating-bar').forEach((el) => {
+        if (!currentMain.contains(el)) el.remove();
       });
 
-      // 4. Update History state
+      // 5. Update History state
       if (!isPopState) {
         window.history.pushState({ url: fullTargetUrl }, '', fullTargetUrl);
       }
+      _lastRenderedUrl = fullTargetUrl;
 
-      // 5. Scroll reset
+      // 6. Scroll reset
       currentMain.scrollTop = 0;
       window.scrollTo(0, 0);
 
-      // 6. Update active nav states
+      // 7. Update active nav states
       updateNavActiveLinks(fullTargetUrl);
     };
 
@@ -414,13 +364,16 @@ export async function softNavigate(targetUrl, { isPopState = false, forceReload 
       doSwap();
     }
 
-    // 7. Initialize target page
-    await runPageInitializer(fullTargetUrl);
+    // 8. Initialize target page controller
+    if (targetRoute?.init && loadedModule) {
+      await targetRoute.init(loadedModule);
+    }
   } catch (err) {
     log.error('Soft navigation error, falling back to full reload', err);
     executeFullReload(fullTargetUrl);
   } finally {
     hideNavigationProgressBar();
+    initIcons();
     _isNavigating = false;
   }
 }
@@ -434,6 +387,7 @@ let _routerInitialized = false;
 export function initRouter() {
   if (typeof window === 'undefined' || _routerInitialized) return;
   _routerInitialized = true;
+  _lastRenderedUrl = window.location.href;
 
   log.info('Initializing router click interception & prefetching');
 

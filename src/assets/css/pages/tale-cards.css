@@ -5,7 +5,7 @@
 /* Base Card Container */
 .tale-card {
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   border-radius: 1.25rem;
   border: 1px solid rgb(var(--light-rgb) / var(--a-03));
   background: linear-gradient(
@@ -25,6 +25,10 @@
   transform: translateZ(0);
 }
 
+.tale-card.menu-open {
+  z-index: 50;
+}
+
 .tale-card:hover {
   border-color: rgb(var(--accent-rgb) / var(--a-08));
   transform: translateY(-4px);
@@ -37,14 +41,12 @@
 .tale-card::before {
   content: '';
   position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
+  inset: 0;
+  border-radius: inherit;
   background: radial-gradient(
     circle at center,
     rgb(var(--accent-rgb) / var(--a-03)) 0%,
-    transparent 50%
+    transparent 70%
   );
   pointer-events: none;
   z-index: 0;

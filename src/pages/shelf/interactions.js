@@ -208,25 +208,36 @@ function _bindCardActions() {
   });
 }
 
-function _toggleMenu(menuId, triggerBtn) {
-  document.querySelectorAll('.options-menu:not([hidden])').forEach((m) => {
-    if (m.id !== menuId) {
-      m.hidden = true;
-      document.querySelector(`[data-menu-id="${m.id}"]`)?.setAttribute('aria-expanded', 'false');
-    }
-  });
+function _setMenuOpen(menu, open, triggerBtn) {
+  if (!menu) return;
+  menu.hidden = !open;
+  menu.classList.toggle('hidden', !open);
+  const card = menu.closest('.shelf-card, [data-id]');
+  card?.classList.toggle('menu-open', open);
 
+  const btn = triggerBtn || document.querySelector(`[data-menu-id="${menu.id}"]`);
+  btn?.setAttribute('aria-expanded', String(open));
+}
+
+function _toggleMenu(menuId, triggerBtn) {
   const menu = document.getElementById(menuId);
   if (!menu) return;
 
-  const isOpen = !menu.hidden;
-  menu.hidden = isOpen;
-  triggerBtn?.setAttribute('aria-expanded', String(!isOpen));
+  const isCurrentlyOpen = !menu.hidden && !menu.classList.contains('hidden');
+
+  _closeAllMenus();
+
+  if (!isCurrentlyOpen) {
+    _setMenuOpen(menu, true, triggerBtn);
+  }
 }
 
 function _closeAllMenus() {
-  document.querySelectorAll('.options-menu:not([hidden])').forEach((m) => {
+  document.querySelectorAll('.options-menu, .shelf-menu').forEach((m) => {
     m.hidden = true;
+    m.classList.add('hidden');
+    const card = m.closest('.shelf-card, [data-id]');
+    card?.classList.remove('menu-open');
   });
   document.querySelectorAll('[data-action="options"]').forEach((btn) => {
     btn.setAttribute('aria-expanded', 'false');

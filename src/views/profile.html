@@ -394,9 +394,14 @@
         class="resize-handle resize-handle-left"
         data-resize="left"
         role="separator"
+        aria-orientation="vertical"
         aria-label="Resize left panel"
         tabindex="0"
-      ></div>
+      >
+        <span class="resize-handle-grip" aria-hidden="true">
+          <i data-lucide="chevrons-left-right" class="w-3 h-3"></i>
+        </span>
+      </div>
 
       <!-- ══════════════════════════════════════════════
            CENTER COLUMN: Chronicle Flow
@@ -540,9 +545,14 @@
         class="resize-handle resize-handle-right"
         data-resize="right"
         role="separator"
+        aria-orientation="vertical"
         aria-label="Resize right panel"
         tabindex="0"
-      ></div>
+      >
+        <span class="resize-handle-grip" aria-hidden="true">
+          <i data-lucide="chevrons-left-right" class="w-3 h-3"></i>
+        </span>
+      </div>
 
       <!-- ══════════════════════════════════════════════
            RIGHT COLUMN: Runic Insights

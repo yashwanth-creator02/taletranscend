@@ -280,40 +280,40 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
 
             <div
               id="${escapeHtml(menuId)}"
-              class="options-menu hidden absolute right-0 z-50 mt-1 w-44 sm:w-52 overflow-hidden rounded-xl p-1.5 shadow-2xl"
+              class="options-menu hidden absolute right-0 z-50 mt-1 w-52 sm:w-60 overflow-hidden rounded-2xl p-2 sm:p-2.5 shadow-2xl"
               role="menu"
             >
-              <div class="px-2.5 py-1.5 border-b border-white/5 mb-1">
-                <span class="text-[8px] font-black uppercase tracking-widest text-zinc-500">Chronicle Options</span>
+              <div class="px-3 py-2 border-b border-white/5 mb-1.5">
+                <span class="text-[9px] font-black uppercase tracking-widest text-zinc-400">Chronicle Options</span>
               </div>
 
               <button type="button" data-action="copy-link" data-id="${escapeHtml(id)}"
-                class="menu-btn flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[9px] font-bold uppercase tracking-wider text-zinc-300 transition-colors hover:bg-white/10 hover:text-white">
-                <i data-lucide="link" class="h-3.5 w-3.5"></i>
+                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 sm:py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-300 transition-colors hover:bg-white/10 hover:text-white">
+                <i data-lucide="link" class="h-4 w-4 shrink-0"></i>
                 <span>Copy Tale Link</span>
               </button>
 
               <button type="button" data-action="download" data-id="${escapeHtml(id)}"
-                class="menu-btn flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[9px] font-bold uppercase tracking-wider text-zinc-300 transition-colors hover:bg-white/10 hover:text-white">
-                <i data-lucide="download" class="h-3.5 w-3.5"></i>
+                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 sm:py-3 text-left text-[10px] font-bold uppercase tracking-wider text-zinc-300 transition-colors hover:bg-white/10 hover:text-white">
+                <i data-lucide="download" class="h-4 w-4 shrink-0"></i>
                 <span>Download Chronicle</span>
               </button>
 
-              <div class="h-px bg-white/5 my-1"></div>
+              <div class="h-px bg-white/5 my-1.5"></div>
 
               <button type="button"
-                class="menu-btn flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[9px] font-bold uppercase tracking-wider transition-colors ${isFinished ? 'opacity-40 text-zinc-600' : 'text-zinc-300 hover:bg-white/10 hover:text-white'}"
+                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 sm:py-3 text-left text-[10px] font-bold uppercase tracking-wider transition-colors ${isFinished ? 'opacity-40 text-zinc-600' : 'text-zinc-300 hover:bg-white/10 hover:text-white'}"
                 data-action="${isFinished ? '' : 'mark-finished'}" data-id="${escapeHtml(id)}">
-                <i data-lucide="check-circle" class="h-3.5 w-3.5"></i>
+                <i data-lucide="check-circle" class="h-4 w-4 shrink-0"></i>
                 <span>${isFinished ? 'Already Sealed' : 'Seal Chronicle'}</span>
               </button>
 
-              <div class="h-px bg-white/5 my-1"></div>
+              <div class="h-px bg-white/5 my-1.5"></div>
 
               <button type="button"
-                class="menu-btn flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[9px] font-bold uppercase tracking-wider transition-colors ${isBookmarked ? 'text-rose-400 hover:bg-rose-500/10' : 'text-emerald-400 hover:bg-emerald-500/10'}"
+                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 sm:py-3 text-left text-[10px] font-bold uppercase tracking-wider transition-colors ${isBookmarked ? 'text-rose-400 hover:bg-rose-500/10' : 'text-emerald-400 hover:bg-emerald-500/10'}"
                 data-action="${bookmarkedAction}" data-id="${escapeHtml(id)}">
-                <i data-lucide="${bookmarkedIcon}" class="h-3.5 w-3.5"></i>
+                <i data-lucide="${bookmarkedIcon}" class="h-4 w-4 shrink-0"></i>
                 <span>${bookmarkedLabel}</span>
               </button>
             </div>

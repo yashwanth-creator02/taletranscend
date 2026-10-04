@@ -156,10 +156,66 @@ export function buildBookmarkCard(tale) {
 
   return `
     <article
-      class="shelf-card group relative rounded-2xl overflow-hidden border border-white/[0.05] bg-white/[0.025] hover:border-indigo-500/25 transition-all duration-400 cursor-pointer"
+      class="shelf-card group relative rounded-2xl overflow-visible border border-white/[0.05] bg-white/[0.025] hover:border-indigo-500/25 transition-all duration-400 cursor-pointer"
       data-id="${id}"
     >
-      <div class="relative aspect-[16/10] max-h-44 bg-zinc-900 overflow-hidden">
+      <!-- Dedicated options button & menu at card level so it is not clipped -->
+      <div class="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-30">
+        <button
+          type="button"
+          data-action="options"
+          data-menu-id="${escapeHtml(menuId)}"
+          class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-zinc-300 transition-all hover:bg-indigo-500/20 hover:border-indigo-500/40 hover:text-white"
+          aria-expanded="false"
+          aria-haspopup="menu"
+          aria-label="Chronicle Options"
+        >
+          <i data-lucide="more-horizontal" class="h-3.5 w-3.5"></i>
+        </button>
+
+        <div
+          id="${escapeHtml(menuId)}"
+          class="options-menu hidden absolute right-0 z-[70] mt-2 w-56 overflow-hidden rounded-2xl p-2 shadow-2xl"
+          role="menu"
+          hidden
+        >
+          <div class="px-3 py-2 border-b border-white/5 mb-1">
+            <span class="text-[8px] font-black uppercase tracking-widest text-zinc-400">Chronicle Options</span>
+          </div>
+
+          <button type="button" data-action="copy-link" data-id="${escapeHtml(id)}"
+            class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] text-zinc-300 transition-colors hover:bg-white/5 hover:text-white">
+            <i data-lucide="link" class="h-3.5 w-3.5"></i>
+            <span>Copy Tale Link</span>
+          </button>
+
+          <button type="button" data-action="download" data-id="${escapeHtml(id)}"
+            class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] text-zinc-300 transition-colors hover:bg-white/5 hover:text-white">
+            <i data-lucide="download" class="h-3.5 w-3.5"></i>
+            <span>Download Chronicle</span>
+          </button>
+
+          <div class="h-px bg-white/5 my-1"></div>
+
+          <button type="button"
+            class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] transition-colors ${isFinished ? 'opacity-40 text-zinc-600' : 'text-zinc-300 hover:bg-white/5 hover:text-white'}"
+            data-action="${isFinished ? '' : 'mark-finished'}" data-id="${escapeHtml(id)}">
+            <i data-lucide="check-circle" class="h-3.5 w-3.5"></i>
+            <span>${isFinished ? 'Already Sealed' : 'Seal Chronicle'}</span>
+          </button>
+
+          <div class="h-px bg-white/5 my-1"></div>
+
+          <button type="button"
+            class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] transition-colors ${isBookmarked ? 'text-rose-400 hover:bg-rose-500/10' : 'text-emerald-400 hover:bg-emerald-500/10'}"
+            data-action="${bookmarkedAction}" data-id="${escapeHtml(id)}">
+            <i data-lucide="${bookmarkedIcon}" class="h-3.5 w-3.5"></i>
+            <span>${bookmarkedLabel}</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="relative aspect-[16/10] max-h-44 bg-zinc-900 rounded-t-2xl overflow-hidden">
         <img
           src="${cover}"
           alt="${safeTitle}"
@@ -168,62 +224,11 @@ export function buildBookmarkCard(tale) {
         />
         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
 
-        <!-- Header: Badges & Actions -->
-        <div class="absolute top-0 left-0 right-0 p-2.5 sm:p-3 flex items-start justify-between gap-2 z-10">
+        <!-- Header: Badges -->
+        <div class="absolute top-0 left-0 right-14 p-2.5 sm:p-3 flex items-start justify-between gap-2 z-10">
           <div class="flex flex-wrap items-center gap-1.5">
             ${_badge(safeEra, 'bg-indigo-500/5 text-indigo-300 text-[8px] sm:text-[9px] px-2 py-0.5')}
             ${isFinished ? _badge('Finished', `${statusBadgeClasses} text-[8px] sm:text-[9px] px-2 py-0.5`) : ''}
-          </div>
-
-          <div class="relative shrink-0">
-            <button
-              type="button"
-              data-action="options"
-              data-menu-id="${escapeHtml(menuId)}"
-              class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg bg-black/40 backdrop-blur-md border border-white/10 text-zinc-400 transition-all hover:bg-indigo-500/20 hover:border-indigo-500/40 hover:text-white"
-            >
-              <i data-lucide="more-horizontal" class="h-3.5 w-3.5"></i>
-            </button>
-
-            <div
-              id="${escapeHtml(menuId)}"
-              class="options-menu hidden absolute right-0 z-[60] mt-2 w-56 overflow-hidden rounded-2xl p-2"
-              role="menu"
-            >
-              <div class="px-3 py-2 border-b border-white/5 mb-1">
-                <span class="text-[8px] font-black uppercase tracking-widest text-zinc-600">Chronicle Options</span>
-              </div>
-
-              <button type="button" data-action="copy-link" data-id="${escapeHtml(id)}"
-                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400 transition-colors hover:bg-white/5 hover:text-white">
-                <i data-lucide="link" class="h-3.5 w-3.5"></i>
-                <span>Copy Tale Link</span>
-              </button>
-
-              <button type="button" data-action="download" data-id="${escapeHtml(id)}"
-                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400 transition-colors hover:bg-white/5 hover:text-white">
-                <i data-lucide="download" class="h-3.5 w-3.5"></i>
-                <span>Download Chronicle</span>
-              </button>
-
-              <div class="h-px bg-white/5 my-1"></div>
-
-              <button type="button"
-                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] transition-colors ${isFinished ? 'opacity-40 text-zinc-600' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}"
-                data-action="${isFinished ? '' : 'mark-finished'}" data-id="${escapeHtml(id)}">
-                <i data-lucide="check-circle" class="h-3.5 w-3.5"></i>
-                <span>${isFinished ? 'Already Sealed' : 'Seal Chronicle'}</span>
-              </button>
-
-              <div class="h-px bg-white/5 my-1"></div>
-
-              <button type="button"
-                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] transition-colors ${isBookmarked ? 'text-rose-400 hover:bg-rose-500/10' : 'text-emerald-400 hover:bg-emerald-500/10'}"
-                data-action="${bookmarkedAction}" data-id="${escapeHtml(id)}">
-                <i data-lucide="${bookmarkedIcon}" class="h-3.5 w-3.5"></i>
-                <span>${bookmarkedLabel}</span>
-              </button>
-            </div>
           </div>
         </div>
 
@@ -303,7 +308,7 @@ export function buildDraftCard(draft) {
 
   return `
     <article
-      class="shelf-card group relative rounded-2xl border border-white/[0.05] bg-white/[0.025] hover:border-indigo-500/25 transition-all duration-400 overflow-hidden cursor-pointer"
+      class="shelf-card group relative rounded-2xl border border-white/[0.05] bg-white/[0.025] hover:border-indigo-500/25 transition-all duration-400 overflow-visible cursor-pointer"
       data-id="${id}"
     >
       <div class="relative p-3 sm:p-3.5">
@@ -320,14 +325,18 @@ export function buildDraftCard(draft) {
               data-action="options"
               data-menu-id="${escapeHtml(menuId)}"
               class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 text-zinc-500 transition-all hover:bg-indigo-500/10 hover:border-indigo-500/30 hover:text-white"
+              aria-expanded="false"
+              aria-haspopup="menu"
+              aria-label="Draft Options"
             >
               <i data-lucide="more-horizontal" class="h-3.5 w-3.5"></i>
             </button>
 
             <div
               id="${escapeHtml(menuId)}"
-              class="options-menu hidden absolute right-0 z-[60] mt-2 w-56 overflow-hidden rounded-2xl p-2"
+              class="options-menu hidden absolute right-0 z-[70] mt-2 w-56 overflow-hidden rounded-2xl p-2 shadow-2xl"
               role="menu"
+              hidden
             >
               <div class="px-3 py-2 border-b border-white/5 mb-1">
                 <span class="text-[8px] font-black uppercase tracking-widest text-zinc-600">Draft Operations</span>

@@ -42,7 +42,6 @@ export async function initLibraryPage() {
 
   initIcons();
   setupPagination();
-  readyReveal();
 
   const submitBtn = document.getElementById('btn-submit-tale');
   if (submitBtn) {
@@ -73,6 +72,7 @@ export async function initLibraryPage() {
   } catch (err) {
     log.error('Init failed:', err);
     showGridError();
+    readyReveal();
   }
 }
 

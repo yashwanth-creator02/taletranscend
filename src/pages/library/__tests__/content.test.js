@@ -33,8 +33,8 @@ describe('library pagination', () => {
   it('loads page 1 correctly', async () => {
     const result = await loadTalesPage(1);
 
-    // Default talesPerPage is 2 in state.js as per previous edit
-    expect(result.tales).toHaveLength(2);
+    // Default talesPerPage is 16 in state.js
+    expect(result.tales).toHaveLength(8);
     expect(result.total).toBe(8);
     expect(libraryState.currentPage).toBe(1);
   });

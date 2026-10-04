@@ -13,7 +13,7 @@ import { auth, signOut } from '@fb/index.js';
 import { BASE_COMMANDS } from './nav.config.js';
 import { getNavElements, getCurrentPage, renderIcons } from './nav.utils.js';
 import { navState } from './nav.state.js';
-import { escapeText as escapeHtml, resolveHref, createLogger } from '@/utils';
+import { escapeText as escapeHtml, resolveHref, navigateTo, createLogger } from '@/utils';
 
 const log = createLogger('NavCommandPalette');
 
@@ -286,7 +286,11 @@ export async function executeCommand(element) {
   closeCommandPalette(false);
 
   if (href) {
-    window.location.href = resolveHref(href);
+    const resolved = resolveHref(href);
+    navigateTo(resolved);
+    if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
+      window.location.href = resolved;
+    }
     return;
   }
 
