@@ -1,0 +1,47 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/tales/:id/read/:path*", "destination": "/reader.html" },
+    { "source": "/tales/:path*", "destination": "/tale.html" },
+    { "source": "/toc/:path*", "destination": "/toc.html" },
+    { "source": "/sitemap", "destination": "/toc.html" },
+    { "source": "/library/:path*", "destination": "/library.html" },
+    { "source": "/shelf/:path*", "destination": "/shelf.html" },
+    { "source": "/reader/:path*", "destination": "/reader.html" },
+    { "source": "/tale/:path*", "destination": "/tale.html" },
+    { "source": "/contribution/:path*", "destination": "/contribution.html" },
+    { "source": "/profile/:path*", "destination": "/profile.html" },
+    { "source": "/login/:path*", "destination": "/login.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000; includeSubDomains; preload"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    },
+    {
+      "source": "/sw.js",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+    }
+  ]
+}
