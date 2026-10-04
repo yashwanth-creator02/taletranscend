@@ -75,6 +75,10 @@ initAuth(async (user) => {
   await initShelfPage();
 });
 
-document.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    initShelfPage();
+  });
+} else {
   initShelfPage();
-});
+}

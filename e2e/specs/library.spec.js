@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Library Page', () => {
   test.beforeEach(async ({ page }) => {
+    page.on('pageerror', (err) => console.log('PAGE ERROR:', err.message, err.stack));
     await page.goto('/library.html');
   });
 

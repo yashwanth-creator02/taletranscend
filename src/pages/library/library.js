@@ -74,9 +74,13 @@ export async function initLibraryPage() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    initLibraryPage();
+  });
+} else {
   initLibraryPage();
-});
+}
 
 initAuth(async (user) => {
   libraryState.userId = user.uid;
