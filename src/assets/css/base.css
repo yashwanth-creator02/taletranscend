@@ -570,6 +570,11 @@ select:focus-visible {
   align-items: center;
 }
 
+.info-tooltip-wrap:hover,
+.info-tooltip-wrap:focus-within {
+  z-index: 50;
+}
+
 .info-tooltip-wrap .info-tooltip-box {
   display: none;
   position: absolute;
@@ -613,4 +618,13 @@ select:focus-visible {
   right: 0;
   transform: none;
   text-align: right;
+}
+
+.info-tooltip-wrap .info-tooltip-box--bottom,
+#edit-modal .info-tooltip-box {
+  bottom: auto;
+  top: calc(100% + 6px);
+  left: 0;
+  transform: none;
+  text-align: left;
 }
