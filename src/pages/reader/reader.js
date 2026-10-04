@@ -54,7 +54,14 @@ import {
 
 import { getDoc, setDoc, serverTimestamp, refs } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
-import { navigateTo, initPageReveal, readyReveal, setupAuthTimeout, createLogger } from '@/utils';
+import {
+  navigateTo,
+  readerUrl,
+  initPageReveal,
+  readyReveal,
+  setupAuthTimeout,
+  createLogger,
+} from '@/utils';
 import { TTS_CHAR_LIMIT } from '@config/app.config.js';
 
 const log = createLogger('Reader');
@@ -70,13 +77,60 @@ initPageReveal();
      /reader?taleId={id}&chapterId={ch}    (legacy query-string — backwards compat)
    ───────────────────────────────────────────── */
 
-const _params = new URLSearchParams(window.location.search);
-const _readerPathMatch = window.location.pathname.match(/\/tales\/([^/]+)\/read\/(\d+)/);
-const taleId =
-  (_readerPathMatch && decodeURIComponent(_readerPathMatch[1])) || _params.get('taleId') || '';
-const chapterIndex =
-  (_readerPathMatch && parseInt(_readerPathMatch[2])) || parseInt(_params.get('chapterId')) || 0;
+/**
+ * Extracts taleId and chapterIndex from any hierarchical or query URL pattern.
+ * Supports:
+ *   - /tales/:id/read/:ch
+ *   - /tales/:id/(read|chapters?|fragments?)/:ch?
+ *   - /reader/:id/:ch?
+ *   - /reader?taleId=:id&chapterId=:ch
+ *   - /reader?id=:id&chapter=:ch
+ */
+export function extractReaderParams() {
+  if (typeof window === 'undefined') return { taleId: '', chapterIndex: 0 };
 
+  const params = new URLSearchParams(window.location.search);
+  const pathname = window.location.pathname || '';
+
+  const talesMatch = pathname.match(
+    /\/tales\/([^/]+)(?:\/(?:read|chapters?|fragments?)(?:\/(\d+))?)?/
+  );
+  const readerMatch = pathname.match(/\/reader(?:\/([^/]+))?(?:\/(\d+))?/);
+
+  let taleId = '';
+  let chapterIndex = 0;
+
+  if (talesMatch && talesMatch[1]) {
+    taleId = decodeURIComponent(talesMatch[1]);
+    if (talesMatch[2] !== undefined) {
+      chapterIndex = parseInt(talesMatch[2], 10);
+    }
+  } else if (readerMatch && readerMatch[1]) {
+    taleId = decodeURIComponent(readerMatch[1]);
+    if (readerMatch[2] !== undefined) {
+      chapterIndex = parseInt(readerMatch[2], 10);
+    }
+  }
+
+  // Fallback to query params if not found in path
+  if (!taleId) {
+    taleId = params.get('taleId') || params.get('id') || '';
+  }
+
+  // Query params can override or specify chapter
+  const queryCh =
+    params.get('chapterId') || params.get('chapter') || params.get('fragment') || params.get('ch');
+  if (queryCh !== null && queryCh !== undefined) {
+    const parsed = parseInt(queryCh, 10);
+    if (!isNaN(parsed)) {
+      chapterIndex = parsed;
+    }
+  }
+
+  return { taleId, chapterIndex: isNaN(chapterIndex) ? 0 : chapterIndex };
+}
+
+const { taleId, chapterIndex } = extractReaderParams();
 readerState.taleId = taleId;
 readerState.chapterIndex = chapterIndex;
 
@@ -269,9 +323,9 @@ function _bindTocEvents() {
   document.querySelectorAll('[data-chapter-id]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const idx = readerState.chapters.findIndex((c) => c.id === btn.dataset.chapterId);
-      const url = new URL(window.location.href);
-      url.searchParams.set('chapterId', idx);
-      navigateTo(url.toString());
+      if (idx !== -1 && readerState.taleId) {
+        navigateTo(readerUrl(readerState.taleId, idx));
+      }
     });
   });
 
@@ -640,10 +694,10 @@ initAuth(async (user) => {
   // Load content
   await loadReaderMeta(taleId);
   const navigation = await loadReaderChapter({ taleId, chapterIndex });
+  readyReveal();
   if (!navigation) return;
 
   applyNavigation(navigation);
-  readyReveal();
   const localProgress = getChapterProgress({ userId: user.uid, taleId, chapterIndex });
   restoreScrollProgress({ scrollPercent: localProgress?.scrollPercent ?? 0 });
 

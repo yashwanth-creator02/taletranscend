@@ -4,7 +4,7 @@
 import { readerState } from './state.js';
 import { renderTocPanel } from './templates.js';
 import { initIcons } from '@ui/components/icons.js';
-import { createLogger } from '@/utils';
+import { createLogger, navigateTo, readerUrl } from '@/utils';
 
 const log = createLogger('ReaderTOC');
 
@@ -69,9 +69,9 @@ function _refreshToc() {
   document.querySelectorAll('[data-chapter-id]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const idx = readerState.chapters.findIndex((c) => c.id === btn.dataset.chapterId);
-      const url = new URL(window.location.href);
-      url.searchParams.set('chapterId', idx);
-      window.location.href = url.toString();
+      if (idx !== -1 && readerState.taleId) {
+        navigateTo(readerUrl(readerState.taleId, idx));
+      }
     });
   });
 

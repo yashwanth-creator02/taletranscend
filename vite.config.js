@@ -46,7 +46,9 @@ function hierarchicalRoutesPlugin() {
       server.middlewares.use((req, res, next) => {
         const url = (req.url || '').split('?')[0];
         const query = (req.url || '').includes('?') ? '?' + (req.url || '').split('?')[1] : '';
-        if (/^\/tales\/[^/]+\/read(\/.*)?$/.test(url)) {
+        if (/^\/tales\/[^/]+\/(?:read|chapters?|fragments?)(\/.*)?$/.test(url)) {
+          req.url = '/reader.html' + query;
+        } else if (/^\/(?:reader|chapters?|fragments?)(\/.*)?$/.test(url)) {
           req.url = '/reader.html' + query;
         } else if (/^\/tales\/[^/]+/.test(url)) {
           req.url = '/tale.html' + query;

@@ -17,7 +17,12 @@ export { escapeText, renderIcons };
 export function getCurrentPage() {
   const path = window.location?.pathname || '';
   if (!path || path === '/' || path === '/index' || path === '/index.html') return 'index.html';
-  if (path.startsWith('/tales/') && path.includes('/read/')) return 'reader.html';
+  if (path.startsWith('/reader') || path.startsWith('/chapter') || path.startsWith('/fragment')) {
+    return 'reader.html';
+  }
+  if (path.startsWith('/tales/') && /\/(?:read|chapters?|fragments?)(\/|$)/.test(path)) {
+    return 'reader.html';
+  }
   if (path.startsWith('/tales/')) return 'tale.html';
   const last = path.split('/').filter(Boolean).pop() || 'index.html';
   return last.endsWith('.html') ? last : `${last}.html`;

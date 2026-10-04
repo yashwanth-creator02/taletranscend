@@ -22,8 +22,9 @@ const PAGE_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 /** Pages that have dedicated standalone layouts (large changes) */
 const STANDALONE_PATTERNS = [
-  /^\/reader(\.html)?(\?.*)?$/,
-  /^\/tales\/[^/]+\/read(\/.*)?$/,
+  /^\/reader(\.html)?(\/.*)?$/,
+  /^\/tales\/[^/]+\/(?:read|chapters?|fragments?)(\/.*)?$/,
+  /^\/(?:chapters?|fragments?)(\/.*)?$/,
   /^\/login(\.html)?(\?.*)?$/,
   /^\/404(\.html)?(\?.*)?$/,
 ];
@@ -141,7 +142,14 @@ export function updateNavActiveLinks(targetUrl) {
   const pathname = parsed.pathname;
 
   let activeFilename = 'index.html';
-  if (pathname.startsWith('/library')) activeFilename = 'library.html';
+  if (
+    pathname.startsWith('/reader') ||
+    pathname.startsWith('/chapter') ||
+    pathname.startsWith('/fragment') ||
+    (pathname.startsWith('/tales/') && /\/(?:read|chapters?|fragments?)(\/|$)/.test(pathname))
+  ) {
+    activeFilename = 'reader.html';
+  } else if (pathname.startsWith('/library')) activeFilename = 'library.html';
   else if (pathname.startsWith('/shelf')) activeFilename = 'shelf.html';
   else if (pathname.startsWith('/profile')) activeFilename = 'profile.html';
   else if (pathname.startsWith('/contribution')) activeFilename = 'contribution.html';
