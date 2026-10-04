@@ -1,5 +1,5 @@
 // src/pages/tale/comments.js
-// Comment (Neural Echo) system with threaded replies and pagination.
+// Comment (Reflections & Echoes) system with threaded replies and pagination.
 // Uses refs.comments() and refs.comment() exclusively — no raw path strings.
 
 import {
@@ -49,7 +49,7 @@ let _isFetching = false;
  */
 export async function listenToComments(taleId) {
   _currentTaleId = taleId;
-  log.info('Initializing Neural Echoes (comments)', { taleId });
+  log.info('Initializing reflections and echoes (comments)', { taleId });
   const list = document.getElementById('comments-list');
   if (!list) return;
 
@@ -137,7 +137,7 @@ export async function postComment(taleId) {
     );
   } catch (err) {
     log.error('Post failed', err);
-    showToast('Transmission failed. Neural link unstable.', 'error');
+    showToast('Failed to post reflection. Please check your connection.', 'error');
     if (btn) {
       btn.disabled = false;
       btn.textContent = originalText;
@@ -160,7 +160,7 @@ async function _fetchComments(isInitial = false) {
   }
 
   if (isInitial) {
-    list.innerHTML = `<div class="py-10 text-center animate-pulse text-[10px] font-black uppercase tracking-widest text-slate-700">Synchronising Echoes...</div>`;
+    list.innerHTML = `<div class="py-10 text-center animate-pulse text-[10px] font-black uppercase tracking-widest text-slate-400">Synchronising Echoes...</div>`;
     _lastVisible = null;
     _allLoaded = false;
   }
@@ -181,7 +181,7 @@ async function _fetchComments(isInitial = false) {
     if (isInitial) list.innerHTML = '';
 
     if (snap.empty && isInitial) {
-      list.innerHTML = `<p class="text-[10px] text-slate-600 font-black uppercase tracking-[0.3em] text-center py-20">The echoes remain silent.</p>`;
+      list.innerHTML = `<p class="text-[10px] text-slate-400 font-black uppercase tracking-[0.3em] text-center py-20">The echoes remain silent.</p>`;
       _isFetching = false;
       return;
     }
@@ -340,11 +340,11 @@ function _renderComment(c) {
           />
           <div>
             <p class="text-[10px] font-black text-white uppercase tracking-widest">${escapeHtml(c.authorName)}</p>
-            <p class="text-[8px] text-slate-500 font-bold uppercase mt-0.5">${date}</p>
+            <p class="text-[8px] text-slate-400 font-bold uppercase mt-0.5">${date}</p>
           </div>
         </div>
         <button
-          class="reply-trigger group flex items-center gap-2 text-[8px] font-black uppercase tracking-[0.2em] text-slate-600 hover:text-indigo-400 transition-all"
+          class="reply-trigger group flex items-center gap-2 text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-all"
           type="button"
           data-comment-id="${c.id}"
         >
@@ -353,7 +353,7 @@ function _renderComment(c) {
         </button>
       </div>
 
-      <p class="text-sm md:text-base text-slate-400 leading-relaxed font-medium">${escapeHtml(c.text)}</p>
+      <p class="text-sm md:text-base text-slate-200 leading-relaxed font-medium">${escapeHtml(c.text)}</p>
 
       <div id="replies-${c.id}" class="mt-8 space-y-4 border-l border-white/5 pl-6 empty:hidden"></div>
 
@@ -362,12 +362,12 @@ function _renderComment(c) {
           <textarea
             id="reply-text-${c.id}"
             placeholder="Respond to the echo…"
-            class="w-full bg-black/20 border border-white/5 rounded-xl p-4 text-xs text-white placeholder:text-slate-800 focus:outline-none focus:border-indigo-500/30 resize-none min-h-20"
+            class="w-full bg-black/30 border border-white/10 rounded-xl p-4 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-indigo-500/50 resize-none min-h-20"
           ></textarea>
           <div class="flex justify-end gap-3 mt-3">
             <button
               type="button"
-              class="cancel-reply py-2 px-4 text-[9px] font-black uppercase tracking-widest text-slate-600 hover:text-white"
+              class="cancel-reply py-2 px-4 text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-white"
               data-comment-id="${c.id}"
             >Cancel</button>
             <button
@@ -391,10 +391,10 @@ function _renderReply(r) {
       <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}" alt="Scribe" class="w-6 h-6 rounded-md bg-white/5 opacity-60" />
       <div class="flex-1">
         <div class="flex items-center gap-2 mb-1.5">
-          <span class="text-[9px] font-black text-slate-300 uppercase tracking-widest">${escapeHtml(r.authorName || 'Scribe')}</span>
-          <span class="text-[7px] text-slate-600 font-bold uppercase">${date}</span>
+          <span class="text-[9px] font-black text-slate-200 uppercase tracking-widest">${escapeHtml(r.authorName || 'Scribe')}</span>
+          <span class="text-[7px] text-slate-400 font-bold uppercase">${date}</span>
         </div>
-        <p class="text-xs text-slate-500 leading-relaxed font-medium">${escapeHtml(r.text || '')}</p>
+        <p class="text-xs text-slate-300 leading-relaxed font-medium">${escapeHtml(r.text || '')}</p>
       </div>
     </div>
   `;

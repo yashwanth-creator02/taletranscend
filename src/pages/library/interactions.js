@@ -14,6 +14,7 @@ import {
   addToBookmarks,
   removeFromBookmarks,
   markTaleFinished,
+  downloadChronicle,
 } from '@services/index.js';
 
 /* ─────────────────────────────────────────────
@@ -52,6 +53,11 @@ export function setupCardInteractions(userId) {
 
         case 'copy-link':
           _handleCopyLink(taleId);
+          return;
+
+        case 'download':
+        case 'save-offline':
+          await downloadChronicle(taleId);
           return;
 
         case 'mark-finished':

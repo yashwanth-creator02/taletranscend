@@ -22,6 +22,7 @@ vi.mock('../index.js', () => ({
   setupShareButton: vi.fn(),
   setupResonance: vi.fn(),
   initHeaderScroll: vi.fn(),
+  setupChronicleBatchActions: vi.fn(),
   listenToComments: vi.fn(),
   postComment: vi.fn(),
   initIcons: vi.fn(),

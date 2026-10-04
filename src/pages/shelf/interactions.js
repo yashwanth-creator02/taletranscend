@@ -13,7 +13,7 @@ import {
 } from './content.js';
 import { setActiveTab, buildSortPanel, refreshSortPanel } from './ui.js';
 import { showToast } from '@ui/components/toast.js';
-import { removeFromBookmarks, getTaleMeta, getChapters } from '@services/index.js';
+import { removeFromBookmarks, downloadChronicle } from '@services/index.js';
 import { debounce, navigateTo, taleUrl, createLogger } from '@/utils';
 
 const log = createLogger('ShelfInteractions');
@@ -236,18 +236,10 @@ async function _handleCardAction(action, id, e) {
       break;
     }
 
+    case 'download':
     case 'save-offline': {
       if (!id) break;
-      showToast('Downloading for offline access...', 'info');
-      try {
-        // This will fetch and automatically save to IndexedDB via the service logic
-        await getTaleMeta(id);
-        await getChapters(id);
-        showToast('Tale saved for offline reading.', 'success');
-      } catch (err) {
-        log.error('Save offline failed:', err);
-        showToast('Could not save tale offline.', 'error');
-      }
+      await downloadChronicle(id);
       break;
     }
 

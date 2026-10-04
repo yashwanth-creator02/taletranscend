@@ -693,7 +693,7 @@
         <div class="p-6 pb-0 flex justify-between items-start shrink-0">
           <div>
             <h2 class="text-xl font-cinzel font-bold text-white">Edit Profile</h2>
-            <p class="text-xs text-slate-600 mt-1">Customise your chronicler identity</p>
+            <p class="text-xs text-slate-400 mt-1">Customise your chronicler identity</p>
           </div>
           <button
             id="btn-close-modal"
@@ -767,30 +767,30 @@
 
               <!-- Display name -->
               <div class="space-y-1.5 mb-4">
-                <label
-                  for="input-name"
-                  class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
-                >
-                  <i data-lucide="signature" class="w-3 h-3"></i>
-                  Display Name
-                </label>
-                <div class="relative">
-                  <input
-                    type="text"
-                    id="input-name"
-                    aria-label="Display Name"
-                    class="input-mythic w-full rounded-xl px-4 py-3.5 text-sm pr-32"
-                    placeholder="Enter your name…"
-                  />
+                <div class="flex items-center justify-between">
+                  <label
+                    for="input-name"
+                    class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
+                  >
+                    <i data-lucide="signature" class="w-3 h-3"></i>
+                    Display Name
+                  </label>
                   <button
                     type="button"
                     id="btn-suggest-name"
                     aria-label="Suggest AI display name based on bio"
-                    class="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[9px] font-bold uppercase tracking-[0.12em] hover:bg-indigo-500/20 transition-colors"
+                    class="px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[9px] font-bold uppercase tracking-[0.12em] hover:bg-indigo-500/20 hover:text-white transition-colors cursor-pointer"
                   >
                     Suggest Name
                   </button>
                 </div>
+                <input
+                  type="text"
+                  id="input-name"
+                  aria-label="Display Name"
+                  class="input-mythic w-full rounded-xl px-4 py-3.5 text-sm"
+                  placeholder="Enter your name…"
+                />
               </div>
 
               <!-- Bio -->
@@ -809,7 +809,7 @@
                   class="input-mythic w-full rounded-xl px-4 py-3.5 text-sm resize-none"
                   placeholder="Tell us your story… (used for AI name suggestions)"
                 ></textarea>
-                <p class="text-[10px] text-slate-700 ml-1">Max 160 characters</p>
+                <p class="text-[10px] text-slate-400 ml-1">Max 160 characters</p>
               </div>
 
               <!-- Pronouns -->
@@ -828,6 +828,52 @@
                   class="input-mythic w-full rounded-xl px-4 py-3.5 text-sm"
                   placeholder="they/them, she/her, he/him…"
                 />
+              </div>
+
+              <!-- Oracle AI / Gemini API Key -->
+              <div class="space-y-1.5 pt-3 border-t border-white/5">
+                <div class="flex items-center justify-between ml-1">
+                  <label
+                    for="input-gemini-key"
+                    class="flex items-center gap-2 text-[10px] font-bold text-amber-400 uppercase tracking-[0.15em]"
+                  >
+                    <i data-lucide="sparkles" class="w-3 h-3 text-amber-400"></i>
+                    Gemini API Key
+                  </label>
+                  <a
+                    href="https://aistudio.google.com/app/apikey"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-[10px] font-semibold text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1"
+                  >
+                    Get free key
+                    <i data-lucide="external-link" class="w-2.5 h-2.5"></i>
+                  </a>
+                </div>
+                <div class="relative">
+                  <input
+                    type="password"
+                    id="input-gemini-key"
+                    aria-label="Gemini API Key"
+                    autocomplete="off"
+                    class="input-mythic w-full rounded-xl px-4 py-3 text-xs pr-20 font-mono placeholder:font-sans placeholder:text-sm"
+                    placeholder="Enter your Gemini API key (AIzaSy…)"
+                  />
+                  <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                    <button
+                      type="button"
+                      id="btn-toggle-gemini-key"
+                      aria-label="Toggle API key visibility"
+                      class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 text-[10px] font-medium transition-colors cursor-pointer"
+                    >
+                      Show
+                    </button>
+                  </div>
+                </div>
+                <p class="text-[10px] text-slate-500 ml-1">
+                  Stored securely in your browser's local storage. Powers AI name suggestions and
+                  text refinement.
+                </p>
               </div>
             </div>
 
@@ -859,7 +905,7 @@
                   <i data-lucide="tags" class="w-3 h-3"></i>
                   Favourite Genres
                 </label>
-                <p class="text-[10px] text-slate-600 ml-1 mb-2">Select all that apply.</p>
+                <p class="text-[10px] text-slate-400 ml-1 mb-2">Select all that apply.</p>
                 <div id="genre-selector" class="flex flex-wrap gap-2">
                   <!-- Chips built by _buildGenreSelector() in ui.js -->
                 </div>
@@ -895,7 +941,7 @@
                     Twitter / X
                   </label>
                   <div class="relative">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 text-sm"
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"
                       >@</span
                     >
                     <input
@@ -903,7 +949,7 @@
                       id="input-twitter"
                       aria-label="Twitter handle"
                       class="input-mythic w-full rounded-xl pl-8 pr-4 py-3.5 text-sm"
-                      placeholder="handle"
+                      placeholder="    handle"
                     />
                   </div>
                 </div>
@@ -917,7 +963,7 @@
                     Instagram
                   </label>
                   <div class="relative">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 text-sm"
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"
                       >@</span
                     >
                     <input
@@ -925,7 +971,7 @@
                       id="input-instagram"
                       aria-label="Instagram handle"
                       class="input-mythic w-full rounded-xl pl-8 pr-4 py-3.5 text-sm"
-                      placeholder="handle"
+                      placeholder="    handle"
                     />
                   </div>
                 </div>
@@ -943,7 +989,7 @@
                     <i data-lucide="target" class="w-3 h-3"></i>
                     Yearly Reading Goal
                   </label>
-                  <p class="text-[10px] text-slate-600 ml-1">
+                  <p class="text-[10px] text-slate-400 ml-1">
                     How many tales do you want to read this year?
                   </p>
                   <input
@@ -959,13 +1005,13 @@
 
                 <!-- Placeholder for future goals -->
                 <div class="profile-panel rounded-2xl p-4 border border-dashed border-white/6">
-                  <div class="flex items-center gap-2 text-slate-600 mb-2">
+                  <div class="flex items-center gap-2 text-slate-400 mb-2">
                     <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-500/50"></i>
                     <span class="text-[10px] font-bold uppercase tracking-[0.15em]"
                       >More goals coming soon</span
                     >
                   </div>
-                  <p class="text-[11px] text-slate-700 leading-relaxed">
+                  <p class="text-[11px] text-slate-400 leading-relaxed">
                     Writing streak goals, word count targets, and contribution milestones will be
                     available in a future update.
                   </p>

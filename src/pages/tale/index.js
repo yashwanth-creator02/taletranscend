@@ -12,6 +12,7 @@ export {
   setupShareButton,
   setupResonance,
   initHeaderScroll,
+  setupChronicleBatchActions,
 } from './interactions.js';
 export { listenToComments, postComment } from './comments.js';
 

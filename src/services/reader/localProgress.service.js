@@ -108,7 +108,7 @@ export function getLastReadChapter({ userId, taleId }) {
  */
 export function getChapterState(progress) {
   if (!progress) return 'not_started';
-  if (progress.scrollPercent >= 95) return 'completed';
+  if (progress.scrollPercent >= 95 || progress.finished || progress.isFinished) return 'completed';
   if (progress.scrollPercent > 0) return 'in_progress';
   return 'not_started';
 }
@@ -223,4 +223,78 @@ export function getLocalTotalReadTime({ userId, taleId }) {
  */
 export function getAllLocalChapters({ userId, taleId }) {
   return readStorage()[userId]?.[taleId]?.chapters || {};
+}
+
+/**
+ * Marks a specific chapter as read (100% progress).
+ *
+ * @param {Object} params
+ * @param {string} params.userId
+ * @param {string} params.taleId
+ * @param {number} params.chapterIndex
+ */
+export function markChapterRead({ userId, taleId, chapterIndex }) {
+  return saveReaderProgress({
+    userId,
+    taleId,
+    chapterIndex,
+    scrollPercent: 100,
+  });
+}
+
+/**
+ * Marks a specific chapter as unread (removes progress).
+ *
+ * @param {Object} params
+ * @param {string} params.userId
+ * @param {string} params.taleId
+ * @param {number} params.chapterIndex
+ */
+export function markChapterUnread({ userId, taleId, chapterIndex }) {
+  if (!userId || !taleId || typeof chapterIndex !== 'number') return;
+  const store = readStorage();
+  if (store[userId]?.[taleId]?.chapters?.[chapterIndex]) {
+    delete store[userId][taleId].chapters[chapterIndex];
+    writeStorage(store);
+  }
+}
+
+/**
+ * Marks all chapters in a tale as read.
+ *
+ * @param {Object} params
+ * @param {string} params.userId
+ * @param {string} params.taleId
+ * @param {number} params.chapterCount
+ */
+export function markAllChaptersRead({ userId, taleId, chapterCount }) {
+  if (!userId || !taleId || !chapterCount) return;
+  const store = readStorage();
+  store[userId] ??= {};
+  store[userId][taleId] ??= { chapters: {}, totalReadTimeMs: 0 };
+
+  const now = Date.now();
+  for (let i = 0; i < chapterCount; i++) {
+    store[userId][taleId].chapters[i] = {
+      scrollPercent: 100,
+      updatedAt: now,
+    };
+  }
+  writeStorage(store);
+}
+
+/**
+ * Marks all chapters in a tale as unread.
+ *
+ * @param {Object} params
+ * @param {string} params.userId
+ * @param {string} params.taleId
+ */
+export function markAllChaptersUnread({ userId, taleId }) {
+  if (!userId || !taleId) return;
+  const store = readStorage();
+  if (store[userId]?.[taleId]) {
+    store[userId][taleId].chapters = {};
+    writeStorage(store);
+  }
 }

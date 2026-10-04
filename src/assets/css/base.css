@@ -39,7 +39,7 @@
    ══════════════════════════════════════════════════════════════════════════ */
 
 @theme inline {
-  --color-base: var(--bg-base);
+  --color-bg-base: var(--bg-base);
   --color-elevated: var(--bg-elevated);
   --color-overlay: var(--bg-overlay);
 

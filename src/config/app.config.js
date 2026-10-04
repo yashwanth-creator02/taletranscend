@@ -67,6 +67,9 @@ export const STORAGE_KEYS = {
 
   // Progress — keyed dynamically: `tt-progress-${uid}-${taleId}`
   progressPrefix: 'tt-progress',
+
+  // Gemini API key stored locally (BYOK)
+  geminiApiKey: 'tt-gemini-api-key',
 };
 
 // ── AI ────────────────────────────────────────────────────────────────

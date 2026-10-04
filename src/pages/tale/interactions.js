@@ -19,6 +19,20 @@ import {
 import { auth } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
 import { initIcons } from '@ui/components/icons.js';
+import { renderChapters } from './ui.js';
+import {
+  markChapterRead,
+  markChapterUnread,
+  markAllChaptersRead,
+  markAllChaptersUnread,
+} from '@services/reader/localProgress.service.js';
+import {
+  syncMarkChapterRead,
+  syncMarkChapterUnread,
+  syncMarkAllChaptersRead,
+  syncMarkAllChaptersUnread,
+} from '@services/reader/cloudProgress.service.js';
+import { downloadChronicle, downloadChapter } from '@services/tale/downloadTale.js';
 
 const log = createLogger('TaleInteractions');
 
@@ -76,7 +90,7 @@ export async function setupResonance(taleId) {
         });
       } catch (err) {
         log.error('Resonance failed', err);
-        showToast('Neural resonance failed. Authentication required.', 'error');
+        showToast('Resonance failed. Authentication required.', 'error');
         btns.forEach((b) => (b.disabled = false));
       }
     });
@@ -111,15 +125,59 @@ function _updateResonanceUI(btn, countEls, active, count) {
    ───────────────────────────────────────────── */
 
 /**
- * Wires chapter item clicks to navigate to the reader page.
+ * Wires chapter item clicks to navigate to the reader page,
+ * or handles manual mark read/unread and individual fragment download.
  *
  * @param {string} taleId
+ * @param {Array<Object>} [chapters]
+ * @param {string} [userId]
+ * @param {Object} [tale]
  */
-export function bindChapterClicks(taleId) {
+export function bindChapterClicks(taleId, chapters = [], userId = null, tale = null) {
   const list = document.getElementById('chapter-list');
   if (!list) return;
 
   list.addEventListener('click', (e) => {
+    // 1. Download fragment button
+    const downloadBtn = e.target.closest('[data-action="download-chapter"]');
+    if (downloadBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const idx = Number(downloadBtn.dataset.chapterIndex ?? 0);
+      const ch = chapters[idx];
+      downloadChapter(taleId, idx, { taleTitle: tale?.title, chapter: ch });
+      return;
+    }
+
+    // 2. Mark fragment as read
+    const markReadBtn = e.target.closest('[data-action="mark-read"]');
+    if (markReadBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const idx = Number(markReadBtn.dataset.chapterIndex ?? 0);
+      markChapterRead({ userId, taleId, chapterIndex: idx });
+      syncMarkChapterRead({ userId, taleId, chapterIndex: idx });
+      const chTitle = chapters[idx]?.title || `Scroll #${idx + 1}`;
+      showToast(`Marked "${chTitle}" as read.`, 'success');
+      renderChapters(userId, chapters, taleId);
+      return;
+    }
+
+    // 3. Mark fragment as unread
+    const markUnreadBtn = e.target.closest('[data-action="mark-unread"]');
+    if (markUnreadBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const idx = Number(markUnreadBtn.dataset.chapterIndex ?? 0);
+      markChapterUnread({ userId, taleId, chapterIndex: idx });
+      syncMarkChapterUnread({ userId, taleId, chapterIndex: idx });
+      const chTitle = chapters[idx]?.title || `Scroll #${idx + 1}`;
+      showToast(`Marked "${chTitle}" as unread.`, 'info');
+      renderChapters(userId, chapters, taleId);
+      return;
+    }
+
+    // 4. Default: Navigate to reader
     const item = e.target.closest('.chapter-item');
     if (!item) return;
 
@@ -127,6 +185,49 @@ export function bindChapterClicks(taleId) {
     const chapterId = item.dataset.chapterIndex ?? '0';
     _fadeAndGo(readerUrl(taleId, chapterId));
   });
+}
+
+/**
+ * Wires batch action buttons in the Chronicles section:
+ * - Mark All Read
+ * - Mark All Unread
+ * - Download All Chronicles
+ *
+ * @param {string} userId
+ * @param {string} taleId
+ * @param {Array<Object>} chapters
+ * @param {Object} [tale]
+ */
+export function setupChronicleBatchActions(userId, taleId, chapters = [], tale = null) {
+  const markAllReadBtn = document.getElementById('btn-mark-all-read');
+  const markAllUnreadBtn = document.getElementById('btn-mark-all-unread');
+  const downloadAllBtn = document.getElementById('btn-download-all-chronicles');
+
+  if (markAllReadBtn) {
+    markAllReadBtn.addEventListener('click', () => {
+      if (!chapters.length) return;
+      markAllChaptersRead({ userId, taleId, chapterCount: chapters.length });
+      syncMarkAllChaptersRead({ userId, taleId, chapterCount: chapters.length });
+      showToast('All fragments marked as read.', 'success');
+      renderChapters(userId, chapters, taleId);
+    });
+  }
+
+  if (markAllUnreadBtn) {
+    markAllUnreadBtn.addEventListener('click', () => {
+      if (!chapters.length) return;
+      markAllChaptersUnread({ userId, taleId });
+      syncMarkAllChaptersUnread({ userId, taleId, chapterCount: chapters.length });
+      showToast('All fragments marked as unread.', 'info');
+      renderChapters(userId, chapters, taleId);
+    });
+  }
+
+  if (downloadAllBtn) {
+    downloadAllBtn.addEventListener('click', () => {
+      downloadChronicle(taleId);
+    });
+  }
 }
 
 /* ─────────────────────────────────────────────
@@ -362,17 +463,40 @@ export function initHeaderScroll() {
   const bar = document.getElementById('tale-action-bar');
   const hero = document.getElementById('hero-section');
   const main = document.getElementById('main-content');
+  const scrollToTopBtn = document.getElementById('scroll-to-top');
 
   const onScroll = () => {
-    if (!hero) return;
     const scrollY = main ? main.scrollTop : window.scrollY;
-    const heroBtn = hero.querySelector('#start-btn');
-    const threshold =
-      heroBtn && window.innerWidth < 1024
-        ? heroBtn.offsetTop + heroBtn.offsetHeight + 30
-        : Math.max(180, hero.offsetTop + hero.offsetHeight - 80);
-    bar?.classList.toggle('is-hidden', scrollY < threshold);
+
+    if (hero && bar) {
+      const heroBtn = hero.querySelector('#start-btn') || hero.querySelector('#start-btn-desktop');
+      const threshold =
+        heroBtn && window.innerWidth < 1024
+          ? heroBtn.offsetTop + heroBtn.offsetHeight + 30
+          : Math.max(180, hero.offsetTop + hero.offsetHeight - 80);
+      bar.classList.toggle('is-hidden', scrollY < threshold);
+    }
+
+    if (scrollToTopBtn) {
+      const showTop = scrollY > 80;
+      scrollToTopBtn.classList.toggle('is-visible', showTop);
+      scrollToTopBtn.classList.toggle('opacity-100', showTop);
+      scrollToTopBtn.classList.toggle('pointer-events-auto', showTop);
+      scrollToTopBtn.classList.toggle('translate-y-0', showTop);
+      scrollToTopBtn.classList.toggle('opacity-0', !showTop);
+      scrollToTopBtn.classList.toggle('pointer-events-none', !showTop);
+      scrollToTopBtn.classList.toggle('translate-y-3', !showTop);
+    }
   };
+
+  if (scrollToTopBtn) {
+    scrollToTopBtn.addEventListener('click', () => {
+      if (main && main.scrollTop > 0) {
+        main.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
 
   window.addEventListener('scroll', onScroll, { passive: true });
   if (main) {

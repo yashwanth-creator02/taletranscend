@@ -248,7 +248,7 @@ export function showGridError() {
           <i data-lucide="alert-triangle" class="w-6 h-6 text-rose-400"></i>
         </div>
         <div class="space-y-1">
-          <h3 class="text-base font-bold text-rose-400">Neural Link Severed</h3>
+          <h3 class="text-base font-bold text-rose-400">Archive Connection Interrupted</h3>
           <p class="text-xs text-rose-400/70 font-medium uppercase tracking-wider">Database connection failed</p>
         </div>
         <button

@@ -23,6 +23,7 @@ import {
   setupShareButton,
   setupResonance,
   initHeaderScroll,
+  setupChronicleBatchActions,
   listenToComments,
   postComment,
   initIcons,
@@ -58,7 +59,7 @@ if (!taleId) {
 
 const authTimeout = setupAuthTimeout(
   'display-description',
-  'Archive connection timed out. Neural link severed.'
+  'Archive connection timed out. Please try again.'
 );
 
 initAuth(async (user) => {
@@ -83,7 +84,8 @@ initAuth(async (user) => {
   readyReveal();
 
   // 3. Interactions
-  bindChapterClicks(taleId);
+  bindChapterClicks(taleId, chapters, userId, tale);
+  setupChronicleBatchActions(userId, taleId, chapters, tale);
   setupStartReading(taleId, chapters);
   setupResumeReading(userId, taleId);
   setupResonance(taleId);

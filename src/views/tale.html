@@ -173,101 +173,170 @@
       <!-- ── Hero Section (The Chronicle Codex Header) ── -->
       <section
         id="hero-section"
-        class="hero-gradient shrink-0 relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-8 sm:pb-10 my-3"
+        class="hero-gradient shrink-0 relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-7 pb-8 sm:pb-9 my-3 overflow-hidden"
       >
-        <div
-          class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-6 sm:gap-8 items-start relative z-10"
-        >
-          <!-- Hero Info -->
-          <div class="space-y-6 max-w-3xl">
-            <!-- Era & Provenance Pill -->
-            <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-              <span
-                class="px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase tracking-[0.25em]"
-              >
-                Neural Fragment
-              </span>
-              <span
-                id="tale-era"
-                class="px-2.5 py-1 rounded-lg bg-white/4 border border-white/6 text-slate-300 text-[10px] font-bold uppercase tracking-[0.2em]"
-              >
-                —
-              </span>
-              <span
-                id="tale-genre"
-                class="px-2.5 py-1 rounded-lg bg-white/4 border border-white/6 text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]"
-              >
-                —
-              </span>
-              <span
-                id="tale-language"
-                class="px-2.5 py-1 rounded-lg bg-white/4 border border-white/6 text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] hidden sm:inline-block"
-              >
-                —
-              </span>
-            </div>
+        <!-- Blurred Cover Backdrop Layer -->
+        <div class="hero-cover-backdrop" aria-hidden="true">
+          <div id="hero-backdrop-img" class="hero-cover-backdrop-img"></div>
+          <div class="hero-cover-backdrop-overlay"></div>
+        </div>
 
-            <!-- Title -->
-            <h1
-              id="display-title"
-              class="hero-title font-cinzel font-black text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white tracking-tight leading-[1.1] transition-all duration-700"
+        <div class="relative z-10 space-y-6 max-w-4xl min-w-0">
+          <!-- Era & Provenance Pill -->
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+            <span
+              class="px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase tracking-[0.25em]"
             >
-              Loading Chronicle...
-            </h1>
+              Tale Chronicle
+            </span>
+            <span
+              id="tale-era"
+              class="px-2.5 py-1 rounded-lg bg-white/4 border border-white/6 text-slate-300 text-[10px] font-bold uppercase tracking-[0.2em]"
+            >
+              —
+            </span>
+            <span
+              id="tale-genre"
+              class="px-2.5 py-1 rounded-lg bg-white/4 border border-white/6 text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]"
+            >
+              —
+            </span>
+            <span
+              id="tale-language"
+              class="px-2.5 py-1 rounded-lg bg-white/4 border border-white/6 text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] hidden sm:inline-block"
+            >
+              —
+            </span>
+          </div>
 
-            <!-- Author & Metadata Row -->
+          <!-- Title -->
+          <h1
+            id="display-title"
+            class="hero-title font-cinzel font-black text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white tracking-tight leading-[1.12] transition-all duration-700"
+          >
+            Loading Chronicle...
+          </h1>
+
+          <!-- Author & Metadata Row (with Ongoing / Completed / Hiatus / Stopped Status) -->
+          <div
+            id="hero-meta"
+            class="flex flex-wrap items-center gap-2.5 sm:gap-3.5 transition-all duration-700"
+          >
             <div
-              id="hero-meta"
-              class="flex flex-wrap items-center gap-3 sm:gap-4 transition-all duration-700"
+              class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-white/4 border border-white/8 shadow-md"
             >
-              <div
-                class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-white/4 border border-white/8 shadow-md"
-              >
-                <img
-                  id="author-avatar-hero"
-                  src=""
-                  class="w-6 h-6 rounded-lg bg-zinc-800 object-cover"
-                  alt="Author"
-                />
-                <span id="display-author" class="text-xs font-bold text-slate-200"> ... </span>
-              </div>
-
-              <div
-                class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/3 border border-white/6 text-xs text-slate-300"
-              >
-                <i data-lucide="layers" class="w-3.5 h-3.5 text-indigo-400"></i>
-                <span id="display-chapters" class="font-semibold text-slate-300">0 Fragments</span>
-              </div>
-
-              <div
-                class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/3 border border-white/6 text-xs text-slate-300"
-              >
-                <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-400"></i>
-                <span id="read-time" class="font-semibold text-slate-300">0 min read</span>
-              </div>
+              <img
+                id="author-avatar-hero"
+                src=""
+                class="w-6 h-6 rounded-lg bg-zinc-800 object-cover"
+                alt="Author"
+              />
+              <span id="display-author" class="text-xs font-bold text-slate-200"> ... </span>
             </div>
 
-            <!-- Mobile Quick Actions (Visible on screens < lg) -->
-            <div class="grid grid-cols-2 gap-2.5 pt-2 lg:hidden w-full">
-              <button
-                id="start-btn"
-                class="action-btn h-11 px-4 bg-linear-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer"
+            <div
+              id="display-status-pill"
+              class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/4 border border-white/8 shadow-md text-xs text-slate-200"
+            >
+              <span
+                id="display-status"
+                class="font-bold uppercase tracking-wider text-[11px] text-slate-200"
+                >Ongoing</span
               >
-                <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
-                <span>Initiate</span>
+            </div>
+
+            <div
+              class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/3 border border-white/6 text-xs text-slate-300"
+            >
+              <i data-lucide="layers" class="w-3.5 h-3.5 text-indigo-400"></i>
+              <span id="display-chapters" class="font-semibold text-slate-300">0 Fragments</span>
+            </div>
+
+            <div
+              class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/3 border border-white/6 text-xs text-slate-300"
+            >
+              <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span id="read-time" class="font-semibold text-slate-300">0 min read</span>
+            </div>
+          </div>
+
+          <!-- Mobile Quick Actions (Visible on screens < lg) -->
+          <div class="grid grid-cols-2 gap-2.5 pt-2 lg:hidden w-full">
+            <button
+              id="start-btn"
+              class="action-btn h-11 px-4 bg-linear-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer"
+            >
+              <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+              <span>Initiate</span>
+            </button>
+
+            <button
+              id="resume-btn"
+              class="action-btn h-11 px-4 glass-strong border border-white/10 hover:border-indigo-500/30 text-indigo-300 hover:text-white rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer"
+            >
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+              <span id="resume-text">Resume</span>
+            </button>
+
+            <button
+              id="shelf-btn"
+              class="action-btn h-10 px-3 glass border border-white/10 hover:border-indigo-500/30 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
+              title="Save to Shelf"
+            >
+              <i data-lucide="bookmark-plus" class="w-3.5 h-3.5"></i>
+              <span>Save to Shelf</span>
+            </button>
+
+            <button
+              id="share-btn"
+              class="action-btn h-10 px-3 glass border border-white/10 hover:border-indigo-500/30 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
+              title="Share Tale"
+            >
+              <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+              <span>Share Tale</span>
+            </button>
+
+            <button
+              id="resonance-btn-mobile"
+              class="col-span-2 w-full h-10 rounded-xl border border-white/10 glass hover:border-orange-500/40 text-slate-300 hover:text-white transition-all flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider cursor-pointer group"
+            >
+              <i
+                data-lucide="heart"
+                class="w-3.5 h-3.5 text-slate-500 group-hover:text-orange-500 transition-colors"
+              ></i>
+              <span class="resonance-label">Align Souls</span>
+              <span class="text-white/20">•</span>
+              <span
+                id="resonance-count-mobile"
+                class="text-orange-400 font-extrabold tracking-wider"
+                >0</span
+              >
+            </button>
+          </div>
+
+          <!-- Desktop Command Hub (Visible on lg+) -->
+          <div class="hidden lg:flex flex-col gap-4 pt-1">
+            <!-- Desktop Action Hub -->
+            <div class="flex flex-wrap items-center gap-3">
+              <button
+                id="start-btn-desktop"
+                class="action-btn py-3 px-6 bg-linear-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
+              >
+                <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+                <span>Initiate Reading</span>
               </button>
 
               <button
-                id="resume-btn"
-                class="action-btn h-11 px-4 glass-strong border border-white/10 hover:border-indigo-500/30 text-indigo-300 hover:text-white rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer"
+                id="resume-btn-desktop"
+                class="action-btn py-3 px-5 glass-strong border border-white/10 hover:border-indigo-500/30 text-indigo-300 hover:text-white rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
               >
                 <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-                <span id="resume-text">Resume</span>
+                <span id="resume-text-desktop">Resume</span>
               </button>
 
               <button
-                id="shelf-btn"
-                class="action-btn h-10 px-3 glass border border-white/10 hover:border-indigo-500/30 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
+                id="shelf-btn-desktop"
+                class="action-btn py-3 px-4 glass border border-white/8 hover:border-indigo-500/30 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
                 title="Save to Shelf"
               >
                 <i data-lucide="bookmark-plus" class="w-3.5 h-3.5"></i>
@@ -275,58 +344,74 @@
               </button>
 
               <button
-                id="share-btn"
-                class="action-btn h-10 px-3 glass border border-white/10 hover:border-indigo-500/30 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
+                id="share-btn-desktop"
+                class="action-btn py-3 px-4 glass border border-white/8 hover:border-indigo-500/30 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
                 title="Share Tale"
               >
                 <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
-                <span>Share Tale</span>
-              </button>
-
-              <button
-                id="resonance-btn-mobile"
-                class="col-span-2 w-full h-10 rounded-xl border border-white/10 glass hover:border-orange-500/40 text-slate-300 hover:text-white transition-all flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider cursor-pointer group"
-              >
-                <i
-                  data-lucide="heart"
-                  class="w-3.5 h-3.5 text-slate-500 group-hover:text-orange-500 transition-colors"
-                ></i>
-                <span class="resonance-label">Align Souls</span>
-                <span class="text-white/20">•</span>
-                <span
-                  id="resonance-count-mobile"
-                  class="text-orange-400 font-extrabold tracking-wider"
-                  >0</span
-                >
+                <span>Share</span>
               </button>
             </div>
-          </div>
 
-          <!-- Tablet / Mobile Hero Cover Thumbnail (Visible on small screens, hidden on desktop where sidebar is present) -->
-          <div class="lg:hidden flex items-center justify-center sm:justify-end sm:pt-2">
-            <div
-              class="relative w-36 sm:w-44 md:w-52 aspect-2/3 rounded-2xl overflow-hidden shadow-2xl border border-white/10 group"
-            >
-              <img
-                id="display-cover-thumb"
-                src=""
-                alt="Cover"
-                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
+            <!-- Soul Resonance Hearth (Archive Status Removed) -->
+            <div class="flex items-center gap-4">
               <div
-                class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"
-              ></div>
+                class="glass-card p-3.5 rounded-2xl border border-white/6 flex items-center justify-between gap-6 max-w-md w-full"
+              >
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-9 h-9 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center shrink-0"
+                  >
+                    <i data-lucide="flame" class="w-4 h-4 text-orange-400"></i>
+                  </div>
+                  <div>
+                    <span
+                      class="text-[9px] font-black uppercase tracking-[0.2em] text-orange-300 block"
+                    >
+                      Soul Resonance
+                    </span>
+                    <span id="resonance-count" class="text-sm font-bold text-white tracking-wider"
+                      >0</span
+                    >
+                  </div>
+                </div>
+                <button
+                  id="resonance-btn-desktop"
+                  class="py-2 px-4 rounded-xl border border-white/10 glass hover:border-orange-500/40 text-slate-300 hover:text-white transition-all flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-wider cursor-pointer group shrink-0"
+                >
+                  <i
+                    data-lucide="heart"
+                    class="w-3.5 h-3.5 text-slate-500 group-hover:text-orange-500 transition-colors"
+                  ></i>
+                  <span class="resonance-label">Align Souls</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- ── Main Grid ── -->
+      <!-- ── Main Content: Sticky Hanging Cover Art + Interactive Tab Panes ── -->
       <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pb-20 sm:pb-24">
         <div
-          class="grid grid-cols-1 lg:grid-cols-[1fr_360px] xl:grid-cols-[1fr_400px] gap-8 xl:gap-12 items-start"
+          class="grid grid-cols-1 lg:grid-cols-[250px_1fr] xl:grid-cols-[280px_1fr] gap-8 items-start"
         >
-          <!-- ── Left Column: Interactive Tab Panes ── -->
+          <!-- Sticky Hanging Cover Art Column (Hangs relative to viewport on scroll) -->
+          <aside class="w-full flex justify-center lg:block lg:sticky lg:top-8 self-start shrink-0">
+            <div
+              class="glass-card p-2 sm:p-2.5 rounded-3xl shine-container group w-48 sm:w-56 lg:w-full aspect-3/4 max-h-[380px] xl:max-h-[420px] overflow-hidden shadow-2xl border border-white/8 relative"
+            >
+              <img
+                id="display-cover"
+                class="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-700"
+                src=""
+                alt="Cover"
+              />
+              <div class="shine-layer"></div>
+            </div>
+          </aside>
+
+          <!-- Tab Panes Column -->
           <div class="space-y-8 min-w-0">
             <!-- Tab Navigation Strip -->
             <div
@@ -334,19 +419,19 @@
             >
               <button
                 data-tab="about"
-                class="tab-btn active px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] rounded-xl transition-all"
+                class="tab-btn active px-5 py-2.5 text-xs font-bold uppercase tracking-[0.2em] rounded-xl transition-all"
               >
                 Synopsis
               </button>
               <button
                 data-tab="chapters"
-                class="tab-btn px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] rounded-xl transition-all"
+                class="tab-btn px-5 py-2.5 text-xs font-bold uppercase tracking-[0.2em] rounded-xl transition-all"
               >
                 Chronicles
               </button>
               <button
                 data-tab="comments"
-                class="tab-btn px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] rounded-xl transition-all"
+                class="tab-btn px-5 py-2.5 text-xs font-bold uppercase tracking-[0.2em] rounded-xl transition-all"
               >
                 Echoes
               </button>
@@ -385,13 +470,50 @@
 
             <!-- Tab 2: Chronicles (Chapters) Pane -->
             <div id="content-chapters" class="tab-content hidden animate-fade-in space-y-4">
-              <div class="flex items-center justify-between px-2 mb-2">
-                <h3 class="text-xs font-black uppercase tracking-[0.3em] text-slate-400">
-                  Fragment Trail
-                </h3>
-                <span class="text-[10px] font-bold uppercase tracking-widest text-indigo-400/80">
-                  Chronicle Sequence
-                </span>
+              <div
+                class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-2 mb-2 pb-3 border-b border-white/6"
+              >
+                <div>
+                  <h3 class="text-xs font-black uppercase tracking-[0.3em] text-slate-300">
+                    Fragment Trail
+                  </h3>
+                  <span
+                    id="chronicle-read-count"
+                    class="text-[10px] font-bold uppercase tracking-widest text-indigo-400/80"
+                  >
+                    Chronicle Sequence
+                  </span>
+                </div>
+                <!-- Batch Actions Toolbar -->
+                <div class="flex items-center gap-2 flex-wrap">
+                  <button
+                    type="button"
+                    id="btn-mark-all-read"
+                    class="px-3 py-1.5 rounded-xl border border-indigo-500/20 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
+                    title="Mark all fragments as read"
+                  >
+                    <i data-lucide="check-check" class="w-3.5 h-3.5"></i>
+                    <span>Mark All Read</span>
+                  </button>
+                  <button
+                    type="button"
+                    id="btn-mark-all-unread"
+                    class="px-3 py-1.5 rounded-xl border border-white/8 bg-white/4 hover:bg-white/10 hover:border-white/15 text-slate-400 hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
+                    title="Mark all fragments as unread"
+                  >
+                    <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                    <span>Mark All Unread</span>
+                  </button>
+                  <button
+                    type="button"
+                    id="btn-download-all-chronicles"
+                    class="px-3 py-1.5 rounded-xl border border-white/8 bg-white/4 hover:bg-white/10 hover:border-white/15 text-slate-400 hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
+                    title="Download entire chronicle (.md)"
+                  >
+                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                    <span class="hidden sm:inline">Download All</span>
+                  </button>
+                </div>
               </div>
               <div id="chapter-list" class="space-y-3">
                 <!-- Rendered by ui.js -->
@@ -406,7 +528,7 @@
                 <div class="flex items-center gap-2.5 text-indigo-400">
                   <i data-lucide="message-square-plus" class="w-4 h-4"></i>
                   <span class="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-300">
-                    Transmit Neural Echo
+                    Inscribe Reflection
                   </span>
                 </div>
                 <textarea
@@ -429,107 +551,6 @@
               </div>
             </div>
           </div>
-
-          <!-- ── Right Column: Sticky Codex Pillar (Desktop) ── -->
-          <aside class="sidebar-sticky hidden lg:block space-y-6">
-            <!-- Cover Art Frame -->
-            <div
-              class="glass-card p-3 rounded-3xl shine-container group aspect-3/4 overflow-hidden shadow-2xl border border-white/8 relative"
-            >
-              <img
-                id="display-cover"
-                class="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-700"
-                src=""
-                alt="Cover"
-              />
-              <div class="shine-layer"></div>
-            </div>
-
-            <!-- Desktop Action Hub -->
-            <div class="glass-card p-5 rounded-3xl border border-white/6 space-y-3 shadow-xl">
-              <button
-                id="start-btn-desktop"
-                class="action-btn w-full py-3.5 px-6 bg-linear-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2.5 transition-all cursor-pointer"
-              >
-                <i data-lucide="play" class="w-4 h-4 fill-current"></i>
-                <span>Initiate Reading</span>
-              </button>
-
-              <button
-                id="resume-btn-desktop"
-                class="action-btn w-full py-3 px-6 glass-strong border border-white/10 hover:border-indigo-500/30 text-indigo-300 hover:text-white rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all cursor-pointer"
-              >
-                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-                <span>Resume Reading</span>
-              </button>
-
-              <div class="grid grid-cols-2 gap-2 pt-1">
-                <button
-                  id="shelf-btn-desktop"
-                  class="action-btn py-2.5 px-3 glass border border-white/8 hover:border-indigo-500/30 text-slate-300 hover:text-white rounded-xl text-[11px] font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
-                >
-                  <i data-lucide="bookmark-plus" class="w-3.5 h-3.5"></i>
-                  <span>Save to Shelf</span>
-                </button>
-                <button
-                  id="share-btn-desktop"
-                  class="action-btn py-2.5 px-3 glass border border-white/8 hover:border-indigo-500/30 text-slate-300 hover:text-white rounded-xl text-[11px] font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
-                >
-                  <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
-                  <span>Share</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Soul Resonance Hearth -->
-            <div class="glass-card p-5 rounded-3xl border border-white/6 space-y-3">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2.5">
-                  <i data-lucide="flame" class="w-4 h-4 text-orange-400"></i>
-                  <span class="text-[10px] font-black uppercase tracking-[0.25em] text-orange-300">
-                    Soul Resonance
-                  </span>
-                </div>
-                <span id="resonance-count" class="text-xs font-bold text-white tracking-wider"
-                  >0</span
-                >
-              </div>
-              <button
-                id="resonance-btn-desktop"
-                class="w-full py-3 rounded-xl border border-white/10 glass hover:border-orange-500/40 text-slate-300 hover:text-white transition-all flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider cursor-pointer group"
-              >
-                <i
-                  data-lucide="heart"
-                  class="w-4 h-4 text-slate-500 group-hover:text-orange-500 transition-colors"
-                ></i>
-                <span class="resonance-label">Align Souls</span>
-              </button>
-            </div>
-
-            <!-- Archive Metadata -->
-            <div class="glass-card p-5 rounded-3xl border border-white/6 space-y-3">
-              <div class="flex items-center gap-2 text-indigo-400 mb-1">
-                <i data-lucide="database" class="w-3.5 h-3.5"></i>
-                <span class="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-300">
-                  Archive Status
-                </span>
-              </div>
-              <div class="space-y-2 text-xs">
-                <div class="flex justify-between items-center text-slate-400">
-                  <span>Origin Era</span>
-                  <span id="sidebar-creation" class="font-semibold text-slate-200">—</span>
-                </div>
-                <div class="flex justify-between items-center text-slate-400">
-                  <span>Fragments</span>
-                  <span id="sidebar-chapter-count" class="font-semibold text-slate-200">0</span>
-                </div>
-                <div class="flex justify-between items-center text-slate-400">
-                  <span>Chronicle Sync</span>
-                  <span class="font-semibold text-emerald-400">Optimal</span>
-                </div>
-              </div>
-            </div>
-          </aside>
         </div>
       </div>
     </main>
@@ -576,6 +597,18 @@
         </div>
       </div>
     </div>
+
+    <!-- ── Scroll to Top Button (Appears when scrolling down) ── -->
+    <button
+      id="scroll-to-top"
+      class="scroll-to-top fixed bottom-6 right-6 z-40 p-3.5 rounded-2xl border border-white/10 glass-strong text-slate-300 hover:text-white hover:border-indigo-500/40 shadow-xl transition-all duration-300 opacity-0 pointer-events-none translate-y-3 flex items-center justify-center cursor-pointer group"
+      aria-label="Scroll to top of chronicle"
+    >
+      <i
+        data-lucide="chevron-up"
+        class="w-5 h-5 group-hover:-translate-y-0.5 transition-transform text-indigo-300 group-hover:text-white"
+      ></i>
+    </button>
 
     <!-- Toast Notifications -->
     <div

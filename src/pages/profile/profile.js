@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
       stopProfileSync();
       await signOut(auth);
       log.info('Sign-out successful');
-      showToast('Signed out. Neural link severed.', 'success');
+      showToast('Signed out successfully.', 'success');
       setTimeout(() => {
         navigateTo('index.html');
       }, 800);

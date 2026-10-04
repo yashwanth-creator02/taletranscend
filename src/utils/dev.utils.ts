@@ -34,7 +34,7 @@ export function initDevMode(): void {
 
     // Cinematic console announcement
     log.log(
-      '%c[TaleTranscend] %cDev Mode Active %c✦ %cNeural link established.',
+      '%c[TaleTranscend] %cDev Mode Active %c✦ %cLiving archive connected.',
       'color: #6366f1; font-weight: 900; font-family: serif; font-size: 14px;',
       'color: #e2e8f0; font-weight: 500; font-family: sans-serif; font-size: 14px;',
       'color: #6366f1; font-weight: bold; font-size: 14px;',

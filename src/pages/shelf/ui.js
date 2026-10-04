@@ -81,7 +81,7 @@ export function setGridEmpty(message) {
         </div>
         <div>
           <h3 class="text-base font-cinzel font-bold text-white mb-2">Nothing here yet</h3>
-          <p class="text-sm text-slate-600 max-w-sm leading-relaxed">${escapeHtml(message)}</p>
+          <p class="text-sm text-slate-400 max-w-sm leading-relaxed">${escapeHtml(message)}</p>
         </div>
         <a href="/library.html"
           class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold uppercase tracking-[0.15em] hover:bg-indigo-500/20 transition-colors">
@@ -191,19 +191,19 @@ export function buildBookmarkCard(tale) {
               role="menu"
             >
               <div class="px-3 py-2 border-b border-white/5 mb-1">
-                <span class="text-[8px] font-black uppercase tracking-widest text-zinc-600">Archive Operations</span>
+                <span class="text-[8px] font-black uppercase tracking-widest text-zinc-600">Chronicle Options</span>
               </div>
 
               <button type="button" data-action="copy-link" data-id="${escapeHtml(id)}"
                 class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400 transition-colors hover:bg-white/5 hover:text-white">
                 <i data-lucide="link" class="h-3.5 w-3.5"></i>
-                <span>Copy Access Link</span>
+                <span>Copy Tale Link</span>
               </button>
 
-              <button type="button" data-action="save-offline" data-id="${escapeHtml(id)}"
+              <button type="button" data-action="download" data-id="${escapeHtml(id)}"
                 class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400 transition-colors hover:bg-white/5 hover:text-white">
                 <i data-lucide="download" class="h-3.5 w-3.5"></i>
-                <span>Neural Download</span>
+                <span>Download Chronicle</span>
               </button>
 
               <div class="h-px bg-white/5 my-1"></div>
@@ -246,12 +246,12 @@ export function buildBookmarkCard(tale) {
         <h3 class="font-bold text-white text-sm leading-snug mb-1.5 group-hover:text-indigo-300 transition-colors line-clamp-2">
           ${safeTitle}
         </h3>
-        <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed mb-3">
+        <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed mb-3">
           ${safeDescription}
         </p>
 
         <div class="flex items-center justify-between pt-3 border-t border-white/[0.04]">
-          <div class="flex items-center gap-3 text-[10px] text-slate-600">
+          <div class="flex items-center gap-3 text-[10px] text-slate-400">
             <span class="flex items-center gap-1.5">
               <i data-lucide="layers" class="w-3 h-3"></i>
               ${chapterCount} ch
@@ -354,23 +354,23 @@ export function buildDraftCard(draft) {
           ${safeTitle}
         </h3>
 
-        <p class="text-xs text-slate-600 line-clamp-3 leading-relaxed mb-4">
+        <p class="text-xs text-slate-400 line-clamp-3 leading-relaxed mb-4">
           ${safeSynopsis || 'No synopsis yet. Open the editor to add one.'}
         </p>
 
         <div class="grid grid-cols-2 gap-3 py-3 border-t border-white/[0.04] mb-4">
-          <div class="flex items-center gap-2 text-[10px] text-slate-600">
-            <i data-lucide="layers" class="w-3 h-3 text-slate-700"></i>
+          <div class="flex items-center gap-2 text-[10px] text-slate-400">
+            <i data-lucide="layers" class="w-3 h-3 text-slate-500"></i>
             ${chapterCount} ${chapterCount === 1 ? 'chapter' : 'chapters'}
           </div>
-          <div class="flex items-center gap-2 text-[10px] text-slate-600">
-            <i data-lucide="file-text" class="w-3 h-3 text-slate-700"></i>
+          <div class="flex items-center gap-2 text-[10px] text-slate-400">
+            <i data-lucide="file-text" class="w-3 h-3 text-slate-500"></i>
             ${wordLabel}
           </div>
         </div>
 
         <div class="flex items-center justify-between">
-          <span class="text-[9px] text-slate-700">Last updated ${updated}</span>
+          <span class="text-[9px] text-slate-400">Last updated ${updated}</span>
           <a
             href="/contribution.html?draft=${id}"
             class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-indigo-400 hover:text-indigo-300 transition-colors group/btn"

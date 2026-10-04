@@ -2,6 +2,7 @@
 // AI helper for profile name suggestions.
 
 import { createLogger } from '@/utils';
+import { getStoredApiKey } from '@/services/ai/apiKey.storage.js';
 
 const log = createLogger('AIName');
 
@@ -12,11 +13,13 @@ const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models
  * Suggests a mythic or folklore-inspired name based on a user bio.
  *
  * @param {string} bio - User biography
- * @param {string} apiKey - Gemini API Key
+ * @param {string} [apiKey] - Gemini API Key (falls back to stored key if omitted)
  * @returns {Promise<string|null>}
  */
 export async function suggestNameFromBio(bio, apiKey) {
-  if (!bio || !apiKey) return null;
+  const resolvedKey =
+    apiKey || getStoredApiKey() || (typeof window !== 'undefined' ? window.__GEMINI_KEY__ : null);
+  if (!bio || !resolvedKey) return null;
 
   try {
     const prompt = `Based on this user bio: "${bio}", suggest ONE unique, mythic, or folklore-inspired name for a storyteller/chronicler. Return ONLY the name, no punctuation or explanation.`;

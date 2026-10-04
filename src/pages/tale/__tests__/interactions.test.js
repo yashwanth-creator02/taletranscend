@@ -6,9 +6,33 @@ import {
   setupTabs,
   setupStartReading,
   setupShelfButton,
+  setupChronicleBatchActions,
 } from '../interactions.js';
 import * as services from '@services/index.js';
 import * as utils from '@/utils';
+import * as localProgress from '@services/reader/localProgress.service.js';
+import * as cloudProgress from '@services/reader/cloudProgress.service.js';
+import * as downloadTale from '@services/tale/downloadTale.js';
+
+vi.mock('@services/reader/localProgress.service.js', () => ({
+  markChapterRead: vi.fn(),
+  markChapterUnread: vi.fn(),
+  markAllChaptersRead: vi.fn(),
+  markAllChaptersUnread: vi.fn(),
+  getChapterProgress: vi.fn(),
+}));
+
+vi.mock('@services/reader/cloudProgress.service.js', () => ({
+  syncMarkChapterRead: vi.fn(),
+  syncMarkChapterUnread: vi.fn(),
+  syncMarkAllChaptersRead: vi.fn(),
+  syncMarkAllChaptersUnread: vi.fn(),
+}));
+
+vi.mock('@services/tale/downloadTale.js', () => ({
+  downloadChronicle: vi.fn(),
+  downloadChapter: vi.fn(),
+}));
 
 vi.mock('@services/index.js', () => ({
   toggleResonance: vi.fn(),
@@ -29,6 +53,8 @@ vi.mock('@/utils', () => ({
   })),
   getRemainingTime: vi.fn(() => 1000),
   applyButtonCooldown: vi.fn(),
+  escapeHtml: vi.fn((str) => str),
+  setText: vi.fn(),
 }));
 
 vi.mock('@fb/index.js', () => ({
@@ -50,8 +76,15 @@ describe('TaleInteractions', () => {
       <button id="resonance-btn"><i></i><span></span></button>
       <div id="resonance-count">0</div>
       <div id="chapter-list">
-        <div class="chapter-item" data-chapter-index="5"></div>
+        <div class="chapter-item" data-chapter-index="5">
+          <button data-action="mark-read" data-chapter-index="5"></button>
+          <button data-action="mark-unread" data-chapter-index="5"></button>
+          <button data-action="download-chapter" data-chapter-index="5"></button>
+        </div>
       </div>
+      <button id="btn-mark-all-read"></button>
+      <button id="btn-mark-all-unread"></button>
+      <button id="btn-download-all-chronicles"></button>
       <button data-tab="synopsis" class="active"></button>
       <button data-tab="echoes"></button>
       <div id="content-synopsis" class="tab-content"></div>
@@ -95,6 +128,84 @@ describe('TaleInteractions', () => {
       const item = document.querySelector('.chapter-item');
       item.click();
       expect(utils.navigateTo).toHaveBeenCalledWith('/tales/t1/read/5');
+    });
+
+    it('marks chapter read when mark-read button clicked without navigating', () => {
+      const chapters = [{ title: 'Chapter 1' }];
+      bindChapterClicks('t1', chapters, 'u1', { title: 'Test Tale' });
+      const btn = document.querySelector('[data-action="mark-read"]');
+      btn.click();
+
+      expect(localProgress.markChapterRead).toHaveBeenCalledWith({
+        userId: 'u1',
+        taleId: 't1',
+        chapterIndex: 5,
+      });
+      expect(cloudProgress.syncMarkChapterRead).toHaveBeenCalled();
+      expect(utils.navigateTo).not.toHaveBeenCalled();
+    });
+
+    it('marks chapter unread when mark-unread button clicked without navigating', () => {
+      const chapters = [{ title: 'Chapter 1' }];
+      bindChapterClicks('t1', chapters, 'u1', { title: 'Test Tale' });
+      const btn = document.querySelector('[data-action="mark-unread"]');
+      btn.click();
+
+      expect(localProgress.markChapterUnread).toHaveBeenCalledWith({
+        userId: 'u1',
+        taleId: 't1',
+        chapterIndex: 5,
+      });
+      expect(cloudProgress.syncMarkChapterUnread).toHaveBeenCalled();
+      expect(utils.navigateTo).not.toHaveBeenCalled();
+    });
+
+    it('downloads chapter when download-chapter button clicked without navigating', () => {
+      const chapters = [{ title: 'Chapter 1' }];
+      bindChapterClicks('t1', chapters, 'u1', { title: 'Test Tale' });
+      const btn = document.querySelector('[data-action="download-chapter"]');
+      btn.click();
+
+      expect(downloadTale.downloadChapter).toHaveBeenCalledWith(
+        't1',
+        5,
+        expect.objectContaining({ taleTitle: 'Test Tale' })
+      );
+      expect(utils.navigateTo).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('setupChronicleBatchActions', () => {
+    it('marks all chapters read on batch button click', () => {
+      const chapters = [{ title: 'C1' }, { title: 'C2' }];
+      setupChronicleBatchActions('u1', 't1', chapters);
+      document.getElementById('btn-mark-all-read').click();
+
+      expect(localProgress.markAllChaptersRead).toHaveBeenCalledWith({
+        userId: 'u1',
+        taleId: 't1',
+        chapterCount: 2,
+      });
+      expect(cloudProgress.syncMarkAllChaptersRead).toHaveBeenCalled();
+    });
+
+    it('marks all chapters unread on batch button click', () => {
+      const chapters = [{ title: 'C1' }, { title: 'C2' }];
+      setupChronicleBatchActions('u1', 't1', chapters);
+      document.getElementById('btn-mark-all-unread').click();
+
+      expect(localProgress.markAllChaptersUnread).toHaveBeenCalledWith({
+        userId: 'u1',
+        taleId: 't1',
+      });
+      expect(cloudProgress.syncMarkAllChaptersUnread).toHaveBeenCalled();
+    });
+
+    it('downloads all chronicles on download all button click', () => {
+      setupChronicleBatchActions('u1', 't1', []);
+      document.getElementById('btn-download-all-chronicles').click();
+
+      expect(downloadTale.downloadChronicle).toHaveBeenCalledWith('t1');
     });
   });
 

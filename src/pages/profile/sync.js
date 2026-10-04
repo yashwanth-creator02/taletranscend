@@ -9,6 +9,7 @@ import { createLogger, validateData, UserProfileSchema } from '@/utils';
 import { createUserProfile } from '@state/index.js';
 import { updateProfileUI, showNotification } from './ui.js';
 import { profileState } from './state.js';
+import { setStoredApiKey, clearStoredApiKey } from '@/services/ai/apiKey.storage.js';
 
 const log = createLogger('ProfileSync');
 
@@ -146,6 +147,14 @@ export async function saveProfile() {
 
   try {
     await setDoc(userRef, updateData, { merge: true });
+    const keyVal = _getVal('input-gemini-key');
+    if (keyVal !== undefined) {
+      if (keyVal.trim()) {
+        setStoredApiKey(keyVal.trim());
+      } else {
+        clearStoredApiKey();
+      }
+    }
     log.info('Profile saved successfully');
     showNotification('Profile saved.', 'success');
   } catch (error) {

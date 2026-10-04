@@ -8,6 +8,11 @@ import { debounce } from '@/utils';
 import { initIcons } from '@ui/components/icons.js';
 import { showToast } from '@ui/components/toast.js';
 import {
+  getStoredApiKey,
+  setStoredApiKey,
+  clearStoredApiKey,
+} from '@/services/ai/apiKey.storage.js';
+import {
   setText,
   setInput,
   formatNumber,
@@ -29,6 +34,7 @@ import {
  * - Genre multi-select
  * - Avatar preview
  * - AI name suggestion button
+ * - Gemini API key input
  * - Backdrop click to close
  */
 export function initProfileUI() {
@@ -37,6 +43,7 @@ export function initProfileUI() {
   _buildGenreSelector();
   _bindAvatarPreview();
   _bindAiNameButton();
+  _bindApiKeyInput();
   _bindBackdropClose();
 }
 
@@ -203,39 +210,92 @@ function _bindAvatarPreview() {
 }
 
 /* ─────────────────────────────────────────────
-   AI Name Suggestion
+   AI Name Suggestion & Gemini Key
    ───────────────────────────────────────────── */
 
 function _bindAiNameButton() {
   const btn = document.getElementById('btn-suggest-name');
   const nameInput = document.getElementById('input-name');
   const bioInput = document.getElementById('input-bio');
+  const keyInput = document.getElementById('input-gemini-key');
   if (!btn || !nameInput || !bioInput) return;
 
   btn.addEventListener('click', async () => {
     const bio = bioInput.value.trim();
     if (!bio || bio.length < 5) {
-      showNotification('Write a short bio first to get a name suggestion.', 'info');
+      showToast('Write a short bio first (at least 5 characters) to summon a name.', 'info');
+      bioInput.focus();
       return;
     }
 
+    const apiKey =
+      keyInput?.value?.trim() ||
+      getStoredApiKey() ||
+      (typeof window !== 'undefined' ? window.__GEMINI_KEY__ : null);
+
+    if (!apiKey) {
+      showToast('Please enter your Gemini API key below to summon name suggestions.', 'info');
+      if (keyInput) {
+        keyInput.focus();
+        keyInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        keyInput.classList.add('ring-2', 'ring-amber-500/50');
+        setTimeout(() => keyInput.classList.remove('ring-2', 'ring-amber-500/50'), 2500);
+      }
+      return;
+    }
+
+    const originalText = btn.textContent;
     btn.disabled = true;
     btn.textContent = 'Conjuring…';
 
-    // API key should come from your environment/config — not hardcoded
-    const apiKey = window.__GEMINI_KEY__ ?? null;
-    const suggested = await suggestNameFromBio(bio, apiKey);
+    try {
+      const suggested = await suggestNameFromBio(bio, apiKey);
 
-    btn.disabled = false;
-    btn.textContent = 'Suggest Name';
-
-    if (suggested) {
-      nameInput.value = suggested;
-      showNotification(`Suggested: "${suggested}"`, 'success');
-    } else {
-      showNotification('Could not generate a name. Add your Gemini API key or try later.', 'error');
+      if (suggested) {
+        nameInput.value = suggested;
+        if (keyInput?.value?.trim()) {
+          setStoredApiKey(keyInput.value.trim());
+        }
+        showToast(`Suggested: "${suggested}"`, 'success');
+      } else {
+        showToast('Could not summon a name. Verify your Gemini API key and try again.', 'error');
+      }
+    } catch {
+      showToast('Failed to summon name. Please check your connection and API key.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
     }
   });
+}
+
+function _bindApiKeyInput() {
+  const keyInput = document.getElementById('input-gemini-key');
+  const toggleBtn = document.getElementById('btn-toggle-gemini-key');
+  if (!keyInput) return;
+
+  const storedKey = getStoredApiKey();
+  if (storedKey) {
+    keyInput.value = storedKey;
+  }
+
+  keyInput.addEventListener('change', () => {
+    const val = keyInput.value.trim();
+    if (val) {
+      setStoredApiKey(val);
+      showToast('Gemini API key saved.', 'success');
+    } else {
+      clearStoredApiKey();
+    }
+  });
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      const isPassword = keyInput.type === 'password';
+      keyInput.type = isPassword ? 'text' : 'password';
+      toggleBtn.textContent = isPassword ? 'Hide' : 'Show';
+    });
+  }
 }
 
 /* ─────────────────────────────────────────────
@@ -307,6 +367,11 @@ export function updateProfileUI(data) {
   setInput('input-instagram', data.instagramHandle || '');
   setInput('input-reading-goal', String(data.readingGoal || 12));
 
+  const keyInput = document.getElementById('input-gemini-key');
+  if (keyInput && !keyInput.value) {
+    keyInput.value = getStoredApiKey() || '';
+  }
+
   // Sync genre chips
   if (data.favouriteGenres) {
     profileState.favouriteGenres = [...data.favouriteGenres];
@@ -351,7 +416,7 @@ function _renderGenrePills(genres) {
   const container = document.getElementById('profile-genres');
   if (!container) return;
   if (!genres.length) {
-    container.innerHTML = '<span class="text-xs text-slate-600 italic">No genres set</span>';
+    container.innerHTML = '<span class="text-xs text-slate-400 italic">No genres set</span>';
     return;
   }
   container.innerHTML = genres
@@ -572,12 +637,12 @@ function _buildPublishedCard(tale) {
       <div class="p-3.5 sm:p-4 space-y-2.5">
         <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed font-medium">${safeDescription}</p>
         <div class="flex items-center justify-between pt-2 border-t border-white/5">
-          <div class="flex items-center gap-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+          <div class="flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
             <span class="flex items-center gap-1.5">
-              <i data-lucide="layers" class="w-3.5 h-3.5 text-slate-600"></i>
+              <i data-lucide="layers" class="w-3.5 h-3.5 text-slate-400"></i>
               ${tale.chapterCount || 0} ch
             </span>
-            ${tale.readCount ? `<span class="flex items-center gap-1.5"><i data-lucide="eye" class="w-3.5 h-3.5 text-slate-600"></i>${formatNumber(tale.readCount)}</span>` : ''}
+            ${tale.readCount ? `<span class="flex items-center gap-1.5"><i data-lucide="eye" class="w-3.5 h-3.5 text-slate-400"></i>${formatNumber(tale.readCount)}</span>` : ''}
           </div>
           <span class="flex items-center gap-1 text-[10px] font-bold text-indigo-400 group-hover:text-indigo-300">
             Read <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i>
@@ -630,7 +695,7 @@ function _buildDraftCard(draft) {
         <span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 text-[8.5px] font-black uppercase tracking-widest rounded-full border border-amber-500/20">
           Draft
         </span>
-        <span class="text-[9.5px] font-medium text-slate-500 uppercase tracking-wider">${updated}</span>
+        <span class="text-[9.5px] font-medium text-slate-400 uppercase tracking-wider">${updated}</span>
       </div>
       <h3 class="font-cinzel font-bold text-white text-sm sm:text-base group-hover:text-amber-300 transition-colors truncate mb-1">
         ${safeTitle}
@@ -638,9 +703,9 @@ function _buildDraftCard(draft) {
       <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed mb-3 font-medium">
         ${safeSynopsis}
       </p>
-      <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-slate-500 pt-2 border-t border-white/5">
+      <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-slate-400 pt-2 border-t border-white/5">
         <span class="flex items-center gap-1.5">
-          <i data-lucide="book-type" class="w-3.5 h-3.5 text-slate-600"></i>
+          <i data-lucide="book-type" class="w-3.5 h-3.5 text-slate-400"></i>
           ${draft.chapterCount || 0} ch
         </span>
         <span class="flex items-center gap-1 text-amber-400 group-hover:gap-1.5 transition-all">

@@ -34,6 +34,9 @@ export * from './markFinish.service.js';
 // Fetch chapter progress data for a tale
 export * from './progress.utils.service.js';
 
+// Download & offline archive export
+export * from './tale/downloadTale.js';
+
 // ── Profile ───────────────────────────────────────────────────────────
 // User profile reads, continue-reading, published tales, drafts
 export * from './profile.service.js';

@@ -3,6 +3,12 @@ import {
   loadLocalProgress,
   saveLocalProgress,
   getOverallProgress,
+  markChapterRead,
+  markChapterUnread,
+  markAllChaptersRead,
+  markAllChaptersUnread,
+  getChapterProgress,
+  getAllLocalChapters,
 } from '../localProgress.service.js';
 
 describe('localProgress.service', () => {
@@ -72,5 +78,37 @@ describe('getOverallProgress', () => {
     };
     const result = getOverallProgress({ chapterCount: 3, chaptersProgress });
     expect(result.percent).toBeCloseTo(50, 0); // 1 finished + 0.5 in-progress = 1.5/3 = 50%
+  });
+
+  describe('manual read/unread markers', () => {
+    it('marks a single chapter as read and unread', () => {
+      const userId = 'user-1';
+      const taleId = 'tale-abc';
+      const chapterIndex = 1;
+
+      markChapterRead({ userId, taleId, chapterIndex });
+      const progRead = getChapterProgress({ userId, taleId, chapterIndex });
+      expect(progRead).toBeDefined();
+      expect(progRead.scrollPercent).toBe(100);
+
+      markChapterUnread({ userId, taleId, chapterIndex });
+      const progUnread = getChapterProgress({ userId, taleId, chapterIndex });
+      expect(progUnread).toBeNull();
+    });
+
+    it('marks all chapters as read and unread in batch', () => {
+      const userId = 'user-2';
+      const taleId = 'tale-xyz';
+
+      markAllChaptersRead({ userId, taleId, chapterCount: 4 });
+      const chaptersRead = getAllLocalChapters({ userId, taleId });
+      expect(Object.keys(chaptersRead)).toHaveLength(4);
+      expect(chaptersRead[0].scrollPercent).toBe(100);
+      expect(chaptersRead[3].scrollPercent).toBe(100);
+
+      markAllChaptersUnread({ userId, taleId });
+      const chaptersUnread = getAllLocalChapters({ userId, taleId });
+      expect(Object.keys(chaptersUnread)).toHaveLength(0);
+    });
   });
 });

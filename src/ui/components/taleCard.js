@@ -273,7 +273,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
               data-action="options"
               data-menu-id="${escapeHtml(menuId)}"
               class="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 text-zinc-400 transition-all hover:bg-white/10 hover:text-white"
-              aria-label="Archive Operations"
+              aria-label="Chronicle Options"
             >
               <i data-lucide="more-horizontal" class="h-3 w-3 sm:h-3.5 sm:w-3.5"></i>
             </button>
@@ -284,19 +284,19 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
               role="menu"
             >
               <div class="px-2.5 py-1.5 border-b border-white/5 mb-1">
-                <span class="text-[8px] font-black uppercase tracking-widest text-zinc-500">Archive Operations</span>
+                <span class="text-[8px] font-black uppercase tracking-widest text-zinc-500">Chronicle Options</span>
               </div>
 
               <button type="button" data-action="copy-link" data-id="${escapeHtml(id)}"
                 class="menu-btn flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[9px] font-bold uppercase tracking-wider text-zinc-300 transition-colors hover:bg-white/10 hover:text-white">
                 <i data-lucide="link" class="h-3.5 w-3.5"></i>
-                <span>Copy Access Link</span>
+                <span>Copy Tale Link</span>
               </button>
 
-              <button type="button" data-action="save-offline" data-id="${escapeHtml(id)}"
+              <button type="button" data-action="download" data-id="${escapeHtml(id)}"
                 class="menu-btn flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[9px] font-bold uppercase tracking-wider text-zinc-300 transition-colors hover:bg-white/10 hover:text-white">
                 <i data-lucide="download" class="h-3.5 w-3.5"></i>
-                <span>Neural Download</span>
+                <span>Download Chronicle</span>
               </button>
 
               <div class="h-px bg-white/5 my-1"></div>
@@ -347,7 +347,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
         <div class="flex-1 flex flex-col justify-start">
           <div class="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
             <span class="h-px w-3 sm:w-4 bg-indigo-500/40"></span>
-            <span class="text-[8px] sm:text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Frag #${id.slice(-4)}</span>
+            <span class="text-[8px] sm:text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Scroll #${id.slice(-4)}</span>
           </div>
 
           <h3 class="mb-1 sm:mb-1.5 line-clamp-1 text-xs sm:text-base font-bold font-cinzel text-white group-hover:text-indigo-300 transition-colors">
@@ -362,7 +362,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
         <!-- Footer: Metadata & Action -->
         <div class="flex items-center justify-between pt-2 sm:pt-3 mt-auto border-t border-white/5 gap-1.5">
           <div class="flex items-center gap-1.5 sm:gap-3 min-w-0">
-            ${_metaItem('layers', `${chapterCount} Frags`)}
+            ${_metaItem('layers', `${chapterCount} Chapters`)}
             <span class="hidden sm:inline-flex">${timeBadge}</span>
           </div>
           <button
@@ -371,7 +371,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
             data-id="${escapeHtml(id)}"
             class="card-button text-[8px] sm:text-[10px] px-2 py-1 sm:px-3 sm:py-1.5 shrink-0"
           >
-            <span>${isFinished ? 'Archive' : 'Engage'}</span>
+            <span>${isFinished ? 'Completed' : 'Read'}</span>
             <i data-lucide="chevron-right" class="h-2.5 w-2.5 sm:h-3 sm:w-3"></i>
           </button>
         </div>

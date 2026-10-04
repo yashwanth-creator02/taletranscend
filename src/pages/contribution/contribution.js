@@ -202,7 +202,7 @@ function bindAIEvents() {
   enhanceBtn.addEventListener('click', async () => {
     const text = contentArea.value.trim();
     if (!text || text.length < 20) {
-      showToast('Neural link requires more data to refine.', 'info');
+      showToast('Please provide more chronicle text to refine (at least 20 characters).', 'info');
       return;
     }
 
@@ -221,7 +221,7 @@ function bindAIEvents() {
       }
     } catch (err) {
       log.error('Enhancement failed:', err);
-      showToast('Neural link severed during refinement.', 'error');
+      showToast('Refinement failed. Please check your connection or API key.', 'error');
     } finally {
       enhanceBtn.disabled = false;
       enhanceBtn.classList.remove('animate-pulse');

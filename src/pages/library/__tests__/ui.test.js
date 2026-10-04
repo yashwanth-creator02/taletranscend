@@ -96,7 +96,9 @@ describe('LibraryUI', () => {
   describe('showGridError', () => {
     it('renders error state', () => {
       showGridError();
-      expect(document.getElementById('cards-grid').textContent).toContain('Neural Link Severed');
+      expect(document.getElementById('cards-grid').textContent).toContain(
+        'Archive Connection Interrupted'
+      );
     });
   });
 });

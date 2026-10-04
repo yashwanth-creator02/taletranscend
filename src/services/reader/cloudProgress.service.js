@@ -142,3 +142,65 @@ export function scheduleProgressSync(payload) {
     )
   );
 }
+
+/**
+ * Syncs marking a single chapter read to the cloud.
+ */
+export async function syncMarkChapterRead({ userId, taleId, chapterIndex }) {
+  return syncChapterProgressToCloud({
+    userId,
+    taleId,
+    chapterIndex,
+    scrollPercent: 100,
+  });
+}
+
+/**
+ * Syncs marking a single chapter unread to the cloud.
+ */
+export async function syncMarkChapterUnread({ userId, taleId, chapterIndex }) {
+  return syncChapterProgressToCloud({
+    userId,
+    taleId,
+    chapterIndex,
+    scrollPercent: 0,
+  });
+}
+
+/**
+ * Syncs marking all chapters in a tale as read to the cloud.
+ */
+export async function syncMarkAllChaptersRead({ userId, taleId, chapterCount }) {
+  if (!userId || !taleId || !chapterCount || !navigator.onLine) return;
+  const promises = [];
+  for (let i = 0; i < chapterCount; i++) {
+    promises.push(
+      syncChapterProgressToCloud({
+        userId,
+        taleId,
+        chapterIndex: i,
+        scrollPercent: 100,
+      })
+    );
+  }
+  return Promise.all(promises);
+}
+
+/**
+ * Syncs marking all chapters in a tale as unread to the cloud.
+ */
+export async function syncMarkAllChaptersUnread({ userId, taleId, chapterCount }) {
+  if (!userId || !taleId || !chapterCount || !navigator.onLine) return;
+  const promises = [];
+  for (let i = 0; i < chapterCount; i++) {
+    promises.push(
+      syncChapterProgressToCloud({
+        userId,
+        taleId,
+        chapterIndex: i,
+        scrollPercent: 0,
+      })
+    );
+  }
+  return Promise.all(promises);
+}
