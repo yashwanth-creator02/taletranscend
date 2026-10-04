@@ -238,11 +238,11 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
   const trimmedEra = typeof era === 'string' ? era.trim() : '';
   const safeEra = trimmedEra ? escapeHtml(trimmedEra) : '';
   const isBookmarked = !!bookmarkMap[id];
-  const isFinished = tale?.status === 'finished';
+  const progress = Math.max(0, Math.min(100, Number(progressPercent) || 0));
+  const isFinished = tale?.status === 'finished' || progress >= 100;
   const totalMs = readTimeMap[id] || 0;
   const readTimeLabel = _formatReadTime(totalMs);
   const menuId = `menu-${id}`;
-  const progress = Math.max(0, Math.min(100, Number(progressPercent) || 0));
   const cover = coverUrl || _defaultCover();
 
   const timeBadge = readTimeLabel ? _badge(readTimeLabel, 'bg-white/5 text-zinc-400') : '';

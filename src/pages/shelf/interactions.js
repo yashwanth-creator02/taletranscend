@@ -13,7 +13,9 @@ import {
 } from './content.js';
 import { setActiveTab, buildSortPanel, refreshSortPanel } from './ui.js';
 import { showToast } from '@ui/components/toast.js';
-import { removeFromBookmarks, downloadChronicle } from '@services/index.js';
+import { initIcons } from '@ui/components/icons.js';
+import { removeFromBookmarks, downloadChronicle, markTaleFinished } from '@services/index.js';
+import { cacheService } from '@services/cache.service.js';
 import { debounce, navigateTo, taleUrl, createLogger } from '@/utils';
 
 const log = createLogger('ShelfInteractions');
@@ -266,10 +268,36 @@ async function _handleCardAction(action, id, e) {
       break;
     }
 
-    case 'mark-finished':
-      // markFinish.service.js handles this — stub until UI is wired
-      showToast('Marked as finished.', 'success');
+    case 'mark-finished': {
+      if (!shelfState.userId || !id) break;
+      try {
+        await markTaleFinished({ userId: shelfState.userId, taleId: id });
+        cacheService.invalidateProgress(shelfState.userId, id);
+        cacheService.invalidateTale(id);
+        cacheService.invalidateTales();
+
+        const cardEl = document.querySelector(`[data-id="${id}"]`);
+        if (cardEl) {
+          const sealBtn = cardEl.querySelector('[data-action="mark-finished"]');
+          if (sealBtn) {
+            sealBtn.dataset.action = '';
+            sealBtn.classList.remove('text-zinc-300', 'hover:bg-white/10', 'hover:text-white');
+            sealBtn.classList.add('opacity-40', 'text-zinc-600');
+            sealBtn.innerHTML = `<i data-lucide="check-circle" class="h-4 w-4 shrink-0"></i><span>Already Sealed</span>`;
+          }
+          const progressFill = cardEl.querySelector('.progress-fill');
+          if (progressFill) progressFill.style.width = '100%';
+          const progressLabel = cardEl.querySelector('.text-indigo-300');
+          if (progressLabel) progressLabel.textContent = '100%';
+        }
+        showToast('Chronicle sealed in the Eternal Archives.', 'success');
+        initIcons();
+      } catch (err) {
+        log.error('Mark finished failed on shelf:', err);
+        showToast('Could not seal chronicle.', 'error');
+      }
       break;
+    }
 
     case 'decouple': {
       // Bug fix: was only doing optimistic UI without calling the service

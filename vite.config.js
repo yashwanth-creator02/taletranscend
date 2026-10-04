@@ -22,6 +22,8 @@ import tailwindcss from '@tailwindcss/vite';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { VitePWA } from 'vite-plugin-pwa';
 
+import fs from 'fs';
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const r = (p) => path.resolve(__dirname, p);
 
@@ -44,8 +46,33 @@ function hierarchicalRoutesPlugin() {
     name: 'hierarchical-routes-dev-rewrites',
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
-        const url = (req.url || '').split('?')[0];
+        const rawUrl = (req.url || '').split('?')[0];
         const query = (req.url || '').includes('?') ? '?' + (req.url || '').split('?')[1] : '';
+        const url = rawUrl.replace(/^\/\.\./, '');
+
+        if (url.startsWith('/assets/')) {
+          const filePath = path.join(__dirname, 'src', url);
+          if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+            const ext = path.extname(filePath).toLowerCase();
+            const mimeTypes = {
+              '.css': 'text/css; charset=utf-8',
+              '.js': 'application/javascript; charset=utf-8',
+              '.json': 'application/json; charset=utf-8',
+              '.png': 'image/png',
+              '.jpg': 'image/jpeg',
+              '.jpeg': 'image/jpeg',
+              '.svg': 'image/svg+xml',
+              '.webp': 'image/webp',
+              '.woff2': 'font/woff2',
+              '.woff': 'font/woff',
+              '.ttf': 'font/ttf',
+            };
+            res.setHeader('Content-Type', mimeTypes[ext] || 'application/octet-stream');
+            fs.createReadStream(filePath).pipe(res);
+            return;
+          }
+        }
+
         if (/^\/tales\/[^/]+\/(?:read|chapters?|fragments?)(\/.*)?$/.test(url)) {
           req.url = '/reader.html' + query;
         } else if (/^\/(?:reader|chapters?|fragments?)(\/.*)?$/.test(url)) {

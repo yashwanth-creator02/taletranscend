@@ -16,6 +16,8 @@ import {
   markTaleFinished,
   downloadChronicle,
 } from '@services/index.js';
+import { cacheService } from '@services/cache.service.js';
+import { libraryState } from './state.js';
 
 /* ─────────────────────────────────────────────
    Card Interactions — single delegated handler
@@ -277,9 +279,64 @@ function _confirmMarkFinished(onConfirm) {
 }
 
 async function _handleMarkFinished(userId, taleId) {
-  await markTaleFinished({ userId, taleId });
-  _closeAllMenus();
-  initIcons();
+  log.info('Sealing chronicle...', { userId, taleId });
+  try {
+    await markTaleFinished({ userId, taleId });
+
+    // Update state
+    const tale = libraryState.allTales?.find((t) => t.id === taleId);
+    if (tale) {
+      tale.status = 'finished';
+    }
+
+    // Invalidate caches
+    if (userId) {
+      cacheService.invalidateProgress(userId, taleId);
+    }
+    cacheService.invalidateTale(taleId);
+    cacheService.invalidateTales();
+
+    // Optimistically update card in DOM
+    const cardEl = document.querySelector(`.tale-card[data-id="${taleId}"]`);
+    if (cardEl) {
+      // 1. Add Finished badge to card header if not present
+      const badgesContainer = cardEl.querySelector(
+        '.flex.items-center.gap-1.sm\\:gap-1\\.5.flex-wrap'
+      );
+      if (badgesContainer && !badgesContainer.querySelector('.border-emerald-500\\/20')) {
+        const badge = document.createElement('span');
+        badge.className = 'badge bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+        badge.textContent = 'Finished';
+        badgesContainer.appendChild(badge);
+      }
+
+      // 2. Set progress percentage and fill to 100%
+      const progressLabel = cardEl.querySelector('.text-indigo-300');
+      if (progressLabel) {
+        progressLabel.textContent = '100%';
+      }
+      const progressFill = cardEl.querySelector('.progress-fill');
+      if (progressFill) {
+        progressFill.style.width = '100%';
+      }
+
+      // 3. Mark Seal Chronicle action button as Already Sealed
+      const sealBtn = cardEl.querySelector('[data-action="mark-finished"]');
+      if (sealBtn) {
+        sealBtn.dataset.action = '';
+        sealBtn.classList.remove('text-zinc-300', 'hover:bg-white/10', 'hover:text-white');
+        sealBtn.classList.add('opacity-40', 'text-zinc-600');
+        sealBtn.innerHTML = `<i data-lucide="check-circle" class="h-4 w-4 shrink-0"></i><span>Already Sealed</span>`;
+      }
+    }
+
+    _closeAllMenus();
+    initIcons();
+    showToast('Chronicle sealed in the Eternal Archives.', 'success');
+  } catch (err) {
+    log.error('Mark finished failed:', err);
+    showToast('Could not seal chronicle. Please try again.', 'error');
+  }
 }
 
 async function _handleCouple(userId, taleId, btn) {

@@ -22,8 +22,54 @@ class CacheService {
     /** @type {Map<string, CacheEntry>} */
     this.memoryCache = new Map();
     this._testModeEnabled = false;
-    this._initFromStorage();
+    this._manualReloadForced = null;
+    /** @type {Set<string>} */
+    this._reloadedKeys = new Set();
+
+    if (this.isManualReload()) {
+      // Manual browser refresh detected (Ctrl+R or reload button)
+      // Clear cached data and visited pages to ensure fresh data from Firestore
+      this.clearSession();
+    } else {
+      this._initFromStorage();
+    }
+
     this._setupSessionCleanup();
+  }
+
+  /**
+   * Checks whether the current page was loaded via a manual browser reload
+   * (e.g. Ctrl+R, F5, or the browser reload button).
+   *
+   * @returns {boolean}
+   */
+  isManualReload() {
+    if (this._manualReloadForced !== null) {
+      return this._manualReloadForced;
+    }
+    if (typeof window === 'undefined' || !window.performance) return false;
+    try {
+      if (typeof window.performance.getEntriesByType === 'function') {
+        const navEntries = window.performance.getEntriesByType('navigation');
+        if (navEntries && navEntries.length > 0) {
+          // @ts-ignore
+          return navEntries[0].type === 'reload';
+        }
+      }
+      // Fallback for older browsers (deprecated PerformanceNavigation)
+      // @ts-ignore
+      return window.performance.navigation?.type === 1;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Helper to simulate manual reload during testing.
+   * @param {boolean|null} forced
+   */
+  setManualReloadForTests(forced) {
+    this._manualReloadForced = forced;
   }
 
   /**
@@ -321,6 +367,7 @@ class CacheService {
    */
   isFirstVisit(urlOrPath) {
     if (!this.isEnabled) return true;
+    if (this.isManualReload()) return true;
     if (typeof window === 'undefined' || !window.sessionStorage) return true;
 
     const pagePath = this.normalizePagePath(urlOrPath);
@@ -380,6 +427,7 @@ class CacheService {
   clearSession() {
     this.clear();
     this.resetVisitedPages();
+    this._reloadedKeys?.clear();
   }
 
   /**
@@ -391,6 +439,8 @@ class CacheService {
    *    and stores fresh data in cache for subsequent visits.
    * 2. If it's a repeat visit in this session:
    *    Returns cached data instantly (0ms), and revalidates in the background.
+   * 3. If the user performed a manual reload (Ctrl+R / browser reload button):
+   *    Bypasses cached data to retrieve fresh data directly from the backend.
    *
    * @template T
    * @param {string} key - Unique cache key
@@ -419,9 +469,10 @@ class CacheService {
     }
 
     // Check if this is the first visit for this page in this browser session
-    // If it's the first visit: "no chacheing here, load fresh from backend"
+    // Or if the user initiated a manual browser reload (Ctrl+R / reload button)
     const isFirstPageVisit = pageUrl !== null ? this.isFirstVisit(pageUrl) : false;
-    const shouldBypassCache = forceRefresh || isFirstPageVisit;
+    const isReload = this.isManualReload() && !this._reloadedKeys.has(key);
+    const shouldBypassCache = forceRefresh || isFirstPageVisit || isReload;
 
     if (!shouldBypassCache) {
       const cached = this.get(key, { allowStale: swr });

@@ -5,6 +5,7 @@ describe('CacheService', () => {
   beforeEach(() => {
     cacheService.enableForTests();
     cacheService.clear();
+    cacheService.setManualReloadForTests(null);
   });
 
   it('stores and retrieves items correctly', () => {
@@ -265,6 +266,38 @@ describe('CacheService', () => {
 
       expect(result).toBe('reloaded');
       expect(reloaded).toBe(true);
+    });
+  });
+
+  describe('manual reload detection and cache bypass', () => {
+    it('detects reload when forced or performance navigation type is reload', () => {
+      cacheService.setManualReloadForTests(true);
+      expect(cacheService.isManualReload()).toBe(true);
+      expect(cacheService.isFirstVisit('/library.html')).toBe(true);
+
+      cacheService.setManualReloadForTests(false);
+      expect(cacheService.isManualReload()).toBe(false);
+    });
+
+    it('bypasses cache when manual reload is detected in fetchWithCache', async () => {
+      cacheService.set('key-reload', 'cached-data');
+      let fetchCount = 0;
+      const fetcher = async () => {
+        fetchCount++;
+        return 'fresh-server-data';
+      };
+
+      // With normal navigation: returns cached
+      cacheService.setManualReloadForTests(false);
+      const res1 = await cacheService.fetchWithCache('key-reload', fetcher);
+      expect(res1).toBe('cached-data');
+      expect(fetchCount).toBe(0);
+
+      // With manual reload: bypasses cache and gets fresh
+      cacheService.setManualReloadForTests(true);
+      const res2 = await cacheService.fetchWithCache('key-reload', fetcher);
+      expect(res2).toBe('fresh-server-data');
+      expect(fetchCount).toBe(1);
     });
   });
 });
