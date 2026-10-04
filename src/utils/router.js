@@ -9,7 +9,8 @@
 // - Large Change: Falls back to a full page reload when navigating to/from standalone views
 //   (e.g. reader, login, 404, external links, or structural divergence).
 
-import { createLogger, resolveHref } from '@/utils';
+import { createLogger } from './logger.ts';
+import { resolveHref } from './navigation.ts';
 import { initIcons } from '@ui/components/icons.js';
 
 const log = createLogger('Router');
@@ -181,25 +182,25 @@ async function runPageInitializer(targetUrl) {
 
   try {
     if (pathname === '/' || pathname === '/index.html' || pathname === '/index') {
-      const { initHomePage } = await import('/pages/home/home.js');
+      const { initHomePage } = await import('@pages/home/home.js');
       initHomePage?.();
     } else if (pathname === '/library.html' || pathname === '/library') {
-      const { initLibraryPage } = await import('/pages/library/library.js');
+      const { initLibraryPage } = await import('@pages/library/library.js');
       await initLibraryPage?.();
     } else if (pathname === '/shelf.html' || pathname === '/shelf') {
-      const { initShelfPage } = await import('/pages/shelf/shelf.js');
+      const { initShelfPage } = await import('@pages/shelf/shelf.js');
       await initShelfPage?.();
     } else if (pathname === '/profile.html' || pathname === '/profile') {
-      const { initProfilePage } = await import('/pages/profile/profile.js');
+      const { initProfilePage } = await import('@pages/profile/profile.js');
       await initProfilePage?.();
     } else if (pathname.startsWith('/tales/') || pathname === '/tale.html') {
-      const { initTalePage } = await import('/pages/tale/tale.js');
+      const { initTalePage } = await import('@pages/tale/tale.js');
       await initTalePage?.();
     } else if (pathname === '/contribution.html' || pathname === '/contribution') {
-      const { initContributionPage } = await import('/pages/contribution/contribution.js');
+      const { initContributionPage } = await import('@pages/contribution/contribution.js');
       await initContributionPage?.();
     } else if (pathname === '/toc.html' || pathname === '/toc' || pathname === '/sitemap') {
-      const { initTOCPage } = await import('/pages/toc/toc.js');
+      const { initTOCPage } = await import('@pages/toc/toc.js');
       await initTOCPage?.();
     }
   } catch (err) {

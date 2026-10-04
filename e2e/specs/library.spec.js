@@ -2,9 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Library Page', () => {
   test.beforeEach(async ({ page }) => {
-    // Vite uses the path from root or defined in config.
-    // In this project, views are in src/views/
-    await page.goto('/src/views/library.html');
+    await page.goto('/library.html');
   });
 
   test('loads and displays tales', async ({ page }) => {
