@@ -2,6 +2,10 @@
 // Central aggregator for all application services.
 // Every page imports service functions from here — never from individual files directly.
 
+// ── Cache Service ─────────────────────────────────────────────────────
+// In-memory + session cache with SWR for instant navigation and data access
+export * from './cache.service.js';
+
 // ── Reader Core ───────────────────────────────────────────────────────
 // Fetches tale metadata and chapter content from Firestore
 export * from './reader/reader.service.js';

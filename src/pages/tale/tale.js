@@ -29,6 +29,7 @@ import {
   initIcons,
 } from './index.js';
 import { addToBookmarks, removeFromBookmarks, isBookmarked } from '@services/index.js';
+import { appState } from '@state/index.js';
 
 const log = createLogger('TaleArchive');
 
@@ -54,65 +55,77 @@ if (!taleId) {
 }
 
 /* ─────────────────────────────────────────────
-   Bootstrap
+   Bootstrap & Lifecycle
    ───────────────────────────────────────────── */
 
-const authTimeout = setupAuthTimeout(
-  'display-description',
-  'Archive connection timed out. Please try again.'
-);
+const authTimeout = setupAuthTimeout('post-btn', 'Archive connection timed out. Please try again.');
 
-initAuth(async (user) => {
-  clearTimeout(authTimeout);
-  const userId = user.uid;
-  log.info('Auth resolved', { userId });
+export async function initTalePage(authUser = null) {
+  const pathMatch = window.location.pathname.match(/\/tales\/([^/]+)/);
+  const currentTaleId =
+    (pathMatch && decodeURIComponent(pathMatch[1])) ||
+    new URLSearchParams(window.location.search).get('id') ||
+    taleId;
 
-  // 0. Skeleton loaders
+  if (!currentTaleId) {
+    location.replace('/library.html');
+    return;
+  }
+
+  // 0. Skeleton loaders & icons
   showArchiveSkeletons();
 
+  const user = authUser;
+  const userId = user?.uid || appState.userId || 'anonymous';
+
   // 1. Data hydration
-  const [tale, chapters] = await Promise.all([loadTale(taleId, user), loadChapters(taleId)]);
+  const [tale, chapters] = await Promise.all([
+    loadTale(currentTaleId, user),
+    loadChapters(currentTaleId),
+  ]);
 
   if (!tale) {
-    log.error('Tale not found', { taleId });
+    log.error('Tale not found', { taleId: currentTaleId });
     return;
   }
 
   // 2. Primary UI
-  await renderTale(userId, tale, taleId);
-  renderChapters(userId, chapters, taleId);
+  await renderTale(userId, tale, currentTaleId);
+  renderChapters(userId, chapters, currentTaleId);
   readyReveal();
 
   // 3. Interactions
-  bindChapterClicks(taleId, chapters, userId, tale);
-  setupChronicleBatchActions(userId, taleId, chapters, tale);
-  setupStartReading(taleId, chapters);
-  setupResumeReading(userId, taleId);
-  setupResonance(taleId);
+  bindChapterClicks(currentTaleId, chapters, userId, tale);
+  setupChronicleBatchActions(userId, currentTaleId, chapters, tale);
+  setupStartReading(currentTaleId, chapters);
+  setupResumeReading(userId, currentTaleId);
+  setupResonance(currentTaleId);
   setupTabs();
   initHeaderScroll();
 
   // 4. Shelf and share buttons
-  await setupShelfButton(userId, taleId, tale, {
+  await setupShelfButton(userId, currentTaleId, tale, {
     addToBookmarks,
     removeFromBookmarks,
     isBookmarked,
   });
-  setupShareButton(taleId);
+  setupShareButton(currentTaleId);
 
   // 5. Real-time listeners
-  listenToComments(taleId);
+  listenToComments(currentTaleId);
 
   // 6. Post-resolve hooks
-  document.getElementById('post-btn')?.addEventListener('click', () => postComment(taleId));
+  document.getElementById('post-btn')?.addEventListener('click', () => postComment(currentTaleId));
 
   initIcons();
-});
+}
 
-/* ─────────────────────────────────────────────
-   Static Init
-   lucide icons are loaded via CDN window.lucide — initIcons wraps window.lucide.createIcons()
-   No 'lucide' npm package import needed or permitted.
-   ───────────────────────────────────────────── */
+initAuth(async (user) => {
+  clearTimeout(authTimeout);
+  const userId = user.uid;
+  appState.userId = userId;
+  log.info('Auth resolved', { userId });
+  await initTalePage(user);
+});
 
 initIcons();

@@ -561,3 +561,98 @@ select:focus-visible {
   letter-spacing: var(--tracking-wider);
   color: var(--text-primary);
 }
+
+/* ── Interactive Info Tooltip ─────────────────────────────────────────── */
+
+.info-tooltip-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.info-tooltip-wrap:hover,
+.info-tooltip-wrap:focus-within {
+  z-index: 50;
+}
+
+.info-tooltip-wrap .info-tooltip-box {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  width: max-content;
+  max-width: 240px;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-xl);
+  background: rgb(var(--dark-rgb) / 0.95);
+  border: 1px solid rgb(var(--light-rgb) / var(--a-10));
+  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.5);
+  backdrop-filter: blur(var(--blur-sm, 8px));
+  -webkit-backdrop-filter: blur(var(--blur-sm, 8px));
+  color: rgb(var(--light-rgb) / var(--a-80));
+  font-size: 0.7rem;
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: center;
+  text-transform: none;
+  letter-spacing: normal;
+  pointer-events: none;
+}
+
+.info-tooltip-wrap:hover .info-tooltip-box,
+.info-tooltip-wrap:focus-within .info-tooltip-box {
+  display: block;
+  animation: fadeIn var(--dur-fast, 150ms) ease-out;
+}
+
+.info-tooltip-wrap .info-tooltip-box--left {
+  left: 0;
+  transform: none;
+  text-align: left;
+}
+
+.info-tooltip-wrap .info-tooltip-box--right {
+  left: auto;
+  right: 0;
+  transform: none;
+  text-align: right;
+}
+
+.info-tooltip-wrap .info-tooltip-box--bottom,
+#edit-modal .info-tooltip-box {
+  bottom: auto;
+  top: calc(100% + 6px);
+  left: 0;
+  transform: none;
+  text-align: left;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   View Transitions for Instant Soft Navigation
+   ══════════════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root) {
+    animation: 160ms cubic-bezier(0.4, 0, 0.2, 1) both tt-nav-fade-out;
+  }
+  ::view-transition-new(root) {
+    animation: 200ms cubic-bezier(0, 0, 0.2, 1) both tt-nav-fade-in;
+  }
+  @keyframes tt-nav-fade-out {
+    to {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
+  @keyframes tt-nav-fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}

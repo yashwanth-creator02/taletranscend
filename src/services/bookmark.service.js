@@ -15,6 +15,7 @@ import {
   syncBookmarksOffline,
   getBookmarksOffline,
 } from '@/utils';
+import { cacheService } from './cache.service.js';
 
 const log = createLogger('BookmarkService');
 log.debug('Module initialized');
@@ -55,6 +56,7 @@ export async function addToBookmarks({ userId, taleId, tale = {} }) {
 
   // Optimistically save offline
   await saveBookmarkOffline(bookmarkData);
+  cacheService.invalidateBookmarks(userId);
 
   return safeAsync(
     setDoc(
@@ -91,6 +93,7 @@ export async function removeFromBookmarks({ userId, taleId }) {
 
   log.info('Removing bookmark', { userId, taleId });
   await removeBookmarkOffline(taleId);
+  cacheService.invalidateBookmarks(userId);
 
   return safeAsync(deleteDoc(refs.bookmark(userId, taleId)), {
     errorMessage: 'Failed to remove bookmark.',
@@ -116,39 +119,45 @@ export async function getBookmarks({ userId }) {
     return local.map((b) => createBookmark(userId, b.taleId, b));
   }
 
-  log.debug('Fetching bookmarks', { userId });
-  return safeAsync(
-    (async () => {
-      const snap = await getDocs(refs.bookmarks(userId));
-      if (snap.empty) {
-        log.info('No bookmarks found', { userId });
-        await syncBookmarksOffline([]);
-        return [];
-      }
-      log.info(`Loaded ${snap.docs.length} bookmarks`, { userId });
-      const bookmarks = snap.docs.map((d) => createBookmark(userId, d.id, d.data()));
+  return cacheService.fetchWithCache(
+    `user:bookmarks:${userId}`,
+    async () => {
+      log.debug('Fetching bookmarks', { userId });
+      return safeAsync(
+        (async () => {
+          const snap = await getDocs(refs.bookmarks(userId));
+          if (snap.empty) {
+            log.info('No bookmarks found', { userId });
+            await syncBookmarksOffline([]);
+            return [];
+          }
+          log.info(`Loaded ${snap.docs.length} bookmarks`, { userId });
+          const bookmarks = snap.docs.map((d) => createBookmark(userId, d.id, d.data()));
 
-      // Sync to offline storage
-      await syncBookmarksOffline(
-        bookmarks.map((b) => ({
-          taleId: b.taleId,
-          taleTitle: b.taleTitle,
-          coverUrl: b.coverUrl,
-          authorName: b.authorName,
-          chapterCount: b.chapterCount,
-          era: b.era,
-          synopsis: b.synopsis,
-          bookmarkedAt: b.bookmarkedAt?.seconds ? b.bookmarkedAt.seconds * 1000 : Date.now(),
-        }))
+          // Sync to offline storage
+          await syncBookmarksOffline(
+            bookmarks.map((b) => ({
+              taleId: b.taleId,
+              taleTitle: b.taleTitle,
+              coverUrl: b.coverUrl,
+              authorName: b.authorName,
+              chapterCount: b.chapterCount,
+              era: b.era,
+              synopsis: b.synopsis,
+              bookmarkedAt: b.bookmarkedAt?.seconds ? b.bookmarkedAt.seconds * 1000 : Date.now(),
+            }))
+          );
+
+          return bookmarks;
+        })(),
+        {
+          fallback: [],
+          errorMessage: 'Failed to load bookmarks.',
+          logContext: 'services.bookmark.getBookmarks',
+        }
       );
-
-      return bookmarks;
-    })(),
-    {
-      fallback: [],
-      errorMessage: 'Failed to load bookmarks.',
-      logContext: 'services.bookmark.getBookmarks',
-    }
+    },
+    { ttl: 2 * 60 * 1000 }
   );
 }
 
@@ -163,18 +172,24 @@ export async function getBookmarks({ userId }) {
 export async function isBookmarked({ userId, taleId }) {
   if (!userId || !taleId) return false;
 
-  log.debug('Checking bookmark status', { userId, taleId });
-  return safeAsync(
-    (async () => {
-      const { getDoc } = await import('@fb/index.js');
-      const snap = await getDoc(refs.bookmark(userId, taleId));
-      const exists = snap.exists();
-      log.debug('Bookmark status resolved', { userId, taleId, exists });
-      return exists;
-    })(),
-    {
-      fallback: false,
-      logContext: 'services.bookmark.isBookmarked',
-    }
+  return cacheService.fetchWithCache(
+    `user:bookmark:${userId}:${taleId}`,
+    async () => {
+      log.debug('Checking bookmark status', { userId, taleId });
+      return safeAsync(
+        (async () => {
+          const { getDoc } = await import('@fb/index.js');
+          const snap = await getDoc(refs.bookmark(userId, taleId));
+          const exists = snap.exists();
+          log.debug('Bookmark status resolved', { userId, taleId, exists });
+          return exists;
+        })(),
+        {
+          fallback: false,
+          logContext: 'services.bookmark.isBookmarked',
+        }
+      );
+    },
+    { ttl: 2 * 60 * 1000 }
   );
 }

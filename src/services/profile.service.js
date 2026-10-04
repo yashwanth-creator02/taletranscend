@@ -7,6 +7,7 @@ import { readStorage } from './reader/localProgress.service.js';
 import { createTale, createDraft } from '@state/index.js';
 import { getTalesByAuthor } from './tale/getTales.js';
 import { safeAsync, createLogger } from '@/utils';
+import { cacheService } from './cache.service.js';
 
 const log = createLogger('ProfileService');
 log.debug('Module initialized');
@@ -25,63 +26,69 @@ log.debug('Module initialized');
 export async function getContinueReading(userId) {
   if (!userId) return [];
 
-  log.debug('Fetching continue reading list', { userId });
-  const store = readStorage();
-  const userProgress = store[userId];
-  if (!userProgress) {
-    log.info('No local progress found for user', { userId });
-    return [];
-  }
-
-  // Only include tales where at least one chapter has been started
-  const taleIds = Object.keys(userProgress).filter(
-    (id) => Object.keys(userProgress[id]?.chapters || {}).length > 0
-  );
-  if (!taleIds.length) {
-    log.info('No tales with started chapters found', { userId });
-    return [];
-  }
-
-  log.info(`Found ${taleIds.length} tales in progress. Fetching metadata...`, { taleIds });
-  const tales = await Promise.all(
-    taleIds.map(async (taleId) => {
-      const snap = await safeAsync(getDoc(refs.tale(taleId)), {
-        fallback: { exists: () => false },
-        logContext: `services.profile.getContinueReading.${taleId}`,
-      });
-
-      if (!snap.exists()) {
-        log.warn(`Tale ${taleId} found in local progress but not in Firestore`);
-        return null;
+  return cacheService.fetchWithCache(
+    `user:continue-reading:${userId}`,
+    async () => {
+      log.debug('Fetching continue reading list', { userId });
+      const store = readStorage();
+      const userProgress = store[userId];
+      if (!userProgress) {
+        log.info('No local progress found for user', { userId });
+        return [];
       }
 
-      const tale = createTale(snap.id, snap.data());
-      const chapters = userProgress[taleId]?.chapters || {};
-
-      // Most recently read chapter
-      const lastEntry = Object.entries(chapters).sort(
-        (a, b) => (b[1].updatedAt || 0) - (a[1].updatedAt || 0)
-      )[0];
-
-      const lastChapterIndex = lastEntry ? Number(lastEntry[0]) : 0;
-      const lastUpdatedAt = lastEntry?.[1]?.updatedAt || 0;
-
-      // Overall tale progress as a percentage
-      const chapterCount = tale.chapterCount || 1;
-      const progressUnits = Object.values(chapters).reduce(
-        (acc, ch) => acc + Math.min(100, Math.max(0, ch.scrollPercent || 0)) / 100,
-        0
+      // Only include tales where at least one chapter has been started
+      const taleIds = Object.keys(userProgress).filter(
+        (id) => Object.keys(userProgress[id]?.chapters || {}).length > 0
       );
-      const percent = Math.min(100, Math.round((progressUnits / chapterCount) * 100));
+      if (!taleIds.length) {
+        log.info('No tales with started chapters found', { userId });
+        return [];
+      }
 
-      return { ...tale, lastChapterIndex, lastUpdatedAt, percent };
-    })
+      log.info(`Found ${taleIds.length} tales in progress. Fetching metadata...`, { taleIds });
+      const tales = await Promise.all(
+        taleIds.map(async (taleId) => {
+          const snap = await safeAsync(getDoc(refs.tale(taleId)), {
+            fallback: { exists: () => false },
+            logContext: `services.profile.getContinueReading.${taleId}`,
+          });
+
+          if (!snap.exists()) {
+            log.warn(`Tale ${taleId} found in local progress but not in Firestore`);
+            return null;
+          }
+
+          const tale = createTale(snap.id, snap.data());
+          const chapters = userProgress[taleId]?.chapters || {};
+
+          // Most recently read chapter
+          const lastEntry = Object.entries(chapters).sort(
+            (a, b) => (b[1].updatedAt || 0) - (a[1].updatedAt || 0)
+          )[0];
+
+          const lastChapterIndex = lastEntry ? Number(lastEntry[0]) : 0;
+          const lastUpdatedAt = lastEntry?.[1]?.updatedAt || 0;
+
+          // Overall tale progress as a percentage
+          const chapterCount = tale.chapterCount || 1;
+          const progressUnits = Object.values(chapters).reduce(
+            (acc, ch) => acc + Math.min(100, Math.max(0, ch.scrollPercent || 0)) / 100,
+            0
+          );
+          const percent = Math.min(100, Math.round((progressUnits / chapterCount) * 100));
+
+          return { ...tale, lastChapterIndex, lastUpdatedAt, percent };
+        })
+      );
+
+      return tales
+        .filter(Boolean)
+        .sort((a, b) => b.lastUpdatedAt - a.lastUpdatedAt)
+        .slice(0, 5);
+    },
+    { ttl: 2 * 60 * 1000 }
   );
-
-  return tales
-    .filter(Boolean)
-    .sort((a, b) => b.lastUpdatedAt - a.lastUpdatedAt)
-    .slice(0, 5);
 }
 
 /* ─────────────────────────────────────────────
@@ -98,7 +105,9 @@ export async function getContinueReading(userId) {
 export async function getUserPublishedTales(userId) {
   if (!userId) return [];
   log.debug('Fetching user published tales', { userId });
-  return getTalesByAuthor(userId);
+  return cacheService.fetchWithCache(`user:published:${userId}`, () => getTalesByAuthor(userId), {
+    ttl: 3 * 60 * 1000,
+  });
 }
 
 /* ─────────────────────────────────────────────
@@ -115,25 +124,31 @@ export async function getUserPublishedTales(userId) {
 export async function getUserDrafts(userId) {
   if (!userId) return [];
 
-  log.debug('Fetching user drafts', { userId });
-  const snapshot = await safeAsync(getDocs(refs.drafts(userId)), {
-    fallback: { empty: true, docs: [] },
-    logContext: 'services.profile.getUserDrafts',
-  });
+  return cacheService.fetchWithCache(
+    `user:drafts:${userId}`,
+    async () => {
+      log.debug('Fetching user drafts', { userId });
+      const snapshot = await safeAsync(getDocs(refs.drafts(userId)), {
+        fallback: { empty: true, docs: [] },
+        logContext: 'services.profile.getUserDrafts',
+      });
 
-  if (snapshot.empty) {
-    log.info('No drafts found for user', { userId });
-    return [];
-  }
+      if (snapshot.empty) {
+        log.info('No drafts found for user', { userId });
+        return [];
+      }
 
-  log.info(`Found ${snapshot.docs.length} drafts`, { userId });
-  return snapshot.docs
-    .map((d) => createDraft(d.id, d.data()))
-    .sort((a, b) => {
-      const aTime = a.updatedAt?.seconds ?? 0;
-      const bTime = b.updatedAt?.seconds ?? 0;
-      return bTime - aTime;
-    });
+      log.info(`Found ${snapshot.docs.length} drafts`, { userId });
+      return snapshot.docs
+        .map((d) => createDraft(d.id, d.data()))
+        .sort((a, b) => {
+          const aTime = a.updatedAt?.seconds ?? 0;
+          const bTime = b.updatedAt?.seconds ?? 0;
+          return bTime - aTime;
+        });
+    },
+    { ttl: 2 * 60 * 1000 }
+  );
 }
 
 /* ─────────────────────────────────────────────
@@ -181,6 +196,8 @@ export async function computeAndSyncStats(userId) {
     }),
     { logContext: 'services.profile.computeAndSyncStats.sync' }
   );
+
+  cacheService.invalidateProfile(userId);
 
   return totalWords;
 }

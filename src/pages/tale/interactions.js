@@ -65,8 +65,10 @@ export async function setupResonance(taleId) {
         if (result.status === 'rate-limited') {
           const rateLimitKey = `resonance:${auth.currentUser?.uid}:${taleId}`;
           btns.forEach((b) => {
-            const label = b.querySelector('.resonance-label') || b.querySelector('span');
-            const currentText = label?.textContent || 'Align Souls';
+            const label =
+              b.querySelector('.resonance-label') ||
+              b.querySelector('span:not([id*="resonance-count"])');
+            const currentText = label?.textContent || '';
             applyButtonCooldown(b, RESONANCE_COOLDOWN_MS, currentText, () =>
               getRemainingTime(rateLimitKey, RESONANCE_COOLDOWN_MS)
             );
@@ -82,8 +84,10 @@ export async function setupResonance(taleId) {
         // Start cooldown after success
         const rateLimitKey = `resonance:${auth.currentUser?.uid}:${taleId}`;
         btns.forEach((b) => {
-          const label = b.querySelector('.resonance-label') || b.querySelector('span');
-          const currentText = label?.textContent || 'Align Souls';
+          const label =
+            b.querySelector('.resonance-label') ||
+            b.querySelector('span:not([id*="resonance-count"])');
+          const currentText = label?.textContent || '';
           applyButtonCooldown(b, RESONANCE_COOLDOWN_MS, currentText, () =>
             getRemainingTime(rateLimitKey, RESONANCE_COOLDOWN_MS)
           );
@@ -102,22 +106,60 @@ function _updateResonanceUI(btn, countEls, active, count) {
     countEls.forEach((el) => (el.textContent = count));
   }
 
-  const icon = btn.querySelector('i');
-  const label = btn.querySelector('.resonance-label') || btn.querySelector('span');
+  const label =
+    btn.querySelector('.resonance-label') || btn.querySelector('span:not([id*="resonance-count"])');
 
   if (active) {
-    btn.classList.add('border-orange-500/40', 'bg-orange-500/10', 'text-orange-300');
-    icon?.setAttribute('data-lucide', 'flame');
-    icon?.classList.add('text-orange-400');
+    btn.classList.add('border-red-500/50', 'bg-red-500/15', 'text-red-400', 'is-aligned');
+    btn.classList.remove(
+      'border-white/8',
+      'border-white/10',
+      'text-slate-300',
+      'border-orange-500/40',
+      'bg-orange-500/10',
+      'text-orange-300'
+    );
+
+    const icon = btn.querySelector('i, svg');
+    if (icon) {
+      icon.setAttribute('data-lucide', 'heart');
+      icon.classList.remove('text-slate-400', 'text-slate-500', 'text-orange-400');
+      icon.classList.add('text-red-500', 'fill-red-500');
+    }
     if (label) label.textContent = 'Souls Aligned';
   } else {
-    btn.classList.remove('border-orange-500/40', 'bg-orange-500/10', 'text-orange-300');
-    icon?.setAttribute('data-lucide', 'heart');
-    icon?.classList.remove('text-orange-400');
+    btn.classList.remove(
+      'border-red-500/50',
+      'bg-red-500/15',
+      'text-red-400',
+      'is-aligned',
+      'border-orange-500/40',
+      'bg-orange-500/10',
+      'text-orange-300'
+    );
+    btn.classList.add('border-white/8', 'text-slate-300');
+
+    const icon = btn.querySelector('i, svg');
+    if (icon) {
+      icon.setAttribute('data-lucide', 'heart');
+      icon.classList.remove('text-red-500', 'fill-red-500', 'text-orange-400');
+      icon.classList.add('text-slate-400');
+    }
     if (label) label.textContent = 'Align Souls';
   }
 
   initIcons(btn);
+
+  const renderedSvg = btn.querySelector('svg');
+  if (renderedSvg) {
+    if (active) {
+      renderedSvg.classList.remove('text-slate-400', 'text-slate-500');
+      renderedSvg.classList.add('text-red-500', 'fill-red-500');
+    } else {
+      renderedSvg.classList.remove('text-red-500', 'fill-red-500');
+      renderedSvg.classList.add('text-slate-400');
+    }
+  }
 }
 
 /* ─────────────────────────────────────────────

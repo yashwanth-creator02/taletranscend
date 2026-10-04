@@ -8,6 +8,7 @@
 
 import { initDevMode } from './dev.utils.ts';
 import { createLogger } from './logger.ts';
+import { initRouter, softNavigate, isSmallChange } from './router.js';
 
 const log = createLogger('Navigation');
 
@@ -40,9 +41,12 @@ export const VIEWS_PATH = '/';
 export function initPageReveal(): void {
   initDevMode();
   if (typeof document !== 'undefined') {
+    initRouter();
     const reveal = () => {
       if (document.body) {
         document.body.classList.add('booted');
+        document.body.style.opacity = '';
+        document.body.style.pointerEvents = '';
       }
     };
     if (document.readyState === 'loading') {
@@ -59,6 +63,8 @@ export function initPageReveal(): void {
 export function readyReveal(): void {
   if (typeof document !== 'undefined' && document.body) {
     document.body.classList.add('booted');
+    document.body.style.opacity = '';
+    document.body.style.pointerEvents = '';
   }
 }
 
@@ -130,10 +136,12 @@ export function readerUrl(
 }
 
 /**
- * Navigates with a fade-out transition.
+ * Navigates to a destination view.
+ * If small change: swaps respective div (#main-content) instantly.
+ * If large change: executes full browser reload with smooth fade.
  *
  * @param target - Destination view name or URL
- * @param delay  - Extra delay in ms before the location changes
+ * @param delay  - Extra delay in ms before the location changes (for full reloads)
  */
 export function navigateTo(target: string, delay = 0): void {
   if (!target) return;
@@ -141,10 +149,12 @@ export function navigateTo(target: string, delay = 0): void {
   const href = resolveHref(target);
   log.info('Navigating to', { target, resolvedHref: href });
 
-  // Respect the user's motion preference: fading out a page the user asked
-  // not to animate is exactly the kind of vestibular trigger the media
-  // query exists for, and it also delays the navigation by 220ms for no
-  // reason they wanted.
+  if (typeof window !== 'undefined' && isSmallChange(window.location.href, href)) {
+    softNavigate(href);
+    return;
+  }
+
+  // Large change: respect motion preference and reload page
   const reduced =
     typeof window.matchMedia === 'function' &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -164,6 +174,17 @@ export function navigateTo(target: string, delay = 0): void {
   window.setTimeout(() => {
     window.location.href = href;
   }, TRANSITION_DURATION_MS + delay);
+}
+
+// Reset body pointer-events and opacity when navigating via browser back/forward buttons (bfcache)
+if (typeof window !== 'undefined') {
+  window.addEventListener('pageshow', () => {
+    if (typeof document !== 'undefined' && document.body) {
+      document.body.style.opacity = '';
+      document.body.style.pointerEvents = '';
+      document.body.classList.add('booted');
+    }
+  });
 }
 
 log.debug('Navigation initialized');

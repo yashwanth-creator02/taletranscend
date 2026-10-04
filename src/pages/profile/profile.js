@@ -61,74 +61,9 @@ const contribTimeout = setTimeout(() => {
    Auth + Data
    ───────────────────────────────────────────── */
 
-initAuth(async (user) => {
-  clearTimeout(authTimeout);
-  clearTimeout(contribTimeout);
-  const uid = user.uid;
-  log.info('Auth resolved', { uid, isAnonymous: user.isAnonymous });
+import { appState } from '@state/index.js';
 
-  // Show upgrade button if user is anonymous
-  if (user.isAnonymous) {
-    const upgradeBtn = document.getElementById('btn-upgrade-account');
-    if (upgradeBtn) {
-      upgradeBtn.classList.remove('hidden');
-      upgradeBtn.classList.add('flex');
-    }
-  }
-
-  // Real-time profile listener — updates UI on every Firestore write
-  startProfileSync(uid);
-
-  showContinueReadingSkeleton();
-  showContributionsSkeleton();
-
-  log.debug('Fetching profile data subsets...');
-  try {
-    const [continueReading, publishedTales, drafts, stats] = await Promise.all([
-      getContinueReading(uid).catch((err) => {
-        log.warn('Failed to fetch continue reading', err);
-        return [];
-      }),
-      getUserPublishedTales(uid).catch((err) => {
-        log.warn('Failed to fetch published tales', err);
-        return [];
-      }),
-      getUserDrafts(uid).catch((err) => {
-        log.warn('Failed to fetch drafts', err);
-        return [];
-      }),
-      computeAndSyncStats(uid).catch((err) => {
-        log.warn('Failed to compute stats', err);
-        return 0;
-      }),
-    ]);
-
-    log.info('Data fetch complete', {
-      continueReadingCount: continueReading?.length ?? 0,
-      publishedCount: publishedTales?.length ?? 0,
-      draftsCount: drafts?.length ?? 0,
-    });
-
-    renderContinueReading(continueReading || []);
-    renderPublishedTales(publishedTales || []);
-    renderDrafts(drafts || []);
-    updateStatsUI(stats);
-  } catch (err) {
-    log.error('Unexpected error fetching profile subsets', err);
-    renderContinueReading([]);
-    renderPublishedTales([]);
-    renderDrafts([]);
-  } finally {
-    readyReveal();
-    initIcons();
-  }
-});
-
-/* ─────────────────────────────────────────────
-   UI Init (DOM-ready)
-   ───────────────────────────────────────────── */
-
-document.addEventListener('DOMContentLoaded', () => {
+export async function initProfilePage(currentUser = auth?.currentUser) {
   initProfileLayout();
   initProfileUI();
 
@@ -158,14 +93,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // Default to published tab
   switchContribTab('published');
 
-  // ── Account Upgrade ─────────────────────────────────────────────
+  // Account upgrade
   document.getElementById('btn-upgrade-account')?.addEventListener('click', async () => {
     log.info('Anonymous upgrade requested');
     try {
       await upgradeAnonymousToGoogle();
       log.info('Upgrade successful');
       showToast('Account secured with Google!', 'success');
-      // Hide the button after successful upgrade
       const upgradeBtn = document.getElementById('btn-upgrade-account');
       if (upgradeBtn) {
         upgradeBtn.classList.add('hidden');
@@ -173,12 +107,63 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } catch (err) {
       log.error('Upgrade failed:', err);
-      // If user cancelled or closed popup, don't show error toast as it's expected
       if (err.code !== 'auth/popup-closed-by-user') {
         showToast('Account link failed. Try again.', 'error');
       }
     }
   });
+
+  const uid = currentUser?.uid || appState.userId;
+  if (uid) {
+    if (currentUser?.isAnonymous) {
+      const upgradeBtn = document.getElementById('btn-upgrade-account');
+      if (upgradeBtn) {
+        upgradeBtn.classList.remove('hidden');
+        upgradeBtn.classList.add('flex');
+      }
+    }
+
+    startProfileSync(uid);
+    showContinueReadingSkeleton();
+    showContributionsSkeleton();
+
+    try {
+      const [continueReading, publishedTales, drafts, stats] = await Promise.all([
+        getContinueReading(uid).catch((err) => {
+          log.warn('Failed to fetch continue reading', err);
+          return [];
+        }),
+        getUserPublishedTales(uid).catch((err) => {
+          log.warn('Failed to fetch published tales', err);
+          return [];
+        }),
+        getUserDrafts(uid).catch((err) => {
+          log.warn('Failed to fetch drafts', err);
+          return [];
+        }),
+        computeAndSyncStats(uid).catch((err) => {
+          log.warn('Failed to compute stats', err);
+          return 0;
+        }),
+      ]);
+
+      renderContinueReading(continueReading || []);
+      renderPublishedTales(publishedTales || []);
+      renderDrafts(drafts || []);
+      updateStatsUI(stats);
+    } catch (err) {
+      log.error('Unexpected error fetching profile subsets', err);
+      renderContinueReading([]);
+      renderPublishedTales([]);
+      renderDrafts([]);
+    } finally {
+      readyReveal();
+      initIcons();
+    }
+  } else {
+    readyReveal();
+    initIcons();
+  }
 
   // ── Sign Out ────────────────────────────────────────────────────
   // Stops the profile listener before signing out to prevent orphaned
@@ -200,4 +185,20 @@ document.addEventListener('DOMContentLoaded', () => {
       if (auth.currentUser) startProfileSync(auth.currentUser.uid);
     }
   });
+}
+
+initAuth(async (user) => {
+  clearTimeout(authTimeout);
+  clearTimeout(contribTimeout);
+  appState.userId = user.uid;
+  log.info('Auth resolved', { uid: user.uid, isAnonymous: user.isAnonymous });
+  await initProfilePage(user);
 });
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    initProfilePage();
+  });
+} else {
+  initProfilePage();
+}

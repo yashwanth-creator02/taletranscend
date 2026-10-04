@@ -30,6 +30,10 @@ let searchQuery = '';
 
 initPageReveal();
 
+export async function initTOCPage() {
+  return initTOC();
+}
+
 /**
  * Initializes Table of Contents
  */
@@ -284,6 +288,10 @@ function _renderError() {
 }
 
 // Bootstrap on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    initTOC();
+  });
+} else {
   initTOC();
-});
+}
