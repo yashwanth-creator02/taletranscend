@@ -406,26 +406,35 @@ body {
 }
 
 @media (max-width: 1023px) {
+  .main-layout {
+    z-index: auto;
+  }
+
   .sidebar {
     display: none !important;
+  }
+
+  .tool-panel-backdrop {
+    z-index: 35;
   }
 
   .tool-panel {
     position: fixed;
     top: auto;
-    bottom: 0;
+    bottom: calc(4.9rem + env(safe-area-inset-bottom, 0px));
     left: 0;
     right: 0;
     width: 100%;
     max-width: 100vw;
-    height: auto;
-    max-height: 82vh;
+    height: min(72dvh, calc(100dvh - 7.5rem));
+    max-height: min(76dvh, calc(100dvh - 7rem));
     border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
     border-left: none;
     border-right: none;
-    border-top: 1px solid rgb(var(--light-rgb) / var(--a-04));
-    z-index: 50;
-    box-shadow: 0 -12px 48px rgb(var(--dark-rgb) / 0.7);
+    border-top: 1px solid rgb(var(--light-rgb) / var(--a-06));
+    border-bottom: 1px solid rgb(var(--light-rgb) / var(--a-06));
+    z-index: 45;
+    box-shadow: 0 -8px 32px rgb(var(--dark-rgb) / 0.6);
     display: none;
     flex-direction: column;
     animation: drawerSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -436,7 +445,9 @@ body {
   }
 
   .tool-panel-content {
-    padding-bottom: max(2rem, env(safe-area-inset-bottom));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-bottom: 1.5rem;
   }
 }
 
