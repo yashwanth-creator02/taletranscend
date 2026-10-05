@@ -19,6 +19,7 @@
  * @property {string}   language
  * @property {string}   visibility       - 'public' | 'unlisted'
  * @property {string}   audience         - 'General' | 'Mature' | 'Young Adult'
+ * @property {string}   [publicationStatus] - 'ongoing' | 'completed' | 'hiatus' | 'cancelled'
  * @property {string[]} contentWarnings
  * @property {string}   worldSetting
  * @property {string}   authorNotes
@@ -54,6 +55,7 @@ export function createDraft(id, userId, data = {}) {
     chapterCount: Number(data.chapterCount ?? 0),
     wordCount: Number(data.wordCount ?? 0),
     status: data.status ?? 'draft',
+    publicationStatus: data.publicationStatus ?? 'ongoing',
     isDirty: data.isDirty ?? false,
     updatedAt: data.updatedAt ?? null,
     createdAt: data.createdAt

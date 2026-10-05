@@ -14,6 +14,10 @@ export const state = {
   // 'new' means the draft hasn't been saved to Firestore yet.
   draftId: 'new',
 
+  // Firestore published tale document ID if editing an existing published tale.
+  // Populated from ?taleId=<id> URL param.
+  publishedTaleId: null,
+
   // ── Tale Metadata ─────────────────────────────────────────────────
   title: '',
   synopsis: '',
@@ -24,6 +28,7 @@ export const state = {
   language: 'English',
   visibility: 'Public',
   audience: 'General',
+  publicationStatus: 'ongoing',
   contentWarnings: '',
   worldSetting: '',
   authorNotes: '',

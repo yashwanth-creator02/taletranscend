@@ -78,6 +78,34 @@ describe('TaleUI', () => {
       expect(document.getElementById('lore-tag-list').children.length).toBe(2);
       expect(document.getElementById('read-time').textContent).toBe('1 min read');
     });
+
+    it('renders publicationStatus and displays author edit button when user is author', async () => {
+      document.body.innerHTML += `
+        <div id="display-status"></div>
+        <div id="display-status-dot"></div>
+        <a id="edit-tale-btn-desktop" class="hidden"></a>
+        <a id="edit-tale-btn-mobile" class="hidden"></a>
+        <div id="author-actions-mobile" class="hidden"></div>
+      `;
+
+      const mockTale = {
+        title: 'Completed Tale',
+        authorId: 'author-123',
+        publicationStatus: 'completed',
+        tags: [],
+      };
+
+      await renderTale('author-123', mockTale, 'tale-abc');
+
+      expect(document.getElementById('display-status').textContent).toBe('Completed');
+      expect(document.getElementById('display-status-dot').className).toContain('bg-indigo-400');
+      const editBtn = document.getElementById('edit-tale-btn-desktop');
+      expect(editBtn.classList.contains('hidden')).toBe(false);
+      expect(editBtn.getAttribute('href')).toBe('/contribution.html?taleId=tale-abc');
+      expect(document.getElementById('author-actions-mobile').classList.contains('hidden')).toBe(
+        false
+      );
+    });
   });
 
   describe('renderChapters', () => {

@@ -10,6 +10,13 @@ vi.mock('../cloud.js', () => ({
   syncMetadataFromDom: vi.fn(),
 }));
 
+vi.mock('@services/cache.service.js', () => ({
+  cacheService: {
+    invalidateTale: vi.fn(),
+    invalidateTales: vi.fn(),
+  },
+}));
+
 // Mock @/utils barrel
 vi.mock('@/utils', () => ({
   navigateTo: vi.fn(),
@@ -102,6 +109,21 @@ describe('Publish Pipeline', () => {
     expect(setDoc).toHaveBeenCalled();
     expect(updateDoc).toHaveBeenCalled();
     expect(document.getElementById('stat-status').textContent).toContain('Published successfully');
+  });
+
+  it('successfully updates an already published tale', async () => {
+    vi.mocked(setDoc).mockResolvedValue(undefined);
+    vi.mocked(updateDoc).mockResolvedValue(undefined);
+
+    state.publishedTaleId = 'existing-tale-123';
+    state.publicationStatus = 'completed';
+
+    await publishFullTale();
+
+    expect(syncMetadataFromDom).toHaveBeenCalled();
+    expect(updateDoc).toHaveBeenCalled();
+    expect(setDoc).toHaveBeenCalled(); // For chapters
+    expect(document.getElementById('stat-status').textContent).toContain('Updated successfully');
   });
 
   it.skip('handles publish failure gracefully', async () => {

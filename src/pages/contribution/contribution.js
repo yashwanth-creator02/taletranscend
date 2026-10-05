@@ -19,6 +19,8 @@ import {
   updateStats,
   saveToCloud,
   loadDraft,
+  loadPublishedTale,
+  updatePublicationStatusIndicator,
   initDraftId,
   syncMetadataFromDom,
   publishFullTale,
@@ -68,19 +70,61 @@ async function init() {
   bindAIEvents();
   bindPresetEvents();
 
-  const hasDraft = await loadDraft();
+  let loaded = false;
+  if (state.publishedTaleId) {
+    loaded = await loadPublishedTale(state.publishedTaleId);
+    if (loaded) {
+      _applyPublishedEditUi();
+      renderChapterList();
+      loadCurrentChapter();
+      updateChecklist();
+      setStatus('Published chronicle loaded for editing.', 'success');
+    }
+  }
 
-  if (hasDraft) {
-    renderChapterList();
-    loadCurrentChapter();
-    updateChecklist();
-    setStatus('Draft restored.', 'success');
-  } else {
-    addNewChapter();
-    setStatus('New tale started.', 'neutral');
+  if (!loaded) {
+    const hasDraft = await loadDraft();
+
+    if (hasDraft) {
+      renderChapterList();
+      loadCurrentChapter();
+      updateChecklist();
+      setStatus('Draft restored.', 'success');
+    } else {
+      addNewChapter();
+      setStatus('New tale started.', 'neutral');
+    }
   }
 
   initIcons();
+}
+
+function _applyPublishedEditUi() {
+  const publishBtn = document.getElementById('publish-btn');
+  if (publishBtn) {
+    const span = publishBtn.querySelector('span[data-label]');
+    if (span) {
+      span.dataset.label = 'Update Archive';
+      span.textContent = 'Update Archive';
+    }
+    const mobileSpan = publishBtn.querySelector('.md\\:hidden');
+    if (mobileSpan) {
+      mobileSpan.dataset.label = 'Update';
+      mobileSpan.textContent = 'Update';
+    }
+  }
+
+  const saveBtn = document.getElementById('save-draft-btn');
+  if (saveBtn) {
+    const span = saveBtn.querySelector('span');
+    if (span) span.textContent = 'Save Updates';
+  }
+
+  const saveBtnMobile = document.getElementById('save-draft-btn-mobile');
+  if (saveBtnMobile) {
+    const span = saveBtnMobile.querySelector('span');
+    if (span) span.textContent = 'Save';
+  }
 }
 
 /* ── Editor Events ────────────────────────────────────────────────── */
@@ -158,6 +202,7 @@ function bindMetadataEvents() {
     'content-warnings',
     'world-setting',
     'story-notes',
+    'story-publication-status',
   ];
 
   metaIds.forEach((id) => {
@@ -166,6 +211,14 @@ function bindMetadataEvents() {
       updateChecklist();
       setStatus('Unsaved changes', 'neutral');
     });
+  });
+
+  document.getElementById('story-publication-status')?.addEventListener('change', (e) => {
+    state.publicationStatus = e.target.value;
+    updatePublicationStatusIndicator(e.target.value);
+    state.isDirty = true;
+    updateChecklist();
+    setStatus('Unsaved changes', 'neutral');
   });
 
   // Right-panel visibility toggle buttons

@@ -39,6 +39,10 @@ export const DraftMetadataSchema = z.object({
   contentWarnings: z.string().max(500).optional(),
   worldSetting: z.string().max(2000).optional(),
   authorNotes: z.string().max(2000).optional(),
+  publicationStatus: z
+    .enum(['ongoing', 'completed', 'hiatus', 'cancelled'])
+    .optional()
+    .default('ongoing'),
   chapterCount: z.number().min(0),
   wordCount: z.number().min(0),
 });
@@ -75,6 +79,10 @@ export const TaleSchema = z.object({
   reactionCount: z.number().optional().default(0),
   bookmarkCount: z.number().optional().default(0),
   status: z.enum(['draft', 'pending', 'published', 'rejected']).optional().default('draft'),
+  publicationStatus: z
+    .enum(['ongoing', 'completed', 'hiatus', 'cancelled'])
+    .optional()
+    .default('ongoing'),
   isFeatured: z.boolean().optional().default(false),
   isEditorsPick: z.boolean().optional().default(false),
   searchKeywords: z.array(z.string()).max(50),

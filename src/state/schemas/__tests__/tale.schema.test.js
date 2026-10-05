@@ -8,6 +8,7 @@ describe('createTale', () => {
     expect(tale.id).toBe('test-123');
     expect(tale.title).toBe('Untitled Tale');
     expect(tale.status).toBe('draft');
+    expect(tale.publicationStatus).toBe('ongoing');
     expect(tale.chapterCount).toBe(0);
     expect(tale.tags).toEqual([]);
     expect(tale.createdAt).toBeInstanceOf(Date);
@@ -17,12 +18,14 @@ describe('createTale', () => {
     const tale = createTale('test-456', {
       title: 'The Ember Archive',
       status: 'published',
+      publicationStatus: 'completed',
       chapterCount: 3,
       tags: ['fantasy', 'mystery'],
     });
 
     expect(tale.title).toBe('The Ember Archive');
     expect(tale.status).toBe('published');
+    expect(tale.publicationStatus).toBe('completed');
     expect(tale.chapterCount).toBe(3);
     expect(tale.tags).toEqual(['fantasy', 'mystery']);
   });

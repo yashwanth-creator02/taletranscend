@@ -626,15 +626,39 @@ function _buildPublishedCard(tale) {
     tale.coverUrl ||
     'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=400';
 
+  const rawStatus = (
+    tale.publicationStatus ||
+    (tale.status !== 'published' && tale.status !== 'pending' && tale.status !== 'draft'
+      ? tale.status
+      : null) ||
+    'ongoing'
+  ).toLowerCase();
+  let statusLabel = 'Ongoing';
+  let statusBadgeClass = 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25';
+
+  if (rawStatus === 'completed') {
+    statusLabel = 'Completed';
+    statusBadgeClass = 'bg-indigo-500/15 text-indigo-400 border-indigo-500/25';
+  } else if (rawStatus === 'hiatus') {
+    statusLabel = 'Hiatus';
+    statusBadgeClass = 'bg-amber-500/15 text-amber-400 border-amber-500/25';
+  } else if (rawStatus === 'cancelled' || rawStatus === 'stopped') {
+    statusLabel = 'Cancelled';
+    statusBadgeClass = 'bg-rose-500/15 text-rose-400 border-rose-500/25';
+  }
+
   return `
-    <a href="${taleUrl(tale.id)}" class="contribution-card group block bg-white/2 border border-white/5 rounded-2xl sm:rounded-3xl overflow-hidden hover:bg-white/4 hover:border-indigo-500/30 hover:-translate-y-1 transition-all duration-300">
-      <div class="relative h-28 sm:h-32 bg-zinc-950 overflow-hidden">
+    <div class="contribution-card group block bg-white/2 border border-white/5 rounded-2xl sm:rounded-3xl overflow-hidden hover:bg-white/4 hover:border-indigo-500/30 hover:-translate-y-1 transition-all duration-300">
+      <a href="${taleUrl(tale.id)}" class="block relative h-28 sm:h-32 bg-zinc-950 overflow-hidden">
         <img src="${cover}" alt="${safeTitle}"
           class="w-full h-full object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-500" loading="lazy" />
         <div class="absolute inset-0 bg-linear-to-t from-black/90 via-black/30 to-transparent"></div>
-        <div class="absolute top-2.5 left-2.5">
+        <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap">
           <span class="px-2.5 py-0.5 bg-emerald-500/15 text-emerald-400 text-[8.5px] font-black uppercase tracking-widest rounded-full border border-emerald-500/25 backdrop-blur-md">
             Published
+          </span>
+          <span class="px-2 py-0.5 ${statusBadgeClass} text-[8.5px] font-bold uppercase tracking-widest rounded-full border backdrop-blur-md">
+            ${statusLabel}
           </span>
         </div>
         <div class="absolute bottom-2.5 left-3 right-3">
@@ -642,7 +666,7 @@ function _buildPublishedCard(tale) {
             ${safeTitle}
           </h3>
         </div>
-      </div>
+      </a>
       <div class="p-3.5 sm:p-4 space-y-2.5">
         <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed font-medium">${safeDescription}</p>
         <div class="flex items-center justify-between pt-2 border-t border-white/5">
@@ -653,12 +677,17 @@ function _buildPublishedCard(tale) {
             </span>
             ${tale.readCount ? `<span class="flex items-center gap-1.5"><i data-lucide="eye" class="w-3.5 h-3.5 text-slate-400"></i>${formatNumber(tale.readCount)}</span>` : ''}
           </div>
-          <span class="flex items-center gap-1 text-[10px] font-bold text-indigo-400 group-hover:text-indigo-300">
-            Read <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i>
-          </span>
+          <div class="flex items-center gap-2">
+            <a href="/contribution.html?taleId=${encodeURIComponent(tale.id)}" class="px-2 py-1 rounded-lg bg-white/4 hover:bg-amber-500/20 border border-white/8 hover:border-amber-500/40 text-[10px] font-bold text-amber-300 hover:text-amber-200 transition-colors flex items-center gap-1" title="Edit Chronicle">
+              <i data-lucide="edit-3" class="w-3 h-3"></i> Edit
+            </a>
+            <a href="${taleUrl(tale.id)}" class="flex items-center gap-1 text-[10px] font-bold text-indigo-400 hover:text-indigo-300">
+              Read <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i>
+            </a>
+          </div>
         </div>
       </div>
-    </a>
+    </div>
   `;
 }
 

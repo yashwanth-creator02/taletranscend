@@ -766,6 +766,40 @@
               </div>
             </div>
 
+            <!-- Chronicle Publication Status -->
+            <div class="space-y-1.5 pt-1">
+              <div class="flex items-center justify-between">
+                <label
+                  class="text-[9px] font-bold uppercase tracking-[0.22em] text-slate-400"
+                  for="story-publication-status"
+                >
+                  Chronicle Status
+                </label>
+                <span
+                  id="publication-status-indicator"
+                  class="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400"
+                >
+                  <span
+                    id="publication-status-dot"
+                    class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"
+                  ></span>
+                  <span id="publication-status-text">Ongoing</span>
+                </span>
+              </div>
+              <select
+                id="story-publication-status"
+                class="shelf-input w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm text-white"
+              >
+                <option value="ongoing">Ongoing (Active Chronicles)</option>
+                <option value="completed">Completed (Finished Tale)</option>
+                <option value="hiatus">Hiatus (On Temporary Pause)</option>
+                <option value="cancelled">Cancelled (Stopped)</option>
+              </select>
+              <p class="text-[10px] text-slate-500">
+                Signals to readers whether new fragments and chapters are actively being penned.
+              </p>
+            </div>
+
             <!-- Visibility Toggle Buttons -->
             <div class="space-y-1.5 pt-1">
               <label class="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">

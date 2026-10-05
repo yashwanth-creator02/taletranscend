@@ -19,6 +19,8 @@ export {
   saveToCloud,
   saveAllChapters,
   loadDraft,
+  loadPublishedTale,
+  updatePublicationStatusIndicator,
   initDraftId,
   syncMetadataFromDom,
 } from './cloud.js';

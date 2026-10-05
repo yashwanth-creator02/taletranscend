@@ -15,6 +15,7 @@
 
 import { auth, setDoc, updateDoc, serverTimestamp, refs } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
+import { cacheService } from '@services/cache.service.js';
 import {
   navigateTo,
   taleUrl,
@@ -86,8 +87,14 @@ export async function publishFullTale() {
   });
 
   if (taleId) {
-    showToast('Legend recorded in the archives.', 'success');
-    _setPublishStatus('Published successfully!', 'success');
+    const successMsg = state.publishedTaleId
+      ? 'Legend updated in the archives.'
+      : 'Legend recorded in the archives.';
+    showToast(successMsg, 'success');
+    _setPublishStatus(
+      state.publishedTaleId ? 'Updated successfully!' : 'Published successfully!',
+      'success'
+    );
 
     setTimeout(() => {
       navigateTo(taleUrl(taleId));
@@ -107,6 +114,86 @@ export async function publishFullTale() {
  */
 async function _doPublish(userId) {
   const authorName = auth.currentUser.displayName || `Scribe ${userId.slice(0, 5)}`;
+
+  /* ── Branch: Updating an already published tale ──────────── */
+  if (state.publishedTaleId) {
+    const id = state.publishedTaleId;
+    const taleRef = refs.tale(id);
+
+    const description = state.synopsis?.trim() || _extractDescription(state.chapters);
+    const wordCount = state.chapters.reduce((acc, ch) => acc + countWords(ch.content), 0);
+    const estimatedReadMins = estimateReadMins(wordCount);
+
+    const updatePayload = {
+      title: state.title,
+      authorName,
+      description,
+      synopsis: state.synopsis || '',
+      coverUrl: state.coverUrl || '',
+      era: state.era || '',
+      tags: state.tags || [],
+      tone: state.tone || '',
+      language: state.language || 'English',
+      visibility: (state.visibility || 'public').toLowerCase(),
+      audience: state.audience || 'General',
+      publicationStatus: state.publicationStatus || 'ongoing',
+      contentWarnings: Array.isArray(state.contentWarnings)
+        ? state.contentWarnings
+        : state.contentWarnings
+          ? [state.contentWarnings]
+          : [],
+      worldSetting: state.worldSetting || '',
+      authorNotes: state.authorNotes || '',
+      chapterCount: state.chapters.length,
+      wordCount,
+      estimatedReadMins,
+      searchKeywords: _buildSearchKeywords(state.title, state.tags),
+      lastChapterAddedAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    };
+
+    await safeAsync(updateDoc(taleRef, updatePayload), {
+      logContext: 'pages.contribution.publish.updatePublishedTaleDoc',
+    });
+
+    /* Write/Update all chapters */
+    await safeAsync(
+      Promise.all(
+        state.chapters.map(async (chapter, index) => {
+          const chapterWordCount = countWords(chapter.content);
+          const chapterReadMins = estimateReadMins(chapterWordCount);
+
+          const chapterPayload = {
+            chapterNum: index + 1,
+            title: chapter.title?.trim() || `Fragment ${index + 1}`,
+            content: chapter.content || '',
+            wordCount: chapterWordCount,
+          };
+
+          const chapterValidated = validateData(DraftChapterSchema, chapterPayload);
+          if (!chapterValidated.success) {
+            throw new Error(`Chapter ${index + 1} Validation Error: ${chapterValidated.error}`);
+          }
+
+          await setDoc(
+            refs.chapter(id, index),
+            {
+              ...chapterValidated.data,
+              estimatedReadMins: chapterReadMins,
+              updatedAt: serverTimestamp(),
+            },
+            { merge: true }
+          );
+        })
+      ),
+      { logContext: 'pages.contribution.publish.writePublishedChapters' }
+    );
+
+    cacheService.invalidateTale(id);
+    cacheService.invalidateTales();
+
+    return id;
+  }
 
   /* ── Step 1: Save all chapters to draft ─────────────────── */
   await safeAsync(saveAllChapters(userId), {
@@ -136,6 +223,7 @@ async function _doPublish(userId) {
     language: state.language || 'English',
     visibility: (state.visibility || 'public').toLowerCase(),
     audience: state.audience || 'General',
+    publicationStatus: state.publicationStatus || 'ongoing',
     contentWarnings: Array.isArray(state.contentWarnings)
       ? state.contentWarnings
       : state.contentWarnings
@@ -304,6 +392,7 @@ const _setPublishStatus = setPublishStatus;
  * @param {boolean} disabled
  */
 function _setPublishButtonsDisabled(disabled) {
+  const isUpdate = Boolean(state.publishedTaleId);
   ['publish-btn', 'publish-btn-mobile'].forEach((id) => {
     const btn = document.getElementById(id);
     if (!btn) return;
@@ -316,11 +405,18 @@ function _setPublishButtonsDisabled(disabled) {
     if (spans.length) {
       spans.forEach((span) => {
         if (!span.classList.contains('hidden')) {
-          span.textContent = disabled ? 'Publishing…' : (span.dataset.label ?? span.textContent);
+          const defaultLabel = span.dataset.label ?? span.textContent;
+          span.textContent = disabled ? (isUpdate ? 'Updating…' : 'Publishing…') : defaultLabel;
         }
       });
     } else {
-      btn.textContent = disabled ? 'Publishing…' : 'Publish';
+      btn.textContent = disabled
+        ? isUpdate
+          ? 'Updating…'
+          : 'Publishing…'
+        : isUpdate
+          ? 'Update'
+          : 'Publish';
     }
   });
 }

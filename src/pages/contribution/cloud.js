@@ -10,8 +10,10 @@
 
 import { auth, getDoc, getDocs, addDoc, setDoc, serverTimestamp, refs } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
+import { cacheService } from '@services/cache.service.js';
 import {
   countWords,
+  estimateReadMins,
   setInput,
   getInput,
   setSelect,
@@ -29,12 +31,16 @@ const log = createLogger('Cloud');
    ───────────────────────────────────────────── */
 
 /**
- * Reads the ?draft=<id> URL param and sets state.draftId.
- * Call this before loadDraft().
+ * Reads the ?draft=<id> or ?taleId=<id> URL params and sets state.draftId / state.publishedTaleId.
+ * Call this before loadDraft() / loadPublishedTale().
  */
 export function initDraftId() {
-  const id = new URLSearchParams(window.location.search).get('draft');
-  if (id) state.draftId = id;
+  const params = new URLSearchParams(window.location.search);
+  const draftId = params.get('draft');
+  const taleId = params.get('taleId') || params.get('edit');
+
+  if (draftId) state.draftId = draftId;
+  if (taleId) state.publishedTaleId = taleId;
 }
 
 /**
@@ -63,6 +69,77 @@ export async function saveToCloud() {
   }
 
   const userId = auth.currentUser.uid;
+
+  if (state.publishedTaleId) {
+    log.info('Saving published tale updates to cloud...', {
+      taleId: state.publishedTaleId,
+      userId,
+    });
+    const taleRef = refs.tale(state.publishedTaleId);
+    const wordCount = state.chapters.reduce((acc, ch) => acc + countWords(ch.content), 0);
+    const estimatedReadMins = estimateReadMins(wordCount);
+
+    await setDoc(
+      taleRef,
+      {
+        title: state.title,
+        synopsis: state.synopsis || '',
+        coverUrl: state.coverUrl || '',
+        era: state.era || '',
+        tags: state.tags || [],
+        tone: state.tone || 'Mythic',
+        language: state.language || 'English',
+        visibility: (state.visibility || 'public').toLowerCase(),
+        audience: state.audience || 'General',
+        publicationStatus: state.publicationStatus || 'ongoing',
+        contentWarnings: Array.isArray(state.contentWarnings)
+          ? state.contentWarnings
+          : state.contentWarnings
+            ? [state.contentWarnings]
+            : [],
+        worldSetting: state.worldSetting || '',
+        authorNotes: state.authorNotes || '',
+        chapterCount: state.chapters.length,
+        wordCount,
+        estimatedReadMins,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+
+    // Save currently active chapter to the published chapter subcollection
+    const chapter = state.chapters[state.currentChapterIndex];
+    if (chapter) {
+      const chapterWordCount = countWords(chapter.content);
+      await setDoc(
+        refs.chapter(state.publishedTaleId, state.currentChapterIndex),
+        {
+          chapterNum: state.currentChapterIndex + 1,
+          title: chapter.title?.trim() || `Fragment ${state.currentChapterIndex + 1}`,
+          content: chapter.content || '',
+          wordCount: chapterWordCount,
+          estimatedReadMins: estimateReadMins(chapterWordCount),
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+    }
+
+    cacheService.invalidateTale(state.publishedTaleId);
+    cacheService.invalidateTales();
+
+    state.isDirty = false;
+    showToast('Chronicle updates preserved in the cloud.', 'success');
+
+    const statusEl = document.getElementById('stat-status');
+    if (statusEl) {
+      statusEl.className = statusEl.className.replace(/text-\w+-\d+/g, '');
+      statusEl.classList.add('text-emerald-400');
+      statusEl.textContent = 'Saved to cloud';
+    }
+    return;
+  }
+
   log.info('Saving draft to cloud...', { draftId: state.draftId, userId });
   const payload = _buildMetadataPayload();
 
@@ -186,6 +263,7 @@ export async function loadDraft() {
   state.language = data.language || 'English';
   state.visibility = data.visibility || 'public';
   state.audience = data.audience || 'General';
+  state.publicationStatus = data.publicationStatus || 'ongoing';
   state.contentWarnings = data.contentWarnings || '';
   state.worldSetting = data.worldSetting || '';
   state.authorNotes = data.authorNotes || '';
@@ -205,6 +283,70 @@ export async function loadDraft() {
         content: ch.content || '',
       }));
 
+    state.currentChapterIndex = 0;
+  }
+
+  return true;
+}
+
+/**
+ * Loads a published tale and its chapters from Firestore for editing.
+ * Restores metadata and chapters into state + DOM.
+ *
+ * @param {string} taleId
+ * @param {string} [userId]
+ * @returns {Promise<boolean>} true if tale was found and loaded
+ */
+export async function loadPublishedTale(taleId, userId) {
+  if (!taleId) return false;
+
+  const uid = userId || auth.currentUser?.uid;
+  log.info('Loading published tale for editing...', { taleId, uid });
+
+  const taleSnap = await getDoc(refs.tale(taleId));
+  if (!taleSnap.exists()) {
+    showToast('Chronicle not found in the archives.', 'error');
+    return false;
+  }
+
+  const data = taleSnap.data();
+  // Author authorization check
+  if (data.authorId && uid && data.authorId !== uid) {
+    showToast('You are not authorized to edit this chronicle.', 'error');
+    return false;
+  }
+
+  state.publishedTaleId = taleId;
+  state.title = data.title || '';
+  state.synopsis = data.synopsis || data.description || '';
+  state.coverUrl = data.coverUrl || '';
+  state.era = data.era || '';
+  state.tags = data.tags || [];
+  state.tone = data.tone || 'Mythic';
+  state.language = data.language || 'English';
+  state.visibility = data.visibility || 'public';
+  state.audience = data.audience || 'General';
+  state.publicationStatus = data.publicationStatus || 'ongoing';
+  state.contentWarnings = Array.isArray(data.contentWarnings)
+    ? data.contentWarnings.join(', ')
+    : data.contentWarnings || '';
+  state.worldSetting = data.worldSetting || '';
+  state.authorNotes = data.authorNotes || '';
+
+  syncMetadataToDom();
+
+  const chaptersSnap = await getDocs(refs.chapters(taleId));
+  if (!chaptersSnap.empty) {
+    state.chapters = chaptersSnap.docs
+      .map((d) => d.data())
+      .sort((a, b) => (a.chapterNum ?? 1) - (b.chapterNum ?? 1))
+      .map((ch) => ({
+        title: ch.title || 'Untitled Chapter',
+        content: ch.content || '',
+      }));
+    state.currentChapterIndex = 0;
+  } else {
+    state.chapters = [{ title: 'Chapter 1', content: '' }];
     state.currentChapterIndex = 0;
   }
 
@@ -238,11 +380,12 @@ export function syncMetadataFromDom() {
   state.language = document.getElementById('story-language')?.value ?? 'English';
   state.visibility = document.getElementById('story-visibility')?.value ?? 'public';
   state.audience = document.getElementById('target-audience')?.value ?? 'General';
+  state.publicationStatus = document.getElementById('story-publication-status')?.value ?? 'ongoing';
 }
 
 /**
  * Writes state metadata back into the DOM fields.
- * Called after a draft is loaded from Firestore.
+ * Called after a draft or published tale is loaded from Firestore.
  */
 export function syncMetadataToDom() {
   setInput('tale-title', state.title);
@@ -258,10 +401,42 @@ export function syncMetadataToDom() {
   setSelect('story-language', state.language);
   setSelect('story-visibility', state.visibility);
   setSelect('target-audience', state.audience);
+  setSelect('story-publication-status', state.publicationStatus || 'ongoing');
+
+  updatePublicationStatusIndicator(state.publicationStatus || 'ongoing');
 
   if (state.coverUrl) {
     const preview = document.getElementById('tale-cover-preview');
     if (preview) preview.src = state.coverUrl;
+  }
+}
+
+/**
+ * Updates the visual status badge / indicator beside the publication status select.
+ *
+ * @param {string} status
+ */
+export function updatePublicationStatusIndicator(status) {
+  const normStatus = (status || 'ongoing').toLowerCase();
+  const textEl = document.getElementById('publication-status-text');
+  const dotEl = document.getElementById('publication-status-dot');
+  const indicatorEl = document.getElementById('publication-status-indicator');
+
+  const configs = {
+    ongoing: { label: 'Ongoing', color: 'text-emerald-400', dot: 'bg-emerald-400' },
+    completed: { label: 'Completed', color: 'text-indigo-400', dot: 'bg-indigo-400' },
+    hiatus: { label: 'Hiatus', color: 'text-amber-400', dot: 'bg-amber-400' },
+    cancelled: { label: 'Cancelled', color: 'text-rose-400', dot: 'bg-rose-400' },
+  };
+
+  const config = configs[normStatus] || configs.ongoing;
+
+  if (textEl) textEl.textContent = config.label;
+  if (dotEl) {
+    dotEl.className = `w-1.5 h-1.5 rounded-full ${config.dot} animate-pulse`;
+  }
+  if (indicatorEl) {
+    indicatorEl.className = `flex items-center gap-1.5 text-[10px] font-bold ${config.color}`;
   }
 }
 
@@ -291,6 +466,7 @@ function _buildMetadataPayload() {
     language: state.language,
     visibility: state.visibility,
     audience: state.audience,
+    publicationStatus: state.publicationStatus || 'ongoing',
     contentWarnings: state.contentWarnings,
     worldSetting: state.worldSetting,
     authorNotes: state.authorNotes,

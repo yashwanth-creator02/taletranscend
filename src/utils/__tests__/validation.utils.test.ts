@@ -79,6 +79,31 @@ describe('Validation Utils', () => {
       const result = validateData(DraftMetadataSchema, { ...validMetadata, coverUrl: 'not-a-url' });
       expect(result.success).toBe(false);
     });
+
+    it('accepts and defaults publicationStatus', () => {
+      const result = validateData(DraftMetadataSchema, validMetadata);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.publicationStatus).toBe('ongoing');
+      }
+
+      const completedResult = validateData(DraftMetadataSchema, {
+        ...validMetadata,
+        publicationStatus: 'completed',
+      });
+      expect(completedResult.success).toBe(true);
+      if (completedResult.success) {
+        expect(completedResult.data.publicationStatus).toBe('completed');
+      }
+    });
+
+    it('rejects invalid publicationStatus', () => {
+      const result = validateData(DraftMetadataSchema, {
+        ...validMetadata,
+        publicationStatus: 'invalid_status',
+      });
+      expect(result.success).toBe(false);
+    });
   });
 
   describe('DraftChapterSchema', () => {
@@ -116,9 +141,22 @@ describe('Validation Utils', () => {
       estimatedReadMins: 5,
     };
 
-    it('validates correct tale', () => {
+    it('validates correct tale and defaults publicationStatus', () => {
       const result = validateData(TaleSchema, validTale);
       expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.publicationStatus).toBe('ongoing');
+      }
+    });
+
+    it('accepts valid publicationStatus values in TaleSchema', () => {
+      ['ongoing', 'completed', 'hiatus', 'cancelled'].forEach((status) => {
+        const result = validateData(TaleSchema, { ...validTale, publicationStatus: status });
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.publicationStatus).toBe(status);
+        }
+      });
     });
 
     it('rejects missing authorId', () => {

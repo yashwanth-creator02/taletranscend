@@ -127,8 +127,14 @@ export async function renderTale(userId, tale, taleId) {
   setTextIfExists('display-chapters', chapterLabel);
   setTextIfExists('sidebar-chapter-count', count);
 
-  // Status indicator (Ongoing, Completed, Hiatus, Stopped)
-  const rawStatus = (tale.status || 'ongoing').toLowerCase();
+  // Status indicator (Ongoing, Completed, Hiatus, Stopped/Cancelled)
+  const rawStatus = (
+    tale.publicationStatus ||
+    (tale.status !== 'published' && tale.status !== 'pending' && tale.status !== 'draft'
+      ? tale.status
+      : null) ||
+    'ongoing'
+  ).toLowerCase();
   let statusLabel = 'Ongoing';
   let dotClass = 'bg-emerald-400';
 
@@ -139,7 +145,7 @@ export async function renderTale(userId, tale, taleId) {
     statusLabel = 'Hiatus';
     dotClass = 'bg-amber-400';
   } else if (rawStatus === 'stopped' || rawStatus === 'cancelled') {
-    statusLabel = 'Stopped';
+    statusLabel = 'Cancelled';
     dotClass = 'bg-rose-400';
   } else {
     statusLabel = rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1);
@@ -150,6 +156,24 @@ export async function renderTale(userId, tale, taleId) {
   const statusDot = getEl('display-status-dot');
   if (statusDot) {
     statusDot.className = `w-2 h-2 rounded-full ${dotClass} animate-pulse`;
+  }
+
+  // Author Edit Chronicle Action Buttons
+  if (userId && tale.authorId === userId) {
+    const editUrl = `/contribution.html?taleId=${encodeURIComponent(taleId)}`;
+    const editBtnDesktop = getEl('edit-tale-btn-desktop');
+    if (editBtnDesktop) {
+      editBtnDesktop.href = editUrl;
+      editBtnDesktop.classList.remove('hidden');
+    }
+    const editBtnMobile = getEl('edit-tale-btn-mobile');
+    const authorActionsMobile = getEl('author-actions-mobile');
+    if (editBtnMobile) {
+      editBtnMobile.href = editUrl;
+    }
+    if (authorActionsMobile) {
+      authorActionsMobile.classList.remove('hidden');
+    }
   }
 
   setTextIfExists('tale-era', eraName);

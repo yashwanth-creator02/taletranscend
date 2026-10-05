@@ -4,6 +4,8 @@ import {
   initDraftId,
   saveToCloud,
   loadDraft,
+  loadPublishedTale,
+  updatePublicationStatusIndicator,
   syncMetadataFromDom,
   syncMetadataToDom,
 } from '../cloud.js';
@@ -23,6 +25,16 @@ vi.mock('@fb/index.js', () => ({
     draft: vi.fn((uid, id) => `refs/draft/${uid}/${id}`),
     draftChapters: vi.fn((uid, id) => `refs/draft/${uid}/${id}/chapters`),
     draftChapter: vi.fn((uid, id, chId) => `refs/draft/${uid}/${id}/chapters/${chId}`),
+    tale: vi.fn((id) => `refs/tale/${id}`),
+    chapters: vi.fn((id) => `refs/tale/${id}/chapters`),
+    chapter: vi.fn((id, chId) => `refs/tale/${id}/chapters/${chId}`),
+  },
+}));
+
+vi.mock('@services/cache.service.js', () => ({
+  cacheService: {
+    invalidateTale: vi.fn(),
+    invalidateTales: vi.fn(),
   },
 }));
 
@@ -40,6 +52,7 @@ vi.mock('@/utils', () => ({
     error: vi.fn(),
   })),
   countWords: vi.fn((s) => (s ? s.trim().split(/\s+/).length : 0)),
+  estimateReadMins: vi.fn(() => 1),
   setInput: vi.fn(),
   getInput: vi.fn((id) => {
     const el = document.getElementById(id);
@@ -101,6 +114,15 @@ describe('Contribution Cloud', () => {
     expect(state.title).toBe('My Tale');
     expect(state.synopsis).toBe('Once upon a time');
     expect(state.tags).toEqual(['Fantasy', 'Magic']);
+  });
+
+  it('syncs metadata from state to DOM', async () => {
+    const { setInput, setSelect } = await import('@/utils');
+    state.title = 'Title in State';
+    state.publicationStatus = 'hiatus';
+    syncMetadataToDom();
+    expect(setInput).toHaveBeenCalledWith('tale-title', 'Title in State');
+    expect(setSelect).toHaveBeenCalledWith('story-publication-status', 'hiatus');
   });
 
   it('saves new draft to cloud', async () => {
@@ -179,5 +201,86 @@ describe('Contribution Cloud', () => {
 
     expect(state.chapters[0].title).toBe('Ch 1');
     expect(state.chapters[1].title).toBe('Ch 2');
+  });
+
+  it('initializes published tale ID from URL', () => {
+    window.location = new URL('http://localhost/contribution?taleId=tale999');
+    initDraftId();
+    expect(state.publishedTaleId).toBe('tale999');
+  });
+
+  it('loads published tale from cloud', async () => {
+    const { getDoc, getDocs } = await import('@fb/index.js');
+
+    getDoc.mockResolvedValueOnce({
+      exists: () => true,
+      data: () => ({
+        title: 'Ancient Chronicles',
+        synopsis: 'A glorious era.',
+        authorId: 'user123',
+        publicationStatus: 'completed',
+      }),
+    });
+
+    getDocs.mockResolvedValueOnce({
+      empty: false,
+      docs: [{ data: () => ({ chapterNum: 1, title: 'Fragment 1', content: 'Once...' }) }],
+    });
+
+    const success = await loadPublishedTale('tale999', 'user123');
+
+    expect(success).toBe(true);
+    expect(state.publishedTaleId).toBe('tale999');
+    expect(state.title).toBe('Ancient Chronicles');
+    expect(state.publicationStatus).toBe('completed');
+    expect(state.chapters).toHaveLength(1);
+  });
+
+  it('rejects loading published tale if author does not match', async () => {
+    const { getDoc } = await import('@fb/index.js');
+
+    getDoc.mockResolvedValueOnce({
+      exists: () => true,
+      data: () => ({
+        title: 'Secret Story',
+        authorId: 'other-user',
+      }),
+    });
+
+    const success = await loadPublishedTale('tale888', 'user123');
+
+    expect(success).toBe(false);
+  });
+
+  it('updates published tale in saveToCloud when publishedTaleId is set', async () => {
+    const { setDoc } = await import('@fb/index.js');
+    const { cacheService } = await import('@services/cache.service.js');
+
+    state.publishedTaleId = 'tale777';
+    state.title = 'Updated Title';
+    state.chapters = [{ title: 'Ch 1', content: 'New words' }];
+    state.currentChapterIndex = 0;
+
+    await saveToCloud();
+
+    expect(setDoc).toHaveBeenCalledTimes(2); // tale doc + chapter doc
+    expect(cacheService.invalidateTale).toHaveBeenCalledWith('tale777');
+    expect(cacheService.invalidateTales).toHaveBeenCalled();
+  });
+
+  it('updates publication status indicator elements', () => {
+    document.body.innerHTML = `
+      <div id="publication-status-indicator"></div>
+      <div id="publication-status-dot"></div>
+      <div id="publication-status-text"></div>
+    `;
+
+    updatePublicationStatusIndicator('completed');
+
+    expect(document.getElementById('publication-status-text').textContent).toBe('Completed');
+    expect(document.getElementById('publication-status-dot').className).toContain('bg-indigo-400');
+    expect(document.getElementById('publication-status-indicator').className).toContain(
+      'text-indigo-400'
+    );
   });
 });

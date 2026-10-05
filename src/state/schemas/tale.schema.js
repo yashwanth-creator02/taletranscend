@@ -33,6 +33,7 @@
  * @property {number}   reactionCount
  * @property {number}   bookmarkCount
  * @property {string}   status
+ * @property {string}   [publicationStatus]
  * @property {import('firebase/firestore').Timestamp|null} submittedAt
  * @property {import('firebase/firestore').Timestamp|null} reviewedAt
  * @property {string|null} reviewedBy
@@ -83,6 +84,7 @@ export function createTale(id, data = {}) {
     reactionCount: Number(data.reactionCount ?? 0),
     bookmarkCount: Number(data.bookmarkCount ?? 0),
     status: data.status ?? 'draft',
+    publicationStatus: data.publicationStatus ?? 'ongoing',
     submittedAt: data.submittedAt ?? null,
     reviewedAt: data.reviewedAt ?? null,
     reviewedBy: data.reviewedBy ?? null,
