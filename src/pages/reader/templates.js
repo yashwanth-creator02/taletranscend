@@ -8,14 +8,14 @@ export function renderTocPanel(chapters, currentChapterId, progress, activeSecti
   return `
     <div class="space-y-2">
       <div class="glass mb-3 rounded-xl p-3">
-        <div class="mb-2 flex items-center justify-between text-xs uppercase tracking-wide" style="color:rgba(255,255,255,0.4)">
+        <div class="mb-2 flex items-center justify-between text-xs uppercase tracking-wide" style="color:var(--reader-muted)">
           <span>Reading progress</span><span class="tabular-nums">${Math.round(progress)}%</span>
         </div>
-        <div style="height:6px;overflow:hidden;border-radius:9999px;background:rgba(255,255,255,0.05)">
+        <div style="height:6px;overflow:hidden;border-radius:9999px;background:var(--reader-border-subtle)">
           <div class="progress-bar" style="height:100%;width:${progress}%"></div>
         </div>
       </div>
-      <div class="mb-2 flex items-center gap-2 text-xs uppercase tracking-wide" style="color:rgba(255,255,255,0.4)">
+      <div class="mb-2 flex items-center gap-2 text-xs uppercase tracking-wide" style="color:var(--reader-muted)">
         <i data-lucide="book" style="width:12px;height:12px"></i>
         <span>${safeArticleTitle}</span>
       </div>
@@ -27,12 +27,12 @@ export function renderTocPanel(chapters, currentChapterId, progress, activeSecti
             return `
           <div class="toc-chapter ${isCurrent ? 'current' : ''}">
             <button class="toc-chapter-btn" data-chapter-id="${c.id}">
-              <span class="toc-number ${isCurrent ? 'current' : ''}" style="${isCurrent ? 'box-shadow:0 0 14px -2px rgba(168,85,247,0.6)' : ''}">${c.number}</span>
+              <span class="toc-number ${isCurrent ? 'current' : ''}" style="${isCurrent ? 'box-shadow:0 0 14px -2px rgb(var(--reader-accent-rgb) / 0.6)' : ''}">${c.number}</span>
               <span class="flex-1">
-                <span class="rune-text block text-sm" style="color:rgba(255,255,255,0.9)">${safeTitle}</span>
-                <span class="block text-xs" style="color:rgba(255,255,255,0.4)">${c.wordCount?.toLocaleString() || 0} words &middot; ${Math.max(1, Math.round((c.wordCount || 0) / 230))} min</span>
+                <span class="rune-text block text-sm" style="color:var(--reader-fg)">${safeTitle}</span>
+                <span class="block text-xs" style="color:var(--reader-muted)">${c.wordCount?.toLocaleString() || 0} words &middot; ${Math.max(1, Math.round((c.wordCount || 0) / 230))} min</span>
               </span>
-              <i data-lucide="chevron-down" class="shrink-0" style="width:14px;height:14px;color:rgba(255,255,255,0.4);transition:transform 200ms;${isCurrent ? 'transform:rotate(180deg)' : ''}"></i>
+              <i data-lucide="chevron-down" class="shrink-0" style="width:14px;height:14px;color:var(--reader-muted);transition:transform 200ms;${isCurrent ? 'transform:rotate(180deg)' : ''}"></i>
             </button>
             ${
               isCurrent && c.sections
@@ -44,8 +44,8 @@ export function renderTocPanel(chapters, currentChapterId, progress, activeSecti
                     const safeSectionTitle = escapeHtml(s.title);
                     return `
                   <button class="toc-section-btn ${active ? 'active' : ''} ${s.level === 3 ? 'pl-7' : ''}" data-section-id="${s.id}">
-                    <span class="toc-dot ${active ? 'active' : ''}" style="${active ? 'box-shadow:0 0 10px 1px rgba(168,85,247,0.7)' : ''}"></span>
-                    <span class="flex-1 text-xs leading-snug ${active ? 'text-white' : ''} ${s.level === 2 ? 'tracking-wide' : ''}" style="${active ? '' : 'color:rgba(255,255,255,0.65)'}">${safeSectionTitle}</span>
+                    <span class="toc-dot ${active ? 'active' : ''}" style="${active ? 'box-shadow:0 0 10px 1px rgb(var(--reader-accent-rgb) / 0.7)' : ''}"></span>
+                    <span class="flex-1 text-xs leading-snug ${s.level === 2 ? 'tracking-wide' : ''}" style="${active ? 'color:var(--reader-accent);font-weight:600' : 'color:var(--reader-secondary)'}">${safeSectionTitle}</span>
                   </button>`;
                   })
                   .join('')}
@@ -67,11 +67,11 @@ export function renderTypographyPanel(state) {
         <div class="font-grid">
           <button class="font-btn ${state.fontFamily === 'serif' ? 'active' : ''}" data-font="serif" style="font-family: var(--font-serif)">
             <div class="text-lg">Aa</div>
-            <div class="mt-1 text-xs uppercase tracking-wide" style="color:rgba(255,255,255,0.5)">Cinzel</div>
+            <div class="mt-1 text-xs uppercase tracking-wide" style="color:var(--reader-muted)">Cinzel</div>
           </button>
           <button class="font-btn ${state.fontFamily === 'sans' ? 'active' : ''}" data-font="sans" style="font-family: var(--font-sans)">
             <div class="text-lg">Aa</div>
-            <div class="mt-1 text-xs uppercase tracking-wide" style="color:rgba(255,255,255,0.5)">Inter</div>
+            <div class="mt-1 text-xs uppercase tracking-wide" style="color:var(--reader-muted)">Inter</div>
           </button>
         </div>
       </div>
@@ -98,7 +98,7 @@ export function renderTypographyPanel(state) {
       <div>
         <div class="field-label">Line width &mdash; ${state.measure}ch</div>
         <input type="range" min="48" max="92" value="${state.measure}" id="mw-range">
-        <div class="mt-1 flex justify-between text-xs" style="color:rgba(255,255,255,0.4)">
+        <div class="mt-1 flex justify-between text-xs" style="color:var(--reader-muted)">
           <span>Narrow</span>
           <span>Wide</span>
         </div>
@@ -113,9 +113,9 @@ export function renderThemePanel(currentTheme) {
       ${THEMES.map(
         (t) => `
         <button class="theme-btn hover-lift ${currentTheme === t.id ? 'active' : ''}" data-theme-id="${t.id}">
-          <div class="theme-preview" style="background:${t.tint || '#8b7cf6'}; opacity: 0.8;"></div>
-          <div class="rune-text text-sm" style="color:rgba(255,255,255,0.9)">${t.label}</div>
-          <div class="text-xs" style="color:rgba(255,255,255,0.4)">${t.sub || 'Theme'}</div>
+          <div class="theme-preview" style="background:${t.tint || 'var(--reader-accent)'};"></div>
+          <div class="rune-text text-sm" style="color:var(--reader-fg)">${t.label}</div>
+          <div class="text-xs" style="color:var(--reader-muted)">${t.sub || 'Theme'}</div>
           ${currentTheme === t.id ? '<span class="theme-check">&#10003;</span>' : ''}
         </button>
       `
@@ -129,8 +129,8 @@ export function renderHighlightsPanel(highlights) {
     return `
       <div class="empty-state">
         <div class="empty-icon"><i data-lucide="highlighter" style="width:20px;height:20px"></i></div>
-        <div class="rune-text text-sm" style="color:rgba(255,255,255,0.85)">No highlights yet</div>
-        <p class="mt-1 max-w-[240px] text-xs leading-relaxed" style="color:rgba(255,255,255,0.45)">
+        <div class="rune-text text-sm" style="color:var(--reader-fg)">No highlights yet</div>
+        <p class="mt-1 max-w-[240px] text-xs leading-relaxed" style="color:var(--reader-muted)">
           Select any text in the article and a small menu will appear. Pick a color or attach a private note.
         </p>
       </div>`;
@@ -147,13 +147,13 @@ export function renderHighlightsPanel(highlights) {
           ${
             h.note
               ? `
-            <div class="mb-2 flex items-start gap-2 text-xs" style="color:rgba(255,255,255,0.7)">
-              <i data-lucide="edit-3" class="mt-0.5 shrink-0" style="width:14px;height:14px;color:#c4b5fd"></i>
+            <div class="mb-2 flex items-start gap-2 text-xs" style="color:var(--reader-secondary)">
+              <i data-lucide="edit-3" class="mt-0.5 shrink-0" style="width:14px;height:14px;color:var(--reader-accent)"></i>
               <span>${safeNote}</span>
             </div>`
               : ''
           }
-          <div class="flex items-center justify-between text-xs" style="color:rgba(255,255,255,0.4)">
+          <div class="flex items-center justify-between text-xs" style="color:var(--reader-muted)">
             <span>${h.at ? new Date(h.at).toLocaleDateString() : 'Just now'}</span>
             <button class="opacity-0 transition-opacity hover-text-red group-hover-opacity-100" data-rm-hl="${h.id}">Remove</button>
           </div>
@@ -169,7 +169,7 @@ export function renderCommentsPanel(comments, newComment) {
     <div class="space-y-5">
       <div class="comment-input-area">
         <textarea class="comment-textarea" id="comment-input" rows="3" placeholder="Add to the discussion…">${safeNewComment}</textarea>
-        <div class="mt-2 flex items-center justify-between text-xs" style="color:rgba(255,255,255,0.4)">
+        <div class="mt-2 flex items-center justify-between text-xs" style="color:var(--reader-muted)">
           <span>Markdown supported</span>
           <button class="post-btn" id="post-comment" ${!newComment?.trim() ? 'disabled' : ''}>Post</button>
         </div>
@@ -185,14 +185,14 @@ export function renderCommentsPanel(comments, newComment) {
                   return `
           <div class="comment-card">
             <div class="mb-2 flex items-center gap-2">
-              <div style="display:flex;align-items:center;justify-content:center;border-radius:50%;color:#fff;width:28px;height:28px;font-size:11px;background:linear-gradient(135deg,rgba(99,102,241,0.85),rgba(168,85,247,0.85));shadow:0 0 18px -6px rgba(139,124,246,0.55);font-family:var(--font-serif);letter-spacing:0.08em">${safeInitials}</div>
+              <div style="display:flex;align-items:center;justify-content:center;border-radius:50%;color:var(--reader-accent-contrast);width:28px;height:28px;font-size:11px;background:var(--reader-accent);box-shadow:0 0 18px -6px rgb(var(--reader-accent-rgb) / 0.55);font-family:var(--font-serif);letter-spacing:0.08em">${safeInitials}</div>
               <div class="leading-tight">
-                <div class="text-sm" style="color:rgba(255,255,255,0.9)">${safeAuthor}</div>
-                <div class="text-xs" style="color:rgba(255,255,255,0.4)">${c.at ? new Date(c.at).toLocaleDateString() : 'Recently'}</div>
+                <div class="text-sm" style="color:var(--reader-fg)">${safeAuthor}</div>
+                <div class="text-xs" style="color:var(--reader-muted)">${c.at ? new Date(c.at).toLocaleDateString() : 'Recently'}</div>
               </div>
             </div>
-            <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,0.75)">${safeBody}</p>
-            <div class="mt-2 flex items-center gap-3 text-xs" style="color:rgba(255,255,255,0.4)">
+            <p class="text-sm leading-relaxed" style="color:var(--reader-secondary)">${safeBody}</p>
+            <div class="mt-2 flex items-center gap-3 text-xs" style="color:var(--reader-muted)">
               <button class="hover-text-violet">Reply</button>
               <button class="flex items-center gap-1 hover-text-orange"><i data-lucide="heart" style="width:12px;height:12px"></i> ${c.likes || 0}</button>
             </div>
@@ -209,21 +209,21 @@ export function renderSharePanel() {
   const url = window.location.href;
   return `
     <div class="space-y-3">
-      <div class="rounded-xl border border-white/10 p-3" style="background:rgba(255,255,255,0.03)">
-        <div class="mb-2 text-xs uppercase tracking-wide" style="color:rgba(255,255,255,0.4)">Direct link</div>
+      <div class="rounded-xl border p-3" style="background:var(--reader-card-bg);border-color:var(--reader-border)">
+        <div class="mb-2 text-xs uppercase tracking-wide" style="color:var(--reader-muted)">Direct link</div>
         <div class="share-link-box">
-          <i data-lucide="link" style="width:16px;height:16px;color:rgba(255,255,255,0.4)"></i>
+          <i data-lucide="link" style="width:16px;height:16px;color:var(--reader-muted)"></i>
           <span class="share-link-text">${url}</span>
           <button class="copy-btn" id="copy-link">Copy</button>
         </div>
       </div>
       <div class="space-y-2">
         <a href="https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}" target="_blank" rel="noreferrer" class="share-link hover-lift">
-          <i data-lucide="twitter" style="width:16px;height:16px;color:#c4b5fd"></i>
+          <i data-lucide="twitter" style="width:16px;height:16px;color:var(--reader-accent)"></i>
           <span>Share on Twitter / X</span>
         </a>
         <a href="https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}" target="_blank" rel="noreferrer" class="share-link hover-lift">
-          <i data-lucide="linkedin" style="width:16px;height:16px;color:#c4b5fd"></i>
+          <i data-lucide="linkedin" style="width:16px;height:16px;color:var(--reader-accent)"></i>
           <span>Share on LinkedIn</span>
         </a>
       </div>
@@ -241,13 +241,13 @@ export function renderTTSPanel(isPlaying, rate) {
             <i data-lucide="${isPlaying ? 'pause' : 'play'}" style="width:20px;height:20px"></i>
           </button>
           <div class="leading-tight">
-            <div class="text-sm" style="color:rgba(255,255,255,0.9)">${isPlaying ? 'Reading aloud…' : 'Listen to this piece'}</div>
-            <div class="text-xs" style="color:rgba(255,255,255,0.4)">${supported ? 'Using your browser voice' : 'Not supported in this browser'}</div>
+            <div class="text-sm" style="color:var(--reader-fg)">${isPlaying ? 'Reading aloud…' : 'Listen to this piece'}</div>
+            <div class="text-xs" style="color:var(--reader-muted)">${supported ? 'Using your browser voice' : 'Not supported in this browser'}</div>
           </div>
         </div>
         <div><div class="field-label">Speed &mdash; ${rate.toFixed(2)}&times;</div><input type="range" min="0.6" max="1.8" step="0.05" value="${rate}" id="tts-rate"></div>
       </div>
-      <p class="text-xs leading-relaxed" style="color:rgba(255,255,255,0.5)">The audio is generated locally by your browser's voice engine — no servers, no recordings.</p>
+      <p class="text-xs leading-relaxed" style="color:var(--reader-muted)">The audio is generated locally by your browser's voice engine — no servers, no recordings.</p>
     </div>`;
 }
 
@@ -259,6 +259,6 @@ export function renderInfoPanel(state) {
       <div class="stat-row"><span class="stat-label">Progress</span><span class="reader-stat-value">${Math.round(state.progress || 0)} %</span></div>
       <div class="stat-row"><span class="stat-label">Era</span><span class="reader-stat-value">${state.era || 'Unknown'}</span></div>
       <div class="stat-row"><span class="stat-label">Language</span><span class="reader-stat-value">${state.language || 'English'}</span></div>
-      <div class="mt-6 rounded-xl border border-white/10 p-3 text-xs leading-relaxed" style="background:rgba(255,255,255,0.03);color:rgba(255,255,255,0.6)">Reader v1.0 — built for slow reading.</div>
+      <div class="mt-6 rounded-xl border p-3 text-xs leading-relaxed" style="background:var(--reader-card-bg);border-color:var(--reader-border);color:var(--reader-muted)">Reader v1.0 &mdash; built for slow reading.</div>
     </div>`;
 }

@@ -384,11 +384,19 @@
      block there. */
 
   --reader-bg: var(--grey-950);
+  --reader-surface: #0d0d14;
+  --reader-surface-glass: rgb(var(--bg-overlay-rgb) / var(--a-11));
   --reader-fg: #e6e7ee;
+  --reader-secondary: #b4b4c7;
   --reader-muted: #8a8aa3;
   --reader-accent: #8b7cf6;
-  --reader-surface: rgb(var(--light-rgb) / var(--a-02));
-  --reader-border: rgb(var(--light-rgb) / var(--a-03));
+  --reader-accent-contrast: #ffffff;
+  --reader-border: rgb(var(--light-rgb) / var(--a-05));
+  --reader-border-subtle: rgb(var(--light-rgb) / var(--a-03));
+  --reader-card-bg: rgb(var(--light-rgb) / var(--a-02));
+  --reader-input-bg: rgb(var(--dark-rgb) / 0.4);
+  --reader-btn-hover: rgb(var(--reader-accent-rgb) / var(--a-04));
+  --reader-shadow: rgb(var(--dark-rgb) / 0.6);
 
   --reader-font-family: var(--font-serif);
   --reader-font-size: 18px;

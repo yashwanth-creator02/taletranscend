@@ -1,123 +1,305 @@
 /* src/assets/css/reader-themes.css */
 /* Reader-specific theme overrides.                                    */
-/* These ONLY affect the reading surface — never bleed to other pages.*/
+/* These ONLY affect the reader page.                                  */
 /*                                                                     */
 /* How it works:                                                       */
 /*   - reader/theme.js sets data-reader-theme="<id>" on               */
-/*     the .reader-surface element (NOT on <html>).                   */
-/*   - Every rule here is scoped inside .reader-surface[data-reader-theme].*/
-/*   - The app design tokens in tokens.css remain completely untouched.*/
-/*                                                                     */
-/* To add a new reader theme: add one block below following the same   */
-/* four-variable pattern. No other file needs to change.               */
+/*     the .reader-surface and document.body.                         */
+/*   - Every rule is scoped to [data-reader-theme="<id>"].             */
+/*   - Complete, harmonious color palettes for each reader theme:     */
+/*     bg, surface, text, muted, accent, borders, cards, shadows.     */
 
-/* ── Noir (default) ─────────────────────────────────────────────── */
-.reader-surface[data-reader-theme='noir'] {
+/* ── 1. Mythic Noir (Default) ─────────────────────────────────────── */
+.reader-surface[data-reader-theme='noir'],
+body[data-reader-theme='noir'],
+[data-reader-theme='noir'] {
   --reader-bg: #030305;
+  --reader-surface: #0d0d14;
+  --reader-surface-glass: rgb(13 13 20 / 0.82);
   --reader-fg: #e6e7ee;
+  --reader-secondary: #b4b4c7;
   --reader-muted: #8a8aa3;
   --reader-accent: #8b7cf6;
+  --reader-accent-rgb: 139 124 246;
+  --reader-accent-contrast: #ffffff;
+  --reader-border: rgb(255 255 255 / 0.08);
+  --reader-border-subtle: rgb(255 255 255 / 0.04);
+  --reader-card-bg: rgb(255 255 255 / 0.03);
+  --reader-input-bg: rgb(0 0 0 / 0.4);
+  --reader-btn-hover: rgb(139 124 246 / 0.12);
+  --reader-shadow: rgb(0 0 0 / 0.65);
+  color-scheme: dark;
 }
 
-/* ── Parchment ───────────────────────────────────────────────────── */
-.reader-surface[data-reader-theme='parchment'] {
-  --reader-bg: #1a1410;
-  --reader-fg: #f0e6d2;
-  --reader-muted: #b8a78a;
+/* ── 2. Parchment (Warm Vellum) ──────────────────────────────────── */
+.reader-surface[data-reader-theme='parchment'],
+body[data-reader-theme='parchment'],
+[data-reader-theme='parchment'] {
+  --reader-bg: #14100c;
+  --reader-surface: #1f1913;
+  --reader-surface-glass: rgb(31 25 19 / 0.85);
+  --reader-fg: #f4ede2;
+  --reader-secondary: #d6c8b4;
+  --reader-muted: #a69580;
   --reader-accent: #f59e0b;
+  --reader-accent-rgb: 245 158 11;
+  --reader-accent-contrast: #14100c;
+  --reader-border: rgb(245 158 11 / 0.14);
+  --reader-border-subtle: rgb(245 158 11 / 0.07);
+  --reader-card-bg: rgb(245 158 11 / 0.04);
+  --reader-input-bg: rgb(10 7 5 / 0.5);
+  --reader-btn-hover: rgb(245 158 11 / 0.12);
+  --reader-shadow: rgb(0 0 0 / 0.65);
+  color-scheme: dark;
 }
 
-/* ── Sepia ───────────────────────────────────────────────────────── */
-.reader-surface[data-reader-theme='sepia'] {
+/* ── 3. Sepia (Daybreak) ─────────────────────────────────────────── */
+.reader-surface[data-reader-theme='sepia'],
+body[data-reader-theme='sepia'],
+[data-reader-theme='sepia'] {
   --reader-bg: #f4ecd8;
-  --reader-fg: #3b2f1e;
-  --reader-muted: #7a6a4a;
-  --reader-accent: #a0522d;
+  --reader-surface: #eadebe;
+  --reader-surface-glass: rgb(234 222 190 / 0.88);
+  --reader-fg: #2c2013;
+  --reader-secondary: #4d3b28;
+  --reader-muted: #78634a;
+  --reader-accent: #8c3e10;
+  --reader-accent-rgb: 140 62 16;
+  --reader-accent-contrast: #ffffff;
+  --reader-border: rgb(77 59 40 / 0.18);
+  --reader-border-subtle: rgb(77 59 40 / 0.1);
+  --reader-card-bg: rgb(77 59 40 / 0.05);
+  --reader-input-bg: rgb(255 255 255 / 0.65);
+  --reader-btn-hover: rgb(140 62 16 / 0.1);
+  --reader-shadow: rgb(77 59 40 / 0.15);
+  color-scheme: light;
 }
 
-/* ── Light ───────────────────────────────────────────────────────── */
-.reader-surface[data-reader-theme='light'] {
+/* ── 4. Light (Bright Hall) ──────────────────────────────────────── */
+.reader-surface[data-reader-theme='light'],
+body[data-reader-theme='light'],
+[data-reader-theme='light'] {
   --reader-bg: #fafafa;
-  --reader-fg: #1a1a22;
-  --reader-muted: #4b4b5a;
-  --reader-accent: #6366f1;
+  --reader-surface: #f0f1f5;
+  --reader-surface-glass: rgb(240 241 245 / 0.88);
+  --reader-fg: #121217;
+  --reader-secondary: #333342;
+  --reader-muted: #5e5e73;
+  --reader-accent: #4f46e5;
+  --reader-accent-rgb: 79 70 229;
+  --reader-accent-contrast: #ffffff;
+  --reader-border: rgb(18 18 23 / 0.14);
+  --reader-border-subtle: rgb(18 18 23 / 0.07);
+  --reader-card-bg: rgb(18 18 23 / 0.03);
+  --reader-input-bg: rgb(255 255 255 / 0.9);
+  --reader-btn-hover: rgb(79 70 229 / 0.1);
+  --reader-shadow: rgb(0 0 0 / 0.08);
+  color-scheme: light;
 }
 
-/* ── Midnight Indigo ─────────────────────────────────────────────── */
-.reader-surface[data-reader-theme='midnight'] {
-  --reader-bg: #0a0f1f;
+/* ── 5. Midnight Indigo (Deep Cobalt) ────────────────────────────── */
+.reader-surface[data-reader-theme='midnight'],
+body[data-reader-theme='midnight'],
+[data-reader-theme='midnight'] {
+  --reader-bg: #080c19;
+  --reader-surface: #11182e;
+  --reader-surface-glass: rgb(17 24 46 / 0.85);
   --reader-fg: #dbe4ff;
-  --reader-muted: #7a89b3;
+  --reader-secondary: #a8bcfa;
+  --reader-muted: #7487bf;
   --reader-accent: #60a5fa;
+  --reader-accent-rgb: 96 165 250;
+  --reader-accent-contrast: #080c19;
+  --reader-border: rgb(96 165 250 / 0.15);
+  --reader-border-subtle: rgb(96 165 250 / 0.08);
+  --reader-card-bg: rgb(96 165 250 / 0.04);
+  --reader-input-bg: rgb(4 6 14 / 0.55);
+  --reader-btn-hover: rgb(96 165 250 / 0.12);
+  --reader-shadow: rgb(0 0 0 / 0.65);
+  color-scheme: dark;
 }
 
-/* ── Emerald Glade ───────────────────────────────────────────────── */
-.reader-surface[data-reader-theme='emerald'] {
-  --reader-bg: #04140e;
+/* ── 6. Emerald Glade (Forest Glass) ─────────────────────────────── */
+.reader-surface[data-reader-theme='emerald'],
+body[data-reader-theme='emerald'],
+[data-reader-theme='emerald'] {
+  --reader-bg: #03120c;
+  --reader-surface: #0a2217;
+  --reader-surface-glass: rgb(10 34 23 / 0.85);
   --reader-fg: #d4f1e3;
-  --reader-muted: #7ba896;
+  --reader-secondary: #9dd4b9;
+  --reader-muted: #699e85;
   --reader-accent: #34d399;
+  --reader-accent-rgb: 52 211 153;
+  --reader-accent-contrast: #03120c;
+  --reader-border: rgb(52 211 153 / 0.15);
+  --reader-border-subtle: rgb(52 211 153 / 0.08);
+  --reader-card-bg: rgb(52 211 153 / 0.04);
+  --reader-input-bg: rgb(2 10 7 / 0.55);
+  --reader-btn-hover: rgb(52 211 153 / 0.12);
+  --reader-shadow: rgb(0 0 0 / 0.65);
+  color-scheme: dark;
 }
 
-/* ── Rose Quartz ─────────────────────────────────────────────────── */
-.reader-surface[data-reader-theme='rose'] {
-  --reader-bg: #1a0a14;
+/* ── 7. Rose Quartz (Soft Bloom) ─────────────────────────────────── */
+.reader-surface[data-reader-theme='rose'],
+body[data-reader-theme='rose'],
+[data-reader-theme='rose'] {
+  --reader-bg: #150811;
+  --reader-surface: #271120;
+  --reader-surface-glass: rgb(39 17 32 / 0.85);
   --reader-fg: #ffe4ef;
-  --reader-muted: #c08a9e;
+  --reader-secondary: #e0a6c0;
+  --reader-muted: #ab6e8a;
   --reader-accent: #f472b6;
+  --reader-accent-rgb: 244 114 182;
+  --reader-accent-contrast: #150811;
+  --reader-border: rgb(244 114 182 / 0.15);
+  --reader-border-subtle: rgb(244 114 182 / 0.08);
+  --reader-card-bg: rgb(244 114 182 / 0.04);
+  --reader-input-bg: rgb(12 4 10 / 0.55);
+  --reader-btn-hover: rgb(244 114 182 / 0.12);
+  --reader-shadow: rgb(0 0 0 / 0.65);
+  color-scheme: dark;
 }
 
-/* ── Solarized ───────────────────────────────────────────────────── */
-.reader-surface[data-reader-theme='solar'] {
+/* ── 8. Solarized (Citrus Page) ──────────────────────────────────── */
+.reader-surface[data-reader-theme='solar'],
+body[data-reader-theme='solar'],
+[data-reader-theme='solar'] {
   --reader-bg: #fdf6e3;
+  --reader-surface: #eee8d5;
+  --reader-surface-glass: rgb(238 232 213 / 0.88);
   --reader-fg: #073642;
-  --reader-muted: #657b83;
-  --reader-accent: #b58900;
+  --reader-secondary: #26525e;
+  --reader-muted: #586e75;
+  --reader-accent: #9e6b00;
+  --reader-accent-rgb: 158 107 0;
+  --reader-accent-contrast: #ffffff;
+  --reader-border: rgb(7 54 66 / 0.18);
+  --reader-border-subtle: rgb(7 54 66 / 0.1);
+  --reader-card-bg: rgb(7 54 66 / 0.04);
+  --reader-input-bg: rgb(255 255 255 / 0.7);
+  --reader-btn-hover: rgb(158 107 0 / 0.1);
+  --reader-shadow: rgb(7 54 66 / 0.1);
+  color-scheme: light;
 }
 
-/* ── Ocean Deep ──────────────────────────────────────────────────── */
-.reader-surface[data-reader-theme='ocean'] {
-  --reader-bg: #021018;
+/* ── 9. Ocean Deep (Abyssal Cyan) ────────────────────────────────── */
+.reader-surface[data-reader-theme='ocean'],
+body[data-reader-theme='ocean'],
+[data-reader-theme='ocean'] {
+  --reader-bg: #020d14;
+  --reader-surface: #071b26;
+  --reader-surface-glass: rgb(7 27 38 / 0.85);
   --reader-fg: #d7eff8;
-  --reader-muted: #6e9fb4;
+  --reader-secondary: #92c8dc;
+  --reader-muted: #5b95ab;
   --reader-accent: #22d3ee;
+  --reader-accent-rgb: 34 211 238;
+  --reader-accent-contrast: #020d14;
+  --reader-border: rgb(34 211 238 / 0.15);
+  --reader-border-subtle: rgb(34 211 238 / 0.08);
+  --reader-card-bg: rgb(34 211 238 / 0.04);
+  --reader-input-bg: rgb(1 7 11 / 0.55);
+  --reader-btn-hover: rgb(34 211 238 / 0.12);
+  --reader-shadow: rgb(0 0 0 / 0.65);
+  color-scheme: dark;
 }
 
-/* ── Sunset Ember ────────────────────────────────────────────────── */
-.reader-surface[data-reader-theme='sunset'] {
-  --reader-bg: #1a0a05;
+/* ── 10. Sunset Ember (Slow Burn) ────────────────────────────────── */
+.reader-surface[data-reader-theme='sunset'],
+body[data-reader-theme='sunset'],
+[data-reader-theme='sunset'] {
+  --reader-bg: #150803;
+  --reader-surface: #261309;
+  --reader-surface-glass: rgb(38 19 9 / 0.85);
   --reader-fg: #ffe7d1;
-  --reader-muted: #c89878;
+  --reader-secondary: #dfa785;
+  --reader-muted: #ab714e;
   --reader-accent: #fb923c;
+  --reader-accent-rgb: 251 146 60;
+  --reader-accent-contrast: #150803;
+  --reader-border: rgb(251 146 60 / 0.15);
+  --reader-border-subtle: rgb(251 146 60 / 0.08);
+  --reader-card-bg: rgb(251 146 60 / 0.04);
+  --reader-input-bg: rgb(12 4 1 / 0.55);
+  --reader-btn-hover: rgb(251 146 60 / 0.12);
+  --reader-shadow: rgb(0 0 0 / 0.65);
+  color-scheme: dark;
 }
 
-/* ── Forest Mist ─────────────────────────────────────────────────── */
-.reader-surface[data-reader-theme='forest'] {
-  --reader-bg: #0a140c;
+/* ── 11. Forest Mist (Mossy Calm) ────────────────────────────────── */
+.reader-surface[data-reader-theme='forest'],
+body[data-reader-theme='forest'],
+[data-reader-theme='forest'] {
+  --reader-bg: #081109;
+  --reader-surface: #112113;
+  --reader-surface-glass: rgb(17 33 19 / 0.85);
   --reader-fg: #e0f0d5;
-  --reader-muted: #88a888;
+  --reader-secondary: #a8cc98;
+  --reader-muted: #6f945e;
   --reader-accent: #a3e635;
+  --reader-accent-rgb: 163 230 53;
+  --reader-accent-contrast: #081109;
+  --reader-border: rgb(163 230 53 / 0.15);
+  --reader-border-subtle: rgb(163 230 53 / 0.08);
+  --reader-card-bg: rgb(163 230 53 / 0.04);
+  --reader-input-bg: rgb(4 9 5 / 0.55);
+  --reader-btn-hover: rgb(163 230 53 / 0.12);
+  --reader-shadow: rgb(0 0 0 / 0.65);
+  color-scheme: dark;
 }
 
-/* ── Ink on Paper ────────────────────────────────────────────────── */
-.reader-surface[data-reader-theme='ink'] {
+/* ── 12. Ink on Paper (Pure Print) ───────────────────────────────── */
+.reader-surface[data-reader-theme='ink'],
+body[data-reader-theme='ink'],
+[data-reader-theme='ink'] {
   --reader-bg: #f5f5f0;
+  --reader-surface: #e5e5dc;
+  --reader-surface-glass: rgb(229 229 220 / 0.88);
   --reader-fg: #0a0a0a;
-  --reader-muted: #5a5a5a;
-  --reader-accent: #111111;
+  --reader-secondary: #2a2a2a;
+  --reader-muted: #525252;
+  --reader-accent: #1c1917;
+  --reader-accent-rgb: 28 25 23;
+  --reader-accent-contrast: #ffffff;
+  --reader-border: rgb(10 10 10 / 0.18);
+  --reader-border-subtle: rgb(10 10 10 / 0.1);
+  --reader-card-bg: rgb(10 10 10 / 0.04);
+  --reader-input-bg: rgb(255 255 255 / 0.9);
+  --reader-btn-hover: rgb(28 25 23 / 0.1);
+  --reader-shadow: rgb(0 0 0 / 0.1);
+  color-scheme: light;
 }
 
 /* ── Atmosphere visibility by theme ─────────────────────────────── */
 /* Dark themes show the atmospheric particle effects.                 */
 /* Light themes hide them — they don't read well on bright surfaces.  */
 
+.reader-surface[data-reader-theme='sepia'] .atmosphere,
+.reader-surface[data-reader-theme='sepia'] .particles,
 .reader-surface[data-reader-theme='sepia'] .reader-atmosphere,
 .reader-surface[data-reader-theme='sepia'] .reader-particles,
+.reader-surface[data-reader-theme='light'] .atmosphere,
+.reader-surface[data-reader-theme='light'] .particles,
 .reader-surface[data-reader-theme='light'] .reader-atmosphere,
 .reader-surface[data-reader-theme='light'] .reader-particles,
+.reader-surface[data-reader-theme='solar'] .atmosphere,
+.reader-surface[data-reader-theme='solar'] .particles,
 .reader-surface[data-reader-theme='solar'] .reader-atmosphere,
 .reader-surface[data-reader-theme='solar'] .reader-particles,
+.reader-surface[data-reader-theme='ink'] .atmosphere,
+.reader-surface[data-reader-theme='ink'] .particles,
 .reader-surface[data-reader-theme='ink'] .reader-atmosphere,
 .reader-surface[data-reader-theme='ink'] .reader-particles {
-  display: none;
+  display: none !important;
+}
+
+/* Disable glow text on light themes to ensure maximum legibility */
+.reader-surface[data-reader-theme='sepia'] .text-glow,
+.reader-surface[data-reader-theme='light'] .text-glow,
+.reader-surface[data-reader-theme='solar'] .text-glow,
+.reader-surface[data-reader-theme='ink'] .text-glow {
+  text-shadow: none !important;
 }

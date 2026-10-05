@@ -106,6 +106,11 @@ export function setTheme(theme) {
 
   const surface = _getSurface();
   if (surface) surface.dataset.readerTheme = theme;
+  if (typeof document !== 'undefined' && document.body) {
+    document.body.dataset.readerTheme = theme;
+    const toolbar = document.getElementById('mobile-toolbar');
+    if (toolbar) toolbar.dataset.readerTheme = theme;
+  }
 
   // Toggle atmosphere and particle effects for dark vs light themes
   const atmosphere = document.getElementById('atmosphere');
