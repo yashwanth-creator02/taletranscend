@@ -125,17 +125,10 @@ function bindEditorEvents() {
   document.getElementById('publish-btn')?.addEventListener('click', publishFullTale);
   document.getElementById('publish-btn-mobile')?.addEventListener('click', publishFullTale);
 
-  // AI stubs
-  document.getElementById('ai-continue-btn')?.addEventListener('click', () => {
-    setStatus('AI continue — coming soon.', 'neutral');
-    log.info('Continue not yet implemented');
-  });
-  document.getElementById('ai-enhance-btn')?.addEventListener('click', () => {
-    setStatus('AI enhance — coming soon.', 'neutral');
-    log.info('Enhance not yet implemented');
-  });
+  // Cover suggest stub
   document.getElementById('btn-generate-cover')?.addEventListener('click', () => {
     setStatus('Cover suggestion — coming soon.', 'neutral');
+    showToast('Cover suggestion — coming soon.', 'info');
     log.info('Cover suggestion not yet implemented');
   });
 

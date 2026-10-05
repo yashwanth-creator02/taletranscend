@@ -144,7 +144,7 @@
 
     <main
       id="main-content"
-      class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20"
+      class="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20 min-w-0"
     >
       <!-- Breadcrumb -->
       <nav aria-label="Breadcrumb" class="mb-6">
@@ -285,11 +285,11 @@
       </section>
 
       <!-- Filter & Search Controls -->
-      <section class="mb-8" aria-label="Codex Filtering">
+      <section class="mb-8 w-full min-w-0" aria-label="Codex Filtering">
         <div
-          class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between bg-white/[0.02] border border-white/5 p-4 rounded-xl"
+          class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between bg-white/[0.02] border border-white/5 p-4 rounded-xl w-full min-w-0"
         >
-          <div class="relative flex-1">
+          <div class="relative flex-1 min-w-0">
             <i
               data-lucide="search"
               class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
@@ -303,7 +303,7 @@
             />
           </div>
           <div
-            class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0"
+            class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 w-full sm:w-auto min-w-0 max-w-full"
             id="era-filter-container"
           >
             <button class="era-pill active" data-era="all">All Eras</button>

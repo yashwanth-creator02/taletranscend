@@ -120,6 +120,7 @@
     </noscript>
 
     <link rel="stylesheet" href="../assets/css/base.css" />
+    <link rel="stylesheet" href="../assets/css/components.css" />
     <link rel="stylesheet" href="../assets/css/pages/login.css" />
 
     <script type="module" src="../pages/login/login.js"></script>
@@ -142,21 +143,20 @@
     <!-- Toast Container -->
     <div
       id="toast-container"
-      class="fixed top-6 right-6 z-200 flex flex-col gap-3 pointer-events-none max-w-sm w-full"
+      class="toast-region fixed top-6 right-6 z-[600] flex flex-col items-end gap-3 pointer-events-none w-auto max-w-[360px]"
       aria-live="polite"
     ></div>
 
-    <!-- Top-Left Header: Brand Logo matching reference layout -->
+    <!-- Top-Left Header: Brand Logo (navigation disabled on login page) -->
     <header
       class="relative lg:absolute top-0 left-0 w-full p-6 sm:p-8 z-30 flex items-center justify-between pointer-events-none"
     >
-      <a
-        href="/index.html"
-        class="inline-flex items-center gap-3 pointer-events-auto group focus:outline-none focus:ring-2 focus:ring-indigo-400 rounded-xl"
-        aria-label="Return to TaleTranscend home"
+      <div
+        class="inline-flex items-center gap-3 pointer-events-auto select-none cursor-default rounded-xl"
+        aria-label="TaleTranscend"
       >
         <div
-          class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shadow-lg shadow-indigo-500/10 group-hover:scale-105 transition-transform"
+          class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shadow-lg shadow-indigo-500/10 transition-transform"
         >
           <img
             src="/logo.png"
@@ -166,7 +166,7 @@
           />
         </div>
         <span class="text-xl font-cinzel font-bold tracking-wider text-white">TaleTranscend</span>
-      </a>
+      </div>
     </header>
 
     <!-- Main Content Container: Full-Height Split Screen -->
@@ -205,7 +205,7 @@
           class="login-panel lg:col-span-6 xl:col-span-5 flex flex-col justify-center px-6 py-8 sm:px-12 lg:px-12 xl:px-16 relative z-10 lg:py-6"
         >
           <div
-            class="login-card w-full max-w-md mx-auto my-auto"
+            class="login-card w-full mx-auto my-auto"
             role="region"
             aria-labelledby="login-heading"
           >

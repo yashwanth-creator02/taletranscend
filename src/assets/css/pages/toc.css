@@ -94,6 +94,21 @@
   border-color: rgb(var(--accent-rgb) / 0.4);
 }
 
+#era-filter-container {
+  max-width: 100%;
+  scrollbar-width: thin;
+}
+
+#main-content {
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  #main-content {
+    max-width: 72rem;
+  }
+}
+
 .toc-era-group {
   margin-bottom: var(--space-8);
 }

@@ -9,15 +9,55 @@
 
 .login-card {
   position: relative;
-  background: transparent;
+  background: rgb(var(--bg-overlay-rgb) / 0.85);
+  backdrop-filter: blur(var(--blur-xl));
+  -webkit-backdrop-filter: blur(var(--blur-xl));
+  border: 1px solid rgb(var(--border) / 0.5);
+  border-bottom-width: 0px;
   border-radius: var(--radius-2xl);
+  box-shadow:
+    0 10px 40px -10px rgb(var(--dark-rgb) / 0.8),
+    0 0 24px rgb(var(--accent-rgb) / 0.08),
+    inset 0 1px 0 rgb(var(--light-rgb) / 0.1);
+  width: 500px;
+  max-width: 100%;
+  min-height: 614px;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 32px;
+  padding-bottom: 8px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   transition:
-    box-shadow var(--transition-base),
-    border-color var(--transition-base);
+    box-shadow var(--transition-slow),
+    border-color var(--transition-slow),
+    transform var(--transition-base);
 }
 
-.login-card:hover {
-  /* Subtle depth */
+.login-card.has-success-glow {
+  box-shadow:
+    0 0 50px rgb(var(--accent-rgb) / 0.4),
+    0 0 80px rgb(var(--rune-rgb) / 0.25),
+    inset 0 1px 0 rgb(var(--light-rgb) / 0.15) !important;
+  border-color: rgb(var(--indigo-border-rgb) / 0.5) !important;
+}
+
+@media (max-width: 540px) {
+  .login-card {
+    width: 100%;
+    min-height: auto;
+    padding-top: 24px;
+    padding-bottom: 12px;
+    padding-left: 14px;
+    padding-right: 14px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+  }
 }
 
 /* ── 2. Left Visual: Boy Reading Under Lamp ──────────────────────────── */

@@ -62,6 +62,7 @@ export function handleAuthSuccess() {
 export function addSuccessGlow() {
   const card = document.querySelector('.login-card');
   if (card) {
+    card.classList.add('has-success-glow');
     card.style.boxShadow = `
       0 0 50px rgba(99, 102, 241, 0.4),
       0 0 80px rgba(245, 158, 11, 0.25),

@@ -160,7 +160,7 @@ export function buildBookmarkCard(tale) {
       data-id="${id}"
     >
       <!-- Dedicated options button & menu at card level so it is not clipped -->
-      <div class="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-30">
+      <div class="absolute top-3 right-3 z-30">
         <button
           type="button"
           data-action="options"

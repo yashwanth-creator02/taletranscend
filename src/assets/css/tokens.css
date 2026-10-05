@@ -66,6 +66,7 @@
   --bg-base-rgb: 3 3 5;
   --bg-overlay-rgb: 13 13 20;
   --accent-light-rgb: 165 180 252; /* Tint used for accent text on dark  */
+  --indigo-border-rgb: 129 140 248; /* Indigo accent border highlight     */
   --reader-accent-rgb: 139 124 246; /* Reader default accent              */
   --text-primary-rgb: 226 232 240;
   --text-secondary-rgb: 148 163 184;

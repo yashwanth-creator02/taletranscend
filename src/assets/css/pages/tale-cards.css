@@ -95,7 +95,18 @@
   transform: scale(1.05);
 }
 
-/* Progress Bar */
+/* Progress Meta & Bar */
+.card-progress-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+  font-size: 0.55rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
 .progress-bar {
   height: 2px;
   background: rgb(var(--light-rgb) / var(--a-04));

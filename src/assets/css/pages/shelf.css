@@ -247,7 +247,7 @@ body.page-shelf #mobile-dock-container {
 /* ── Sort Popup Panel ───────────────────────── */
 #sort-panel {
   z-index: 1000 !important;
-  background: rgb(var(--bg-overlay-rgb) / var(--a-11)) !important;
+  background: rgb(var(--bg-overlay-rgb) / 0.98) !important;
   backdrop-filter: blur(40px) saturate(200%) !important;
   border: 1px solid rgb(var(--rune-rgb) / var(--a-08)) !important;
   box-shadow:

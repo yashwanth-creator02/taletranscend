@@ -333,7 +333,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
 
           <!-- Bottom of Cover: Progress Bar & Percentage -->
           <div class="absolute inset-x-0 bottom-0 p-2 sm:p-2.5 z-10">
-            <div class="flex items-center justify-between mb-1 text-[7px] sm:text-[8px] font-black uppercase tracking-wider">
+            <div class="card-progress-meta">
               <span class="text-zinc-400">Progress</span>
               <span class="text-indigo-300">${_progressLabel(progress)}</span>
             </div>

@@ -47,13 +47,14 @@
   #sidebar {
     display: block;
     position: fixed;
-    top: 0;
+    top: var(--nav-height, 64px);
     left: 0;
-    height: 100vh;
-    max-width: 85vw;
-    width: 18rem;
-    z-index: 75;
+    height: calc(100vh - var(--nav-height, 64px));
+    height: calc(100dvh - var(--nav-height, 64px));
+    width: min(18rem, 85vw) !important;
+    z-index: 150;
     transform: translateX(-100%);
+    transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: 16px 0 50px rgb(var(--dark-rgb) / 0.85);
   }
 
@@ -64,21 +65,36 @@
   #sidebar .sidebar-inner {
     background: rgb(var(--bg-overlay-rgb));
     border-right: 1px solid rgb(var(--light-rgb) / var(--a-04));
+    padding-bottom: calc(var(--space-12) + 30px);
   }
 }
 
 .sidebar-backdrop {
   position: fixed;
   inset: 0;
+  top: var(--nav-height, 64px);
   background: rgb(var(--dark-rgb) / 0.75);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  z-index: 70;
+  z-index: 140;
   transition: opacity 250ms ease;
 }
 
-#sidebar.sidebar--collapsed {
-  width: var(--sidebar-width-collapsed);
+@media (min-width: 768px) {
+  #sidebar.sidebar--collapsed {
+    width: var(--sidebar-width-collapsed);
+  }
+
+  /* Labels / text that hide on collapse */
+  #sidebar.sidebar--collapsed .sidebar-label,
+  #sidebar.sidebar--collapsed .sidebar-section-heading,
+  #sidebar.sidebar--collapsed .sidebar-user-text {
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    overflow: hidden;
+    display: none;
+  }
 }
 
 .sidebar-inner {
@@ -91,17 +107,6 @@
   border-right: 1px solid rgb(var(--light-rgb) / var(--a-03));
   padding: 16px 10px;
   overflow: hidden;
-}
-
-/* Labels / text that hide on collapse */
-#sidebar.sidebar--collapsed .sidebar-label,
-#sidebar.sidebar--collapsed .sidebar-section-heading,
-#sidebar.sidebar--collapsed .sidebar-user-text {
-  opacity: 0;
-  pointer-events: none;
-  width: 0;
-  overflow: hidden;
-  display: none;
 }
 
 /* ── Sidebar filter buttons ──────────────────── */
@@ -248,15 +253,21 @@
   background: rgb(var(--dark-rgb) / 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  z-index: 100;
+  z-index: 250;
   display: none;
   align-items: center;
   justify-content: center;
   padding: 16px;
 }
 
-.modal-overlay.is-open {
+.modal-overlay.is-open,
+.modal-overlay.flex,
+.modal-overlay:not(.hidden) {
   display: flex;
+}
+
+.modal-overlay.hidden {
+  display: none !important;
 }
 
 /* ── Skeletons ───────────────────────────────── */
