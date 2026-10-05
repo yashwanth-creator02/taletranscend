@@ -218,7 +218,7 @@ export const FONT_STYLESHEETS = [
     '&family=Uncial+Antiqua' +
     '&family=JetBrains+Mono:wght@400;500;700' +
     '&display=swap',
-  'https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/open-dyslexic.min.css',
+  'https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/open-dyslexic-regular.css',
 ];
 
 /**

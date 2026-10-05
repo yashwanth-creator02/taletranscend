@@ -21,16 +21,11 @@ export async function toggleGlobalCommandPalette() {
   if (!palette) {
     log.info('Mounting command palette dynamically for standalone view');
 
-    // 1. Ensure nav CSS is present in head
-    const hasNavCss = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).some((l) =>
-      l.getAttribute('href')?.includes('nav.css')
-    );
-
-    if (!hasNavCss) {
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = '/src/assets/css/nav.css';
-      document.head.appendChild(link);
+    // 1. Ensure nav CSS is loaded
+    try {
+      await import('@css/nav.css');
+    } catch {
+      // Gracefully continue if running in a test or headless environment
     }
 
     // 2. Build and mount command palette markup

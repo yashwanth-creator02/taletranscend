@@ -41,6 +41,7 @@ async function _loadIcons() {
     ChevronDown: L.ChevronDown,
     ChevronLeft: L.ChevronLeft,
     ChevronRight: L.ChevronRight,
+    ChevronsLeftRight: L.ChevronsLeftRight,
     ArrowLeft: L.ArrowLeft,
     ArrowRight: L.ArrowRight,
     ArrowUp: L.ArrowUp,
@@ -49,6 +50,7 @@ async function _loadIcons() {
     PanelLeftClose: L.PanelLeftClose,
     PanelLeftOpen: L.PanelLeftOpen,
     LayoutGrid: L.LayoutGrid,
+    Columns2: L.Columns2,
     Maximize2: L.Maximize2,
     Minimize2: L.Minimize2,
     // Actions
@@ -59,6 +61,7 @@ async function _loadIcons() {
     Minus: L.Minus,
     X: L.X,
     Check: L.Check,
+    CheckCheck: L.CheckCheck,
     Send: L.Send,
     Download: L.Download,
     Copy: L.Copy,
@@ -78,7 +81,9 @@ async function _loadIcons() {
     BookmarkMinus: L.BookmarkMinus,
     Share2: L.Share2,
     Link: L.Link,
+    ExternalLink: L.ExternalLink,
     Globe: L.Globe,
+    Rss: L.Rss,
     // Status & Alerts
     CheckCircle: L.CheckCircle,
     CheckCircle2: L.CheckCircle2,
@@ -93,6 +98,7 @@ async function _loadIcons() {
     Pause: L.Pause,
     Mic: L.Mic,
     Volume2: L.Volume2,
+    Image: L.Image,
     // People
     User: L.User,
     UserCheck: L.UserCheck,

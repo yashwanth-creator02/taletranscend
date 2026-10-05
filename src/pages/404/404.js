@@ -2,6 +2,7 @@
 // Entry point for the 404 error page.
 
 import '@css/base.css';
+import '@css/components.css';
 import { initIcons } from '@ui/components/icons.js';
 import { initPageReveal, readyReveal } from '@/utils';
 

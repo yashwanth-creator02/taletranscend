@@ -3,6 +3,7 @@
 // tabbed Email/Phone authentication, password toggle, and accessible placeholders.
 
 import '@css/base.css';
+import '@css/components.css';
 import '@css/pages/login.css';
 
 import { auth, signInAnonymously, signInWithGoogle, onAuthStateChanged } from '@fb/index.js';
