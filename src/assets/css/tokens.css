@@ -236,10 +236,14 @@
 
   /* ══ 4. SPACE & SHAPE ═══════════════════════════════════════════════════ */
 
-  /* 4px base grid. */
+  /* 4px base grid + subgrid steps. */
+  --space-0-5: 0.125rem;
   --space-1: 0.25rem;
+  --space-1-5: 0.375rem;
   --space-2: 0.5rem;
+  --space-2-5: 0.625rem;
   --space-3: 0.75rem;
+  --space-3-5: 0.875rem;
   --space-4: 1rem;
   --space-5: 1.5rem;
   --space-6: 2rem;
@@ -247,6 +251,10 @@
   --space-8: 4rem;
   --space-9: 6rem;
   --space-10: 8rem;
+
+  /* Aliases for decimal naming */
+  --space-2\.5: var(--space-2-5);
+  --space-3\.5: var(--space-3-5);
 
   /* The horizontal gutter every page aligns to, and the widest a content
      column may get. Previously each page picked its own (`max-w-350`,

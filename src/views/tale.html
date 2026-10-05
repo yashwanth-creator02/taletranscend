@@ -150,20 +150,13 @@
 
     <main
       id="main-content"
-      class="app-viewport scroll-container overflow-y-auto flex-1 focus:outline-none"
+      class="app-viewport scroll-container overflow-y-auto overflow-x-hidden dock-clearance flex-1 focus:outline-none"
     >
       <!-- ── Breadcrumb & Top Bar ── -->
       <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-2">
         <div class="flex items-center justify-between gap-4">
-          <a
-            href="/library.html"
-            id="btn-back-nav"
-            class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-white/6 bg-white/3 hover:bg-white/7 hover:border-white/12 text-xs font-semibold text-slate-400 hover:text-white transition-all group"
-          >
-            <i
-              data-lucide="chevron-left"
-              class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform text-slate-500 group-hover:text-white"
-            ></i>
+          <a href="/library.html" id="btn-back-nav" class="btn-back-pill">
+            <i data-lucide="chevron-left"></i>
             <span>Library</span>
           </a>
           <span id="loading-indicator" class="hidden" aria-hidden="true"></span>
@@ -269,7 +262,7 @@
             <div class="grid grid-cols-2 gap-2">
               <button
                 id="start-btn"
-                class="action-btn h-11 px-4 bg-linear-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                class="btn btn-primary h-11 text-xs uppercase tracking-wider rounded-xl shadow-lg"
               >
                 <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
                 <span>Initiate</span>
@@ -277,7 +270,7 @@
 
               <button
                 id="resume-btn"
-                class="action-btn h-11 px-4 glass-strong border border-white/10 hover:border-indigo-500/30 text-indigo-300 hover:text-white rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer"
+                class="btn btn-secondary h-11 text-xs uppercase tracking-wider rounded-xl"
               >
                 <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
                 <span id="resume-text">Resume</span>
@@ -287,7 +280,7 @@
             <div class="grid grid-cols-3 gap-2">
               <button
                 id="resonance-btn-mobile"
-                class="action-btn h-10 px-2 glass border border-white/10 hover:border-red-500/40 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer group"
+                class="btn btn-secondary h-10 px-2 rounded-xl text-xs font-semibold group"
                 title="Soul Resonance"
                 aria-label="Soul Resonance"
               >
@@ -300,7 +293,7 @@
 
               <button
                 id="shelf-btn"
-                class="action-btn h-10 px-2 glass border border-white/10 hover:border-indigo-500/30 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                class="btn btn-secondary h-10 px-2 rounded-xl text-xs font-semibold"
                 title="Save to Shelf"
                 aria-label="Save to Shelf"
               >
@@ -310,7 +303,7 @@
 
               <button
                 id="share-btn"
-                class="action-btn h-10 px-2 glass border border-white/10 hover:border-indigo-500/30 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                class="btn btn-secondary h-10 px-2 rounded-xl text-xs font-semibold"
                 title="Share Tale"
                 aria-label="Share Tale"
               >
@@ -324,7 +317,7 @@
               <a
                 id="edit-tale-btn-mobile"
                 href="#"
-                class="action-btn w-full h-10 px-3 glass border border-amber-500/30 hover:border-amber-400 text-amber-300 hover:text-white rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
+                class="btn btn-accent w-full h-10 px-3 rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm"
                 title="Edit Chronicle"
               >
                 <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
@@ -337,7 +330,7 @@
           <div class="hidden lg:flex flex-wrap items-center gap-3 pt-2">
             <button
               id="start-btn-desktop"
-              class="action-btn py-3 px-6 bg-linear-to-r from-indigo-500 via-indigo-600 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
+              class="btn btn-primary py-3 px-6 rounded-xl text-xs uppercase tracking-wider shadow-lg shrink-0"
             >
               <i data-lucide="play" class="w-4 h-4 fill-current"></i>
               <span>Initiate Reading</span>
@@ -345,7 +338,7 @@
 
             <button
               id="resume-btn-desktop"
-              class="action-btn py-3 px-5 glass-strong border border-white/10 hover:border-indigo-500/30 text-indigo-300 hover:text-white rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
+              class="btn btn-secondary py-3 px-5 rounded-xl text-xs uppercase tracking-wider shrink-0"
             >
               <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
               <span id="resume-text-desktop">Resume</span>
@@ -353,7 +346,7 @@
 
             <button
               id="resonance-btn-desktop"
-              class="action-btn py-3 px-4.5 glass border border-white/8 hover:border-red-500/40 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0 group"
+              class="btn btn-secondary py-3 px-4.5 rounded-xl text-xs font-semibold shrink-0 group"
               title="Soul Resonance"
               aria-label="Soul Resonance"
             >
@@ -366,7 +359,7 @@
 
             <button
               id="shelf-btn-desktop"
-              class="action-btn py-3 px-4 glass border border-white/8 hover:border-indigo-500/30 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
+              class="btn btn-secondary py-3 px-4 rounded-xl text-xs font-semibold shrink-0"
               title="Save to Shelf"
               aria-label="Save to Shelf"
             >
@@ -376,7 +369,7 @@
 
             <button
               id="share-btn-desktop"
-              class="action-btn py-3 px-4 glass border border-white/8 hover:border-indigo-500/30 text-slate-300 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
+              class="btn btn-secondary py-3 px-4 rounded-xl text-xs font-semibold shrink-0"
               title="Share Tale"
               aria-label="Share Tale"
             >
@@ -388,7 +381,7 @@
             <a
               id="edit-tale-btn-desktop"
               href="#"
-              class="hidden action-btn py-3 px-4.5 glass border border-amber-500/30 hover:border-amber-400 text-amber-300 hover:text-white rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0 shadow-sm"
+              class="hidden btn btn-accent py-3 px-4.5 rounded-xl text-xs font-bold uppercase tracking-wider shrink-0 shadow-sm"
               title="Edit Chronicle"
             >
               <i data-lucide="edit-3" class="w-4 h-4"></i>
