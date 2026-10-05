@@ -22,8 +22,7 @@ export function initScrollToTop() {
   if (!btn) {
     btn = document.createElement('button');
     btn.id = 'scroll-to-top';
-    btn.className =
-      'scroll-to-top fixed bottom-20 sm:bottom-6 right-5 sm:right-6 z-40 p-3 sm:p-3.5 rounded-2xl border border-white/10 glass-strong text-slate-300 hover:text-white hover:border-indigo-500/40 shadow-2xl transition-all duration-300 opacity-0 pointer-events-none translate-y-3 flex items-center justify-center cursor-pointer group';
+    btn.className = 'scroll-to-top group';
     btn.setAttribute('aria-label', 'Scroll to top');
     btn.setAttribute('title', 'Scroll to top');
     btn.innerHTML = `

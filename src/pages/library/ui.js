@@ -48,13 +48,13 @@ export function setupSidebarToggle() {
   const openMobileDrawer = () => {
     sidebar.classList.add('sidebar--mobile-open');
     if (backdrop) backdrop.classList.remove('hidden');
-    document.body.classList.add('overflow-hidden');
+    document.body.classList.add('overflow-hidden', 'has-sidebar-open');
   };
 
   const closeMobileDrawer = () => {
     sidebar.classList.remove('sidebar--mobile-open');
     if (backdrop) backdrop.classList.add('hidden');
-    document.body.classList.remove('overflow-hidden');
+    document.body.classList.remove('overflow-hidden', 'has-sidebar-open');
   };
 
   if (mobileToggleBtn) {
