@@ -180,6 +180,8 @@ export function bindChapterClicks(taleId, chapters = [], userId = null, tale = n
   if (!list) return;
 
   list.addEventListener('click', (e) => {
+    const uid = userId || auth.currentUser?.uid;
+
     // 1. Download fragment button
     const downloadBtn = e.target.closest('[data-action="download-chapter"]');
     if (downloadBtn) {
@@ -197,11 +199,11 @@ export function bindChapterClicks(taleId, chapters = [], userId = null, tale = n
       e.preventDefault();
       e.stopPropagation();
       const idx = Number(markReadBtn.dataset.chapterIndex ?? 0);
-      markChapterRead({ userId, taleId, chapterIndex: idx });
-      syncMarkChapterRead({ userId, taleId, chapterIndex: idx });
+      markChapterRead({ userId: uid, taleId, chapterIndex: idx });
+      syncMarkChapterRead({ userId: uid, taleId, chapterIndex: idx });
       const chTitle = chapters[idx]?.title || `Scroll #${idx + 1}`;
       showToast(`Marked "${chTitle}" as read.`, 'success');
-      renderChapters(userId, chapters, taleId);
+      renderChapters(uid, chapters, taleId);
       return;
     }
 
@@ -211,11 +213,11 @@ export function bindChapterClicks(taleId, chapters = [], userId = null, tale = n
       e.preventDefault();
       e.stopPropagation();
       const idx = Number(markUnreadBtn.dataset.chapterIndex ?? 0);
-      markChapterUnread({ userId, taleId, chapterIndex: idx });
-      syncMarkChapterUnread({ userId, taleId, chapterIndex: idx });
+      markChapterUnread({ userId: uid, taleId, chapterIndex: idx });
+      syncMarkChapterUnread({ userId: uid, taleId, chapterIndex: idx });
       const chTitle = chapters[idx]?.title || `Scroll #${idx + 1}`;
       showToast(`Marked "${chTitle}" as unread.`, 'info');
-      renderChapters(userId, chapters, taleId);
+      renderChapters(uid, chapters, taleId);
       return;
     }
 
@@ -248,20 +250,22 @@ export function setupChronicleBatchActions(userId, taleId, chapters = [], tale =
   if (markAllReadBtn) {
     markAllReadBtn.addEventListener('click', () => {
       if (!chapters.length) return;
-      markAllChaptersRead({ userId, taleId, chapterCount: chapters.length });
-      syncMarkAllChaptersRead({ userId, taleId, chapterCount: chapters.length });
+      const uid = userId || auth.currentUser?.uid;
+      markAllChaptersRead({ userId: uid, taleId, chapterCount: chapters.length });
+      syncMarkAllChaptersRead({ userId: uid, taleId, chapterCount: chapters.length });
       showToast('All fragments marked as read.', 'success');
-      renderChapters(userId, chapters, taleId);
+      renderChapters(uid, chapters, taleId);
     });
   }
 
   if (markAllUnreadBtn) {
     markAllUnreadBtn.addEventListener('click', () => {
       if (!chapters.length) return;
-      markAllChaptersUnread({ userId, taleId });
-      syncMarkAllChaptersUnread({ userId, taleId, chapterCount: chapters.length });
+      const uid = userId || auth.currentUser?.uid;
+      markAllChaptersUnread({ userId: uid, taleId });
+      syncMarkAllChaptersUnread({ userId: uid, taleId, chapterCount: chapters.length });
       showToast('All fragments marked as unread.', 'info');
-      renderChapters(userId, chapters, taleId);
+      renderChapters(uid, chapters, taleId);
     });
   }
 

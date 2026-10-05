@@ -1,15 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { markTaleFinished } from '../markFinish.service.js';
-import {
-  getDoc,
-  setDoc,
-  updateDoc,
-  getDocs,
-  writeBatch,
-  refs,
-  db,
-  serverTimestamp,
-} from '@fb/index.js';
+import { getDoc, getDocs, writeBatch, refs, serverTimestamp } from '@fb/index.js';
+import { markAllChaptersRead } from '@services/reader/localProgress.service.js';
+import { cacheService } from '@services/cache.service.js';
 
 // Mock @/utils
 vi.mock('@/utils', async () => {
@@ -26,9 +19,32 @@ vi.mock('@/utils', async () => {
   };
 });
 
+// Mock localProgress
+vi.mock('@services/reader/localProgress.service.js', () => ({
+  markAllChaptersRead: vi.fn(),
+}));
+
+// Mock cacheService
+vi.mock('@services/cache.service.js', () => ({
+  cacheService: {
+    invalidateProgress: vi.fn(),
+    invalidateTale: vi.fn(),
+    invalidateTales: vi.fn(),
+  },
+}));
+
 describe('MarkFinishService', () => {
+  let mockBatch;
+
   beforeEach(() => {
     vi.clearAllMocks();
+    mockBatch = {
+      set: vi.fn(),
+      update: vi.fn(),
+      commit: vi.fn().mockResolvedValue(undefined),
+    };
+    writeBatch.mockReturnValue(mockBatch);
+    serverTimestamp.mockReturnValue('mock-timestamp');
   });
 
   describe('markTaleFinished', () => {
@@ -37,96 +53,94 @@ describe('MarkFinishService', () => {
       expect(getDoc).not.toHaveBeenCalled();
     });
 
-    it("should mark tale as finished, creating progress doc if it doesn't exist", async () => {
-      // Setup mocks
-      getDoc
-        .mockResolvedValueOnce({ exists: () => false }) // progressSnap
-        .mockResolvedValueOnce({
-          // taleSnap
-          exists: () => true,
-          data: () => ({ title: 'Tale Title', coverUrl: 'cover.jpg' }),
-        });
-
-      getDocs.mockResolvedValue({
-        empty: false,
-        docs: [
-          { ref: 'chapterRef1', data: () => ({}) },
-          { ref: 'chapterRef2', data: () => ({}) },
-        ],
-        forEach(cb) {
-          this.docs.forEach(cb);
-        },
+    it('should mark tale and all its chapters as finished in Firestore and local storage', async () => {
+      // Mock tale metadata with 2 chapters
+      getDoc.mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({ title: 'Tale Title', coverUrl: 'cover.jpg', chapterCount: 2 }),
       });
 
-      const mockBatch = {
-        update: vi.fn(),
-        commit: vi.fn().mockResolvedValue(undefined),
-      };
-      writeBatch.mockReturnValue(mockBatch);
-      serverTimestamp.mockReturnValue('mock-timestamp');
+      // Mock existing progress chapters query
+      getDocs.mockResolvedValueOnce({
+        empty: true,
+        docs: [],
+      });
 
       await markTaleFinished({ userId: 'u1', taleId: 't1' });
 
       expect(refs.progress).toHaveBeenCalledWith('u1', 't1');
       expect(refs.tale).toHaveBeenCalledWith('t1');
 
-      // Should create progress doc
-      expect(setDoc).toHaveBeenCalledWith(expect.anything(), {
-        status: 'finished',
-        finishedAt: 'mock-timestamp',
-        lastReadAt: 'mock-timestamp',
-        totalReadTimeMs: 0,
-        taleTitle: 'Tale Title',
-        coverUrl: 'cover.jpg',
-        createdAt: 'mock-timestamp',
-        updatedAt: 'mock-timestamp',
-      });
+      // Should batch set chapter 0 and chapter 1 to 100%
+      expect(refs.progressChapter).toHaveBeenCalledWith('u1', 't1', 0);
+      expect(refs.progressChapter).toHaveBeenCalledWith('u1', 't1', 1);
 
-      // Should update chapters in batch
-      expect(getDocs).toHaveBeenCalled();
-      expect(mockBatch.update).toHaveBeenCalledTimes(2);
+      // Total batch.set calls: 2 chapters + 1 progress doc = 3
+      expect(mockBatch.set).toHaveBeenCalledTimes(3);
       expect(mockBatch.commit).toHaveBeenCalled();
 
-      // Should update tale status to finished
-      expect(updateDoc).toHaveBeenCalledWith(expect.anything(), {
-        status: 'finished',
-        finishedAt: 'mock-timestamp',
-        lastReadAt: 'mock-timestamp',
-        taleTitle: 'Tale Title',
-        coverUrl: 'cover.jpg',
-        updatedAt: 'mock-timestamp',
+      // Tale-level progress doc set to finished
+      expect(mockBatch.set).toHaveBeenCalledWith(
+        refs.progress('u1', 't1'),
+        expect.objectContaining({
+          status: 'finished',
+          finishedAt: 'mock-timestamp',
+          lastReadAt: 'mock-timestamp',
+          taleTitle: 'Tale Title',
+          coverUrl: 'cover.jpg',
+          chapterCount: 2,
+        }),
+        { merge: true }
+      );
+
+      // Local storage and cache updated
+      expect(markAllChaptersRead).toHaveBeenCalledWith({
+        userId: 'u1',
+        taleId: 't1',
+        chapterCount: 2,
+      });
+      expect(cacheService.invalidateProgress).toHaveBeenCalledWith('u1', 't1');
+      expect(cacheService.invalidateTale).toHaveBeenCalledWith('t1');
+      expect(cacheService.invalidateTales).toHaveBeenCalled();
+    });
+
+    it('should proceed and default chapterCount to 1 if tale metadata fetch fails', async () => {
+      getDoc.mockRejectedValueOnce(new Error('Metadata fail'));
+      getDocs
+        .mockResolvedValueOnce({ empty: true, docs: [] }) // progressChapters
+        .mockResolvedValueOnce({ empty: true, docs: [] }); // chapters fallback
+
+      await markTaleFinished({ userId: 'u1', taleId: 't1' });
+
+      expect(mockBatch.set).toHaveBeenCalledTimes(2); // 1 chapter (index 0) + 1 progress doc
+      expect(mockBatch.commit).toHaveBeenCalled();
+      expect(markAllChaptersRead).toHaveBeenCalledWith({
+        userId: 'u1',
+        taleId: 't1',
+        chapterCount: 1,
       });
     });
 
-    it('should proceed if tale metadata fetch fails', async () => {
-      getDoc
-        .mockResolvedValueOnce({ exists: () => true, data: () => ({}) }) // progressSnap
-        .mockRejectedValueOnce(new Error('Metadata fail')); // taleSnap
+    it('should include any pre-existing chapter documents beyond chapterCount', async () => {
+      getDoc.mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({ title: 'Tale Title', coverUrl: 'cover.jpg', chapterCount: 1 }),
+      });
 
-      getDocs.mockResolvedValue({ empty: true });
-
-      await markTaleFinished({ userId: 'u1', taleId: 't1' });
-
-      expect(updateDoc).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({
-          taleTitle: '',
-          coverUrl: '',
-        })
-      );
-    });
-
-    it('should not update chapters if none found', async () => {
-      getDoc
-        .mockResolvedValueOnce({ exists: () => true, data: () => ({}) })
-        .mockResolvedValueOnce({ exists: () => false });
-
-      getDocs.mockResolvedValue({ empty: true });
+      getDocs.mockResolvedValueOnce({
+        empty: false,
+        docs: [{ id: '0' }, { id: '1' }],
+        forEach(cb) {
+          this.docs.forEach(cb);
+        },
+      });
 
       await markTaleFinished({ userId: 'u1', taleId: 't1' });
 
-      expect(writeBatch).not.toHaveBeenCalled();
-      expect(updateDoc).toHaveBeenCalled();
+      // Chapter 0 (from loop) and Chapter 1 (from existing docs)
+      expect(refs.progressChapter).toHaveBeenCalledWith('u1', 't1', 0);
+      expect(refs.progressChapter).toHaveBeenCalledWith('u1', 't1', '1');
+      expect(mockBatch.commit).toHaveBeenCalled();
     });
   });
 });

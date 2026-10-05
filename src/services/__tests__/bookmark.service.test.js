@@ -11,11 +11,13 @@ vi.mock('@fb/index.js', () => ({
   getDocs: vi.fn(() => Promise.resolve({ empty: true, docs: [] })),
   getDoc: vi.fn(() => Promise.resolve({ exists: () => false })),
   serverTimestamp: vi.fn(() => 'mock-timestamp'),
+  auth: { currentUser: null },
 }));
 
 // Mock @state/index.js
 vi.mock('@state/index.js', () => ({
   createBookmark: vi.fn((userId, taleId, data) => ({ userId, taleId, ...data })),
+  appState: { userId: null },
 }));
 
 // Mock @/utils

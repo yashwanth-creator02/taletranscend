@@ -183,6 +183,18 @@ export async function syncMarkAllChaptersRead({ userId, taleId, chapterCount }) 
       })
     );
   }
+  promises.push(
+    setDoc(
+      refs.progress(userId, taleId),
+      {
+        status: 'finished',
+        finishedAt: serverTimestamp(),
+        lastReadAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    )
+  );
   return Promise.all(promises);
 }
 
@@ -202,5 +214,16 @@ export async function syncMarkAllChaptersUnread({ userId, taleId, chapterCount }
       })
     );
   }
+  promises.push(
+    setDoc(
+      refs.progress(userId, taleId),
+      {
+        status: 'in-progress',
+        finishedAt: null,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    )
+  );
   return Promise.all(promises);
 }

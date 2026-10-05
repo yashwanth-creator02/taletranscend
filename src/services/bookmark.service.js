@@ -3,8 +3,8 @@
 // Bookmarks are private to each user under users/{uid}/bookmarks/{taleId}.
 // Key tale fields are cached on the bookmark document to avoid extra reads on the shelf page.
 
-import { getDocs, deleteDoc, setDoc, serverTimestamp, refs } from '@fb/index.js';
-import { createBookmark } from '@state/index.js';
+import { getDoc, getDocs, deleteDoc, setDoc, serverTimestamp, refs, auth } from '@fb/index.js';
+import { appState, createBookmark } from '@state/index.js';
 import {
   safeAsync,
   guardOffline,
@@ -28,39 +28,54 @@ export const BOOKMARK_COOLDOWN_MS = 5000; // 5s
  * can render without fetching the full tale document.
  *
  * @param {Object} params
- * @param {string} params.userId
+ * @param {string} [params.userId]
  * @param {string} params.taleId
  * @param {import('@state/schemas/tale.schema.js').Tale} [params.tale] - Optional tale object for caching fields
  */
 export async function addToBookmarks({ userId, taleId, tale = {} }) {
-  if (!userId || !taleId) return;
+  const uid = userId || auth?.currentUser?.uid || appState?.userId;
+  if (!uid || !taleId) return;
   if (guardOffline()) return;
 
-  if (!checkRateLimit(`bookmark:${userId}`, BOOKMARK_COOLDOWN_MS)) {
+  if (!checkRateLimit(`bookmark:${uid}`, BOOKMARK_COOLDOWN_MS)) {
     const { showToast } = await import('@ui/components/toast.js');
     showToast('Soul link unstable. Please wait.', 'warning');
     return { status: 'rate-limited' };
   }
 
-  log.info('Adding bookmark', { userId, taleId });
+  log.info('Adding bookmark', { userId: uid, taleId });
+
+  let resolvedTale = { ...tale };
+  if (!resolvedTale.title) {
+    try {
+      const snap = await getDoc(refs.tale(taleId));
+      if (snap && typeof snap.exists === 'function' && snap.exists()) {
+        const data = typeof snap.data === 'function' ? snap.data() : snap;
+        resolvedTale = { ...data, ...resolvedTale };
+      }
+    } catch (err) {
+      log.warn('Could not fetch tale metadata for bookmark', err);
+    }
+  }
+
   const bookmarkData = {
     taleId,
-    taleTitle: tale.title ?? '',
-    coverUrl: tale.coverUrl ?? '',
-    authorName: tale.authorName ?? '',
-    chapterCount: tale.chapterCount ?? 0,
-    era: tale.era ?? '',
-    synopsis: tale.synopsis || tale.description || '',
+    taleTitle: resolvedTale.title ?? '',
+    coverUrl: resolvedTale.coverUrl ?? '',
+    authorName: resolvedTale.authorName ?? '',
+    chapterCount: Number(resolvedTale.chapterCount) || 0,
+    era: resolvedTale.era ?? '',
+    synopsis: resolvedTale.synopsis || resolvedTale.description || '',
     bookmarkedAt: Date.now(),
   };
 
   // Optimistically save offline
   await saveBookmarkOffline(bookmarkData);
-  cacheService.invalidateBookmarks(userId);
+  cacheService.invalidateBookmarks(uid);
 
   return safeAsync(
     setDoc(
-      refs.bookmark(userId, taleId),
+      refs.bookmark(uid, taleId),
       {
         ...bookmarkData,
         bookmarkedAt: serverTimestamp(),
@@ -82,20 +97,21 @@ export async function addToBookmarks({ userId, taleId, tale = {} }) {
  * @param {string} params.taleId
  */
 export async function removeFromBookmarks({ userId, taleId }) {
-  if (!userId || !taleId) return;
+  const uid = userId || auth?.currentUser?.uid || appState?.userId;
+  if (!uid || !taleId) return;
   if (guardOffline()) return;
 
-  if (!checkRateLimit(`bookmark:${userId}`, BOOKMARK_COOLDOWN_MS)) {
+  if (!checkRateLimit(`bookmark:${uid}`, BOOKMARK_COOLDOWN_MS)) {
     const { showToast } = await import('@ui/components/toast.js');
     showToast('Soul link unstable. Please wait.', 'warning');
     return { status: 'rate-limited' };
   }
 
-  log.info('Removing bookmark', { userId, taleId });
+  log.info('Removing bookmark', { userId: uid, taleId });
   await removeBookmarkOffline(taleId);
-  cacheService.invalidateBookmarks(userId);
+  cacheService.invalidateBookmarks(uid);
 
-  return safeAsync(deleteDoc(refs.bookmark(userId, taleId)), {
+  return safeAsync(deleteDoc(refs.bookmark(uid, taleId)), {
     errorMessage: 'Failed to remove bookmark.',
     logContext: 'services.bookmark.removeFromBookmarks',
   });

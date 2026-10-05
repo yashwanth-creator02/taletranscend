@@ -14,8 +14,15 @@ import {
 import { setActiveTab, buildSortPanel, refreshSortPanel } from './ui.js';
 import { showToast } from '@ui/components/toast.js';
 import { initIcons } from '@ui/components/icons.js';
-import { removeFromBookmarks, downloadChronicle, markTaleFinished } from '@services/index.js';
+import {
+  addToBookmarks,
+  removeFromBookmarks,
+  downloadChronicle,
+  markTaleFinished,
+} from '@services/index.js';
 import { cacheService } from '@services/cache.service.js';
+import { auth } from '@fb/index.js';
+import { appState } from '@state/index.js';
 import { debounce, navigateTo, taleUrl, createLogger } from '@/utils';
 
 const log = createLogger('ShelfInteractions');
@@ -249,6 +256,8 @@ function _closeAllMenus() {
 async function _handleCardAction(action, id, e) {
   e.stopPropagation();
 
+  const uid = shelfState.userId || auth.currentUser?.uid || appState?.userId;
+
   switch (action) {
     case 'resume':
       navigateTo(taleUrl(id));
@@ -269,12 +278,28 @@ async function _handleCardAction(action, id, e) {
     }
 
     case 'mark-finished': {
-      if (!shelfState.userId || !id) break;
+      if (!uid || !id) {
+        showToast('Please sign in to seal chronicles.', 'warning');
+        break;
+      }
       try {
-        await markTaleFinished({ userId: shelfState.userId, taleId: id });
-        cacheService.invalidateProgress(shelfState.userId, id);
+        await markTaleFinished({ userId: uid, taleId: id });
+        cacheService.invalidateProgress(uid, id);
         cacheService.invalidateTale(id);
         cacheService.invalidateTales();
+
+        // Update in-memory cached tales so tab switching or re-filtering preserves finished state
+        const bookmarked = shelfState.bookmarkedTales.find((t) => t.id === id);
+        if (bookmarked) {
+          bookmarked.progress = 100;
+          bookmarked.status = 'finished';
+        }
+        const recent = shelfState.recentTales.find((t) => t.id === id);
+        if (recent) {
+          recent.progress = 100;
+          recent.status = 'finished';
+        }
+        computeAndRenderHeroStats();
 
         const cardEl = document.querySelector(`[data-id="${id}"]`);
         if (cardEl) {
@@ -287,7 +312,7 @@ async function _handleCardAction(action, id, e) {
           }
           const progressFill = cardEl.querySelector('.progress-fill');
           if (progressFill) progressFill.style.width = '100%';
-          const progressLabel = cardEl.querySelector('.text-indigo-300');
+          const progressLabel = cardEl.querySelector('.text-indigo-300, .text-indigo-400');
           if (progressLabel) progressLabel.textContent = '100%';
         }
         showToast('Chronicle sealed in the Eternal Archives.', 'success');
@@ -299,11 +324,30 @@ async function _handleCardAction(action, id, e) {
       break;
     }
 
-    case 'decouple': {
-      // Bug fix: was only doing optimistic UI without calling the service
-      if (!shelfState.userId || !id) break;
+    case 'couple': {
+      if (!uid || !id) {
+        showToast('Please sign in to add to shelf.', 'warning');
+        break;
+      }
       try {
-        await removeFromBookmarks({ userId: shelfState.userId, taleId: id });
+        const tale = shelfState.bookmarkedTales.find((t) => t.id === id) ||
+          shelfState.recentTales.find((t) => t.id === id) || { id };
+        await addToBookmarks({ userId: uid, taleId: id, tale });
+        showToast('Added to shelf.', 'success');
+      } catch (err) {
+        log.error('Couple failed on shelf:', err);
+        showToast('Could not add to shelf.', 'error');
+      }
+      break;
+    }
+
+    case 'decouple': {
+      if (!uid || !id) {
+        showToast('Please sign in to manage shelf.', 'warning');
+        break;
+      }
+      try {
+        await removeFromBookmarks({ userId: uid, taleId: id });
         // Optimistic UI: remove card from DOM and cached state
         document.querySelector(`[data-id="${id}"]`)?.remove();
         shelfState.bookmarkedTales = shelfState.bookmarkedTales.filter((t) => t.id !== id);
@@ -317,12 +361,12 @@ async function _handleCardAction(action, id, e) {
     }
 
     case 'delete-draft': {
-      if (!shelfState.userId || !id) break;
+      if (!uid || !id) break;
       if (!confirm('Are you sure you want to discard this draft? This cannot be undone.')) break;
 
       try {
         const { deleteDoc, refs } = await import('@fb/index.js');
-        await deleteDoc(refs.draft(shelfState.userId, id));
+        await deleteDoc(refs.draft(uid, id));
 
         // Optimistic UI: remove card from DOM and cached state
         document.querySelector(`[data-id="${id}"]`)?.remove();

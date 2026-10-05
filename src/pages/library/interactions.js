@@ -17,6 +17,8 @@ import {
   downloadChronicle,
 } from '@services/index.js';
 import { cacheService } from '@services/cache.service.js';
+import { auth } from '@fb/index.js';
+import { appState } from '@state/index.js';
 import { libraryState } from './state.js';
 
 /* ─────────────────────────────────────────────
@@ -279,9 +281,14 @@ function _confirmMarkFinished(onConfirm) {
 }
 
 async function _handleMarkFinished(userId, taleId) {
-  log.info('Sealing chronicle...', { userId, taleId });
+  const uid = userId || _activeUserId || auth.currentUser?.uid || appState?.userId;
+  if (!uid) {
+    showToast('Please sign in to seal chronicles.', 'warning');
+    return;
+  }
+  log.info('Sealing chronicle...', { userId: uid, taleId });
   try {
-    await markTaleFinished({ userId, taleId });
+    await markTaleFinished({ userId: uid, taleId });
 
     // Update state
     const tale = libraryState.allTales?.find((t) => t.id === taleId);
@@ -290,9 +297,7 @@ async function _handleMarkFinished(userId, taleId) {
     }
 
     // Invalidate caches
-    if (userId) {
-      cacheService.invalidateProgress(userId, taleId);
-    }
+    cacheService.invalidateProgress(uid, taleId);
     cacheService.invalidateTale(taleId);
     cacheService.invalidateTales();
 
@@ -340,9 +345,15 @@ async function _handleMarkFinished(userId, taleId) {
 }
 
 async function _handleCouple(userId, taleId, btn) {
+  const uid = userId || _activeUserId || auth.currentUser?.uid || appState?.userId;
+  if (!uid) {
+    showToast('Please sign in to add to shelf.', 'warning');
+    return;
+  }
   btn.setAttribute('disabled', 'true');
   try {
-    await addToBookmarks({ userId, taleId });
+    const tale = libraryState.allTales?.find((t) => t.id === taleId);
+    await addToBookmarks({ userId: uid, taleId, tale });
     btn.dataset.action = 'decouple';
     btn.innerHTML = `<i data-lucide="bookmark-minus" class="w-3.5 h-3.5"></i> Remove from shelf`;
     btn.classList.remove('text-emerald-400', 'hover:bg-emerald-500/20');
@@ -359,9 +370,14 @@ async function _handleCouple(userId, taleId, btn) {
 }
 
 async function _handleDecouple(userId, taleId, btn) {
+  const uid = userId || _activeUserId || auth.currentUser?.uid || appState?.userId;
+  if (!uid) {
+    showToast('Please sign in to remove from shelf.', 'warning');
+    return;
+  }
   btn.setAttribute('disabled', 'true');
   try {
-    await removeFromBookmarks({ userId, taleId });
+    await removeFromBookmarks({ userId: uid, taleId });
     btn.dataset.action = 'couple';
     btn.innerHTML = `<i data-lucide="bookmark-plus" class="w-3.5 h-3.5"></i> Add to shelf`;
     btn.classList.remove('text-red-400', 'hover:bg-red-500/20');
