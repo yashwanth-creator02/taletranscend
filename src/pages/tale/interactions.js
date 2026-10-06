@@ -242,7 +242,7 @@ export function bindChapterClicks(taleId, chapters = [], userId = null, tale = n
  * @param {Array<Object>} chapters
  * @param {Object} [tale]
  */
-export function setupChronicleBatchActions(userId, taleId, chapters = [], tale = null) {
+export function setupChronicleBatchActions(userId, taleId, chapters = [], _tale = null) {
   const markAllReadBtn = document.getElementById('btn-mark-all-read');
   const markAllUnreadBtn = document.getElementById('btn-mark-all-unread');
   const downloadAllBtn = document.getElementById('btn-download-all-chronicles');

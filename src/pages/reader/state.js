@@ -82,6 +82,8 @@ export const readerState = {
 
   // User-specific state
   userId: null,
+  authorId: '',
+  isFollowingAuthor: false,
   bookmarked: false,
   claps: 0,
   hasClapped: false,

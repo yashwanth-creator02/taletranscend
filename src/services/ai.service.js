@@ -22,9 +22,10 @@ const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models
  *
  * @param {string} prompt - Synopsis or snippet
  * @param {string} [apiKey] - Optional explicit API Key, falls back to stored key
+ * @param {object} [options] - Optional call options (e.g. maxRetries)
  * @returns {Promise<string|null>}
  */
-export async function suggestTitle(prompt, apiKey) {
+export async function suggestTitle(prompt, apiKey, options = {}) {
   if (!prompt || prompt.trim().length < 10) return null;
   const key = apiKey || getStoredApiKey();
   if (!key) return null;
@@ -32,7 +33,8 @@ export async function suggestTitle(prompt, apiKey) {
   log.info('Requesting mythic title suggestion...');
   return _callGemini(
     `Suggest ONE epic, mythic, or fantasy title for a story with this synopsis: "${prompt}". Return ONLY the title text, no punctuation or formatting.`,
-    key
+    key,
+    options
   );
 }
 
@@ -41,9 +43,10 @@ export async function suggestTitle(prompt, apiKey) {
  *
  * @param {string} text - Raw text to refine
  * @param {string} [apiKey] - Optional explicit API Key, falls back to stored key
+ * @param {object} [options] - Optional call options (e.g. maxRetries)
  * @returns {Promise<string|null>}
  */
-export async function refineMythicText(text, apiKey) {
+export async function refineMythicText(text, apiKey, options = {}) {
   if (!text || text.trim().length < 20) return null;
   const key = apiKey || getStoredApiKey();
   if (!key) return null;
@@ -51,7 +54,29 @@ export async function refineMythicText(text, apiKey) {
   log.info('Requesting mythic text refinement...');
   return _callGemini(
     `Rewrite the following paragraph to be more epic, mythic, and elevated in tone while fixing grammar. Keep it roughly the same length. Return ONLY the refined text:\n\n"${text}"`,
-    key
+    key,
+    options
+  );
+}
+
+/**
+ * Generates a narrative continuation for a tale chapter draft.
+ *
+ * @param {string} prompt - Existing story draft text
+ * @param {string} [apiKey] - Optional explicit API Key, falls back to stored key
+ * @param {object} [options] - Optional call options (e.g. maxRetries)
+ * @returns {Promise<string|null>}
+ */
+export async function generateTaleContinuation(prompt, apiKey, options = {}) {
+  if (!prompt || prompt.trim().length < 20) return null;
+  const key = apiKey || getStoredApiKey();
+  if (!key) return null;
+
+  log.info('Requesting mythic tale continuation...');
+  return _callGemini(
+    `You are a master chronicler of ancient folklore and mythic sagas. Seamlessly continue the following narrative, matching its tone, voice, and atmosphere. Write the next logical passage (roughly 100-250 words). Return ONLY the continuation text with no meta-commentary, markdown headings, or introductory phrases:\n\n"${prompt}"`,
+    key,
+    options
   );
 }
 

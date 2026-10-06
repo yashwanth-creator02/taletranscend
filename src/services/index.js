@@ -53,6 +53,10 @@ export * from './resonance.service.js';
 // Scribe registration and author verification
 export * from './author.service.js';
 
+// ── Notifications ─────────────────────────────────────────────────────
+// User notifications retrieval and read state management
+export * from './notification.service.js';
+
 // ── AI ────────────────────────────────────────────────────────────────
 // Gemini-powered title suggestions and text refinement
 export * from './ai.service.js';

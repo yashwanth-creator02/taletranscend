@@ -164,6 +164,22 @@ export const refs = {
 
   /** Single achievement document */
   achievement: (uid, achievementId) => doc(db, PATHS.achievement(uid, achievementId)),
+
+  // ── Tale Deletion Requests ─────────────────────────────────────────
+
+  /** All deletion requests collection */
+  deletionRequests: () => collection(db, PATHS.deletionRequests()),
+
+  /** Single deletion request document */
+  deletionRequest: (id) => doc(db, PATHS.deletionRequest(id)),
+
+  // ── Inquiries & Chronicler's Missives ─────────────────────────────
+
+  /** All inquiries collection */
+  inquiries: () => collection(db, PATHS.inquiries()),
+
+  /** Single inquiry document */
+  inquiry: (id) => doc(db, PATHS.inquiry(id)),
 };
 
 log.debug('Firestore references initialized');

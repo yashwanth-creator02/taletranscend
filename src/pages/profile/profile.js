@@ -35,7 +35,13 @@ import {
 } from './index.js';
 import { initProfileLayout } from './layout.js';
 
-import { getContinueReading, getUserPublishedTales, getUserDrafts } from '@services/index.js';
+import {
+  getContinueReading,
+  getUserPublishedTales,
+  getUserDrafts,
+  deleteUserAccount,
+  submitTaleDeletionRequest,
+} from '@services/index.js';
 
 log.info('Initializing Profile page');
 initPageReveal();
@@ -206,6 +212,110 @@ export async function initProfilePage(currentUser = auth?.currentUser) {
     readyReveal();
     initIcons();
   }
+
+  // ── Tale Deletion Request Modal Wiring ─────────────────────────
+  const taleDeletionModal = document.getElementById('modal-tale-deletion-request');
+  const openTaleDeletionBtn = document.getElementById('btn-open-tale-deletion-request');
+  const cancelTaleDeletionBtn = document.getElementById('btn-cancel-tale-deletion');
+  const formTaleDeletion = document.getElementById('form-tale-deletion-request');
+
+  openTaleDeletionBtn?.addEventListener('click', () => {
+    closeModal();
+    taleDeletionModal?.classList.remove('hidden');
+    taleDeletionModal?.classList.add('flex');
+    initIcons(taleDeletionModal);
+  });
+
+  cancelTaleDeletionBtn?.addEventListener('click', () => {
+    taleDeletionModal?.classList.add('hidden');
+    taleDeletionModal?.classList.remove('flex');
+  });
+
+  formTaleDeletion?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const taleId = document.getElementById('input-deletion-tale-id')?.value.trim();
+    const reason = document.getElementById('input-deletion-reason')?.value.trim();
+
+    if (!taleId) {
+      showToast('Please enter the chronicle title or ID.', 'error');
+      return;
+    }
+    if (!reason || reason.length < 5) {
+      showToast('Please provide a reason for removal (at least 5 characters).', 'error');
+      return;
+    }
+
+    try {
+      await submitTaleDeletionRequest({ userId: uid, taleId, reason });
+      showToast('Removal petition dispatched to archive administration.', 'success');
+      formTaleDeletion.reset();
+      taleDeletionModal?.classList.add('hidden');
+      taleDeletionModal?.classList.remove('flex');
+    } catch (err) {
+      log.error('Failed to submit chronicle deletion petition:', err);
+      showToast(err.message || 'Failed to submit removal petition.', 'error');
+    }
+  });
+
+  // ── Account Dissolution Modal Wiring ───────────────────────────
+  const deleteAccountModal = document.getElementById('modal-confirm-delete-account');
+  const openDeleteAccountBtn = document.getElementById('btn-delete-account-trigger');
+  const cancelDeleteAccountBtn = document.getElementById('btn-cancel-delete-account');
+  const inputConfirmDelete = document.getElementById('input-confirm-delete-account');
+  const btnConfirmDelete = document.getElementById('btn-confirm-delete-account');
+  const formConfirmDelete = document.getElementById('form-confirm-delete-account');
+
+  openDeleteAccountBtn?.addEventListener('click', () => {
+    closeModal();
+    deleteAccountModal?.classList.remove('hidden');
+    deleteAccountModal?.classList.add('flex');
+    initIcons(deleteAccountModal);
+  });
+
+  cancelDeleteAccountBtn?.addEventListener('click', () => {
+    deleteAccountModal?.classList.add('hidden');
+    deleteAccountModal?.classList.remove('flex');
+    if (inputConfirmDelete) inputConfirmDelete.value = '';
+    if (btnConfirmDelete) btnConfirmDelete.disabled = true;
+  });
+
+  inputConfirmDelete?.addEventListener('input', (e) => {
+    const val = e.target.value.trim().toUpperCase();
+    if (btnConfirmDelete) {
+      btnConfirmDelete.disabled = val !== 'DELETE';
+    }
+  });
+
+  formConfirmDelete?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (inputConfirmDelete?.value.trim().toUpperCase() !== 'DELETE') return;
+
+    if (btnConfirmDelete) {
+      btnConfirmDelete.disabled = true;
+      btnConfirmDelete.textContent = 'Dissolving…';
+    }
+
+    try {
+      stopProfileSync();
+      const { preservedTalesCount } = await deleteUserAccount(uid);
+      showToast(
+        `Your identity has been dissolved. ${preservedTalesCount} contributed chronicle(s) remain immortalized in the archive.`,
+        'success'
+      );
+      deleteAccountModal?.classList.add('hidden');
+      deleteAccountModal?.classList.remove('flex');
+      setTimeout(() => {
+        navigateTo('index.html');
+      }, 1500);
+    } catch (err) {
+      log.error('Account deletion failed:', err);
+      showToast(err.message || 'Failed to dissolve account.', 'error');
+      if (btnConfirmDelete) {
+        btnConfirmDelete.disabled = false;
+        btnConfirmDelete.textContent = 'Dissolve Identity';
+      }
+    }
+  });
 
   // ── Sign Out ────────────────────────────────────────────────────
   // Stops the profile listener before signing out to prevent orphaned

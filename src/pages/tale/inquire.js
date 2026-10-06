@@ -204,7 +204,7 @@ export function setupInquire(taleId, tale, userId = null) {
 
   // 8. Form Submission Handling
   if (form) {
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const moniker = senderNameInput?.value.trim() || '';
@@ -264,6 +264,30 @@ export function setupInquire(taleId, tale, userId = null) {
         });
         localStorage.setItem(storageKey, JSON.stringify(existing.slice(0, 30)));
         sessionStorage.setItem(cooldownKey, String(Date.now()));
+
+        // Persist to Firestore archive inquiries collection (non-blocking)
+        const senderId = userId || auth.currentUser?.uid || 'anonymous';
+        if (auth.currentUser) {
+          import('@fb/index.js')
+            .then((fb) => {
+              if (fb.addDoc && fb.refs?.inquiries) {
+                return fb.addDoc(fb.refs.inquiries(), {
+                  taleId,
+                  authorId: authorId || '',
+                  senderId,
+                  senderMoniker: moniker,
+                  senderContact: contact,
+                  category,
+                  message,
+                  status: 'sent',
+                  createdAt: fb.serverTimestamp ? fb.serverTimestamp() : new Date(),
+                });
+              }
+            })
+            .catch((dbErr) => {
+              (log.warn || log.debug)('Could not persist missive to Firestore archive:', dbErr);
+            });
+        }
 
         log.info('Missive dispatched successfully', { taleId, category, moniker });
         showToast('Your missive has been dispatched to the scribe!', 'success');

@@ -1,28 +1,32 @@
 // src/ui/__tests__/icons.test.js
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const mockCreateIcons = vi.fn();
-
-// Use a simpler mock for lucide
-vi.mock('lucide', () => ({
-  createIcons: mockCreateIcons,
-  ChevronUp: {},
-  ChevronDown: {},
-  Plus: {},
+const { mockCreateIcons } = vi.hoisted(() => ({
+  mockCreateIcons: vi.fn(),
 }));
 
-describe.skip('Icons Registry', () => {
+// Mock createIcons while preserving all icon definitions and brand fallbacks
+vi.mock('lucide', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    Twitter: actual.X || {},
+    Instagram: actual.Camera || {},
+    Linkedin: {},
+    createIcons: mockCreateIcons,
+  };
+});
+
+describe('Icons Registry', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     document.body.innerHTML = '<i data-lucide="chevron-up"></i>';
   });
 
   it('calls createIcons when initialized', async () => {
-    // If it's already loaded, initIcons will render sync
     const { initIcons } = await import('../icons.js');
     await initIcons();
 
-    // We wait a bit in case it's still bootstrapping
     await vi.waitFor(
       () => {
         expect(mockCreateIcons).toHaveBeenCalled();

@@ -29,7 +29,7 @@ import {
 } from './index.js';
 import { debounce } from '@/utils';
 import { setupAuthTimeout } from '@/utils';
-import { refineMythicText } from '@services/index.js';
+import { refineMythicText, generateTaleContinuation, getStoredApiKey } from '@services/index.js';
 import { AI_API_KEY } from '@config/app.config.js';
 import { showToast } from '@ui/components/toast.js';
 
@@ -244,6 +244,14 @@ function bindMetadataEvents() {
 
 /* ── AI Assisted Storytelling ────────────────────────────────────── */
 
+function _getEffectiveApiKey() {
+  return (
+    getStoredApiKey() ||
+    AI_API_KEY ||
+    (typeof window !== 'undefined' ? window.__GEMINI_KEY__ : null)
+  );
+}
+
 function bindAIEvents() {
   const enhanceBtn = document.getElementById('ai-enhance-btn');
   const continueBtn = document.getElementById('ai-continue-btn');
@@ -258,12 +266,13 @@ function bindAIEvents() {
       return;
     }
 
+    const key = _getEffectiveApiKey();
     enhanceBtn.disabled = true;
     enhanceBtn.classList.add('animate-pulse');
     showToast('Consulting the Oracle...', 'info');
 
     try {
-      const refined = await refineMythicText(text, AI_API_KEY);
+      const refined = await refineMythicText(text, key);
       if (refined) {
         contentArea.value = refined;
         contentArea.dispatchEvent(new Event('input', { bubbles: true }));
@@ -273,16 +282,49 @@ function bindAIEvents() {
       }
     } catch (err) {
       log.error('Enhancement failed:', err);
-      showToast('Refinement failed. Please check your connection or API key.', 'error');
+      showToast(
+        'Refinement failed. Please check your connection or API key in profile settings.',
+        'error'
+      );
     } finally {
       enhanceBtn.disabled = false;
       enhanceBtn.classList.remove('animate-pulse');
     }
   });
 
-  // Stub for continue
-  continueBtn.addEventListener('click', () => {
-    showToast('AI Continuation coming soon in the next era.', 'info');
+  continueBtn.addEventListener('click', async () => {
+    const text = contentArea.value.trim();
+    if (!text || text.length < 20) {
+      showToast('Please draft a narrative opening first (at least 20 characters).', 'info');
+      return;
+    }
+
+    const key = _getEffectiveApiKey();
+    continueBtn.disabled = true;
+    continueBtn.classList.add('animate-pulse');
+    showToast('The Oracle channels the narrative thread...', 'info');
+
+    try {
+      const continuation = await generateTaleContinuation(text, key);
+      if (continuation) {
+        const separator = contentArea.value.endsWith('\n\n')
+          ? ''
+          : contentArea.value.endsWith('\n')
+            ? '\n'
+            : '\n\n';
+        contentArea.value = contentArea.value + separator + continuation;
+        contentArea.dispatchEvent(new Event('input', { bubbles: true }));
+        showToast('The narrative continues.', 'success');
+      } else {
+        showToast('The muse provides no further words at this time.', 'warning');
+      }
+    } catch (err) {
+      log.error('AI Continuation failed:', err);
+      showToast('Continuation failed. Please check your connection or API key.', 'error');
+    } finally {
+      continueBtn.disabled = false;
+      continueBtn.classList.remove('animate-pulse');
+    }
   });
 }
 

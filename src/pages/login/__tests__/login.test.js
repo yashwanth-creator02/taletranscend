@@ -11,7 +11,13 @@ vi.mock('@fb/index.js', () => ({
   auth: { currentUser: null },
   signInAnonymously: vi.fn(),
   signInWithGoogle: vi.fn(),
+  signInWithEmail: vi.fn().mockResolvedValue({ user: { uid: 'u1' } }),
+  registerWithEmail: vi.fn().mockResolvedValue({ user: { uid: 'u1' } }),
+  sendPasswordReset: vi.fn().mockResolvedValue(true),
   onAuthStateChanged: vi.fn(() => vi.fn()),
+  setDoc: vi.fn().mockResolvedValue(true),
+  serverTimestamp: vi.fn(() => ({})),
+  refs: { user: vi.fn(() => ({})) },
 }));
 
 vi.mock('@/utils', async (importOriginal) => {
@@ -205,10 +211,12 @@ describe('Login Page', () => {
     const forgotBtn = document.getElementById('btn-forgot-password');
     forgotBtn.click();
 
-    expect(showToast).toHaveBeenCalledWith(
-      expect.stringContaining('Recovery scroll dispatched'),
-      'info'
-    );
+    await vi.waitFor(() => {
+      expect(showToast).toHaveBeenCalledWith(
+        expect.stringContaining('Recovery scroll dispatched'),
+        'info'
+      );
+    });
   });
 
   it('handles email form submit with placeholder toast and loading state', async () => {
@@ -217,11 +225,12 @@ describe('Login Page', () => {
     const form = document.getElementById('email-login-form');
     form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
 
-    vi.advanceTimersByTime(1200);
-    expect(showToast).toHaveBeenCalledWith(
-      expect.stringContaining('Preserved credentials recognized'),
-      'success'
-    );
+    await vi.waitFor(() => {
+      expect(showToast).toHaveBeenCalledWith(
+        expect.stringContaining('Preserved credentials recognized'),
+        'success'
+      );
+    });
   });
 
   it('calls markUserVisited when clicking a return/navigation link', async () => {

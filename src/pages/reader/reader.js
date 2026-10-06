@@ -50,9 +50,23 @@ import {
   addToBookmarks,
   removeFromBookmarks,
   isBookmarked,
+  toggleResonance,
+  getResonanceStatus,
+  toggleFollowAuthor,
+  isFollowingAuthor,
 } from './index.js';
 
-import { getDoc, setDoc, serverTimestamp, refs } from '@fb/index.js';
+import {
+  getDoc,
+  setDoc,
+  serverTimestamp,
+  refs,
+  getDocs,
+  addDoc,
+  query,
+  orderBy,
+  limit,
+} from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
 import {
   navigateTo,
@@ -211,6 +225,11 @@ function openPanel(toolId) {
   if (!panel || !title || !content) return;
 
   title.textContent = PANEL_TITLES[toolId] || 'Panel';
+
+  if (toolId === 'comments' && readerState.comments.length === 0) {
+    _loadComments();
+  }
+
   _refreshPanelContent();
 
   panel.classList.add('visible');
@@ -401,13 +420,69 @@ function _bindThemeEvents() {
   });
 }
 
+function _getHighlightStorageKey(tid, chIdx) {
+  return `tt_highlights_${tid}_${chIdx}`;
+}
+
+function _loadHighlights() {
+  if (!readerState.taleId) return;
+  try {
+    const raw = localStorage.getItem(
+      _getHighlightStorageKey(readerState.taleId, readerState.chapterIndex)
+    );
+    if (raw) {
+      readerState.highlights = JSON.parse(raw);
+    } else {
+      readerState.highlights = [];
+    }
+  } catch (err) {
+    log.warn('Could not load highlights from localStorage:', err);
+    readerState.highlights = [];
+  }
+}
+
+function _saveHighlights() {
+  if (!readerState.taleId) return;
+  try {
+    localStorage.setItem(
+      _getHighlightStorageKey(readerState.taleId, readerState.chapterIndex),
+      JSON.stringify(readerState.highlights)
+    );
+  } catch (err) {
+    log.warn('Could not save highlights to localStorage:', err);
+  }
+}
+
 function _bindHighlightEvents() {
   document.querySelectorAll('[data-rm-hl]').forEach((btn) => {
     btn.addEventListener('click', () => {
       readerState.highlights = readerState.highlights.filter((h) => h.id !== btn.dataset.rmHl);
+      _saveHighlights();
       _refreshPanelContent();
     });
   });
+}
+
+async function _loadComments() {
+  if (!readerState.taleId) return;
+  try {
+    const q = query(refs.comments(readerState.taleId), orderBy('createdAt', 'desc'), limit(50));
+    const snap = await getDocs(q);
+    readerState.comments = snap.docs.map((d) => {
+      const data = d.data();
+      return {
+        id: d.id,
+        author: data.authorName || 'Anonymous',
+        initials: (data.authorName || 'A').slice(0, 2).toUpperCase(),
+        body: data.text || '',
+        at: data.createdAt?.toMillis ? data.createdAt.toMillis() : Date.now(),
+        likes: data.likeCount || 0,
+      };
+    });
+    if (readerState.openTool === 'comments') _refreshPanelContent();
+  } catch (err) {
+    log.warn('Could not load comments from Firestore:', err);
+  }
 }
 
 function _bindCommentEvents() {
@@ -418,19 +493,47 @@ function _bindCommentEvents() {
     if (postBtn) postBtn.disabled = !readerState.newComment.trim();
   });
 
-  document.getElementById('post-comment')?.addEventListener('click', () => {
+  document.getElementById('post-comment')?.addEventListener('click', async () => {
     const body = readerState.newComment.trim();
     if (!body) return;
-    readerState.comments.unshift({
-      id: Math.random().toString(36).slice(2, 9),
-      author: readerState.userName || 'You',
-      initials: (readerState.userName || 'Y').slice(0, 2).toUpperCase(),
-      body,
-      at: Date.now(),
-      likes: 0,
-    });
-    readerState.newComment = '';
-    _refreshPanelContent();
+    if (!readerState.userId) {
+      showToast('Please sign in to join the discussion.', 'info');
+      return;
+    }
+
+    const postBtn = document.getElementById('post-comment');
+    if (postBtn) postBtn.disabled = true;
+
+    try {
+      const commentPayload = {
+        text: body,
+        taleId: readerState.taleId,
+        authorId: readerState.userId,
+        authorName: readerState.userName || 'Anonymous',
+        type: 'general',
+        depth: 0,
+        likeCount: 0,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      };
+
+      const docRef = await addDoc(refs.comments(readerState.taleId), commentPayload);
+      readerState.comments.unshift({
+        id: docRef.id,
+        author: readerState.userName || 'You',
+        initials: (readerState.userName || 'Y').slice(0, 2).toUpperCase(),
+        body,
+        at: Date.now(),
+        likes: 0,
+      });
+      readerState.newComment = '';
+      showToast('Comment posted.', 'success');
+    } catch (err) {
+      log.error('Failed to post comment to Firestore:', err);
+      showToast('Could not post comment.', 'error');
+    } finally {
+      _refreshPanelContent();
+    }
   });
 }
 
@@ -481,16 +584,61 @@ function _bindTTSEvents() {
    ───────────────────────────────────────────── */
 
 function initEngagement() {
-  document.getElementById('clap-btn')?.addEventListener('click', () => {
-    if (!readerState.hasClapped) {
-      readerState.claps++;
-      readerState.hasClapped = true;
+  document.getElementById('clap-btn')?.addEventListener('click', async () => {
+    if (!readerState.userId) {
+      showToast('Please sign in to applaud this chronicle.', 'info');
+      return;
+    }
+    try {
+      const result = await toggleResonance(readerState.taleId);
+      if (result.status === 'rate-limited') return;
+      readerState.hasClapped = Boolean(result.active);
+      readerState.claps =
+        result.count ??
+        (readerState.hasClapped ? readerState.claps + 1 : Math.max(0, readerState.claps - 1));
       _renderEngagement();
+      showToast(result.active ? 'Soul resonance aligned.' : 'Resonance released.', 'success');
+    } catch (err) {
+      log.error('Resonance toggle error:', err);
+      showToast('Could not update resonance.', 'error');
     }
   });
 
   document.getElementById('eng-share')?.addEventListener('click', () => openPanel('share'));
   document.getElementById('eng-comment')?.addEventListener('click', () => openPanel('comments'));
+
+  document.querySelector('.follow-btn')?.addEventListener('click', async () => {
+    if (!readerState.userId) {
+      showToast('Please sign in to follow this author.', 'info');
+      return;
+    }
+    if (!readerState.authorId || readerState.userId === readerState.authorId) return;
+
+    try {
+      const following = await toggleFollowAuthor({
+        userId: readerState.userId,
+        targetAuthorId: readerState.authorId,
+      });
+      readerState.isFollowingAuthor = following;
+      _renderFollowButton();
+      showToast(following ? 'Following scribe.' : 'Unfollowed scribe.', 'success');
+    } catch (err) {
+      log.error('Follow author error:', err);
+      showToast('Could not update follow status.', 'error');
+    }
+  });
+}
+
+function _renderFollowButton() {
+  const btn = document.querySelector('.follow-btn');
+  if (!btn) return;
+  if (!readerState.authorId || readerState.userId === readerState.authorId) {
+    btn.style.display = 'none';
+    return;
+  }
+  btn.style.display = '';
+  btn.textContent = readerState.isFollowingAuthor ? 'Following' : 'Follow';
+  btn.classList.toggle('following', readerState.isFollowingAuthor);
 }
 
 function _renderEngagement() {
@@ -568,6 +716,7 @@ function _addHighlight(color, note = '') {
     note,
     at: Date.now(),
   });
+  _saveHighlights();
   readerState.selection = null;
   window.getSelection()?.removeAllRanges();
   document.getElementById('selection-toolbar')?.classList.add('hidden');
@@ -693,6 +842,21 @@ initAuth(async (user) => {
 
   // Load content
   await loadReaderMeta(taleId);
+
+  // Check resonance status
+  readerState.hasClapped = await getResonanceStatus(taleId);
+
+  // Check follow status
+  if (user.uid && readerState.authorId && user.uid !== readerState.authorId) {
+    readerState.isFollowingAuthor = await isFollowingAuthor({
+      userId: user.uid,
+      targetAuthorId: readerState.authorId,
+    });
+  }
+
+  _loadHighlights();
+  _loadComments();
+
   const navigation = await loadReaderChapter({ taleId, chapterIndex });
   readyReveal();
   if (!navigation) return;
@@ -723,6 +887,7 @@ initAuth(async (user) => {
   initEngagement();
   initSelectionToolbar();
   _renderEngagement();
+  _renderFollowButton();
 
   // Open TOC by default on desktop
   if (window.innerWidth >= 1024) openPanel('toc');

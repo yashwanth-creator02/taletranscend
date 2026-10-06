@@ -163,7 +163,7 @@ export function switchTab(tab) {
   profileState.activeModalTab = tab;
 
   // Toggle panel visibility
-  ['basic', 'identity', 'social', 'goals'].forEach((t) => {
+  ['basic', 'identity', 'social', 'goals', 'account'].forEach((t) => {
     const panel = document.getElementById(`tab-panel-${t}`);
     if (panel) panel.hidden = t !== tab;
 

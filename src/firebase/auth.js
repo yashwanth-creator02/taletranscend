@@ -10,6 +10,10 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   linkWithPopup,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  deleteUser,
 } from 'firebase/auth';
 import app from './app.js';
 import { createLogger } from '@/utils';
@@ -70,4 +74,54 @@ export async function upgradeAnonymousToGoogle() {
   return result.user;
 }
 
-export { onAuthStateChanged, signOut, signInAnonymously };
+/**
+ * Signs in a user with email and password.
+ * @param {string} email
+ * @param {string} password
+ * @returns {Promise<import('firebase/auth').User>}
+ */
+export async function signInWithEmail(email, password) {
+  const result = await signInWithEmailAndPassword(auth, email, password);
+  return result.user;
+}
+
+/**
+ * Registers a new user with email and password.
+ * @param {string} email
+ * @param {string} password
+ * @returns {Promise<import('firebase/auth').User>}
+ */
+export async function registerWithEmail(email, password) {
+  const result = await createUserWithEmailAndPassword(auth, email, password);
+  return result.user;
+}
+
+/**
+ * Sends a password reset email.
+ * @param {string} email
+ * @returns {Promise<void>}
+ */
+export async function sendPasswordReset(email) {
+  await sendPasswordResetEmail(auth, email);
+}
+
+/**
+ * Deletes the currently authenticated user's account from Firebase Auth.
+ * @returns {Promise<void>}
+ */
+export async function deleteCurrentUser() {
+  if (!auth.currentUser) {
+    throw new Error('No user is currently signed in.');
+  }
+  await deleteUser(auth.currentUser);
+}
+
+export {
+  onAuthStateChanged,
+  signOut,
+  signInAnonymously,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  deleteUser,
+};

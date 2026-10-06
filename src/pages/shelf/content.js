@@ -15,7 +15,6 @@ import {
   getAllLocalChapters,
 } from '@services/index.js';
 import { cacheService } from '@services/cache.service.js';
-import { createBookmark } from '@state/index.js';
 import { createLogger } from '@/utils';
 import { shelfState } from './state.js';
 import {

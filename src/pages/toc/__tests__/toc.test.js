@@ -66,11 +66,8 @@ describe('Table of Contents Page', () => {
 
     vi.mocked(services.getTales).mockResolvedValue(mockTales);
 
-    await import('../toc.js');
-    document.dispatchEvent(new Event('DOMContentLoaded'));
-
-    // Wait for microtasks
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    const { initTOCPage } = await import('../toc.js');
+    await initTOCPage();
 
     expect(services.getTales).toHaveBeenCalled();
     expect(document.getElementById('stat-total-tales').textContent).toBe('2');

@@ -452,7 +452,22 @@ async function _doPublish(userId, authorStatus = null) {
     { logContext: 'pages.contribution.publish.writeChapters' }
   );
 
-  /* ── Step 6: Update draft with published reference ──────── */
+  /* ── Step 6: Record immutable publish version snapshot ──────── */
+  const versionId = `v_${Date.now()}`;
+  await safeAsync(
+    setDoc(refs.taleVersion(id, versionId), {
+      versionId,
+      taleId: id,
+      title: state.title,
+      chapterCount: state.chapters.length,
+      wordCount,
+      estimatedReadMins,
+      createdAt: serverTimestamp(),
+    }),
+    { logContext: 'pages.contribution.publish.recordVersion' }
+  );
+
+  /* ── Step 7: Update draft with published reference ──────── */
   if (state.draftId !== 'new') {
     await safeAsync(
       updateDoc(refs.draft(userId, state.draftId), {

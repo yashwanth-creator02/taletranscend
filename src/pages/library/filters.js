@@ -243,7 +243,10 @@ async function _applySidebarFilter(tales, filter, userId) {
         .slice(0, 30);
 
     case 'finished':
-      return tales.filter((t) => t.status === 'finished');
+      return tales.filter(
+        (t) =>
+          t.publicationStatus === 'completed' || t.status === 'completed' || t.status === 'finished'
+      );
 
     case 'bookmarked': {
       log.debug('Fetching bookmarks for filter...');

@@ -6,7 +6,18 @@ import '@css/base.css';
 import '@css/components.css';
 import '@css/pages/login.css';
 
-import { auth, signInAnonymously, signInWithGoogle, onAuthStateChanged } from '@fb/index.js';
+import {
+  auth,
+  signInAnonymously,
+  signInWithGoogle,
+  signInWithEmail,
+  registerWithEmail,
+  sendPasswordReset,
+  onAuthStateChanged,
+  setDoc,
+  serverTimestamp,
+  refs,
+} from '@fb/index.js';
 import { navigateTo, initPageReveal, readyReveal, createLogger, markUserVisited } from '@/utils';
 import { initIcons } from '@ui/components/icons.js';
 import { showToast } from '@ui/components/toast.js';
@@ -172,7 +183,7 @@ function _setupAuthModeToggle() {
 }
 
 /**
- * Sets up Email & Phone form submissions with realistic feedback placeholders.
+ * Sets up Email & Phone form submissions with Firebase Authentication.
  */
 function _setupFormSubmissions() {
   // Email Form
@@ -195,32 +206,86 @@ function _setupFormSubmissions() {
     log.info(`Email auth attempt in mode: ${authMode}`, { email });
     toggleButtonLoading('btn-email-submit', true);
 
-    // Simulated verification & placeholder feedback
-    setTimeout(() => {
-      toggleButtonLoading('btn-email-submit', false);
+    try {
       if (authMode === 'signup') {
+        const user = await registerWithEmail(email, password);
+        // Initialize default user document in Firestore
+        try {
+          const userRef = refs.user(user.uid);
+          await setDoc(
+            userRef,
+            {
+              name: email.split('@')[0],
+              email: email,
+              role: 'reader',
+              bio: '',
+              avatarUrl: '',
+              website: '',
+              createdAt: serverTimestamp(),
+              joinedAt: serverTimestamp(),
+              updatedAt: serverTimestamp(),
+            },
+            { merge: true }
+          );
+        } catch (profileErr) {
+          log.warn('Could not initialize initial profile record:', profileErr);
+        }
         showToast('Account drafted! Entering as an authenticated scribe...', 'success');
         addSuccessGlow();
         handleAuthSuccess();
       } else {
+        await signInWithEmail(email, password);
         showToast('Preserved credentials recognized. Welcome back!', 'success');
         addSuccessGlow();
         handleAuthSuccess();
       }
-    }, 1100);
+    } catch (err) {
+      log.error('Email authentication failed:', err);
+      let errorMsg = 'Authentication failed. Please try again.';
+      switch (err?.code) {
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+        case 'auth/invalid-credential':
+          errorMsg = 'Invalid email or password.';
+          break;
+        case 'auth/email-already-in-use':
+          errorMsg = 'An account with this email already exists. Please sign in instead.';
+          break;
+        case 'auth/weak-password':
+          errorMsg = 'Password is too weak. Please use at least 6 characters.';
+          break;
+        case 'auth/invalid-email':
+          errorMsg = 'Please enter a valid email address.';
+          break;
+        case 'auth/too-many-requests':
+          errorMsg = 'Too many attempts. Please try again shortly.';
+          break;
+        default:
+          if (err?.message) errorMsg = err.message;
+      }
+      showToast(errorMsg, 'error');
+    } finally {
+      toggleButtonLoading('btn-email-submit', false);
+    }
   });
 
   // Forgot Password Link
-  document.getElementById('btn-forgot-password')?.addEventListener('click', () => {
+  document.getElementById('btn-forgot-password')?.addEventListener('click', async () => {
     const email = document.getElementById('input-email')?.value.trim();
     if (email && email.includes('@')) {
-      showToast(`Recovery scroll dispatched to ${email}.`, 'info');
+      try {
+        await sendPasswordReset(email);
+        showToast(`Recovery scroll dispatched to ${email}.`, 'info');
+      } catch (err) {
+        log.error('Password reset dispatch failed:', err);
+        showToast('Failed to dispatch recovery scroll. Please check the email.', 'error');
+      }
     } else {
       showToast('Please enter your email address to receive password reset instructions.', 'info');
     }
   });
 
-  // Phone Form (Placeholder)
+  // Phone Form
   const phoneForm = document.getElementById('phone-login-form');
   phoneForm?.addEventListener('submit', (e) => {
     e.preventDefault();

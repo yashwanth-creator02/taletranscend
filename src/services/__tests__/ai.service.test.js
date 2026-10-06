@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest';
 import { setupServer } from 'msw/node';
 import { http, HttpResponse } from 'msw';
-import { suggestTitle, refineMythicText } from '../ai.service.js';
+import { suggestTitle, refineMythicText, generateTaleContinuation } from '../ai.service.js';
 
 const GEMINI_ENDPOINT =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
@@ -15,7 +15,7 @@ const server = setupServer(
       return new HttpResponse(null, { status: 400 });
     }
 
-    const body = await request.json();
+    const body = await request.clone().json();
     const prompt = body.contents[0].parts[0].text;
 
     if (prompt.includes('Suggest ONE epic, mythic, or fantasy title')) {
@@ -30,6 +30,18 @@ const server = setupServer(
           {
             content: {
               parts: [{ text: 'In the age of legends, the sun rose over the silver peaks.' }],
+            },
+          },
+        ],
+      });
+    }
+
+    if (prompt.includes('You are a master chronicler')) {
+      return HttpResponse.json({
+        candidates: [
+          {
+            content: {
+              parts: [{ text: 'The saga unfolds beyond the veil of ancient stars.' }],
             },
           },
         ],
@@ -66,7 +78,7 @@ describe('ai.service', () => {
       let capturedPrompt = '';
       server.use(
         http.post(GEMINI_ENDPOINT, async ({ request }) => {
-          const body = await request.json();
+          const body = await request.clone().json();
           capturedPrompt = body.contents[0].parts[0].text;
           return HttpResponse.json({
             candidates: [{ content: { parts: [{ text: 'Clean Title' }] } }],
@@ -95,10 +107,11 @@ describe('ai.service', () => {
       );
       const result = await suggestTitle(
         'This is a long synopsis about a hero in a fantasy world.',
-        apiKey
+        apiKey,
+        { maxRetries: 0 }
       );
       expect(result).toBeNull();
-    }, 20000);
+    });
   });
 
   describe('refineMythicText', () => {
@@ -122,6 +135,33 @@ describe('ai.service', () => {
       );
       const result = await refineMythicText(
         'The sun rose over the mountains. It was very beautiful and everyone was happy.',
+        apiKey
+      );
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('generateTaleContinuation', () => {
+    it('returns null if text is too short', async () => {
+      expect(await generateTaleContinuation('too short', apiKey)).toBeNull();
+    });
+
+    it('returns continuation text from Gemini', async () => {
+      const result = await generateTaleContinuation(
+        'The lone chronicler walked through the forgotten gate into the valley of winds.',
+        apiKey
+      );
+      expect(result).toBe('The saga unfolds beyond the veil of ancient stars.');
+    });
+
+    it('returns null if Gemini response is empty', async () => {
+      server.use(
+        http.post(GEMINI_ENDPOINT, () => {
+          return HttpResponse.json({ candidates: [] });
+        })
+      );
+      const result = await generateTaleContinuation(
+        'The lone chronicler walked through the forgotten gate into the valley of winds.',
         apiKey
       );
       expect(result).toBeNull();

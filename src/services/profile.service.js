@@ -2,7 +2,7 @@
 // Profile-specific data fetching: reading history, published tales, drafts.
 // All returned objects are normalized through schema factories.
 
-import { getDocs, getDoc, refs } from '@fb/index.js';
+import { getDocs, getDoc, setDoc, deleteDoc, serverTimestamp, refs } from '@fb/index.js';
 import { readStorage } from './reader/localProgress.service.js';
 import { createTale, createDraft } from '@state/index.js';
 import { getTalesByAuthor } from './tale/getTales.js';
@@ -200,4 +200,155 @@ export async function computeAndSyncStats(userId) {
   cacheService.invalidateProfile(userId);
 
   return totalWords;
+}
+
+/**
+ * Deletes a user's account and personal private records while strictly PRESERVING
+ * all contributed tales and lore in the eternal library archive.
+ *
+ * Requirements:
+ * 1. Clean up user private data: preferences, bookmarks, reading progress, and profile doc.
+ * 2. All authored tales in public/data/tales remain intact and published for posterity.
+ * 3. Delete the user identity in Firebase Auth.
+ * 4. Invalidate all user caches and purge local storage.
+ *
+ * @param {string} userId
+ * @returns {Promise<{ success: boolean, preservedTalesCount: number }>}
+ */
+export async function deleteUserAccount(userId) {
+  if (!userId) throw new Error('User ID required for account deletion');
+  const { auth, deleteDoc, deleteCurrentUser, refs } = await import('@fb/index.js');
+
+  if (auth.currentUser?.uid !== userId) {
+    throw new Error('Unauthorized: Can only delete your own account.');
+  }
+
+  log.info('Initiating account deletion while preserving all contributed chronicles...', {
+    userId,
+  });
+
+  // Count preserved tales for transparent feedback to the user
+  const publishedTales = await getUserPublishedTales(userId);
+  const preservedTalesCount = publishedTales.length;
+  log.info(`Preserving ${preservedTalesCount} contributed chronicles in the living archive.`, {
+    userId,
+  });
+
+  // 1. Delete user profile document
+  await safeAsync(deleteDoc(refs.user(userId)), {
+    logContext: 'services.profile.deleteUserAccount.userDoc',
+  });
+
+  // Delete preferences
+  await safeAsync(deleteDoc(refs.readerPrefs(userId)), {
+    logContext: 'services.profile.deleteUserAccount.readerPrefs',
+  });
+
+  // 2. Clear caches & local storage
+  cacheService.invalidateProfile(userId);
+  try {
+    localStorage.removeItem('taletranscend_auth');
+    localStorage.removeItem('taletranscend_settings');
+    localStorage.removeItem(`tale_progress_${userId}`);
+  } catch (err) {
+    log.warn('Could not clear local storage during deletion:', err);
+  }
+
+  // 3. Delete auth account in Firebase Auth
+  await deleteCurrentUser();
+
+  log.info('User account deleted successfully. Contributed chronicles preserved.', {
+    userId,
+    preservedTalesCount,
+  });
+
+  return { success: true, preservedTalesCount };
+}
+
+/**
+ * Submits a formal chronicle deletion request to the archive administration.
+ * Tales cannot be directly deleted by authors after publication; deletion rests solely with admins.
+ *
+ * @param {{ userId: string, taleId: string, reason: string }} requestData
+ * @returns {Promise<{ success: boolean, requestId: string }>}
+ */
+export async function submitTaleDeletionRequest({ userId, taleId, reason }) {
+  if (!userId || !taleId || !reason) {
+    throw new Error('User ID, Tale ID, and reason are required to request chronicle deletion.');
+  }
+
+  const { addDoc, serverTimestamp, refs } = await import('@fb/index.js');
+  log.info('Submitting chronicle deletion request to admin...', { userId, taleId });
+
+  const docRef = await addDoc(refs.deletionRequests(), {
+    userId,
+    taleId,
+    reason: reason.trim(),
+    status: 'pending',
+    createdAt: serverTimestamp(),
+  });
+
+  log.info('Chronicle deletion request submitted successfully', { requestId: docRef.id });
+  return { success: true, requestId: docRef.id };
+}
+
+/**
+ * Toggles following a target author.
+ *
+ * @param {{ userId: string, targetAuthorId: string }} params
+ * @returns {Promise<boolean>} True if now following, false if unfollowed
+ */
+export async function toggleFollowAuthor({ userId, targetAuthorId }) {
+  if (!userId || !targetAuthorId || userId === targetAuthorId) {
+    return false;
+  }
+
+  const followRef = refs.follow(userId, targetAuthorId);
+  const followerRef = refs.follower(targetAuthorId, userId);
+
+  const snap = await safeAsync(getDoc(followRef), {
+    fallback: { exists: () => false },
+    logContext: 'services.profile.toggleFollowAuthor.check',
+  });
+
+  if (snap.exists()) {
+    await safeAsync(deleteDoc(followRef), {
+      logContext: 'services.profile.toggleFollowAuthor.unfollow',
+    });
+    await safeAsync(deleteDoc(followerRef), {
+      logContext: 'services.profile.toggleFollowAuthor.unfollower',
+    });
+    return false;
+  } else {
+    await safeAsync(
+      setDoc(followRef, {
+        targetUid: targetAuthorId,
+        followedAt: serverTimestamp(),
+      }),
+      { logContext: 'services.profile.toggleFollowAuthor.follow' }
+    );
+    await safeAsync(
+      setDoc(followerRef, {
+        followerUid: userId,
+        followedAt: serverTimestamp(),
+      }),
+      { logContext: 'services.profile.toggleFollowAuthor.follower' }
+    );
+    return true;
+  }
+}
+
+/**
+ * Checks whether a user is following a target author.
+ *
+ * @param {{ userId: string, targetAuthorId: string }} params
+ * @returns {Promise<boolean>}
+ */
+export async function isFollowingAuthor({ userId, targetAuthorId }) {
+  if (!userId || !targetAuthorId) return false;
+  const snap = await safeAsync(getDoc(refs.follow(userId, targetAuthorId)), {
+    fallback: { exists: () => false },
+    logContext: 'services.profile.isFollowingAuthor',
+  });
+  return snap.exists();
 }

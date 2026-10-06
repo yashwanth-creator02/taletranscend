@@ -170,6 +170,22 @@ export const PATHS = {
 
   /** Single achievement document (keyed by achievement slug) */
   achievement: (uid, achievementId) => `${APP_ROOT}/users/${uid}/achievements/${achievementId}`,
+
+  // ── Tale Deletion Requests (Admin moderated) ──────────────────────
+
+  /** All deletion requests */
+  deletionRequests: () => `${APP_ROOT}/deletionRequests`,
+
+  /** Single deletion request */
+  deletionRequest: (id) => `${APP_ROOT}/deletionRequests/${id}`,
+
+  // ── Inquiries & Chronicler's Missives ─────────────────────────────
+
+  /** All inquiries collection */
+  inquiries: () => `${APP_ROOT}/inquiries`,
+
+  /** Single inquiry document */
+  inquiry: (id) => `${APP_ROOT}/inquiries/${id}`,
 };
 
 log.debug('Firestore paths initialized');

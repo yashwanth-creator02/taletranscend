@@ -4,7 +4,6 @@
 // being stored in readerState.
 
 import { getTaleMeta, getChapter, getChapters } from '@services/index.js';
-import { createChapter } from '@state/index.js';
 import { readerState } from './state.js';
 import {
   sanitizeHtml,
@@ -70,6 +69,8 @@ export async function loadReaderMeta(taleId) {
   readerState.authorHandle =
     meta.authorHandle || `@${(meta.authorName || 'scribe').toLowerCase().replace(/\s+/g, '')}`;
   readerState.coverUrl = meta.coverUrl || '';
+  readerState.authorId = meta.authorId || '';
+  readerState.claps = meta.reactionCount || 0;
   readerState.tags = meta.tags || [];
   readerState.era = meta.era || 'Mythic';
   readerState.language = meta.language || 'High Elven';
