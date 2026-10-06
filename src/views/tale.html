@@ -430,6 +430,15 @@
               >
                 Echoes
               </button>
+              <button
+                data-tab="letter"
+                id="tab-btn-letter"
+                class="tab-btn px-5 py-2.5 text-xs font-bold uppercase tracking-[0.2em] rounded-xl transition-all flex items-center gap-2"
+              >
+                <i data-lucide="feather" class="w-3.5 h-3.5 text-indigo-400"></i>
+                <span class="hidden sm:inline">The Chronicler's Letter</span>
+                <span class="sm:hidden">Letter</span>
+              </button>
             </div>
 
             <!-- Tab 1: Synopsis Pane -->
@@ -460,6 +469,41 @@
                   </span>
                 </div>
                 <div id="lore-tag-list" class="flex flex-wrap gap-2"></div>
+              </div>
+
+              <!-- Chronicler's Letter Quick Teaser / Inquire Invitation -->
+              <div
+                class="chronicler-invite-card glass-card-strong p-6 sm:p-7 rounded-3xl border border-white/6 shadow-xl relative overflow-hidden group"
+              >
+                <div
+                  class="flex flex-col sm:flex-row sm:items-center justify-between gap-5 relative z-10"
+                >
+                  <div class="space-y-2">
+                    <div class="flex items-center gap-2 text-indigo-400">
+                      <i data-lucide="feather" class="w-4 h-4"></i>
+                      <span
+                        class="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-300"
+                      >
+                        The Chronicler's Letter
+                      </span>
+                    </div>
+                    <h3 class="text-base sm:text-lg font-bold text-white font-cinzel tracking-wide">
+                      Have questions or lore doubts for the Scribe?
+                    </h3>
+                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-xl">
+                      Dispatch a direct inquiry regarding hidden lore, character motivations, or
+                      narrative mysteries.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    id="btn-open-chronicler-letter"
+                    class="btn btn-secondary px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider shrink-0 self-start sm:self-center flex items-center gap-2 hover:border-indigo-400/40 hover:text-white transition-all cursor-pointer"
+                  >
+                    <i data-lucide="send" class="w-3.5 h-3.5 text-indigo-400"></i>
+                    <span>Inquire of Author</span>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -543,6 +587,307 @@
 
               <div id="comments-list" class="space-y-4">
                 <!-- Rendered by comments.js -->
+              </div>
+            </div>
+
+            <!-- Tab 4: The Chronicler's Letter (Ask Author / Connect) Pane -->
+            <div id="content-letter" class="tab-content hidden animate-fade-in space-y-6">
+              <!-- Main Inquire Card -->
+              <div
+                class="chronicler-letter-card glass-card-strong p-6 sm:p-8 md:p-10 rounded-3xl border border-white/6 shadow-2xl relative overflow-hidden space-y-8"
+              >
+                <!-- Header -->
+                <div class="space-y-3 relative z-10 border-b border-white/6 pb-6">
+                  <div class="flex items-center gap-2.5 text-indigo-400">
+                    <i data-lucide="feather" class="w-4 h-4 text-indigo-400"></i>
+                    <span
+                      class="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-300"
+                    >
+                      The Chronicler's Letter
+                    </span>
+                    <span
+                      class="px-2 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-[9px] font-bold uppercase tracking-wider text-indigo-300"
+                    >
+                      Author Missive
+                    </span>
+                  </div>
+                  <h2
+                    class="font-cinzel text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight"
+                  >
+                    Inquire of the Scribe
+                  </h2>
+                  <p class="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+                    Have an unresolved question about character fates, worldbuilding mysteries, or
+                    plot threads? Dispatch your missive directly to
+                    <span id="inquire-author-display" class="font-semibold text-indigo-300"
+                      >the author</span
+                    ><span
+                      id="inquire-author-email-pill"
+                      class="hidden text-xs text-indigo-400 font-mono ml-1.5"
+                      >(&lt;<span id="inquire-author-email-target"></span>&gt;)</span
+                    >.
+                  </p>
+                </div>
+
+                <!-- Form View -->
+                <form id="chronicler-inquire-form" class="space-y-6 relative z-10" novalidate>
+                  <!-- Inquiry Category Selector -->
+                  <div class="space-y-2.5">
+                    <label class="block text-xs font-bold uppercase tracking-widest text-slate-300">
+                      Select Inquiry Type
+                    </label>
+                    <div
+                      id="inquiry-category-chips"
+                      class="grid grid-cols-2 sm:grid-cols-4 gap-2.5"
+                      role="radiogroup"
+                      aria-label="Inquiry Category"
+                    >
+                      <button
+                        type="button"
+                        role="radio"
+                        aria-checked="true"
+                        class="inquiry-category-chip active"
+                        data-category="lore"
+                      >
+                        <i data-lucide="compass" class="w-4 h-4"></i>
+                        <span>Lore & World</span>
+                      </button>
+                      <button
+                        type="button"
+                        role="radio"
+                        aria-checked="false"
+                        class="inquiry-category-chip"
+                        data-category="characters"
+                      >
+                        <i data-lucide="user" class="w-4 h-4"></i>
+                        <span>Character Doubts</span>
+                      </button>
+                      <button
+                        type="button"
+                        role="radio"
+                        aria-checked="false"
+                        class="inquiry-category-chip"
+                        data-category="plot"
+                      >
+                        <i data-lucide="help-circle" class="w-4 h-4"></i>
+                        <span>Plot & Theories</span>
+                      </button>
+                      <button
+                        type="button"
+                        role="radio"
+                        aria-checked="false"
+                        class="inquiry-category-chip"
+                        data-category="connect"
+                      >
+                        <i data-lucide="heart" class="w-4 h-4"></i>
+                        <span>Connect & Praise</span>
+                      </button>
+                    </div>
+                    <input type="hidden" id="inquire-category" value="lore" />
+                  </div>
+
+                  <!-- Author & Sender Details Grid -->
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                      <label
+                        for="inquire-sender-name"
+                        class="block text-xs font-bold uppercase tracking-widest text-slate-300"
+                      >
+                        Your Reader Moniker <span class="text-indigo-400">*</span>
+                      </label>
+                      <div class="relative">
+                        <input
+                          type="text"
+                          id="inquire-sender-name"
+                          required
+                          maxlength="50"
+                          class="inquire-input w-full px-4 py-3 rounded-2xl text-sm font-medium"
+                          placeholder="e.g. Archivist Ronin"
+                        />
+                      </div>
+                    </div>
+                    <div class="space-y-2">
+                      <label
+                        for="inquire-sender-contact"
+                        class="block text-xs font-bold uppercase tracking-widest text-slate-300"
+                      >
+                        Contact / Handle
+                        <span class="text-slate-500 font-normal text-[10px] lowercase"
+                          >(optional for reply)</span
+                        >
+                      </label>
+                      <div class="relative">
+                        <input
+                          type="text"
+                          id="inquire-sender-contact"
+                          maxlength="80"
+                          class="inquire-input w-full px-4 py-3 rounded-2xl text-sm font-medium"
+                          placeholder="email@domain.com or @handle"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Missive Question Textarea -->
+                  <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                      <label
+                        for="inquire-message"
+                        class="block text-xs font-bold uppercase tracking-widest text-slate-300"
+                      >
+                        Your Inquiry / Missive <span class="text-indigo-400">*</span>
+                      </label>
+                      <span
+                        id="inquire-char-counter"
+                        class="text-[10px] font-bold text-slate-500 tracking-wider"
+                      >
+                        0 / 800
+                      </span>
+                    </div>
+                    <textarea
+                      id="inquire-message"
+                      required
+                      minlength="10"
+                      maxlength="800"
+                      class="inquire-input w-full p-4 rounded-2xl text-sm font-medium h-36 resize-none focus:ring-1 focus:ring-indigo-500/50"
+                      placeholder="Inscribe your question, doubt, or message for the chronicler..."
+                    ></textarea>
+                    <p
+                      id="inquire-form-error"
+                      class="hidden text-xs text-rose-400 font-medium pt-1"
+                    ></p>
+                  </div>
+
+                  <!-- Footer / Dispatch Action -->
+                  <div
+                    class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2 border-t border-white/6"
+                  >
+                    <div class="flex items-center gap-2 text-slate-400 text-xs">
+                      <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+                      <span
+                        >Missives are routed to the author's registered correspondence inbox.</span
+                      >
+                    </div>
+
+                    <button
+                      type="submit"
+                      id="inquire-submit-btn"
+                      class="btn btn-primary px-7 py-3 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shrink-0 shadow-lg shadow-indigo-500/20 active:scale-95 cursor-pointer"
+                    >
+                      <i data-lucide="send" class="w-3.5 h-3.5 fill-current"></i>
+                      <span id="inquire-submit-text">Dispatch Missive</span>
+                    </button>
+                  </div>
+                </form>
+
+                <!-- Success Confirmation View (Hidden by default) -->
+                <div
+                  id="chronicler-inquire-success"
+                  class="hidden space-y-6 py-6 text-center animate-fade-in relative z-10"
+                >
+                  <div
+                    class="w-16 h-16 mx-auto rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shadow-xl shadow-indigo-500/10"
+                  >
+                    <i data-lucide="check-check" class="w-8 h-8"></i>
+                  </div>
+                  <div class="space-y-2 max-w-lg mx-auto">
+                    <h3 class="font-cinzel text-xl sm:text-2xl font-black text-white">
+                      Missive Inscribed & Dispatched
+                    </h3>
+                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                      Your inquiry has been relayed across the archives to
+                      <span id="success-author-target" class="font-semibold text-indigo-300"
+                        >the author</span
+                      >. Thank you for engaging deeply with this chronicle.
+                    </p>
+                  </div>
+                  <div class="pt-2">
+                    <button
+                      type="button"
+                      id="btn-inquire-another"
+                      class="btn btn-secondary px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer"
+                    >
+                      <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                      <span>Inscribe Another Missive</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Author Sanctuary / Connect Card -->
+              <div
+                class="glass-card-strong p-6 sm:p-8 rounded-3xl border border-white/6 shadow-xl relative overflow-hidden"
+              >
+                <div
+                  class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6"
+                >
+                  <div class="flex items-center gap-4">
+                    <img
+                      id="letter-author-avatar"
+                      src=""
+                      alt="Author Avatar"
+                      class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-zinc-800 object-cover border border-white/10 shadow-md shrink-0"
+                    />
+                    <div class="space-y-1">
+                      <div class="flex items-center gap-2">
+                        <span
+                          class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400"
+                        >
+                          Chronicle Author
+                        </span>
+                      </div>
+                      <h4
+                        id="letter-author-name"
+                        class="font-cinzel text-lg sm:text-xl font-bold text-white"
+                      >
+                        Author Name
+                      </h4>
+                      <p
+                        id="letter-author-bio"
+                        class="text-xs text-slate-400 max-w-md line-clamp-2"
+                      >
+                        Creator and keeper of this chronicle.
+                      </p>
+                      <!-- Author Registered Correspondence Email Row -->
+                      <div
+                        id="letter-author-email-row"
+                        class="hidden flex items-center gap-2 pt-1 text-indigo-300"
+                      >
+                        <i data-lucide="mail" class="w-3.5 h-3.5 text-indigo-400"></i>
+                        <span id="letter-author-email-display" class="text-xs font-mono"></span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <a
+                      id="letter-author-email-btn"
+                      href="#"
+                      class="hidden btn btn-secondary flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:text-white"
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      <i data-lucide="mail" class="w-3.5 h-3.5 text-indigo-400"></i>
+                      <span>Direct Mail</span>
+                    </a>
+                    <a
+                      id="letter-author-profile-link"
+                      href="#"
+                      class="btn btn-secondary flex-1 sm:flex-initial px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:text-white"
+                    >
+                      <i data-lucide="user" class="w-3.5 h-3.5"></i>
+                      <span>View Profile</span>
+                    </a>
+                    <button
+                      type="button"
+                      id="letter-shelf-quick-btn"
+                      class="btn btn-secondary flex-1 sm:flex-initial px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2"
+                    >
+                      <i data-lucide="bookmark-plus" class="w-3.5 h-3.5"></i>
+                      <span>Bookmark Tale</span>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

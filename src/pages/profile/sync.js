@@ -7,6 +7,7 @@ import { auth, onSnapshot, setDoc, serverTimestamp, getDoc, refs } from '@fb/ind
 
 import { createLogger, validateData, UserProfileSchema } from '@/utils';
 import { createUserProfile } from '@state/index.js';
+import { registerAuthor } from '@services/author.service.js';
 import { updateProfileUI, showNotification } from './ui.js';
 import { profileState } from './state.js';
 import { setStoredApiKey, clearStoredApiKey } from '@/services/ai/apiKey.storage.js';
@@ -64,6 +65,10 @@ export function startProfileSync(uid) {
         instagramHandle: normalized.instagramHandle,
         readingGoal: normalized.readingGoal,
         favouriteGenres: normalized.favouriteGenres,
+        isAuthor: Boolean(normalized.isAuthor),
+        penName: normalized.penName || '',
+        authorEmail: normalized.authorEmail || '',
+        authorBio: normalized.authorBio || '',
         joinedAt: normalized.joinedAt
           ? new Date(normalized.joinedAt.seconds * 1000).toISOString()
           : '',
@@ -160,6 +165,41 @@ export async function saveProfile() {
   } catch (error) {
     log.error('Save error:', error);
     showNotification('Failed to save profile. Please try again.', 'error');
+  }
+}
+
+/* ─────────────────────────────────────────────
+   Author / Scribe Registration
+   ───────────────────────────────────────────── */
+
+/**
+ * Saves or updates proactive author registration details in Firestore and profileState.
+ *
+ * @param {{ penName: string, authorEmail: string, authorBio?: string }} authorData
+ * @returns {Promise<boolean>}
+ */
+export async function saveAuthorRegistry(authorData) {
+  if (!auth.currentUser) {
+    showNotification('You must be signed in to register as a scribe.', 'error');
+    return false;
+  }
+
+  const uid = auth.currentUser.uid;
+  try {
+    const updated = await registerAuthor(uid, authorData);
+    Object.assign(profileState, {
+      isAuthor: updated.isAuthor,
+      penName: updated.penName,
+      authorEmail: updated.authorEmail,
+      authorBio: updated.authorBio,
+    });
+    updateProfileUI(profileState);
+    showNotification('Scribe credentials recorded in the sanctum!', 'success');
+    return true;
+  } catch (err) {
+    log.error('Author registration failed:', err);
+    showNotification(err.message || 'Failed to update author registration.', 'error');
+    return false;
   }
 }
 

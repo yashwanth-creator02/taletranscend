@@ -49,6 +49,10 @@ export * from './profile.service.js';
 // Soul Resonance (reaction) toggle and status checks
 export * from './resonance.service.js';
 
+// ── Author Registry ───────────────────────────────────────────────────
+// Scribe registration and author verification
+export * from './author.service.js';
+
 // ── AI ────────────────────────────────────────────────────────────────
 // Gemini-powered title suggestions and text refinement
 export * from './ai.service.js';

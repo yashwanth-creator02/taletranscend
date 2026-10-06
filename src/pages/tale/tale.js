@@ -24,6 +24,7 @@ import {
   setupResonance,
   initHeaderScroll,
   setupChronicleBatchActions,
+  setupInquire,
   listenToComments,
   postComment,
   initIcons,
@@ -101,6 +102,7 @@ export async function initTalePage(authUser = null) {
   setupResumeReading(userId, currentTaleId);
   setupResonance(currentTaleId);
   setupTabs();
+  setupInquire(currentTaleId, tale, userId);
   initHeaderScroll();
 
   // 4. Shelf and share buttons

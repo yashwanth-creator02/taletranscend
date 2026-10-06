@@ -72,6 +72,15 @@ export function createUserProfile(uid, data = {}) {
     writingStreak: data.writingStreak ?? 0,
     lastWrittenAt: data.lastWrittenAt ?? null,
     role: data.role ?? 'reader',
+    isAuthor: Boolean(
+      data.isAuthor ||
+      data.role === 'author' ||
+      data.isVerifiedWriter ||
+      (data.authorEmail && data.penName)
+    ),
+    penName: data.penName ?? '',
+    authorEmail: data.authorEmail ?? '',
+    authorBio: data.authorBio ?? '',
     isBanned: data.isBanned ?? false,
     isVerifiedWriter: data.isVerifiedWriter ?? false,
     joinedAt: data.joinedAt ?? null,

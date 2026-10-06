@@ -905,5 +905,117 @@
         </div>
       </aside>
     </main>
+
+    <!-- ── Author Registration Wall Modal ── -->
+    <div
+      id="author-registration-wall-modal"
+      class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md animate-fade-in"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="wall-modal-title"
+    >
+      <div
+        class="glass-card-strong w-full max-w-lg p-6 sm:p-8 rounded-3xl border border-white/10 shadow-2xl relative space-y-6"
+      >
+        <!-- Header -->
+        <div class="space-y-2 border-b border-white/6 pb-5">
+          <div class="flex items-center gap-2 text-indigo-400">
+            <i data-lucide="feather" class="w-4 h-4"></i>
+            <span class="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-300">
+              Scribe Registry Required
+            </span>
+          </div>
+          <h2
+            id="wall-modal-title"
+            class="font-cinzel text-xl sm:text-2xl font-bold text-white tracking-wide"
+          >
+            Author Registration Wall
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            Before sealing your legend into the eternal archives, register your Scribe identity.
+            Readers of this tale will be able to dispatch inquiries to your registered email via The
+            Chronicler's Letter.
+          </p>
+        </div>
+
+        <!-- Form -->
+        <form id="author-registration-wall-form" class="space-y-4" novalidate>
+          <div class="space-y-1.5">
+            <label
+              for="wall-pen-name"
+              class="block text-xs font-bold uppercase tracking-wider text-slate-300"
+            >
+              Scribe / Pen Name <span class="text-indigo-400">*</span>
+            </label>
+            <input
+              type="text"
+              id="wall-pen-name"
+              required
+              maxlength="80"
+              class="shelf-input w-full px-3.5 py-2.5 rounded-xl border border-white/10 bg-black/30 text-sm text-white placeholder:text-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50"
+              placeholder="e.g. Chronicler Valen"
+            />
+          </div>
+
+          <div class="space-y-1.5">
+            <label
+              for="wall-author-email"
+              class="block text-xs font-bold uppercase tracking-wider text-slate-300"
+            >
+              Author Correspondence Email <span class="text-indigo-400">*</span>
+            </label>
+            <input
+              type="email"
+              id="wall-author-email"
+              required
+              maxlength="100"
+              class="shelf-input w-full px-3.5 py-2.5 rounded-xl border border-white/10 bg-black/30 text-sm text-white placeholder:text-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50"
+              placeholder="author@example.com"
+            />
+            <p class="text-[10px] text-slate-400 leading-tight">
+              Inquiries from readers via The Chronicler's Letter will be connected to this address.
+            </p>
+          </div>
+
+          <div class="space-y-1.5">
+            <label
+              for="wall-author-bio"
+              class="block text-xs font-bold uppercase tracking-wider text-slate-300"
+            >
+              Scribe Creed / Author Bio
+              <span class="text-slate-500 font-normal text-[10px] lowercase">(optional)</span>
+            </label>
+            <textarea
+              id="wall-author-bio"
+              rows="3"
+              maxlength="500"
+              class="shelf-input w-full px-3.5 py-2.5 rounded-xl border border-white/10 bg-black/30 text-sm text-white placeholder:text-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 resize-none"
+              placeholder="A few words about your chronicles, inspirations, or realm…"
+            ></textarea>
+          </div>
+
+          <p id="wall-form-error" class="hidden text-xs text-rose-400 font-medium"></p>
+
+          <!-- Actions -->
+          <div class="flex items-center justify-end gap-3 pt-3 border-t border-white/6">
+            <button
+              type="button"
+              id="btn-cancel-wall"
+              class="btn btn-secondary px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              id="btn-confirm-wall"
+              class="btn btn-primary px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-500/20"
+            >
+              <i data-lucide="feather" class="w-3.5 h-3.5"></i>
+              <span id="wall-submit-text">Register & Publish</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </body>
 </html>

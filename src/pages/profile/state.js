@@ -19,6 +19,10 @@ log.debug('Module loaded');
  * @property {string}        instagramHandle
  * @property {number}        readingGoal        - books per year target
  * @property {string[]}      favouriteGenres
+ * @property {boolean}       isAuthor           - whether the user is registered as a scribe
+ * @property {string}        penName            - active scribe pen name
+ * @property {string}        authorEmail        - registered author correspondence email
+ * @property {string}        authorBio          - author creed or bio
  * @property {string}        joinedAt           - ISO date string from Firebase auth
  * @property {number}        totalWordsWritten  - computed from drafts + published
  * @property {number}        totalReaders       - sum of readers across published tales
@@ -40,6 +44,10 @@ export const profileState = {
   instagramHandle: '',
   readingGoal: 12,
   favouriteGenres: [],
+  isAuthor: false,
+  penName: '',
+  authorEmail: '',
+  authorBio: '',
   joinedAt: '',
   totalWordsWritten: 0,
   totalReaders: 0,

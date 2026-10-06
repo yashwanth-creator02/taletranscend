@@ -30,6 +30,8 @@ import {
   showContributionsSkeleton,
   switchContribTab,
   closeModal,
+  closeAuthorModal,
+  saveAuthorRegistry,
 } from './index.js';
 import { initProfileLayout } from './layout.js';
 
@@ -73,6 +75,46 @@ export async function initProfilePage(currentUser = auth?.currentUser) {
     log.info('Profile form submitted');
     await saveProfile();
     closeModal();
+  });
+
+  // Scribe registry form submit
+  document.getElementById('profile-author-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    log.info('Profile author form submitted');
+    const penName = document.getElementById('profile-pen-name-input')?.value.trim() || '';
+    const authorEmail = document.getElementById('profile-author-email-input')?.value.trim() || '';
+    const authorBio = document.getElementById('profile-author-bio-input')?.value.trim() || '';
+    const errorEl = document.getElementById('profile-author-form-error');
+
+    if (!penName || penName.length < 2) {
+      if (errorEl) {
+        errorEl.textContent = 'Please enter a valid pen name (at least 2 characters).';
+        errorEl.classList.remove('hidden');
+      }
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!authorEmail || !emailRegex.test(authorEmail)) {
+      if (errorEl) {
+        errorEl.textContent = 'Please enter a valid correspondence email.';
+        errorEl.classList.remove('hidden');
+      }
+      return;
+    }
+
+    const submitBtn = document.getElementById('btn-save-profile-author');
+    const submitText = document.getElementById('profile-author-submit-text');
+    if (submitBtn) submitBtn.disabled = true;
+    if (submitText) submitText.textContent = 'Saving…';
+
+    const success = await saveAuthorRegistry({ penName, authorEmail, authorBio });
+    if (submitBtn) submitBtn.disabled = false;
+    if (submitText) submitText.textContent = 'Save Scribe Registry';
+
+    if (success) {
+      closeAuthorModal();
+    }
   });
 
   // New story CTA

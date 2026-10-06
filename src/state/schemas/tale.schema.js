@@ -63,6 +63,7 @@ export function createTale(id, data = {}) {
     title: data.title || 'Untitled Tale',
     authorId: data.authorId ?? '',
     authorName: data.authorName ?? '',
+    authorEmail: data.authorEmail ?? '',
     authorAvatarUrl: data.authorAvatarUrl ?? '',
     description: data.description ?? '',
     synopsis: data.synopsis ?? '',

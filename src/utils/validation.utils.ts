@@ -58,6 +58,7 @@ export const TaleSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200),
   authorId: z.string().min(1),
   authorName: z.string().min(1),
+  authorEmail: z.string().email().or(z.string().length(0)).optional().default(''),
   authorAvatarUrl: z.string().optional(),
   description: z.string().max(1000),
   synopsis: z.string().max(2000),
@@ -99,6 +100,16 @@ export const UserProfileSchema = z.object({
   instagramHandle: z.string().max(100).optional(),
   readingGoal: z.number().min(0).max(1000).optional().default(30),
   favouriteGenres: z.array(z.string()).max(10).optional(),
+  isAuthor: z.boolean().optional().default(false),
+  penName: z.string().max(100).optional(),
+  authorEmail: z.string().email().or(z.string().length(0)).optional(),
+  authorBio: z.string().max(1000).optional(),
+});
+
+export const AuthorRegistrationSchema = z.object({
+  penName: z.string().min(2, 'Pen name must be at least 2 characters').max(100),
+  authorEmail: z.string().email('Valid contact email is required for author registration'),
+  authorBio: z.string().max(1000).optional().default(''),
 });
 
 /**

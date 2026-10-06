@@ -134,6 +134,8 @@ async function _loadIcons() {
     // Communication
     MessageSquare: L.MessageSquare,
     MessageSquarePlus: L.MessageSquarePlus,
+    Mail: L.Mail,
+    HelpCircle: L.HelpCircle,
     Database: L.Database,
     Cloud: L.Cloud,
     // UI Chrome

@@ -17,9 +17,17 @@ vi.mock('@services/cache.service.js', () => ({
   },
 }));
 
+vi.mock('@services/author.service.js', () => ({
+  getAuthorStatus: vi.fn(),
+  registerAuthor: vi.fn(),
+}));
+
+import { getAuthorStatus, registerAuthor } from '@services/author.service.js';
+
 // Mock @/utils barrel
 vi.mock('@/utils', () => ({
   navigateTo: vi.fn(),
+  taleUrl: vi.fn((id) => `/tale.html?id=${id}`),
   countWords: vi.fn((s) => (s ? s.split(' ').length : 0)),
   estimateReadMins: vi.fn(() => 1),
   safeAsync: vi.fn(async (p, options = {}) => {
@@ -53,20 +61,37 @@ describe('Publish Pipeline', () => {
 
     // Reset mock defaults
     vi.mocked(utils.guardOffline).mockReturnValue(false);
+    vi.mocked(getAuthorStatus).mockResolvedValue({
+      isAuthor: true,
+      penName: 'Test User',
+      authorEmail: 'test@example.com',
+      authorBio: 'Bio',
+    });
 
     document.body.innerHTML = `
       <div id="stat-status"></div>
       <button id="publish-btn"><span>Publish</span></button>
       <button id="publish-btn-mobile"><span>Publish</span></button>
+      <div id="author-registration-wall-modal" class="hidden">
+        <form id="author-registration-wall-form">
+          <input id="wall-pen-name" value="" />
+          <input id="wall-author-email" value="" />
+          <textarea id="wall-author-bio"></textarea>
+          <p id="wall-form-error" class="hidden"></p>
+          <button type="button" id="btn-cancel-wall">Cancel</button>
+          <button type="submit" id="btn-confirm-wall"><span id="wall-submit-text">Register & Publish</span></button>
+        </form>
+      </div>
     `;
 
     // Reset state
     state.title = 'Test Tale';
     state.chapters = [{ title: 'C1', content: 'Content 1' }];
     state.draftId = 'd1';
+    state.publishedTaleId = null;
 
     // Mock auth
-    auth.currentUser = { uid: 'u1', displayName: 'Test User' };
+    auth.currentUser = { uid: 'u1', displayName: 'Test User', email: 'test@example.com' };
   });
 
   afterEach(() => {
@@ -124,6 +149,74 @@ describe('Publish Pipeline', () => {
     expect(updateDoc).toHaveBeenCalled();
     expect(setDoc).toHaveBeenCalled(); // For chapters
     expect(document.getElementById('stat-status').textContent).toContain('Updated successfully');
+  });
+
+  it('halts publishing if unregistered author cancels registration wall', async () => {
+    vi.mocked(getAuthorStatus).mockResolvedValue({
+      isAuthor: false,
+      penName: '',
+      authorEmail: '',
+      authorBio: '',
+    });
+
+    const publishPromise = publishFullTale();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    // Modal should have opened
+    const modal = document.getElementById('author-registration-wall-modal');
+    expect(modal.classList.contains('flex')).toBe(true);
+
+    // Click cancel
+    document.getElementById('btn-cancel-wall').click();
+
+    await publishPromise;
+
+    expect(document.getElementById('stat-status').textContent).toContain(
+      'Author registration required'
+    );
+    expect(saveAllChapters).not.toHaveBeenCalled();
+  });
+
+  it('registers author via wall and continues publishing', async () => {
+    vi.mocked(getAuthorStatus).mockResolvedValue({
+      isAuthor: false,
+      penName: '',
+      authorEmail: '',
+      authorBio: '',
+    });
+    vi.mocked(registerAuthor).mockResolvedValue({
+      isAuthor: true,
+      penName: 'Scribe Jane',
+      authorEmail: 'jane@example.com',
+      authorBio: 'Chronicler of old.',
+    });
+    vi.mocked(setDoc).mockResolvedValue(undefined);
+    vi.mocked(updateDoc).mockResolvedValue(undefined);
+    vi.mocked(saveAllChapters).mockResolvedValue(undefined);
+
+    const publishPromise = publishFullTale();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    const penNameInput = document.getElementById('wall-pen-name');
+    const emailInput = document.getElementById('wall-author-email');
+    const form = document.getElementById('author-registration-wall-form');
+
+    penNameInput.value = 'Scribe Jane';
+    emailInput.value = 'jane@example.com';
+
+    form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+
+    await publishPromise;
+
+    expect(registerAuthor).toHaveBeenCalledWith('u1', {
+      penName: 'Scribe Jane',
+      authorEmail: 'jane@example.com',
+      authorBio: '',
+    });
+    expect(saveAllChapters).toHaveBeenCalledWith('u1');
+    expect(setDoc).toHaveBeenCalled();
   });
 
   it.skip('handles publish failure gracefully', async () => {

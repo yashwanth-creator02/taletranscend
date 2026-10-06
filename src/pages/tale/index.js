@@ -13,6 +13,7 @@ export {
   setupResonance,
   initHeaderScroll,
   setupChronicleBatchActions,
+  setupInquire,
 } from './interactions.js';
 export { listenToComments, postComment } from './comments.js';
 

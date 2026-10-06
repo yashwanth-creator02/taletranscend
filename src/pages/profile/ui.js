@@ -39,6 +39,7 @@ import {
  */
 export function initProfileUI() {
   _bindModalTriggers();
+  _bindAuthorRegistryUI();
   _bindTabSwitching();
   _buildGenreSelector();
   _bindAvatarPreview();
@@ -55,6 +56,62 @@ function _bindModalTriggers() {
   ['btn-close-modal', 'btn-cancel-modal'].forEach((id) => {
     document.getElementById(id)?.addEventListener('click', closeModal);
   });
+}
+
+function _bindAuthorRegistryUI() {
+  ['btn-register-scribe-open', 'btn-edit-scribe-open'].forEach((id) => {
+    document.getElementById(id)?.addEventListener('click', openAuthorModal);
+  });
+
+  document.getElementById('btn-cancel-profile-author')?.addEventListener('click', closeAuthorModal);
+
+  document.getElementById('profile-author-modal')?.addEventListener('click', (e) => {
+    if (e.target === e.currentTarget || e.target.classList?.contains('modal-backdrop')) {
+      closeAuthorModal();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeAuthorModal();
+  });
+}
+
+export function openAuthorModal() {
+  const modal = document.getElementById('profile-author-modal');
+  if (!modal) return;
+  const penNameInput = document.getElementById('profile-pen-name-input');
+  const emailInput = document.getElementById('profile-author-email-input');
+  const bioInput = document.getElementById('profile-author-bio-input');
+  const errorEl = document.getElementById('profile-author-form-error');
+
+  if (penNameInput) {
+    penNameInput.value = profileState.penName || profileState.name || '';
+  }
+  if (emailInput) {
+    emailInput.value = profileState.authorEmail || '';
+  }
+  if (bioInput) {
+    bioInput.value = profileState.authorBio || '';
+  }
+  if (errorEl) {
+    errorEl.textContent = '';
+    errorEl.classList.add('hidden');
+  }
+
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  document.body.style.overflow = 'hidden';
+  window.requestAnimationFrame(() => {
+    penNameInput?.focus();
+  });
+}
+
+export function closeAuthorModal() {
+  const modal = document.getElementById('profile-author-modal');
+  if (!modal) return;
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+  document.body.style.overflow = '';
 }
 
 export function openModal() {
@@ -386,6 +443,54 @@ export function updateProfileUI(data) {
     profileState.favouriteGenres = [...data.favouriteGenres];
     syncGenreChips();
   }
+
+  // Scribe / Author Registry Card
+  _renderAuthorRegistry(data);
+}
+
+function _renderAuthorRegistry(data) {
+  const authorCard = document.getElementById('author-registry-card');
+  if (!authorCard) return;
+
+  const isRegistered = Boolean(data.isAuthor && data.authorEmail);
+  const unreg = document.getElementById('author-registry-unregistered');
+  const reg = document.getElementById('author-registry-registered');
+  const badge = document.getElementById('profile-author-badge');
+  const penNameEl = document.getElementById('profile-author-pen-name');
+  const emailEl = document.getElementById('profile-author-email-display');
+  const bioWrap = document.getElementById('profile-author-bio-wrap');
+  const bioEl = document.getElementById('profile-author-bio-display');
+
+  if (isRegistered) {
+    unreg?.classList.add('hidden');
+    reg?.classList.remove('hidden');
+    if (badge) {
+      badge.textContent = 'Verified Scribe';
+      badge.className =
+        'text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-300';
+    }
+    if (penNameEl) penNameEl.textContent = data.penName || data.name || 'Anonymous Scribe';
+    if (emailEl) emailEl.textContent = data.authorEmail || '';
+    if (data.authorBio && bioWrap && bioEl) {
+      bioWrap.classList.remove('hidden');
+      bioEl.textContent = data.authorBio;
+    } else if (bioWrap) {
+      bioWrap.classList.add('hidden');
+    }
+  } else {
+    unreg?.classList.remove('hidden');
+    reg?.classList.add('hidden');
+    if (badge) {
+      badge.textContent = 'Reader';
+      badge.className =
+        'text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-slate-700 bg-slate-800/60 text-slate-400';
+    }
+  }
+
+  // Prefill author modal inputs
+  setInput('profile-pen-name-input', data.penName || data.name || '');
+  setInput('profile-author-email-input', data.authorEmail || '');
+  setInput('profile-author-bio-input', data.authorBio || '');
 }
 
 function _renderRank(wordCount) {

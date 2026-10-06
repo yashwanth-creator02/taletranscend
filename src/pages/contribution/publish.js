@@ -16,6 +16,7 @@
 import { auth, setDoc, updateDoc, serverTimestamp, refs } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
 import { cacheService } from '@services/cache.service.js';
+import { getAuthorStatus, registerAuthor } from '@services/author.service.js';
 import {
   navigateTo,
   taleUrl,
@@ -35,12 +36,133 @@ import { saveAllChapters, syncMetadataFromDom } from './cloud.js';
 const log = createLogger('Publish');
 
 /* ─────────────────────────────────────────────
+   Author Registration Wall Prompt
+   ───────────────────────────────────────────── */
+
+/**
+ * Displays the Author Registration Wall modal and waits for completion or dismissal.
+ *
+ * @param {string} userId
+ * @param {import('@services/author.service.js').AuthorStatus} [currentStatus]
+ * @returns {Promise<import('@services/author.service.js').AuthorStatus|null>}
+ */
+export function promptAuthorRegistrationWall(userId, currentStatus = null) {
+  return new Promise((resolve) => {
+    const modal = document.getElementById('author-registration-wall-modal');
+    const form = document.getElementById('author-registration-wall-form');
+    const penNameInput = document.getElementById('wall-pen-name');
+    const emailInput = document.getElementById('wall-author-email');
+    const bioInput = document.getElementById('wall-author-bio');
+    const errorEl = document.getElementById('wall-form-error');
+    const cancelBtn = document.getElementById('btn-cancel-wall');
+    const submitBtn = document.getElementById('btn-confirm-wall');
+    const submitText = document.getElementById('wall-submit-text');
+
+    if (!modal || !form || !penNameInput || !emailInput) {
+      log.warn('Author registration wall modal elements not found in DOM');
+      resolve(null);
+      return;
+    }
+
+    // Prefill inputs
+    penNameInput.value = currentStatus?.penName || auth.currentUser?.displayName || '';
+    emailInput.value = currentStatus?.authorEmail || auth.currentUser?.email || '';
+    if (bioInput) bioInput.value = currentStatus?.authorBio || '';
+
+    if (errorEl) {
+      errorEl.textContent = '';
+      errorEl.classList.add('hidden');
+    }
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    penNameInput.focus();
+
+    const cleanup = () => {
+      form.removeEventListener('submit', handleSubmit);
+      if (cancelBtn) cancelBtn.removeEventListener('click', handleCancel);
+      document.removeEventListener('keydown', handleKeydown);
+    };
+
+    const closeModal = () => {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      cleanup();
+    };
+
+    const handleCancel = () => {
+      closeModal();
+      resolve(null);
+    };
+
+    const handleKeydown = (e) => {
+      if (e.key === 'Escape') {
+        handleCancel();
+      }
+    };
+
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      const penName = penNameInput.value.trim();
+      const authorEmail = emailInput.value.trim();
+      const authorBio = bioInput ? bioInput.value.trim() : '';
+
+      if (!penName || penName.length < 2) {
+        if (errorEl) {
+          errorEl.textContent = 'Please enter a pen name of at least 2 characters.';
+          errorEl.classList.remove('hidden');
+        }
+        penNameInput.focus();
+        return;
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!authorEmail || !emailRegex.test(authorEmail)) {
+        if (errorEl) {
+          errorEl.textContent = 'Please enter a valid author correspondence email.';
+          errorEl.classList.remove('hidden');
+        }
+        emailInput.focus();
+        return;
+      }
+
+      if (submitBtn) submitBtn.disabled = true;
+      if (submitText) submitText.textContent = 'Registering…';
+
+      try {
+        const updatedStatus = await registerAuthor(userId, {
+          penName,
+          authorEmail,
+          authorBio,
+        });
+        showToast('Scribe registration sealed! Resuming publication…', 'success');
+        closeModal();
+        resolve(updatedStatus);
+      } catch (err) {
+        log.error('Author registration wall submission failed', err);
+        if (errorEl) {
+          errorEl.textContent = err.message || 'Failed to complete registration.';
+          errorEl.classList.remove('hidden');
+        }
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+        if (submitText) submitText.textContent = 'Register & Publish';
+      }
+    };
+
+    form.addEventListener('submit', handleSubmit);
+    if (cancelBtn) cancelBtn.addEventListener('click', handleCancel);
+    document.addEventListener('keydown', handleKeydown);
+  });
+}
+
+/* ─────────────────────────────────────────────
    Publish Pipeline
    ───────────────────────────────────────────── */
 
 /**
  * Runs the full publishing pipeline.
- * Validates state, writes to the tales collection, then redirects to the new tale.
+ * Validates state, checks author registration wall, writes to tales collection, then redirects.
  */
 export async function publishFullTale() {
   log.info('Publish pipeline initiated');
@@ -76,12 +198,30 @@ export async function publishFullTale() {
     return;
   }
 
+  const userId = auth.currentUser.uid;
+
+  /* ── Author Registration Wall ───────────────────────────────── */
+  let authorStatus = await safeAsync(getAuthorStatus(userId), {
+    fallback: { isAuthor: false, penName: '', authorEmail: '', authorBio: '' },
+    logContext: 'pages.contribution.publish.checkAuthorStatus',
+  });
+
+  if (!authorStatus?.isAuthor || !authorStatus?.authorEmail) {
+    log.info('Author registration required before publishing', { userId });
+    _setPublishStatus('Author registration required...', 'loading');
+    const registered = await promptAuthorRegistrationWall(userId, authorStatus);
+    if (!registered || !registered.isAuthor || !registered.authorEmail) {
+      _setPublishStatus('Author registration required before publishing.', 'error');
+      _setPublishButtonsDisabled(false);
+      return;
+    }
+    authorStatus = registered;
+  }
+
   _setPublishStatus('Submitting to the archive...', 'loading');
   _setPublishButtonsDisabled(true);
 
-  const userId = auth.currentUser.uid;
-
-  const taleId = await safeAsync(_doPublish(userId), {
+  const taleId = await safeAsync(_doPublish(userId, authorStatus), {
     errorMessage: 'Publishing failed. Your draft is safe — try again.',
     logContext: 'pages.contribution.publish.fullPipeline',
   });
@@ -110,10 +250,14 @@ export async function publishFullTale() {
  * Separated so it can be wrapped by safeCall.
  *
  * @param {string} userId
+ * @param {import('@services/author.service.js').AuthorStatus} [authorStatus]
  * @returns {Promise<string>} The published tale ID
  */
-async function _doPublish(userId) {
-  const authorName = auth.currentUser.displayName || `Scribe ${userId.slice(0, 5)}`;
+async function _doPublish(userId, authorStatus = null) {
+  const status = authorStatus || (await getAuthorStatus(userId));
+  const authorName =
+    status?.penName || auth.currentUser.displayName || `Scribe ${userId.slice(0, 5)}`;
+  const authorEmail = status?.authorEmail || '';
 
   /* ── Branch: Updating an already published tale ──────────── */
   if (state.publishedTaleId) {
@@ -127,6 +271,7 @@ async function _doPublish(userId) {
     const updatePayload = {
       title: state.title,
       authorName,
+      authorEmail,
       description,
       synopsis: state.synopsis || '',
       coverUrl: state.coverUrl || '',
@@ -213,6 +358,7 @@ async function _doPublish(userId) {
     title: state.title,
     authorId: userId,
     authorName,
+    authorEmail,
     authorAvatarUrl: '',
     description,
     synopsis: state.synopsis || '',

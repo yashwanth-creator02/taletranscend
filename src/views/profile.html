@@ -314,6 +314,97 @@
             </div>
           </div>
 
+          <!-- Author / Scribe Registry Card -->
+          <div
+            id="author-registry-card"
+            class="identity-card p-4 sm:p-5 relative rounded-2xl border border-white/10 bg-white/2 backdrop-blur-md space-y-3.5 transition-all"
+          >
+            <!-- Header Row -->
+            <div class="flex items-center justify-between gap-2 border-b border-white/6 pb-2.5">
+              <div class="flex items-center gap-2">
+                <div
+                  class="w-7 h-7 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400"
+                >
+                  <i data-lucide="feather" class="w-3.5 h-3.5"></i>
+                </div>
+                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-300">
+                  Scribe Registry
+                </span>
+              </div>
+              <!-- Status Pill -->
+              <span
+                id="profile-author-badge"
+                class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-slate-700 bg-slate-800/60 text-slate-400"
+              >
+                Reader
+              </span>
+            </div>
+
+            <!-- Content: Unregistered View -->
+            <div id="author-registry-unregistered" class="space-y-3">
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Register proactively as a verified author to seal chronicles into the eternal
+                archives and receive missives from readers via The Chronicler's Letter.
+              </p>
+              <button
+                type="button"
+                id="btn-register-scribe-open"
+                class="w-full py-2.5 px-3 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/25 hover:text-white transition-all text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+              >
+                <i data-lucide="pen-tool" class="w-3.5 h-3.5"></i>
+                <span>Register as Scribe</span>
+              </button>
+            </div>
+
+            <!-- Content: Registered View (Hidden by default) -->
+            <div id="author-registry-registered" class="hidden space-y-3">
+              <div class="space-y-1">
+                <span class="text-[9px] font-bold uppercase tracking-widest text-slate-500 block">
+                  Pen Name / Moniker
+                </span>
+                <p
+                  id="profile-author-pen-name"
+                  class="font-cinzel text-sm font-bold text-white tracking-wide"
+                >
+                  —
+                </p>
+              </div>
+
+              <div class="space-y-1">
+                <span class="text-[9px] font-bold uppercase tracking-widest text-slate-500 block">
+                  Correspondence Email
+                </span>
+                <p
+                  id="profile-author-email-display"
+                  class="text-xs font-mono text-indigo-300 truncate"
+                >
+                  —
+                </p>
+              </div>
+
+              <div id="profile-author-bio-wrap" class="hidden space-y-1">
+                <span class="text-[9px] font-bold uppercase tracking-widest text-slate-500 block">
+                  Scribe Creed
+                </span>
+                <p
+                  id="profile-author-bio-display"
+                  class="text-xs text-slate-300 line-clamp-2 italic"
+                >
+                  —
+                </p>
+              </div>
+
+              <button
+                type="button"
+                id="btn-edit-scribe-open"
+                class="w-full py-2.5 px-3 rounded-xl bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 transition-all text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                <span>Edit Scribe Details</span>
+              </button>
+            </div>
+          </div>
+
           <!-- Navigation Links -->
           <div class="pillar-nav-links space-y-2.5 sm:space-y-3">
             <a
@@ -1253,6 +1344,117 @@
                 Save Changes
               </button>
             </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ── Profile Author / Scribe Registration Modal ── -->
+    <div
+      id="profile-author-modal"
+      class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md animate-fade-in"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="profile-author-modal-title"
+    >
+      <div
+        class="glass-card-strong w-full max-w-lg p-6 sm:p-8 rounded-3xl border border-white/10 shadow-2xl relative space-y-6"
+      >
+        <!-- Header -->
+        <div class="space-y-2 border-b border-white/6 pb-5">
+          <div class="flex items-center gap-2 text-indigo-400">
+            <i data-lucide="feather" class="w-4 h-4"></i>
+            <span class="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-300">
+              Scribe Registry
+            </span>
+          </div>
+          <h2
+            id="profile-author-modal-title"
+            class="font-cinzel text-xl sm:text-2xl font-bold text-white tracking-wide"
+          >
+            Author / Scribe Identity
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            Configure your official pen name and correspondence email. Readers of your tales will be
+            routed to your registered email when inquiring via The Chronicler's Letter.
+          </p>
+        </div>
+
+        <!-- Form -->
+        <form id="profile-author-form" class="space-y-4" novalidate>
+          <div class="space-y-1.5">
+            <label
+              for="profile-pen-name-input"
+              class="block text-xs font-bold uppercase tracking-wider text-slate-300"
+            >
+              Pen Name / Moniker <span class="text-indigo-400">*</span>
+            </label>
+            <input
+              type="text"
+              id="profile-pen-name-input"
+              required
+              maxlength="80"
+              class="input-mythic w-full rounded-xl px-4 py-3 text-sm"
+              placeholder="e.g. Chronicler Valen"
+            />
+          </div>
+
+          <div class="space-y-1.5">
+            <label
+              for="profile-author-email-input"
+              class="block text-xs font-bold uppercase tracking-wider text-slate-300"
+            >
+              Correspondence Email <span class="text-indigo-400">*</span>
+            </label>
+            <input
+              type="email"
+              id="profile-author-email-input"
+              required
+              maxlength="100"
+              class="input-mythic w-full rounded-xl px-4 py-3 text-sm"
+              placeholder="author@example.com"
+            />
+            <p class="text-[10px] text-slate-400 leading-tight">
+              Missives dispatched from The Chronicler's Letter will connect to this inbox.
+            </p>
+          </div>
+
+          <div class="space-y-1.5">
+            <label
+              for="profile-author-bio-input"
+              class="block text-xs font-bold uppercase tracking-wider text-slate-300"
+            >
+              Scribe Creed / Bio
+              <span class="text-slate-500 font-normal text-[10px] lowercase">(optional)</span>
+            </label>
+            <textarea
+              id="profile-author-bio-input"
+              rows="3"
+              maxlength="500"
+              class="input-mythic w-full rounded-xl p-4 text-sm resize-none"
+              placeholder="Your themes, inspirations, and lore philosophy..."
+            ></textarea>
+          </div>
+
+          <p id="profile-author-form-error" class="hidden text-xs text-rose-400 font-medium"></p>
+
+          <!-- Actions -->
+          <div class="flex items-center justify-end gap-3 pt-3 border-t border-white/6">
+            <button
+              type="button"
+              id="btn-cancel-profile-author"
+              class="btn btn-secondary px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              id="btn-save-profile-author"
+              class="btn btn-primary px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-500/20"
+            >
+              <i data-lucide="feather" class="w-3.5 h-3.5"></i>
+              <span id="profile-author-submit-text">Save Scribe Registry</span>
+            </button>
           </div>
         </form>
       </div>

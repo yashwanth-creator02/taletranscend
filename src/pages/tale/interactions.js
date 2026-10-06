@@ -295,11 +295,14 @@ export function setupTabs() {
 
       document.querySelectorAll('.tab-content').forEach((pane) => pane.classList.add('hidden'));
 
-      // Check standard target ID (e.g. content-about, content-synopsis)
+      // Check standard target ID (e.g. content-about, content-synopsis, content-letter)
       const targetPane =
         document.getElementById(`content-${target}`) ||
         (target === 'synopsis' ? document.getElementById('content-about') : null) ||
-        (target === 'echoes' ? document.getElementById('content-comments') : null);
+        (target === 'echoes' ? document.getElementById('content-comments') : null) ||
+        (target === 'letter' || target === 'inquire'
+          ? document.getElementById('content-letter') || document.getElementById('content-inquire')
+          : null);
 
       if (targetPane) {
         targetPane.classList.remove('hidden');
@@ -558,3 +561,5 @@ export function initHeaderScroll() {
 function _fadeAndGo(url) {
   navigateTo(url);
 }
+
+export { setupInquire } from './inquire.js';

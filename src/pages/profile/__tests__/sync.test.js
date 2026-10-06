@@ -1,9 +1,22 @@
 // src/pages/profile/__tests__/sync.test.js
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { startProfileSync, stopProfileSync, saveProfile, computeAndSyncStats } from '../sync.js';
+import {
+  startProfileSync,
+  stopProfileSync,
+  saveProfile,
+  saveAuthorRegistry,
+  computeAndSyncStats,
+} from '../sync.js';
 import { profileState } from '../state.js';
 import * as fb from '@fb/index.js';
 import * as ui from '../ui.js';
+
+vi.mock('@services/author.service.js', () => ({
+  registerAuthor: vi.fn(),
+  getAuthorStatus: vi.fn(),
+}));
+
+import { registerAuthor } from '@services/author.service.js';
 
 vi.mock('@fb/index.js', () => ({
   auth: { currentUser: { uid: 'u1' } },
@@ -104,6 +117,50 @@ describe('ProfileSync', () => {
         { merge: true }
       );
       expect(ui.showNotification).toHaveBeenCalledWith(expect.stringContaining('saved'), 'success');
+    });
+  });
+
+  describe('saveAuthorRegistry', () => {
+    it('calls registerAuthor and updates state', async () => {
+      vi.mocked(registerAuthor).mockResolvedValue({
+        isAuthor: true,
+        penName: 'Chronicler Valen',
+        authorEmail: 'valen@example.com',
+        authorBio: 'Lore master',
+      });
+
+      const res = await saveAuthorRegistry({
+        penName: 'Chronicler Valen',
+        authorEmail: 'valen@example.com',
+        authorBio: 'Lore master',
+      });
+
+      expect(res).toBe(true);
+      expect(registerAuthor).toHaveBeenCalledWith('u1', {
+        penName: 'Chronicler Valen',
+        authorEmail: 'valen@example.com',
+        authorBio: 'Lore master',
+      });
+      expect(profileState.isAuthor).toBe(true);
+      expect(profileState.penName).toBe('Chronicler Valen');
+      expect(profileState.authorEmail).toBe('valen@example.com');
+      expect(ui.updateProfileUI).toHaveBeenCalledWith(profileState);
+      expect(ui.showNotification).toHaveBeenCalledWith(
+        expect.stringContaining('sanctum'),
+        'success'
+      );
+    });
+
+    it('handles failure gracefully', async () => {
+      vi.mocked(registerAuthor).mockRejectedValue(new Error('Registration error'));
+
+      const res = await saveAuthorRegistry({
+        penName: 'Invalid',
+        authorEmail: 'bad-email',
+      });
+
+      expect(res).toBe(false);
+      expect(ui.showNotification).toHaveBeenCalledWith('Registration error', 'error');
     });
   });
 

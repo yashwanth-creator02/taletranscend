@@ -23,6 +23,7 @@ vi.mock('../index.js', () => ({
   setupResonance: vi.fn(),
   initHeaderScroll: vi.fn(),
   setupChronicleBatchActions: vi.fn(),
+  setupInquire: vi.fn(),
   listenToComments: vi.fn(),
   postComment: vi.fn(),
   initIcons: vi.fn(),
