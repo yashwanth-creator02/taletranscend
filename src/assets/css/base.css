@@ -203,9 +203,11 @@ select:focus-visible {
   transform: translateY(0);
 }
 
-/* Completely hidden utility, overriding display: inline-flex or flex on components */
-.hidden,
-[hidden] {
+/* Completely hidden utility for HTML [hidden] and components marked hidden */
+[hidden],
+.btn.hidden,
+.btn[hidden],
+.modal-overlay.hidden {
   display: none !important;
 }
 
