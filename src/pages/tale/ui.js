@@ -234,6 +234,29 @@ export async function renderTale(userId, tale, taleId, isResonated = false) {
     authorAvatar.alt = authorName;
   }
 
+  const letterAuthorName = getEl('letter-author-name');
+  if (letterAuthorName) letterAuthorName.textContent = authorName;
+
+  const letterAuthorBio = getEl('letter-author-bio');
+  if (letterAuthorBio) {
+    letterAuthorBio.textContent = tale.authorBio || `Creator and keeper of this chronicle.`;
+  }
+
+  const letterAuthorAvatar = getEl('letter-author-avatar');
+  if (letterAuthorAvatar) {
+    const seed = encodeURIComponent((tale.authorId || 'scribe').slice(0, 8));
+    letterAuthorAvatar.src =
+      tale.authorAvatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
+    letterAuthorAvatar.alt = authorName;
+  }
+
+  const profileLink = getEl('letter-author-profile-link');
+  if (profileLink) {
+    profileLink.href = tale.authorId
+      ? `/profile.html?uid=${encodeURIComponent(tale.authorId)}`
+      : '/library.html';
+  }
+
   const coverUrl = tale.coverUrl || FALLBACK_COVER;
   setCoverImage(coverUrl, title);
 
