@@ -36,6 +36,18 @@ describe('Firebase Paths', () => {
       );
     });
 
+    it('publicTaleCommentReplies(tid, cid) returns the correct path', () => {
+      expect(PATHS.publicTaleCommentReplies('123', 'c1')).toBe(
+        `${APP_ROOT}/public/data/tales/123/comments/c1/replies`
+      );
+    });
+
+    it('publicTaleCommentReply(tid, cid, rid) returns the correct path', () => {
+      expect(PATHS.publicTaleCommentReply('123', 'c1', 'r1')).toBe(
+        `${APP_ROOT}/public/data/tales/123/comments/c1/replies/r1`
+      );
+    });
+
     it('commentLikes(tid, cid) returns the correct path', () => {
       expect(PATHS.commentLikes('123', 'c1')).toBe(
         `${APP_ROOT}/public/data/tales/123/comments/c1/likes`

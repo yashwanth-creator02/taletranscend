@@ -562,6 +562,41 @@ service cloud.firestore {
             isAuthenticated() && resource.data.authorId == request.auth.uid
           ) || isAdmin();
 
+          // COMMENT REPLIES — .../comments/{commentId}/replies/{replyId}
+          match /replies/{replyId} {
+            allow read: if get(/databases/$(database)/documents/v1/taletranscend/projects/v1/public/data/tales/$(taleId)).data.visibility == 'public'
+              || get(/databases/$(database)/documents/v1/taletranscend/projects/v1/public/data/tales/$(taleId)).data.status == 'published'
+              || isAdmin();
+
+            allow create: if isAuthenticated()
+              && isValidString('text', 1, 5000)
+              && request.resource.data.text.trim().size() > 0
+              && isValidString('taleId', 1, 100)
+              && request.resource.data.taleId == taleId
+              && isValidString('authorId', 1, 100)
+              && request.resource.data.authorId == request.auth.uid
+              && isValidString('authorName', 1, 100)
+              && isValidString('parentId', 1, 100)
+              && request.resource.data.parentId == commentId
+              && isValidTimestamp('createdAt')
+              && isValidTimestamp('updatedAt');
+
+            allow update: if (
+                isAuthenticated()
+                && resource.data.authorId == request.auth.uid
+                && isValidString('text', 1, 5000)
+                && request.resource.data.text.trim().size() > 0
+                && isValidBool('isEdited')
+                && request.resource.data.isEdited == true
+                && isValidTimestamp('updatedAt')
+                && isValidTimestamp('editedAt')
+              ) || isAdmin();
+
+            allow delete: if (
+              isAuthenticated() && resource.data.authorId == request.auth.uid
+            ) || isAdmin();
+          }
+
           // COMMENT LIKES  —  .../comments/{commentId}/likes/{uid}
           match /likes/{uid} {
             allow read: if true;

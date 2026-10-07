@@ -1,12 +1,12 @@
-// src/pages/tale/__tests__/comments.test.js
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { listenToComments, postComment } from '../comments.js';
+import { listenToComments, postComment, editComment } from '../comments.js';
 import * as fb from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
 
 vi.mock('@fb/index.js', () => ({
   auth: { currentUser: { uid: 'u1', displayName: 'Hero' } },
   addDoc: vi.fn(),
+  updateDoc: vi.fn(() => Promise.resolve()),
   deleteDoc: vi.fn(() => Promise.resolve()),
   getDoc: vi.fn(() => Promise.resolve({ exists: () => false })),
   getDocs: vi.fn(),
@@ -17,6 +17,8 @@ vi.mock('@fb/index.js', () => ({
   refs: {
     comments: vi.fn(() => 'comments-ref'),
     comment: vi.fn((tid, cid) => `comments/${tid}/${cid}`),
+    commentReplies: vi.fn((tid, cid) => `comments/${tid}/${cid}/replies`),
+    commentReply: vi.fn((tid, cid, rid) => `comments/${tid}/${cid}/replies/${rid}`),
     tale: vi.fn((tid) => `tales/${tid}`),
   },
   serverTimestamp: vi.fn(() => 'mock-ts'),
@@ -151,6 +153,182 @@ describe('TaleComments', () => {
       expect(fb.addDoc).not.toHaveBeenCalled();
       expect(showToast).toHaveBeenCalledWith(expect.stringContaining('wait'), 'warning');
       expect(applyButtonCooldown).toHaveBeenCalled();
+    });
+  });
+
+  describe('comment editing and edited badge', () => {
+    it('renders edited badge when isEdited is true', async () => {
+      vi.mocked(fb.getDocs).mockResolvedValue({
+        empty: false,
+        docs: [
+          {
+            id: 'c-edited',
+            data: () => ({
+              authorId: 'u2',
+              authorName: 'Other Scribe',
+              text: 'Edited content',
+              isEdited: true,
+              createdAt: { seconds: 123 },
+            }),
+          },
+        ],
+      });
+
+      await listenToComments('t1');
+
+      const list = document.getElementById('comments-list');
+      const badge = list.querySelector('.edited-badge');
+      expect(badge).not.toBeNull();
+      expect(badge.textContent).toContain('Edited');
+    });
+
+    it('does not render edited badge when isEdited is false or undefined', async () => {
+      vi.mocked(fb.getDocs).mockResolvedValue({
+        empty: false,
+        docs: [
+          {
+            id: 'c-normal',
+            data: () => ({
+              authorId: 'u2',
+              authorName: 'Other Scribe',
+              text: 'Original content',
+              isEdited: false,
+              createdAt: { seconds: 123 },
+            }),
+          },
+        ],
+      });
+
+      await listenToComments('t1');
+
+      const list = document.getElementById('comments-list');
+      expect(list.querySelector('.edited-badge')).toBeNull();
+    });
+
+    it('renders edit button for comment author but not for other users', async () => {
+      vi.mocked(fb.getDocs).mockResolvedValue({
+        empty: false,
+        docs: [
+          {
+            id: 'c-mine',
+            data: () => ({
+              authorId: 'u1',
+              authorName: 'Hero',
+              text: 'My echo',
+              createdAt: { seconds: 123 },
+            }),
+          },
+          {
+            id: 'c-other',
+            data: () => ({
+              authorId: 'u2',
+              authorName: 'Other',
+              text: 'Other echo',
+              createdAt: { seconds: 123 },
+            }),
+          },
+        ],
+      });
+
+      await listenToComments('t1');
+
+      expect(document.querySelector('#comment-c-mine .edit-comment-trigger')).not.toBeNull();
+      expect(document.querySelector('#comment-c-other .edit-comment-trigger')).toBeNull();
+    });
+
+    it('toggles edit form on edit button click and cancels correctly', async () => {
+      vi.mocked(fb.getDocs).mockResolvedValue({
+        empty: false,
+        docs: [
+          {
+            id: 'c-mine',
+            data: () => ({
+              authorId: 'u1',
+              authorName: 'Hero',
+              text: 'Original text',
+              createdAt: { seconds: 123 },
+            }),
+          },
+        ],
+      });
+
+      await listenToComments('t1');
+
+      const editBtn = document.querySelector('.edit-comment-trigger');
+      const form = document.getElementById('comment-edit-form-c-mine');
+      const textDisplay = document.getElementById('comment-text-display-c-mine');
+
+      expect(form.classList.contains('hidden')).toBe(true);
+
+      editBtn.click();
+      expect(form.classList.contains('hidden')).toBe(false);
+      expect(textDisplay.classList.contains('hidden')).toBe(true);
+
+      const cancelBtn = document.querySelector('.cancel-edit-trigger');
+      cancelBtn.click();
+      expect(form.classList.contains('hidden')).toBe(true);
+      expect(textDisplay.classList.contains('hidden')).toBe(false);
+    });
+
+    it('saves edited comment, updates DOM, and adds edited badge', async () => {
+      vi.mocked(fb.getDocs).mockResolvedValue({
+        empty: false,
+        docs: [
+          {
+            id: 'c-mine',
+            data: () => ({
+              authorId: 'u1',
+              authorName: 'Hero',
+              text: 'Old echo',
+              isEdited: false,
+              createdAt: { seconds: 123 },
+            }),
+          },
+        ],
+      });
+
+      await listenToComments('t1');
+
+      const editBtn = document.querySelector('.edit-comment-trigger');
+      editBtn.click();
+
+      const textarea = document.getElementById('comment-edit-text-c-mine');
+      textarea.value = 'Updated echo text';
+
+      const saveBtn = document.querySelector('.save-edit-trigger');
+      saveBtn.click();
+
+      await new Promise((r) => setTimeout(r, 10));
+
+      expect(fb.updateDoc).toHaveBeenCalledWith(
+        'comments/t1/c-mine',
+        expect.objectContaining({
+          text: 'Updated echo text',
+          isEdited: true,
+          editedAt: 'mock-ts',
+          updatedAt: 'mock-ts',
+        })
+      );
+
+      const textDisplay = document.getElementById('comment-text-display-c-mine');
+      expect(textDisplay.textContent).toBe('Updated echo text');
+      expect(textDisplay.classList.contains('hidden')).toBe(false);
+
+      const badge = document.querySelector('#comment-c-mine .edited-badge');
+      expect(badge).not.toBeNull();
+      expect(badge.textContent).toContain('Edited');
+      expect(showToast).toHaveBeenCalledWith('Echo updated.', 'success');
+    });
+
+    it('editComment helper function executes updateDoc with required fields', async () => {
+      await editComment('tale-1', 'comment-1', 'Direct edit text');
+
+      expect(fb.updateDoc).toHaveBeenCalledWith('comments/tale-1/comment-1', {
+        text: 'Direct edit text',
+        isEdited: true,
+        editedAt: 'mock-ts',
+        updatedAt: 'mock-ts',
+      });
     });
   });
 

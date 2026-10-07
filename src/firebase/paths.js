@@ -36,6 +36,14 @@ export const PATHS = {
   publicTaleComment: (taleId, commentId) =>
     `${APP_ROOT}/public/data/tales/${taleId}/comments/${commentId}`,
 
+  /** Replies subcollection inside a comment */
+  publicTaleCommentReplies: (taleId, commentId) =>
+    `${APP_ROOT}/public/data/tales/${taleId}/comments/${commentId}/replies`,
+
+  /** Single reply document inside a comment */
+  publicTaleCommentReply: (taleId, commentId, replyId) =>
+    `${APP_ROOT}/public/data/tales/${taleId}/comments/${commentId}/replies/${replyId}`,
+
   /** Likes subcollection inside a comment */
   commentLikes: (taleId, commentId) =>
     `${APP_ROOT}/public/data/tales/${taleId}/comments/${commentId}/likes`,

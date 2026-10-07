@@ -52,6 +52,18 @@ describe('Firebase Refs', () => {
       expect(ref.path).toContain('/public/data/tales/123/comments/c1');
     });
 
+    it('commentReplies(tid, cid) returns a collection ref', () => {
+      const ref = refs.commentReplies('123', 'c1');
+      expect(ref.type).toBe('collection');
+      expect(ref.path).toContain('/public/data/tales/123/comments/c1/replies');
+    });
+
+    it('commentReply(tid, cid, rid) returns a doc ref', () => {
+      const ref = refs.commentReply('123', 'c1', 'r1');
+      expect(ref.type).toBe('doc');
+      expect(ref.path).toContain('/public/data/tales/123/comments/c1/replies/r1');
+    });
+
     it('commentLikes(tid, cid) returns a collection ref', () => {
       const ref = refs.commentLikes('123', 'c1');
       expect(ref.type).toBe('collection');

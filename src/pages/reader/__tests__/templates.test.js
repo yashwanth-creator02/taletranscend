@@ -1,5 +1,5 @@
 // src/pages/reader/__tests__/templates.test.js
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import {
   renderTocPanel,
   renderTypographyPanel,
@@ -68,6 +68,13 @@ describe('ReaderTemplates', () => {
       const html = renderCommentsPanel(comments, '');
       expect(html).toContain('Author');
       expect(html).toContain('author-tag');
+    });
+
+    it('renders edited badge when isEdited is true', () => {
+      const comments = [{ body: 'Edited note', author: 'Reader', initials: 'RD', isEdited: true }];
+      const html = renderCommentsPanel(comments, '');
+      expect(html).toContain('Edited');
+      expect(html).toContain('edited-badge');
     });
   });
 

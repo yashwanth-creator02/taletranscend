@@ -187,9 +187,10 @@ export function renderCommentsPanel(comments, newComment) {
             <div class="mb-2 flex items-center gap-2">
               <div style="display:flex;align-items:center;justify-content:center;border-radius:50%;color:var(--reader-accent-contrast);width:28px;height:28px;font-size:11px;background:var(--reader-accent);box-shadow:0 0 18px -6px rgb(var(--reader-accent-rgb) / 0.55);font-family:var(--font-serif);letter-spacing:0.08em">${safeInitials}</div>
               <div class="leading-tight">
-                <div class="flex items-center gap-1.5">
+                <div class="flex items-center gap-1.5 flex-wrap">
                   <div class="text-sm font-semibold" style="color:var(--reader-fg)">${safeAuthor}</div>
                   ${c.isTaleAuthor ? '<span class="author-tag" style="font-size:8px;padding:1px 5px;border-radius:4px;background:rgb(var(--accent-rgb)/var(--a-16));border:1px solid rgb(var(--accent-rgb)/var(--a-40));color:rgb(var(--accent-rgb));font-weight:700;text-transform:uppercase;letter-spacing:0.08em">Author</span>' : ''}
+                  ${c.isEdited ? '<span class="edited-badge edited-tag" style="font-size:8px;padding:1px 5px;border-radius:4px;background:var(--reader-card-bg);border:1px solid var(--reader-border);color:var(--reader-muted);font-weight:700;text-transform:uppercase;letter-spacing:0.06em">Edited</span>' : ''}
                 </div>
                 <div class="text-xs" style="color:var(--reader-muted)">${c.at ? new Date(c.at).toLocaleDateString() : 'Recently'}</div>
               </div>

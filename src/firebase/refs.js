@@ -35,6 +35,14 @@ export const refs = {
   /** Single comment document */
   comment: (taleId, commentId) => doc(db, PATHS.publicTaleComment(taleId, commentId)),
 
+  /** Replies subcollection inside a comment */
+  commentReplies: (taleId, commentId) =>
+    collection(db, PATHS.publicTaleCommentReplies(taleId, commentId)),
+
+  /** Single reply document */
+  commentReply: (taleId, commentId, replyId) =>
+    doc(db, PATHS.publicTaleCommentReply(taleId, commentId, replyId)),
+
   /** Likes subcollection inside a comment */
   commentLikes: (taleId, commentId) => collection(db, PATHS.commentLikes(taleId, commentId)),
 
