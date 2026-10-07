@@ -163,6 +163,8 @@ export function createChapter(id, data = {}) {
  * @property {number}      likeCount
  * @property {boolean}     isEdited
  * @property {import('firebase/firestore').Timestamp|null} editedAt
+ * @property {boolean}     isDeleted
+ * @property {import('firebase/firestore').Timestamp|null} deletedAt
  * @property {boolean}     isPinned
  * @property {boolean}     isHidden
  * @property {number}      reportCount
@@ -191,6 +193,8 @@ export function createComment(id, data = {}) {
     likeCount: data.likeCount ?? 0,
     isEdited: data.isEdited ?? false,
     editedAt: data.editedAt ?? null,
+    isDeleted: data.isDeleted ?? false,
+    deletedAt: data.deletedAt ?? null,
     isPinned: data.isPinned ?? false,
     isHidden: data.isHidden ?? false,
     reportCount: data.reportCount ?? 0,

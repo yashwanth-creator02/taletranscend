@@ -6,7 +6,6 @@ import {
   auth,
   addDoc,
   updateDoc,
-  deleteDoc,
   getDoc,
   doc,
   serverTimestamp,
@@ -142,6 +141,8 @@ export async function postComment(taleId) {
       likeCount: 0,
       isEdited: false,
       editedAt: null,
+      isDeleted: false,
+      deletedAt: null,
       isPinned: false,
       isHidden: false,
       reportCount: 0,
@@ -319,6 +320,8 @@ async function _handlePostReply(commentId, btn) {
       ...validated.data,
       isEdited: false,
       editedAt: null,
+      isDeleted: false,
+      deletedAt: null,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
@@ -469,6 +472,41 @@ async function _handleSaveEditReply(commentId, replyId, btn) {
   }
 }
 
+/**
+ * Soft-deletes an existing comment, erasing its text and marking it as deleted.
+ *
+ * @param {string} taleId
+ * @param {string} commentId
+ */
+export async function deleteComment(taleId, commentId) {
+  return updateDoc(refs.comment(taleId, commentId), {
+    text: '',
+    isDeleted: true,
+    deletedAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+}
+
+/**
+ * Soft-deletes an existing reply, erasing its text and marking it as deleted.
+ *
+ * @param {string} taleId
+ * @param {string} commentId
+ * @param {string} replyId
+ */
+export async function deleteReply(taleId, commentId, replyId) {
+  const replyRef = refs.commentReply
+    ? refs.commentReply(taleId, commentId, replyId)
+    : doc(db, `${PATHS.publicTaleComment(taleId, commentId)}/replies/${replyId}`);
+
+  return updateDoc(replyRef, {
+    text: '',
+    isDeleted: true,
+    deletedAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+}
+
 async function _handleDeleteReply(commentId, replyId) {
   if (
     typeof window !== 'undefined' &&
@@ -479,12 +517,27 @@ async function _handleDeleteReply(commentId, replyId) {
   }
 
   try {
-    const replyRef = refs.commentReply
-      ? refs.commentReply(_currentTaleId, commentId, replyId)
-      : doc(db, `${PATHS.publicTaleComment(_currentTaleId, commentId)}/replies/${replyId}`);
+    await deleteReply(_currentTaleId, commentId, replyId);
 
-    await deleteDoc(replyRef);
-    document.getElementById(`reply-${replyId}`)?.remove();
+    const textDisplay = document.getElementById(`reply-text-display-${replyId}`);
+    if (textDisplay) {
+      textDisplay.textContent = 'This has been deleted by the user.';
+      textDisplay.className = 'text-xs text-slate-400 italic font-medium';
+      textDisplay.classList.remove('hidden');
+    }
+
+    document.getElementById(`reply-edit-form-${replyId}`)?.remove();
+    document.getElementById(`reply-tags-${replyId}`)?.querySelector('.edited-badge')?.remove();
+    document.getElementById(`reply-tags-${replyId}`)?.querySelector('.author-tag')?.remove();
+
+    const actionsContainer = document.getElementById(`reply-actions-${replyId}`);
+    if (actionsContainer) {
+      actionsContainer.innerHTML = '';
+    } else {
+      document.querySelector(`.edit-reply-trigger[data-reply-id="${replyId}"]`)?.remove();
+      document.querySelector(`.delete-reply-trigger[data-reply-id="${replyId}"]`)?.remove();
+    }
+
     showToast('Reply silenced.', 'success');
   } catch (err) {
     log.error('Failed to delete reply:', err);
@@ -503,18 +556,21 @@ async function _handleDeleteReply(commentId, replyId) {
 function _renderComment(c) {
   const date = c.createdAt ? new Date(c.createdAt.seconds * 1000).toLocaleDateString() : 'Just now';
   const seed = encodeURIComponent((c.authorId || 'scribe').slice(0, 8));
+  const isDeleted = Boolean(c.isDeleted);
   const isOwner = auth.currentUser?.uid && auth.currentUser.uid === c.authorId;
   const isTaleAuthor = Boolean(_taleAuthorId && c.authorId && c.authorId === _taleAuthorId);
-  const authorBadgeHtml = isTaleAuthor
-    ? `<span class="author-tag px-2 py-0.5 rounded-md bg-indigo-500/20 border border-indigo-500/40 text-[8px] font-black uppercase tracking-wider text-indigo-300">Author</span>`
-    : '';
-  const isEdited = Boolean(c.isEdited);
+  const authorBadgeHtml =
+    isTaleAuthor && !isDeleted
+      ? `<span class="author-tag px-2 py-0.5 rounded-md bg-indigo-500/20 border border-indigo-500/40 text-[8px] font-black uppercase tracking-wider text-indigo-300">Author</span>`
+      : '';
+  const isEdited = Boolean(c.isEdited) && !isDeleted;
   const editedBadgeHtml = isEdited
     ? `<span class="edited-badge edited-tag inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-[8px] font-bold uppercase tracking-wider text-slate-400" title="Edited"><i data-lucide="edit-3" class="w-2.5 h-2.5"></i> Edited</span>`
     : '';
 
-  const editBtnHtml = isOwner
-    ? `<button
+  const editBtnHtml =
+    isOwner && !isDeleted
+      ? `<button
         class="edit-comment-trigger group flex items-center gap-1.5 text-[8px] font-black uppercase tracking-[0.2em] text-indigo-300 hover:text-white transition-all ml-1"
         type="button"
         data-comment-id="${c.id}"
@@ -524,10 +580,11 @@ function _renderComment(c) {
         <i data-lucide="edit-3" class="w-3.5 h-3.5 group-hover:scale-110 transition-transform"></i>
         <span>Edit</span>
       </button>`
-    : '';
+      : '';
 
-  const deleteBtnHtml = isOwner
-    ? `<button
+  const deleteBtnHtml =
+    isOwner && !isDeleted
+      ? `<button
         class="delete-comment-trigger group flex items-center gap-1.5 text-[8px] font-black uppercase tracking-[0.2em] text-red-400/70 hover:text-red-400 transition-all ml-1"
         type="button"
         data-comment-id="${c.id}"
@@ -537,7 +594,69 @@ function _renderComment(c) {
         <i data-lucide="trash-2" class="w-3.5 h-3.5 group-hover:scale-110 transition-transform"></i>
         <span>Silence</span>
       </button>`
+      : '';
+
+  const replyBtnHtml = !isDeleted
+    ? `<button
+        class="reply-trigger group flex items-center gap-1.5 text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-all"
+        type="button"
+        data-comment-id="${c.id}"
+      >
+        <i data-lucide="message-square-plus" class="w-3.5 h-3.5 group-hover:scale-110 transition-transform"></i>
+        <span>Echo Back</span>
+      </button>`
     : '';
+
+  const textDisplayHtml = isDeleted
+    ? `<p id="comment-text-display-${c.id}" class="text-sm md:text-base text-slate-400 italic font-medium">This has been deleted by the user.</p>`
+    : `<p id="comment-text-display-${c.id}" class="text-sm md:text-base text-slate-200 leading-relaxed font-medium">${escapeHtml(c.text)}</p>`;
+
+  const editFormHtml = isDeleted
+    ? ''
+    : `<div id="comment-edit-form-${c.id}" class="hidden mt-3">
+        <textarea
+          id="comment-edit-text-${c.id}"
+          placeholder="Edit your echo…"
+          class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm text-white placeholder:text-slate-400 focus:outline-none focus:border-indigo-500/50 resize-y min-h-20"
+          maxlength="5000"
+        >${escapeHtml(c.text)}</textarea>
+        <div class="flex justify-end gap-2 mt-2">
+          <button
+            type="button"
+            class="cancel-edit-trigger py-1.5 px-3 text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors"
+            data-comment-id="${c.id}"
+          >Cancel</button>
+          <button
+            type="button"
+            class="save-edit-trigger py-1.5 px-4 rounded-lg bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 text-[9px] font-black uppercase tracking-widest hover:bg-indigo-500/30 hover:text-white transition-all"
+            data-comment-id="${c.id}"
+          >Save</button>
+        </div>
+      </div>`;
+
+  const replyFormHtml = isDeleted
+    ? ''
+    : `<div id="reply-form-${c.id}" class="hidden mt-8 pt-6 border-t border-white/3">
+        <div class="relative">
+          <textarea
+            id="reply-text-${c.id}"
+            placeholder="Respond to the echo…"
+            class="w-full bg-black/30 border border-white/10 rounded-xl p-4 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-indigo-500/50 resize-none min-h-20"
+          ></textarea>
+          <div class="flex justify-end gap-3 mt-3">
+            <button
+              type="button"
+              class="cancel-reply py-2 px-4 text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-white"
+              data-comment-id="${c.id}"
+            >Cancel</button>
+            <button
+              type="button"
+              class="submit-reply py-2 px-6 rounded-lg bg-indigo-600/10 border border-indigo-500/20 text-indigo-400 text-[9px] font-black uppercase tracking-widest hover:bg-indigo-500/20"
+              data-comment-id="${c.id}"
+            >Transmit</button>
+          </div>
+        </div>
+      </div>`;
 
   return `
     <div class="glass-card p-6 md:p-8 rounded-4xl border-l-4 border-indigo-500/40 animate-fade-in mb-6 last:mb-0" id="comment-${c.id}">
@@ -558,67 +677,21 @@ function _renderComment(c) {
             <p class="text-[8px] text-slate-400 font-bold uppercase mt-0.5">${date}</p>
           </div>
         </div>
-        <div class="flex items-center gap-2 md:gap-3 flex-wrap justify-end">
-          <button
-            class="reply-trigger group flex items-center gap-1.5 text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-all"
-            type="button"
-            data-comment-id="${c.id}"
-          >
-            <i data-lucide="message-square-plus" class="w-3.5 h-3.5 group-hover:scale-110 transition-transform"></i>
-            <span>Echo Back</span>
-          </button>
+        <div class="flex items-center gap-2 md:gap-3 flex-wrap justify-end" id="comment-actions-${c.id}">
+          ${replyBtnHtml}
           ${editBtnHtml}
           ${deleteBtnHtml}
         </div>
       </div>
 
       <div id="comment-body-${c.id}">
-        <p id="comment-text-display-${c.id}" class="text-sm md:text-base text-slate-200 leading-relaxed font-medium">${escapeHtml(c.text)}</p>
-        <div id="comment-edit-form-${c.id}" class="hidden mt-3">
-          <textarea
-            id="comment-edit-text-${c.id}"
-            placeholder="Edit your echo…"
-            class="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm text-white placeholder:text-slate-400 focus:outline-none focus:border-indigo-500/50 resize-y min-h-20"
-            maxlength="5000"
-          >${escapeHtml(c.text)}</textarea>
-          <div class="flex justify-end gap-2 mt-2">
-            <button
-              type="button"
-              class="cancel-edit-trigger py-1.5 px-3 text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors"
-              data-comment-id="${c.id}"
-            >Cancel</button>
-            <button
-              type="button"
-              class="save-edit-trigger py-1.5 px-4 rounded-lg bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 text-[9px] font-black uppercase tracking-widest hover:bg-indigo-500/30 hover:text-white transition-all"
-              data-comment-id="${c.id}"
-            >Save</button>
-          </div>
-        </div>
+        ${textDisplayHtml}
+        ${editFormHtml}
       </div>
 
       <div id="replies-${c.id}" class="mt-8 space-y-4 border-l border-white/5 pl-6 empty:hidden"></div>
 
-      <div id="reply-form-${c.id}" class="hidden mt-8 pt-6 border-t border-white/3">
-        <div class="relative">
-          <textarea
-            id="reply-text-${c.id}"
-            placeholder="Respond to the echo…"
-            class="w-full bg-black/30 border border-white/10 rounded-xl p-4 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-indigo-500/50 resize-none min-h-20"
-          ></textarea>
-          <div class="flex justify-end gap-3 mt-3">
-            <button
-              type="button"
-              class="cancel-reply py-2 px-4 text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-white"
-              data-comment-id="${c.id}"
-            >Cancel</button>
-            <button
-              type="button"
-              class="submit-reply py-2 px-6 rounded-lg bg-indigo-600/10 border border-indigo-500/20 text-indigo-400 text-[9px] font-black uppercase tracking-widest hover:bg-indigo-500/20"
-              data-comment-id="${c.id}"
-            >Transmit</button>
-          </div>
-        </div>
-      </div>
+      ${replyFormHtml}
     </div>
   `;
 }
@@ -626,18 +699,20 @@ function _renderComment(c) {
 function _renderReply(r) {
   const date = r.createdAt ? new Date(r.createdAt.seconds * 1000).toLocaleDateString() : 'Just now';
   const seed = encodeURIComponent((r.authorId || 'scribe').slice(0, 8));
+  const isDeleted = Boolean(r.isDeleted);
   const isOwner = auth.currentUser?.uid && auth.currentUser.uid === r.authorId;
   const isTaleAuthor = Boolean(_taleAuthorId && r.authorId && r.authorId === _taleAuthorId);
-  const authorBadgeHtml = isTaleAuthor
-    ? `<span class="author-tag px-1.5 py-0.5 rounded-md bg-indigo-500/20 border border-indigo-500/40 text-[7px] font-black uppercase tracking-wider text-indigo-300">Author</span>`
-    : '';
-  const isEdited = Boolean(r.isEdited);
+  const authorBadgeHtml =
+    isTaleAuthor && !isDeleted
+      ? `<span class="author-tag px-1.5 py-0.5 rounded-md bg-indigo-500/20 border border-indigo-500/40 text-[7px] font-black uppercase tracking-wider text-indigo-300">Author</span>`
+      : '';
+  const isEdited = Boolean(r.isEdited) && !isDeleted;
   const editedBadgeHtml = isEdited
     ? `<span class="edited-badge edited-tag inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-[7px] font-bold uppercase tracking-wider text-slate-400" title="Edited"><i data-lucide="edit-3" class="w-2 h-2"></i> Edited</span>`
     : '';
 
   const editBtnHtml =
-    isOwner && r.id
+    isOwner && r.id && !isDeleted
       ? `<button
         class="edit-reply-trigger group flex items-center gap-1 text-[7px] font-black uppercase tracking-[0.2em] text-indigo-300 hover:text-white transition-all ml-1"
         type="button"
@@ -652,7 +727,7 @@ function _renderReply(r) {
       : '';
 
   const deleteBtnHtml =
-    isOwner && r.id
+    isOwner && r.id && !isDeleted
       ? `<button
         class="delete-reply-trigger group flex items-center gap-1 text-[7px] font-black uppercase tracking-[0.2em] text-red-400/70 hover:text-red-400 transition-all ml-1"
         type="button"
@@ -666,6 +741,34 @@ function _renderReply(r) {
       </button>`
       : '';
 
+  const replyTextHtml = isDeleted
+    ? `<p id="reply-text-display-${r.id || ''}" class="text-xs text-slate-400 italic font-medium">This has been deleted by the user.</p>`
+    : `<p id="reply-text-display-${r.id || ''}" class="text-xs text-slate-300 leading-relaxed font-medium">${escapeHtml(r.text || '')}</p>`;
+
+  const replyEditFormHtml = isDeleted
+    ? ''
+    : `<div id="reply-edit-form-${r.id || ''}" class="hidden mt-2">
+        <textarea
+          id="reply-edit-text-${r.id || ''}"
+          placeholder="Edit your reply…"
+          class="w-full bg-black/40 border border-white/10 rounded-xl p-2.5 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-indigo-500/50 resize-y min-h-16"
+          maxlength="5000"
+        >${escapeHtml(r.text || '')}</textarea>
+        <div class="flex justify-end gap-2 mt-2">
+          <button
+            type="button"
+            class="cancel-reply-edit-trigger py-1 px-2.5 text-[8px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors"
+            data-reply-id="${r.id || ''}"
+          >Cancel</button>
+          <button
+            type="button"
+            class="save-reply-edit-trigger py-1 px-3 rounded-lg bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 text-[8px] font-black uppercase tracking-widest hover:bg-indigo-500/30 hover:text-white transition-all"
+            data-comment-id="${r.parentId || ''}"
+            data-reply-id="${r.id || ''}"
+          >Save</button>
+        </div>
+      </div>`;
+
   return `
     <div class="flex gap-4 animate-fade-in" id="reply-${r.id || ''}">
       <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}" alt="Scribe" class="w-6 h-6 rounded-md bg-white/5 opacity-60" />
@@ -677,34 +780,14 @@ function _renderReply(r) {
             ${editedBadgeHtml}
             <span class="text-[7px] text-slate-400 font-bold uppercase">${date}</span>
           </div>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2" id="reply-actions-${r.id || ''}">
             ${editBtnHtml}
             ${deleteBtnHtml}
           </div>
         </div>
         <div id="reply-body-${r.id || ''}">
-          <p id="reply-text-display-${r.id || ''}" class="text-xs text-slate-300 leading-relaxed font-medium">${escapeHtml(r.text || '')}</p>
-          <div id="reply-edit-form-${r.id || ''}" class="hidden mt-2">
-            <textarea
-              id="reply-edit-text-${r.id || ''}"
-              placeholder="Edit your reply…"
-              class="w-full bg-black/40 border border-white/10 rounded-xl p-2.5 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-indigo-500/50 resize-y min-h-16"
-              maxlength="5000"
-            >${escapeHtml(r.text || '')}</textarea>
-            <div class="flex justify-end gap-2 mt-2">
-              <button
-                type="button"
-                class="cancel-reply-edit-trigger py-1 px-2.5 text-[8px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors"
-                data-reply-id="${r.id || ''}"
-              >Cancel</button>
-              <button
-                type="button"
-                class="save-reply-edit-trigger py-1 px-3 rounded-lg bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 text-[8px] font-black uppercase tracking-widest hover:bg-indigo-500/30 hover:text-white transition-all"
-                data-comment-id="${r.parentId || ''}"
-                data-reply-id="${r.id || ''}"
-              >Save</button>
-            </div>
-          </div>
+          ${replyTextHtml}
+          ${replyEditFormHtml}
         </div>
       </div>
     </div>
@@ -768,8 +851,37 @@ function _bindDelegatedEvents(list) {
         return;
       }
       try {
-        await deleteDoc(refs.comment(_currentTaleId, commentId));
-        document.getElementById(`comment-${commentId}`)?.remove();
+        await deleteComment(_currentTaleId, commentId);
+
+        const textDisplay = document.getElementById(`comment-text-display-${commentId}`);
+        if (textDisplay) {
+          textDisplay.textContent = 'This has been deleted by the user.';
+          textDisplay.className = 'text-sm md:text-base text-slate-400 italic font-medium';
+          textDisplay.classList.remove('hidden');
+        }
+
+        document.getElementById(`comment-edit-form-${commentId}`)?.remove();
+        document.getElementById(`reply-form-${commentId}`)?.remove();
+        document
+          .getElementById(`comment-tags-${commentId}`)
+          ?.querySelector('.edited-badge')
+          ?.remove();
+        document
+          .getElementById(`comment-tags-${commentId}`)
+          ?.querySelector('.author-tag')
+          ?.remove();
+
+        const actionsContainer = document.getElementById(`comment-actions-${commentId}`);
+        if (actionsContainer) {
+          actionsContainer.innerHTML = '';
+        } else {
+          document.querySelector(`.edit-comment-trigger[data-comment-id="${commentId}"]`)?.remove();
+          document
+            .querySelector(`.delete-comment-trigger[data-comment-id="${commentId}"]`)
+            ?.remove();
+          document.querySelector(`.reply-trigger[data-comment-id="${commentId}"]`)?.remove();
+        }
+
         showToast('Echo silenced.', 'success');
       } catch (err) {
         log.error('Failed to delete echo:', err);

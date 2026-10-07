@@ -530,22 +530,36 @@ service cloud.firestore {
             && isValidInt('depth', 0, 3)  // Prevent deep nesting abuse
             && isValidTimestamp('createdAt')
             && isValidTimestamp('updatedAt')
-            && request.resource.data.size() <= 20;
+            && request.resource.data.size() <= 22;
 
-          // Update: EITHER the author editing their own comment, OR admin
-          // moderating, OR any authenticated user adjusting only likeCount
+          // Update: EITHER the author editing their own comment, OR author
+          // soft-deleting their own comment (erasing text and setting isDeleted),
+          // OR admin moderating, OR any authenticated user adjusting only likeCount
           // (mirrors the tale reactionCount fix above — same bug shape,
           // fixed proactively since commentLikes isn't wired up client-side
           // yet, but will hit the same wall the moment it is).
           allow update: if (
               isAuthenticated()
               && resource.data.authorId == request.auth.uid
-              && isValidString('text', 1, 5000)
-              && request.resource.data.text.trim().size() > 0
-              && isValidBool('isEdited')
-              && request.resource.data.isEdited == true
-              && isValidTimestamp('updatedAt')
-              && isValidTimestamp('editedAt')
+              && (
+                // Author editing text
+                (
+                  isValidString('text', 1, 5000)
+                  && request.resource.data.text.trim().size() > 0
+                  && isValidBool('isEdited')
+                  && request.resource.data.isEdited == true
+                  && isValidTimestamp('updatedAt')
+                  && isValidTimestamp('editedAt')
+                ) ||
+                // Author soft-deleting comment
+                (
+                  isValidString('text', 0, 5000)
+                  && isValidBool('isDeleted')
+                  && request.resource.data.isDeleted == true
+                  && isValidTimestamp('updatedAt')
+                  && isValidTimestamp('deletedAt')
+                )
+              )
             ) || (
               isAdmin()
               && isValidBool('isHidden')
@@ -584,12 +598,25 @@ service cloud.firestore {
             allow update: if (
                 isAuthenticated()
                 && resource.data.authorId == request.auth.uid
-                && isValidString('text', 1, 5000)
-                && request.resource.data.text.trim().size() > 0
-                && isValidBool('isEdited')
-                && request.resource.data.isEdited == true
-                && isValidTimestamp('updatedAt')
-                && isValidTimestamp('editedAt')
+                && (
+                  // Author editing reply text
+                  (
+                    isValidString('text', 1, 5000)
+                    && request.resource.data.text.trim().size() > 0
+                    && isValidBool('isEdited')
+                    && request.resource.data.isEdited == true
+                    && isValidTimestamp('updatedAt')
+                    && isValidTimestamp('editedAt')
+                  ) ||
+                  // Author soft-deleting reply
+                  (
+                    isValidString('text', 0, 5000)
+                    && isValidBool('isDeleted')
+                    && request.resource.data.isDeleted == true
+                    && isValidTimestamp('updatedAt')
+                    && isValidTimestamp('deletedAt')
+                  )
+                )
               ) || isAdmin();
 
             allow delete: if (

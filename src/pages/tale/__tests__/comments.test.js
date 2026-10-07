@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { listenToComments, postComment, editComment } from '../comments.js';
+import {
+  listenToComments,
+  postComment,
+  editComment,
+  deleteComment,
+  deleteReply,
+} from '../comments.js';
 import * as fb from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
 
@@ -332,8 +338,8 @@ describe('TaleComments', () => {
     });
   });
 
-  describe('comment deletion', () => {
-    it('deletes a comment when silence button is clicked by author', async () => {
+  describe('comment deletion and soft-delete display', () => {
+    it('erases text and shows "This has been deleted by the user." when silence button is clicked by author', async () => {
       vi.spyOn(window, 'confirm').mockReturnValue(true);
 
       vi.mocked(fb.getDocs).mockResolvedValueOnce({
@@ -344,7 +350,7 @@ describe('TaleComments', () => {
             data: () => ({
               authorId: 'u1',
               authorName: 'Hero',
-              text: 'My echo',
+              text: 'My echo to silence',
               createdAt: { seconds: 123 },
             }),
           },
@@ -361,9 +367,182 @@ describe('TaleComments', () => {
       // Wait a tick for async handler
       await new Promise((r) => setTimeout(r, 10));
 
-      expect(fb.deleteDoc).toHaveBeenCalledWith('comments/t1/c-mine');
-      expect(document.getElementById('comment-c-mine')).toBeNull();
+      expect(fb.updateDoc).toHaveBeenCalledWith(
+        'comments/t1/c-mine',
+        expect.objectContaining({
+          text: '',
+          isDeleted: true,
+          deletedAt: 'mock-ts',
+          updatedAt: 'mock-ts',
+        })
+      );
+      // Comment container remains present
+      expect(document.getElementById('comment-c-mine')).not.toBeNull();
+      const textDisplay = document.getElementById('comment-text-display-c-mine');
+      expect(textDisplay.textContent).toBe('This has been deleted by the user.');
+      expect(textDisplay.classList.contains('italic')).toBe(true);
+
+      // Actions are removed
+      expect(document.querySelector('#comment-c-mine .delete-comment-trigger')).toBeNull();
+      expect(document.querySelector('#comment-c-mine .edit-comment-trigger')).toBeNull();
+      expect(document.querySelector('#comment-c-mine .reply-trigger')).toBeNull();
       expect(showToast).toHaveBeenCalledWith('Echo silenced.', 'success');
+    });
+
+    it('renders "This has been deleted by the user." for initially deleted comments without edit/delete/reply triggers', async () => {
+      vi.mocked(fb.getDocs).mockResolvedValueOnce({
+        empty: false,
+        docs: [
+          {
+            id: 'c-deleted',
+            data: () => ({
+              authorId: 'u1',
+              authorName: 'Hero',
+              text: '',
+              isDeleted: true,
+              createdAt: { seconds: 123 },
+            }),
+          },
+        ],
+      });
+
+      await listenToComments('t1');
+
+      const textDisplay = document.getElementById('comment-text-display-c-deleted');
+      expect(textDisplay).not.toBeNull();
+      expect(textDisplay.textContent).toBe('This has been deleted by the user.');
+      expect(textDisplay.classList.contains('italic')).toBe(true);
+
+      // No action triggers rendered
+      expect(document.querySelector('#comment-c-deleted .edit-comment-trigger')).toBeNull();
+      expect(document.querySelector('#comment-c-deleted .delete-comment-trigger')).toBeNull();
+      expect(document.querySelector('#comment-c-deleted .reply-trigger')).toBeNull();
+    });
+
+    it('soft-deletes reply when silence reply is clicked', async () => {
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+      // 1st getDocs: comment
+      vi.mocked(fb.getDocs)
+        .mockResolvedValueOnce({
+          empty: false,
+          docs: [
+            {
+              id: 'c1',
+              data: () => ({
+                authorId: 'u2',
+                authorName: 'Other',
+                text: 'Top echo',
+                createdAt: { seconds: 123 },
+              }),
+            },
+          ],
+        })
+        // 2nd getDocs: replies for c1
+        .mockResolvedValueOnce({
+          empty: false,
+          docs: [
+            {
+              id: 'r1',
+              data: () => ({
+                authorId: 'u1',
+                authorName: 'Hero',
+                text: 'My reply to silence',
+                parentId: 'c1',
+                createdAt: { seconds: 124 },
+              }),
+            },
+          ],
+        });
+
+      await listenToComments('t1');
+
+      const deleteReplyBtn = document.querySelector('.delete-reply-trigger');
+      expect(deleteReplyBtn).not.toBeNull();
+
+      deleteReplyBtn.click();
+
+      await new Promise((r) => setTimeout(r, 10));
+
+      expect(fb.updateDoc).toHaveBeenCalledWith(
+        'comments/t1/c1/replies/r1',
+        expect.objectContaining({
+          text: '',
+          isDeleted: true,
+          deletedAt: 'mock-ts',
+          updatedAt: 'mock-ts',
+        })
+      );
+      expect(document.getElementById('reply-r1')).not.toBeNull();
+      const replyDisplay = document.getElementById('reply-text-display-r1');
+      expect(replyDisplay.textContent).toBe('This has been deleted by the user.');
+      expect(document.querySelector('#reply-r1 .delete-reply-trigger')).toBeNull();
+      expect(document.querySelector('#reply-r1 .edit-reply-trigger')).toBeNull();
+      expect(showToast).toHaveBeenCalledWith('Reply silenced.', 'success');
+    });
+
+    it('renders "This has been deleted by the user." for initially deleted replies', async () => {
+      vi.mocked(fb.getDocs)
+        .mockResolvedValueOnce({
+          empty: false,
+          docs: [
+            {
+              id: 'c1',
+              data: () => ({
+                authorId: 'u2',
+                authorName: 'Other',
+                text: 'Top echo',
+                createdAt: { seconds: 123 },
+              }),
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          empty: false,
+          docs: [
+            {
+              id: 'r-deleted',
+              data: () => ({
+                authorId: 'u1',
+                authorName: 'Hero',
+                text: '',
+                isDeleted: true,
+                parentId: 'c1',
+                createdAt: { seconds: 124 },
+              }),
+            },
+          ],
+        });
+
+      await listenToComments('t1');
+
+      const replyDisplay = document.getElementById('reply-text-display-r-deleted');
+      expect(replyDisplay).not.toBeNull();
+      expect(replyDisplay.textContent).toBe('This has been deleted by the user.');
+      expect(document.querySelector('#reply-r-deleted .delete-reply-trigger')).toBeNull();
+      expect(document.querySelector('#reply-r-deleted .edit-reply-trigger')).toBeNull();
+    });
+
+    it('deleteComment helper function executes updateDoc with soft delete payload', async () => {
+      await deleteComment('tale-1', 'comment-1');
+
+      expect(fb.updateDoc).toHaveBeenCalledWith('comments/tale-1/comment-1', {
+        text: '',
+        isDeleted: true,
+        deletedAt: 'mock-ts',
+        updatedAt: 'mock-ts',
+      });
+    });
+
+    it('deleteReply helper function executes updateDoc with soft delete payload', async () => {
+      await deleteReply('tale-1', 'comment-1', 'reply-1');
+
+      expect(fb.updateDoc).toHaveBeenCalledWith('comments/tale-1/comment-1/replies/reply-1', {
+        text: '',
+        isDeleted: true,
+        deletedAt: 'mock-ts',
+        updatedAt: 'mock-ts',
+      });
     });
   });
 });

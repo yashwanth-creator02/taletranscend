@@ -15,7 +15,13 @@ export {
   setupChronicleBatchActions,
   setupInquire,
 } from './interactions.js';
-export { listenToComments, postComment } from './comments.js';
+export {
+  listenToComments,
+  postComment,
+  editComment,
+  deleteComment,
+  deleteReply,
+} from './comments.js';
 
 export { initAuth } from '@fb/index.js';
 export { initIcons } from '@ui/components/icons.js';

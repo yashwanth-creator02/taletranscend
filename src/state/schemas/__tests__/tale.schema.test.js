@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createTale, createChapter } from '../tale.schema.js';
+import { createTale, createChapter, createComment } from '../tale.schema.js';
 
 describe('createTale', () => {
   it('returns a tale with safe defaults when given empty data', () => {
@@ -49,5 +49,29 @@ describe('createChapter', () => {
     expect(chapter.chapterNum).toBe(1);
     expect(chapter.title).toBe('Untitled Chapter');
     expect(chapter.content).toBe('');
+  });
+});
+
+describe('createComment', () => {
+  it('returns comment with safe defaults including isDeleted and deletedAt', () => {
+    const comment = createComment('com-1', {});
+
+    expect(comment.id).toBe('com-1');
+    expect(comment.text).toBe('');
+    expect(comment.isEdited).toBe(false);
+    expect(comment.isDeleted).toBe(false);
+    expect(comment.deletedAt).toBeNull();
+  });
+
+  it('preserves isDeleted and deletedAt when provided', () => {
+    const dummyDate = new Date();
+    const comment = createComment('com-2', {
+      text: '',
+      isDeleted: true,
+      deletedAt: dummyDate,
+    });
+
+    expect(comment.isDeleted).toBe(true);
+    expect(comment.deletedAt).toBe(dummyDate);
   });
 });
