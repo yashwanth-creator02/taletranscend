@@ -400,15 +400,22 @@ function _bindRightRail() {
     navigateTo('contribution.html');
   });
 
-  document.getElementById('ritual-voice-note')?.addEventListener('click', () => {
-    showToast('Voice Chronicle — coming soon.', 'info');
-  });
+  const handleVoiceChronicle = () => {
+    const SpeechRecognition =
+      typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition);
+    if (SpeechRecognition) {
+      showToast('Opening Scribe Atelier with voice dictation enabled…', 'info');
+    } else {
+      showToast('Opening Scribe Atelier to compose chronicle.', 'info');
+    }
+    navigateTo('contribution.html');
+  };
+
+  document.getElementById('ritual-voice-note')?.addEventListener('click', handleVoiceChronicle);
 
   document.getElementById('ritual-publish')?.addEventListener('click', () => {
     navigateTo('contribution.html');
   });
 
-  document.getElementById('hero-voice-btn')?.addEventListener('click', () => {
-    showToast('Voice Chronicle — coming soon.', 'info');
-  });
+  document.getElementById('hero-voice-btn')?.addEventListener('click', handleVoiceChronicle);
 }

@@ -4,19 +4,34 @@ import {
   getUserPublishedTales,
   getUserDrafts,
   computeAndSyncStats,
+  deleteUserAccount,
+  submitTaleDeletionRequest,
+  toggleFollowAuthor,
+  isFollowingAuthor,
 } from '../profile.service.js';
 
 // Mock Firebase
 vi.mock('@fb/index.js', () => ({
+  auth: {
+    currentUser: { uid: 'u1' },
+  },
   refs: {
     tale: vi.fn((tid) => ({ path: `tales/${tid}` })),
     drafts: vi.fn((uid) => ({ path: `users/${uid}/drafts` })),
     draftChapters: vi.fn((uid, did) => ({ path: `users/${uid}/drafts/${did}/chapters` })),
     user: vi.fn((uid) => ({ path: `users/${uid}` })),
+    readerPrefs: vi.fn((uid) => ({ path: `users/${uid}/preferences/reader` })),
+    deletionRequests: vi.fn(() => ({ path: 'deletionRequests' })),
+    follow: vi.fn((uid, tid) => ({ path: `users/${uid}/following/${tid}` })),
+    follower: vi.fn((tid, uid) => ({ path: `users/${tid}/followers/${uid}` })),
   },
   getDoc: vi.fn(),
   getDocs: vi.fn(),
+  setDoc: vi.fn(() => Promise.resolve()),
+  deleteDoc: vi.fn(() => Promise.resolve()),
+  addDoc: vi.fn(() => Promise.resolve({ id: 'req-new' })),
   updateDoc: vi.fn(() => Promise.resolve()),
+  deleteCurrentUser: vi.fn(() => Promise.resolve()),
   serverTimestamp: vi.fn(() => 'mock-timestamp'),
 }));
 
@@ -154,8 +169,114 @@ describe('profile.service', () => {
 
       expect(result).toBe(300);
       expect(updateDoc).toHaveBeenCalled();
-      const [ref, data] = updateDoc.mock.calls[0];
+      const [, data] = updateDoc.mock.calls[0];
       expect(data.totalWordsWritten).toBe(300);
+    });
+  });
+
+  describe('deleteUserAccount', () => {
+    it('throws error if no userId is provided', async () => {
+      await expect(deleteUserAccount('')).rejects.toThrow('User ID required');
+    });
+
+    it('throws error if auth currentUser does not match userId', async () => {
+      await expect(deleteUserAccount('u-other')).rejects.toThrow('Unauthorized');
+    });
+
+    it('deletes user doc, preferences, clears auth, and preserves published tales', async () => {
+      const { deleteDoc, deleteCurrentUser, refs } = await import('@fb/index.js');
+      const { getTalesByAuthor } = await import('../tale/getTales.js');
+
+      getTalesByAuthor.mockResolvedValueOnce([{ id: 'tale-1' }, { id: 'tale-2' }]);
+
+      const result = await deleteUserAccount('u1');
+
+      expect(result).toEqual({ success: true, preservedTalesCount: 2 });
+      expect(deleteDoc).toHaveBeenCalledWith(expect.objectContaining({ path: 'users/u1' }));
+      expect(deleteDoc).toHaveBeenCalledWith(
+        expect.objectContaining({ path: 'users/u1/preferences/reader' })
+      );
+      expect(deleteCurrentUser).toHaveBeenCalled();
+      expect(refs.user).toHaveBeenCalledWith('u1');
+      expect(refs.readerPrefs).toHaveBeenCalledWith('u1');
+    });
+  });
+
+  describe('submitTaleDeletionRequest', () => {
+    it('throws error if required fields are missing', async () => {
+      await expect(
+        submitTaleDeletionRequest({ userId: '', taleId: 't1', reason: 'Too old' })
+      ).rejects.toThrow('User ID, Tale ID, and reason are required');
+      await expect(
+        submitTaleDeletionRequest({ userId: 'u1', taleId: '', reason: 'Too old' })
+      ).rejects.toThrow('User ID, Tale ID, and reason are required');
+      await expect(
+        submitTaleDeletionRequest({ userId: 'u1', taleId: 't1', reason: '' })
+      ).rejects.toThrow('User ID, Tale ID, and reason are required');
+    });
+
+    it('submits deletion request document to archive administration', async () => {
+      const { addDoc, refs } = await import('@fb/index.js');
+
+      const result = await submitTaleDeletionRequest({
+        userId: 'u1',
+        taleId: 'tale-99',
+        reason: 'Author desires removal from canonical weave',
+      });
+
+      expect(result).toEqual({ success: true, requestId: 'req-new' });
+      expect(addDoc).toHaveBeenCalledWith(
+        expect.objectContaining({ path: 'deletionRequests' }),
+        expect.objectContaining({
+          userId: 'u1',
+          taleId: 'tale-99',
+          reason: 'Author desires removal from canonical weave',
+          status: 'pending',
+          createdAt: 'mock-timestamp',
+        })
+      );
+      expect(refs.deletionRequests).toHaveBeenCalled();
+    });
+  });
+
+  describe('toggleFollowAuthor and isFollowingAuthor', () => {
+    it('returns false for isFollowingAuthor if missing params', async () => {
+      expect(await isFollowingAuthor({ userId: '', targetAuthorId: 'target' })).toBe(false);
+      expect(await isFollowingAuthor({ userId: 'u1', targetAuthorId: '' })).toBe(false);
+    });
+
+    it('checks follow status from Firestore', async () => {
+      const { getDoc } = await import('@fb/index.js');
+      getDoc.mockResolvedValueOnce({ exists: () => true });
+
+      const following = await isFollowingAuthor({ userId: 'u1', targetAuthorId: 'target-author' });
+      expect(following).toBe(true);
+    });
+
+    it('toggles follow to true when not previously following', async () => {
+      const { getDoc, setDoc } = await import('@fb/index.js');
+      getDoc.mockResolvedValueOnce({ exists: () => false });
+
+      const isNowFollowing = await toggleFollowAuthor({
+        userId: 'u1',
+        targetAuthorId: 'target-author',
+      });
+
+      expect(isNowFollowing).toBe(true);
+      expect(setDoc).toHaveBeenCalledTimes(2); // followRef + followerRef
+    });
+
+    it('toggles follow to false when already following', async () => {
+      const { getDoc, deleteDoc } = await import('@fb/index.js');
+      getDoc.mockResolvedValueOnce({ exists: () => true });
+
+      const isNowFollowing = await toggleFollowAuthor({
+        userId: 'u1',
+        targetAuthorId: 'target-author',
+      });
+
+      expect(isNowFollowing).toBe(false);
+      expect(deleteDoc).toHaveBeenCalledTimes(2); // followRef + followerRef
     });
   });
 });

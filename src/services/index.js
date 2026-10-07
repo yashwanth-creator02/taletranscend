@@ -60,3 +60,7 @@ export * from './notification.service.js';
 // ── AI ────────────────────────────────────────────────────────────────
 // Gemini-powered title suggestions and text refinement
 export * from './ai.service.js';
+
+// ── Administration & Archive Governance ──────────────────────────────
+// Chronicle deletion requests review, preservation policy enforcement
+export * from './admin.service.js';

@@ -5,6 +5,7 @@
 import {
   auth,
   addDoc,
+  deleteDoc,
   serverTimestamp,
   query,
   orderBy,
@@ -327,6 +328,19 @@ async function _handlePostReply(commentId, btn) {
 function _renderComment(c) {
   const date = c.createdAt ? new Date(c.createdAt.seconds * 1000).toLocaleDateString() : 'Just now';
   const seed = encodeURIComponent((c.authorId || 'scribe').slice(0, 8));
+  const isOwner = auth.currentUser?.uid && auth.currentUser.uid === c.authorId;
+  const deleteBtnHtml = isOwner
+    ? `<button
+        class="delete-comment-trigger group flex items-center gap-1.5 text-[8px] font-black uppercase tracking-[0.2em] text-red-400/70 hover:text-red-400 transition-all ml-2"
+        type="button"
+        data-comment-id="${c.id}"
+        aria-label="Silence Echo"
+        title="Silence Echo"
+      >
+        <i data-lucide="trash-2" class="w-3.5 h-3.5 group-hover:scale-110 transition-transform"></i>
+        <span>Silence</span>
+      </button>`
+    : '';
 
   return `
     <div class="glass-card p-6 md:p-8 rounded-4xl border-l-4 border-indigo-500/40 animate-fade-in mb-6 last:mb-0" id="comment-${c.id}">
@@ -343,14 +357,17 @@ function _renderComment(c) {
             <p class="text-[8px] text-slate-400 font-bold uppercase mt-0.5">${date}</p>
           </div>
         </div>
-        <button
-          class="reply-trigger group flex items-center gap-2 text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-all"
-          type="button"
-          data-comment-id="${c.id}"
-        >
-          <i data-lucide="message-square-plus" class="w-3.5 h-3.5 group-hover:scale-110 transition-transform"></i>
-          Echo Back
-        </button>
+        <div class="flex items-center gap-3">
+          <button
+            class="reply-trigger group flex items-center gap-2 text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-all"
+            type="button"
+            data-comment-id="${c.id}"
+          >
+            <i data-lucide="message-square-plus" class="w-3.5 h-3.5 group-hover:scale-110 transition-transform"></i>
+            Echo Back
+          </button>
+          ${deleteBtnHtml}
+        </div>
       </div>
 
       <p class="text-sm md:text-base text-slate-200 leading-relaxed font-medium">${escapeHtml(c.text)}</p>
@@ -424,6 +441,25 @@ function _bindDelegatedEvents(list) {
 
     if (target.classList.contains('submit-reply')) {
       await _handlePostReply(commentId, target);
+      return;
+    }
+
+    if (target.classList.contains('delete-comment-trigger')) {
+      if (
+        typeof window !== 'undefined' &&
+        window.confirm &&
+        !window.confirm('Silence this echo from the weave permanently?')
+      ) {
+        return;
+      }
+      try {
+        await deleteDoc(refs.comment(_currentTaleId, commentId));
+        document.getElementById(`comment-${commentId}`)?.remove();
+        showToast('Echo silenced.', 'success');
+      } catch (err) {
+        log.error('Failed to delete echo:', err);
+        showToast('Failed to silence echo.', 'error');
+      }
     }
   });
 }

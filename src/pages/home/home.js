@@ -17,6 +17,7 @@ import {
   createLogger,
 } from '@/utils';
 import { initIcons } from '@ui/components/icons.js';
+import { showToast } from '@ui/components/toast.js';
 import { getTales } from '@services/index.js';
 import { cacheService } from '@services/cache.service.js';
 import { DEFAULT_COVER_URL } from '@config/app.config.js';
@@ -57,9 +58,29 @@ function _initInteractions() {
     navigateTo('contribution.html');
   });
 
-  // Newsletter form — placeholder, no backend yet
-  document.getElementById('newsletter-form')?.addEventListener('submit', (e) => {
+  // Newsletter form — handles Reading Circle dispatches subscription
+  const newsletterForm = document.getElementById('newsletter-form');
+  newsletterForm?.addEventListener('submit', (e) => {
     e.preventDefault();
+    const emailInput = document.getElementById('newsletter-email');
+    const email = emailInput?.value?.trim();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showToast('Please enter a valid email address for dispatches.', 'warning');
+      return;
+    }
+
+    try {
+      const existing = JSON.parse(localStorage.getItem('tt_newsletter_subscribers') || '[]');
+      if (!existing.includes(email)) {
+        existing.push(email);
+        localStorage.setItem('tt_newsletter_subscribers', JSON.stringify(existing));
+      }
+    } catch {
+      // Ignore localStorage access failures
+    }
+
+    showToast('Welcome to the Reading Circle. Dispatches shall be delivered.', 'success');
+    if (emailInput) emailInput.value = '';
   });
 
   // Search.

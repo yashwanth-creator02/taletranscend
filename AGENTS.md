@@ -27,7 +27,7 @@ This document provides high-signal instructions for OpenCode sessions to quickly
 
 1.  **Configuration**: Copy `.env.example` to `.env` and fill in Firebase project credentials.
 2.  **Firestore Index**: Deploy the required composite index using `firebase deploy --only firestore:indexes`. The index definition is in `firestore.indexes.json`.
-3.  **Firestore Rules**: Security rules are defined in `firestore.rules`. **Note:** Current rules use test-mode logic; ensure production-ready rules before deployment.
+3.  **Firestore Rules**: Production-grade security rules are defined in `firestore.rules`. Enforces strict schema validations, author ownership, and admin-only chronicle dissolution under the Chronicle Preservation Policy.
 4.  **Firestore Database Path**: All application data resides under `v1/taletranscend/projects/v1/`.
 
 ## Code Structure & Conventions

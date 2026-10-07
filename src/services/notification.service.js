@@ -2,7 +2,17 @@
 // Service for fetching and managing user notifications.
 // users/{userId}/notifications/{notificationId}
 
-import { getDocs, updateDoc, query, orderBy, limit, where, refs } from '@fb/index.js';
+import {
+  getDocs,
+  updateDoc,
+  addDoc,
+  serverTimestamp,
+  query,
+  orderBy,
+  limit,
+  where,
+  refs,
+} from '@fb/index.js';
 import { createNotification } from '@state/index.js';
 import { safeAsync, createLogger } from '@/utils';
 
@@ -74,6 +84,32 @@ export async function markNotificationAsRead(userId, notificationId) {
     {
       fallback: false,
       logContext: 'services.notification.markNotificationAsRead',
+    }
+  );
+}
+
+/**
+ * Creates and delivers a notification to a specific user.
+ *
+ * @param {string} userId
+ * @param {object} notificationData
+ * @returns {Promise<string|null>} Created notification doc ID or null
+ */
+export async function createNotificationForUser(userId, notificationData) {
+  if (!userId || !notificationData) return null;
+
+  return safeAsync(
+    (async () => {
+      const docRef = await addDoc(refs.notifications(userId), {
+        ...notificationData,
+        isRead: false,
+        createdAt: serverTimestamp(),
+      });
+      return docRef.id;
+    })(),
+    {
+      fallback: null,
+      logContext: 'services.notification.createNotificationForUser',
     }
   );
 }

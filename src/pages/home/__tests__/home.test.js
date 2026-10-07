@@ -25,6 +25,10 @@ vi.mock('@ui/components/icons.js', () => ({
   initIcons: vi.fn(),
 }));
 
+vi.mock('@ui/components/toast.js', () => ({
+  showToast: vi.fn(),
+}));
+
 describe('Home Page', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -38,7 +42,9 @@ describe('Home Page', () => {
       <div id="trending-grid"></div>
       <div id="trending-section"></div>
       <div id="archive-reliquary-container"></div>
-      <form id="newsletter-form"></form>
+      <form id="newsletter-form">
+        <input id="newsletter-email" />
+      </form>
     `;
   });
 
@@ -83,5 +89,24 @@ describe('Home Page', () => {
     await vi.waitFor(() => {
       expect(document.getElementById('trending-section').classList.contains('hidden')).toBe(true);
     });
+  });
+
+  it('validates email and shows toast on newsletter submission', async () => {
+    const { showToast } = await import('@ui/components/toast.js');
+    await initPage();
+
+    const input = document.getElementById('newsletter-email');
+    const form = document.getElementById('newsletter-form');
+
+    // Invalid email
+    input.value = 'invalid-email';
+    form.dispatchEvent(new Event('submit', { cancelable: true }));
+    expect(showToast).toHaveBeenCalledWith(expect.stringContaining('valid email'), 'warning');
+
+    // Valid email
+    input.value = 'scribe@ancient.realm';
+    form.dispatchEvent(new Event('submit', { cancelable: true }));
+    expect(showToast).toHaveBeenCalledWith(expect.stringContaining('Reading Circle'), 'success');
+    expect(input.value).toBe('');
   });
 });

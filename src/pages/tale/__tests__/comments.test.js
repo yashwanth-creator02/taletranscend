@@ -7,12 +7,16 @@ import { showToast } from '@ui/components/toast.js';
 vi.mock('@fb/index.js', () => ({
   auth: { currentUser: { uid: 'u1', displayName: 'Hero' } },
   addDoc: vi.fn(),
+  deleteDoc: vi.fn(() => Promise.resolve()),
   getDocs: vi.fn(),
   query: vi.fn(),
   orderBy: vi.fn(),
   limit: vi.fn(),
   startAfter: vi.fn(),
-  refs: { comments: vi.fn(() => 'comments-ref') },
+  refs: {
+    comments: vi.fn(() => 'comments-ref'),
+    comment: vi.fn((tid, cid) => `comments/${tid}/${cid}`),
+  },
   serverTimestamp: vi.fn(() => 'mock-ts'),
 }));
 
@@ -97,6 +101,41 @@ describe('TaleComments', () => {
       expect(fb.addDoc).not.toHaveBeenCalled();
       expect(showToast).toHaveBeenCalledWith(expect.stringContaining('wait'), 'warning');
       expect(applyButtonCooldown).toHaveBeenCalled();
+    });
+  });
+
+  describe('comment deletion', () => {
+    it('deletes a comment when silence button is clicked by author', async () => {
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+      vi.mocked(fb.getDocs).mockResolvedValueOnce({
+        empty: false,
+        docs: [
+          {
+            id: 'c-mine',
+            data: () => ({
+              authorId: 'u1',
+              authorName: 'Hero',
+              text: 'My echo',
+              createdAt: { seconds: 123 },
+            }),
+          },
+        ],
+      });
+
+      await listenToComments('t1');
+
+      const deleteBtn = document.querySelector('.delete-comment-trigger');
+      expect(deleteBtn).not.toBeNull();
+
+      deleteBtn.click();
+
+      // Wait a tick for async handler
+      await new Promise((r) => setTimeout(r, 10));
+
+      expect(fb.deleteDoc).toHaveBeenCalledWith('comments/t1/c-mine');
+      expect(document.getElementById('comment-c-mine')).toBeNull();
+      expect(showToast).toHaveBeenCalledWith('Echo silenced.', 'success');
     });
   });
 });

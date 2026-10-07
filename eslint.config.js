@@ -29,7 +29,14 @@ export default [
       },
     },
     rules: {
-      'no-unused-vars': 'warn', // Warn if variables are declared but never used
+      'no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ], // Warn if variables are declared but never used, ignore _ prefixed
       'no-undef': 'error', // Error if undefined variables are used
       'prefer-const': 'error', // Prefer const over let when variables are not reassigned
       'no-console': 'off', // Allow console.log (don’t throw errors)
