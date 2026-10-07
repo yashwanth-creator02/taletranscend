@@ -60,13 +60,6 @@ service cloud.firestore {
         && request.resource.data[field].size() <= maxLen;
     }
 
-    /** Validates that a field is a list with bounded length. */
-    function isValidList(field, maxLen) {
-      return field in request.resource.data
-        && request.resource.data[field] is list
-        && request.resource.data[field].size() <= maxLen;
-    }
-
     /** Validates that a field is an integer within a range. */
     function isValidInt(field, min, max) {
       return field in request.resource.data
