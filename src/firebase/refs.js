@@ -143,11 +143,17 @@ export const refs = {
   /** Single following entry */
   followingEntry: (uid, targetUid) => doc(db, PATHS.followingEntry(uid, targetUid)),
 
+  /** Follow alias (single following entry) */
+  follow: (uid, targetUid) => doc(db, PATHS.followingEntry(uid, targetUid)),
+
   /** Users following this user */
   followers: (uid) => collection(db, PATHS.followers(uid)),
 
   /** Single follower entry */
   followerEntry: (uid, followerUid) => doc(db, PATHS.followerEntry(uid, followerUid)),
+
+  /** Follower alias (single follower entry) */
+  follower: (uid, followerUid) => doc(db, PATHS.followerEntry(uid, followerUid)),
 
   // ── Notifications ─────────────────────────────────────────────────
 

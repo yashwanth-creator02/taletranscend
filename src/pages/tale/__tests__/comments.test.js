@@ -8,6 +8,7 @@ vi.mock('@fb/index.js', () => ({
   auth: { currentUser: { uid: 'u1', displayName: 'Hero' } },
   addDoc: vi.fn(),
   deleteDoc: vi.fn(() => Promise.resolve()),
+  getDoc: vi.fn(() => Promise.resolve({ exists: () => false })),
   getDocs: vi.fn(),
   query: vi.fn(),
   orderBy: vi.fn(),
@@ -16,6 +17,7 @@ vi.mock('@fb/index.js', () => ({
   refs: {
     comments: vi.fn(() => 'comments-ref'),
     comment: vi.fn((tid, cid) => `comments/${tid}/${cid}`),
+    tale: vi.fn((tid) => `tales/${tid}`),
   },
   serverTimestamp: vi.fn(() => 'mock-ts'),
 }));
@@ -71,6 +73,54 @@ describe('TaleComments', () => {
       const list = document.getElementById('comments-list');
       expect(list.innerHTML).toContain('Hello');
       expect(list.innerHTML).toContain('A1');
+    });
+
+    it('renders author tag when comment author matches tale author', async () => {
+      vi.mocked(fb.getDocs).mockResolvedValue({
+        empty: false,
+        docs: [
+          {
+            id: 'c-author',
+            data: () => ({
+              authorId: 'author-1',
+              authorName: 'Scribe Prime',
+              text: 'My tale note',
+              createdAt: { seconds: 123 },
+            }),
+          },
+        ],
+      });
+
+      await listenToComments('t1', 'author-1');
+
+      const list = document.getElementById('comments-list');
+      expect(list.innerHTML).toContain('Scribe Prime');
+      const tag = list.querySelector('.author-tag');
+      expect(tag).not.toBeNull();
+      expect(tag.textContent).toBe('Author');
+    });
+
+    it('does not render author tag when comment author does not match tale author', async () => {
+      vi.mocked(fb.getDocs).mockResolvedValue({
+        empty: false,
+        docs: [
+          {
+            id: 'c-reader',
+            data: () => ({
+              authorId: 'reader-99',
+              authorName: 'Reader Joy',
+              text: 'Great tale',
+              createdAt: { seconds: 123 },
+            }),
+          },
+        ],
+      });
+
+      await listenToComments('t1', 'author-1');
+
+      const list = document.getElementById('comments-list');
+      expect(list.innerHTML).toContain('Reader Joy');
+      expect(list.querySelector('.author-tag')).toBeNull();
     });
   });
 

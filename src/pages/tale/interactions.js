@@ -13,6 +13,7 @@ import {
   resolveResumePoint,
   toggleResonance,
   getResonanceStatus,
+  getResonanceCount,
   RESONANCE_COOLDOWN_MS,
   BOOKMARK_COOLDOWN_MS,
 } from '@services/index.js';
@@ -45,16 +46,32 @@ const log = createLogger('TaleInteractions');
  * Sets up the Soul Resonance (reaction) interaction across all resonance buttons.
  *
  * @param {string} taleId
+ * @param {number|null} [initialCount=null]
+ * @param {boolean|null} [initialActive=null]
+ * @param {string|null} [userId=null]
  */
-export async function setupResonance(taleId) {
-  log.info('Setting up resonance', { taleId });
+export async function setupResonance(
+  taleId,
+  initialCount = null,
+  initialActive = null,
+  userId = null
+) {
+  log.info('Setting up resonance', { taleId, initialCount, initialActive, userId });
   const btns = document.querySelectorAll('[id^="resonance-btn"]');
   const countEls = document.querySelectorAll('[id^="resonance-count"]');
   if (!btns.length || !countEls.length) return;
 
-  const isActive = await getResonanceStatus(taleId);
-  log.debug('Initial resonance status', { isActive });
-  btns.forEach((btn) => _updateResonanceUI(btn, countEls, isActive));
+  const [isActive, currentCount] = await Promise.all([
+    initialActive !== null && initialActive !== undefined
+      ? Promise.resolve(initialActive)
+      : getResonanceStatus(taleId, userId),
+    initialCount !== null && initialCount !== undefined
+      ? Promise.resolve(initialCount)
+      : getResonanceCount(taleId),
+  ]);
+
+  log.debug('Initial resonance status', { isActive, currentCount });
+  btns.forEach((btn) => _updateResonanceUI(btn, countEls, isActive, currentCount));
 
   btns.forEach((btn) => {
     btn.addEventListener('click', async () => {
@@ -63,7 +80,7 @@ export async function setupResonance(taleId) {
       try {
         const result = await toggleResonance(taleId);
 
-        if (result.status === 'rate-limited') {
+        if (result?.status === 'rate-limited') {
           const rateLimitKey = `resonance:${auth.currentUser?.uid}:${taleId}`;
           btns.forEach((b) => {
             const label =
@@ -74,6 +91,11 @@ export async function setupResonance(taleId) {
               getRemainingTime(rateLimitKey, RESONANCE_COOLDOWN_MS)
             );
           });
+          return;
+        }
+
+        if (result?.status === 'error' || result?.active === undefined) {
+          btns.forEach((b) => (b.disabled = false));
           return;
         }
 
@@ -103,9 +125,11 @@ export async function setupResonance(taleId) {
 }
 
 function _updateResonanceUI(btn, countEls, active, count) {
-  if (count !== undefined) {
+  if (count !== undefined && count !== null) {
     countEls.forEach((el) => (el.textContent = count));
   }
+
+  btn.setAttribute('aria-pressed', active ? 'true' : 'false');
 
   const label =
     btn.querySelector('.resonance-label') || btn.querySelector('span:not([id*="resonance-count"])');
@@ -126,6 +150,8 @@ function _updateResonanceUI(btn, countEls, active, count) {
       icon.setAttribute('data-lucide', 'heart');
       icon.classList.remove('text-slate-400', 'text-slate-500', 'text-orange-400');
       icon.classList.add('text-red-500', 'fill-red-500');
+      icon.setAttribute('fill', 'currentColor');
+      icon.style.fill = 'currentColor';
     }
     if (label) label.textContent = 'Souls Aligned';
   } else {
@@ -145,6 +171,8 @@ function _updateResonanceUI(btn, countEls, active, count) {
       icon.setAttribute('data-lucide', 'heart');
       icon.classList.remove('text-red-500', 'fill-red-500', 'text-orange-400');
       icon.classList.add('text-slate-400');
+      icon.setAttribute('fill', 'none');
+      icon.style.fill = 'none';
     }
     if (label) label.textContent = 'Align Souls';
   }
@@ -156,9 +184,13 @@ function _updateResonanceUI(btn, countEls, active, count) {
     if (active) {
       renderedSvg.classList.remove('text-slate-400', 'text-slate-500');
       renderedSvg.classList.add('text-red-500', 'fill-red-500');
+      renderedSvg.setAttribute('fill', 'currentColor');
+      renderedSvg.style.fill = 'currentColor';
     } else {
       renderedSvg.classList.remove('text-red-500', 'fill-red-500');
       renderedSvg.classList.add('text-slate-400');
+      renderedSvg.setAttribute('fill', 'none');
+      renderedSvg.style.fill = 'none';
     }
   }
 }
@@ -422,6 +454,11 @@ export async function setupShelfButton(userId, taleId, tale, bookmarkService) {
             return;
           }
 
+          if (result === null) {
+            btns.forEach((b) => (b.disabled = false));
+            return;
+          }
+
           btns.forEach((b) => _updateShelfUI(b, false));
           showToast('Removed from your shelf.', 'info');
 
@@ -445,6 +482,11 @@ export async function setupShelfButton(userId, taleId, tale, bookmarkService) {
                 getRemainingTime(rateLimitKey, BOOKMARK_COOLDOWN_MS)
               );
             });
+            return;
+          }
+
+          if (result === null) {
+            btns.forEach((b) => (b.disabled = false));
             return;
           }
 

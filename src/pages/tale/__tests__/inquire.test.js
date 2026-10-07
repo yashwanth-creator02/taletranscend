@@ -296,4 +296,11 @@ describe("The Chronicler's Letter Inquire System", () => {
 
     expect(shelfClickSpy).toHaveBeenCalled();
   });
+
+  it('hides inquiry tab and controls when user is author', () => {
+    setupInquire('tale-001', mockTale, 'author-789');
+
+    expect(document.getElementById('tab-btn-letter').classList.contains('hidden')).toBe(true);
+    expect(document.getElementById('content-letter').classList.contains('hidden')).toBe(true);
+  });
 });

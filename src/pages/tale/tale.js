@@ -29,7 +29,12 @@ import {
   postComment,
   initIcons,
 } from './index.js';
-import { addToBookmarks, removeFromBookmarks, isBookmarked } from '@services/index.js';
+import {
+  addToBookmarks,
+  removeFromBookmarks,
+  isBookmarked,
+  getResonanceStatus,
+} from '@services/index.js';
 import { appState } from '@state/index.js';
 
 const log = createLogger('TaleArchive');
@@ -80,9 +85,10 @@ export async function initTalePage(authUser = null) {
   const userId = user?.uid || appState.userId || 'anonymous';
 
   // 1. Data hydration
-  const [tale, chapters] = await Promise.all([
+  const [tale, chapters, isResonated] = await Promise.all([
     loadTale(currentTaleId, user),
     loadChapters(currentTaleId),
+    getResonanceStatus(currentTaleId, userId),
   ]);
 
   if (!tale) {
@@ -91,7 +97,7 @@ export async function initTalePage(authUser = null) {
   }
 
   // 2. Primary UI
-  await renderTale(userId, tale, currentTaleId);
+  await renderTale(userId, tale, currentTaleId, isResonated);
   renderChapters(userId, chapters, currentTaleId);
   readyReveal();
 
@@ -100,7 +106,7 @@ export async function initTalePage(authUser = null) {
   setupChronicleBatchActions(userId, currentTaleId, chapters, tale);
   setupStartReading(currentTaleId, chapters);
   setupResumeReading(userId, currentTaleId);
-  setupResonance(currentTaleId);
+  setupResonance(currentTaleId, tale?.reactionCount ?? 0, isResonated, userId);
   setupTabs();
   setupInquire(currentTaleId, tale, userId);
   initHeaderScroll();
@@ -114,7 +120,7 @@ export async function initTalePage(authUser = null) {
   setupShareButton(currentTaleId);
 
   // 5. Real-time listeners
-  listenToComments(currentTaleId);
+  listenToComments(currentTaleId, tale?.authorId || null);
 
   // 6. Post-resolve hooks
   document.getElementById('post-btn')?.addEventListener('click', () => postComment(currentTaleId));

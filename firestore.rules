@@ -274,16 +274,8 @@ service cloud.firestore {
 
         match /bookmarks/{bookmarkId} {
           allow read: if isOwner(userId) || isAdmin();
-          allow create: if isOwner(userId)
-            && isValidString('taleId', 1, 100)
-            && isValidString('userId', 1, 100)
-            && request.resource.data.userId == userId
-            && isValidTimestamp('createdAt')
-            && isValidTimestamp('updatedAt');
-
-          allow update: if isOwner(userId)
-            && isValidTimestamp('updatedAt');
-
+          allow create, update: if isOwner(userId)
+            && isValidString('taleId', 1, 100);
           allow delete: if isOwner(userId) || isAdmin();
         }
 
@@ -460,9 +452,9 @@ service cloud.firestore {
             isAuthenticated()
             && request.resource.data.diff(resource.data).affectedKeys()
                  .hasOnly(['reactionCount', 'commentCount', 'bookmarkCount'])
-            && isValidNumber('reactionCount', 0, 1000000000)
-            && isValidNumber('commentCount', 0, 1000000000)
-            && isValidNumber('bookmarkCount', 0, 1000000000)
+            && isValidOptionalNumber('reactionCount', 0, 1000000000)
+            && isValidOptionalNumber('commentCount', 0, 1000000000)
+            && isValidOptionalNumber('bookmarkCount', 0, 1000000000)
           );
 
         // Delete: admin only (authors must submit an archive deletion request)
@@ -587,17 +579,13 @@ service cloud.firestore {
           allow create: if isAuthenticated()
             && isValidString('userId', 1, 100)
             && request.resource.data.userId == request.auth.uid
-            && isValidString('taleId', 1, 100)
-            && request.resource.data.taleId == taleId
             && isValidString('type', 1, 50)
-            && request.resource.data.type in ['like', 'love', 'insightful', 'mythic']
-            && isValidTimestamp('createdAt');
+            && request.resource.data.type in ['like', 'love', 'insightful', 'mythic'];
 
           allow update: if isAuthenticated()
             && resource.data.userId == request.auth.uid
             && isValidString('type', 1, 50)
-            && request.resource.data.type in ['like', 'love', 'insightful', 'mythic']
-            && isValidTimestamp('updatedAt');
+            && request.resource.data.type in ['like', 'love', 'insightful', 'mythic'];
 
           allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
         }

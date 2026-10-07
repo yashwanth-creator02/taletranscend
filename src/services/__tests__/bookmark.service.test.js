@@ -69,6 +69,7 @@ describe('bookmark.service', () => {
       expect(setDoc).toHaveBeenCalledTimes(1);
       const [ref, data] = setDoc.mock.calls[0];
       expect(ref.path).toBe('users/user-123/bookmarks/tale-456');
+      expect(data.userId).toBe('user-123');
       expect(data.taleId).toBe('tale-456');
       expect(data.taleTitle).toBe('Mythic Quest');
       expect(data.coverUrl).toBe('http://img.jpg');
@@ -76,6 +77,8 @@ describe('bookmark.service', () => {
       expect(data.chapterCount).toBe(12);
       expect(data.era).toBe('Mythic');
       expect(data.bookmarkedAt).toBeDefined();
+      expect(data.createdAt).toBeDefined();
+      expect(data.updatedAt).toBeDefined();
     });
 
     it('returns null if userId or taleId is missing', async () => {

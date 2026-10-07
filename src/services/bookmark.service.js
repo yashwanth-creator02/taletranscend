@@ -59,6 +59,7 @@ export async function addToBookmarks({ userId, taleId, tale = {} }) {
   }
 
   const bookmarkData = {
+    userId: uid,
     taleId,
     taleTitle: resolvedTale.title ?? '',
     coverUrl: resolvedTale.coverUrl ?? '',
@@ -79,6 +80,8 @@ export async function addToBookmarks({ userId, taleId, tale = {} }) {
       {
         ...bookmarkData,
         bookmarkedAt: serverTimestamp(),
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       },
       { merge: true }
     ),

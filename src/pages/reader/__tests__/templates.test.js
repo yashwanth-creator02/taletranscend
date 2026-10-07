@@ -60,6 +60,15 @@ describe('ReaderTemplates', () => {
       expect(html).toContain('Nice tale!');
       expect(html).toContain('U1');
     });
+
+    it('renders author badge when isTaleAuthor is true', () => {
+      const comments = [
+        { body: 'Note from author', author: 'Author Scribe', initials: 'AS', isTaleAuthor: true },
+      ];
+      const html = renderCommentsPanel(comments, '');
+      expect(html).toContain('Author');
+      expect(html).toContain('author-tag');
+    });
   });
 
   describe('renderInfoPanel', () => {

@@ -55,8 +55,11 @@ export async function toggleResonance(taleId) {
         // Add reaction
         await setDoc(reactionRef, {
           userId: user.uid,
+          taleId,
           type: 'like',
+          createdAt: serverTimestamp(),
           reactedAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
         });
         await updateDoc(taleRef, { reactionCount: increment(1) });
       }
@@ -77,19 +80,40 @@ export async function toggleResonance(taleId) {
  * Checks whether the current user has reacted to a tale.
  *
  * @param {string} taleId
+ * @param {string} [userId]
  * @returns {Promise<boolean>}
  */
-export async function getResonanceStatus(taleId) {
-  const user = auth.currentUser;
-  if (!user) return false;
+export async function getResonanceStatus(taleId, userId = null) {
+  const uid = userId || auth.currentUser?.uid;
+  if (!uid || uid === 'anonymous') return false;
 
   return safeCall(
     (async () => {
-      const snap = await getDoc(refs.taleReaction(taleId, user.uid));
+      const snap = await getDoc(refs.taleReaction(taleId, uid));
       return snap.exists();
     })(),
     false,
     'Failed to check resonance status.',
+    true // silent
+  );
+}
+
+/**
+ * Gets the current resonance (reaction) count for a tale.
+ *
+ * @param {string} taleId
+ * @returns {Promise<number>}
+ */
+export async function getResonanceCount(taleId) {
+  if (!taleId) return 0;
+
+  return safeCall(
+    (async () => {
+      const snap = await getDoc(refs.tale(taleId));
+      return snap.data()?.reactionCount ?? 0;
+    })(),
+    0,
+    'Failed to check resonance count.',
     true // silent
   );
 }

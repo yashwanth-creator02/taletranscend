@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { toggleResonance, getResonanceStatus } from '../resonance.service.js';
+import { toggleResonance, getResonanceStatus, getResonanceCount } from '../resonance.service.js';
 
 // Mock @fb/index.js
 vi.mock('@fb/index.js', () => ({
@@ -112,12 +112,45 @@ describe('ResonanceService', () => {
       expect(result).toBe(true);
     });
 
-    it('should return false if reaction does not exist', async () => {
-      const { getDoc, auth } = await import('@fb/index.js');
-      auth.currentUser = { uid: 'u1' };
-      getDoc.mockResolvedValueOnce({ exists: () => false });
-      const result = await getResonanceStatus('t1');
-      expect(result).toBe(false);
+    it('should check status for explicit userId', async () => {
+      const { getDoc } = await import('@fb/index.js');
+      getDoc.mockResolvedValueOnce({ exists: () => true });
+      const result = await getResonanceStatus('t1', 'user-explicit');
+      expect(result).toBe(true);
+    });
+
+    it('should return false if userId is anonymous or missing', async () => {
+      const { auth } = await import('@fb/index.js');
+      const original = auth.currentUser;
+      auth.currentUser = null;
+      expect(await getResonanceStatus('t1')).toBe(false);
+      expect(await getResonanceStatus('t1', 'anonymous')).toBe(false);
+      auth.currentUser = original;
+    });
+  });
+
+  describe('getResonanceCount', () => {
+    it('should return 0 if taleId is missing', async () => {
+      expect(await getResonanceCount('')).toBe(0);
+      expect(await getResonanceCount(null)).toBe(0);
+    });
+
+    it('should return reactionCount from tale doc', async () => {
+      const { getDoc } = await import('@fb/index.js');
+      getDoc.mockResolvedValueOnce({
+        data: () => ({ reactionCount: 42 }),
+      });
+      const count = await getResonanceCount('tale-xyz');
+      expect(count).toBe(42);
+    });
+
+    it('should default to 0 if reactionCount field is missing', async () => {
+      const { getDoc } = await import('@fb/index.js');
+      getDoc.mockResolvedValueOnce({
+        data: () => ({}),
+      });
+      const count = await getResonanceCount('tale-xyz');
+      expect(count).toBe(0);
     });
   });
 });

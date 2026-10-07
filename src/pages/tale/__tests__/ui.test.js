@@ -1,7 +1,6 @@
 // src/pages/tale/__tests__/ui.test.js
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderTale, renderChapters, showArchiveSkeletons } from '../ui.js';
-import * as services from '@services/index.js';
 import { getChapterProgress } from '@services/reader/localProgress.service.js';
 
 vi.mock('@services/index.js', () => ({
@@ -79,13 +78,16 @@ describe('TaleUI', () => {
       expect(document.getElementById('read-time').textContent).toBe('1 min read');
     });
 
-    it('renders publicationStatus and displays author edit button when user is author', async () => {
+    it('renders publicationStatus, displays author edit button, and hides inquire controls when user is author', async () => {
       document.body.innerHTML += `
         <div id="display-status"></div>
         <div id="display-status-dot"></div>
         <a id="edit-tale-btn-desktop" class="hidden"></a>
         <a id="edit-tale-btn-mobile" class="hidden"></a>
         <div id="author-actions-mobile" class="hidden"></div>
+        <button id="tab-btn-letter"></button>
+        <div id="content-letter"></div>
+        <div class="chronicler-invite-card"></div>
       `;
 
       const mockTale = {
@@ -105,6 +107,66 @@ describe('TaleUI', () => {
       expect(document.getElementById('author-actions-mobile').classList.contains('hidden')).toBe(
         false
       );
+      expect(document.getElementById('tab-btn-letter').classList.contains('hidden')).toBe(true);
+      expect(document.getElementById('content-letter').classList.contains('hidden')).toBe(true);
+      expect(document.querySelector('.chronicler-invite-card').classList.contains('hidden')).toBe(
+        true
+      );
+    });
+
+    it('hides author edit button and displays inquire controls when user is not author', async () => {
+      document.body.innerHTML += `
+        <a id="edit-tale-btn-desktop"></a>
+        <a id="edit-tale-btn-mobile"></a>
+        <div id="author-actions-mobile"></div>
+        <button id="tab-btn-letter" class="hidden"></button>
+        <div id="content-letter" class="hidden"></div>
+        <div class="chronicler-invite-card hidden"></div>
+      `;
+
+      const mockTale = {
+        title: 'Reader Tale',
+        authorId: 'author-123',
+        tags: [],
+      };
+
+      await renderTale('reader-456', mockTale, 'tale-abc');
+
+      expect(document.getElementById('edit-tale-btn-desktop').classList.contains('hidden')).toBe(
+        true
+      );
+      expect(document.getElementById('author-actions-mobile').classList.contains('hidden')).toBe(
+        true
+      );
+      expect(document.getElementById('tab-btn-letter').classList.contains('hidden')).toBe(false);
+      expect(document.querySelector('.chronicler-invite-card').classList.contains('hidden')).toBe(
+        false
+      );
+    });
+
+    it('populates resonance count and initial active state when isResonated is true', async () => {
+      document.body.innerHTML += `
+        <span id="resonance-count">0</span>
+        <span id="resonance-count-mobile">0</span>
+        <button id="resonance-btn-desktop">
+          <i></i>
+          <span class="resonance-label">Align Souls</span>
+        </button>
+      `;
+
+      const mockTale = {
+        title: 'Resonant Tale',
+        reactionCount: 27,
+      };
+
+      await renderTale('user-1', mockTale, 'tale-1', true);
+
+      expect(document.getElementById('resonance-count').textContent).toBe('27');
+      expect(document.getElementById('resonance-count-mobile').textContent).toBe('27');
+      const btn = document.getElementById('resonance-btn-desktop');
+      expect(btn.classList.contains('is-aligned')).toBe(true);
+      expect(btn.getAttribute('aria-pressed')).toBe('true');
+      expect(btn.querySelector('.resonance-label').textContent).toBe('Souls Aligned');
     });
   });
 

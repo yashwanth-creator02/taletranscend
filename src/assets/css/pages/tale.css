@@ -227,17 +227,28 @@
 /* ── Aligned Soul Resonance ─────────────────────────────────── */
 
 #resonance-btn-desktop.is-aligned,
-#resonance-btn-mobile.is-aligned {
-  background: rgb(var(--danger-rgb) / var(--a-16));
-  border-color: rgb(var(--danger-rgb) / var(--a-60));
-  color: rgb(var(--danger-rgb));
+#resonance-btn-mobile.is-aligned,
+[id^='resonance-btn'].is-aligned {
+  background: rgb(var(--danger-rgb) / var(--a-16)) !important;
+  border-color: rgb(var(--danger-rgb) / var(--a-60)) !important;
+  color: rgb(var(--danger-rgb)) !important;
   box-shadow: 0 0 16px rgb(var(--danger-rgb) / var(--a-24));
 }
 
 #resonance-btn-desktop.is-aligned svg,
-#resonance-btn-mobile.is-aligned svg {
-  fill: rgb(var(--danger-rgb));
-  color: rgb(var(--danger-rgb));
+#resonance-btn-mobile.is-aligned svg,
+[id^='resonance-btn'].is-aligned svg,
+#resonance-btn-desktop.is-aligned i,
+#resonance-btn-mobile.is-aligned i,
+[id^='resonance-btn'].is-aligned i {
+  fill: currentColor !important;
+  color: rgb(var(--danger-rgb)) !important;
+}
+
+#resonance-btn-desktop.is-aligned svg path,
+#resonance-btn-mobile.is-aligned svg path,
+[id^='resonance-btn'].is-aligned svg path {
+  fill: currentColor !important;
 }
 
 /* ── The Chronicler's Letter: Inquire & Connect ──────────────── */

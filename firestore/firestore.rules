@@ -60,13 +60,6 @@ service cloud.firestore {
         && request.resource.data[field].size() <= maxLen;
     }
 
-    /** Validates that a field is a list with bounded length. */
-    function isValidList(field, maxLen) {
-      return field in request.resource.data
-        && request.resource.data[field] is list
-        && request.resource.data[field].size() <= maxLen;
-    }
-
     /** Validates that a field is an integer within a range. */
     function isValidInt(field, min, max) {
       return field in request.resource.data
@@ -281,16 +274,8 @@ service cloud.firestore {
 
         match /bookmarks/{bookmarkId} {
           allow read: if isOwner(userId) || isAdmin();
-          allow create: if isOwner(userId)
-            && isValidString('taleId', 1, 100)
-            && isValidString('userId', 1, 100)
-            && request.resource.data.userId == userId
-            && isValidTimestamp('createdAt')
-            && isValidTimestamp('updatedAt');
-
-          allow update: if isOwner(userId)
-            && isValidTimestamp('updatedAt');
-
+          allow create, update: if isOwner(userId)
+            && isValidString('taleId', 1, 100);
           allow delete: if isOwner(userId) || isAdmin();
         }
 
@@ -467,13 +452,13 @@ service cloud.firestore {
             isAuthenticated()
             && request.resource.data.diff(resource.data).affectedKeys()
                  .hasOnly(['reactionCount', 'commentCount', 'bookmarkCount'])
-            && isValidNumber('reactionCount', 0, 1000000000)
-            && isValidNumber('commentCount', 0, 1000000000)
-            && isValidNumber('bookmarkCount', 0, 1000000000)
+            && isValidOptionalNumber('reactionCount', 0, 1000000000)
+            && isValidOptionalNumber('commentCount', 0, 1000000000)
+            && isValidOptionalNumber('bookmarkCount', 0, 1000000000)
           );
 
-        // Delete: author or admin only
-        allow delete: if isAuthor() || isAdmin();
+        // Delete: admin only (authors must submit an archive deletion request)
+        allow delete: if isAdmin();
 
         // ═══════════════════════════════════════════════════════════
         //  CHAPTERS  —  public/data/tales/{taleId}/chapters/{chapterIndex}
@@ -508,9 +493,8 @@ service cloud.firestore {
             && isValidInt('estimatedReadMins', 0, 10000)
             && isValidTimestamp('updatedAt');
 
-          allow delete: if isAuthenticated()
-            && get(/databases/$(database)/documents/v1/taletranscend/projects/v1/public/data/tales/$(taleId)).data.authorId == request.auth.uid
-            || isAdmin();
+          // Delete: admin only
+          allow delete: if isAdmin();
         }
 
         // ═══════════════════════════════════════════════════════════
@@ -595,17 +579,13 @@ service cloud.firestore {
           allow create: if isAuthenticated()
             && isValidString('userId', 1, 100)
             && request.resource.data.userId == request.auth.uid
-            && isValidString('taleId', 1, 100)
-            && request.resource.data.taleId == taleId
             && isValidString('type', 1, 50)
-            && request.resource.data.type in ['like', 'love', 'insightful', 'mythic']
-            && isValidTimestamp('createdAt');
+            && request.resource.data.type in ['like', 'love', 'insightful', 'mythic'];
 
           allow update: if isAuthenticated()
             && resource.data.userId == request.auth.uid
             && isValidString('type', 1, 50)
-            && request.resource.data.type in ['like', 'love', 'insightful', 'mythic']
-            && isValidTimestamp('updatedAt');
+            && request.resource.data.type in ['like', 'love', 'insightful', 'mythic'];
 
           allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
         }
@@ -692,6 +672,42 @@ service cloud.firestore {
           && isValidString('targetId', 1, 100)
           && isValidString('targetType', 1, 50)
           && isValidString('reason', 1, 1000)
+          && isValidTimestamp('createdAt');
+        allow update, delete: if isAdmin();
+      }
+
+      // ═════════════════════════════════════════════════════════════
+      //  TALE DELETION REQUESTS  —  deletionRequests/{requestId}
+      //  Chroniclers request admin removal of contributed tales.
+      // ═════════════════════════════════════════════════════════════
+
+      match /deletionRequests/{requestId} {
+        allow read: if isAdmin()
+          || (isAuthenticated() && resource.data.userId == request.auth.uid);
+        allow create: if isAuthenticated()
+          && request.resource.data.userId == request.auth.uid
+          && isValidString('taleId', 1, 100)
+          && isValidString('reason', 5, 2000)
+          && isValidTimestamp('createdAt');
+        allow update, delete: if isAdmin();
+      }
+
+      // ═════════════════════════════════════════════════════════════
+      //  INQUIRIES  —  inquiries/{inquiryId}
+      //  Missives sent from readers to authors.
+      // ═════════════════════════════════════════════════════════════
+
+      match /inquiries/{inquiryId} {
+        allow read: if isAdmin()
+          || (isAuthenticated() && (
+            resource.data.senderId == request.auth.uid
+            || resource.data.authorId == request.auth.uid
+          ));
+        allow create: if isAuthenticated()
+          && request.resource.data.senderId == request.auth.uid
+          && isValidString('authorId', 1, 100)
+          && isValidString('taleId', 1, 100)
+          && isValidString('message', 1, 5000)
           && isValidTimestamp('createdAt');
         allow update, delete: if isAdmin();
       }

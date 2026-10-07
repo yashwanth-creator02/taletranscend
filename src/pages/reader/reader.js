@@ -470,9 +470,13 @@ async function _loadComments() {
     const snap = await getDocs(q);
     readerState.comments = snap.docs.map((d) => {
       const data = d.data();
+      const isTaleAuthor = Boolean(
+        readerState.authorId && data.authorId && data.authorId === readerState.authorId
+      );
       return {
         id: d.id,
         author: data.authorName || 'Anonymous',
+        isTaleAuthor,
         initials: (data.authorName || 'A').slice(0, 2).toUpperCase(),
         body: data.text || '',
         at: data.createdAt?.toMillis ? data.createdAt.toMillis() : Date.now(),
@@ -518,9 +522,13 @@ function _bindCommentEvents() {
       };
 
       const docRef = await addDoc(refs.comments(readerState.taleId), commentPayload);
+      const isTaleAuthor = Boolean(
+        readerState.authorId && readerState.userId && readerState.userId === readerState.authorId
+      );
       readerState.comments.unshift({
         id: docRef.id,
         author: readerState.userName || 'You',
+        isTaleAuthor,
         initials: (readerState.userName || 'Y').slice(0, 2).toUpperCase(),
         body,
         at: Date.now(),

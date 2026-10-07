@@ -6,6 +6,7 @@ import {
   auth,
   addDoc,
   deleteDoc,
+  getDoc,
   serverTimestamp,
   query,
   orderBy,
@@ -37,6 +38,7 @@ const COMMENT_COOLDOWN_MS = 30000; // 30s
 let _lastVisible = null;
 let _allLoaded = false;
 let _currentTaleId = null;
+let _taleAuthorId = null;
 let _isFetching = false;
 
 /* ─────────────────────────────────────────────
@@ -47,10 +49,27 @@ let _isFetching = false;
  * Initialises the comment section and loads the first page of comments.
  *
  * @param {string} taleId
+ * @param {string|null} [taleAuthorId=null]
  */
-export async function listenToComments(taleId) {
+export async function listenToComments(taleId, taleAuthorId = null) {
   _currentTaleId = taleId;
-  log.info('Initializing reflections and echoes (comments)', { taleId });
+  _taleAuthorId = taleAuthorId;
+
+  if (!_taleAuthorId && taleId) {
+    try {
+      const snap = await getDoc(refs.tale(taleId));
+      if (snap?.exists?.()) {
+        _taleAuthorId = snap.data()?.authorId || null;
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  log.info('Initializing reflections and echoes (comments)', {
+    taleId,
+    taleAuthorId: _taleAuthorId,
+  });
   const list = document.getElementById('comments-list');
   if (!list) return;
 
@@ -329,6 +348,11 @@ function _renderComment(c) {
   const date = c.createdAt ? new Date(c.createdAt.seconds * 1000).toLocaleDateString() : 'Just now';
   const seed = encodeURIComponent((c.authorId || 'scribe').slice(0, 8));
   const isOwner = auth.currentUser?.uid && auth.currentUser.uid === c.authorId;
+  const isTaleAuthor = Boolean(_taleAuthorId && c.authorId && c.authorId === _taleAuthorId);
+  const authorBadgeHtml = isTaleAuthor
+    ? `<span class="author-tag px-2 py-0.5 rounded-md bg-indigo-500/20 border border-indigo-500/40 text-[8px] font-black uppercase tracking-wider text-indigo-300">Author</span>`
+    : '';
+
   const deleteBtnHtml = isOwner
     ? `<button
         class="delete-comment-trigger group flex items-center gap-1.5 text-[8px] font-black uppercase tracking-[0.2em] text-red-400/70 hover:text-red-400 transition-all ml-2"
@@ -353,7 +377,10 @@ function _renderComment(c) {
             loading="lazy"
           />
           <div>
-            <p class="text-[10px] font-black text-white uppercase tracking-widest">${escapeHtml(c.authorName)}</p>
+            <div class="flex items-center gap-2">
+              <p class="text-[10px] font-black text-white uppercase tracking-widest">${escapeHtml(c.authorName)}</p>
+              ${authorBadgeHtml}
+            </div>
             <p class="text-[8px] text-slate-400 font-bold uppercase mt-0.5">${date}</p>
           </div>
         </div>
@@ -402,6 +429,10 @@ function _renderComment(c) {
 function _renderReply(r) {
   const date = r.createdAt ? new Date(r.createdAt.seconds * 1000).toLocaleDateString() : 'Just now';
   const seed = encodeURIComponent((r.authorId || 'scribe').slice(0, 8));
+  const isTaleAuthor = Boolean(_taleAuthorId && r.authorId && r.authorId === _taleAuthorId);
+  const authorBadgeHtml = isTaleAuthor
+    ? `<span class="author-tag px-1.5 py-0.5 rounded-md bg-indigo-500/20 border border-indigo-500/40 text-[7px] font-black uppercase tracking-wider text-indigo-300">Author</span>`
+    : '';
 
   return `
     <div class="flex gap-4 animate-fade-in">
@@ -409,6 +440,7 @@ function _renderReply(r) {
       <div class="flex-1">
         <div class="flex items-center gap-2 mb-1.5">
           <span class="text-[9px] font-black text-slate-200 uppercase tracking-widest">${escapeHtml(r.authorName || 'Scribe')}</span>
+          ${authorBadgeHtml}
           <span class="text-[7px] text-slate-400 font-bold uppercase">${date}</span>
         </div>
         <p class="text-xs text-slate-300 leading-relaxed font-medium">${escapeHtml(r.text || '')}</p>

@@ -1,6 +1,5 @@
 // src/pages/tale/__tests__/tale.test.js
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { initAuth } from '@fb/index.js';
 import * as index from '../index.js';
 
 vi.mock('@fb/index.js', () => ({
@@ -9,7 +8,7 @@ vi.mock('@fb/index.js', () => ({
 
 vi.mock('../index.js', () => ({
   initAuth: vi.fn(),
-  loadTale: vi.fn(() => Promise.resolve({ title: 'Tale' })),
+  loadTale: vi.fn(() => Promise.resolve({ title: 'Tale', authorId: 'author-1' })),
   loadChapters: vi.fn(() => Promise.resolve([])),
   renderTale: vi.fn(),
   renderChapters: vi.fn(),
@@ -48,6 +47,7 @@ vi.mock('@services/index.js', () => ({
   addToBookmarks: vi.fn(),
   removeFromBookmarks: vi.fn(),
   isBookmarked: vi.fn(),
+  getResonanceStatus: vi.fn(() => Promise.resolve(true)),
 }));
 
 describe('Tale Page Controller', () => {
@@ -82,7 +82,8 @@ describe('Tale Page Controller', () => {
 
     expect(index.showArchiveSkeletons).toHaveBeenCalled();
     expect(index.loadTale).toHaveBeenCalledWith('tale123', mockUser);
-    expect(index.renderTale).toHaveBeenCalled();
-    expect(index.listenToComments).toHaveBeenCalledWith('tale123');
+    expect(index.renderTale).toHaveBeenCalledWith('u1', expect.anything(), 'tale123', true);
+    expect(index.setupResonance).toHaveBeenCalledWith('tale123', 0, true, 'u1');
+    expect(index.listenToComments).toHaveBeenCalledWith('tale123', 'author-1');
   });
 });

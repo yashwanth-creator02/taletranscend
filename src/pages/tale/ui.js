@@ -94,9 +94,10 @@ export function showArchiveSkeletons() {
  * @param {string} userId
  * @param {import('@state/schemas/tale.schema.js').Tale} tale
  * @param {string} taleId
+ * @param {boolean} [isResonated=false]
  */
-export async function renderTale(userId, tale, taleId) {
-  log.info('Rendering tale metadata', { taleId, title: tale.title });
+export async function renderTale(userId, tale, taleId, isResonated = false) {
+  log.info('Rendering tale metadata', { taleId, title: tale.title, isResonated });
   const title = tale.title || 'Untitled Tale';
   const description = tale.description || 'A mysterious tale waiting to be uncovered...';
   const count = tale.chapterCount || 0;
@@ -158,22 +159,36 @@ export async function renderTale(userId, tale, taleId) {
     statusDot.className = `w-2 h-2 rounded-full ${dotClass} animate-pulse`;
   }
 
-  // Author Edit Chronicle Action Buttons
-  if (userId && tale.authorId === userId) {
-    const editUrl = `/contribution.html?taleId=${encodeURIComponent(taleId)}`;
-    const editBtnDesktop = getEl('edit-tale-btn-desktop');
-    if (editBtnDesktop) {
-      editBtnDesktop.href = editUrl;
-      editBtnDesktop.classList.remove('hidden');
-    }
-    const editBtnMobile = getEl('edit-tale-btn-mobile');
-    const authorActionsMobile = getEl('author-actions-mobile');
-    if (editBtnMobile) {
-      editBtnMobile.href = editUrl;
-    }
-    if (authorActionsMobile) {
-      authorActionsMobile.classList.remove('hidden');
-    }
+  // Author Edit Chronicle Action Buttons & Inquire Controls
+  const isAuthor = Boolean(userId && tale.authorId && userId === tale.authorId);
+  const editUrl = `/contribution.html?taleId=${encodeURIComponent(taleId)}`;
+
+  const editBtnDesktop = getEl('edit-tale-btn-desktop');
+  if (editBtnDesktop) {
+    editBtnDesktop.href = editUrl;
+    editBtnDesktop.classList.toggle('hidden', !isAuthor);
+  }
+  const editBtnMobile = getEl('edit-tale-btn-mobile');
+  if (editBtnMobile) {
+    editBtnMobile.href = editUrl;
+  }
+  const authorActionsMobile = getEl('author-actions-mobile');
+  if (authorActionsMobile) {
+    authorActionsMobile.classList.toggle('hidden', !isAuthor);
+  }
+
+  // Inquire of the Author controls (hidden if user is the author)
+  const tabBtnLetter = getEl('tab-btn-letter');
+  if (tabBtnLetter) {
+    tabBtnLetter.classList.toggle('hidden', isAuthor);
+  }
+  const contentLetter = getEl('content-letter');
+  if (contentLetter && isAuthor) {
+    contentLetter.classList.add('hidden');
+  }
+  const inviteCard = document.querySelector('.chronicler-invite-card');
+  if (inviteCard) {
+    inviteCard.classList.toggle('hidden', isAuthor);
   }
 
   setTextIfExists('tale-era', eraName);
@@ -227,7 +242,56 @@ export async function renderTale(userId, tale, taleId) {
   const minutes = Math.max(1, Math.floor(totalMs / MS_PER_MINUTE));
   setText('read-time', `${minutes} min read`);
 
+  // Soul Resonance Initial Display & Alignment
+  const reactionCount = Number(tale.reactionCount ?? 0);
+  setTextIfExists('resonance-count', reactionCount);
+  setTextIfExists('resonance-count-mobile', reactionCount);
+
+  const resonanceBtns = document.querySelectorAll('[id^="resonance-btn"]');
+  resonanceBtns.forEach((btn) => {
+    btn.setAttribute('aria-pressed', isResonated ? 'true' : 'false');
+    const label =
+      btn.querySelector('.resonance-label') ||
+      btn.querySelector('span:not([id*="resonance-count"])');
+
+    if (isResonated) {
+      btn.classList.add('border-red-500/50', 'bg-red-500/15', 'text-red-400', 'is-aligned');
+      btn.classList.remove('border-white/8', 'border-white/10', 'text-slate-300');
+      if (label) label.textContent = 'Souls Aligned';
+      const icon = btn.querySelector('i, svg');
+      if (icon) {
+        icon.classList.remove('text-slate-400', 'text-slate-500');
+        icon.classList.add('text-red-500', 'fill-red-500');
+        icon.setAttribute('fill', 'currentColor');
+        icon.style.fill = 'currentColor';
+      }
+    } else {
+      btn.classList.remove('border-red-500/50', 'bg-red-500/15', 'text-red-400', 'is-aligned');
+      btn.classList.add('border-white/8', 'text-slate-300');
+      if (label) label.textContent = 'Align Souls';
+      const icon = btn.querySelector('i, svg');
+      if (icon) {
+        icon.classList.remove('text-red-500', 'fill-red-500');
+        icon.classList.add('text-slate-400');
+        icon.setAttribute('fill', 'none');
+        icon.style.fill = 'none';
+      }
+    }
+  });
+
   initIcons();
+
+  if (isResonated) {
+    resonanceBtns.forEach((btn) => {
+      const renderedSvg = btn.querySelector('svg');
+      if (renderedSvg) {
+        renderedSvg.classList.remove('text-slate-400', 'text-slate-500');
+        renderedSvg.classList.add('text-red-500', 'fill-red-500');
+        renderedSvg.setAttribute('fill', 'currentColor');
+        renderedSvg.style.fill = 'currentColor';
+      }
+    });
+  }
 }
 
 /**
@@ -279,7 +343,6 @@ export function renderChapters(userId, chapters, taleId) {
             <div class="min-w-0">
               <div class="flex items-center gap-2 mb-0.5">
                 <span class="text-[9px] font-black text-indigo-400/70 uppercase tracking-[0.2em] block">Scroll #${idx + 1}</span>
-                ${isCompleted ? `<span class="px-1.5 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[8px] font-bold uppercase tracking-wider">Read</span>` : ''}
               </div>
               <h4 class="text-xs sm:text-sm font-bold text-white uppercase tracking-tight truncate">${escapeHtml(ch.title || 'Untitled')}</h4>
             </div>

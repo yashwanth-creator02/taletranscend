@@ -23,8 +23,23 @@ const MAX_MESSAGE_LENGTH = 800;
 export function setupInquire(taleId, tale, userId = null) {
   log.info("Setting up Chronicler's Letter inquiry system", { taleId });
 
-  const authorName = tale?.authorName || 'The Scribe';
   const authorId = tale?.authorId || '';
+  const currentUserId = userId || auth.currentUser?.uid;
+  const isAuthor = Boolean(currentUserId && authorId && currentUserId === authorId);
+
+  const tabBtnLetter = document.getElementById('tab-btn-letter');
+  const contentLetter = document.getElementById('content-letter');
+  const inviteCard = document.querySelector('.chronicler-invite-card');
+
+  if (isAuthor) {
+    if (tabBtnLetter) tabBtnLetter.classList.add('hidden');
+    if (contentLetter) contentLetter.classList.add('hidden');
+    if (inviteCard) inviteCard.classList.add('hidden');
+    log.info('User is author; skipping inquiry setup');
+    return;
+  }
+
+  const authorName = tale?.authorName || 'The Scribe';
   let authorEmail = tale?.authorEmail || '';
 
   // 1. Hydrate Author Profile & Target Displays

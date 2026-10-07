@@ -43,6 +43,7 @@ vi.mock('@ui/components/confirmModal.js', () => ({
 vi.mock('@services/index.js', () => ({
   toggleResonance: vi.fn(),
   getResonanceStatus: vi.fn(),
+  getResonanceCount: vi.fn(),
   resolveResumePoint: vi.fn(),
   RESONANCE_COOLDOWN_MS: 2000,
   BOOKMARK_COOLDOWN_MS: 5000,
@@ -125,6 +126,45 @@ describe('TaleInteractions', () => {
       await btn.click();
 
       expect(utils.applyButtonCooldown).toHaveBeenCalled();
+    });
+
+    it('re-enables button and does not toggle state if resonance returns error', async () => {
+      vi.mocked(services.getResonanceStatus).mockResolvedValue(false);
+      vi.mocked(services.toggleResonance).mockResolvedValue({ status: 'error' });
+
+      await setupResonance('t1');
+
+      const btn = document.getElementById('resonance-btn');
+      await btn.click();
+
+      expect(btn.disabled).toBe(false);
+      expect(btn.classList.contains('is-aligned')).toBe(false);
+    });
+
+    it('initializes with provided count and resonated state immediately', async () => {
+      await setupResonance('t1', 50, true, 'u1');
+
+      expect(services.getResonanceStatus).not.toHaveBeenCalled();
+      expect(services.getResonanceCount).not.toHaveBeenCalled();
+
+      const btn = document.getElementById('resonance-btn');
+      expect(document.getElementById('resonance-count').textContent).toBe('50');
+      expect(btn.classList.contains('is-aligned')).toBe(true);
+      expect(btn.getAttribute('aria-pressed')).toBe('true');
+      expect(btn.querySelector('span').textContent).toBe('Souls Aligned');
+    });
+
+    it('fetches count and status if not provided', async () => {
+      vi.mocked(services.getResonanceStatus).mockResolvedValue(true);
+      vi.mocked(services.getResonanceCount).mockResolvedValue(12);
+
+      await setupResonance('t1');
+
+      expect(services.getResonanceStatus).toHaveBeenCalledWith('t1', null);
+      expect(services.getResonanceCount).toHaveBeenCalledWith('t1');
+      expect(document.getElementById('resonance-count').textContent).toBe('12');
+      const btn = document.getElementById('resonance-btn');
+      expect(btn.classList.contains('is-aligned')).toBe(true);
     });
   });
 
@@ -279,6 +319,23 @@ describe('TaleInteractions', () => {
 
       expect(mockService.addToBookmarks).toHaveBeenCalled();
       expect(btn.dataset.shelved).toBe('true');
+    });
+
+    it('re-enables button and does not toggle state if adding bookmark fails', async () => {
+      const mockService = {
+        isBookmarked: vi.fn(() => Promise.resolve(false)),
+        addToBookmarks: vi.fn(() => Promise.resolve(null)),
+        removeFromBookmarks: vi.fn(),
+      };
+
+      await setupShelfButton('u1', 't1', {}, mockService);
+
+      const btn = document.getElementById('shelf-btn');
+      await btn.click();
+
+      expect(mockService.addToBookmarks).toHaveBeenCalled();
+      expect(btn.disabled).toBe(false);
+      expect(btn.dataset.shelved).toBe('false');
     });
   });
 });
