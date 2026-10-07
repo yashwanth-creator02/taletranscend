@@ -25,16 +25,31 @@ export function setupInquire(taleId, tale, userId = null) {
 
   const authorId = tale?.authorId || '';
   const currentUserId = userId || auth.currentUser?.uid;
-  const isAuthor = Boolean(currentUserId && authorId && currentUserId === authorId);
+  const isAuthor = Boolean(
+    currentUserId &&
+    currentUserId !== 'anonymous' &&
+    authorId &&
+    authorId !== 'anonymous' &&
+    currentUserId === authorId
+  );
 
   const tabBtnLetter = document.getElementById('tab-btn-letter');
   const contentLetter = document.getElementById('content-letter');
   const inviteCard = document.querySelector('.chronicler-invite-card');
 
   if (isAuthor) {
-    if (tabBtnLetter) tabBtnLetter.classList.add('hidden');
-    if (contentLetter) contentLetter.classList.add('hidden');
-    if (inviteCard) inviteCard.classList.add('hidden');
+    if (tabBtnLetter) {
+      tabBtnLetter.classList.add('hidden');
+      tabBtnLetter.style.setProperty('display', 'none', 'important');
+    }
+    if (contentLetter) {
+      contentLetter.classList.add('hidden');
+      contentLetter.style.setProperty('display', 'none', 'important');
+    }
+    if (inviteCard) {
+      inviteCard.classList.add('hidden');
+      inviteCard.style.setProperty('display', 'none', 'important');
+    }
     log.info('User is author; skipping inquiry setup');
     return;
   }

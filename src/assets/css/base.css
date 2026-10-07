@@ -203,6 +203,12 @@ select:focus-visible {
   transform: translateY(0);
 }
 
+/* Completely hidden utility, overriding display: inline-flex or flex on components */
+.hidden,
+[hidden] {
+  display: none !important;
+}
+
 /* Visually hidden, still announced. */
 .sr-only {
   position: absolute;

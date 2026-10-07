@@ -103,10 +103,12 @@ describe('TaleUI', () => {
       expect(document.getElementById('display-status-dot').className).toContain('bg-indigo-400');
       const editBtn = document.getElementById('edit-tale-btn-desktop');
       expect(editBtn.classList.contains('hidden')).toBe(false);
+      expect(editBtn.style.display).toBe('inline-flex');
       expect(editBtn.getAttribute('href')).toBe('/contribution.html?taleId=tale-abc');
       expect(document.getElementById('author-actions-mobile').classList.contains('hidden')).toBe(
         false
       );
+      expect(document.getElementById('author-actions-mobile').style.display).toBe('block');
       expect(document.getElementById('tab-btn-letter').classList.contains('hidden')).toBe(true);
       expect(document.getElementById('content-letter').classList.contains('hidden')).toBe(true);
       expect(document.querySelector('.chronicler-invite-card').classList.contains('hidden')).toBe(
@@ -114,7 +116,7 @@ describe('TaleUI', () => {
       );
     });
 
-    it('hides author edit button and displays inquire controls when user is not author', async () => {
+    it('hides author edit button and displays inquire controls when user is not author or anonymous', async () => {
       document.body.innerHTML += `
         <a id="edit-tale-btn-desktop"></a>
         <a id="edit-tale-btn-mobile"></a>
@@ -135,13 +137,20 @@ describe('TaleUI', () => {
       expect(document.getElementById('edit-tale-btn-desktop').classList.contains('hidden')).toBe(
         true
       );
+      expect(document.getElementById('edit-tale-btn-desktop').style.display).toBe('none');
       expect(document.getElementById('author-actions-mobile').classList.contains('hidden')).toBe(
         true
       );
+      expect(document.getElementById('author-actions-mobile').style.display).toBe('none');
       expect(document.getElementById('tab-btn-letter').classList.contains('hidden')).toBe(false);
       expect(document.querySelector('.chronicler-invite-card').classList.contains('hidden')).toBe(
         false
       );
+
+      // Also ensure anonymous user with anonymous tale author is NOT treated as author
+      await renderTale('anonymous', { title: 'Anon Tale', authorId: 'anonymous' }, 'tale-xyz');
+      expect(document.getElementById('edit-tale-btn-desktop').style.display).toBe('none');
+      expect(document.getElementById('author-actions-mobile').style.display).toBe('none');
     });
 
     it('populates resonance count and initial active state when isResonated is true', async () => {

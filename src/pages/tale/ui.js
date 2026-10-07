@@ -82,6 +82,22 @@ export function showArchiveSkeletons() {
       </div>
     `;
   }
+
+  const editBtnDesktop = getEl('edit-tale-btn-desktop');
+  if (editBtnDesktop) {
+    editBtnDesktop.classList.add('hidden');
+    editBtnDesktop.style.setProperty('display', 'none', 'important');
+  }
+  const editBtnMobile = getEl('edit-tale-btn-mobile');
+  if (editBtnMobile) {
+    editBtnMobile.classList.add('hidden');
+    editBtnMobile.style.setProperty('display', 'none', 'important');
+  }
+  const authorActionsMobile = getEl('author-actions-mobile');
+  if (authorActionsMobile) {
+    authorActionsMobile.classList.add('hidden');
+    authorActionsMobile.style.setProperty('display', 'none', 'important');
+  }
 }
 
 /* ─────────────────────────────────────────────
@@ -160,21 +176,31 @@ export async function renderTale(userId, tale, taleId, isResonated = false) {
   }
 
   // Author Edit Chronicle Action Buttons & Inquire Controls
-  const isAuthor = Boolean(userId && tale.authorId && userId === tale.authorId);
+  const isAuthor = Boolean(
+    userId &&
+    userId !== 'anonymous' &&
+    tale.authorId &&
+    tale.authorId !== 'anonymous' &&
+    userId === tale.authorId
+  );
   const editUrl = `/contribution.html?taleId=${encodeURIComponent(taleId)}`;
 
   const editBtnDesktop = getEl('edit-tale-btn-desktop');
   if (editBtnDesktop) {
     editBtnDesktop.href = editUrl;
     editBtnDesktop.classList.toggle('hidden', !isAuthor);
+    editBtnDesktop.style.setProperty('display', isAuthor ? 'inline-flex' : 'none', 'important');
   }
   const editBtnMobile = getEl('edit-tale-btn-mobile');
   if (editBtnMobile) {
     editBtnMobile.href = editUrl;
+    editBtnMobile.classList.toggle('hidden', !isAuthor);
+    editBtnMobile.style.setProperty('display', isAuthor ? 'inline-flex' : 'none', 'important');
   }
   const authorActionsMobile = getEl('author-actions-mobile');
   if (authorActionsMobile) {
     authorActionsMobile.classList.toggle('hidden', !isAuthor);
+    authorActionsMobile.style.setProperty('display', isAuthor ? 'block' : 'none', 'important');
   }
 
   // Inquire of the Author controls (hidden if user is the author)
