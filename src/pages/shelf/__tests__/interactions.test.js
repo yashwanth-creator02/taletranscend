@@ -20,8 +20,16 @@ vi.mock('../ui.js', () => ({
   refreshSortPanel: vi.fn(),
 }));
 
+import * as confirmModal from '@ui/components/confirmModal.js';
+
 vi.mock('@services/index.js', () => ({
   removeFromBookmarks: vi.fn(),
+  downloadChronicle: vi.fn(),
+}));
+
+vi.mock('@ui/components/confirmModal.js', () => ({
+  confirmTaleDownload: vi.fn(),
+  showConfirmModal: vi.fn(),
 }));
 
 vi.mock('@/utils', () => ({
@@ -57,6 +65,7 @@ describe('ShelfInteractions', () => {
           <button data-action="options" data-menu-id="menu-t1"></button>
           <div id="menu-t1" class="shelf-menu" hidden>
             <button data-action="decouple" data-id="t1"></button>
+            <button data-action="download" data-id="t1"></button>
           </div>
         </div>
       </div>
@@ -109,5 +118,24 @@ describe('ShelfInteractions', () => {
     initShelfInteractions();
     document.getElementById('ritual-new-draft').click();
     expect(utils.navigateTo).toHaveBeenCalledWith('contribution.html');
+  });
+
+  it('handles download action when confirmed', async () => {
+    confirmModal.confirmTaleDownload.mockResolvedValue(true);
+    initShelfInteractions();
+    const downloadBtn = document.querySelector('[data-action="download"]');
+    await downloadBtn.click();
+
+    expect(confirmModal.confirmTaleDownload).toHaveBeenCalled();
+    expect(services.downloadChronicle).toHaveBeenCalledWith('t1');
+  });
+
+  it('does not download when confirmation cancelled', async () => {
+    confirmModal.confirmTaleDownload.mockResolvedValue(false);
+    initShelfInteractions();
+    const downloadBtn = document.querySelector('[data-action="download"]');
+    await downloadBtn.click();
+
+    expect(services.downloadChronicle).not.toHaveBeenCalled();
   });
 });

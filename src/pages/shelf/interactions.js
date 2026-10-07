@@ -14,6 +14,7 @@ import {
 import { setActiveTab, buildSortPanel, refreshSortPanel } from './ui.js';
 import { showToast } from '@ui/components/toast.js';
 import { initIcons } from '@ui/components/icons.js';
+import { confirmTaleDownload } from '@ui/components/confirmModal.js';
 import {
   addToBookmarks,
   removeFromBookmarks,
@@ -273,7 +274,16 @@ async function _handleCardAction(action, id, e) {
     case 'download':
     case 'save-offline': {
       if (!id) break;
-      await downloadChronicle(id);
+      _closeAllMenus();
+      const card = document.querySelector(`[data-id="${id}"]`);
+      const taleTitle =
+        card?.getAttribute('aria-label') ||
+        card?.querySelector('h3')?.textContent?.trim() ||
+        'Chronicle';
+      const confirmed = await confirmTaleDownload({ title: taleTitle });
+      if (confirmed) {
+        await downloadChronicle(id);
+      }
       break;
     }
 

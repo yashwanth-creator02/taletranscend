@@ -5,6 +5,7 @@
 
 import { showToast } from '@ui/components/toast.js';
 import { initIcons } from '@ui/components/icons.js';
+import { confirmTaleDownload } from '@ui/components/confirmModal.js';
 import { navigateTo, taleUrl, readerUrl, createLogger } from '@/utils';
 
 const log = createLogger('LibraryInteractions');
@@ -65,9 +66,18 @@ export function setupCardInteractions(userId) {
           return;
 
         case 'download':
-        case 'save-offline':
-          await downloadChronicle(taleId);
+        case 'save-offline': {
+          _closeAllMenus();
+          const taleTitle =
+            card.getAttribute('aria-label') ||
+            card.querySelector('h3')?.textContent?.trim() ||
+            'Chronicle';
+          const confirmed = await confirmTaleDownload({ title: taleTitle });
+          if (confirmed) {
+            await downloadChronicle(taleId);
+          }
           return;
+        }
 
         case 'mark-finished':
           if (actionEl.hasAttribute('disabled')) return;

@@ -13,6 +13,7 @@ import * as utils from '@/utils';
 import * as localProgress from '@services/reader/localProgress.service.js';
 import * as cloudProgress from '@services/reader/cloudProgress.service.js';
 import * as downloadTale from '@services/tale/downloadTale.js';
+import * as confirmModal from '@ui/components/confirmModal.js';
 
 vi.mock('@services/reader/localProgress.service.js', () => ({
   markChapterRead: vi.fn(),
@@ -32,6 +33,11 @@ vi.mock('@services/reader/cloudProgress.service.js', () => ({
 vi.mock('@services/tale/downloadTale.js', () => ({
   downloadChronicle: vi.fn(),
   downloadChapter: vi.fn(),
+}));
+
+vi.mock('@ui/components/confirmModal.js', () => ({
+  confirmTaleDownload: vi.fn(),
+  showConfirmModal: vi.fn(),
 }));
 
 vi.mock('@services/index.js', () => ({
@@ -160,18 +166,37 @@ describe('TaleInteractions', () => {
       expect(utils.navigateTo).not.toHaveBeenCalled();
     });
 
-    it('downloads chapter when download-chapter button clicked without navigating', () => {
+    it('downloads chapter when download-chapter button clicked and confirmed', async () => {
+      confirmModal.confirmTaleDownload.mockResolvedValue(true);
       const chapters = [{ title: 'Chapter 1' }];
       bindChapterClicks('t1', chapters, 'u1', { title: 'Test Tale' });
       const btn = document.querySelector('[data-action="download-chapter"]');
       btn.click();
+      await Promise.resolve();
 
+      expect(confirmModal.confirmTaleDownload).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Test Tale',
+          isFragment: true,
+        })
+      );
       expect(downloadTale.downloadChapter).toHaveBeenCalledWith(
         't1',
         5,
         expect.objectContaining({ taleTitle: 'Test Tale' })
       );
       expect(utils.navigateTo).not.toHaveBeenCalled();
+    });
+
+    it('does not download chapter when confirmation cancelled', async () => {
+      confirmModal.confirmTaleDownload.mockResolvedValue(false);
+      const chapters = [{ title: 'Chapter 1' }];
+      bindChapterClicks('t1', chapters, 'u1', { title: 'Test Tale' });
+      const btn = document.querySelector('[data-action="download-chapter"]');
+      btn.click();
+      await Promise.resolve();
+
+      expect(downloadTale.downloadChapter).not.toHaveBeenCalled();
     });
   });
 
@@ -201,11 +226,21 @@ describe('TaleInteractions', () => {
       expect(cloudProgress.syncMarkAllChaptersUnread).toHaveBeenCalled();
     });
 
-    it('downloads all chronicles on download all button click', () => {
+    it('downloads all chronicles on download all button click when confirmed', async () => {
+      confirmModal.confirmTaleDownload.mockResolvedValue(true);
       setupChronicleBatchActions('u1', 't1', []);
-      document.getElementById('btn-download-all-chronicles').click();
+      await document.getElementById('btn-download-all-chronicles').click();
 
+      expect(confirmModal.confirmTaleDownload).toHaveBeenCalled();
       expect(downloadTale.downloadChronicle).toHaveBeenCalledWith('t1');
+    });
+
+    it('does not download all chronicles when confirmation cancelled', async () => {
+      confirmModal.confirmTaleDownload.mockResolvedValue(false);
+      setupChronicleBatchActions('u1', 't1', []);
+      await document.getElementById('btn-download-all-chronicles').click();
+
+      expect(downloadTale.downloadChronicle).not.toHaveBeenCalled();
     });
   });
 

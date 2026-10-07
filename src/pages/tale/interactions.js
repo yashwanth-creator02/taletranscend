@@ -33,6 +33,7 @@ import {
   syncMarkAllChaptersUnread,
 } from '@services/reader/cloudProgress.service.js';
 import { downloadChronicle, downloadChapter } from '@services/tale/downloadTale.js';
+import { confirmTaleDownload } from '@ui/components/confirmModal.js';
 
 const log = createLogger('TaleInteractions');
 
@@ -189,7 +190,19 @@ export function bindChapterClicks(taleId, chapters = [], userId = null, tale = n
       e.stopPropagation();
       const idx = Number(downloadBtn.dataset.chapterIndex ?? 0);
       const ch = chapters[idx];
-      downloadChapter(taleId, idx, { taleTitle: tale?.title, chapter: ch });
+      const taleTitle =
+        tale?.title || document.querySelector('h1')?.textContent?.trim() || 'Chronicle';
+      const fragmentTitle = ch?.title || `Scroll #${idx + 1}`;
+
+      confirmTaleDownload({
+        title: taleTitle,
+        isFragment: true,
+        fragmentTitle,
+      }).then((confirmed) => {
+        if (confirmed) {
+          downloadChapter(taleId, idx, { taleTitle, chapter: ch });
+        }
+      });
       return;
     }
 
@@ -242,7 +255,7 @@ export function bindChapterClicks(taleId, chapters = [], userId = null, tale = n
  * @param {Array<Object>} chapters
  * @param {Object} [tale]
  */
-export function setupChronicleBatchActions(userId, taleId, chapters = [], _tale = null) {
+export function setupChronicleBatchActions(userId, taleId, chapters = [], tale = null) {
   const markAllReadBtn = document.getElementById('btn-mark-all-read');
   const markAllUnreadBtn = document.getElementById('btn-mark-all-unread');
   const downloadAllBtn = document.getElementById('btn-download-all-chronicles');
@@ -270,8 +283,16 @@ export function setupChronicleBatchActions(userId, taleId, chapters = [], _tale 
   }
 
   if (downloadAllBtn) {
-    downloadAllBtn.addEventListener('click', () => {
-      downloadChronicle(taleId);
+    downloadAllBtn.addEventListener('click', async () => {
+      const taleTitle =
+        tale?.title || document.querySelector('h1')?.textContent?.trim() || 'Chronicle';
+      const confirmed = await confirmTaleDownload({
+        title: taleTitle,
+        chapterCount: chapters?.length || 0,
+      });
+      if (confirmed) {
+        downloadChronicle(taleId);
+      }
     });
   }
 }

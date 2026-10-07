@@ -1017,3 +1017,51 @@
   pointer-events: auto !important;
   transform: translateY(0) !important;
 }
+
+/* ══ MODAL OVERLAYS & DIALOGS ══════════════════════════════════════════════
+   Standardized backdrop, overlay, and glassmorphic dialog card.
+   Zero raw colour literals; uses only design tokens.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgb(var(--dark-rgb) / 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 250;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+}
+
+.modal-overlay.is-open,
+.modal-overlay.flex,
+.modal-overlay:not(.hidden) {
+  display: flex;
+}
+
+.modal-overlay.hidden {
+  display: none !important;
+}
+
+.modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 24rem;
+  background: var(--surface-gradient-strong);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-xl), var(--shadow-glow);
+  padding: var(--space-6);
+  text-align: center;
+  color: rgb(var(--light-rgb));
+}
+
+@media (min-width: 640px) {
+  .modal-card {
+    max-width: 28rem;
+    padding: var(--space-8);
+  }
+}

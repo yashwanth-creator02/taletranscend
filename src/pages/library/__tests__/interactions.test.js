@@ -4,11 +4,19 @@ import { setupCardInteractions } from '../interactions.js';
 import * as services from '@services/index.js';
 import * as utils from '@/utils';
 
+import * as confirmModal from '@ui/components/confirmModal.js';
+
 vi.mock('@services/index.js', () => ({
   resolveResumePoint: vi.fn(),
   addToBookmarks: vi.fn(),
   removeFromBookmarks: vi.fn(),
   markTaleFinished: vi.fn(),
+  downloadChronicle: vi.fn(),
+}));
+
+vi.mock('@ui/components/confirmModal.js', () => ({
+  confirmTaleDownload: vi.fn(),
+  showConfirmModal: vi.fn(),
 }));
 
 vi.mock('@/utils', () => ({
@@ -43,6 +51,7 @@ describe('LibraryInteractions', () => {
             <button data-action="couple"></button>
             <button data-action="copy-link"></button>
             <button data-action="mark-finished"></button>
+            <button data-action="download"></button>
           </div>
         </div>
       </div>
@@ -111,5 +120,24 @@ describe('LibraryInteractions', () => {
     await acceptBtn.click();
 
     expect(services.markTaleFinished).toHaveBeenCalledWith({ userId: 'u1', taleId: 't1' });
+  });
+
+  it('handles download action when confirmed', async () => {
+    confirmModal.confirmTaleDownload.mockResolvedValue(true);
+    setupCardInteractions('u1');
+    const downloadBtn = document.querySelector('[data-action="download"]');
+    await downloadBtn.click();
+
+    expect(confirmModal.confirmTaleDownload).toHaveBeenCalled();
+    expect(services.downloadChronicle).toHaveBeenCalledWith('t1');
+  });
+
+  it('does not download when confirmation cancelled', async () => {
+    confirmModal.confirmTaleDownload.mockResolvedValue(false);
+    setupCardInteractions('u1');
+    const downloadBtn = document.querySelector('[data-action="download"]');
+    await downloadBtn.click();
+
+    expect(services.downloadChronicle).not.toHaveBeenCalled();
   });
 });
