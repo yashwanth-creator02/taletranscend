@@ -3,8 +3,10 @@ import {
   listenToComments,
   postComment,
   editComment,
+  editReply,
   deleteComment,
   deleteReply,
+  buildReplyTree,
 } from '../comments.js';
 import * as fb from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
@@ -57,6 +59,7 @@ import { checkRateLimit, applyButtonCooldown } from '@/utils';
 describe('TaleComments', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(checkRateLimit).mockReturnValue(true);
     document.body.innerHTML = `
       <div id="comments-list"></div>
       <textarea id="comment-text"></textarea>
@@ -542,6 +545,386 @@ describe('TaleComments', () => {
         isDeleted: true,
         deletedAt: 'mock-ts',
         updatedAt: 'mock-ts',
+      });
+    });
+  });
+
+  describe('nested replies and reply-to-reply hierarchy', () => {
+    describe('buildReplyTree', () => {
+      it('returns empty array when given non-array or empty array', () => {
+        expect(buildReplyTree([])).toEqual([]);
+        expect(buildReplyTree(null)).toEqual([]);
+        expect(buildReplyTree(undefined)).toEqual([]);
+      });
+
+      it('returns root nodes for replies without replyToId', () => {
+        const replies = [
+          { id: 'r1', text: 'First' },
+          { id: 'r2', text: 'Second' },
+        ];
+        const tree = buildReplyTree(replies);
+        expect(tree).toHaveLength(2);
+        expect(tree[0].id).toBe('r1');
+        expect(tree[0].children).toEqual([]);
+        expect(tree[1].id).toBe('r2');
+        expect(tree[1].children).toEqual([]);
+      });
+
+      it('nests child replies under their parent reply', () => {
+        const replies = [
+          { id: 'r1', text: 'Parent' },
+          { id: 'r2', text: 'Child of r1', replyToId: 'r1' },
+          { id: 'r3', text: 'Grandchild of r2', replyToId: 'r2' },
+          { id: 'r4', text: 'Another child of r1', replyToId: 'r1' },
+        ];
+        const tree = buildReplyTree(replies);
+        expect(tree).toHaveLength(1);
+        expect(tree[0].id).toBe('r1');
+        expect(tree[0].children).toHaveLength(2);
+        expect(tree[0].children[0].id).toBe('r2');
+        expect(tree[0].children[0].children).toHaveLength(1);
+        expect(tree[0].children[0].children[0].id).toBe('r3');
+        expect(tree[0].children[1].id).toBe('r4');
+      });
+
+      it('gracefully handles orphaned reply by making it a root node', () => {
+        const replies = [
+          { id: 'r1', text: 'Parent' },
+          { id: 'r2', text: 'Orphan reply', replyToId: 'non-existent' },
+        ];
+        const tree = buildReplyTree(replies);
+        expect(tree).toHaveLength(2);
+        expect(tree[0].id).toBe('r1');
+        expect(tree[1].id).toBe('r2');
+      });
+    });
+
+    describe('nested reply rendering and interactions', () => {
+      it('renders hierarchical tree with replyTo badge and nested children container', async () => {
+        vi.mocked(fb.getDocs)
+          .mockResolvedValueOnce({
+            empty: false,
+            docs: [
+              {
+                id: 'c1',
+                data: () => ({
+                  authorId: 'u2',
+                  authorName: 'Commenter',
+                  text: 'Top level echo',
+                  createdAt: { seconds: 123 },
+                }),
+              },
+            ],
+          })
+          .mockResolvedValueOnce({
+            empty: false,
+            docs: [
+              {
+                id: 'r1',
+                data: () => ({
+                  authorId: 'u3',
+                  authorName: 'ReplyAuthor1',
+                  text: 'Direct reply',
+                  createdAt: { seconds: 124 },
+                  replyToId: null,
+                }),
+              },
+              {
+                id: 'r2',
+                data: () => ({
+                  authorId: 'u1',
+                  authorName: 'Hero',
+                  text: 'Nested reply to r1',
+                  createdAt: { seconds: 125 },
+                  replyToId: 'r1',
+                  replyToAuthorName: 'ReplyAuthor1',
+                }),
+              },
+            ],
+          });
+
+        await listenToComments('t1');
+
+        // Verify r1 contains child replies container holding r2
+        const r1Element = document.getElementById('reply-r1');
+        expect(r1Element).not.toBeNull();
+
+        const childContainer = document.getElementById('child-replies-r1');
+        expect(childContainer).not.toBeNull();
+        expect(childContainer.querySelector('#reply-r2')).not.toBeNull();
+
+        // Verify r2 has the reply-to tag pointing to ReplyAuthor1
+        const r2Tag = document.querySelector('#reply-r2 .reply-to-tag');
+        expect(r2Tag).not.toBeNull();
+        expect(r2Tag.textContent).toContain('ReplyAuthor1');
+
+        // Verify Echo Back button is rendered for r2
+        const r2EchoBtn = document.querySelector('.reply-to-reply-trigger[data-reply-id="r2"]');
+        expect(r2EchoBtn).not.toBeNull();
+      });
+
+      it('opens and cancels reply-to-reply form', async () => {
+        vi.mocked(fb.getDocs)
+          .mockResolvedValueOnce({
+            empty: false,
+            docs: [
+              {
+                id: 'c1',
+                data: () => ({
+                  authorId: 'u2',
+                  authorName: 'TopAuthor',
+                  text: 'Echo',
+                  createdAt: { seconds: 123 },
+                }),
+              },
+            ],
+          })
+          .mockResolvedValueOnce({
+            empty: false,
+            docs: [
+              {
+                id: 'r1',
+                data: () => ({
+                  authorId: 'u3',
+                  authorName: 'ReplyAuthor1',
+                  text: 'Parent reply',
+                  createdAt: { seconds: 124 },
+                }),
+              },
+            ],
+          });
+
+        await listenToComments('t1');
+
+        const trigger = document.querySelector('.reply-to-reply-trigger[data-reply-id="r1"]');
+        const form = document.getElementById('reply-to-reply-form-r1');
+        expect(form.classList.contains('hidden')).toBe(true);
+
+        trigger.click();
+        expect(form.classList.contains('hidden')).toBe(false);
+
+        const cancelBtn = document.querySelector('.cancel-reply-to-reply[data-reply-id="r1"]');
+        cancelBtn.click();
+        expect(form.classList.contains('hidden')).toBe(true);
+      });
+
+      it('submits reply-to-reply with target reply info and refreshes thread', async () => {
+        vi.mocked(fb.getDocs)
+          .mockResolvedValueOnce({
+            empty: false,
+            docs: [
+              {
+                id: 'c1',
+                data: () => ({
+                  authorId: 'u2',
+                  authorName: 'TopAuthor',
+                  text: 'Echo',
+                  createdAt: { seconds: 123 },
+                }),
+              },
+            ],
+          })
+          .mockResolvedValueOnce({
+            empty: false,
+            docs: [
+              {
+                id: 'r1',
+                data: () => ({
+                  authorId: 'u3',
+                  authorName: 'TargetAuthor',
+                  text: 'Parent reply',
+                  createdAt: { seconds: 124 },
+                }),
+              },
+            ],
+          })
+          .mockResolvedValueOnce({
+            // Refresh call after posting
+            empty: false,
+            docs: [],
+          });
+
+        await listenToComments('t1');
+
+        const trigger = document.querySelector('.reply-to-reply-trigger[data-reply-id="r1"]');
+        trigger.click();
+
+        const input = document.getElementById('reply-to-reply-text-r1');
+        input.value = 'My nested reply text';
+
+        const submitBtn = document.querySelector('.submit-reply-to-reply[data-reply-id="r1"]');
+        submitBtn.click();
+
+        await new Promise((r) => setTimeout(r, 10));
+
+        expect(fb.addDoc).toHaveBeenCalledWith(
+          'comments/t1/c1/replies',
+          expect.objectContaining({
+            parentId: 'c1',
+            replyToId: 'r1',
+            replyToAuthorName: 'TargetAuthor',
+            text: 'My nested reply text',
+            authorId: 'u1',
+          })
+        );
+        expect(showToast).toHaveBeenCalledWith('Echo back recorded.', 'success');
+      });
+
+      it('allows editing a nested reply in-place', async () => {
+        vi.mocked(fb.getDocs)
+          .mockResolvedValueOnce({
+            empty: false,
+            docs: [
+              {
+                id: 'c1',
+                data: () => ({
+                  authorId: 'u2',
+                  authorName: 'TopAuthor',
+                  text: 'Echo',
+                  createdAt: { seconds: 123 },
+                }),
+              },
+            ],
+          })
+          .mockResolvedValueOnce({
+            empty: false,
+            docs: [
+              {
+                id: 'r1',
+                data: () => ({
+                  authorId: 'u3',
+                  authorName: 'ParentAuthor',
+                  text: 'Parent reply',
+                  createdAt: { seconds: 124 },
+                }),
+              },
+              {
+                id: 'r2',
+                data: () => ({
+                  authorId: 'u1', // Current user
+                  authorName: 'Hero',
+                  text: 'Original nested text',
+                  replyToId: 'r1',
+                  replyToAuthorName: 'ParentAuthor',
+                  createdAt: { seconds: 125 },
+                }),
+              },
+            ],
+          });
+
+        await listenToComments('t1');
+
+        const editBtn = document.querySelector('.edit-reply-trigger[data-reply-id="r2"]');
+        expect(editBtn).not.toBeNull();
+
+        editBtn.click();
+
+        const editForm = document.getElementById('reply-edit-form-r2');
+        expect(editForm.classList.contains('hidden')).toBe(false);
+
+        const textarea = document.getElementById('reply-edit-text-r2');
+        textarea.value = 'Updated nested text';
+
+        const saveBtn = document.querySelector('.save-reply-edit-trigger[data-reply-id="r2"]');
+        saveBtn.click();
+
+        await new Promise((r) => setTimeout(r, 10));
+
+        expect(fb.updateDoc).toHaveBeenCalledWith(
+          'comments/t1/c1/replies/r2',
+          expect.objectContaining({
+            text: 'Updated nested text',
+            isEdited: true,
+            editedAt: 'mock-ts',
+            updatedAt: 'mock-ts',
+          })
+        );
+
+        const textDisplay = document.getElementById('reply-text-display-r2');
+        expect(textDisplay.textContent).toBe('Updated nested text');
+        expect(document.querySelector('#reply-r2 .edited-badge')).not.toBeNull();
+      });
+
+      it('silencing (soft-deleting) parent reply preserves its child replies in the hierarchy', async () => {
+        vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+        vi.mocked(fb.getDocs)
+          .mockResolvedValueOnce({
+            empty: false,
+            docs: [
+              {
+                id: 'c1',
+                data: () => ({
+                  authorId: 'u2',
+                  authorName: 'TopAuthor',
+                  text: 'Echo',
+                  createdAt: { seconds: 123 },
+                }),
+              },
+            ],
+          })
+          .mockResolvedValueOnce({
+            empty: false,
+            docs: [
+              {
+                id: 'r1',
+                data: () => ({
+                  authorId: 'u1', // Current user
+                  authorName: 'Hero',
+                  text: 'Parent reply to delete',
+                  createdAt: { seconds: 124 },
+                }),
+              },
+              {
+                id: 'r2',
+                data: () => ({
+                  authorId: 'u3',
+                  authorName: 'OtherAuthor',
+                  text: 'Child reply that should remain visible',
+                  replyToId: 'r1',
+                  replyToAuthorName: 'Hero',
+                  createdAt: { seconds: 125 },
+                }),
+              },
+            ],
+          });
+
+        await listenToComments('t1');
+
+        const deleteR1Btn = document.querySelector('.delete-reply-trigger[data-reply-id="r1"]');
+        expect(deleteR1Btn).not.toBeNull();
+
+        deleteR1Btn.click();
+
+        await new Promise((r) => setTimeout(r, 10));
+
+        // Parent reply is soft-deleted
+        expect(fb.updateDoc).toHaveBeenCalledWith(
+          'comments/t1/c1/replies/r1',
+          expect.objectContaining({
+            text: '',
+            isDeleted: true,
+            deletedAt: 'mock-ts',
+            updatedAt: 'mock-ts',
+          })
+        );
+
+        const r1Display = document.getElementById('reply-text-display-r1');
+        expect(r1Display.textContent).toBe('This has been deleted by the user.');
+
+        // r1 action triggers are removed
+        expect(document.querySelector('.delete-reply-trigger[data-reply-id="r1"]')).toBeNull();
+        expect(document.querySelector('.edit-reply-trigger[data-reply-id="r1"]')).toBeNull();
+        expect(document.querySelector('.reply-to-reply-trigger[data-reply-id="r1"]')).toBeNull();
+
+        // Crucial: Child replies container AND r2 are preserved and still in DOM
+        const childContainer = document.getElementById('child-replies-r1');
+        expect(childContainer).not.toBeNull();
+        const r2Element = document.getElementById('reply-r2');
+        expect(r2Element).not.toBeNull();
+        expect(document.getElementById('reply-text-display-r2').textContent).toBe(
+          'Child reply that should remain visible'
+        );
       });
     });
   });

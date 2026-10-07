@@ -47,6 +47,7 @@ async function _loadIcons() {
     ArrowUp: L.ArrowUp,
     ArrowDown: L.ArrowDown,
     ArrowUpDown: L.ArrowUpDown,
+    CornerDownRight: L.CornerDownRight,
     PanelLeftClose: L.PanelLeftClose,
     PanelLeftOpen: L.PanelLeftOpen,
     LayoutGrid: L.LayoutGrid,

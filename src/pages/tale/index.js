@@ -19,8 +19,10 @@ export {
   listenToComments,
   postComment,
   editComment,
+  editReply,
   deleteComment,
   deleteReply,
+  buildReplyTree,
 } from './comments.js';
 
 export { initAuth } from '@fb/index.js';

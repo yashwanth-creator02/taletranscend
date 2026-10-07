@@ -257,13 +257,21 @@ async function _fetchReplies(commentId) {
       ? refs.commentReplies(_currentTaleId, commentId)
       : collection(db, `${PATHS.publicTaleComment(_currentTaleId, commentId)}/replies`);
 
-    const snap = await getDocs(query(repliesRef, orderBy('createdAt', 'asc'), limit(20)));
+    const snap = await getDocs(query(repliesRef, orderBy('createdAt', 'asc'), limit(50)));
 
-    if (snap.empty) return;
+    if (snap.empty) {
+      container.innerHTML = '';
+      return;
+    }
 
-    container.innerHTML = snap.docs
-      .map((d) => _renderReply({ id: d.id, parentId: commentId, ...d.data() }))
-      .join('');
+    const rawReplies = snap.docs.map((d) => ({
+      id: d.id,
+      parentId: commentId,
+      ...d.data(),
+    }));
+
+    const tree = buildReplyTree(rawReplies);
+    container.innerHTML = tree.map((node) => _renderReplyNode(node, 1)).join('');
     initIcons(container);
   } catch (err) {
     log.error('Fetch replies failed', err);
@@ -300,7 +308,88 @@ async function _handlePostReply(commentId, btn) {
     authorName: auth.currentUser.displayName || 'Anonymous Scribe',
     authorAvatarUrl: '',
     parentId: commentId,
-    depth: 1, // Replies are always depth 1 for now in this UI
+    depth: 1, // Direct reply to top-level comment
+  };
+
+  const validated = validateData(CommentSchema, payload);
+  if (!validated.success) {
+    showToast(validated.error, 'error');
+    btn.disabled = false;
+    btn.textContent = originalText;
+    return;
+  }
+
+  try {
+    const repliesRef = refs.commentReplies
+      ? refs.commentReplies(_currentTaleId, commentId)
+      : collection(db, `${PATHS.publicTaleComment(_currentTaleId, commentId)}/replies`);
+
+    await addDoc(repliesRef, {
+      ...validated.data,
+      replyToId: null,
+      replyToAuthorName: null,
+      isEdited: false,
+      editedAt: null,
+      isDeleted: false,
+      deletedAt: null,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+
+    if (input) input.value = '';
+    document.getElementById(`reply-form-${commentId}`)?.classList.add('hidden');
+    showToast('Echo back recorded.', 'success');
+    await _fetchReplies(commentId);
+
+    // The button is inside a form that might have been hidden, but let's apply anyway
+    applyButtonCooldown(btn, COMMENT_COOLDOWN_MS, originalText, () =>
+      getRemainingTime(rateLimitKey, COMMENT_COOLDOWN_MS)
+    );
+  } catch (err) {
+    log.error('Post reply failed', err);
+    showToast('Failed to echo back.', 'error');
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
+async function _handlePostReplyToReply(commentId, replyId, btn) {
+  const input = document.getElementById(`reply-to-reply-text-${replyId}`);
+  const text = input?.value.trim();
+  if (!text || !auth.currentUser) return;
+
+  const targetAuthorName = btn.dataset.authorName || 'Scribe';
+  const targetDepth = parseInt(btn.dataset.depth, 10) || 2;
+  const clampedDepth = Math.min(Math.max(targetDepth, 1), 5);
+
+  // Rate Limiting
+  const userId = auth.currentUser.uid;
+  const rateLimitKey = `comment:${userId}`;
+  const originalText = 'Transmit';
+
+  if (!checkRateLimit(rateLimitKey, COMMENT_COOLDOWN_MS)) {
+    showToast('Please wait before transmitting another echo.', 'warning');
+    applyButtonCooldown(btn, COMMENT_COOLDOWN_MS, originalText, () =>
+      getRemainingTime(rateLimitKey, COMMENT_COOLDOWN_MS)
+    );
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  // Validation
+  const payload = {
+    taleId: _currentTaleId,
+    text,
+    type: 'general',
+    authorId: userId,
+    authorName: auth.currentUser.displayName || 'Anonymous Scribe',
+    authorAvatarUrl: '',
+    parentId: commentId,
+    replyToId: replyId,
+    replyToAuthorName: targetAuthorName,
+    depth: clampedDepth,
   };
 
   const validated = validateData(CommentSchema, payload);
@@ -327,16 +416,15 @@ async function _handlePostReply(commentId, btn) {
     });
 
     if (input) input.value = '';
-    document.getElementById(`reply-form-${commentId}`)?.classList.add('hidden');
+    document.getElementById(`reply-to-reply-form-${replyId}`)?.classList.add('hidden');
     showToast('Echo back recorded.', 'success');
     await _fetchReplies(commentId);
 
-    // The button is inside a form that might have been hidden, but let's apply anyway
     applyButtonCooldown(btn, COMMENT_COOLDOWN_MS, originalText, () =>
       getRemainingTime(rateLimitKey, COMMENT_COOLDOWN_MS)
     );
   } catch (err) {
-    log.error('Post reply failed', err);
+    log.error('Post reply to reply failed', err);
     showToast('Failed to echo back.', 'error');
     btn.disabled = false;
     btn.textContent = originalText;
@@ -696,7 +784,45 @@ function _renderComment(c) {
   `;
 }
 
-function _renderReply(r) {
+/**
+ * Transforms a flat list of replies into a hierarchical tree.
+ *
+ * @param {Array<object>} replies
+ * @returns {Array<object>} Root-level reply nodes with a `children` array
+ */
+export function buildReplyTree(replies) {
+  if (!Array.isArray(replies) || replies.length === 0) return [];
+
+  const map = new Map();
+  const roots = [];
+
+  // Initialize node with empty children
+  replies.forEach((r) => {
+    map.set(r.id, { ...r, children: [] });
+  });
+
+  replies.forEach((r) => {
+    const node = map.get(r.id);
+    if (r.replyToId && map.has(r.replyToId)) {
+      map.get(r.replyToId).children.push(node);
+    } else {
+      roots.push(node);
+    }
+  });
+
+  return roots;
+}
+
+function _renderReplyNode(node, currentDepth = 1) {
+  const nextDepth = currentDepth + 1;
+  const childrenHtml =
+    node.children && node.children.length > 0
+      ? node.children.map((child) => _renderReplyNode(child, nextDepth)).join('')
+      : '';
+  return _renderReply(node, childrenHtml, currentDepth);
+}
+
+function _renderReply(r, childrenHtml = '', currentDepth = 1) {
   const date = r.createdAt ? new Date(r.createdAt.seconds * 1000).toLocaleDateString() : 'Just now';
   const seed = encodeURIComponent((r.authorId || 'scribe').slice(0, 8));
   const isDeleted = Boolean(r.isDeleted);
@@ -710,6 +836,14 @@ function _renderReply(r) {
   const editedBadgeHtml = isEdited
     ? `<span class="edited-badge edited-tag inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-[7px] font-bold uppercase tracking-wider text-slate-400" title="Edited"><i data-lucide="edit-3" class="w-2 h-2"></i> Edited</span>`
     : '';
+
+  const replyToBadgeHtml =
+    r.replyToAuthorName && !isDeleted
+      ? `<span class="reply-to-tag inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-[7px] font-bold text-indigo-300" title="Replying to ${escapeHtml(r.replyToAuthorName)}">
+          <i data-lucide="corner-down-right" class="w-2 h-2"></i>
+          <span>@${escapeHtml(r.replyToAuthorName)}</span>
+        </span>`
+      : '';
 
   const editBtnHtml =
     isOwner && r.id && !isDeleted
@@ -741,13 +875,31 @@ function _renderReply(r) {
       </button>`
       : '';
 
+  const replyBtnHtml =
+    !isDeleted && r.id
+      ? `<button
+        class="reply-to-reply-trigger group flex items-center gap-1 text-[7px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-all"
+        type="button"
+        data-comment-id="${r.parentId || ''}"
+        data-reply-id="${r.id}"
+        data-author-name="${escapeHtml(r.authorName || 'Scribe')}"
+        data-depth="${currentDepth}"
+        aria-label="Echo back to reply"
+        title="Echo Back"
+      >
+        <i data-lucide="message-square-plus" class="w-2.5 h-2.5 group-hover:scale-110 transition-transform"></i>
+        <span>Echo Back</span>
+      </button>`
+      : '';
+
   const replyTextHtml = isDeleted
     ? `<p id="reply-text-display-${r.id || ''}" class="text-xs text-slate-400 italic font-medium">This has been deleted by the user.</p>`
     : `<p id="reply-text-display-${r.id || ''}" class="text-xs text-slate-300 leading-relaxed font-medium">${escapeHtml(r.text || '')}</p>`;
 
-  const replyEditFormHtml = isDeleted
-    ? ''
-    : `<div id="reply-edit-form-${r.id || ''}" class="hidden mt-2">
+  const replyEditFormHtml =
+    isDeleted || !r.id
+      ? ''
+      : `<div id="reply-edit-form-${r.id || ''}" class="hidden mt-2">
         <textarea
           id="reply-edit-text-${r.id || ''}"
           placeholder="Edit your reply…"
@@ -769,26 +921,69 @@ function _renderReply(r) {
         </div>
       </div>`;
 
+  const replyToReplyFormHtml =
+    isDeleted || !r.id
+      ? ''
+      : `<div id="reply-to-reply-form-${r.id}" class="hidden mt-3 pt-3 border-t border-white/5">
+        <div class="relative">
+          <div class="flex items-center gap-1 text-[8px] font-bold text-indigo-300/80 mb-1.5">
+            <i data-lucide="corner-down-right" class="w-2.5 h-2.5"></i>
+            <span>Replying to @${escapeHtml(r.authorName || 'Scribe')}</span>
+          </div>
+          <textarea
+            id="reply-to-reply-text-${r.id}"
+            placeholder="Echo back to @${escapeHtml(r.authorName || 'Scribe')}…"
+            class="w-full bg-black/40 border border-white/10 rounded-xl p-2.5 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-indigo-500/50 resize-y min-h-16"
+            maxlength="5000"
+          ></textarea>
+          <div class="flex justify-end gap-2 mt-2">
+            <button
+              type="button"
+              class="cancel-reply-to-reply py-1 px-2.5 text-[8px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors"
+              data-reply-id="${r.id}"
+            >Cancel</button>
+            <button
+              type="button"
+              class="submit-reply-to-reply py-1 px-3.5 rounded-lg bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 text-[8px] font-black uppercase tracking-widest hover:bg-indigo-500/30 hover:text-white transition-all"
+              data-comment-id="${r.parentId || ''}"
+              data-reply-id="${r.id}"
+              data-author-name="${escapeHtml(r.authorName || 'Scribe')}"
+              data-depth="${currentDepth + 1}"
+            >Transmit</button>
+          </div>
+        </div>
+      </div>`;
+
+  const indentClass = currentDepth <= 2 ? 'pl-3 md:pl-4' : 'pl-2 md:pl-2.5';
+
   return `
-    <div class="flex gap-4 animate-fade-in" id="reply-${r.id || ''}">
-      <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}" alt="Scribe" class="w-6 h-6 rounded-md bg-white/5 opacity-60" />
-      <div class="flex-1">
-        <div class="flex items-center justify-between mb-1.5 flex-wrap gap-2">
-          <div class="flex items-center gap-2 flex-wrap" id="reply-tags-${r.id || ''}">
-            <span class="text-[9px] font-black text-slate-200 uppercase tracking-widest">${escapeHtml(r.authorName || 'Scribe')}</span>
-            ${authorBadgeHtml}
-            ${editedBadgeHtml}
-            <span class="text-[7px] text-slate-400 font-bold uppercase">${date}</span>
+    <div class="flex flex-col gap-2 animate-fade-in" id="reply-${r.id || ''}">
+      <div class="flex gap-3 items-start">
+        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}" alt="Scribe" class="w-6 h-6 rounded-md bg-white/5 opacity-60 mt-0.5" />
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between mb-1.5 flex-wrap gap-2">
+            <div class="flex items-center gap-1.5 flex-wrap" id="reply-tags-${r.id || ''}">
+              <span class="text-[9px] font-black text-slate-200 uppercase tracking-widest">${escapeHtml(r.authorName || 'Scribe')}</span>
+              ${authorBadgeHtml}
+              ${replyToBadgeHtml}
+              ${editedBadgeHtml}
+              <span class="text-[7px] text-slate-400 font-bold uppercase">${date}</span>
+            </div>
+            <div class="flex items-center gap-2" id="reply-actions-${r.id || ''}">
+              ${replyBtnHtml}
+              ${editBtnHtml}
+              ${deleteBtnHtml}
+            </div>
           </div>
-          <div class="flex items-center gap-2" id="reply-actions-${r.id || ''}">
-            ${editBtnHtml}
-            ${deleteBtnHtml}
+          <div id="reply-body-${r.id || ''}">
+            ${replyTextHtml}
+            ${replyEditFormHtml}
+            ${replyToReplyFormHtml}
           </div>
         </div>
-        <div id="reply-body-${r.id || ''}">
-          ${replyTextHtml}
-          ${replyEditFormHtml}
-        </div>
+      </div>
+      <div id="child-replies-${r.id || ''}" class="child-replies space-y-3 mt-1 ${indentClass} border-l border-white/10 ${childrenHtml ? '' : 'hidden'}">
+        ${childrenHtml}
       </div>
     </div>
   `;
@@ -818,6 +1013,26 @@ function _bindDelegatedEvents(list) {
 
     if (target.classList.contains('submit-reply') && commentId) {
       await _handlePostReply(commentId, target);
+      return;
+    }
+
+    if (target.classList.contains('reply-to-reply-trigger') && replyId) {
+      const form = document.getElementById(`reply-to-reply-form-${replyId}`);
+      if (form) {
+        form.classList.remove('hidden');
+        initIcons(form);
+        document.getElementById(`reply-to-reply-text-${replyId}`)?.focus();
+      }
+      return;
+    }
+
+    if (target.classList.contains('cancel-reply-to-reply') && replyId) {
+      document.getElementById(`reply-to-reply-form-${replyId}`)?.classList.add('hidden');
+      return;
+    }
+
+    if (target.classList.contains('submit-reply-to-reply') && replyId && commentId) {
+      await _handlePostReplyToReply(commentId, replyId, target);
       return;
     }
 

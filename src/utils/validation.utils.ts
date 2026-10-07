@@ -19,6 +19,8 @@ export const CommentSchema = z.object({
   authorName: z.string().min(1, 'Author Name is required'),
   authorAvatarUrl: z.string().optional(),
   parentId: z.string().nullable().optional(),
+  replyToId: z.string().nullable().optional(),
+  replyToAuthorName: z.string().nullable().optional(),
   depth: z.number().min(0).max(5, 'Echo nesting is too deep'),
 });
 

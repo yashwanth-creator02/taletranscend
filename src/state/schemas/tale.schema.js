@@ -158,6 +158,8 @@ export function createChapter(id, data = {}) {
  * @property {string}      authorName
  * @property {string}      authorAvatarUrl
  * @property {string|null} parentId
+ * @property {string|null} replyToId
+ * @property {string|null} replyToAuthorName
  * @property {number}      replyCount
  * @property {number}      depth
  * @property {number}      likeCount
@@ -188,6 +190,8 @@ export function createComment(id, data = {}) {
     authorName: data.authorName ?? '',
     authorAvatarUrl: data.authorAvatarUrl ?? '',
     parentId: data.parentId ?? null,
+    replyToId: data.replyToId ?? null,
+    replyToAuthorName: data.replyToAuthorName ?? null,
     replyCount: data.replyCount ?? 0,
     depth: data.depth ?? 0,
     likeCount: data.likeCount ?? 0,
