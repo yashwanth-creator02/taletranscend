@@ -45,6 +45,7 @@ import {
   renderCommentsPanel,
   renderTTSPanel,
   renderInfoPanel,
+  bindTocEvents,
   appState,
   setAppUser,
   setAppReaderPrefs,
@@ -253,7 +254,7 @@ function _refreshPanelContent() {
       readerState.activeSection,
       readerState.taleTitle
     );
-    _bindTocEvents();
+    bindTocEvents({ onRefresh: _refreshPanelContent });
   } else if (toolId === 'type') {
     content.innerHTML = renderTypographyPanel(readerState);
     _bindTypographyEvents();
@@ -335,30 +336,7 @@ function _updateCollapseIcon() {
    ───────────────────────────────────────────── */
 
 function _bindTocEvents() {
-  document.querySelectorAll('[data-chapter-id]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const idx = readerState.chapters.findIndex((c) => c.id === btn.dataset.chapterId);
-      if (idx !== -1 && readerState.taleId) {
-        navigateTo(readerUrl(readerState.taleId, idx));
-      }
-    });
-  });
-
-  document.querySelectorAll('[data-section-id]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const target = document.getElementById(btn.dataset.sectionId);
-      const scroller = document.getElementById('scroller');
-      if (target && scroller) {
-        const top =
-          target.getBoundingClientRect().top -
-          scroller.getBoundingClientRect().top +
-          scroller.scrollTop -
-          32;
-        scroller.scrollTo({ top, behavior: 'smooth' });
-        if (window.innerWidth < 1024) closePanel();
-      }
-    });
-  });
+  bindTocEvents({ onRefresh: _refreshPanelContent });
 }
 
 function _bindTypographyEvents() {

@@ -18,6 +18,10 @@ describe('ReaderTemplates', () => {
       expect(html).toContain('My Tale');
       expect(html).toContain('Ch 1');
       expect(html).toContain('1,000 words');
+      expect(html).toContain('data-toc-menu-trigger="c1"');
+      expect(html).toContain('data-action="mark-read"');
+      expect(html).toContain('data-action="mark-unread"');
+      expect(html).toContain('data-action="download-chapter"');
     });
   });
 

@@ -95,6 +95,10 @@ Enforce architectural conventions, module aliases, state management patterns, an
     - **Exact Position Memory**: The exact scroll position (`scrollTop` in pixels) is persisted alongside `scrollPercent` in localStorage via `saveReaderProgress`.
     - **Always Restore on Open**: Whenever a chapter is opened, `restoreScrollProgress` unconditionally restores the user's saved position, even if the chapter is already at 100% progress.
     - **Unload Persistence**: A synchronous `beforeunload` and `pagehide` listener persists current `scrollTop` to prevent scroll state loss on tab close or navigation.
+17. **Table of Contents Chapter Menu Options**:
+    - **Actions Menu**: Every chapter in the reader Table of Contents panel includes an accessible chapter options trigger (`.toc-menu-trigger`) with a popup dropdown (`.toc-menu-dropdown`).
+    - **Mark Read / Unread**: Readers can mark any fragment as read or unread directly from the TOC, syncing both local storage and cloud records, updating reading status indicators, and notifying with a toast.
+    - **Download Fragment**: Direct download action allows saving the individual chapter Markdown export via `downloadChapter`.
 
 ## Tools / Scripts to Use
 

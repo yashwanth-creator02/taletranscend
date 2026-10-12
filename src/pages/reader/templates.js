@@ -1,17 +1,28 @@
 // src/pages/reader/templates.js
 // UI Templates for the Reader Panels
-import { THEMES } from './state.js';
+import { THEMES, readerState } from './state.js';
+import { getChapterProgress } from '@services/index.js';
 import { escapeText as escapeHtml } from '@/utils';
 
-export function renderTocPanel(chapters, currentChapterId, progress, activeSection, articleTitle) {
+export function renderTocPanel(
+  chapters,
+  currentChapterId,
+  progress,
+  activeSection,
+  articleTitle,
+  { userId, taleId } = {}
+) {
   const safeArticleTitle = escapeHtml(articleTitle);
+  const activeUserId = userId || readerState?.userId;
+  const activeTaleId = taleId || readerState?.taleId;
+
   return `
     <div class="space-y-2">
       <div class="glass mb-3 rounded-xl p-3">
         <div class="mb-2 flex items-center justify-between text-xs uppercase tracking-wide" style="color:var(--reader-muted)">
           <span>Reading progress</span><span class="tabular-nums">${Math.round(progress)}%</span>
         </div>
-        <div style="height:6px;overflow:hidden;border-radius:9999px;background:var(--reader-border-subtle)">
+        <div style="height:6px;overflow:hidden;border-radius:3px;background:var(--reader-border-subtle)">
           <div class="progress-bar" style="height:100%;width:${progress}%"></div>
         </div>
       </div>
@@ -21,19 +32,82 @@ export function renderTocPanel(chapters, currentChapterId, progress, activeSecti
       </div>
       <div class="space-y-1">
         ${chapters
-          .map((c) => {
+          .map((c, idx) => {
             const isCurrent = c.id === currentChapterId;
             const safeTitle = escapeHtml(c.title);
+            const chapterIndex = typeof c.number === 'number' ? c.number - 1 : idx;
+            const chProgress =
+              activeUserId && activeTaleId
+                ? getChapterProgress({ userId: activeUserId, taleId: activeTaleId, chapterIndex })
+                : null;
+            const isCompleted = chProgress?.scrollPercent >= 95;
+
             return `
           <div class="toc-chapter ${isCurrent ? 'current' : ''}">
-            <button class="toc-chapter-btn" data-chapter-id="${c.id}">
-              <span class="toc-number ${isCurrent ? 'current' : ''}" style="${isCurrent ? 'box-shadow:0 0 14px -2px rgb(var(--reader-accent-rgb) / 0.6)' : ''}">${c.number}</span>
-              <span class="flex-1">
-                <span class="rune-text block text-sm" style="color:var(--reader-fg)">${safeTitle}</span>
-                <span class="block text-xs" style="color:var(--reader-muted)">${c.wordCount?.toLocaleString() || 0} words &middot; ${Math.max(1, Math.round((c.wordCount || 0) / 230))} min</span>
-              </span>
-              <i data-lucide="chevron-down" class="shrink-0" style="width:14px;height:14px;color:var(--reader-muted);transition:transform 200ms;${isCurrent ? 'transform:rotate(180deg)' : ''}"></i>
-            </button>
+            <div class="toc-chapter-header">
+              <button class="toc-chapter-btn" data-chapter-id="${c.id}" type="button">
+                <span class="toc-number ${isCurrent ? 'current' : ''}" style="${isCurrent ? 'box-shadow:0 0 14px -2px rgb(var(--reader-accent-rgb) / 0.6)' : ''}">${c.number}</span>
+                <span class="flex-1 min-w-0">
+                  <span class="rune-text block text-sm truncate" style="color:var(--reader-fg)">${safeTitle}</span>
+                  <span class="block text-xs" style="color:var(--reader-muted)">
+                    ${c.wordCount?.toLocaleString() || 0} words &middot; ${Math.max(1, Math.round((c.wordCount || 0) / 230))} min
+                    ${isCompleted ? ' &middot; <span class="toc-read-label" style="color:var(--reader-accent);font-weight:600">Read</span>' : ''}
+                  </span>
+                </span>
+                <i data-lucide="chevron-down" class="shrink-0" style="width:14px;height:14px;color:var(--reader-muted);transition:transform 200ms;${isCurrent ? 'transform:rotate(180deg)' : ''}"></i>
+              </button>
+              <div class="toc-chapter-menu-wrap">
+                <button
+                  type="button"
+                  class="toc-menu-trigger"
+                  data-toc-menu-trigger="${c.id}"
+                  data-chapter-index="${chapterIndex}"
+                  aria-label="Options for ${safeTitle}"
+                  title="Chapter options"
+                >
+                  <i data-lucide="more-vertical" style="width:14px;height:14px"></i>
+                </button>
+                <div
+                  class="toc-menu-dropdown hidden"
+                  id="toc-menu-${c.id}"
+                  role="menu"
+                >
+                  <button
+                    type="button"
+                    class="toc-menu-item"
+                    data-action="mark-read"
+                    data-chapter-index="${chapterIndex}"
+                    data-chapter-title="${safeTitle}"
+                    role="menuitem"
+                  >
+                    <i data-lucide="check" style="width:13px;height:13px;color:var(--reader-accent)"></i>
+                    <span>Mark Read</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="toc-menu-item"
+                    data-action="mark-unread"
+                    data-chapter-index="${chapterIndex}"
+                    data-chapter-title="${safeTitle}"
+                    role="menuitem"
+                  >
+                    <i data-lucide="rotate-ccw" style="width:13px;height:13px;color:var(--reader-muted)"></i>
+                    <span>Mark Unread</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="toc-menu-item"
+                    data-action="download-chapter"
+                    data-chapter-index="${chapterIndex}"
+                    data-chapter-title="${safeTitle}"
+                    role="menuitem"
+                  >
+                    <i data-lucide="download" style="width:13px;height:13px;color:var(--reader-accent)"></i>
+                    <span>Download</span>
+                  </button>
+                </div>
+              </div>
+            </div>
             ${
               isCurrent && c.sections
                 ? `
@@ -43,7 +117,7 @@ export function renderTocPanel(chapters, currentChapterId, progress, activeSecti
                     const active = activeSection === s.id;
                     const safeSectionTitle = escapeHtml(s.title);
                     return `
-                  <button class="toc-section-btn ${active ? 'active' : ''} ${s.level === 3 ? 'pl-7' : ''}" data-section-id="${s.id}">
+                  <button class="toc-section-btn ${active ? 'active' : ''} ${s.level === 3 ? 'pl-7' : ''}" data-section-id="${s.id}" type="button">
                     <span class="toc-dot ${active ? 'active' : ''}" style="${active ? 'box-shadow:0 0 10px 1px rgb(var(--reader-accent-rgb) / 0.7)' : ''}"></span>
                     <span class="flex-1 text-xs leading-snug ${s.level === 2 ? 'tracking-wide' : ''}" style="${active ? 'color:var(--reader-accent);font-weight:600' : 'color:var(--reader-secondary)'}">${safeSectionTitle}</span>
                   </button>`;
