@@ -64,8 +64,16 @@ export function saveReaderProgress({ userId, taleId, chapterIndex, scrollPercent
   store[userId] ??= {};
   store[userId][taleId] ??= { chapters: {}, totalReadTimeMs: 0 };
 
+  const existingChapter = store[userId][taleId].chapters[chapterIndex];
+  if (existingChapter && existingChapter.scrollPercent >= 100 && scrollPercent < 100) {
+    log.debug('Progress already at 100%, ignoring lower scrollPercent', { taleId, chapterIndex });
+    return;
+  }
+
+  const safePercent = Math.min(100, Math.max(0, scrollPercent));
+
   store[userId][taleId].chapters[chapterIndex] = {
-    scrollPercent,
+    scrollPercent: safePercent,
     updatedAt: Date.now(),
   };
 

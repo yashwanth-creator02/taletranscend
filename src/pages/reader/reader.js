@@ -29,6 +29,7 @@ import {
   applyNavigation,
   bindScrollProgress,
   restoreScrollProgress,
+  updateReaderProgress,
   getChapterProgress,
   saveReaderProgress,
   scheduleProgressSync,
@@ -789,21 +790,42 @@ initAuth(async (user) => {
   applyNavigation(navigation);
   _renderDiscussion();
   const localProgress = getChapterProgress({ userId: user.uid, taleId, chapterIndex });
-  restoreScrollProgress({ scrollPercent: localProgress?.scrollPercent ?? 0 });
+  const initialScrollPercent = localProgress?.scrollPercent ?? 0;
+  readerState.progress = initialScrollPercent >= 100 ? 100 : initialScrollPercent;
+
+  if (readerState.progress >= 100) {
+    updateReaderProgress({ scrollPercent: 100 });
+  } else {
+    restoreScrollProgress({ scrollPercent: initialScrollPercent });
+    updateReaderProgress({ scrollPercent: initialScrollPercent });
+  }
 
   // Scroll tracking
   bindScrollProgress({
+    initialPercent: readerState.progress,
     onScroll(scrollPercent) {
-      readerState.progress = scrollPercent;
-      saveReaderProgress({ userId: user.uid, taleId, chapterIndex, scrollPercent });
-      scheduleProgressSync({ userId: user.uid, taleId, chapterIndex, scrollPercent });
+      if (readerState.progress >= 100 || scrollPercent >= 100) {
+        readerState.progress = 100;
+        scrollPercent = 100;
+      } else {
+        readerState.progress = scrollPercent;
+      }
+
+      saveReaderProgress({
+        userId: user.uid,
+        taleId,
+        chapterIndex,
+        scrollPercent: readerState.progress,
+      });
+      scheduleProgressSync({
+        userId: user.uid,
+        taleId,
+        chapterIndex,
+        scrollPercent: readerState.progress,
+      });
       updateTOCScrollSpy();
 
-      const pctEl = document.getElementById('top-bar-pct');
-      if (pctEl) pctEl.textContent = Math.round(scrollPercent) + '%';
-
-      const progressBar = document.getElementById('progress-bar');
-      if (progressBar) progressBar.style.width = scrollPercent + '%';
+      updateReaderProgress({ scrollPercent: readerState.progress });
 
       if (readerState.openTool === 'toc') _refreshPanelContent();
     },

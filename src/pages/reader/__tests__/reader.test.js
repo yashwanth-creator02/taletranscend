@@ -47,6 +47,7 @@ vi.mock('../index.js', () => ({
   applyNavigation: vi.fn(),
   bindScrollProgress: vi.fn(),
   restoreScrollProgress: vi.fn(),
+  updateReaderProgress: vi.fn(),
   getChapterProgress: vi.fn(),
   saveReaderProgress: vi.fn(),
   scheduleProgressSync: vi.fn(),

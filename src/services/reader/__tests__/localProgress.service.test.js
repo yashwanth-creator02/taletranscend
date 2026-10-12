@@ -50,6 +50,17 @@ describe('localProgress.service', () => {
     expect(progress.chapterIndex).toBe(3);
     expect(progress.percent).toBe(80);
   });
+
+  it('persists 100% progress and ignores subsequent lower scroll percentages', () => {
+    saveLocalProgress('tale-123', 1, 100);
+    const completed = loadLocalProgress('tale-123');
+    expect(completed.percent).toBe(100);
+
+    // Attempt to save lower progress on the same chapter
+    saveLocalProgress('tale-123', 1, 40);
+    const stillCompleted = loadLocalProgress('tale-123');
+    expect(stillCompleted.percent).toBe(100);
+  });
 });
 
 describe('getOverallProgress', () => {
