@@ -81,7 +81,7 @@ export function bindScrollProgress({ onScroll, initialPercent = 0 }) {
       }
     }
 
-    onScroll(scrollPercent);
+    onScroll(scrollPercent, scroller.scrollTop);
   };
 
   scroller.addEventListener('scroll', handler, { passive: true });
@@ -97,27 +97,60 @@ export function bindScrollProgress({ onScroll, initialPercent = 0 }) {
    ───────────────────────────────────────────── */
 
 /**
- * Restores the user's scroll position from a saved percentage.
- * If chapter is already completed (100%), scroll restoration is skipped so
- * user can read fresh from the top while keeping progress at 100%.
+ * Restores the user's scroll position from a saved percentage or pixel offset.
+ * Always restores the scroll position when opened, even if reading progress is 100%.
  *
- * @param {{ scrollPercent: number }} params
+ * @param {Object} [params]
+ * @param {number} [params.scrollPercent=0]
+ * @param {number} [params.scrollTop]
  */
-export function restoreScrollProgress({ scrollPercent }) {
-  if (typeof scrollPercent !== 'number' || scrollPercent <= 2 || scrollPercent >= 100) return;
-
+export function restoreScrollProgress({ scrollPercent = 0, scrollTop } = {}) {
   const scroller = document.getElementById('scroller');
   if (!scroller) return;
 
-  const observer = new ResizeObserver(() => {
-    const max = _getArticleMaxScroll(scroller);
-    if (max > 50) {
-      scroller.scrollTop = (scrollPercent / 100) * max;
-      observer.disconnect();
-    }
-  });
+  const hasScrollTop = typeof scrollTop === 'number' && scrollTop > 0;
+  const hasScrollPercent = typeof scrollPercent === 'number' && scrollPercent > 2;
 
-  observer.observe(scroller);
+  if (!hasScrollTop && !hasScrollPercent) {
+    scroller.scrollTop = 0;
+    return;
+  }
+
+  const getTarget = () => {
+    if (hasScrollTop) return scrollTop;
+    const max = _getArticleMaxScroll(scroller);
+    if (max > 50) return (scrollPercent / 100) * max;
+    return 0;
+  };
+
+  const applyScroll = () => {
+    const target = getTarget();
+    if (target <= 0) return false;
+
+    const max = _getMaxScroll(scroller);
+    scroller.scrollTop = target;
+
+    if (Math.abs(scroller.scrollTop - target) <= 2) {
+      return true;
+    }
+    if (max > 50 && scroller.scrollTop >= max) {
+      return true;
+    }
+    return false;
+  };
+
+  if (typeof ResizeObserver !== 'undefined') {
+    let attempts = 0;
+    const observer = new ResizeObserver(() => {
+      attempts++;
+      if (applyScroll() || attempts >= 10) {
+        observer.disconnect();
+      }
+    });
+    observer.observe(scroller);
+  } else {
+    applyScroll();
+  }
 }
 
 /* ─────────────────────────────────────────────

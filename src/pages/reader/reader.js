@@ -1249,19 +1249,16 @@ initAuth(async (user) => {
   _renderDiscussion();
   const localProgress = getChapterProgress({ userId: user.uid, taleId, chapterIndex });
   const initialScrollPercent = localProgress?.scrollPercent ?? 0;
+  const initialScrollTop = localProgress?.scrollTop ?? 0;
   readerState.progress = initialScrollPercent >= 100 ? 100 : initialScrollPercent;
 
-  if (readerState.progress >= 100) {
-    updateReaderProgress({ scrollPercent: 100 });
-  } else {
-    restoreScrollProgress({ scrollPercent: initialScrollPercent });
-    updateReaderProgress({ scrollPercent: initialScrollPercent });
-  }
+  updateReaderProgress({ scrollPercent: readerState.progress });
+  restoreScrollProgress({ scrollPercent: initialScrollPercent, scrollTop: initialScrollTop });
 
   // Scroll tracking
   bindScrollProgress({
     initialPercent: readerState.progress,
-    onScroll(scrollPercent) {
+    onScroll(scrollPercent, scrollTop) {
       if (readerState.progress >= 100 || scrollPercent >= 100) {
         readerState.progress = 100;
         scrollPercent = 100;
@@ -1269,11 +1266,17 @@ initAuth(async (user) => {
         readerState.progress = scrollPercent;
       }
 
+      const safeScrollTop =
+        typeof scrollTop === 'number'
+          ? scrollTop
+          : (document.getElementById('scroller')?.scrollTop ?? 0);
+
       saveReaderProgress({
         userId: user.uid,
         taleId,
         chapterIndex,
         scrollPercent: readerState.progress,
+        scrollTop: safeScrollTop,
       });
       scheduleProgressSync({
         userId: user.uid,
@@ -1341,6 +1344,24 @@ initAuth(async (user) => {
 
 document.addEventListener('DOMContentLoaded', () => initIcons());
 
+function _saveCurrentScroll() {
+  const scroller = document.getElementById('scroller');
+  if (scroller && readerState.userId && taleId) {
+    saveReaderProgress({
+      userId: readerState.userId,
+      taleId,
+      chapterIndex,
+      scrollPercent: readerState.progress,
+      scrollTop: scroller.scrollTop,
+    });
+  }
+}
+
 window.addEventListener('beforeunload', () => {
+  _saveCurrentScroll();
   if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+});
+
+window.addEventListener('pagehide', () => {
+  _saveCurrentScroll();
 });

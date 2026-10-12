@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   loadLocalProgress,
   saveLocalProgress,
+  saveReaderProgress,
   getOverallProgress,
   markChapterRead,
   markChapterUnread,
@@ -60,6 +61,50 @@ describe('localProgress.service', () => {
     saveLocalProgress('tale-123', 1, 40);
     const stillCompleted = loadLocalProgress('tale-123');
     expect(stillCompleted.percent).toBe(100);
+  });
+
+  it('saves and updates scrollTop even when progress reaches 100%', () => {
+    const userId = 'user-scroll-test';
+    const taleId = 'tale-scroll-123';
+    const chapterIndex = 1;
+
+    saveReaderProgress({
+      userId,
+      taleId,
+      chapterIndex,
+      scrollPercent: 50,
+      scrollTop: 600,
+    });
+
+    const initial = getChapterProgress({ userId, taleId, chapterIndex });
+    expect(initial.scrollPercent).toBe(50);
+    expect(initial.scrollTop).toBe(600);
+
+    // Mark as 100%
+    saveReaderProgress({
+      userId,
+      taleId,
+      chapterIndex,
+      scrollPercent: 100,
+      scrollTop: 1500,
+    });
+
+    const at100 = getChapterProgress({ userId, taleId, chapterIndex });
+    expect(at100.scrollPercent).toBe(100);
+    expect(at100.scrollTop).toBe(1500);
+
+    // Reading progress stays locked at 100%, but scroll position continues to be remembered
+    saveReaderProgress({
+      userId,
+      taleId,
+      chapterIndex,
+      scrollPercent: 20,
+      scrollTop: 300,
+    });
+
+    const updated = getChapterProgress({ userId, taleId, chapterIndex });
+    expect(updated.scrollPercent).toBe(100);
+    expect(updated.scrollTop).toBe(300);
   });
 });
 

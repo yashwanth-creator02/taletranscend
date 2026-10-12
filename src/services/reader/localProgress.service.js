@@ -54,10 +54,10 @@ function writeStorage(data) {
  * @param {number} params.chapterIndex
  * @param {number} params.scrollPercent
  */
-export function saveReaderProgress({ userId, taleId, chapterIndex, scrollPercent }) {
+export function saveReaderProgress({ userId, taleId, chapterIndex, scrollPercent, scrollTop }) {
   if (!userId || !taleId || typeof chapterIndex !== 'number') return;
 
-  log.debug('Saving local progress', { taleId, chapterIndex, scrollPercent });
+  log.debug('Saving local progress', { taleId, chapterIndex, scrollPercent, scrollTop });
   const store = readStorage();
 
   // Initialize nested structure if it does not exist
@@ -65,15 +65,24 @@ export function saveReaderProgress({ userId, taleId, chapterIndex, scrollPercent
   store[userId][taleId] ??= { chapters: {}, totalReadTimeMs: 0 };
 
   const existingChapter = store[userId][taleId].chapters[chapterIndex];
-  if (existingChapter && existingChapter.scrollPercent >= 100 && scrollPercent < 100) {
-    log.debug('Progress already at 100%, ignoring lower scrollPercent', { taleId, chapterIndex });
-    return;
-  }
 
-  const safePercent = Math.min(100, Math.max(0, scrollPercent));
+  // If chapter was already at 100% or reaches 100%, reading progress stays locked at 100%
+  const isCompleted =
+    (existingChapter && existingChapter.scrollPercent >= 100) ||
+    (typeof scrollPercent === 'number' && scrollPercent >= 100);
+
+  const safePercent = isCompleted
+    ? 100
+    : typeof scrollPercent === 'number'
+      ? Math.min(100, Math.max(0, scrollPercent))
+      : (existingChapter?.scrollPercent ?? 0);
+
+  const safeScrollTop =
+    typeof scrollTop === 'number' ? Math.max(0, scrollTop) : existingChapter?.scrollTop;
 
   store[userId][taleId].chapters[chapterIndex] = {
     scrollPercent: safePercent,
+    ...(typeof safeScrollTop === 'number' ? { scrollTop: safeScrollTop } : {}),
     updatedAt: Date.now(),
   };
 

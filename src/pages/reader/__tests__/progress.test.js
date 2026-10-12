@@ -70,7 +70,7 @@ describe('Reader Progress', () => {
       // Dispatch scroll event
       scroller.dispatchEvent(new Event('scroll'));
 
-      expect(onScroll).toHaveBeenCalledWith(50);
+      expect(onScroll).toHaveBeenCalledWith(50, 750);
       expect(document.getElementById('progressBar').style.width).toBe('50%');
 
       cleanup();
@@ -97,12 +97,12 @@ describe('Reader Progress', () => {
       // Scroll to 250 (halfway through tale content)
       scroller.scrollTop = 250;
       scroller.dispatchEvent(new Event('scroll'));
-      expect(onScroll).toHaveBeenLastCalledWith(50);
+      expect(onScroll).toHaveBeenLastCalledWith(50, 250);
 
       // Scroll to 500 (end of tale content)
       scroller.scrollTop = 500;
       scroller.dispatchEvent(new Event('scroll'));
-      expect(onScroll).toHaveBeenLastCalledWith(100);
+      expect(onScroll).toHaveBeenLastCalledWith(100, 500);
 
       cleanup();
     });
@@ -116,14 +116,14 @@ describe('Reader Progress', () => {
       // Scroll to 100%
       scroller.scrollTop = 1500;
       scroller.dispatchEvent(new Event('scroll'));
-      expect(onScroll).toHaveBeenLastCalledWith(100);
+      expect(onScroll).toHaveBeenLastCalledWith(100, 1500);
       expect(document.getElementById('progressBar').style.width).toBe('100%');
       expect(document.getElementById('topBarPct').textContent).toBe('100%');
 
       // Scroll back to top
       scroller.scrollTop = 0;
       scroller.dispatchEvent(new Event('scroll'));
-      expect(onScroll).toHaveBeenLastCalledWith(100);
+      expect(onScroll).toHaveBeenLastCalledWith(100, 0);
       expect(document.getElementById('progressBar').style.width).toBe('100%');
       expect(document.getElementById('topBarPct').textContent).toBe('100%');
 
@@ -140,7 +140,7 @@ describe('Reader Progress', () => {
       const scroller = document.getElementById('scroller');
       scroller.scrollTop = 200;
       scroller.dispatchEvent(new Event('scroll'));
-      expect(onScroll).toHaveBeenLastCalledWith(100);
+      expect(onScroll).toHaveBeenLastCalledWith(100, 200);
 
       cleanup();
     });
@@ -206,10 +206,54 @@ describe('Reader Progress', () => {
       expect(scroller.scrollTop).toBe(0);
     });
 
-    it('does nothing if scrollPercent is already 100', () => {
+    it('restores scroll position even if scrollPercent is 100', () => {
+      let observerCallback;
+      const mockObserve = vi.fn();
+      const mockDisconnect = vi.fn();
+
+      global.ResizeObserver = class {
+        constructor(cb) {
+          observerCallback = cb;
+        }
+        observe = mockObserve;
+        disconnect = mockDisconnect;
+      };
+
       restoreScrollProgress({ scrollPercent: 100 });
       const scroller = document.getElementById('scroller');
-      expect(scroller.scrollTop).toBe(0);
+      expect(mockObserve).toHaveBeenCalledWith(scroller);
+
+      observerCallback();
+
+      expect(scroller.scrollTop).toBe(1500); // 100% of (2000 - 500)
+      expect(mockDisconnect).toHaveBeenCalled();
+
+      delete global.ResizeObserver;
+    });
+
+    it('restores exact scroll position when scrollTop is provided', () => {
+      let observerCallback;
+      const mockObserve = vi.fn();
+      const mockDisconnect = vi.fn();
+
+      global.ResizeObserver = class {
+        constructor(cb) {
+          observerCallback = cb;
+        }
+        observe = mockObserve;
+        disconnect = mockDisconnect;
+      };
+
+      restoreScrollProgress({ scrollTop: 420 });
+      const scroller = document.getElementById('scroller');
+      expect(mockObserve).toHaveBeenCalledWith(scroller);
+
+      observerCallback();
+
+      expect(scroller.scrollTop).toBe(420);
+      expect(mockDisconnect).toHaveBeenCalled();
+
+      delete global.ResizeObserver;
     });
   });
 });

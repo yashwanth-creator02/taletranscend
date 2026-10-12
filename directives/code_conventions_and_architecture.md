@@ -90,6 +90,11 @@ Enforce architectural conventions, module aliases, state management patterns, an
 15. **Official Brand Emblem (Golden Quill)**:
     - Official logo assets are centralized in `public/` (`logo.png`, `logo-wide.png`, `icon.svg`, `apple-touch-icon.png`, `favicon.ico`).
     - Used in navbar brand mark (`.nav-logo__img`), home footer, login header, pre-render boot curtain (`.boot-crest`), and social cards.
+16. **Reader Progress and Scroll Position Restoration Standard**:
+    - **Progress Lock**: Once reading progress reaches 100%, the reading progress percentage remains permanently locked at 100% and cannot be reduced by scrolling back upward.
+    - **Exact Position Memory**: The exact scroll position (`scrollTop` in pixels) is persisted alongside `scrollPercent` in localStorage via `saveReaderProgress`.
+    - **Always Restore on Open**: Whenever a chapter is opened, `restoreScrollProgress` unconditionally restores the user's saved position, even if the chapter is already at 100% progress.
+    - **Unload Persistence**: A synchronous `beforeunload` and `pagehide` listener persists current `scrollTop` to prevent scroll state loss on tab close or navigation.
 
 ## Tools / Scripts to Use
 
