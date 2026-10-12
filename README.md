@@ -40,6 +40,7 @@ src/
 │   ├── reader/          # Progress sync, resume, read time
 │   ├── tale/            # Tale fetching and pagination
 │   ├── ai.service.js    # Gemini integration
+│   ├── author.service.js # Author registration, status, and caching
 │   ├── bookmark.service.js
 │   ├── profile.service.js
 │   └── resonance.service.js
@@ -120,9 +121,9 @@ Rules are defined in `firestore.rules`.
 
 ## Agent Architecture & Directives
 TaleTranscend adopts the 3-Layer Architecture (`directives/`, `execution/`, `.tmp/`):
-- **Layer 1 (Directives):** Standard operating procedures in `directives/` (`developer_verification.md`, `firestore_management.md`, `code_conventions_and_architecture.md`, `deploy_application.md`).
+- **Layer 1 (Directives):** Standard operating procedures in `directives/` (`author_registration_and_correspondence.md`, `code_conventions_and_architecture.md`, `deploy_application.md`, `developer_verification.md`, `firestore_management.md`, `tale_interactions_and_comments.md`).
 - **Layer 2 (Orchestration):** Agent operating instructions in `AGENTS.md`.
-- **Layer 3 (Execution):** Deterministic execution scripts in `execution/` (`run_verify.py`).
+- **Layer 3 (Execution):** Deterministic execution scripts in `execution/` (`run_verify.py`, `verify_author_flows.py`).
 - **Skills:** Reusable agent skills located in `agents/skills/` synchronized with `brand-leo-utils`.
 
 ## License

@@ -60,17 +60,24 @@ Define the standard operating procedures, data structures, and UI behaviors for 
   - UI representation: Displays "This comment has been removed by the user" in muted, italic typography.
   - Action buttons (reply, edit) are hidden on soft-deleted comments, but the child reply tree remains intact.
 
-### 3. Sidebar & Author Sanctuary
+### 3. Sidebar, Author Sanctuary, and The Chronicler's Letter
 
 - **Layout Structure**:
   - Positioned beneath the Sticky Hanging Cover Art column (`sticky top-24`).
   - Combines author identity with connect/inquire functionality.
 - **Navigation**:
-  - Clicking the author avatar navigates to `/author/?id=${tale.authorId || tale.authorUID}`.
+  - Clicking the author avatar or "View Profile" navigates to `/profile.html?uid=${tale.authorId || tale.authorUID}`.
+- **The Chronicler's Letter Tab**:
+  - Located on the tale page under `#tab-inquire` (`data-tab="inquire"`) activating `#letter-tab-panel`.
+  - Replaces legacy newsletter subscription with reader inquiries across 4 categories: Lore & World, Character Doubts, Plot & Theories, and Connect & Praise.
+  - Missives are routed to the author's registered correspondence inbox (`v1/taletranscend/projects/v1/tales/${taleId}/inquiries`).
+  - Provides a direct mail action button (`#letter-author-email-btn`) linking directly to `mailto:${authorEmail}`.
 - **Self-Inquiry Guard**:
-  - Hide the "Inquire" / "Letter" button if the viewer is the tale author.
+  - If the viewing user is the tale author (`auth.currentUser.uid === tale.authorId`), hide `#tab-inquire` or disable inquiry submissions. Authors cannot inquire themselves.
 - **Consolidation**:
-  - Bookmark controls reside exclusively in the hero interaction bar, not in the sidebar sanctuary card.
+  - Bookmark controls reside in the hero interaction bar and the author sanctuary card.
+- **Reference**:
+  - See `directives/author_registration_and_correspondence.md` for full registration wall and correspondence procedures.
 
 ### 4. Anti-Vibecoding & Aesthetics Compliance
 

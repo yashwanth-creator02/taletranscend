@@ -69,6 +69,16 @@ v1/taletranscend/projects/v1/
 5. **Soul Resonance (Interactions)**:
    - Tracks resonance per user UID under tale interactions and reflects aggregated resonance counts on the tale document.
 
+6. **Inquiries & Missives (The Chronicler's Letter)**:
+   - Path: `v1/taletranscend/projects/v1/tales/${taleId}/inquiries/${inquiryId}`
+   - Records reader inquiries sent to authors.
+   - Contains: `taleId`, `taleTitle`, `authorId`, `authorName`, `authorEmail`, `readerId`, `readerName`, `readerContact`, `category`, `message`, `status: 'unread'`, and `createdAt`.
+
+7. **User Profile & Scribe Registry**:
+   - Path: `v1/taletranscend/projects/v1/users/${userId}`
+   - Author fields: `isAuthor: boolean`, `penName: string`, `authorEmail: string`, `authorBio: string`, `authorRegisteredAt: timestamp`.
+   - Author ownership: Read permitted publicly; write strictly restricted to `request.auth.uid == userId`.
+
 ## Outputs
 
 - Deployed composite indexes on Cloud Firestore.

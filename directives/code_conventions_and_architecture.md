@@ -32,7 +32,7 @@ Enforce architectural conventions, module aliases, state management patterns, an
    - Direct DOM manipulation; no virtual DOM or reactive framework abstraction.
 3. **TypeScript & Aliases**:
    - `@fb/*` -> `src/firebase/*`
-   - `@services/*` -> `src/services/*`
+   - `@services/*` -> `src/services/*` (including `author.service.js`, `ai.service.js`, `bookmark.service.js`, etc.)
    - `@state/*` -> `src/state/*`
    - `@ui/*` -> `src/ui/*`
    - `@pages/*` -> `src/pages/*`
@@ -45,13 +45,15 @@ Enforce architectural conventions, module aliases, state management patterns, an
    - Connecting tree guidelines: `border-l border-white/10 hover:border-indigo-500/30` with capped responsive indentation (`pl-3 md:pl-4`) to prevent mobile layout squishing.
    - Soft-delete policy: Erased comments display `"This has been deleted by the user."` (italic slate); edit, silence, and reply triggers are removed, but all child replies remain intact.
    - Edit transparency: Edits display an `Edited` badge (`edit-3` icon) next to the timestamp.
-5. **Author Role Ownership & Inquire Constraints**:
-   - Author edit actions ("Edit Chronicle") must only appear if the current authenticated user matches the tale author UID (`isAuthor`).
-   - If the author views their own tale, inquiry invitation controls (`.chronicler-invite-card`, `#tab-btn-letter`, `#content-letter`) are hidden. Authors cannot inquire themselves.
-   - Comments authored by the tale creator display an `Author` badge.
+5. **Author Role Ownership, Registration Gating & Inquire Constraints**:
+   - **Publish Gating**: Unregistered authors are gated by `#author-registration-wall-modal` in the contribution atelier before manuscript publishing.
+   - **Proactive Scribe Registry**: Users can proactively register/update scribe credentials on the profile page (`#author-registry-card`, `#profile-author-modal`).
+   - **Author Ownership**: Author edit actions ("Edit Chronicle") must only appear if the current authenticated user matches the tale author UID (`isAuthor`).
+   - **Self-Inquiry Guard**: If the author views their own tale, inquiry invitation controls (`#tab-inquire`, `#letter-tab-panel`) are hidden or guarded. Authors cannot inquire themselves.
+   - **Author Badges**: Comments authored by the tale creator display an `Author` badge.
 6. **Sidebar Sticky Layout & Cover Art**:
    - `<aside class="... lg:sticky lg:top-8 ...">` pins the cover art frame and combined Author Sanctuary / Inquire card to the viewport on desktop scroll.
-   - Tapping the author's avatar navigates directly to `/profile.html?uid=...`. Do not introduce redundant standalone "View Profile" or duplicate "Bookmark Tale" buttons inside this card.
+   - Tapping the author's avatar navigates directly to `/profile.html?uid=...`.
 7. **Commit Discipline**:
    - Commit changes atomically after each completed feature, fix, or turn ("commit every time").
    - Run verification (`npm run verify`) before committing to maintain a clean git history.
