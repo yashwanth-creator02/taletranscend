@@ -1,4 +1,56 @@
-# Agent Instructions
+# TaleTranscend Agent Guidance
+
+This document provides high-signal instructions for agent sessions to quickly understand and work within the TaleTranscend repository.
+
+## Project Overview
+
+- **Architecture**: Multi-Page Application (MPA) using Vanilla JavaScript (ES2022 modules), Tailwind CSS, and Vite. No client-side SPA router.
+- **Backend**: Firebase (Firestore, Anonymous Auth).
+- **State Management**: Uses a global mutable singleton (`appState`) and page-local state objects with direct DOM manipulation.
+- **Image Storage**: Cover images currently use external URLs.
+- **Authentication**: Firebase Anonymous Auth is used, providing a persistent anonymous UID to every visitor.
+
+## Developer Commands
+
+- **Install Dependencies**: `npm install`
+- **Start Dev Server**: `npm run dev`
+- **Build for Production**: `npm run build`
+- **Run Unit/Integration Tests**: `npm test`
+- **Run E2E Tests (Playwright)**: `npm run e2e`
+- **Lint**: `npm run lint`
+- **Lint Design Tokens**: `npm run lint:tokens` (fails on any raw colour literal outside `tokens.css`)
+- **Format**: `npm run format`
+- **Run All Checks (Format, Lint, Tokens, Types, Tests)**: `npm run verify`
+- **Type Check**: `npm run type-check`
+
+## Environment Setup
+
+1. **Configuration**: Copy `.env.example` to `.env` and fill in Firebase project credentials.
+2. **Firestore Index**: Deploy the required composite index using `firebase deploy --only firestore:indexes`. The index definition is in `firestore.indexes.json`.
+3. **Firestore Rules**: Production-grade security rules are defined in `firestore.rules`. Enforces strict schema validations, author ownership, and admin-only chronicle dissolution under the Chronicle Preservation Policy.
+4. **Firestore Database Path**: All application data resides under `v1/taletranscend/projects/v1/`.
+
+## Code Structure & Conventions
+
+- **TypeScript Aliases**:
+  - `@fb/*`: `src/firebase/*`
+  - `@services/*`: `src/services/*`
+  - `@state/*`: `src/state/*`
+  - `@ui/*`: `src/ui/*`
+  - `@pages/*`: `src/pages/*`
+  - `@config/*`: `src/config/*`
+  - `@css/*`: `src/assets/css/*`
+  - `@/*`: `src/*`
+- **Directory Ownership**:
+  - `src/pages/`: Contains separate directories for each HTML page, reflecting the MPA architecture.
+  - `src/firebase/`: Firebase SDK wrappers.
+  - `src/services/`: Business logic and data access.
+  - `src/utils/`: TypeScript utility modules.
+- **Pre-commit Hooks**: Husky is configured (`package.json`, `prepare` script) to run linting and formatting on staged files using `lint-staged`.
+
+---
+
+# Agent Instructions & 3-Layer Architecture
 
 You operate within a 3-layer architecture that separates concerns to maximize reliability. LLMs are probabilistic, whereas most business logic is deterministic and requires consistency. This system fixes that mismatch.
 
@@ -14,16 +66,14 @@ You operate within a 3-layer architecture that separates concerns to maximize re
 
 - This is you. Your job: intelligent routing.
 - Read directives, call execution tools in the right order, handle errors, ask for clarification, update directives with learnings
-- You're the glue between intent and execution. E.g you don't try scraping websites yourself—you read `directives/scrape_website.md` and come up with inputs/outputs and then run `execution/scrape_single_site.py`
+- You're the glue between intent and execution.
 
 **Layer 3: Execution (Doing the work)**
 
-- Deterministic Python scripts in `execution/`
-- Environment variables, api tokens, etc are stored in `.env`
+- Deterministic scripts in `execution/`
+- Environment variables, API keys, etc. are stored in `.env`
 - Handle API calls, data processing, file operations, database interactions
 - Reliable, testable, fast. Use scripts instead of manual work. Commented well.
-
-**Why this works:** if you do everything yourself, errors compound. 90% accuracy per step = 59% success over 5 steps. The solution is push complexity into deterministic code. That way you just focus on decision-making.
 
 ## Operating Principles
 
@@ -33,20 +83,19 @@ Before writing a script, check `execution/` per your directive. Only create new 
 **2. Self-anneal when things break**
 
 - Read error message and stack trace
-- Fix the script and test it again (unless it uses paid tokens/credits/etc—in which case you check w user first)
+- Fix the script and test it again
 - Update the directive with what you learned (API limits, timing, edge cases)
-- Example: you hit an API rate limit → you then look into API → find a batch endpoint that would fix → rewrite script to accommodate → test → update directive.
 
 **3. Update directives as you learn**
-Directives are living documents. When you discover API constraints, better approaches, common errors, or timing expectations—update the directive. But don't create or overwrite directives without asking unless explicitly told to. Directives are your instruction set and must be preserved (and improved upon over time, not extemporaneously used and then discarded).
+Directives are living documents. When you discover API constraints, better approaches, common errors, or timing expectations—update the directive. Directives are your instruction set and must be preserved.
 
 **4. Anti-Vibecoding & Aesthetics Standards**
 
 - **Zero emojis**: Never use emojis anywhere in UI, code, logs, comments, commit messages, terminal outputs, or documentation. Zero exceptions.
 - **Zero glowing or pulsing dots**: Never use neon green dots, pulsing indicator pips, or AI "agent active" dots.
 - **Zero pill-type labels or badges**: Never use pill-shaped labels (`border-radius: 9999px`) or floating pill badges unless explicitly requested by the user. Use clean structural typography, technical rectangular shields, or subtle metadata text.
-- **Eliminate AI "vibecoded" cliches**: Avoid generic SaaS tropes (gratuitous floating tags, decorative blur rings, cookie-cutter purple/neon gradients, generic marketing fluff badges). Focus on authentic, intentional, high-contrast craft.
-- **Single-source colors**: All colors must derive from `brand/leo-theme.css`. Never hardcode colors, and strictly adhere to the brand's Obsidian Copper and Radiant Light palettes (zero gold).
+- **Eliminate AI "vibecoded" cliches**: Avoid generic SaaS tropes (gratuitous floating tags, decorative blur rings, cookie-cutter purple/neon gradients, generic marketing fluff badges). Focus on authentic, intentional craft.
+- **Single-source colors**: All colors must derive from design tokens in `src/assets/css/tokens.css`. Never write raw hex or rgb literals in CSS or components.
 
 **5. Git Safety & Branch Isolation**
 
@@ -65,9 +114,8 @@ Directives are living documents. When you discover API constraints, better appro
 
 **8. Destination Setup & 3-Layer Infrastructure Population**
 
-- Whenever setup is invoked (`SETUP.md` or `execution/instantiate_project.py`), apply the full contents of `AGENTS.md` to the destination repository.
-- Ensure the project's 3-layer architecture directories (`directives/`, `execution/`, `.tmp/`) and `agents/skills/` are initialized.
-- Invoke the `populate` skill to fill up the `directives/` folder with dedicated SOPs capturing all instructions, domain knowledge, user guidelines, and architectural rules saved regarding this project from chat memory/transcripts, integrating with the `/learn` workflow.
+- Maintain the project's 3-layer architecture directories (`directives/`, `execution/`, `.tmp/`) and `agents/skills/`.
+- Directly consult Layer 1 directives in `directives/` for repeatable procedures.
 - Strictly adhere to the 3-layer infrastructure (Layer 1: Directives, Layer 2: Orchestration, Layer 3: Execution).
 
 ## Self-annealing loop
@@ -84,24 +132,15 @@ Errors are learning opportunities. When something breaks:
 
 **Deliverables vs Intermediates:**
 
-- **Deliverables**: Google Sheets, Google Slides, or other cloud-based outputs that the user can access
-- **Intermediates**: Temporary files needed during processing
+- **Deliverables**: Committed source code, deployed builds, persistent repository documentation.
+- **Intermediates**: Temporary files needed during processing.
 
 **Directory structure:**
 
-- `.tmp/` - All intermediate files (dossiers, scraped data, temp exports). Never commit, always regenerated.
-- `execution/` - Python scripts (the deterministic tools)
-- `directives/` - SOPs in Markdown (the instruction set)
-- `.env` - Environment variables and API keys
-- `credentials.json`, `token.json` - Google OAuth credentials (required files, in `.gitignore`)
-
-**Key principle:** Local files are only for processing. Deliverables live in cloud services (Google Sheets, Slides, etc.) where the user can access them. Everything in `.tmp/` can be deleted and regenerated.
-
-## Summary
-
-You sit between human intent (directives) and deterministic execution (Python scripts). Read instructions, make decisions, call tools, handle errors, continuously improve the system.
-
-Be pragmatic. Be reliable. Self-anneal.
+- `.tmp/` - All intermediate files (scraped data, temp exports). Never commit, always regenerated.
+- `execution/` - Deterministic runner scripts.
+- `directives/` - SOPs in Markdown (the instruction set).
+- `.env` - Environment variables and API keys (in `.gitignore`).
 
 <!-- brand-leo-utils:skill-sync:start -->
 

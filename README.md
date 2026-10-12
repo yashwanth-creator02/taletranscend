@@ -118,5 +118,13 @@ Rules are defined in `firestore.rules`.
 - **Firebase Anonymous Auth:** Every visitor gets a persistent, anonymous UID.
 - **Image Storage:** Cover images currently use external URLs.
 
+## Agent Architecture & Directives
+TaleTranscend adopts the 3-Layer Architecture (`directives/`, `execution/`, `.tmp/`):
+- **Layer 1 (Directives):** Standard operating procedures in `directives/` (`developer_verification.md`, `firestore_management.md`, `code_conventions_and_architecture.md`, `deploy_application.md`).
+- **Layer 2 (Orchestration):** Agent operating instructions in `AGENTS.md`.
+- **Layer 3 (Execution):** Deterministic execution scripts in `execution/` (`run_verify.py`).
+- **Skills:** Reusable agent skills located in `agents/skills/` synchronized with `brand-leo-utils`.
+
 ## License
 MIT
+
