@@ -24,6 +24,7 @@ def run_step(name: str, cmd: list[str]) -> bool:
 
 def main():
     steps = [
+        ("Prettier Format Check", ["npm", "run", "format:check"]),
         ("Design Tokens Lint", ["npm", "run", "lint:tokens"]),
         ("ESLint", ["npm", "run", "lint"]),
         ("TypeScript Type Check", ["npm", "run", "type-check"]),

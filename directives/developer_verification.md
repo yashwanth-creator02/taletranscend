@@ -31,13 +31,14 @@ python execution/run_verify.py
 
 Or run individual npm scripts:
 
-- `npm run verify`: Runs format check, lint, design token lint, type checking, and tests.
+- `npm run verify`: Runs format check (`prettier . --check`), lint, design token lint, type checking, and unit/integration tests in sequence.
+- `npm run format:check`: Validates Prettier formatting across the repository without modifying files.
+- `npm run format`: Automatically fixes Prettier formatting issues across all files.
 - `npm test`: Runs Vitest unit and integration test suite.
 - `npm run test:coverage`: Generates test coverage report.
 - `npm run e2e`: Executes Playwright end-to-end tests.
 - `npm run lint`: Runs ESLint across JavaScript and TypeScript files.
 - `npm run lint:tokens`: Fails on any raw colour literals outside design token definitions (`tokens.css`).
-- `npm run format`: Runs Prettier check/format.
 - `npm run type-check`: Validates TypeScript type safety without emitting build output.
 
 ## Outputs
