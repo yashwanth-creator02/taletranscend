@@ -50,10 +50,6 @@ import {
   addToBookmarks,
   removeFromBookmarks,
   isBookmarked,
-  toggleResonance,
-  getResonanceStatus,
-  toggleFollowAuthor,
-  isFollowingAuthor,
 } from './index.js';
 
 import {
@@ -590,81 +586,6 @@ function _bindTTSEvents() {
 }
 
 /* ─────────────────────────────────────────────
-   Engagement
-   ───────────────────────────────────────────── */
-
-function initEngagement() {
-  document.getElementById('clap-btn')?.addEventListener('click', async () => {
-    if (!readerState.userId) {
-      showToast('Please sign in to applaud this chronicle.', 'info');
-      return;
-    }
-    try {
-      const result = await toggleResonance(readerState.taleId);
-      if (result.status === 'rate-limited') return;
-      readerState.hasClapped = Boolean(result.active);
-      readerState.claps =
-        result.count ??
-        (readerState.hasClapped ? readerState.claps + 1 : Math.max(0, readerState.claps - 1));
-      _renderEngagement();
-      showToast(result.active ? 'Soul resonance aligned.' : 'Resonance released.', 'success');
-    } catch (err) {
-      log.error('Resonance toggle error:', err);
-      showToast('Could not update resonance.', 'error');
-    }
-  });
-
-  document.getElementById('eng-share')?.addEventListener('click', () => openPanel('share'));
-  document.getElementById('eng-comment')?.addEventListener('click', () => openPanel('comments'));
-
-  document.querySelector('.follow-btn')?.addEventListener('click', async () => {
-    if (!readerState.userId) {
-      showToast('Please sign in to follow this author.', 'info');
-      return;
-    }
-    if (!readerState.authorId || readerState.userId === readerState.authorId) return;
-
-    try {
-      const following = await toggleFollowAuthor({
-        userId: readerState.userId,
-        targetAuthorId: readerState.authorId,
-      });
-      readerState.isFollowingAuthor = following;
-      _renderFollowButton();
-      showToast(following ? 'Following scribe.' : 'Unfollowed scribe.', 'success');
-    } catch (err) {
-      log.error('Follow author error:', err);
-      showToast('Could not update follow status.', 'error');
-    }
-  });
-}
-
-function _renderFollowButton() {
-  const btn = document.querySelector('.follow-btn');
-  if (!btn) return;
-  if (!readerState.authorId || readerState.userId === readerState.authorId) {
-    btn.style.display = 'none';
-    return;
-  }
-  btn.style.display = '';
-  btn.textContent = readerState.isFollowingAuthor ? 'Following' : 'Follow';
-  btn.classList.toggle('following', readerState.isFollowingAuthor);
-}
-
-function _renderEngagement() {
-  const clapCount = document.getElementById('clap-count');
-  const clapLabel = document.getElementById('clap-label');
-  const clapIconWrap = document.getElementById('clap-icon-wrap');
-
-  if (clapCount) clapCount.textContent = readerState.claps;
-  if (clapLabel) clapLabel.textContent = readerState.hasClapped ? 'Thank you' : 'Tap to applaud';
-  if (clapIconWrap) {
-    clapIconWrap.classList.toggle('clapped', readerState.hasClapped);
-    if (readerState.hasClapped) clapIconWrap.style.boxShadow = '0 0 30px -4px rgba(245,158,11,0.6)';
-  }
-}
-
-/* ─────────────────────────────────────────────
    Selection Toolbar
    ───────────────────────────────────────────── */
 
@@ -746,9 +667,7 @@ async function _handleBookmark() {
   readerState.bookmarked = !readerState.bookmarked;
 
   document
-    .querySelectorAll(
-      '#sidebar-bookmark, #eng-bookmark, #eng-bookmark-mobile, #sidebarBookmark, #engBookmark'
-    )
+    .querySelectorAll('#sidebar-bookmark, #eng-bookmark-mobile, #sidebarBookmark')
     .forEach((b) => (b.dataset.active = String(readerState.bookmarked)));
 
   try {
@@ -853,17 +772,6 @@ initAuth(async (user) => {
   // Load content
   await loadReaderMeta(taleId);
 
-  // Check resonance status
-  readerState.hasClapped = await getResonanceStatus(taleId);
-
-  // Check follow status
-  if (user.uid && readerState.authorId && user.uid !== readerState.authorId) {
-    readerState.isFollowingAuthor = await isFollowingAuthor({
-      userId: user.uid,
-      targetAuthorId: readerState.authorId,
-    });
-  }
-
   _loadHighlights();
   _loadComments();
 
@@ -894,17 +802,13 @@ initAuth(async (user) => {
   });
 
   initSidebar();
-  initEngagement();
   initSelectionToolbar();
-  _renderEngagement();
-  _renderFollowButton();
 
   // Open TOC by default on desktop
   if (window.innerWidth >= 1024) openPanel('toc');
 
   // Global action bindings
   document.getElementById('sidebar-bookmark')?.addEventListener('click', _handleBookmark);
-  document.getElementById('eng-bookmark')?.addEventListener('click', _handleBookmark);
   document.getElementById('eng-bookmark-mobile')?.addEventListener('click', _handleBookmark);
   document.getElementById('sidebar-focus-mobile')?.addEventListener('click', toggleFocusMode);
   document.getElementById('close-panel')?.addEventListener('click', closePanel);
