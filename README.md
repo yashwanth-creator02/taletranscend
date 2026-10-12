@@ -116,14 +116,26 @@ Rules are defined in `firestore.rules`.
 ## Architecture Notes
 - **Multi-Page Application (MPA):** Each page is a separate HTML file bundled by Vite. No client-side SPA router.
 - **State Management:** Global mutable singleton (`appState`) + page-local state objects. No reactive framework (direct DOM manipulation).
+- **Navigation & Bfcache Guarantee:** Page transition system (`src/utils/navigation.ts`) binds a global `pageshow` listener to guarantee pointer events and opacity are unconditionally restored when navigating backward via browser address bar controls.
 - **Firebase Anonymous Auth:** Every visitor gets a persistent, anonymous UID.
-- **Image Storage:** Cover images currently use external URLs.
+- **Design Tokens:** Strict single-source palette in `src/assets/css/tokens.css` enforced by `npm run lint:tokens`. Zero raw colour literals.
+- **Image Storage:** Cover images use external URLs with subtle 8px backdrop blurring.
 
 ## Agent Architecture & Directives
 TaleTranscend adopts the 3-Layer Architecture (`directives/`, `execution/`, `.tmp/`):
-- **Layer 1 (Directives):** Standard operating procedures in `directives/` (`author_registration_and_correspondence.md`, `code_conventions_and_architecture.md`, `deploy_application.md`, `developer_verification.md`, `firestore_management.md`, `tale_interactions_and_comments.md`).
+- **Layer 1 (Directives):** Standard operating procedures in `directives/`:
+  - `author_registration_and_correspondence.md`: Scribe registry, publication gating wall, and reader missives.
+  - `code_conventions_and_architecture.md`: MPA conventions, bfcache restoration, tooltip standards, and rate limiting.
+  - `deploy_application.md`: Production build and Firebase/Vercel deployment workflows.
+  - `developer_verification.md`: Mandatory formatting, token linting, TypeScript, and testing pipeline.
+  - `firestore_management.md`: Firestore indexes, database paths, and collection schemas.
+  - `profile_and_oracle_ai.md`: Chronicler profile, client-side Gemini API key storage, Oracle AI, and non-clipping tooltips.
+  - `tale_interactions_and_comments.md`: Consolidated hero action deck, red soul resonance, fragment progress/downloads, and comments.
 - **Layer 2 (Orchestration):** Agent operating instructions in `AGENTS.md`.
-- **Layer 3 (Execution):** Deterministic execution scripts in `execution/` (`run_verify.py`, `verify_author_flows.py`).
+- **Layer 3 (Execution):** Deterministic execution scripts in `execution/`:
+  - `run_verify.py`: Full test suite, format check, token check, linter, and type-check runner.
+  - `verify_author_flows.py`: Author registration and inquiry verification suite.
+  - `verify_interactions_and_profile.py`: Hero interactions, soul resonance, bfcache navigation, and profile suites.
 - **Skills:** Reusable agent skills located in `agents/skills/` synchronized with `brand-leo-utils`.
 
 ## License

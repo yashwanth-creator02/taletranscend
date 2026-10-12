@@ -57,12 +57,42 @@ Enforce architectural conventions, module aliases, state management patterns, an
 7. **Commit Discipline**:
    - Commit changes atomically after each completed feature, fix, or turn ("commit every time").
    - Run verification (`npm run verify`) before committing to maintain a clean git history.
-8. **Anti-Vibecoding & Aesthetics Standards**:
-   - **Zero Emojis**: Do not use emojis anywhere in UI, code, logs, comments, commit messages, or documentation. Zero exceptions.
-   - **Zero Glowing or Pulsing Dots**: Do not use neon green dots, pulsing indicator dots, or generic "live/online" light pips.
-   - **Zero Pill-Type Labels or Badges**: Do not add pill-shaped labels (`border-radius: 9999px`), floating pill tags above headings, or rounded status capsules unless explicitly requested. Use clean structural typography, technical rectangular shields, or subtle metadata text.
-   - **Design Token Discipline**: All color values must reference design tokens in `src/assets/css/tokens.css`. Never write raw hex or rgb literals.
-   - **Authentic Craft**: Eliminate generic SaaS tropes, gratuitous blur rings, and cookie-cutter purple gradients.
+8. **Browser Back Button & Bfcache Interactivity Guarantee**:
+   - In Multi-Page Application (MPA) navigation, page transition animations (`navigateTo`) set `document.body.style.pointerEvents = 'none'` and `opacity = '0'`.
+   - When users navigate backward using browser address bar controls, browsers restore frozen DOM state from bfcache (Back/Forward Cache).
+   - A global `window.addEventListener('pageshow', (e) => { ... })` handler must be registered across navigation utilities (`src/utils/navigation.ts`).
+   - If `e.persisted` is true or upon any reveal initialization, `document.body.style.pointerEvents = ''` and `opacity = ''` must be unconditionally restored to prevent frozen, unresponsive pages.
+9. **Scroll Container & Modal Tooltip Positioning**:
+   - Interactive hover tooltips situated inside scrollable containers (`overflow-y-auto` modal bodies) must position downward (`top: calc(100% + 6px); bottom: auto; left: 0; transform: none; text-align: left;`).
+   - Upward-positioned tooltips in top modal fields clip against container boundaries and disappear beneath tab bars (`Basic`, `Identity`, `Social`, `Goals`).
+   - Elevate `.info-tooltip-wrap:hover, .info-tooltip-wrap:focus-within` to `z-index: 50` so disclosure overlays sit cleanly above sibling inputs.
+10. **Button Rate-Limit Cooldown Protection**:
+
+- Rate-limit countdown timers applied via `applyButtonCooldown` must only update explicit text label spans.
+- Never allow countdown strings to overwrite numeric counter badges (`span[id*="count"]`) or replace icon nodes.
+
+11. **Anti-Vibecoding & Aesthetics Standards**:
+
+- **Zero Emojis**: Do not use emojis anywhere in UI, code, logs, comments, commit messages, or documentation. Zero exceptions.
+- **Zero Glowing or Pulsing Dots**: Do not use neon green dots, pulsing indicator dots, or generic "live/online" light pips.
+- **Zero Pill-Type Labels or Badges**: Do not add pill-shaped labels (`border-radius: 9999px`), floating pill tags above headings, or rounded status capsules unless explicitly requested. Use clean structural typography, technical rectangular shields, or subtle metadata text.
+- **Design Token Discipline**: All color values must reference design tokens in `src/assets/css/tokens.css`. Never write raw hex or rgb literals.
+- **Authentic Craft**: Eliminate generic SaaS tropes, gratuitous blur rings, and cookie-cutter purple gradients.
+
+## Tools / Scripts to Use
+
+- Run full verification checks:
+  ```powershell
+  python execution/run_verify.py
+  ```
+- Run interactions and profile verification:
+  ```powershell
+  python execution/verify_interactions_and_profile.py
+  ```
+- Run design token linter:
+  ```powershell
+  npm run lint:tokens
+  ```
 
 ## Outputs
 
