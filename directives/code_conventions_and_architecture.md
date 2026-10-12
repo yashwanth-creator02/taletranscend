@@ -72,12 +72,24 @@ Enforce architectural conventions, module aliases, state management patterns, an
 - Never allow countdown strings to overwrite numeric counter badges (`span[id*="count"]`) or replace icon nodes.
 
 11. **Anti-Vibecoding & Aesthetics Standards**:
-
-- **Zero Emojis**: Do not use emojis anywhere in UI, code, logs, comments, commit messages, or documentation. Zero exceptions.
-- **Zero Glowing or Pulsing Dots**: Do not use neon green dots, pulsing indicator dots, or generic "live/online" light pips.
-- **Zero Pill-Type Labels or Badges**: Do not add pill-shaped labels (`border-radius: 9999px`), floating pill tags above headings, or rounded status capsules unless explicitly requested. Use clean structural typography, technical rectangular shields, or subtle metadata text.
-- **Design Token Discipline**: All color values must reference design tokens in `src/assets/css/tokens.css`. Never write raw hex or rgb literals.
-- **Authentic Craft**: Eliminate generic SaaS tropes, gratuitous blur rings, and cookie-cutter purple gradients.
+    - **Zero Emojis**: Do not use emojis anywhere in UI, code, logs, comments, commit messages, or documentation. Zero exceptions.
+    - **Zero Glowing or Pulsing Dots**: Do not use neon green dots, pulsing indicator dots, or generic "live/online" light pips.
+    - **Zero Pill-Type Labels or Badges**: Do not add pill-shaped labels (`border-radius: 9999px`), floating pill tags above headings, or rounded status capsules unless explicitly requested. Use clean structural typography, technical rectangular shields, or subtle metadata text.
+    - **Design Token Discipline**: All color values must reference design tokens in `src/assets/css/tokens.css`. Never write raw hex or rgb literals.
+    - **Authentic Craft**: Eliminate generic SaaS tropes, gratuitous blur rings, and cookie-cutter purple gradients.
+12. **Single-Page Footer Isolation Policy**:
+    - Only `src/views/index.html` (the home page) contains a site footer (`.home-footer` / `.site-footer`).
+    - All inner pages (`library.html`, `shelf.html`, `reader.html`, `tale.html`, `contribution.html`, `profile.html`, `login.html`, `toc.html`, `404.html`) must NEVER contain a footer.
+13. **Hierarchical Routing & `resolveHref` Safety**:
+    - Deep hierarchical URLs (`/tales/:id`, `/tales/:id/read/:chapterIndex`) are supported via `taleUrl()` and `readerUrl()` in `src/utils/navigation.ts`.
+    - All internal links must be normalized through `resolveHref()`.
+    - `resolveHref()` must never append `.html` to static assets (`.png`, `.svg`, `.ico`, `.webp`, `.jpg`).
+14. **Accessible Toast Notifications & Keyboard Navigation**:
+    - Toast notifications (`src/ui/components/toast.js`) use `aria-live="polite"` with pause-on-hover/focus to comply with WCAG 2.2.
+    - Interactive elements must be keyboard-focusable; Command Palette opens via `Ctrl+K` / `⌘K`. `Ctrl+A` in text inputs selects all text without interfering with global handlers.
+15. **Official Brand Emblem (Golden Quill)**:
+    - Official logo assets are centralized in `public/` (`logo.png`, `logo-wide.png`, `icon.svg`, `apple-touch-icon.png`, `favicon.ico`).
+    - Used in navbar brand mark (`.nav-logo__img`), home footer, login header, pre-render boot curtain (`.boot-crest`), and social cards.
 
 ## Tools / Scripts to Use
 

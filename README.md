@@ -48,7 +48,7 @@ src/
 │   └── schemas/         # Data shape definitions (tale, user, progress, etc.)
 ├── ui/components/       # Shared components (cards, nav, toast, feedback)
 ├── utils/               # TypeScript utilities (dom, format, sanitize, etc.)
-└── views/               # HTML entry points (9 pages)
+└── views/               # HTML entry points (10 pages)
 ```
 
 ## Development
@@ -119,16 +119,21 @@ Rules are defined in `firestore.rules`.
 - **Navigation & Bfcache Guarantee:** Page transition system (`src/utils/navigation.ts`) binds a global `pageshow` listener to guarantee pointer events and opacity are unconditionally restored when navigating backward via browser address bar controls.
 - **Firebase Anonymous Auth:** Every visitor gets a persistent, anonymous UID.
 - **Design Tokens:** Strict single-source palette in `src/assets/css/tokens.css` enforced by `npm run lint:tokens`. Zero raw colour literals.
+- **Single-Page Footer Isolation:** Only the home page (`src/views/index.html`) contains a site footer; inner views rely on the global navigation header (`app-nav`) and mobile dock.
+- **Brand Emblem Suite:** The mythical golden quill pen is the official brand emblem across header, home footer, auth, boot curtains, and social graph cards (`public/logo.png`, `logo-wide.png`, `icon.svg`, `apple-touch-icon.png`, `favicon.ico`).
+- **Hierarchical Routing & Discoverability:** Canonical clean URLs (`/tales/:id`, `/tales/:id/read/:chapter`, `/toc`) supported across Vite and Firebase with dynamic XML and HTML sitemaps.
 - **Image Storage:** Cover images use external URLs with subtle 8px backdrop blurring.
 
 ## Agent Architecture & Directives
 TaleTranscend adopts the 3-Layer Architecture (`directives/`, `execution/`, `.tmp/`):
 - **Layer 1 (Directives):** Standard operating procedures in `directives/`:
+  - `accessibility_and_ui_standards.md`: Single-page footer isolation, accessible toasting, keyboard navigation (`Ctrl+K`, `Ctrl+A`), and brand quill assets.
   - `author_registration_and_correspondence.md`: Scribe registry, publication gating wall, and reader missives.
-  - `code_conventions_and_architecture.md`: MPA conventions, bfcache restoration, tooltip standards, and rate limiting.
+  - `code_conventions_and_architecture.md`: MPA conventions, bfcache restoration, tooltip standards, rate limiting, and core guidelines.
   - `deploy_application.md`: Production build and Firebase/Vercel deployment workflows.
   - `developer_verification.md`: Mandatory formatting, token linting, TypeScript, and testing pipeline.
   - `firestore_management.md`: Firestore indexes, database paths, and collection schemas.
+  - `navigation_routing_and_sitemaps.md`: Hierarchical clean URLs, `resolveHref` asset safety, XML sitemap, and Table of Contents (Living Codex).
   - `profile_and_oracle_ai.md`: Chronicler profile, client-side Gemini API key storage, Oracle AI, and non-clipping tooltips.
   - `tale_interactions_and_comments.md`: Consolidated hero action deck, red soul resonance, fragment progress/downloads, and comments.
 - **Layer 2 (Orchestration):** Agent operating instructions in `AGENTS.md`.
@@ -136,6 +141,7 @@ TaleTranscend adopts the 3-Layer Architecture (`directives/`, `execution/`, `.tm
   - `run_verify.py`: Full test suite, format check, token check, linter, and type-check runner.
   - `verify_author_flows.py`: Author registration and inquiry verification suite.
   - `verify_interactions_and_profile.py`: Hero interactions, soul resonance, bfcache navigation, and profile suites.
+  - `verify_navigation_and_ui.py`: Navigation, hierarchical routing, footer isolation, brand emblem assets, and UI test suite.
 - **Skills:** Reusable agent skills located in `agents/skills/` synchronized with `brand-leo-utils`.
 
 ## License
