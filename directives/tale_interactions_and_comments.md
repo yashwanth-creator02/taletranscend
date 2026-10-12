@@ -98,8 +98,13 @@ Define the standard operating procedures, data structures, and UI behaviors for 
 - **Soft Deletion**:
   - Comments are never silently erased or hard-deleted if replies may exist.
   - Firestore payload: `text: ''`, `isDeleted: true`, `deletedAt: serverTimestamp()`.
-  - UI representation: Displays "This comment has been removed by the user" in muted, italic typography.
-  - Action buttons (reply, edit) are hidden on soft-deleted comments, but the child reply tree remains intact.
+  - UI representation: Displays "This comment has been deleted by the user." in muted, italic typography.
+  - Action buttons (reply, edit, delete) are hidden on soft-deleted comments, but the child reply tree remains intact.
+- **Reader Page Discussion Features**:
+  - Timestamps: Always render both formatted date and time (`MMM D, YYYY at h:mm A`) using `formatCommentDateTime(at)`.
+  - Likes: Optimistic like toggle backed by subcollection doc `comments/{commentId}/likes/{uid}` and `likeCount` atomic increment/decrement on the comment or reply.
+  - Replies: Nested reply form toggled via Reply trigger, saving to child replies subcollection or tree.
+  - Badges: Rectangular technical `Author` and `Edited` badges (`edited-badge`) adhering to anti-vibecoding guidelines (no pill styling).
 
 ### 4. Sidebar, Author Sanctuary, and The Chronicler's Letter
 
