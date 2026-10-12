@@ -303,10 +303,10 @@ function toggleFocusMode() {
 
   if (readerState.focusMode) closePanel();
 
-  const focusBtn = document.getElementById('sidebar-focus');
-  if (focusBtn) focusBtn.dataset.active = String(readerState.focusMode);
-  const mobileFocusBtn = document.getElementById('sidebar-focus-mobile');
-  if (mobileFocusBtn) mobileFocusBtn.dataset.active = String(readerState.focusMode);
+  const focusBtns = document.querySelectorAll(
+    '#sidebar-focus, #sidebar-focus-mobile, #top-bar-focus'
+  );
+  focusBtns.forEach((b) => (b.dataset.active = String(readerState.focusMode)));
 }
 
 function _isPanelVisible() {
@@ -1120,7 +1120,9 @@ async function _handleBookmark() {
   readerState.bookmarked = !readerState.bookmarked;
 
   document
-    .querySelectorAll('#sidebar-bookmark, #eng-bookmark-mobile, #sidebarBookmark')
+    .querySelectorAll(
+      '#sidebar-bookmark, #eng-bookmark-mobile, #top-bar-bookmark, #sidebarBookmark'
+    )
     .forEach((b) => (b.dataset.active = String(readerState.bookmarked)));
 
   try {
@@ -1221,6 +1223,11 @@ initAuth(async (user) => {
 
   // Check bookmark status
   readerState.bookmarked = await isBookmarked({ userId: user.uid, taleId });
+  document
+    .querySelectorAll(
+      '#sidebar-bookmark, #eng-bookmark-mobile, #top-bar-bookmark, #sidebarBookmark'
+    )
+    .forEach((b) => (b.dataset.active = String(readerState.bookmarked)));
 
   // Load content
   await loadReaderMeta(taleId);
@@ -1285,7 +1292,30 @@ initAuth(async (user) => {
   // Global action bindings
   document.getElementById('sidebar-bookmark')?.addEventListener('click', _handleBookmark);
   document.getElementById('eng-bookmark-mobile')?.addEventListener('click', _handleBookmark);
+  document.getElementById('top-bar-bookmark')?.addEventListener('click', _handleBookmark);
   document.getElementById('sidebar-focus-mobile')?.addEventListener('click', toggleFocusMode);
+  document.getElementById('top-bar-focus')?.addEventListener('click', toggleFocusMode);
+
+  document.getElementById('top-bar-share')?.addEventListener('click', async (e) => {
+    e.preventDefault();
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: readerState.taleTitle || document.title || 'TaleTranscend',
+          url: window.location.href,
+        });
+        return;
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+      }
+    }
+    if (readerState.openTool === 'share' && _isPanelVisible()) {
+      closePanel();
+    } else {
+      openPanel('share');
+    }
+  });
+
   document.getElementById('close-panel')?.addEventListener('click', closePanel);
   document.getElementById('tool-panel-backdrop')?.addEventListener('click', closePanel);
   document.getElementById('back-to-top')?.addEventListener('click', () => {

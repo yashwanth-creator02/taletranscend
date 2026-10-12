@@ -175,4 +175,22 @@ describe('Reader Page Controller', () => {
       expect(index.applyCloudPrefs).toHaveBeenCalledWith(expect.objectContaining(mockPrefs));
     });
   });
+
+  it('toggles focus mode from top bar', async () => {
+    document.body.innerHTML = `
+      <div id="top-bar"></div>
+      <div id="sidebar"></div>
+      <div id="mobile-toolbar"></div>
+      <div id="focus-exit" class="hidden"></div>
+      <button id="top-bar-focus"></button>
+    `;
+
+    await import('../reader.js');
+    document.dispatchEvent(new Event('DOMContentLoaded'));
+
+    const focusBtn = document.getElementById('top-bar-focus');
+    focusBtn.click();
+    expect(index.readerState.focusMode).toBe(true);
+    expect(focusBtn.dataset.active).toBe('true');
+  });
 });

@@ -173,12 +173,43 @@
           </span>
         </div>
 
-        <!-- Right Side Stats -->
+        <!-- Right Side Stats & Actions -->
         <div class="top-bar-stats">
           <span id="top-bar-read-time" class="hidden top-bar-read-time items-center gap-1.5">
             <i data-lucide="clock" style="width: 14px; height: 14px"></i>
             <span id="top-bar-min">0</span> min
           </span>
+          <div class="top-bar-mobile-actions" id="top-bar-mobile-actions">
+            <button
+              type="button"
+              id="top-bar-bookmark"
+              class="top-bar-action-btn"
+              data-active="false"
+              aria-label="Bookmark tale"
+              title="Save"
+            >
+              <i data-lucide="bookmark" style="width: 15px; height: 15px"></i>
+            </button>
+            <button
+              type="button"
+              id="top-bar-share"
+              class="top-bar-action-btn"
+              aria-label="Share tale"
+              title="Share"
+            >
+              <i data-lucide="share-2" style="width: 15px; height: 15px"></i>
+            </button>
+            <button
+              type="button"
+              id="top-bar-focus"
+              class="top-bar-action-btn"
+              data-active="false"
+              aria-label="Focus mode"
+              title="Focus"
+            >
+              <i data-lucide="maximize-2" style="width: 15px; height: 15px"></i>
+            </button>
+          </div>
           <span class="tabular-nums font-medium" id="top-bar-pct">0%</span>
         </div>
       </header>
@@ -393,29 +424,27 @@
       </button>
 
       <button
-        id="eng-bookmark-mobile"
         type="button"
         class="mobile-tool-btn group"
-        data-active="false"
-        aria-label="Bookmark tale"
+        data-tool="tts"
+        aria-label="Listen to chapter"
       >
         <span class="mobile-tool-icon-wrap">
-          <i data-lucide="bookmark" class="mobile-tool-icon"></i>
+          <i data-lucide="volume-2" class="mobile-tool-icon"></i>
         </span>
-        <span class="mobile-tool-label">Save</span>
+        <span class="mobile-tool-label">Listen</span>
       </button>
 
       <button
-        id="sidebar-focus-mobile"
         type="button"
         class="mobile-tool-btn group"
-        data-active="false"
-        aria-label="Focus mode"
+        data-tool="info"
+        aria-label="About chapter and author"
       >
         <span class="mobile-tool-icon-wrap">
-          <i data-lucide="maximize-2" class="mobile-tool-icon"></i>
+          <i data-lucide="info" class="mobile-tool-icon"></i>
         </span>
-        <span class="mobile-tool-label">Focus</span>
+        <span class="mobile-tool-label">Info</span>
       </button>
 
       <button id="reader-settings-btn" type="button" class="hidden" aria-hidden="true"></button>
