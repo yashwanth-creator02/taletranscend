@@ -153,7 +153,6 @@ const PANEL_TITLES = {
   type: 'Typography',
   theme: 'Theme',
   highlights: 'Your Highlights',
-  comments: 'Discussion',
   share: 'Share This Piece',
   tts: 'Listen',
   info: 'About this piece',
@@ -164,7 +163,6 @@ const SIDEBAR_TOOLS = [
   { id: 'type', icon: 'type', label: 'Typography' },
   { id: 'theme', icon: 'palette', label: 'Themes' },
   { id: 'highlights', icon: 'highlighter', label: 'Highlights' },
-  { id: 'comments', icon: 'message-square', label: 'Discussion' },
   { id: 'share', icon: 'share-2', label: 'Share' },
   { id: 'tts', icon: 'volume-2', label: 'Listen' },
   { id: 'info', icon: 'info', label: 'About' },
@@ -222,10 +220,6 @@ function openPanel(toolId) {
 
   title.textContent = PANEL_TITLES[toolId] || 'Panel';
 
-  if (toolId === 'comments' && readerState.comments.length === 0) {
-    _loadComments();
-  }
-
   _refreshPanelContent();
 
   panel.classList.add('visible');
@@ -266,9 +260,6 @@ function _refreshPanelContent() {
   } else if (toolId === 'highlights') {
     content.innerHTML = renderHighlightsPanel(readerState.highlights);
     _bindHighlightEvents();
-  } else if (toolId === 'comments') {
-    content.innerHTML = renderCommentsPanel(readerState.comments, readerState.newComment);
-    _bindCommentEvents();
   } else if (toolId === 'share') {
     content.innerHTML = renderSharePanel();
     _bindShareEvents();
@@ -480,10 +471,26 @@ async function _loadComments() {
         likes: data.likeCount || 0,
       };
     });
-    if (readerState.openTool === 'comments') _refreshPanelContent();
+    _renderDiscussion();
   } catch (err) {
     log.warn('Could not load comments from Firestore:', err);
   }
+}
+
+function _renderDiscussion() {
+  const container = document.getElementById('reader-discussion-content');
+  if (!container) return;
+
+  container.innerHTML = renderCommentsPanel(readerState.comments, readerState.newComment);
+  _bindCommentEvents();
+
+  const countEl = document.getElementById('discussion-count');
+  if (countEl) {
+    const len = readerState.comments?.length || 0;
+    countEl.textContent = len === 1 ? '1 comment' : `${len} comments`;
+  }
+
+  initIcons();
 }
 
 function _bindCommentEvents() {
@@ -538,7 +545,7 @@ function _bindCommentEvents() {
       log.error('Failed to post comment to Firestore:', err);
       showToast('Could not post comment.', 'error');
     } finally {
-      _refreshPanelContent();
+      _renderDiscussion();
     }
   });
 }
@@ -780,6 +787,7 @@ initAuth(async (user) => {
   if (!navigation) return;
 
   applyNavigation(navigation);
+  _renderDiscussion();
   const localProgress = getChapterProgress({ userId: user.uid, taleId, chapterIndex });
   restoreScrollProgress({ scrollPercent: localProgress?.scrollPercent ?? 0 });
 

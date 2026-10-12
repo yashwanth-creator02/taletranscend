@@ -256,9 +256,39 @@ export function renderTTSPanel(isPlaying, rate) {
 }
 
 export function renderInfoPanel(state) {
+  const authorName = state.authorName || '';
+  const authorHandle = state.authorHandle || '';
+  const authorBio = state.authorBio || '';
+  const safeAuthor = escapeHtml(authorName || 'Unknown Scribe');
+  const safeHandle = escapeHtml(authorHandle);
+  const safeBio = escapeHtml(authorBio);
+  const initials = authorName
+    ? authorName
+        .split(' ')
+        .filter(Boolean)
+        .map((n) => n[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase()
+    : 'A';
+
+  const authorSection = `
+      <div class="rounded-xl border p-3.5 space-y-2.5" style="background:var(--reader-card-bg);border-color:var(--reader-border)">
+        <div class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--reader-muted)">Author / Chronicler</div>
+        <div class="flex items-center gap-3">
+          <div style="display:flex;align-items:center;justify-content:center;border-radius:50%;color:var(--reader-accent-contrast);width:36px;height:36px;font-size:12px;font-weight:600;background:var(--reader-accent);box-shadow:0 0 16px -4px rgb(var(--reader-accent-rgb) / var(--a-50, 0.5));font-family:var(--font-serif);letter-spacing:0.06em;flex-shrink:0">${initials}</div>
+          <div class="min-w-0 flex-1">
+            <div class="text-sm font-semibold truncate" style="color:var(--reader-fg)">${safeAuthor}</div>
+            ${safeHandle ? `<div class="text-xs truncate" style="color:var(--reader-muted)">${safeHandle}</div>` : ''}
+          </div>
+        </div>
+        ${safeBio ? `<p class="text-xs leading-relaxed" style="color:var(--reader-secondary)">${safeBio}</p>` : ''}
+      </div>`;
+
   return `
     <div class="space-y-4 text-sm">
-      <div class="stat-row"><span class="stat-label">Reading time</span><span class="reader-stat-value">${state.estimatedReadMins} min</span></div>
+      ${authorSection}
+      <div class="stat-row"><span class="stat-label">Reading time</span><span class="reader-stat-value">${state.estimatedReadMins || 0} min</span></div>
       <div class="stat-row"><span class="stat-label">Word count</span><span class="reader-stat-value">${state.wordCount?.toLocaleString() || 0}</span></div>
       <div class="stat-row"><span class="stat-label">Progress</span><span class="reader-stat-value">${Math.round(state.progress || 0)} %</span></div>
       <div class="stat-row"><span class="stat-label">Era</span><span class="reader-stat-value">${state.era || 'Unknown'}</span></div>

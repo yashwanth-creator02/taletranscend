@@ -284,6 +284,37 @@
 
             <!-- Navigation between chapters -->
             <div class="chapter-nav" id="chapter-nav"></div>
+
+            <!-- Chapter Discussion Section -->
+            <section
+              class="reader-discussion glass"
+              id="reader-discussion"
+              aria-labelledby="discussion-heading"
+            >
+              <div class="reader-discussion-header">
+                <div class="flex items-center gap-2">
+                  <i
+                    data-lucide="message-square"
+                    style="width: 18px; height: 18px; color: var(--reader-accent)"
+                  ></i>
+                  <h2
+                    id="discussion-heading"
+                    class="rune-text text-base font-semibold"
+                    style="color: var(--reader-fg)"
+                  >
+                    Discussion
+                  </h2>
+                </div>
+                <span
+                  class="text-xs"
+                  style="color: var(--reader-muted)"
+                  id="discussion-count"
+                ></span>
+              </div>
+              <div id="reader-discussion-content">
+                <!-- Rendered by reader.js -->
+              </div>
+            </section>
           </div>
         </main>
       </div>

@@ -93,5 +93,20 @@ describe('ReaderTemplates', () => {
       expect(html).toContain('25 %');
       expect(html).toContain('Modern');
     });
+
+    it('renders author info when provided', () => {
+      const state = {
+        estimatedReadMins: 5,
+        wordCount: 1200,
+        authorName: 'Eldritch Scribe',
+        authorHandle: '@eldritch',
+        authorBio: 'Keeper of forgotten mythologies.',
+      };
+      const html = renderInfoPanel(state);
+      expect(html).toContain('Eldritch Scribe');
+      expect(html).toContain('@eldritch');
+      expect(html).toContain('Keeper of forgotten mythologies.');
+      expect(html).toContain('ES');
+    });
   });
 });

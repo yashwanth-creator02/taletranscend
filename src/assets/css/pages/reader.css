@@ -811,6 +811,36 @@ body {
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
+   Chapter Discussion
+   ────────────────────────────────────────────────────────────────────────── */
+
+.reader-discussion {
+  margin: 3.5rem auto 0;
+  max-width: var(--reader-measure);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--reader-border);
+  background: var(--reader-card-bg);
+  color: var(--reader-fg);
+}
+
+.reader-discussion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--reader-border);
+}
+
+@media (max-width: 640px) {
+  .reader-discussion {
+    margin-top: 2.5rem;
+    padding: 1rem;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
    Selection & Toolbar
    ────────────────────────────────────────────────────────────────────────── */
 
