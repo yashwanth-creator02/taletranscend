@@ -1,52 +1,107 @@
-# TaleTranscend Agent Guidance
+# Agent Instructions
 
-This document provides high-signal instructions for OpenCode sessions to quickly understand and work within the TaleTranscend repository.
+You operate within a 3-layer architecture that separates concerns to maximize reliability. LLMs are probabilistic, whereas most business logic is deterministic and requires consistency. This system fixes that mismatch.
 
-## Project Overview
+## The 3-Layer Architecture
 
-- **Architecture**: Multi-Page Application (MPA) using Vanilla JavaScript (ES2022 modules), Tailwind CSS, and Vite. No client-side SPA router.
-- **Backend**: Firebase (Firestore, Anonymous Auth).
-- **State Management**: Uses a global mutable singleton (`appState`) and page-local state objects with direct DOM manipulation.
-- **Image Storage**: Cover images currently use external URLs.
-- **Authentication**: Firebase Anonymous Auth is used, providing a persistent anonymous UID to every visitor.
+**Layer 1: Directive (What to do)**
 
-## Developer Commands
+- Basically just SOPs written in Markdown, live in `directives/`
+- Define the goals, inputs, tools/scripts to use, outputs, and edge cases
+- Natural language instructions, like you'd give a mid-level employee
 
-- **Install Dependencies**: `npm install`
-- **Start Dev Server**: `npm run dev`
-- **Build for Production**: `npm run build`
-- **Run Unit/Integration Tests**: `npm test`
-- **Run E2E Tests (Playwright)**: `npm run e2e`
-- **Lint**: `npm run lint`
-- **Lint Design Tokens**: `npm run lint:tokens` (fails on any raw colour literal outside `tokens.css`)
-- **Format**: `npm run format`
-- **Run All Checks (Format, Lint, Tokens, Types, Tests)**: `npm run verify`
-- **Type Check**: `npm run type-check`
+**Layer 2: Orchestration (Decision making)**
 
-## Environment Setup
+- This is you. Your job: intelligent routing.
+- Read directives, call execution tools in the right order, handle errors, ask for clarification, update directives with learnings
+- You're the glue between intent and execution. E.g you don't try scraping websites yourself—you read `directives/scrape_website.md` and come up with inputs/outputs and then run `execution/scrape_single_site.py`
 
-1.  **Configuration**: Copy `.env.example` to `.env` and fill in Firebase project credentials.
-2.  **Firestore Index**: Deploy the required composite index using `firebase deploy --only firestore:indexes`. The index definition is in `firestore.indexes.json`.
-3.  **Firestore Rules**: Production-grade security rules are defined in `firestore.rules`. Enforces strict schema validations, author ownership, and admin-only chronicle dissolution under the Chronicle Preservation Policy.
-4.  **Firestore Database Path**: All application data resides under `v1/taletranscend/projects/v1/`.
+**Layer 3: Execution (Doing the work)**
 
-## Code Structure & Conventions
+- Deterministic Python scripts in `execution/`
+- Environment variables, api tokens, etc are stored in `.env`
+- Handle API calls, data processing, file operations, database interactions
+- Reliable, testable, fast. Use scripts instead of manual work. Commented well.
 
-- **TypeScript Aliases**:
-  - `@fb/*`: `src/firebase/*`
-  - `@services/*`: `src/services/*`
-  - `@state/*`: `src/state/*`
-  - `@ui/*`: `src/ui/*`
-  - `@pages/*`: `src/pages/*`
-  - `@config/*`: `src/config/*`
-  - `@css/*`: `src/assets/css/*`
-  - `@/*`: `src/*`
-- **Directory Ownership**:
-  - `src/pages/`: Contains separate directories for each HTML page, reflecting the MPA architecture.
-  - `src/firebase/`: Firebase SDK wrappers.
-  - `src/services/`: Business logic and data access.
-  - `src/utils/`: TypeScript utility modules.
-- **Pre-commit Hooks**: Husky is configured (`package.json`, `prepare` script) to run linting and formatting on staged files using `lint-staged`.
+**Why this works:** if you do everything yourself, errors compound. 90% accuracy per step = 59% success over 5 steps. The solution is push complexity into deterministic code. That way you just focus on decision-making.
+
+## Operating Principles
+
+**1. Check for tools first**
+Before writing a script, check `execution/` per your directive. Only create new scripts if none exist.
+
+**2. Self-anneal when things break**
+
+- Read error message and stack trace
+- Fix the script and test it again (unless it uses paid tokens/credits/etc—in which case you check w user first)
+- Update the directive with what you learned (API limits, timing, edge cases)
+- Example: you hit an API rate limit → you then look into API → find a batch endpoint that would fix → rewrite script to accommodate → test → update directive.
+
+**3. Update directives as you learn**
+Directives are living documents. When you discover API constraints, better approaches, common errors, or timing expectations—update the directive. But don't create or overwrite directives without asking unless explicitly told to. Directives are your instruction set and must be preserved (and improved upon over time, not extemporaneously used and then discarded).
+
+**4. Anti-Vibecoding & Aesthetics Standards**
+
+- **Zero emojis**: Never use emojis anywhere in UI, code, logs, comments, commit messages, terminal outputs, or documentation. Zero exceptions.
+- **Zero glowing or pulsing dots**: Never use neon green dots, pulsing indicator pips, or AI "agent active" dots.
+- **Zero pill-type labels or badges**: Never use pill-shaped labels (`border-radius: 9999px`) or floating pill badges unless explicitly requested by the user. Use clean structural typography, technical rectangular shields, or subtle metadata text.
+- **Eliminate AI "vibecoded" cliches**: Avoid generic SaaS tropes (gratuitous floating tags, decorative blur rings, cookie-cutter purple/neon gradients, generic marketing fluff badges). Focus on authentic, intentional, high-contrast craft.
+- **Single-source colors**: All colors must derive from `brand/leo-theme.css`. Never hardcode colors, and strictly adhere to the brand's Obsidian Copper and Radiant Light palettes (zero gold).
+
+**5. Git Safety & Branch Isolation**
+
+- Create a dedicated branch for every new feature, bug fix, or major refactor. Never commit directly to `main` or `master`.
+- Never merge any branch into `main` or `master` without explicit permission from the user in the conversation. The branch is the safety net; merges require explicit user confirmation.
+
+**6. Use Skills Wherever Possible**
+
+- Proactively inspect `agents/skills/` (and all available environment skills) before writing custom code, scripts, or reinventing patterns.
+- Leverage matching skills whenever applicable rather than writing ad-hoc implementations.
+
+**7. Maintain Documentation & Proactive Inception**
+
+- Always maintain and update project documentation (`README.md`, `docs/`) with every code change, feature, or refactor.
+- If no documentation is present in the project, proactively ask the user to initiate the creation of documentation.
+
+**8. Destination Setup & 3-Layer Infrastructure Population**
+
+- Whenever setup is invoked (`SETUP.md` or `execution/instantiate_project.py`), apply the full contents of `AGENTS.md` to the destination repository.
+- Ensure the project's 3-layer architecture directories (`directives/`, `execution/`, `.tmp/`) and `agents/skills/` are initialized.
+- Invoke the `populate` skill to fill up the `directives/` folder with dedicated SOPs capturing all instructions, domain knowledge, user guidelines, and architectural rules saved regarding this project from chat memory/transcripts, integrating with the `/learn` workflow.
+- Strictly adhere to the 3-layer infrastructure (Layer 1: Directives, Layer 2: Orchestration, Layer 3: Execution).
+
+## Self-annealing loop
+
+Errors are learning opportunities. When something breaks:
+
+1. Fix it
+2. Update the tool
+3. Test tool, make sure it works
+4. Update directive to include new flow
+5. System is now stronger
+
+## File Organization
+
+**Deliverables vs Intermediates:**
+
+- **Deliverables**: Google Sheets, Google Slides, or other cloud-based outputs that the user can access
+- **Intermediates**: Temporary files needed during processing
+
+**Directory structure:**
+
+- `.tmp/` - All intermediate files (dossiers, scraped data, temp exports). Never commit, always regenerated.
+- `execution/` - Python scripts (the deterministic tools)
+- `directives/` - SOPs in Markdown (the instruction set)
+- `.env` - Environment variables and API keys
+- `credentials.json`, `token.json` - Google OAuth credentials (required files, in `.gitignore`)
+
+**Key principle:** Local files are only for processing. Deliverables live in cloud services (Google Sheets, Slides, etc.) where the user can access them. Everything in `.tmp/` can be deleted and regenerated.
+
+## Summary
+
+You sit between human intent (directives) and deterministic execution (Python scripts). Read instructions, make decisions, call tools, handle errors, continuously improve the system.
+
+Be pragmatic. Be reliable. Self-anneal.
 
 <!-- brand-leo-utils:skill-sync:start -->
 
@@ -59,9 +114,11 @@ not one specific tool.
 
 - To load or refresh skills from brand-leo-utils, follow its
   `directives/instantiate_project_skills.md`.
+- To update or migrate this project to the latest brand guidelines, skills, and infrastructure,
+  follow its `directives/update_project_from_brand.md`.
 - If you create or edit a skill under `agents/skills/`, it isn't done
 until it's synced back: follow brand-leo-utils's
-`directives/sync_skill_to_brand.md`. Both directives branch first,
+`directives/sync_skill_to_brand.md`. All directives branch first,
 never commit to main/master directly, and only reach main via a
 pull request or an explicit, separate go-ahead from the user.
 <!-- brand-leo-utils:skill-sync:end -->
