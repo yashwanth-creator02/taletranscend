@@ -60,6 +60,8 @@ import {
   refs,
   getDocs,
   addDoc,
+  updateDoc,
+  deleteDoc,
   query,
   orderBy,
   limit,
@@ -456,22 +458,87 @@ async function _loadComments() {
   try {
     const q = query(refs.comments(readerState.taleId), orderBy('createdAt', 'desc'), limit(50));
     const snap = await getDocs(q);
-    readerState.comments = snap.docs.map((d) => {
-      const data = d.data();
-      const isTaleAuthor = Boolean(
-        readerState.authorId && data.authorId && data.authorId === readerState.authorId
-      );
-      return {
-        id: d.id,
-        author: data.authorName || 'Anonymous',
-        isTaleAuthor,
-        isEdited: Boolean(data.isEdited),
-        initials: (data.authorName || 'A').slice(0, 2).toUpperCase(),
-        body: data.text || '',
-        at: data.createdAt?.toMillis ? data.createdAt.toMillis() : Date.now(),
-        likes: data.likeCount || 0,
-      };
-    });
+    readerState.comments = await Promise.all(
+      snap.docs.map(async (d) => {
+        const data = d.data();
+        const isTaleAuthor = Boolean(
+          readerState.authorId && data.authorId && data.authorId === readerState.authorId
+        );
+
+        let liked = false;
+        if (readerState.userId) {
+          try {
+            const likeDoc = await getDoc(
+              refs.commentLike(readerState.taleId, d.id, readerState.userId)
+            );
+            liked = likeDoc.exists();
+          } catch {
+            // Ignore offline or permission errors
+          }
+        }
+
+        let replies = [];
+        try {
+          const rq = query(
+            refs.commentReplies(readerState.taleId, d.id),
+            orderBy('createdAt', 'asc'),
+            limit(50)
+          );
+          const rsnap = await getDocs(rq);
+          replies = await Promise.all(
+            rsnap.docs.map(async (rd) => {
+              const rdata = rd.data();
+              const isReplyTaleAuthor = Boolean(
+                readerState.authorId && rdata.authorId && rdata.authorId === readerState.authorId
+              );
+              let replyLiked = false;
+              if (readerState.userId) {
+                try {
+                  const rLikeDoc = await getDoc(
+                    refs.commentLike(readerState.taleId, rd.id, readerState.userId)
+                  );
+                  replyLiked = rLikeDoc.exists();
+                } catch {
+                  // Ignore
+                }
+              }
+
+              return {
+                id: rd.id,
+                parentId: d.id,
+                author: rdata.authorName || 'Anonymous',
+                authorId: rdata.authorId || '',
+                isTaleAuthor: isReplyTaleAuthor,
+                isEdited: Boolean(rdata.isEdited),
+                isDeleted: Boolean(rdata.isDeleted),
+                initials: (rdata.authorName || 'A').slice(0, 2).toUpperCase(),
+                body: rdata.text || '',
+                at: rdata.createdAt?.toMillis ? rdata.createdAt.toMillis() : Date.now(),
+                likes: rdata.likeCount || 0,
+                liked: replyLiked,
+              };
+            })
+          );
+        } catch {
+          // Ignore subcollection error if no replies
+        }
+
+        return {
+          id: d.id,
+          author: data.authorName || 'Anonymous',
+          authorId: data.authorId || '',
+          isTaleAuthor,
+          isEdited: Boolean(data.isEdited),
+          isDeleted: Boolean(data.isDeleted),
+          initials: (data.authorName || 'A').slice(0, 2).toUpperCase(),
+          body: data.text || '',
+          at: data.createdAt?.toMillis ? data.createdAt.toMillis() : Date.now(),
+          likes: data.likeCount || 0,
+          liked,
+          replies,
+        };
+      })
+    );
     _renderDiscussion();
   } catch (err) {
     log.warn('Could not load comments from Firestore:', err);
@@ -482,7 +549,11 @@ function _renderDiscussion() {
   const container = document.getElementById('reader-discussion-content');
   if (!container) return;
 
-  container.innerHTML = renderCommentsPanel(readerState.comments, readerState.newComment);
+  container.innerHTML = renderCommentsPanel(
+    readerState.comments,
+    readerState.newComment,
+    readerState.userId
+  );
   _bindCommentEvents();
 
   const countEl = document.getElementById('discussion-count');
@@ -522,6 +593,8 @@ function _bindCommentEvents() {
         type: 'general',
         depth: 0,
         likeCount: 0,
+        isEdited: false,
+        isDeleted: false,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       };
@@ -533,12 +606,16 @@ function _bindCommentEvents() {
       readerState.comments.unshift({
         id: docRef.id,
         author: readerState.userName || 'You',
+        authorId: readerState.userId,
         isTaleAuthor,
         isEdited: false,
+        isDeleted: false,
         initials: (readerState.userName || 'Y').slice(0, 2).toUpperCase(),
         body,
         at: Date.now(),
         likes: 0,
+        liked: false,
+        replies: [],
       });
       readerState.newComment = '';
       showToast('Comment posted.', 'success');
@@ -548,6 +625,374 @@ function _bindCommentEvents() {
     } finally {
       _renderDiscussion();
     }
+  });
+
+  // ── Comment Likes ──────────────────────────────────────────────
+  document.querySelectorAll('.like-trigger').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const commentId = btn.dataset.commentId;
+      const comment = readerState.comments.find((c) => c.id === commentId);
+      if (!comment) return;
+
+      if (!readerState.userId) {
+        showToast('Please sign in to like comments.', 'info');
+        return;
+      }
+
+      btn.disabled = true;
+      const willLike = !comment.liked;
+      const newCount = Math.max(0, (comment.likes || 0) + (willLike ? 1 : -1));
+      comment.liked = willLike;
+      comment.likes = newCount;
+
+      try {
+        if (willLike) {
+          await setDoc(refs.commentLike(readerState.taleId, commentId, readerState.userId), {
+            userId: readerState.userId,
+            createdAt: serverTimestamp(),
+          });
+        } else {
+          await deleteDoc(refs.commentLike(readerState.taleId, commentId, readerState.userId));
+        }
+
+        await updateDoc(refs.comment(readerState.taleId, commentId), {
+          likeCount: newCount,
+        });
+      } catch (err) {
+        log.error('Like toggle failed:', err);
+        comment.liked = !willLike;
+        comment.likes = Math.max(0, (comment.likes || 0) + (willLike ? -1 : 1));
+        showToast('Could not update like.', 'error');
+      } finally {
+        _renderDiscussion();
+      }
+    });
+  });
+
+  // ── Reply Triggers & Form ──────────────────────────────────────
+  document.querySelectorAll('.reply-trigger').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const commentId = btn.dataset.commentId;
+      const form = document.getElementById(`reply-form-${commentId}`);
+      if (form) {
+        const willShow = form.classList.contains('hidden');
+        form.classList.toggle('hidden');
+        if (willShow) {
+          form.querySelector('textarea')?.focus();
+        }
+      }
+    });
+  });
+
+  document.querySelectorAll('.cancel-reply-trigger').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const commentId = btn.dataset.commentId;
+      const form = document.getElementById(`reply-form-${commentId}`);
+      form?.classList.add('hidden');
+      const textarea = form?.querySelector('textarea');
+      if (textarea) textarea.value = '';
+    });
+  });
+
+  document.querySelectorAll('.submit-reply-trigger').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const commentId = btn.dataset.commentId;
+      const form = document.getElementById(`reply-form-${commentId}`);
+      const textarea = form?.querySelector('textarea');
+      const replyText = textarea?.value?.trim();
+      if (!replyText) return;
+
+      if (!readerState.userId) {
+        showToast('Please sign in to reply.', 'info');
+        return;
+      }
+
+      btn.disabled = true;
+      try {
+        const replyPayload = {
+          text: replyText,
+          taleId: readerState.taleId,
+          authorId: readerState.userId,
+          authorName: readerState.userName || 'Anonymous',
+          parentId: commentId,
+          isEdited: false,
+          isDeleted: false,
+          likeCount: 0,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        };
+
+        const docRef = await addDoc(
+          refs.commentReplies(readerState.taleId, commentId),
+          replyPayload
+        );
+        const comment = readerState.comments.find((c) => c.id === commentId);
+        if (comment) {
+          comment.replies ??= [];
+          const isReplyAuthor = Boolean(
+            readerState.authorId &&
+            readerState.userId &&
+            readerState.userId === readerState.authorId
+          );
+          comment.replies.push({
+            id: docRef.id,
+            parentId: commentId,
+            author: readerState.userName || 'You',
+            authorId: readerState.userId,
+            isTaleAuthor: isReplyAuthor,
+            isEdited: false,
+            isDeleted: false,
+            initials: (readerState.userName || 'Y').slice(0, 2).toUpperCase(),
+            body: replyText,
+            at: Date.now(),
+            likes: 0,
+            liked: false,
+          });
+        }
+        showToast('Reply posted.', 'success');
+      } catch (err) {
+        log.error('Failed to post reply:', err);
+        showToast('Could not post reply.', 'error');
+      } finally {
+        _renderDiscussion();
+      }
+    });
+  });
+
+  // ── Comment Edit Triggers & Form ───────────────────────────────
+  document.querySelectorAll('.edit-trigger').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const commentId = btn.dataset.commentId;
+      const form = document.getElementById(`comment-edit-form-${commentId}`);
+      const bodyEl = document.getElementById(`comment-body-${commentId}`);
+      if (form && bodyEl) {
+        form.classList.remove('hidden');
+        bodyEl.classList.add('hidden');
+        form.querySelector('textarea')?.focus();
+      }
+    });
+  });
+
+  document.querySelectorAll('.cancel-edit-trigger').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const commentId = btn.dataset.commentId;
+      const form = document.getElementById(`comment-edit-form-${commentId}`);
+      const bodyEl = document.getElementById(`comment-body-${commentId}`);
+      form?.classList.add('hidden');
+      bodyEl?.classList.remove('hidden');
+    });
+  });
+
+  document.querySelectorAll('.save-edit-trigger').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const commentId = btn.dataset.commentId;
+      const form = document.getElementById(`comment-edit-form-${commentId}`);
+      const textarea = form?.querySelector('textarea');
+      const updatedText = textarea?.value?.trim();
+      if (!updatedText) {
+        showToast('Comment cannot be empty.', 'warning');
+        return;
+      }
+
+      btn.disabled = true;
+      try {
+        await updateDoc(refs.comment(readerState.taleId, commentId), {
+          text: updatedText,
+          isEdited: true,
+          editedAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+
+        const comment = readerState.comments.find((c) => c.id === commentId);
+        if (comment) {
+          comment.body = updatedText;
+          comment.isEdited = true;
+        }
+        showToast('Comment updated.', 'success');
+      } catch (err) {
+        log.error('Failed to update comment:', err);
+        showToast('Could not update comment.', 'error');
+      } finally {
+        _renderDiscussion();
+      }
+    });
+  });
+
+  // ── Comment Delete Trigger ────────────────────────────────────
+  document.querySelectorAll('.delete-trigger').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const commentId = btn.dataset.commentId;
+      if (
+        typeof window !== 'undefined' &&
+        window.confirm &&
+        !window.confirm('Delete this comment?')
+      ) {
+        return;
+      }
+
+      btn.disabled = true;
+      try {
+        await updateDoc(refs.comment(readerState.taleId, commentId), {
+          text: '',
+          isDeleted: true,
+          deletedAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+
+        const comment = readerState.comments.find((c) => c.id === commentId);
+        if (comment) {
+          comment.isDeleted = true;
+          comment.body = '';
+        }
+        showToast('Comment deleted.', 'info');
+      } catch (err) {
+        log.error('Failed to delete comment:', err);
+        showToast('Could not delete comment.', 'error');
+      } finally {
+        _renderDiscussion();
+      }
+    });
+  });
+
+  // ── Reply Like, Edit, Delete Triggers ─────────────────────────
+  document.querySelectorAll('.reply-like-trigger').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const commentId = btn.dataset.commentId;
+      const replyId = btn.dataset.replyId;
+      const comment = readerState.comments.find((c) => c.id === commentId);
+      const reply = comment?.replies?.find((r) => r.id === replyId);
+      if (!reply) return;
+
+      if (!readerState.userId) {
+        showToast('Please sign in to like replies.', 'info');
+        return;
+      }
+
+      btn.disabled = true;
+      const willLike = !reply.liked;
+      const newCount = Math.max(0, (reply.likes || 0) + (willLike ? 1 : -1));
+      reply.liked = willLike;
+      reply.likes = newCount;
+
+      try {
+        if (willLike) {
+          await setDoc(refs.commentLike(readerState.taleId, replyId, readerState.userId), {
+            userId: readerState.userId,
+            createdAt: serverTimestamp(),
+          });
+        } else {
+          await deleteDoc(refs.commentLike(readerState.taleId, replyId, readerState.userId));
+        }
+
+        await updateDoc(refs.commentReply(readerState.taleId, commentId, replyId), {
+          likeCount: newCount,
+        });
+      } catch (err) {
+        log.error('Reply like failed:', err);
+        reply.liked = !willLike;
+        reply.likes = Math.max(0, (reply.likes || 0) + (willLike ? -1 : 1));
+        showToast('Could not update like.', 'error');
+      } finally {
+        _renderDiscussion();
+      }
+    });
+  });
+
+  document.querySelectorAll('.reply-edit-trigger').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const replyId = btn.dataset.replyId;
+      const form = document.getElementById(`reply-edit-form-${replyId}`);
+      const textEl = document.getElementById(`reply-body-${replyId}`);
+      if (form && textEl) {
+        form.classList.remove('hidden');
+        textEl.classList.add('hidden');
+        form.querySelector('textarea')?.focus();
+      }
+    });
+  });
+
+  document.querySelectorAll('.cancel-reply-edit-trigger').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const replyId = btn.dataset.replyId;
+      const form = document.getElementById(`reply-edit-form-${replyId}`);
+      const textEl = document.getElementById(`reply-body-${replyId}`);
+      form?.classList.add('hidden');
+      textEl?.classList.remove('hidden');
+    });
+  });
+
+  document.querySelectorAll('.save-reply-edit-trigger').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const replyId = btn.dataset.replyId;
+      const commentId = btn.dataset.commentId;
+      const form = document.getElementById(`reply-edit-form-${replyId}`);
+      const textarea = form?.querySelector('textarea');
+      const updatedText = textarea?.value?.trim();
+      if (!updatedText) {
+        showToast('Reply cannot be empty.', 'warning');
+        return;
+      }
+
+      btn.disabled = true;
+      try {
+        await updateDoc(refs.commentReply(readerState.taleId, commentId, replyId), {
+          text: updatedText,
+          isEdited: true,
+          editedAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+
+        const comment = readerState.comments.find((c) => c.id === commentId);
+        const reply = comment?.replies?.find((r) => r.id === replyId);
+        if (reply) {
+          reply.body = updatedText;
+          reply.isEdited = true;
+        }
+        showToast('Reply updated.', 'success');
+      } catch (err) {
+        log.error('Failed to update reply:', err);
+        showToast('Could not update reply.', 'error');
+      } finally {
+        _renderDiscussion();
+      }
+    });
+  });
+
+  document.querySelectorAll('.reply-delete-trigger').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const replyId = btn.dataset.replyId;
+      const commentId = btn.dataset.commentId;
+      if (
+        typeof window !== 'undefined' &&
+        window.confirm &&
+        !window.confirm('Delete this reply?')
+      ) {
+        return;
+      }
+
+      btn.disabled = true;
+      try {
+        await updateDoc(refs.commentReply(readerState.taleId, commentId, replyId), {
+          text: '',
+          isDeleted: true,
+          deletedAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+
+        const comment = readerState.comments.find((c) => c.id === commentId);
+        const reply = comment?.replies?.find((r) => r.id === replyId);
+        if (reply) {
+          reply.isDeleted = true;
+          reply.body = '';
+        }
+        showToast('Reply deleted.', 'info');
+      } catch (err) {
+        log.error('Failed to delete reply:', err);
+        showToast('Could not delete reply.', 'error');
+      } finally {
+        _renderDiscussion();
+      }
+    });
   });
 }
 

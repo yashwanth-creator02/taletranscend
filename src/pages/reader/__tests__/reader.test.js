@@ -5,10 +5,12 @@ import * as index from '../index.js';
 
 vi.mock('@fb/index.js', () => ({
   initAuth: vi.fn(),
-  getDoc: vi.fn(),
+  getDoc: vi.fn().mockResolvedValue({ exists: () => false }),
   setDoc: vi.fn(),
   getDocs: vi.fn().mockResolvedValue({ docs: [] }),
   addDoc: vi.fn(),
+  updateDoc: vi.fn(),
+  deleteDoc: vi.fn(),
   query: vi.fn(),
   orderBy: vi.fn(),
   limit: vi.fn(),
@@ -16,6 +18,11 @@ vi.mock('@fb/index.js', () => ({
   refs: {
     readerPrefs: vi.fn(),
     comments: vi.fn(),
+    comment: vi.fn(),
+    commentReplies: vi.fn(),
+    commentReply: vi.fn(),
+    commentLikes: vi.fn(),
+    commentLike: vi.fn(),
     taleReaction: vi.fn(),
     follow: vi.fn(),
     follower: vi.fn(),

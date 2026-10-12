@@ -76,6 +76,86 @@ describe('ReaderTemplates', () => {
       expect(html).toContain('Edited');
       expect(html).toContain('edited-badge');
     });
+
+    it('renders date and time for comments', () => {
+      const fixedTime = new Date('2026-10-12T15:30:00Z').getTime();
+      const comments = [{ body: 'Hello world', author: 'User', at: fixedTime }];
+      const html = renderCommentsPanel(comments, '');
+      expect(html).toContain('Oct 12, 2026');
+      expect(html).toContain(':'); // Contains time component
+    });
+
+    it('renders deleted notice when isDeleted is true', () => {
+      const comments = [
+        {
+          id: 'c1',
+          body: '',
+          author: 'Reader',
+          authorId: 'u1',
+          isDeleted: true,
+        },
+      ];
+      const html = renderCommentsPanel(comments, '', 'u1');
+      expect(html).toContain('This comment has been deleted by the user.');
+      expect(html).not.toContain('delete-trigger');
+      expect(html).not.toContain('edit-trigger');
+    });
+
+    it('renders reply and like buttons', () => {
+      const comments = [
+        {
+          id: 'c1',
+          body: 'Great chapter!',
+          author: 'Reader',
+          authorId: 'u2',
+          likes: 5,
+          liked: true,
+        },
+      ];
+      const html = renderCommentsPanel(comments, '', 'u1');
+      expect(html).toContain('reply-trigger');
+      expect(html).toContain('like-trigger');
+      expect(html).toContain('5');
+    });
+
+    it('renders edit and delete buttons for comment owner', () => {
+      const comments = [
+        {
+          id: 'c1',
+          body: 'My own comment',
+          author: 'Me',
+          authorId: 'u1',
+        },
+      ];
+      const html = renderCommentsPanel(comments, '', 'u1');
+      expect(html).toContain('edit-trigger');
+      expect(html).toContain('delete-trigger');
+      expect(html).toContain('comment-edit-form-c1');
+    });
+
+    it('renders nested replies when present', () => {
+      const comments = [
+        {
+          id: 'c1',
+          body: 'Top level',
+          author: 'User 1',
+          replies: [
+            {
+              id: 'r1',
+              parentId: 'c1',
+              body: 'Nested reply here',
+              author: 'Replier',
+              authorId: 'u2',
+              likes: 2,
+            },
+          ],
+        },
+      ];
+      const html = renderCommentsPanel(comments, '');
+      expect(html).toContain('Nested reply here');
+      expect(html).toContain('reply-r1');
+      expect(html).toContain('Replier');
+    });
   });
 
   describe('renderInfoPanel', () => {
