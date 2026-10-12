@@ -296,17 +296,23 @@ function closePanel() {
 function toggleFocusMode() {
   readerState.focusMode = !readerState.focusMode;
 
+  document.body.classList.toggle('focus-mode', readerState.focusMode);
   document.getElementById('sidebar')?.classList.toggle('hidden', readerState.focusMode);
-  document.getElementById('top-bar')?.classList.toggle('hidden', readerState.focusMode);
   document.getElementById('mobile-toolbar')?.classList.toggle('hidden', readerState.focusMode);
-  document.getElementById('focus-exit')?.classList.toggle('hidden', !readerState.focusMode);
 
   if (readerState.focusMode) closePanel();
 
   const focusBtns = document.querySelectorAll(
     '#sidebar-focus, #sidebar-focus-mobile, #top-bar-focus'
   );
-  focusBtns.forEach((b) => (b.dataset.active = String(readerState.focusMode)));
+  focusBtns.forEach((b) => {
+    b.dataset.active = String(readerState.focusMode);
+    b.setAttribute('aria-label', readerState.focusMode ? 'Exit focus mode' : 'Focus mode');
+    b.setAttribute('title', readerState.focusMode ? 'Exit focus' : 'Focus mode');
+    b.innerHTML = `<i data-lucide="${readerState.focusMode ? 'minimize-2' : 'maximize-2'}" style="width: 15px; height: 15px"></i>`;
+  });
+
+  initIcons();
 }
 
 function _isPanelVisible() {
@@ -1324,7 +1330,10 @@ initAuth(async (user) => {
   document.getElementById('back-btn')?.addEventListener('click', () => goBackToTale());
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && _isPanelVisible()) closePanel();
+    if (e.key === 'Escape') {
+      if (_isPanelVisible()) closePanel();
+      else if (readerState.focusMode) toggleFocusMode();
+    }
   });
 
   initIcons();

@@ -179,11 +179,12 @@
             <i data-lucide="clock" style="width: 14px; height: 14px"></i>
             <span id="top-bar-min">0</span> min
           </span>
-          <div class="top-bar-mobile-actions" id="top-bar-mobile-actions">
+          <span class="tabular-nums font-medium" id="top-bar-pct">0%</span>
+          <div class="top-bar-actions" id="top-bar-actions">
             <button
               type="button"
               id="top-bar-bookmark"
-              class="top-bar-action-btn"
+              class="top-bar-action-btn mobile-only-action"
               data-active="false"
               aria-label="Bookmark tale"
               title="Save"
@@ -193,7 +194,7 @@
             <button
               type="button"
               id="top-bar-share"
-              class="top-bar-action-btn"
+              class="top-bar-action-btn mobile-only-action"
               aria-label="Share tale"
               title="Share"
             >
@@ -205,12 +206,11 @@
               class="top-bar-action-btn"
               data-active="false"
               aria-label="Focus mode"
-              title="Focus"
+              title="Focus mode"
             >
               <i data-lucide="maximize-2" style="width: 15px; height: 15px"></i>
             </button>
           </div>
-          <span class="tabular-nums font-medium" id="top-bar-pct">0%</span>
         </div>
       </header>
 
@@ -355,7 +355,12 @@
         <i data-lucide="arrow-up" style="width: 20px; height: 20px"></i>
       </button>
 
-      <button class="focus-exit glass hidden" id="focus-exit">
+      <button
+        class="focus-exit glass hidden"
+        id="focus-exit"
+        aria-hidden="true"
+        style="display: none !important"
+      >
         <i data-lucide="minimize-2" style="width: 14px; height: 14px"></i>
         Exit Focus
       </button>
