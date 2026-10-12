@@ -1,0 +1,102 @@
+# Directive: Accessibility, UI Standards, and Brand Assets
+
+## Goal
+
+Define explicit standards for footer layout isolation, accessible toasting, keyboard shortcut navigation, ARIA tagging, and official brand emblem asset usage across TaleTranscend.
+
+## When this fires
+
+- Designing, refactoring, or reviewing page layouts, footers, and view structures.
+- Implementing notification toasts, alert banners, or system messages.
+- Adding interactive components, inputs, dialogs, command palettes, or keyboard shortcuts.
+- Updating logo marks, icons, favicons, social cards, or boot curtains.
+
+## Inputs
+
+- Component sources: `src/ui/components/toast.js`, `src/ui/components/nav/nav.templates.js`, `src/ui/components/nav/nav.interactions.js`.
+- View templates: `src/views/*.html`.
+- Stylesheets: `src/assets/css/nav.css`, `src/assets/css/components.css`, `src/assets/css/tokens.css`.
+- Public brand assets: `public/logo.png`, `public/logo-wide.png`, `public/icon.svg`, `public/apple-touch-icon.png`, `public/favicon.ico`.
+
+## Git Safety (If Modifying Code)
+
+- Always create a dedicated branch off `main` or `master`.
+- Never commit directly to `main` or `master`.
+- Merges to `main` strictly require explicit user approval in the conversation.
+
+## Architectural Principles & Rules
+
+### 1. Footer Isolation Policy (Home Page Only)
+
+- **Strict Rule**: ONLY the home page (`src/views/index.html`) may contain a full site footer (`.home-footer` / `.site-footer`).
+- **Inner Pages Forbidden**: Inner application pages (`library.html`, `shelf.html`, `reader.html`, `tale.html`, `contribution.html`, `profile.html`, `login.html`, `toc.html`, `404.html`) must NEVER contain a footer.
+- **Rationale**: Inner views are specialized application workspaces (reading sanctuaries, writing ateliers, archives). They rely on the persistent global top navbar (`app-nav`) on desktop and the mobile bottom dock (`mobile-dock`) on handheld devices. A footer adds clutter and disrupts full-height layouts.
+
+### 2. Accessible Toasting System (`src/ui/components/toast.js`)
+
+- **Live Region Announcement**: Toast container must define `aria-live="polite"` and `aria-atomic="true"` with `role="status"` (or `role="alert"` for high-severity errors) so screen readers announce notifications without stealing focus.
+- **Semantic Variants**: Supports `info`, `success`, `warning`, and `error` with Lucide icons (`info`, `circle-check`, `triangle-alert`, `circle-x`) and design-token-compliant accent borders.
+- **User Control & WCAG 2.2**:
+  - Dismissible: Each toast includes a clear close button with `aria-label="Dismiss notification"`.
+  - Pause-on-Interaction: Auto-dismiss timers MUST pause when the user hovers over or focuses inside the toast, resuming when pointer/focus exits (satisfies WCAG 2.2.1 Timing Adjustable).
+  - Escape Dismiss: Pressing `Escape` while focused within a toast dismisses it immediately.
+
+### 3. Keyboard Navigation & ARIA Standards
+
+- **Global Command Palette**:
+  - Invoked via `Ctrl+K` (Windows/Linux) or `⌘K` (macOS).
+  - Triggers declare `aria-keyshortcuts="Control+K Meta+K"`, `aria-haspopup="dialog"`, and `aria-expanded`.
+  - Palette modal traps focus and supports ArrowUp/ArrowDown selection with Enter execution.
+- **Text Selection Shortcut (`Ctrl+A`)**:
+  - In input fields, search boxes, and manuscript atelier textareas, `Ctrl+A` / `⌘A` must reliably select all text without being intercepted by global page shortcuts.
+- **Dialog & Modal Focus Trapping**:
+  - Every modal must trap focus between its first and last focusable elements while open.
+  - Pressing `Escape` must close the top-most modal and restore focus to the triggering element.
+- **Meaningful ARIA Attributes**:
+  - All icon-only buttons must include an explicit `aria-label`.
+  - Decorative icons and marks must carry `aria-hidden="true"`.
+  - Active navigation links must include `aria-current="page"`.
+
+### 4. Official Brand Emblem & Quill Assets
+
+The TaleTranscend brand mark is the mythical golden-trimmed black quill pen encircled by stardust rings:
+
+- **`public/logo.png`**: High-resolution 512×512 square transparent PNG with centered quill for UI usage.
+- **`public/logo-wide.png`**: 1024×559 PNG for Open Graph (`og:image`) and Twitter Cards (`twitter:image`).
+- **`public/icon.svg`**: Base64-embedded quill vector for modern browser tabs and PWA manifests.
+- **`public/apple-touch-icon.png`**: 180×180 PNG formatted specifically for iOS home screen bookmarks.
+- **`public/favicon.ico`**: Multi-resolution (16/32/48px) favicon for legacy browsers.
+- **`src/assets/images/logo.png`**: Colocated asset for local module imports.
+
+#### UI Brand Mark Placements
+
+- **Header Navbar**: `<div class="nav-logo__mark"><img src="${resolveHref('/logo.png')}" alt="" class="nav-logo__img" aria-hidden="true" width="28" height="28" /></div>`. Styled with subtle glass backdrop, gold border (`var(--accent-rgb)`), and hover micro-interaction.
+- **Home Footer**: `<span class="home-footer__mark"><img src="/logo.png" alt="" class="home-footer__logo-img" width="22" height="22" /></span>`.
+- **Login Screen Header**: `<div class="..."><img src="/logo.png" alt="" class="w-7 h-7 object-contain drop-shadow" aria-hidden="true" /></div>`.
+- **Page Boot Curtain**: `<div class="boot-crest"><img src="/logo.png" alt="" width="26" height="26" class="object-contain" /></div>` across all 10 HTML entry points.
+
+## Tools / Scripts to Use
+
+- Run the UI and navigation verification suite:
+  ```powershell
+  python execution/verify_navigation_and_ui.py
+  ```
+- Run toast component tests:
+  ```powershell
+  npx vitest run src/ui/components/__tests__/toast.test.js
+  ```
+- Run design token linter:
+  ```powershell
+  npm run lint:tokens
+  ```
+
+## Outputs
+
+- Single-page footer isolation strictly maintained (only `index.html` has a footer).
+- Zero broken image links across navbar, footer, auth, or boot curtains.
+- Accessible toast alerts and complete keyboard shortcuts operational.
+
+## Edge Cases & Error Handling
+
+- **Focus Restoration**: When dismissing a toast or modal, return focus to the last active element or document body to prevent keyboard focus from getting lost.
+- **Reduced Motion**: All toast animations and boot crest pulses must respect `prefers-reduced-motion: reduce`.
