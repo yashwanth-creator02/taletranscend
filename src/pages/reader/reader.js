@@ -46,6 +46,9 @@ import {
   renderTTSPanel,
   renderInfoPanel,
   bindTocEvents,
+  applyDOMHighlights,
+  jumpToHighlight,
+  openQuoteModal,
   appState,
   setAppUser,
   setAppReaderPrefs,
@@ -428,11 +431,39 @@ function _saveHighlights() {
 }
 
 function _bindHighlightEvents() {
+  // 1. Remove highlight
   document.querySelectorAll('[data-rm-hl]').forEach((btn) => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
       readerState.highlights = readerState.highlights.filter((h) => h.id !== btn.dataset.rmHl);
       _saveHighlights();
+      applyDOMHighlights(readerState.highlights);
       _refreshPanelContent();
+      showToast('Highlight removed.', 'info');
+    });
+  });
+
+  // 2. Jump to highlight in reader view
+  document.querySelectorAll('[data-jump-hl]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      jumpToHighlight(btn.dataset.jumpHl, { onClosePanel: closePanel });
+    });
+  });
+
+  // 3. Open Quote Share Card
+  document.querySelectorAll('[data-share-quote]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const highlight = readerState.highlights.find((h) => h.id === btn.dataset.shareQuote);
+      if (highlight) {
+        openQuoteModal({
+          quote: highlight.text,
+          taleTitle: readerState.taleTitle,
+          authorName: readerState.authorName,
+          coverUrl: readerState.coverUrl,
+          chapterNum: readerState.chapterIndex + 1,
+        });
+      }
     });
   });
 }
@@ -1073,6 +1104,20 @@ function initSelectionToolbar() {
     readerState.selection = null;
     toolbar.classList.add('hidden');
   });
+
+  document.getElementById('sel-share')?.addEventListener('click', () => {
+    if (readerState.selection?.text) {
+      openQuoteModal({
+        quote: readerState.selection.text,
+        taleTitle: readerState.taleTitle,
+        authorName: readerState.authorName,
+        coverUrl: readerState.coverUrl,
+        chapterNum: readerState.chapterIndex + 1,
+      });
+    }
+    readerState.selection = null;
+    toolbar.classList.add('hidden');
+  });
 }
 
 function _addHighlight(color, note = '') {
@@ -1085,6 +1130,7 @@ function _addHighlight(color, note = '') {
     at: Date.now(),
   });
   _saveHighlights();
+  applyDOMHighlights(readerState.highlights);
   readerState.selection = null;
   window.getSelection()?.removeAllRanges();
   document.getElementById('selection-toolbar')?.classList.add('hidden');
@@ -1222,6 +1268,23 @@ initAuth(async (user) => {
   const navigation = await loadReaderChapter({ taleId, chapterIndex });
   readyReveal();
   if (!navigation) return;
+
+  applyDOMHighlights(readerState.highlights);
+  document.getElementById('article-body')?.addEventListener('click', (e) => {
+    const mark = e.target.closest('mark.reader-highlight');
+    if (!mark) return;
+    const hlId = mark.dataset.highlightId;
+    const highlight = readerState.highlights.find((h) => h.id === hlId);
+    if (highlight) {
+      openQuoteModal({
+        quote: highlight.text,
+        taleTitle: readerState.taleTitle,
+        authorName: readerState.authorName,
+        coverUrl: readerState.coverUrl,
+        chapterNum: readerState.chapterIndex + 1,
+      });
+    }
+  });
 
   applyNavigation(navigation);
   _renderDiscussion();

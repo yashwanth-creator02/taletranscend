@@ -5,6 +5,7 @@ import {
   renderTypographyPanel,
   renderThemePanel,
   renderHighlightsPanel,
+  renderQuoteCardModal,
   renderCommentsPanel,
   renderInfoPanel,
 } from '../templates.js';
@@ -49,11 +50,41 @@ describe('ReaderTemplates', () => {
       expect(html).toContain('No highlights yet');
     });
 
-    it('renders highlights', () => {
+    it('renders highlights with jump target and share card button', () => {
       const highlights = [{ id: 'h1', text: 'Important text', color: 'gold', at: Date.now() }];
       const html = renderHighlightsPanel(highlights);
       expect(html).toContain('Important text');
       expect(html).toContain('highlight-gold');
+      expect(html).toContain('data-jump-hl="h1"');
+      expect(html).toContain('data-share-quote="h1"');
+      expect(html).toContain('data-rm-hl="h1"');
+    });
+  });
+
+  describe('renderQuoteCardModal', () => {
+    it('renders big bold quote, author, tale title, and cover background', () => {
+      const html = renderQuoteCardModal({
+        quote: 'The stars whisper forgotten truths.',
+        taleTitle: 'The Celestial Scribe',
+        authorName: 'Aurelius Vance',
+        coverUrl: 'https://images.unsplash.com/photo-stars.jpg',
+        chapterNum: 3,
+      });
+
+      expect(html).toContain('The stars whisper forgotten truths.');
+      expect(html).toContain('The Celestial Scribe');
+      expect(html).toContain('by Aurelius Vance');
+      expect(html).toContain('https://images.unsplash.com/photo-stars.jpg');
+      expect(html).toContain('Fragment 3');
+      expect(html).toContain('data-copy-quote');
+      expect(html).toContain('data-modal-close');
+    });
+
+    it('renders fallback values gracefully when options omitted', () => {
+      const html = renderQuoteCardModal();
+      expect(html).toContain('Untitled Tale');
+      expect(html).toContain('by Unknown Scribe');
+      expect(html).toContain('Fragment 1');
     });
   });
 

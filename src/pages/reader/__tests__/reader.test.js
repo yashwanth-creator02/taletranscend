@@ -82,6 +82,10 @@ vi.mock('../index.js', () => ({
   renderCommentsPanel: vi.fn(),
   renderTTSPanel: vi.fn(),
   renderInfoPanel: vi.fn(),
+  applyDOMHighlights: vi.fn(),
+  jumpToHighlight: vi.fn(),
+  openQuoteModal: vi.fn(),
+  closeQuoteModal: vi.fn(),
 }));
 
 vi.mock('@/utils', () => ({

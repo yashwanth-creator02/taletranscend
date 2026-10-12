@@ -122,6 +122,7 @@ Rules are defined in `firestore.rules`.
 - **Single-Page Footer Isolation:** Only the home page (`src/views/index.html`) contains a site footer; inner views rely on the global navigation header (`app-nav`) and mobile dock.
 - **Brand Emblem Suite:** The mythical golden quill pen is the official brand emblem across header, home footer, auth, boot curtains, and social graph cards (`public/logo.png`, `logo-wide.png`, `icon.svg`, `apple-touch-icon.png`, `favicon.ico`).
 - **Hierarchical Routing & Discoverability:** Canonical clean URLs (`/tales/:id`, `/tales/:id/read/:chapter`, `/toc`) supported across Vite and Firebase with dynamic XML and HTML sitemaps.
+- **Reader Text Highlighting & Quote Share Cards:** Highlighted passages are marked directly in the reader view with theme-aware accent colors and smooth scroll-to-jump navigation; readers can generate luxury editorial quote share cards with tale cover art backgrounds and copyable quotes.
 - **Image Storage:** Cover images use external URLs with subtle 8px backdrop blurring.
 
 ## Agent Architecture & Directives

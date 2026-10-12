@@ -216,8 +216,10 @@ export function renderHighlightsPanel(highlights) {
           const safeText = escapeHtml(h.text.length > 160 ? h.text.slice(0, 160) + '…' : h.text);
           const safeNote = h.note ? escapeHtml(h.note) : '';
           return `
-        <div class="highlight-card group">
-          <div class="highlight-text highlight-${h.color}">"${safeText}"</div>
+        <div class="highlight-card group" data-highlight-item="${h.id}">
+          <button type="button" class="highlight-jump-btn text-left w-full cursor-pointer focus:outline-none" data-jump-hl="${h.id}" title="Jump to highlight in story" aria-label="Jump to highlight in story">
+            <div class="highlight-text highlight-${h.color}">"${safeText}"</div>
+          </button>
           ${
             h.note
               ? `
@@ -227,14 +229,98 @@ export function renderHighlightsPanel(highlights) {
             </div>`
               : ''
           }
-          <div class="flex items-center justify-between text-xs" style="color:var(--reader-muted)">
-            <span>${h.at ? new Date(h.at).toLocaleDateString() : 'Just now'}</span>
-            <button class="opacity-0 transition-opacity hover-text-red group-hover-opacity-100" data-rm-hl="${h.id}">Remove</button>
+          <div class="flex items-center justify-between text-xs pt-1.5 border-t border-white/[0.04]" style="color:var(--reader-muted)">
+            <span class="text-[11px]">${h.at ? new Date(h.at).toLocaleDateString() : 'Just now'}</span>
+            <div class="flex items-center gap-2">
+              <button type="button" class="highlight-share-btn text-slate-400 hover:text-white transition-colors p-1" data-share-quote="${h.id}" title="Create Share Card" aria-label="Create Share Card">
+                <i data-lucide="share-2" style="width:13px;height:13px"></i>
+              </button>
+              <button type="button" class="transition-opacity hover-text-red text-[11px]" data-rm-hl="${h.id}">Remove</button>
+            </div>
           </div>
         </div>`;
         })
         .join('')}
     </div>`;
+}
+
+/**
+ * Renders an editorial quote share card modal with tale cover background.
+ *
+ * @param {Object} params
+ * @param {string} params.quote
+ * @param {string} [params.taleTitle]
+ * @param {string} [params.authorName]
+ * @param {string} [params.coverUrl]
+ * @param {number} [params.chapterNum]
+ * @returns {string} HTML string
+ */
+export function renderQuoteCardModal({
+  quote = '',
+  taleTitle = 'Untitled Tale',
+  authorName = 'Unknown Scribe',
+  coverUrl = '',
+  chapterNum = 1,
+} = {}) {
+  const safeQuote = escapeHtml(quote);
+  const safeTitle = escapeHtml(taleTitle);
+  const safeAuthor = escapeHtml(authorName);
+  const coverBg = coverUrl ? `background-image: url('${coverUrl}');` : '';
+
+  return `
+    <div id="tt-quote-modal" class="quote-modal-overlay active" role="dialog" aria-modal="true" aria-labelledby="quote-card-title">
+      <div class="quote-card-dialog">
+        <div class="quote-card-hero" style="${coverBg}">
+          <div class="quote-card-scrim"></div>
+          <div class="quote-card-content">
+            <div class="quote-card-header">
+              <div class="quote-card-brand">
+                <div class="quote-card-crest">
+                  <i data-lucide="feather" style="width:14px;height:14px"></i>
+                </div>
+                <span class="quote-card-brand-label">TaleTranscend Scribe</span>
+              </div>
+              <button type="button" class="glyph-btn quote-modal-close" style="width:28px;height:28px" aria-label="Close quote card" data-modal-close>
+                <i data-lucide="x" style="width:14px;height:14px"></i>
+              </button>
+            </div>
+
+            <div class="my-auto py-2">
+              <div class="quote-card-quote-icon">
+                <i data-lucide="quote" style="width:28px;height:28px"></i>
+              </div>
+              <blockquote id="quote-card-title" class="quote-card-quote-text">
+                "${safeQuote}"
+              </blockquote>
+            </div>
+
+            <div>
+              <div class="quote-card-divider"></div>
+              <div class="quote-card-attribution">
+                <div class="min-w-0 flex-1">
+                  <div class="quote-card-tale-title">${safeTitle}</div>
+                  <div class="quote-card-author">by ${safeAuthor}</div>
+                </div>
+                <div class="shrink-0 px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-widest text-slate-400 border border-white/[0.08] bg-white/[0.02]">
+                  Fragment ${chapterNum}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="quote-card-actions">
+          <button type="button" class="quote-card-btn quote-card-btn-secondary" data-modal-close>
+            Close
+          </button>
+          <button type="button" class="quote-card-btn quote-card-btn-primary" data-copy-quote>
+            <i data-lucide="copy" style="width:13px;height:13px"></i>
+            <span>Copy Quote</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 /**
