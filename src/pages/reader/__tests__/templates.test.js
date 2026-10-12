@@ -7,6 +7,7 @@ import {
   renderHighlightsPanel,
   renderQuoteCardModal,
   renderCommentsPanel,
+  buildReplyTree,
   renderInfoPanel,
 } from '../templates.js';
 
@@ -190,6 +191,97 @@ describe('ReaderTemplates', () => {
       expect(html).toContain('Nested reply here');
       expect(html).toContain('reply-r1');
       expect(html).toContain('Replier');
+      expect(html).toContain('reply-to-reply-trigger');
+      expect(html).toContain('reply-to-reply-form-r1');
+    });
+
+    it('renders arbitrary multi-level nested replies with reply target badges', () => {
+      const comments = [
+        {
+          id: 'c1',
+          body: 'Root comment',
+          author: 'Author A',
+          replies: [
+            {
+              id: 'r1',
+              parentId: 'c1',
+              replyToId: null,
+              author: 'Responder B',
+              body: 'First-level reply',
+            },
+            {
+              id: 'r2',
+              parentId: 'c1',
+              replyToId: 'r1',
+              replyToAuthor: 'Responder B',
+              author: 'Responder C',
+              body: 'Second-level reply',
+            },
+            {
+              id: 'r3',
+              parentId: 'c1',
+              replyToId: 'r2',
+              replyToAuthor: 'Responder C',
+              author: 'Responder D',
+              body: 'Third-level reply',
+            },
+          ],
+        },
+      ];
+      const html = renderCommentsPanel(comments, '');
+      expect(html).toContain('First-level reply');
+      expect(html).toContain('Second-level reply');
+      expect(html).toContain('Third-level reply');
+      expect(html).toContain('@Responder B');
+      expect(html).toContain('@Responder C');
+      expect(html).toContain('reply-to-reply-form-r1');
+      expect(html).toContain('reply-to-reply-form-r2');
+      expect(html).toContain('reply-to-reply-form-r3');
+    });
+  });
+
+  describe('buildReplyTree', () => {
+    it('returns an empty array when given empty or null list', () => {
+      expect(buildReplyTree([])).toEqual([]);
+      expect(buildReplyTree(null)).toEqual([]);
+      expect(buildReplyTree(undefined)).toEqual([]);
+    });
+
+    it('returns flat nodes when none have replyToId', () => {
+      const replies = [
+        { id: 'r1', body: 'Reply 1' },
+        { id: 'r2', body: 'Reply 2' },
+      ];
+      const tree = buildReplyTree(replies);
+      expect(tree).toHaveLength(2);
+      expect(tree[0].id).toBe('r1');
+      expect(tree[0].children).toEqual([]);
+      expect(tree[1].id).toBe('r2');
+      expect(tree[1].children).toEqual([]);
+    });
+
+    it('builds multi-level nested hierarchy accurately', () => {
+      const replies = [
+        { id: 'r1', body: 'Level 1' },
+        { id: 'r2', replyToId: 'r1', body: 'Level 2' },
+        { id: 'r3', replyToId: 'r2', body: 'Level 3' },
+        { id: 'r4', replyToId: 'r1', body: 'Another Level 2' },
+      ];
+      const tree = buildReplyTree(replies);
+      expect(tree).toHaveLength(1);
+      expect(tree[0].id).toBe('r1');
+      expect(tree[0].children).toHaveLength(2);
+      expect(tree[0].children[0].id).toBe('r2');
+      expect(tree[0].children[0].children).toHaveLength(1);
+      expect(tree[0].children[0].children[0].id).toBe('r3');
+      expect(tree[0].children[1].id).toBe('r4');
+    });
+
+    it('falls back to root level for orphaned replies with nonexistent replyToId', () => {
+      const replies = [{ id: 'r1', replyToId: 'missing-parent', body: 'Orphan reply' }];
+      const tree = buildReplyTree(replies);
+      expect(tree).toHaveLength(1);
+      expect(tree[0].id).toBe('r1');
     });
   });
 

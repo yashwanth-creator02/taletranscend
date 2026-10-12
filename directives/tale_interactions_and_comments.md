@@ -103,7 +103,7 @@ Define the standard operating procedures, data structures, and UI behaviors for 
 - **Reader Page Discussion Features**:
   - Timestamps: Always render both formatted date and time (`MMM D, YYYY at h:mm A`) using `formatCommentDateTime(at)`.
   - Likes: Optimistic like toggle backed by subcollection doc `comments/{commentId}/likes/{uid}` and `likeCount` atomic increment/decrement on the comment or reply.
-  - Replies: Nested reply form toggled via Reply trigger, saving to child replies subcollection or tree.
+  - Multi-Level Nested Replies: Each reply includes a `Reply` trigger (`.reply-to-reply-trigger`) and inline form (`#reply-to-reply-form-${replyId}`) allowing replying to any reply to arbitrary nesting depth. Hierarchical tree is built via `buildReplyTree` and rendered recursively with responsive left border and indentation (`0.75rem` mobile, `1.25rem` desktop) to prevent horizontal clipping.
   - Badges: Rectangular technical `Author` and `Edited` badges (`edited-badge`) adhering to anti-vibecoding guidelines (no pill styling).
 
 ### 4. Sidebar, Author Sanctuary, and The Chronicler's Letter

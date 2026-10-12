@@ -346,6 +346,125 @@ export function formatCommentDateTime(at) {
   return `${dateStr} at ${timeStr}`;
 }
 
+/**
+ * Builds a hierarchical tree from a flat array of replies containing replyToId.
+ *
+ * @param {Array<Object>} replies
+ * @returns {Array<Object>} Root replies with nested children arrays
+ */
+export function buildReplyTree(replies) {
+  if (!Array.isArray(replies) || replies.length === 0) return [];
+
+  const map = new Map();
+  const roots = [];
+
+  replies.forEach((r) => {
+    map.set(r.id, { ...r, children: [] });
+  });
+
+  replies.forEach((r) => {
+    const node = map.get(r.id);
+    if (r.replyToId && map.has(r.replyToId)) {
+      map.get(r.replyToId).children.push(node);
+    } else {
+      roots.push(node);
+    }
+  });
+
+  return roots;
+}
+
+function _renderReplyNode(r, commentId, currentUserId) {
+  const isReplyOwner = Boolean(currentUserId && r.authorId && r.authorId === currentUserId);
+  const safeReplyAuthor = escapeHtml(r.author || 'Anonymous');
+  const safeReplyBody = escapeHtml(r.body || '');
+  const safeReplyInitials = escapeHtml(r.initials || '??');
+  const safeReplyToAuthor = r.replyToAuthor ? escapeHtml(r.replyToAuthor) : '';
+  const isReplyDeleted = Boolean(r.isDeleted);
+  const isReplyEdited = Boolean(r.isEdited) && !isReplyDeleted;
+
+  const childrenHtml =
+    r.children && r.children.length > 0
+      ? `
+    <div class="comment-replies-list" id="replies-list-${r.id}">
+      ${r.children.map((child) => _renderReplyNode(child, commentId, currentUserId)).join('')}
+    </div>`
+      : '';
+
+  return `
+    <div class="comment-reply-card" id="reply-${r.id}">
+      <div class="mb-1.5 flex items-center gap-2">
+        <div style="display:flex;align-items:center;justify-content:center;border-radius:50%;color:var(--reader-accent-contrast);width:22px;height:22px;font-size:9px;background:var(--reader-accent);font-family:var(--font-serif)">${safeReplyInitials}</div>
+        <div class="leading-tight">
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <div class="text-xs font-semibold" style="color:var(--reader-fg)">${safeReplyAuthor}</div>
+            ${safeReplyToAuthor && !isReplyDeleted ? `<span class="reply-target-tag" style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgb(var(--accent-rgb)/var(--a-10));border:1px solid rgb(var(--accent-rgb)/var(--a-20));color:var(--accent-tint);font-weight:600">@${safeReplyToAuthor}</span>` : ''}
+            ${r.isTaleAuthor && !isReplyDeleted ? '<span class="author-tag" style="font-size:7px;padding:1px 4px;border-radius:3px;background:rgb(var(--accent-rgb)/var(--a-16));border:1px solid rgb(var(--accent-rgb)/var(--a-40));color:rgb(var(--accent-rgb));font-weight:700;text-transform:uppercase;letter-spacing:0.06em">Author</span>' : ''}
+            ${isReplyEdited ? '<span class="edited-badge edited-tag" style="font-size:7px;padding:1px 4px;border-radius:3px;background:var(--reader-card-bg);border:1px solid var(--reader-border);color:var(--reader-muted);font-weight:700;text-transform:uppercase;letter-spacing:0.05em">Edited</span>' : ''}
+          </div>
+          <div class="text-[10px]" style="color:var(--reader-muted)">${formatCommentDateTime(r.at)}</div>
+        </div>
+      </div>
+      ${
+        isReplyDeleted
+          ? `<p class="text-xs italic" style="color:var(--reader-muted)">This comment has been deleted by the user.</p>`
+          : `
+        <p class="comment-reply-text text-xs leading-relaxed" id="reply-body-${r.id}" style="color:var(--reader-secondary)">${safeReplyBody}</p>
+        ${
+          isReplyOwner
+            ? `
+          <div class="comment-inline-form hidden" id="reply-edit-form-${r.id}">
+            <textarea class="comment-textarea" id="reply-edit-input-${r.id}" rows="2">${safeReplyBody}</textarea>
+            <div class="mt-2 flex items-center justify-end gap-2 text-xs">
+              <button type="button" class="glyph-btn cancel-reply-edit-trigger" data-reply-id="${r.id}" data-comment-id="${commentId}" style="font-size:10px;padding:2px 6px">Cancel</button>
+              <button type="button" class="post-btn save-reply-edit-trigger" data-reply-id="${r.id}" data-comment-id="${commentId}" style="font-size:10px;padding:2px 8px">Save</button>
+            </div>
+          </div>
+        `
+            : ''
+        }
+        <div class="comment-inline-form hidden mt-2" id="reply-to-reply-form-${r.id}">
+          <div class="text-[10px] text-indigo-300 mb-1 flex items-center gap-1 font-semibold">
+            <i data-lucide="corner-down-right" style="width:10px;height:10px"></i>
+            <span>Replying to @${safeReplyAuthor}</span>
+          </div>
+          <textarea class="comment-textarea" id="reply-to-reply-input-${r.id}" rows="2" placeholder="Write a reply to @${safeReplyAuthor}..."></textarea>
+          <div class="mt-2 flex items-center justify-end gap-2 text-xs">
+            <button type="button" class="glyph-btn cancel-reply-to-reply-trigger" data-reply-id="${r.id}" style="font-size:10px;padding:2px 6px">Cancel</button>
+            <button type="button" class="post-btn submit-reply-to-reply-trigger" data-comment-id="${commentId}" data-reply-id="${r.id}" data-reply-author="${safeReplyAuthor}" style="font-size:10px;padding:2px 8px">Reply</button>
+          </div>
+        </div>
+        <div class="comment-actions mt-1.5 flex items-center gap-2.5 text-[11px]" style="color:var(--reader-muted)">
+          <button type="button" class="comment-action-btn reply-like-trigger flex items-center gap-1 ${r.liked ? 'liked' : ''}" data-comment-id="${commentId}" data-reply-id="${r.id}" aria-label="Like reply" style="${r.liked ? 'color:var(--reader-accent)' : ''}">
+            <i data-lucide="heart" class="${r.liked ? 'fill-current' : ''}" style="width:10px;height:10px"></i>
+            <span>${r.likes || 0}</span>
+          </button>
+          <button type="button" class="comment-action-btn reply-to-reply-trigger flex items-center gap-1 hover-text-violet" data-comment-id="${commentId}" data-reply-id="${r.id}" data-author="${safeReplyAuthor}" aria-label="Reply to reply">
+            <i data-lucide="corner-down-right" style="width:10px;height:10px"></i>
+            <span>Reply</span>
+          </button>
+          ${
+            isReplyOwner
+              ? `
+            <button type="button" class="comment-action-btn reply-edit-trigger flex items-center gap-1" data-reply-id="${r.id}">
+              <i data-lucide="edit-3" style="width:10px;height:10px"></i>
+              <span>Edit</span>
+            </button>
+            <button type="button" class="comment-action-btn reply-delete-trigger flex items-center gap-1 hover-text-red" data-reply-id="${r.id}" data-comment-id="${commentId}">
+              <i data-lucide="trash-2" style="width:10px;height:10px"></i>
+              <span>Delete</span>
+            </button>
+          `
+              : ''
+          }
+        </div>
+      `
+      }
+      ${childrenHtml}
+    </div>
+  `;
+}
+
 export function renderCommentsPanel(comments, newComment, currentUserId = '') {
   const safeNewComment = escapeHtml(newComment || '');
   return `
@@ -371,80 +490,13 @@ export function renderCommentsPanel(comments, newComment, currentUserId = '') {
                   const isDeleted = Boolean(c.isDeleted);
                   const isEdited = Boolean(c.isEdited) && !isDeleted;
 
+                  const replyTree = buildReplyTree(c.replies || []);
                   const repliesHtml =
-                    c.replies && c.replies.length > 0
+                    replyTree.length > 0
                       ? `
                     <div class="comment-replies-list" id="replies-list-${c.id}">
-                      ${c.replies
-                        .map((r) => {
-                          const isReplyOwner = Boolean(
-                            currentUserId && r.authorId && r.authorId === currentUserId
-                          );
-                          const safeReplyAuthor = escapeHtml(r.author || 'Anonymous');
-                          const safeReplyBody = escapeHtml(r.body || '');
-                          const safeReplyInitials = escapeHtml(r.initials || '??');
-                          const isReplyDeleted = Boolean(r.isDeleted);
-                          const isReplyEdited = Boolean(r.isEdited) && !isReplyDeleted;
-
-                          return `
-                        <div class="comment-reply-card" id="reply-${r.id}">
-                          <div class="mb-1.5 flex items-center gap-2">
-                            <div style="display:flex;align-items:center;justify-content:center;border-radius:50%;color:var(--reader-accent-contrast);width:22px;height:22px;font-size:9px;background:var(--reader-accent);font-family:var(--font-serif)">${safeReplyInitials}</div>
-                            <div class="leading-tight">
-                              <div class="flex items-center gap-1.5 flex-wrap">
-                                <div class="text-xs font-semibold" style="color:var(--reader-fg)">${safeReplyAuthor}</div>
-                                ${r.isTaleAuthor && !isReplyDeleted ? '<span class="author-tag" style="font-size:7px;padding:1px 4px;border-radius:3px;background:rgb(var(--accent-rgb)/var(--a-16));border:1px solid rgb(var(--accent-rgb)/var(--a-40));color:rgb(var(--accent-rgb));font-weight:700;text-transform:uppercase;letter-spacing:0.06em">Author</span>' : ''}
-                                ${isReplyEdited ? '<span class="edited-badge edited-tag" style="font-size:7px;padding:1px 4px;border-radius:3px;background:var(--reader-card-bg);border:1px solid var(--reader-border);color:var(--reader-muted);font-weight:700;text-transform:uppercase;letter-spacing:0.05em">Edited</span>' : ''}
-                              </div>
-                              <div class="text-[10px]" style="color:var(--reader-muted)">${formatCommentDateTime(r.at)}</div>
-                            </div>
-                          </div>
-                          ${
-                            isReplyDeleted
-                              ? `<p class="text-xs italic" style="color:var(--reader-muted)">This comment has been deleted by the user.</p>`
-                              : `
-                            <p class="comment-reply-text text-xs leading-relaxed" id="reply-body-${r.id}" style="color:var(--reader-secondary)">${safeReplyBody}</p>
-                            ${
-                              isReplyOwner
-                                ? `
-                              <div class="comment-inline-form hidden" id="reply-edit-form-${r.id}">
-                                <textarea class="comment-textarea" id="reply-edit-input-${r.id}" rows="2">${safeReplyBody}</textarea>
-                                <div class="mt-2 flex items-center justify-end gap-2 text-xs">
-                                  <button type="button" class="glyph-btn cancel-reply-edit-trigger" data-reply-id="${r.id}" data-comment-id="${c.id}" style="font-size:10px;padding:2px 6px">Cancel</button>
-                                  <button type="button" class="post-btn save-reply-edit-trigger" data-reply-id="${r.id}" data-comment-id="${c.id}" style="font-size:10px;padding:2px 8px">Save</button>
-                                </div>
-                              </div>
-                            `
-                                : ''
-                            }
-                            <div class="comment-actions mt-1.5 flex items-center gap-2.5 text-[11px]" style="color:var(--reader-muted)">
-                              <button type="button" class="comment-action-btn reply-like-trigger flex items-center gap-1 ${r.liked ? 'liked' : ''}" data-comment-id="${c.id}" data-reply-id="${r.id}" aria-label="Like reply" style="${r.liked ? 'color:var(--reader-accent)' : ''}">
-                                <i data-lucide="heart" class="${r.liked ? 'fill-current' : ''}" style="width:10px;height:10px"></i>
-                                <span>${r.likes || 0}</span>
-                              </button>
-                              ${
-                                isReplyOwner
-                                  ? `
-                                <button type="button" class="comment-action-btn reply-edit-trigger flex items-center gap-1" data-reply-id="${r.id}">
-                                  <i data-lucide="edit-3" style="width:10px;height:10px"></i>
-                                  <span>Edit</span>
-                                </button>
-                                <button type="button" class="comment-action-btn reply-delete-trigger flex items-center gap-1 hover-text-red" data-reply-id="${r.id}" data-comment-id="${c.id}">
-                                  <i data-lucide="trash-2" style="width:10px;height:10px"></i>
-                                  <span>Delete</span>
-                                </button>
-                              `
-                                  : ''
-                              }
-                            </div>
-                          `
-                          }
-                        </div>
-                      `;
-                        })
-                        .join('')}
-                    </div>
-                  `
+                      ${replyTree.map((r) => _renderReplyNode(r, c.id, currentUserId)).join('')}
+                    </div>`
                       : '';
 
                   return `

@@ -1265,12 +1265,19 @@ body.focus-mode #top-bar-focus:hover {
 
 .comment-replies-list {
   margin-top: 0.75rem;
-  margin-left: 1.25rem;
-  padding-left: 0.75rem;
+  margin-left: 0.75rem;
+  padding-left: 0.5rem;
   border-left: 1px solid var(--reader-border);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .comment-replies-list {
+    margin-left: 1.25rem;
+    padding-left: 0.75rem;
+  }
 }
 
 .comment-reply-card {
@@ -1279,6 +1286,16 @@ body.focus-mode #top-bar-focus:hover {
   background: var(--reader-card-bg);
   padding: 0.625rem;
   color: var(--reader-fg);
+}
+
+.reply-target-tag {
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgb(var(--accent-rgb) / var(--a-04));
+  border: 1px solid rgb(var(--accent-rgb) / var(--a-07));
+  color: var(--accent-tint);
+  font-weight: 600;
 }
 
 .highlight-text {

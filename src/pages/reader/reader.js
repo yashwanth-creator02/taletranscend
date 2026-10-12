@@ -71,14 +71,7 @@ import {
   limit,
 } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
-import {
-  navigateTo,
-  readerUrl,
-  initPageReveal,
-  readyReveal,
-  setupAuthTimeout,
-  createLogger,
-} from '@/utils';
+import { initPageReveal, readyReveal, setupAuthTimeout, createLogger } from '@/utils';
 import { TTS_CHAR_LIMIT } from '@config/app.config.js';
 
 const log = createLogger('Reader');
@@ -521,6 +514,8 @@ async function _loadComments() {
               return {
                 id: rd.id,
                 parentId: d.id,
+                replyToId: rdata.replyToId || null,
+                replyToAuthor: rdata.replyToAuthorName || rdata.replyToAuthor || '',
                 author: rdata.authorName || 'Anonymous',
                 authorId: rdata.authorId || '',
                 isTaleAuthor: isReplyTaleAuthor,
@@ -767,6 +762,102 @@ function _bindCommentEvents() {
         showToast('Reply posted.', 'success');
       } catch (err) {
         log.error('Failed to post reply:', err);
+        showToast('Could not post reply.', 'error');
+      } finally {
+        _renderDiscussion();
+      }
+    });
+  });
+
+  // ── Reply to Reply Triggers & Form ──────────────────────────────
+  document.querySelectorAll('.reply-to-reply-trigger').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const replyId = btn.dataset.replyId;
+      const form = document.getElementById(`reply-to-reply-form-${replyId}`);
+      if (form) {
+        const willShow = form.classList.contains('hidden');
+        form.classList.toggle('hidden');
+        if (willShow) {
+          form.querySelector('textarea')?.focus();
+        }
+      }
+    });
+  });
+
+  document.querySelectorAll('.cancel-reply-to-reply-trigger').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const replyId = btn.dataset.replyId;
+      const form = document.getElementById(`reply-to-reply-form-${replyId}`);
+      form?.classList.add('hidden');
+      const textarea = form?.querySelector('textarea');
+      if (textarea) textarea.value = '';
+    });
+  });
+
+  document.querySelectorAll('.submit-reply-to-reply-trigger').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const commentId = btn.dataset.commentId;
+      const replyId = btn.dataset.replyId;
+      const replyAuthor = btn.dataset.replyAuthor || 'Anonymous';
+      const form = document.getElementById(`reply-to-reply-form-${replyId}`);
+      const textarea = form?.querySelector('textarea');
+      const replyText = textarea?.value?.trim();
+      if (!replyText) return;
+
+      if (!readerState.userId) {
+        showToast('Please sign in to reply.', 'info');
+        return;
+      }
+
+      btn.disabled = true;
+      try {
+        const replyPayload = {
+          text: replyText,
+          taleId: readerState.taleId,
+          authorId: readerState.userId,
+          authorName: readerState.userName || 'Anonymous',
+          parentId: commentId,
+          replyToId: replyId,
+          replyToAuthorName: replyAuthor,
+          isEdited: false,
+          isDeleted: false,
+          likeCount: 0,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        };
+
+        const docRef = await addDoc(
+          refs.commentReplies(readerState.taleId, commentId),
+          replyPayload
+        );
+        const comment = readerState.comments.find((c) => c.id === commentId);
+        if (comment) {
+          comment.replies ??= [];
+          const isReplyAuthor = Boolean(
+            readerState.authorId &&
+            readerState.userId &&
+            readerState.userId === readerState.authorId
+          );
+          comment.replies.push({
+            id: docRef.id,
+            parentId: commentId,
+            replyToId: replyId,
+            replyToAuthor: replyAuthor,
+            author: readerState.userName || 'You',
+            authorId: readerState.userId,
+            isTaleAuthor: isReplyAuthor,
+            isEdited: false,
+            isDeleted: false,
+            initials: (readerState.userName || 'Y').slice(0, 2).toUpperCase(),
+            body: replyText,
+            at: Date.now(),
+            likes: 0,
+            liked: false,
+          });
+        }
+        showToast('Reply posted.', 'success');
+      } catch (err) {
+        log.error('Failed to post nested reply:', err);
         showToast('Could not post reply.', 'error');
       } finally {
         _renderDiscussion();
