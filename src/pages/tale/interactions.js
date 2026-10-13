@@ -670,7 +670,7 @@ export function setupReportMissingTale(taleId) {
     try {
       const confirmed = await showConfirmModal({
         title: 'Report Missing Chronicle',
-        message: `Would you like to dispatch an archival report for unrecorded chronicle <span class="font-mono text-amber-300 font-bold">${escapeHtml(taleId || 'Unknown')}</span>?`,
+        message: `Would you like to dispatch an archival report for unrecorded chronicle <span class="font-mono text-indigo-300 font-semibold">${escapeHtml(taleId || 'Unknown')}</span>?`,
         subtext: 'Archivists will inspect missing indices under the Chronicle Preservation Policy.',
         confirmText: 'Dispatch Report',
         cancelText: 'Cancel',
