@@ -156,12 +156,13 @@ Define the standard operating procedures, data structures, and UI behaviors for 
 - **Architectural Distinction vs Global 404**:
   - **Global 404 (`src/views/404.html`)**: Generic page-level fallback with giant `404` typography, "Lost in the Archives" headline, and "Return Home" CTA.
   - **Tale 404 (`#tale-not-found-view` in `tale.html`)**: Preserves the archive layout and navigation bar, displaying:
-    - Amber archival shield emblem (`book-x`).
-    - Technical rectangular badge: `CHRONICLE 404 // RECORD UNRESOLVED`.
-    - Searched ID code block: `#not-found-tale-id` showing the requested ID in monospace typography.
-    - Mythic archival copy: "The tale you are searching for is not recorded or might have been deleted under the Chronicle Preservation Policy."
+    - Calm frosted emblem (`book-x`) in subtle neutral tones (`bg-white/4`, `text-slate-300`).
+    - Quiet technical badge: `Archive 404 // Record Unresolved` (`text-slate-400 font-mono text-[10px]`).
+    - Subtle searched ID chip: `#not-found-tale-id` in monospace text without harsh contrast.
+    - Concise archival copy: "The tale you are searching for is not recorded or might have been deleted under the Chronicle Preservation Policy."
+    - Restrained layout: Centered `max-w-2xl` card with zero aggressive blur rings or neon glows, ensuring comfortable reading in dark mode.
     - Primary CTA: "Navigate to Library" linking directly to `/library.html`.
-    - Secondary CTA: "Report Missing" button.
+    - Secondary CTA: "Report Missing" button with quiet ghost styling.
 - **Report Missing Flow (`setupReportMissingTale`)**:
   - Clicking "Report Missing" opens an accessible glassmorphic confirmation modal (`showConfirmModal`) confirming the report dispatch for the specific chronicle ID.
   - Upon user confirmation, dispatches the archival report, fires a feedback toast ("Missing chronicle report dispatched to the archivists."), and transitions the button into a disabled state displaying "Report Dispatched".
