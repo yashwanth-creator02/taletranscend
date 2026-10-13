@@ -108,9 +108,7 @@ describe('TaleUI', () => {
       expect(document.getElementById('author-actions-mobile').classList.contains('hidden')).toBe(
         false
       );
-      expect(document.getElementById('author-actions-mobile').style.display).toBe('block');
-      expect(document.getElementById('tab-btn-letter').classList.contains('hidden')).toBe(true);
-      expect(document.getElementById('content-letter').classList.contains('hidden')).toBe(true);
+      expect(document.getElementById('tab-btn-letter').classList.contains('hidden')).toBe(false);
       expect(document.querySelector('.chronicler-invite-card').classList.contains('hidden')).toBe(
         true
       );

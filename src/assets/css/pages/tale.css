@@ -527,6 +527,84 @@
   box-shadow: 0 0 0 3px rgb(var(--accent-rgb) / var(--a-03));
 }
 
+/* ── Missives & Author Mailroom ─────────────────────────────── */
+
+.filter-chip {
+  padding: 0.35rem 0.75rem;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-radius: 0.5rem;
+  border: 1px solid rgb(var(--light-rgb) / var(--a-04));
+  background: rgb(var(--light-rgb) / var(--a-02));
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--dur-base) ease;
+}
+
+.filter-chip:hover {
+  color: white;
+  border-color: rgb(var(--light-rgb) / var(--a-08));
+  background: rgb(var(--light-rgb) / var(--a-04));
+}
+
+.filter-chip.active {
+  background: rgb(var(--accent-rgb) / var(--a-16));
+  border-color: rgb(var(--accent-rgb) / var(--a-40));
+  color: white;
+  box-shadow: 0 0 12px rgb(var(--accent-rgb) / var(--a-10));
+}
+
+.missive-card {
+  border-radius: 0.875rem;
+  border: 1px solid rgb(var(--light-rgb) / var(--a-04));
+  background: rgb(var(--dark-rgb) / 0.35);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 1rem;
+  color: var(--text-primary);
+  transition: border-color var(--dur-base) ease;
+}
+
+.missive-card:hover {
+  border-color: rgb(var(--light-rgb) / var(--a-08));
+}
+
+.missive-reply-bubble {
+  border-radius: 0.625rem;
+  border: 1px solid rgb(var(--accent-rgb) / var(--a-20));
+  background: rgb(var(--accent-rgb) / var(--a-06));
+  padding: 0.875rem;
+}
+
+.missive-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.35rem 0.65rem;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 0.375rem;
+  border: 1px solid rgb(var(--light-rgb) / var(--a-04));
+  background: rgb(var(--light-rgb) / var(--a-02));
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--dur-base) ease;
+}
+
+.missive-action-btn:hover {
+  color: white;
+  border-color: rgb(var(--light-rgb) / var(--a-08));
+  background: rgb(var(--light-rgb) / var(--a-04));
+}
+
+.missive-action-btn.btn-danger:hover {
+  color: var(--danger);
+  border-color: rgb(var(--danger-rgb) / var(--a-30));
+  background: rgb(var(--danger-rgb) / var(--a-08));
+}
+
 /* ── Mobile Overrides ───────────────────────────────────────── */
 
 @media (max-width: 767px) {

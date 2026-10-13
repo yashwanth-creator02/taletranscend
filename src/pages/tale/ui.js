@@ -203,14 +203,10 @@ export async function renderTale(userId, tale, taleId, isResonated = false) {
     authorActionsMobile.style.setProperty('display', isAuthor ? 'block' : 'none', 'important');
   }
 
-  // Inquire of the Author controls (hidden if user is the author)
+  // Missives controls: tab button is available for both author and readers.
   const tabBtnLetter = getEl('tab-btn-letter');
   if (tabBtnLetter) {
-    tabBtnLetter.classList.toggle('hidden', isAuthor);
-  }
-  const contentLetter = getEl('content-letter');
-  if (contentLetter && isAuthor) {
-    contentLetter.classList.add('hidden');
+    tabBtnLetter.classList.remove('hidden');
   }
   const inviteCard = document.querySelector('.chronicler-invite-card');
   if (inviteCard) {

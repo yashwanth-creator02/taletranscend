@@ -110,22 +110,30 @@ Define the standard operating procedures, data structures, and UI behaviors for 
 - **Rate Limiting & Cooldown**:
   - Posting reflections and echo-backs is protected by cooldown (`checkRateLimit`, `applyButtonCooldown`) preventing spam transmissions.
 
-### 4. Sidebar, Author Sanctuary, and The Chronicler's Letter
+### 4. Chronicle Missives & Author Sanctuary Architecture
 
-- **Layout Structure**:
-  - Positioned beneath the Sticky Hanging Cover Art column (`sticky top-24`).
-  - Combines author identity with connect/inquire functionality.
-- **Navigation**:
-  - Clicking the author avatar or "View Profile" navigates to `/profile.html?uid=${tale.authorId || tale.authorUID}`.
-- **The Chronicler's Letter Tab**:
-  - Located on the tale page under `#tab-inquire` (`data-tab="inquire"`) activating `#letter-tab-panel`.
-  - Replaces legacy newsletter subscription with reader inquiries across 4 categories: Lore & World, Character Doubts, Plot & Theories, and Connect & Praise.
-  - Missives are routed to the author's registered correspondence inbox (`v1/taletranscend/projects/v1/tales/${taleId}/inquiries`).
-  - Provides a direct mail action button (`#letter-author-email-btn`) linking directly to `mailto:${authorEmail}`.
-- **Self-Inquiry Guard**:
-  - If the viewing user is the tale author (`auth.currentUser.uid === tale.authorId`), hide `#tab-inquire` or disable inquiry submissions. Authors cannot inquire themselves.
-- **Consolidation**:
-  - Bookmark controls reside in the hero interaction bar and the author sanctuary card.
+- **Section Naming & Lore Alignment**:
+  - The section and tab are named **Missives** (`data-tab="letter"`), reflecting the archival high-fantasy lore alongside _Synopsis_, _Chronicles_, and _Echoes_.
+  - Dual-mode architecture depending on whether the viewing user is the tale author or a reader:
+- **Author Mailroom View (`#author-missives-view`)**:
+  - Activated when `auth.currentUser.uid === tale.authorId`.
+  - Inbound Missives Desk: Renders all missives received from readers for this chronicle.
+  - Stats Bar: Live tally of Total, Pending, and Replied missives.
+  - Filter Bar: Filter chips for `All`, `Unanswered`, `Replied`, `Reported`, and `Blocked`.
+  - Author Operations:
+    - **Reply** (`replyToMissive`): Inline response composer allowing the author to transmit an archival response back to the reader, setting `status: 'replied'`.
+    - **Report** (`reportMissive`): Flags inappropriate or abusive missives to archivists.
+    - **Block** (`blockSender`): Blocks hostile senders from submitting further missives for this chronicle.
+- **Reader Missives View (`#reader-missives-view`)**:
+  - Activated when the viewing user is a reader or guest.
+  - Inscribe Missive: Reader form with category selection (Lore & World, Character Doubts, Plot & Theories, Connect & Praise), reader moniker, optional contact handle, and message textarea.
+  - Dispatched Inquiries & Scribe Responses (`#reader-sent-inquiries-container`):
+    - Lists all inquiries dispatched by the user for this tale.
+    - Status indicators: `Awaiting Scribe Response` vs `Response Received`.
+    - When the author replies, the scribe's response card is displayed directly beneath the inquiry with author avatar, timestamp, and response text.
+  - Scribe Invitation Teaser: Compact teaser card (`.chronicler-invite-card`) in the synopsis panel inviting readers to dispatch missives; hidden for authors.
+- **Direct Mail Action**:
+  - If author has registered email, direct mail button (`#letter-author-email-btn`) links to `mailto:${authorEmail}`.
 - **Reference**:
   - See `directives/author_registration_and_correspondence.md` for full registration wall and correspondence procedures.
 
