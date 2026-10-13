@@ -10,7 +10,7 @@ export function renderTocPanel(
   progress,
   activeSection,
   articleTitle,
-  { userId, taleId } = {}
+  { userId, taleId, bookmarkedChapterIndex } = {}
 ) {
   const safeArticleTitle = escapeHtml(articleTitle);
   const activeUserId = userId || readerState?.userId;
@@ -41,6 +41,8 @@ export function renderTocPanel(
                 ? getChapterProgress({ userId: activeUserId, taleId: activeTaleId, chapterIndex })
                 : null;
             const isCompleted = chProgress?.scrollPercent >= 95;
+            const isBookmarked =
+              typeof bookmarkedChapterIndex === 'number' && chapterIndex === bookmarkedChapterIndex;
 
             return `
           <div class="toc-chapter ${isCurrent ? 'current' : ''}">
@@ -52,6 +54,7 @@ export function renderTocPanel(
                   <span class="block text-xs" style="color:var(--reader-muted)">
                     ${c.wordCount?.toLocaleString() || 0} words &middot; ${Math.max(1, Math.round((c.wordCount || 0) / 230))} min
                     ${isCompleted ? ' &middot; <span class="toc-read-label" style="color:var(--reader-accent);font-weight:600">Read</span>' : ''}
+                    ${isBookmarked ? ' &middot; <span class="toc-bookmark-label" style="color:var(--reader-accent);font-weight:600"><i data-lucide="bookmark" class="inline fill-current mr-0.5" style="width:10px;height:10px"></i>Bookmarked</span>' : ''}
                   </span>
                 </span>
                 <i data-lucide="chevron-down" class="shrink-0" style="width:14px;height:14px;color:var(--reader-muted);transition:transform 200ms;${isCurrent ? 'transform:rotate(180deg)' : ''}"></i>
@@ -415,8 +418,8 @@ function _renderReplyNode(r, commentId, currentUserId) {
             ? `
           <div class="comment-inline-form hidden" id="reply-edit-form-${r.id}">
             <textarea class="comment-textarea" id="reply-edit-input-${r.id}" rows="2">${safeReplyBody}</textarea>
-            <div class="mt-2 flex items-center justify-end gap-2 text-xs">
-              <button type="button" class="glyph-btn cancel-reply-edit-trigger" data-reply-id="${r.id}" data-comment-id="${commentId}" style="font-size:10px;padding:2px 6px">Cancel</button>
+            <div class="mt-2 flex flex-wrap items-center justify-end gap-2 text-xs">
+              <button type="button" class="comment-cancel-btn cancel-reply-edit-trigger" data-reply-id="${r.id}" data-comment-id="${commentId}" style="font-size:10px;padding:2px 6px">Cancel</button>
               <button type="button" class="post-btn save-reply-edit-trigger" data-reply-id="${r.id}" data-comment-id="${commentId}" style="font-size:10px;padding:2px 8px">Save</button>
             </div>
           </div>
@@ -429,12 +432,12 @@ function _renderReplyNode(r, commentId, currentUserId) {
             <span>Replying to @${safeReplyAuthor}</span>
           </div>
           <textarea class="comment-textarea" id="reply-to-reply-input-${r.id}" rows="2" placeholder="Write a reply to @${safeReplyAuthor}..."></textarea>
-          <div class="mt-2 flex items-center justify-end gap-2 text-xs">
-            <button type="button" class="glyph-btn cancel-reply-to-reply-trigger" data-reply-id="${r.id}" style="font-size:10px;padding:2px 6px">Cancel</button>
+          <div class="mt-2 flex flex-wrap items-center justify-end gap-2 text-xs">
+            <button type="button" class="comment-cancel-btn cancel-reply-to-reply-trigger" data-reply-id="${r.id}" style="font-size:10px;padding:2px 6px">Cancel</button>
             <button type="button" class="post-btn submit-reply-to-reply-trigger" data-comment-id="${commentId}" data-reply-id="${r.id}" data-reply-author="${safeReplyAuthor}" style="font-size:10px;padding:2px 8px">Reply</button>
           </div>
         </div>
-        <div class="comment-actions mt-1.5 flex items-center gap-2.5 text-[11px]" style="color:var(--reader-muted)">
+        <div class="comment-actions mt-1.5 flex flex-wrap items-center gap-2 sm:gap-2.5 text-[11px]" style="color:var(--reader-muted)">
           <button type="button" class="comment-action-btn reply-like-trigger flex items-center gap-1 ${r.liked ? 'liked' : ''}" data-comment-id="${commentId}" data-reply-id="${r.id}" aria-label="Like reply" style="${r.liked ? 'color:var(--reader-accent)' : ''}">
             <i data-lucide="heart" class="${r.liked ? 'fill-current' : ''}" style="width:10px;height:10px"></i>
             <span>${r.likes || 0}</span>
@@ -522,15 +525,15 @@ export function renderCommentsPanel(comments, newComment, currentUserId = '') {
                   ? `
                 <div class="comment-inline-form hidden" id="comment-edit-form-${c.id}">
                   <textarea class="comment-textarea" id="comment-edit-input-${c.id}" rows="3">${safeBody}</textarea>
-                  <div class="mt-2 flex items-center justify-end gap-2 text-xs">
-                    <button type="button" class="glyph-btn cancel-edit-trigger" data-comment-id="${c.id}" style="font-size:11px;padding:3px 8px">Cancel</button>
+                  <div class="mt-2 flex flex-wrap items-center justify-end gap-2 text-xs">
+                    <button type="button" class="comment-cancel-btn cancel-edit-trigger" data-comment-id="${c.id}" style="font-size:11px;padding:3px 8px">Cancel</button>
                     <button type="button" class="post-btn save-edit-trigger" data-comment-id="${c.id}" style="font-size:11px;padding:3px 10px">Save</button>
                   </div>
                 </div>
               `
                   : ''
               }
-              <div class="comment-actions mt-2 flex items-center gap-3 text-xs" style="color:var(--reader-muted)">
+              <div class="comment-actions mt-2 flex flex-wrap items-center gap-2 sm:gap-3 text-xs" style="color:var(--reader-muted)">
                 <button type="button" class="comment-action-btn reply-trigger flex items-center gap-1 hover-text-violet" data-comment-id="${c.id}" aria-label="Reply to comment">
                   <i data-lucide="message-square" style="width:12px;height:12px"></i>
                   <span>Reply</span>
@@ -556,8 +559,8 @@ export function renderCommentsPanel(comments, newComment, currentUserId = '') {
               </div>
               <div class="comment-inline-form hidden" id="reply-form-${c.id}">
                 <textarea class="comment-textarea" id="reply-input-${c.id}" rows="2" placeholder="Write a reply to ${safeAuthor}..."></textarea>
-                <div class="mt-2 flex items-center justify-end gap-2 text-xs">
-                  <button type="button" class="glyph-btn cancel-reply-trigger" data-comment-id="${c.id}" style="font-size:11px;padding:3px 8px">Cancel</button>
+                <div class="mt-2 flex flex-wrap items-center justify-end gap-2 text-xs">
+                  <button type="button" class="comment-cancel-btn cancel-reply-trigger" data-comment-id="${c.id}" style="font-size:11px;padding:3px 8px">Cancel</button>
                   <button type="button" class="post-btn submit-reply-trigger" data-comment-id="${c.id}" style="font-size:11px;padding:3px 10px">Reply</button>
                 </div>
               </div>

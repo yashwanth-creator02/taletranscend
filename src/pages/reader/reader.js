@@ -52,9 +52,10 @@ import {
   appState,
   setAppUser,
   setAppReaderPrefs,
-  addToBookmarks,
-  removeFromBookmarks,
-  isBookmarked,
+  saveReaderBookmark,
+  getReaderBookmark,
+  removeReaderBookmark,
+  isChapterBookmarked,
 } from './index.js';
 
 import {
@@ -204,7 +205,6 @@ function initSidebar() {
     });
   });
 
-  document.getElementById('sidebar-focus')?.addEventListener('click', toggleFocusMode);
   document.getElementById('focus-exit')?.addEventListener('click', toggleFocusMode);
 }
 
@@ -243,12 +243,21 @@ function _refreshPanelContent() {
   if (!content || !toolId) return;
 
   if (toolId === 'toc') {
+    const activeBookmark = getReaderBookmark({
+      userId: readerState.userId,
+      taleId: readerState.taleId,
+    });
     content.innerHTML = renderTocPanel(
       readerState.chapters,
       readerState.currentChapterId,
       readerState.progress,
       readerState.activeSection,
-      readerState.taleTitle
+      readerState.taleTitle,
+      {
+        userId: readerState.userId,
+        taleId: readerState.taleId,
+        bookmarkedChapterIndex: activeBookmark?.chapterIndex,
+      }
     );
     bindTocEvents({ onRefresh: _refreshPanelContent });
   } else if (toolId === 'type') {
@@ -299,9 +308,7 @@ function toggleFocusMode() {
 
   if (readerState.focusMode) closePanel();
 
-  const focusBtns = document.querySelectorAll(
-    '#sidebar-focus, #sidebar-focus-mobile, #top-bar-focus'
-  );
+  const focusBtns = document.querySelectorAll('#top-bar-focus');
   focusBtns.forEach((b) => {
     b.dataset.active = String(readerState.focusMode);
     b.setAttribute('aria-label', readerState.focusMode ? 'Exit focus mode' : 'Focus mode');
@@ -1230,41 +1237,70 @@ function _addHighlight(color, note = '') {
 }
 
 /* ─────────────────────────────────────────────
-   Bookmark
+   Bookmark (Reading Bookmark)
    ───────────────────────────────────────────── */
 
-async function _handleBookmark() {
-  const userId = readerState.userId;
-  const taleId_ = readerState.taleId;
-  if (!userId || !taleId_) return;
-
-  readerState.bookmarked = !readerState.bookmarked;
-
+function _updateBookmarkButtons(isBookmarked) {
+  readerState.bookmarked = Boolean(isBookmarked);
   document
     .querySelectorAll(
       '#sidebar-bookmark, #eng-bookmark-mobile, #top-bar-bookmark, #sidebarBookmark'
     )
-    .forEach((b) => (b.dataset.active = String(readerState.bookmarked)));
+    .forEach((b) => {
+      b.dataset.active = String(readerState.bookmarked);
+      b.setAttribute(
+        'aria-label',
+        readerState.bookmarked ? 'Remove bookmark' : 'Bookmark this chapter'
+      );
+      b.setAttribute('title', readerState.bookmarked ? 'Remove bookmark' : 'Bookmark this chapter');
+    });
+}
+
+function _syncCurrentChapterBookmark() {
+  const isBookmarked = isChapterBookmarked({
+    userId: readerState.userId,
+    taleId: readerState.taleId,
+    chapterIndex: readerState.chapterIndex,
+  });
+  _updateBookmarkButtons(isBookmarked);
+}
+
+async function _handleBookmark() {
+  const userId = readerState.userId;
+  const taleId_ = readerState.taleId;
+  if (!taleId_) return;
+
+  const currentChapterIndex = readerState.chapterIndex;
+  const currentBookmark = getReaderBookmark({ userId, taleId: taleId_ });
+  const isCurrentlyBookmarkedHere =
+    currentBookmark && currentBookmark.chapterIndex === currentChapterIndex;
 
   try {
-    if (readerState.bookmarked) {
-      await addToBookmarks({
+    if (isCurrentlyBookmarkedHere) {
+      removeReaderBookmark({ userId, taleId: taleId_ });
+      _updateBookmarkButtons(false);
+      showToast('Bookmark removed.', 'info');
+    } else {
+      const scroller =
+        document.getElementById('scroller') || document.getElementById('main-scroll');
+      const chapterTitle = readerState.chapter?.title || `Fragment ${currentChapterIndex + 1}`;
+      saveReaderBookmark({
         userId,
         taleId: taleId_,
-        tale: {
-          title: readerState.taleTitle,
-          coverUrl: readerState.coverUrl,
-          authorName: readerState.authorName,
-        },
+        chapterIndex: currentChapterIndex,
+        chapterTitle,
+        scrollTop: scroller?.scrollTop || 0,
+        scrollPercent: Math.round(readerState.progress || 0),
       });
-      showToast('Saved to Library.', 'success');
-    } else {
-      await removeFromBookmarks({ userId, taleId: taleId_ });
-      showToast('Removed from Library.', 'info');
+      _updateBookmarkButtons(true);
+      showToast(`Bookmarked ${chapterTitle}.`, 'success');
+    }
+
+    if (readerState.openTool === 'toc') {
+      _refreshPanelContent();
     }
   } catch (err) {
     log.error('Bookmark failed:', err);
-    readerState.bookmarked = !readerState.bookmarked;
     showToast('Could not update bookmark.', 'error');
   }
 }
@@ -1342,13 +1378,8 @@ initAuth(async (user) => {
   // Load cloud prefs (non-blocking — will override localStorage defaults when ready)
   _loadAndApplyCloudPrefs(user.uid);
 
-  // Check bookmark status
-  readerState.bookmarked = await isBookmarked({ userId: user.uid, taleId });
-  document
-    .querySelectorAll(
-      '#sidebar-bookmark, #eng-bookmark-mobile, #top-bar-bookmark, #sidebarBookmark'
-    )
-    .forEach((b) => (b.dataset.active = String(readerState.bookmarked)));
+  // Check reading bookmark status for current chapter
+  _syncCurrentChapterBookmark();
 
   // Load content
   await loadReaderMeta(taleId);
@@ -1434,7 +1465,6 @@ initAuth(async (user) => {
   document.getElementById('sidebar-bookmark')?.addEventListener('click', _handleBookmark);
   document.getElementById('eng-bookmark-mobile')?.addEventListener('click', _handleBookmark);
   document.getElementById('top-bar-bookmark')?.addEventListener('click', _handleBookmark);
-  document.getElementById('sidebar-focus-mobile')?.addEventListener('click', toggleFocusMode);
   document.getElementById('top-bar-focus')?.addEventListener('click', toggleFocusMode);
 
   document.getElementById('top-bar-share')?.addEventListener('click', async (e) => {

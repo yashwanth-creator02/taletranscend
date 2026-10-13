@@ -25,6 +25,18 @@ describe('ReaderTemplates', () => {
       expect(html).toContain('data-action="mark-unread"');
       expect(html).toContain('data-action="download-chapter"');
     });
+
+    it('renders bookmark indicator when chapter is bookmarked', () => {
+      const chapters = [
+        { id: 'c1', title: 'Ch 1', number: 1, wordCount: 1000 },
+        { id: 'c2', title: 'Ch 2', number: 2, wordCount: 1200 },
+      ];
+      const html = renderTocPanel(chapters, 'c1', 25, null, 'My Tale', {
+        bookmarkedChapterIndex: 1,
+      });
+      expect(html).toContain('toc-bookmark-label');
+      expect(html).toContain('Bookmarked');
+    });
   });
 
   describe('renderTypographyPanel', () => {
@@ -167,6 +179,8 @@ describe('ReaderTemplates', () => {
       expect(html).toContain('edit-trigger');
       expect(html).toContain('delete-trigger');
       expect(html).toContain('comment-edit-form-c1');
+      expect(html).toContain('comment-cancel-btn');
+      expect(html).toContain('flex-wrap');
     });
 
     it('renders nested replies when present', () => {

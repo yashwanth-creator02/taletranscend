@@ -167,4 +167,52 @@ describe('getOverallProgress', () => {
       expect(Object.keys(chaptersUnread)).toHaveLength(0);
     });
   });
+
+  describe('reader bookmarks', () => {
+    it('saves and retrieves reading bookmark', async () => {
+      const { saveReaderBookmark, getReaderBookmark, isChapterBookmarked } =
+        await import('../localProgress.service.js');
+      const saved = saveReaderBookmark({
+        userId: 'u1',
+        taleId: 't1',
+        chapterIndex: 2,
+        chapterTitle: 'The Awakening',
+        scrollTop: 450,
+        scrollPercent: 40,
+      });
+
+      expect(saved.chapterIndex).toBe(2);
+      expect(saved.chapterTitle).toBe('The Awakening');
+      expect(saved.scrollTop).toBe(450);
+      expect(saved.scrollPercent).toBe(40);
+
+      const retrieved = getReaderBookmark({ userId: 'u1', taleId: 't1' });
+      expect(retrieved).toEqual(saved);
+      expect(isChapterBookmarked({ userId: 'u1', taleId: 't1', chapterIndex: 2 })).toBe(true);
+      expect(isChapterBookmarked({ userId: 'u1', taleId: 't1', chapterIndex: 1 })).toBe(false);
+    });
+
+    it('removes reading bookmark', async () => {
+      const { saveReaderBookmark, getReaderBookmark, removeReaderBookmark } =
+        await import('../localProgress.service.js');
+      saveReaderBookmark({ userId: 'u1', taleId: 't1', chapterIndex: 0 });
+      expect(getReaderBookmark({ userId: 'u1', taleId: 't1' })).toBeDefined();
+
+      removeReaderBookmark({ userId: 'u1', taleId: 't1' });
+      expect(getReaderBookmark({ userId: 'u1', taleId: 't1' })).toBeNull();
+    });
+
+    it('handles anonymous user bookmarking gracefully', async () => {
+      const { saveReaderBookmark, getReaderBookmark } = await import('../localProgress.service.js');
+      saveReaderBookmark({
+        taleId: 't2',
+        chapterIndex: 1,
+        chapterTitle: 'Fragment 2',
+      });
+
+      const anonBookmark = getReaderBookmark({ taleId: 't2' });
+      expect(anonBookmark.chapterIndex).toBe(1);
+      expect(anonBookmark.chapterTitle).toBe('Fragment 2');
+    });
+  });
 });
