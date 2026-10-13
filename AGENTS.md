@@ -118,6 +118,12 @@ Directives are living documents. When you discover API constraints, better appro
 - Directly consult Layer 1 directives in `directives/` for repeatable procedures.
 - Strictly adhere to the 3-layer infrastructure (Layer 1: Directives, Layer 2: Orchestration, Layer 3: Execution).
 
+**9. Continuous Knowledge & Directive Population (/populate)**
+
+- Systematically invoke the populate skill (`.agents/skills/populate/SKILL.md`) after completing major features, refactors, UI redesigns, or architectural decisions to update corresponding Layer 1 directives in `directives/` and keep project documentation synchronized.
+- Ensure directives remain living documents, preserving discovered patterns, edge cases, and design constraints permanently for future sessions.
+- Always keep directives and documentation relevant, accurate, and up-to-date with current code implementations.
+
 ## Self-annealing loop
 
 Errors are learning opportunities. When something breaks:

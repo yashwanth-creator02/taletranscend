@@ -75,36 +75,40 @@ Define the standard operating procedures, data structures, and UI behaviors for 
     - `#btn-mark-all-unread`: Resets all fragment read states to unread.
     - `#btn-download-all-chronicles`: Initiates comprehensive offline download.
 
-### 3. Comment & Reply Tree Architecture
+### 3. Comment & Reply Tree Architecture (Unified Design System)
 
+- **Design Parity between Reader and Tale Pages**:
+  - The comments ("echoes") section on the tale page matches the design system established on the reader page discussion panel.
+- **Circular Typography Initials Avatar**:
+  - Instead of external Dicebear avatar images, avatars use circular typography chips rendering the user's uppercase initials (extracted via `getAuthorInitials(authorName)`).
+  - Background uses `var(--accent)`, font uses `var(--font-serif)`, with `border-radius: 50%` and high-contrast letterforms.
+- **Date-Time Formatting Standard**:
+  - All timestamps use `formatCommentDateTime(at)` rendering both formatted date and time (`MMM D, YYYY at h:mm A`, e.g., "Oct 12, 2026 at 11:05 PM").
+- **Rectangular Technical Badges (Anti-Vibecoding)**:
+  - **Author Tag** (`.author-tag`): Structural rectangular shield with `var(--accent)` background and border, indicating the tale author. Never use rounded pill badges.
+  - **Edited Badge** (`.edited-badge`): Clean rectangular badge with `var(--border)` and `var(--text-muted)` indicating modified reflections.
+  - **Mention Badge** (`.reply-target-tag` / `.reply-to-tag`): Displays `@AuthorName` in nested replies for clear conversational continuity.
+- **Nested Replies Indentation & Boundary Alignment**:
+  - **Left-Only Indentation**: Replies indent only on the left side with a subtle guide line (`border-left: 1px solid rgb(var(--light-rgb) / var(--a-04))`).
+  - **Flush Right Boundary**: On the right side, nested replies must not inset further. CSS applies negative right margin (`margin-right: -0.75rem` desktop, `-0.5rem` mobile) on nested `.child-replies` / `.comment-replies-list` so reply boxes stretch flush with the parent container rather than pinching inwards.
 - **Data Storage**:
   - All comments and replies live under `v1/taletranscend/projects/v1/tales/${taleId}/comments`.
   - Root comments: `parentId: null` or omitted.
   - Replies: `parentId: rootCommentId`, `replyToId: immediateCommentOrReplyId`, `replyToAuthorName: string`.
   - Security Rules requirement: All replies under a comment must adhere to Firestore rules validating that `parentId` matches the parent chain.
 - **Tree Construction**:
-  - Retrieve comments for the tale ordered by creation timestamp.
-  - Group into a hierarchy using `buildReplyTree(comments)`.
-  - Render replies nested beneath parent nodes using structural indentation (`pl-3 md:pl-4`).
-- **Mention Indicators**:
-  - When rendering a nested reply, display a technical `@RecipientName` badge to identify conversational context.
-- **Author Recognition**:
-  - Comments authored by the tale creator display a subtle rectangular `(author)` shield next to the author name.
-- **Inline Comment Editing**:
-  - Comments can be edited by their original author.
-  - Renders inline textarea with save and cancel buttons.
+  - Group flat or hierarchical reply records using `buildReplyTree(comments)`.
+  - Recursively render reply nodes with nested child lists (`_renderReplyNode`).
+- **Inline Editing & Forms**:
+  - Comments and replies can be edited by their original author via `.comment-inline-form` with `.comment-textarea`, `.comment-cancel-btn`, and save action.
   - Updates Firestore document: `text: updatedText`, `isEdited: true`, `editedAt: serverTimestamp()`.
-  - Displayed with a technical, subdued `(edited)` text indicator.
-- **Soft Deletion**:
-  - Comments are never silently erased or hard-deleted if replies may exist.
+- **Soft Deletion Protocol**:
+  - Comments are never hard-deleted if descendant replies may exist.
   - Firestore payload: `text: ''`, `isDeleted: true`, `deletedAt: serverTimestamp()`.
-  - UI representation: Displays "This comment has been deleted by the user." in muted, italic typography.
-  - Action buttons (reply, edit, delete) are hidden on soft-deleted comments, but the child reply tree remains intact.
-- **Reader Page Discussion Features**:
-  - Timestamps: Always render both formatted date and time (`MMM D, YYYY at h:mm A`) using `formatCommentDateTime(at)`.
-  - Likes: Optimistic like toggle backed by subcollection doc `comments/{commentId}/likes/{uid}` and `likeCount` atomic increment/decrement on the comment or reply.
-  - Multi-Level Nested Replies: Each reply includes a `Reply` trigger (`.reply-to-reply-trigger`) and inline form (`#reply-to-reply-form-${replyId}`) allowing replying to any reply to arbitrary nesting depth. Hierarchical tree is built via `buildReplyTree` and rendered recursively with responsive left border and indentation (`0.75rem` mobile, `1.25rem` desktop) to prevent horizontal clipping.
-  - Badges: Rectangular technical `Author` and `Edited` badges (`edited-badge`) adhering to anti-vibecoding guidelines (no pill styling).
+  - UI representation: Displays "This has been deleted by the user." in muted, italic typography.
+  - Action triggers (reply, edit, delete) are hidden on soft-deleted items, while preserving the child reply tree.
+- **Rate Limiting & Cooldown**:
+  - Posting reflections and echo-backs is protected by cooldown (`checkRateLimit`, `applyButtonCooldown`) preventing spam transmissions.
 
 ### 4. Sidebar, Author Sanctuary, and The Chronicler's Letter
 
