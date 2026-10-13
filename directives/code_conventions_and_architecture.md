@@ -90,6 +90,20 @@ Enforce architectural conventions, module aliases, state management patterns, an
 15. **Official Brand Emblem (Golden Quill)**:
     - Official logo assets are centralized in `public/` (`logo.png`, `logo-wide.png`, `icon.svg`, `apple-touch-icon.png`, `favicon.ico`).
     - Used in navbar brand mark (`.nav-logo__img`), home footer, login header, pre-render boot curtain (`.boot-crest`), and social cards.
+16. **Reader Progress and Scroll Position Restoration Standard**:
+    - **Progress Lock**: Once reading progress reaches 100%, the reading progress percentage remains permanently locked at 100% and cannot be reduced by scrolling back upward.
+    - **Exact Position Memory**: The exact scroll position (`scrollTop` in pixels) is persisted alongside `scrollPercent` in localStorage via `saveReaderProgress`.
+    - **Always Restore on Open**: Whenever a chapter is opened, `restoreScrollProgress` unconditionally restores the user's saved position, even if the chapter is already at 100% progress.
+    - **Unload Persistence**: A synchronous `beforeunload` and `pagehide` listener persists current `scrollTop` to prevent scroll state loss on tab close or navigation.
+17. **Table of Contents Chapter Menu Options**:
+    - **Actions Menu**: Every chapter in the reader Table of Contents panel includes an accessible chapter options trigger (`.toc-menu-trigger`) with a popup dropdown (`.toc-menu-dropdown`).
+    - **Mark Read / Unread**: Readers can mark any fragment as read or unread directly from the TOC, syncing both local storage and cloud records, updating reading status indicators, and notifying with a toast.
+    - **Download Fragment**: Direct download action allows saving the individual chapter Markdown export via `downloadChapter`.
+
+18. **Reader Text Highlighting, Jump Navigation, and Quote Share Card Standard**:
+    - **DOM Highlighting**: Saved highlights are rendered directly into `#article-body` via `applyDOMHighlights` using `<mark class="reader-highlight reader-highlight--{color}">` elements without disrupting HTML document tree structure.
+    - **Jump to Highlight**: Tapping any highlight in "Your Highlights" panel smoothly scrolls `#scroller` to the target highlighted element with a 64px offset, applies a 1.8s focus pulse indicator (`.highlight-focused`), and closes the panel on mobile viewports.
+    - **Quote Share Card**: High-contrast, editorial share card modal (`#tt-quote-modal`) rendering the selected or saved quote in prominent serif typography with the tale's cover art as a backdrop (`background-image: url(...)`), dark overlay scrim, tale title, and author attribution, with single-click clipboard copy action.
 
 ## Tools / Scripts to Use
 

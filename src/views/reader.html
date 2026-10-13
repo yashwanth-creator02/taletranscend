@@ -173,13 +173,44 @@
           </span>
         </div>
 
-        <!-- Right Side Stats -->
+        <!-- Right Side Stats & Actions -->
         <div class="top-bar-stats">
           <span id="top-bar-read-time" class="hidden top-bar-read-time items-center gap-1.5">
             <i data-lucide="clock" style="width: 14px; height: 14px"></i>
             <span id="top-bar-min">0</span> min
           </span>
           <span class="tabular-nums font-medium" id="top-bar-pct">0%</span>
+          <div class="top-bar-actions" id="top-bar-actions">
+            <button
+              type="button"
+              id="top-bar-bookmark"
+              class="top-bar-action-btn mobile-only-action"
+              data-active="false"
+              aria-label="Bookmark tale"
+              title="Save"
+            >
+              <i data-lucide="bookmark" style="width: 15px; height: 15px"></i>
+            </button>
+            <button
+              type="button"
+              id="top-bar-share"
+              class="top-bar-action-btn mobile-only-action"
+              aria-label="Share tale"
+              title="Share"
+            >
+              <i data-lucide="share-2" style="width: 15px; height: 15px"></i>
+            </button>
+            <button
+              type="button"
+              id="top-bar-focus"
+              class="top-bar-action-btn"
+              data-active="false"
+              aria-label="Focus mode"
+              title="Focus mode"
+            >
+              <i data-lucide="maximize-2" style="width: 15px; height: 15px"></i>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -204,14 +235,6 @@
               aria-label="Bookmark"
             >
               <i data-lucide="bookmark" style="width: 20px; height: 20px"></i>
-            </button>
-            <button
-              class="glyph-btn"
-              id="sidebar-focus"
-              data-active="false"
-              aria-label="Focus mode"
-            >
-              <i data-lucide="maximize-2" style="width: 20px; height: 20px"></i>
             </button>
           </div>
         </aside>
@@ -285,61 +308,48 @@
             <!-- Navigation between chapters -->
             <div class="chapter-nav" id="chapter-nav"></div>
 
-            <!-- Engagement & Social -->
-            <div class="engagement-bar glass" id="engagement">
-              <button class="clap-btn" id="clap-btn">
-                <span class="clap-icon-wrap" id="clap-icon-wrap">
-                  <i data-lucide="heart" style="width: 20px; height: 20px"></i>
-                </span>
-                <div class="text-left">
-                  <div class="text-sm font-medium"><span id="clap-count">128</span> claps</div>
-                  <div class="text-xs" style="color: var(--reader-muted)" id="clap-label">
-                    Tap to applaud
-                  </div>
+            <!-- Chapter Discussion Section -->
+            <section
+              class="reader-discussion glass"
+              id="reader-discussion"
+              aria-labelledby="discussion-heading"
+            >
+              <div class="reader-discussion-header">
+                <div class="flex items-center gap-2">
+                  <i
+                    data-lucide="message-square"
+                    style="width: 18px; height: 18px; color: var(--reader-accent)"
+                  ></i>
+                  <h2
+                    id="discussion-heading"
+                    class="rune-text text-base font-semibold"
+                    style="color: var(--reader-fg)"
+                  >
+                    Discussion
+                  </h2>
                 </div>
-              </button>
-              <div class="action-btns flex gap-2">
-                <button
-                  class="glyph-btn"
-                  id="eng-bookmark"
-                  data-active="false"
-                  aria-label="Bookmark"
-                >
-                  <i data-lucide="bookmark" style="width: 20px; height: 20px"></i>
-                </button>
-                <button class="glyph-btn" id="eng-share" aria-label="Share">
-                  <i data-lucide="share-2" style="width: 20px; height: 20px"></i>
-                </button>
-                <button class="glyph-btn" id="eng-comment" aria-label="Comments">
-                  <i data-lucide="message-square" style="width: 20px; height: 20px"></i>
-                </button>
+                <span
+                  class="text-xs"
+                  style="color: var(--reader-muted)"
+                  id="discussion-count"
+                ></span>
               </div>
-            </div>
-
-            <!-- Author Bio Card -->
-            <section class="author-card glass" id="author-card" aria-labelledby="author-heading">
-              <div class="author-card-inner">
-                <div id="author-card-avatar"></div>
-                <div class="author-info">
-                  <div class="author-name-row">
-                    <h3 id="author-heading" class="rune-text text-lg author-card-name"></h3>
-                    <span class="text-xs author-card-handle" id="author-handle"></span>
-                  </div>
-                  <p class="author-bio" id="author-card-bio"></p>
-                </div>
-                <button class="follow-btn">Follow</button>
+              <div id="reader-discussion-content">
+                <!-- Rendered by reader.js -->
               </div>
             </section>
           </div>
         </main>
       </div>
 
-      <!-- Scroll Helpers -->
-      <button class="back-to-top glass hover-lift hidden" id="back-to-top" aria-label="Back to top">
-        <i data-lucide="arrow-up" style="width: 20px; height: 20px"></i>
-      </button>
+      <!-- Focus Exit Helper -->
 
-      <button class="focus-exit glass hidden" id="focus-exit">
+      <button
+        class="focus-exit glass hidden"
+        id="focus-exit"
+        aria-hidden="true"
+        style="display: none !important"
+      >
         <i data-lucide="minimize-2" style="width: 14px; height: 14px"></i>
         Exit Focus
       </button>
@@ -360,6 +370,15 @@
         </button>
         <button class="glyph-btn" style="width: 32px; height: 32px" id="sel-copy" aria-label="Copy">
           <i data-lucide="copy" style="width: 16px; height: 16px"></i>
+        </button>
+        <button
+          class="glyph-btn"
+          style="width: 32px; height: 32px"
+          id="sel-share"
+          aria-label="Create Quote Share Card"
+          title="Share Card"
+        >
+          <i data-lucide="share-2" style="width: 16px; height: 16px"></i>
         </button>
       </div>
     </div>
@@ -408,29 +427,27 @@
       </button>
 
       <button
-        id="eng-bookmark-mobile"
         type="button"
         class="mobile-tool-btn group"
-        data-active="false"
-        aria-label="Bookmark tale"
+        data-tool="tts"
+        aria-label="Listen to chapter"
       >
         <span class="mobile-tool-icon-wrap">
-          <i data-lucide="bookmark" class="mobile-tool-icon"></i>
+          <i data-lucide="volume-2" class="mobile-tool-icon"></i>
         </span>
-        <span class="mobile-tool-label">Save</span>
+        <span class="mobile-tool-label">Listen</span>
       </button>
 
       <button
-        id="sidebar-focus-mobile"
         type="button"
         class="mobile-tool-btn group"
-        data-active="false"
-        aria-label="Focus mode"
+        data-tool="info"
+        aria-label="About chapter and author"
       >
         <span class="mobile-tool-icon-wrap">
-          <i data-lucide="maximize-2" class="mobile-tool-icon"></i>
+          <i data-lucide="info" class="mobile-tool-icon"></i>
         </span>
-        <span class="mobile-tool-label">Focus</span>
+        <span class="mobile-tool-label">Info</span>
       </button>
 
       <button id="reader-settings-btn" type="button" class="hidden" aria-hidden="true"></button>

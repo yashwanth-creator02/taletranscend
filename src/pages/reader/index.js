@@ -14,6 +14,7 @@ export * from './navigation.js';
 export * from './progress.js';
 export * from './toc.js';
 export * from './templates.js';
+export * from './highlights.js';
 
 // ── Services ──────────────────────────────────────────────────────────
 export * from '@services/index.js';

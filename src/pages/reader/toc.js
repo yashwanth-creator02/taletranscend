@@ -5,6 +5,15 @@ import { readerState } from './state.js';
 import { renderTocPanel } from './templates.js';
 import { initIcons } from '@ui/components/icons.js';
 import { createLogger, navigateTo, readerUrl } from '@/utils';
+import { showToast } from '@ui/components/toast.js';
+import {
+  markChapterRead,
+  markChapterUnread,
+  syncMarkChapterRead,
+  syncMarkChapterUnread,
+  downloadChapter,
+} from '@services/index.js';
+import { updateReaderProgress } from './progress.js';
 
 const log = createLogger('ReaderTOC');
 
@@ -53,19 +62,40 @@ export function updateTOCScrollSpy() {
   }
 }
 
-function _refreshToc() {
-  const content = document.getElementById('panel-content');
-  if (!content) return;
+/**
+ * Binds all interactive events in the TOC panel:
+ * - Chapter navigation
+ * - Heading section scroll spy jumping
+ * - Chapter options dropdown toggle
+ * - Mark as Read / Mark as Unread actions
+ * - Fragment download action
+ *
+ * @param {Object} [options]
+ * @param {Function} [options.onRefresh]
+ */
+export function bindTocEvents({ onRefresh } = {}) {
+  // Global outside-click and escape listeners for TOC dropdowns (bound once)
+  if (typeof window !== 'undefined' && !window._tocMenuListenersBound) {
+    window._tocMenuListenersBound = true;
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.toc-chapter-menu-wrap')) {
+        document.querySelectorAll('.toc-menu-dropdown').forEach((m) => m.classList.add('hidden'));
+        document
+          .querySelectorAll('[data-toc-menu-trigger]')
+          .forEach((t) => t.setAttribute('aria-expanded', 'false'));
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.toc-menu-dropdown').forEach((m) => m.classList.add('hidden'));
+        document
+          .querySelectorAll('[data-toc-menu-trigger]')
+          .forEach((t) => t.setAttribute('aria-expanded', 'false'));
+      }
+    });
+  }
 
-  content.innerHTML = renderTocPanel(
-    readerState.chapters,
-    readerState.currentChapterId,
-    readerState.progress,
-    readerState.activeSection,
-    readerState.taleTitle
-  );
-
-  // Re-bind events (same as in reader.js but encapsulated here for spy updates)
+  // 1. Chapter navigation
   document.querySelectorAll('[data-chapter-id]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const idx = readerState.chapters.findIndex((c) => c.id === btn.dataset.chapterId);
@@ -75,6 +105,7 @@ function _refreshToc() {
     });
   });
 
+  // 2. Section smooth scroll
   document.querySelectorAll('[data-section-id]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const id = btn.dataset.sectionId;
@@ -95,7 +126,96 @@ function _refreshToc() {
     });
   });
 
+  // 3. Chapter options dropdown toggle
+  document.querySelectorAll('[data-toc-menu-trigger]').forEach((trigger) => {
+    trigger.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const chapterId = trigger.dataset.tocMenuTrigger;
+      const menu = document.getElementById(`toc-menu-${chapterId}`);
+      if (!menu) return;
+
+      const isHidden = menu.classList.contains('hidden');
+
+      // Close all other open menus
+      document.querySelectorAll('.toc-menu-dropdown').forEach((m) => m.classList.add('hidden'));
+      document
+        .querySelectorAll('[data-toc-menu-trigger]')
+        .forEach((t) => t.setAttribute('aria-expanded', 'false'));
+
+      if (isHidden) {
+        menu.classList.remove('hidden');
+        trigger.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+
+  // 4. Chapter menu actions
+  document.querySelectorAll('.toc-menu-item').forEach((item) => {
+    item.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const action = item.dataset.action;
+      const chapterIndex = Number(item.dataset.chapterIndex ?? 0);
+      const chapterTitle = item.dataset.chapterTitle || `Fragment ${chapterIndex + 1}`;
+      const taleId = readerState.taleId;
+      const userId = readerState.userId;
+
+      // Close all menus
+      document.querySelectorAll('.toc-menu-dropdown').forEach((m) => m.classList.add('hidden'));
+      document
+        .querySelectorAll('[data-toc-menu-trigger]')
+        .forEach((t) => t.setAttribute('aria-expanded', 'false'));
+
+      if (action === 'mark-read') {
+        if (userId && taleId) {
+          markChapterRead({ userId, taleId, chapterIndex });
+          syncMarkChapterRead({ userId, taleId, chapterIndex });
+        }
+        if (chapterIndex === readerState.chapterIndex) {
+          readerState.progress = 100;
+          updateReaderProgress({ scrollPercent: 100 });
+        }
+        showToast(`Marked "${chapterTitle}" as read.`, 'success');
+        onRefresh?.();
+      } else if (action === 'mark-unread') {
+        if (userId && taleId) {
+          markChapterUnread({ userId, taleId, chapterIndex });
+          syncMarkChapterUnread({ userId, taleId, chapterIndex });
+        }
+        if (chapterIndex === readerState.chapterIndex) {
+          readerState.progress = 0;
+          updateReaderProgress({ scrollPercent: 0 });
+        }
+        showToast(`Marked "${chapterTitle}" as unread.`, 'info');
+        onRefresh?.();
+      } else if (action === 'download-chapter') {
+        const targetChapter = readerState.chapters[chapterIndex];
+        downloadChapter(taleId, chapterIndex, {
+          taleTitle: readerState.taleTitle,
+          chapter: targetChapter,
+        });
+      }
+    });
+  });
+
   initIcons();
+}
+
+export function _refreshToc() {
+  const content = document.getElementById('panel-content');
+  if (!content) return;
+
+  content.innerHTML = renderTocPanel(
+    readerState.chapters,
+    readerState.currentChapterId,
+    readerState.progress,
+    readerState.activeSection,
+    readerState.taleTitle
+  );
+
+  bindTocEvents({ onRefresh: _refreshToc });
 }
 
 function _extractSectionsFromDOM(container) {

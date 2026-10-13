@@ -137,56 +137,98 @@ export const DEFAULT_THEME = 'noir';
 /** @type {Object.<string, FontFamily>} */
 export const FONTS = {
   serif: {
-    label: 'Serif',
+    label: 'Cinzel',
+    sub: 'Serif',
     css: '"Cinzel", "Cormorant Garamond", Georgia, serif',
   },
   sans: {
-    label: 'Sans',
+    label: 'Inter',
+    sub: 'Sans',
     css: '"Inter", ui-sans-serif, system-ui, sans-serif',
   },
-  mono: {
-    label: 'Mono',
-    css: '"JetBrains Mono", ui-monospace, monospace',
-  },
   literary: {
-    label: 'Literary',
+    label: 'Merriweather',
+    sub: 'Literary',
     css: '"Merriweather", "Baskerville", "Times New Roman", serif',
   },
   elegant: {
-    label: 'Elegant',
+    label: 'Playfair',
+    sub: 'Elegant',
     css: '"Playfair Display", "Cormorant Garamond", serif',
   },
-  modern: {
-    label: 'Modern',
-    css: '"Poppins", "Inter", sans-serif',
-  },
   classic: {
-    label: 'Classic',
+    label: 'Lora',
+    sub: 'Classic',
     css: '"Lora", Georgia, serif',
   },
-  fantasy: {
-    label: 'Fantasy',
-    css: '"Uncial Antiqua", "Cinzel Decorative", fantasy',
+  crimson: {
+    label: 'Crimson Pro',
+    sub: 'Book Serif',
+    css: '"Crimson Pro", Georgia, serif',
   },
-  typewriter: {
-    label: 'Typewriter',
-    css: '"Special Elite", "Courier New", monospace',
+  spectral: {
+    label: 'Spectral',
+    sub: 'Editorial',
+    css: '"Spectral", Georgia, serif',
   },
-  clean: {
-    label: 'Clean',
-    css: '"Nunito Sans", "Inter", sans-serif',
+  baskerville: {
+    label: 'Baskerville',
+    sub: 'Traditional',
+    css: '"Libre Baskerville", "Baskerville", serif',
   },
-  gothic: {
-    label: 'Gothic',
-    css: '"IM Fell English", "Garamond", serif',
+  cormorant: {
+    label: 'Cormorant',
+    sub: 'Classical',
+    css: '"Cormorant Garamond", Georgia, serif',
   },
   manuscript: {
-    label: 'Manuscript',
+    label: 'EB Garamond',
+    sub: 'Manuscript',
     css: '"EB Garamond", "Palatino Linotype", serif',
   },
-
+  gothic: {
+    label: 'IM Fell',
+    sub: 'Gothic',
+    css: '"IM Fell English", "Garamond", serif',
+  },
+  fantasy: {
+    label: 'Uncial',
+    sub: 'Fantasy',
+    css: '"Uncial Antiqua", "Cinzel Decorative", fantasy',
+  },
+  medieval: {
+    label: 'Medieval',
+    sub: 'Mythic',
+    css: '"MedievalSharp", "Cinzel Decorative", cursive',
+  },
+  modern: {
+    label: 'Poppins',
+    sub: 'Modern',
+    css: '"Poppins", "Inter", sans-serif',
+  },
+  clean: {
+    label: 'Nunito',
+    sub: 'Clean',
+    css: '"Nunito Sans", "Inter", sans-serif',
+  },
+  outfit: {
+    label: 'Outfit',
+    sub: 'Geometric',
+    css: '"Outfit", "Inter", sans-serif',
+  },
+  mono: {
+    label: 'JetBrains',
+    sub: 'Monospace',
+    css: '"JetBrains Mono", ui-monospace, monospace',
+  },
+  typewriter: {
+    label: 'Special Elite',
+    sub: 'Typewriter',
+    css: '"Special Elite", "Courier New", monospace',
+  },
   dyslexic: {
-    label: 'Dyslexic',
+    label: 'OpenDyslexic',
+    sub: 'Accessible',
     css: '"OpenDyslexic", "Comic Sans MS", sans-serif',
   },
 };
@@ -196,11 +238,6 @@ export const DEFAULT_FONT = 'serif';
 
 /**
  * Stylesheets that must be loaded for the FONTS above to actually render.
- *
- * This did not exist. The picker offered twelve families while the reader
- * page linked three (Cinzel, Cormorant Garamond, Inter), so nine of the
- * twelve silently fell back to Georgia — the user picked "Typewriter" and
- * got a serif. Every family declared above is now in this list.
  *
  * Loaded lazily by the reader on first paint rather than blocking it: the
  * reader only needs the *selected* family immediately, and the rest matter
@@ -217,6 +254,13 @@ export const FONT_STYLESHEETS = [
     '&family=Special+Elite' +
     '&family=Uncial+Antiqua' +
     '&family=JetBrains+Mono:wght@400;500;700' +
+    '&family=Crimson+Pro:ital,wght@0,400;0,600;1,400' +
+    '&family=Spectral:ital,wght@0,400;0,600;1,400' +
+    '&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400' +
+    '&family=MedievalSharp' +
+    '&family=Outfit:wght@300;400;500;600' +
+    '&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400' +
+    '&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400' +
     '&display=swap',
   'https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/open-dyslexic-regular.css',
 ];

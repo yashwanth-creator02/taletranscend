@@ -5,10 +5,12 @@ import * as index from '../index.js';
 
 vi.mock('@fb/index.js', () => ({
   initAuth: vi.fn(),
-  getDoc: vi.fn(),
+  getDoc: vi.fn().mockResolvedValue({ exists: () => false }),
   setDoc: vi.fn(),
   getDocs: vi.fn().mockResolvedValue({ docs: [] }),
   addDoc: vi.fn(),
+  updateDoc: vi.fn(),
+  deleteDoc: vi.fn(),
   query: vi.fn(),
   orderBy: vi.fn(),
   limit: vi.fn(),
@@ -16,6 +18,11 @@ vi.mock('@fb/index.js', () => ({
   refs: {
     readerPrefs: vi.fn(),
     comments: vi.fn(),
+    comment: vi.fn(),
+    commentReplies: vi.fn(),
+    commentReply: vi.fn(),
+    commentLikes: vi.fn(),
+    commentLike: vi.fn(),
     taleReaction: vi.fn(),
     follow: vi.fn(),
     follower: vi.fn(),
@@ -38,6 +45,7 @@ vi.mock('../index.js', () => ({
     hasClapped: false,
     authorId: '',
     isFollowingAuthor: false,
+    focusMode: false,
   },
   initTheme: vi.fn(),
   loadReaderMeta: vi.fn(() => Promise.resolve({ title: 'Tale' })),
@@ -47,6 +55,7 @@ vi.mock('../index.js', () => ({
   applyNavigation: vi.fn(),
   bindScrollProgress: vi.fn(),
   restoreScrollProgress: vi.fn(),
+  updateReaderProgress: vi.fn(),
   getChapterProgress: vi.fn(),
   saveReaderProgress: vi.fn(),
   scheduleProgressSync: vi.fn(),
@@ -61,6 +70,10 @@ vi.mock('../index.js', () => ({
     user: null,
     readerPrefs: {},
   },
+  saveReaderBookmark: vi.fn(),
+  getReaderBookmark: vi.fn(() => null),
+  removeReaderBookmark: vi.fn(),
+  isChapterBookmarked: vi.fn(() => false),
   isBookmarked: vi.fn(() => Promise.resolve(false)),
   toggleResonance: vi.fn().mockResolvedValue({ active: true, count: 1 }),
   getResonanceStatus: vi.fn().mockResolvedValue(false),
@@ -74,6 +87,10 @@ vi.mock('../index.js', () => ({
   renderCommentsPanel: vi.fn(),
   renderTTSPanel: vi.fn(),
   renderInfoPanel: vi.fn(),
+  applyDOMHighlights: vi.fn(),
+  jumpToHighlight: vi.fn(),
+  openQuoteModal: vi.fn(),
+  closeQuoteModal: vi.fn(),
 }));
 
 vi.mock('@/utils', () => ({
@@ -166,5 +183,23 @@ describe('Reader Page Controller', () => {
     await vi.waitFor(() => {
       expect(index.applyCloudPrefs).toHaveBeenCalledWith(expect.objectContaining(mockPrefs));
     });
+  });
+
+  it('toggles focus mode from top bar', async () => {
+    document.body.innerHTML = `
+      <div id="top-bar"></div>
+      <div id="sidebar"></div>
+      <div id="mobile-toolbar"></div>
+      <div id="focus-exit" class="hidden"></div>
+      <button id="top-bar-focus"></button>
+    `;
+
+    await import('../reader.js');
+    document.dispatchEvent(new Event('DOMContentLoaded'));
+
+    const focusBtn = document.getElementById('top-bar-focus');
+    focusBtn.click();
+    expect(index.readerState.focusMode).toBe(true);
+    expect(focusBtn.dataset.active).toBe('true');
   });
 });

@@ -76,8 +76,8 @@ export const readerState = {
   measure: 68,
 
   // Panel / UI state
-  openTool: 'toc',
-  isCollapsed: false,
+  openTool: null,
+  isCollapsed: true,
   focusMode: false,
 
   // User-specific state

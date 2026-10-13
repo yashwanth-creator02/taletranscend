@@ -29,6 +29,7 @@ import {
   applyNavigation,
   bindScrollProgress,
   restoreScrollProgress,
+  updateReaderProgress,
   getChapterProgress,
   saveReaderProgress,
   scheduleProgressSync,
@@ -44,16 +45,17 @@ import {
   renderCommentsPanel,
   renderTTSPanel,
   renderInfoPanel,
+  bindTocEvents,
+  applyDOMHighlights,
+  jumpToHighlight,
+  openQuoteModal,
   appState,
   setAppUser,
   setAppReaderPrefs,
-  addToBookmarks,
-  removeFromBookmarks,
-  isBookmarked,
-  toggleResonance,
-  getResonanceStatus,
-  toggleFollowAuthor,
-  isFollowingAuthor,
+  saveReaderBookmark,
+  getReaderBookmark,
+  removeReaderBookmark,
+  isChapterBookmarked,
 } from './index.js';
 
 import {
@@ -63,19 +65,14 @@ import {
   refs,
   getDocs,
   addDoc,
+  updateDoc,
+  deleteDoc,
   query,
   orderBy,
   limit,
 } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
-import {
-  navigateTo,
-  readerUrl,
-  initPageReveal,
-  readyReveal,
-  setupAuthTimeout,
-  createLogger,
-} from '@/utils';
+import { initPageReveal, readyReveal, setupAuthTimeout, createLogger } from '@/utils';
 import { TTS_CHAR_LIMIT } from '@config/app.config.js';
 
 const log = createLogger('Reader');
@@ -157,7 +154,6 @@ const PANEL_TITLES = {
   type: 'Typography',
   theme: 'Theme',
   highlights: 'Your Highlights',
-  comments: 'Discussion',
   share: 'Share This Piece',
   tts: 'Listen',
   info: 'About this piece',
@@ -168,7 +164,6 @@ const SIDEBAR_TOOLS = [
   { id: 'type', icon: 'type', label: 'Typography' },
   { id: 'theme', icon: 'palette', label: 'Themes' },
   { id: 'highlights', icon: 'highlighter', label: 'Highlights' },
-  { id: 'comments', icon: 'message-square', label: 'Discussion' },
   { id: 'share', icon: 'share-2', label: 'Share' },
   { id: 'tts', icon: 'volume-2', label: 'Listen' },
   { id: 'info', icon: 'info', label: 'About' },
@@ -210,7 +205,6 @@ function initSidebar() {
     });
   });
 
-  document.getElementById('sidebar-focus')?.addEventListener('click', toggleFocusMode);
   document.getElementById('focus-exit')?.addEventListener('click', toggleFocusMode);
 }
 
@@ -225,10 +219,6 @@ function openPanel(toolId) {
   if (!panel || !title || !content) return;
 
   title.textContent = PANEL_TITLES[toolId] || 'Panel';
-
-  if (toolId === 'comments' && readerState.comments.length === 0) {
-    _loadComments();
-  }
 
   _refreshPanelContent();
 
@@ -253,14 +243,23 @@ function _refreshPanelContent() {
   if (!content || !toolId) return;
 
   if (toolId === 'toc') {
+    const activeBookmark = getReaderBookmark({
+      userId: readerState.userId,
+      taleId: readerState.taleId,
+    });
     content.innerHTML = renderTocPanel(
       readerState.chapters,
       readerState.currentChapterId,
       readerState.progress,
       readerState.activeSection,
-      readerState.taleTitle
+      readerState.taleTitle,
+      {
+        userId: readerState.userId,
+        taleId: readerState.taleId,
+        bookmarkedChapterIndex: activeBookmark?.chapterIndex,
+      }
     );
-    _bindTocEvents();
+    bindTocEvents({ onRefresh: _refreshPanelContent });
   } else if (toolId === 'type') {
     content.innerHTML = renderTypographyPanel(readerState);
     _bindTypographyEvents();
@@ -270,9 +269,6 @@ function _refreshPanelContent() {
   } else if (toolId === 'highlights') {
     content.innerHTML = renderHighlightsPanel(readerState.highlights);
     _bindHighlightEvents();
-  } else if (toolId === 'comments') {
-    content.innerHTML = renderCommentsPanel(readerState.comments, readerState.newComment);
-    _bindCommentEvents();
   } else if (toolId === 'share') {
     content.innerHTML = renderSharePanel();
     _bindShareEvents();
@@ -306,17 +302,21 @@ function closePanel() {
 function toggleFocusMode() {
   readerState.focusMode = !readerState.focusMode;
 
+  document.body.classList.toggle('focus-mode', readerState.focusMode);
   document.getElementById('sidebar')?.classList.toggle('hidden', readerState.focusMode);
-  document.getElementById('top-bar')?.classList.toggle('hidden', readerState.focusMode);
   document.getElementById('mobile-toolbar')?.classList.toggle('hidden', readerState.focusMode);
-  document.getElementById('focus-exit')?.classList.toggle('hidden', !readerState.focusMode);
 
   if (readerState.focusMode) closePanel();
 
-  const focusBtn = document.getElementById('sidebar-focus');
-  if (focusBtn) focusBtn.dataset.active = String(readerState.focusMode);
-  const mobileFocusBtn = document.getElementById('sidebar-focus-mobile');
-  if (mobileFocusBtn) mobileFocusBtn.dataset.active = String(readerState.focusMode);
+  const focusBtns = document.querySelectorAll('#top-bar-focus');
+  focusBtns.forEach((b) => {
+    b.dataset.active = String(readerState.focusMode);
+    b.setAttribute('aria-label', readerState.focusMode ? 'Exit focus mode' : 'Focus mode');
+    b.setAttribute('title', readerState.focusMode ? 'Exit focus' : 'Focus mode');
+    b.innerHTML = `<i data-lucide="${readerState.focusMode ? 'minimize-2' : 'maximize-2'}" style="width: 15px; height: 15px"></i>`;
+  });
+
+  initIcons();
 }
 
 function _isPanelVisible() {
@@ -339,30 +339,7 @@ function _updateCollapseIcon() {
    ───────────────────────────────────────────── */
 
 function _bindTocEvents() {
-  document.querySelectorAll('[data-chapter-id]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const idx = readerState.chapters.findIndex((c) => c.id === btn.dataset.chapterId);
-      if (idx !== -1 && readerState.taleId) {
-        navigateTo(readerUrl(readerState.taleId, idx));
-      }
-    });
-  });
-
-  document.querySelectorAll('[data-section-id]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const target = document.getElementById(btn.dataset.sectionId);
-      const scroller = document.getElementById('scroller');
-      if (target && scroller) {
-        const top =
-          target.getBoundingClientRect().top -
-          scroller.getBoundingClientRect().top +
-          scroller.scrollTop -
-          32;
-        scroller.scrollTo({ top, behavior: 'smooth' });
-        if (window.innerWidth < 1024) closePanel();
-      }
-    });
-  });
+  bindTocEvents({ onRefresh: _refreshPanelContent });
 }
 
 function _bindTypographyEvents() {
@@ -454,11 +431,39 @@ function _saveHighlights() {
 }
 
 function _bindHighlightEvents() {
+  // 1. Remove highlight
   document.querySelectorAll('[data-rm-hl]').forEach((btn) => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
       readerState.highlights = readerState.highlights.filter((h) => h.id !== btn.dataset.rmHl);
       _saveHighlights();
+      applyDOMHighlights(readerState.highlights);
       _refreshPanelContent();
+      showToast('Highlight removed.', 'info');
+    });
+  });
+
+  // 2. Jump to highlight in reader view
+  document.querySelectorAll('[data-jump-hl]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      jumpToHighlight(btn.dataset.jumpHl, { onClosePanel: closePanel });
+    });
+  });
+
+  // 3. Open Quote Share Card
+  document.querySelectorAll('[data-share-quote]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const highlight = readerState.highlights.find((h) => h.id === btn.dataset.shareQuote);
+      if (highlight) {
+        openQuoteModal({
+          quote: highlight.text,
+          taleTitle: readerState.taleTitle,
+          authorName: readerState.authorName,
+          coverUrl: readerState.coverUrl,
+          chapterNum: readerState.chapterIndex + 1,
+        });
+      }
     });
   });
 }
@@ -468,26 +473,113 @@ async function _loadComments() {
   try {
     const q = query(refs.comments(readerState.taleId), orderBy('createdAt', 'desc'), limit(50));
     const snap = await getDocs(q);
-    readerState.comments = snap.docs.map((d) => {
-      const data = d.data();
-      const isTaleAuthor = Boolean(
-        readerState.authorId && data.authorId && data.authorId === readerState.authorId
-      );
-      return {
-        id: d.id,
-        author: data.authorName || 'Anonymous',
-        isTaleAuthor,
-        isEdited: Boolean(data.isEdited),
-        initials: (data.authorName || 'A').slice(0, 2).toUpperCase(),
-        body: data.text || '',
-        at: data.createdAt?.toMillis ? data.createdAt.toMillis() : Date.now(),
-        likes: data.likeCount || 0,
-      };
-    });
-    if (readerState.openTool === 'comments') _refreshPanelContent();
+    readerState.comments = await Promise.all(
+      snap.docs.map(async (d) => {
+        const data = d.data();
+        const isTaleAuthor = Boolean(
+          readerState.authorId && data.authorId && data.authorId === readerState.authorId
+        );
+
+        let liked = false;
+        if (readerState.userId) {
+          try {
+            const likeDoc = await getDoc(
+              refs.commentLike(readerState.taleId, d.id, readerState.userId)
+            );
+            liked = likeDoc.exists();
+          } catch {
+            // Ignore offline or permission errors
+          }
+        }
+
+        let replies = [];
+        try {
+          const rq = query(
+            refs.commentReplies(readerState.taleId, d.id),
+            orderBy('createdAt', 'asc'),
+            limit(50)
+          );
+          const rsnap = await getDocs(rq);
+          replies = await Promise.all(
+            rsnap.docs.map(async (rd) => {
+              const rdata = rd.data();
+              const isReplyTaleAuthor = Boolean(
+                readerState.authorId && rdata.authorId && rdata.authorId === readerState.authorId
+              );
+              let replyLiked = false;
+              if (readerState.userId) {
+                try {
+                  const rLikeDoc = await getDoc(
+                    refs.commentLike(readerState.taleId, rd.id, readerState.userId)
+                  );
+                  replyLiked = rLikeDoc.exists();
+                } catch {
+                  // Ignore
+                }
+              }
+
+              return {
+                id: rd.id,
+                parentId: d.id,
+                replyToId: rdata.replyToId || null,
+                replyToAuthor: rdata.replyToAuthorName || rdata.replyToAuthor || '',
+                author: rdata.authorName || 'Anonymous',
+                authorId: rdata.authorId || '',
+                isTaleAuthor: isReplyTaleAuthor,
+                isEdited: Boolean(rdata.isEdited),
+                isDeleted: Boolean(rdata.isDeleted),
+                initials: (rdata.authorName || 'A').slice(0, 2).toUpperCase(),
+                body: rdata.text || '',
+                at: rdata.createdAt?.toMillis ? rdata.createdAt.toMillis() : Date.now(),
+                likes: rdata.likeCount || 0,
+                liked: replyLiked,
+              };
+            })
+          );
+        } catch {
+          // Ignore subcollection error if no replies
+        }
+
+        return {
+          id: d.id,
+          author: data.authorName || 'Anonymous',
+          authorId: data.authorId || '',
+          isTaleAuthor,
+          isEdited: Boolean(data.isEdited),
+          isDeleted: Boolean(data.isDeleted),
+          initials: (data.authorName || 'A').slice(0, 2).toUpperCase(),
+          body: data.text || '',
+          at: data.createdAt?.toMillis ? data.createdAt.toMillis() : Date.now(),
+          likes: data.likeCount || 0,
+          liked,
+          replies,
+        };
+      })
+    );
+    _renderDiscussion();
   } catch (err) {
     log.warn('Could not load comments from Firestore:', err);
   }
+}
+
+function _renderDiscussion() {
+  const container = document.getElementById('reader-discussion-content');
+  if (!container) return;
+
+  container.innerHTML = renderCommentsPanel(
+    readerState.comments,
+    readerState.newComment,
+    readerState.userId
+  );
+  _bindCommentEvents();
+
+  const countEl = document.getElementById('discussion-count');
+  if (countEl) {
+    const len = readerState.comments?.length || 0;
+    countEl.textContent = len === 1 ? '1 comment' : `${len} comments`;
+  }
+
+  initIcons();
 }
 
 function _bindCommentEvents() {
@@ -518,6 +610,8 @@ function _bindCommentEvents() {
         type: 'general',
         depth: 0,
         likeCount: 0,
+        isEdited: false,
+        isDeleted: false,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       };
@@ -529,12 +623,16 @@ function _bindCommentEvents() {
       readerState.comments.unshift({
         id: docRef.id,
         author: readerState.userName || 'You',
+        authorId: readerState.userId,
         isTaleAuthor,
         isEdited: false,
+        isDeleted: false,
         initials: (readerState.userName || 'Y').slice(0, 2).toUpperCase(),
         body,
         at: Date.now(),
         likes: 0,
+        liked: false,
+        replies: [],
       });
       readerState.newComment = '';
       showToast('Comment posted.', 'success');
@@ -542,8 +640,472 @@ function _bindCommentEvents() {
       log.error('Failed to post comment to Firestore:', err);
       showToast('Could not post comment.', 'error');
     } finally {
-      _refreshPanelContent();
+      _renderDiscussion();
     }
+  });
+
+  // ── Comment Likes ──────────────────────────────────────────────
+  document.querySelectorAll('.like-trigger').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const commentId = btn.dataset.commentId;
+      const comment = readerState.comments.find((c) => c.id === commentId);
+      if (!comment) return;
+
+      if (!readerState.userId) {
+        showToast('Please sign in to like comments.', 'info');
+        return;
+      }
+
+      btn.disabled = true;
+      const willLike = !comment.liked;
+      const newCount = Math.max(0, (comment.likes || 0) + (willLike ? 1 : -1));
+      comment.liked = willLike;
+      comment.likes = newCount;
+
+      try {
+        if (willLike) {
+          await setDoc(refs.commentLike(readerState.taleId, commentId, readerState.userId), {
+            userId: readerState.userId,
+            createdAt: serverTimestamp(),
+          });
+        } else {
+          await deleteDoc(refs.commentLike(readerState.taleId, commentId, readerState.userId));
+        }
+
+        await updateDoc(refs.comment(readerState.taleId, commentId), {
+          likeCount: newCount,
+        });
+      } catch (err) {
+        log.error('Like toggle failed:', err);
+        comment.liked = !willLike;
+        comment.likes = Math.max(0, (comment.likes || 0) + (willLike ? -1 : 1));
+        showToast('Could not update like.', 'error');
+      } finally {
+        _renderDiscussion();
+      }
+    });
+  });
+
+  // ── Reply Triggers & Form ──────────────────────────────────────
+  document.querySelectorAll('.reply-trigger').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const commentId = btn.dataset.commentId;
+      const form = document.getElementById(`reply-form-${commentId}`);
+      if (form) {
+        const willShow = form.classList.contains('hidden');
+        form.classList.toggle('hidden');
+        if (willShow) {
+          form.querySelector('textarea')?.focus();
+        }
+      }
+    });
+  });
+
+  document.querySelectorAll('.cancel-reply-trigger').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const commentId = btn.dataset.commentId;
+      const form = document.getElementById(`reply-form-${commentId}`);
+      form?.classList.add('hidden');
+      const textarea = form?.querySelector('textarea');
+      if (textarea) textarea.value = '';
+    });
+  });
+
+  document.querySelectorAll('.submit-reply-trigger').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const commentId = btn.dataset.commentId;
+      const form = document.getElementById(`reply-form-${commentId}`);
+      const textarea = form?.querySelector('textarea');
+      const replyText = textarea?.value?.trim();
+      if (!replyText) return;
+
+      if (!readerState.userId) {
+        showToast('Please sign in to reply.', 'info');
+        return;
+      }
+
+      btn.disabled = true;
+      try {
+        const replyPayload = {
+          text: replyText,
+          taleId: readerState.taleId,
+          authorId: readerState.userId,
+          authorName: readerState.userName || 'Anonymous',
+          parentId: commentId,
+          isEdited: false,
+          isDeleted: false,
+          likeCount: 0,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        };
+
+        const docRef = await addDoc(
+          refs.commentReplies(readerState.taleId, commentId),
+          replyPayload
+        );
+        const comment = readerState.comments.find((c) => c.id === commentId);
+        if (comment) {
+          comment.replies ??= [];
+          const isReplyAuthor = Boolean(
+            readerState.authorId &&
+            readerState.userId &&
+            readerState.userId === readerState.authorId
+          );
+          comment.replies.push({
+            id: docRef.id,
+            parentId: commentId,
+            author: readerState.userName || 'You',
+            authorId: readerState.userId,
+            isTaleAuthor: isReplyAuthor,
+            isEdited: false,
+            isDeleted: false,
+            initials: (readerState.userName || 'Y').slice(0, 2).toUpperCase(),
+            body: replyText,
+            at: Date.now(),
+            likes: 0,
+            liked: false,
+          });
+        }
+        showToast('Reply posted.', 'success');
+      } catch (err) {
+        log.error('Failed to post reply:', err);
+        showToast('Could not post reply.', 'error');
+      } finally {
+        _renderDiscussion();
+      }
+    });
+  });
+
+  // ── Reply to Reply Triggers & Form ──────────────────────────────
+  document.querySelectorAll('.reply-to-reply-trigger').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const replyId = btn.dataset.replyId;
+      const form = document.getElementById(`reply-to-reply-form-${replyId}`);
+      if (form) {
+        const willShow = form.classList.contains('hidden');
+        form.classList.toggle('hidden');
+        if (willShow) {
+          form.querySelector('textarea')?.focus();
+        }
+      }
+    });
+  });
+
+  document.querySelectorAll('.cancel-reply-to-reply-trigger').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const replyId = btn.dataset.replyId;
+      const form = document.getElementById(`reply-to-reply-form-${replyId}`);
+      form?.classList.add('hidden');
+      const textarea = form?.querySelector('textarea');
+      if (textarea) textarea.value = '';
+    });
+  });
+
+  document.querySelectorAll('.submit-reply-to-reply-trigger').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const commentId = btn.dataset.commentId;
+      const replyId = btn.dataset.replyId;
+      const replyAuthor = btn.dataset.replyAuthor || 'Anonymous';
+      const form = document.getElementById(`reply-to-reply-form-${replyId}`);
+      const textarea = form?.querySelector('textarea');
+      const replyText = textarea?.value?.trim();
+      if (!replyText) return;
+
+      if (!readerState.userId) {
+        showToast('Please sign in to reply.', 'info');
+        return;
+      }
+
+      btn.disabled = true;
+      try {
+        const replyPayload = {
+          text: replyText,
+          taleId: readerState.taleId,
+          authorId: readerState.userId,
+          authorName: readerState.userName || 'Anonymous',
+          parentId: commentId,
+          replyToId: replyId,
+          replyToAuthorName: replyAuthor,
+          isEdited: false,
+          isDeleted: false,
+          likeCount: 0,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        };
+
+        const docRef = await addDoc(
+          refs.commentReplies(readerState.taleId, commentId),
+          replyPayload
+        );
+        const comment = readerState.comments.find((c) => c.id === commentId);
+        if (comment) {
+          comment.replies ??= [];
+          const isReplyAuthor = Boolean(
+            readerState.authorId &&
+            readerState.userId &&
+            readerState.userId === readerState.authorId
+          );
+          comment.replies.push({
+            id: docRef.id,
+            parentId: commentId,
+            replyToId: replyId,
+            replyToAuthor: replyAuthor,
+            author: readerState.userName || 'You',
+            authorId: readerState.userId,
+            isTaleAuthor: isReplyAuthor,
+            isEdited: false,
+            isDeleted: false,
+            initials: (readerState.userName || 'Y').slice(0, 2).toUpperCase(),
+            body: replyText,
+            at: Date.now(),
+            likes: 0,
+            liked: false,
+          });
+        }
+        showToast('Reply posted.', 'success');
+      } catch (err) {
+        log.error('Failed to post nested reply:', err);
+        showToast('Could not post reply.', 'error');
+      } finally {
+        _renderDiscussion();
+      }
+    });
+  });
+
+  // ── Comment Edit Triggers & Form ───────────────────────────────
+  document.querySelectorAll('.edit-trigger').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const commentId = btn.dataset.commentId;
+      const form = document.getElementById(`comment-edit-form-${commentId}`);
+      const bodyEl = document.getElementById(`comment-body-${commentId}`);
+      if (form && bodyEl) {
+        form.classList.remove('hidden');
+        bodyEl.classList.add('hidden');
+        form.querySelector('textarea')?.focus();
+      }
+    });
+  });
+
+  document.querySelectorAll('.cancel-edit-trigger').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const commentId = btn.dataset.commentId;
+      const form = document.getElementById(`comment-edit-form-${commentId}`);
+      const bodyEl = document.getElementById(`comment-body-${commentId}`);
+      form?.classList.add('hidden');
+      bodyEl?.classList.remove('hidden');
+    });
+  });
+
+  document.querySelectorAll('.save-edit-trigger').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const commentId = btn.dataset.commentId;
+      const form = document.getElementById(`comment-edit-form-${commentId}`);
+      const textarea = form?.querySelector('textarea');
+      const updatedText = textarea?.value?.trim();
+      if (!updatedText) {
+        showToast('Comment cannot be empty.', 'warning');
+        return;
+      }
+
+      btn.disabled = true;
+      try {
+        await updateDoc(refs.comment(readerState.taleId, commentId), {
+          text: updatedText,
+          isEdited: true,
+          editedAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+
+        const comment = readerState.comments.find((c) => c.id === commentId);
+        if (comment) {
+          comment.body = updatedText;
+          comment.isEdited = true;
+        }
+        showToast('Comment updated.', 'success');
+      } catch (err) {
+        log.error('Failed to update comment:', err);
+        showToast('Could not update comment.', 'error');
+      } finally {
+        _renderDiscussion();
+      }
+    });
+  });
+
+  // ── Comment Delete Trigger ────────────────────────────────────
+  document.querySelectorAll('.delete-trigger').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const commentId = btn.dataset.commentId;
+      if (
+        typeof window !== 'undefined' &&
+        window.confirm &&
+        !window.confirm('Delete this comment?')
+      ) {
+        return;
+      }
+
+      btn.disabled = true;
+      try {
+        await updateDoc(refs.comment(readerState.taleId, commentId), {
+          text: '',
+          isDeleted: true,
+          deletedAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+
+        const comment = readerState.comments.find((c) => c.id === commentId);
+        if (comment) {
+          comment.isDeleted = true;
+          comment.body = '';
+        }
+        showToast('Comment deleted.', 'info');
+      } catch (err) {
+        log.error('Failed to delete comment:', err);
+        showToast('Could not delete comment.', 'error');
+      } finally {
+        _renderDiscussion();
+      }
+    });
+  });
+
+  // ── Reply Like, Edit, Delete Triggers ─────────────────────────
+  document.querySelectorAll('.reply-like-trigger').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const commentId = btn.dataset.commentId;
+      const replyId = btn.dataset.replyId;
+      const comment = readerState.comments.find((c) => c.id === commentId);
+      const reply = comment?.replies?.find((r) => r.id === replyId);
+      if (!reply) return;
+
+      if (!readerState.userId) {
+        showToast('Please sign in to like replies.', 'info');
+        return;
+      }
+
+      btn.disabled = true;
+      const willLike = !reply.liked;
+      const newCount = Math.max(0, (reply.likes || 0) + (willLike ? 1 : -1));
+      reply.liked = willLike;
+      reply.likes = newCount;
+
+      try {
+        if (willLike) {
+          await setDoc(refs.commentLike(readerState.taleId, replyId, readerState.userId), {
+            userId: readerState.userId,
+            createdAt: serverTimestamp(),
+          });
+        } else {
+          await deleteDoc(refs.commentLike(readerState.taleId, replyId, readerState.userId));
+        }
+
+        await updateDoc(refs.commentReply(readerState.taleId, commentId, replyId), {
+          likeCount: newCount,
+        });
+      } catch (err) {
+        log.error('Reply like failed:', err);
+        reply.liked = !willLike;
+        reply.likes = Math.max(0, (reply.likes || 0) + (willLike ? -1 : 1));
+        showToast('Could not update like.', 'error');
+      } finally {
+        _renderDiscussion();
+      }
+    });
+  });
+
+  document.querySelectorAll('.reply-edit-trigger').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const replyId = btn.dataset.replyId;
+      const form = document.getElementById(`reply-edit-form-${replyId}`);
+      const textEl = document.getElementById(`reply-body-${replyId}`);
+      if (form && textEl) {
+        form.classList.remove('hidden');
+        textEl.classList.add('hidden');
+        form.querySelector('textarea')?.focus();
+      }
+    });
+  });
+
+  document.querySelectorAll('.cancel-reply-edit-trigger').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const replyId = btn.dataset.replyId;
+      const form = document.getElementById(`reply-edit-form-${replyId}`);
+      const textEl = document.getElementById(`reply-body-${replyId}`);
+      form?.classList.add('hidden');
+      textEl?.classList.remove('hidden');
+    });
+  });
+
+  document.querySelectorAll('.save-reply-edit-trigger').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const replyId = btn.dataset.replyId;
+      const commentId = btn.dataset.commentId;
+      const form = document.getElementById(`reply-edit-form-${replyId}`);
+      const textarea = form?.querySelector('textarea');
+      const updatedText = textarea?.value?.trim();
+      if (!updatedText) {
+        showToast('Reply cannot be empty.', 'warning');
+        return;
+      }
+
+      btn.disabled = true;
+      try {
+        await updateDoc(refs.commentReply(readerState.taleId, commentId, replyId), {
+          text: updatedText,
+          isEdited: true,
+          editedAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+
+        const comment = readerState.comments.find((c) => c.id === commentId);
+        const reply = comment?.replies?.find((r) => r.id === replyId);
+        if (reply) {
+          reply.body = updatedText;
+          reply.isEdited = true;
+        }
+        showToast('Reply updated.', 'success');
+      } catch (err) {
+        log.error('Failed to update reply:', err);
+        showToast('Could not update reply.', 'error');
+      } finally {
+        _renderDiscussion();
+      }
+    });
+  });
+
+  document.querySelectorAll('.reply-delete-trigger').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const replyId = btn.dataset.replyId;
+      const commentId = btn.dataset.commentId;
+      if (
+        typeof window !== 'undefined' &&
+        window.confirm &&
+        !window.confirm('Delete this reply?')
+      ) {
+        return;
+      }
+
+      btn.disabled = true;
+      try {
+        await updateDoc(refs.commentReply(readerState.taleId, commentId, replyId), {
+          text: '',
+          isDeleted: true,
+          deletedAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+
+        const comment = readerState.comments.find((c) => c.id === commentId);
+        const reply = comment?.replies?.find((r) => r.id === replyId);
+        if (reply) {
+          reply.isDeleted = true;
+          reply.body = '';
+        }
+        showToast('Reply deleted.', 'info');
+      } catch (err) {
+        log.error('Failed to delete reply:', err);
+        showToast('Could not delete reply.', 'error');
+      } finally {
+        _renderDiscussion();
+      }
+    });
   });
 }
 
@@ -587,81 +1149,6 @@ function _bindTTSEvents() {
     }
     _refreshPanelContent();
   });
-}
-
-/* ─────────────────────────────────────────────
-   Engagement
-   ───────────────────────────────────────────── */
-
-function initEngagement() {
-  document.getElementById('clap-btn')?.addEventListener('click', async () => {
-    if (!readerState.userId) {
-      showToast('Please sign in to applaud this chronicle.', 'info');
-      return;
-    }
-    try {
-      const result = await toggleResonance(readerState.taleId);
-      if (result.status === 'rate-limited') return;
-      readerState.hasClapped = Boolean(result.active);
-      readerState.claps =
-        result.count ??
-        (readerState.hasClapped ? readerState.claps + 1 : Math.max(0, readerState.claps - 1));
-      _renderEngagement();
-      showToast(result.active ? 'Soul resonance aligned.' : 'Resonance released.', 'success');
-    } catch (err) {
-      log.error('Resonance toggle error:', err);
-      showToast('Could not update resonance.', 'error');
-    }
-  });
-
-  document.getElementById('eng-share')?.addEventListener('click', () => openPanel('share'));
-  document.getElementById('eng-comment')?.addEventListener('click', () => openPanel('comments'));
-
-  document.querySelector('.follow-btn')?.addEventListener('click', async () => {
-    if (!readerState.userId) {
-      showToast('Please sign in to follow this author.', 'info');
-      return;
-    }
-    if (!readerState.authorId || readerState.userId === readerState.authorId) return;
-
-    try {
-      const following = await toggleFollowAuthor({
-        userId: readerState.userId,
-        targetAuthorId: readerState.authorId,
-      });
-      readerState.isFollowingAuthor = following;
-      _renderFollowButton();
-      showToast(following ? 'Following scribe.' : 'Unfollowed scribe.', 'success');
-    } catch (err) {
-      log.error('Follow author error:', err);
-      showToast('Could not update follow status.', 'error');
-    }
-  });
-}
-
-function _renderFollowButton() {
-  const btn = document.querySelector('.follow-btn');
-  if (!btn) return;
-  if (!readerState.authorId || readerState.userId === readerState.authorId) {
-    btn.style.display = 'none';
-    return;
-  }
-  btn.style.display = '';
-  btn.textContent = readerState.isFollowingAuthor ? 'Following' : 'Follow';
-  btn.classList.toggle('following', readerState.isFollowingAuthor);
-}
-
-function _renderEngagement() {
-  const clapCount = document.getElementById('clap-count');
-  const clapLabel = document.getElementById('clap-label');
-  const clapIconWrap = document.getElementById('clap-icon-wrap');
-
-  if (clapCount) clapCount.textContent = readerState.claps;
-  if (clapLabel) clapLabel.textContent = readerState.hasClapped ? 'Thank you' : 'Tap to applaud';
-  if (clapIconWrap) {
-    clapIconWrap.classList.toggle('clapped', readerState.hasClapped);
-    if (readerState.hasClapped) clapIconWrap.style.boxShadow = '0 0 30px -4px rgba(245,158,11,0.6)';
-  }
 }
 
 /* ─────────────────────────────────────────────
@@ -715,6 +1202,20 @@ function initSelectionToolbar() {
     readerState.selection = null;
     toolbar.classList.add('hidden');
   });
+
+  document.getElementById('sel-share')?.addEventListener('click', () => {
+    if (readerState.selection?.text) {
+      openQuoteModal({
+        quote: readerState.selection.text,
+        taleTitle: readerState.taleTitle,
+        authorName: readerState.authorName,
+        coverUrl: readerState.coverUrl,
+        chapterNum: readerState.chapterIndex + 1,
+      });
+    }
+    readerState.selection = null;
+    toolbar.classList.add('hidden');
+  });
 }
 
 function _addHighlight(color, note = '') {
@@ -727,6 +1228,7 @@ function _addHighlight(color, note = '') {
     at: Date.now(),
   });
   _saveHighlights();
+  applyDOMHighlights(readerState.highlights);
   readerState.selection = null;
   window.getSelection()?.removeAllRanges();
   document.getElementById('selection-toolbar')?.classList.add('hidden');
@@ -735,41 +1237,70 @@ function _addHighlight(color, note = '') {
 }
 
 /* ─────────────────────────────────────────────
-   Bookmark
+   Bookmark (Reading Bookmark)
    ───────────────────────────────────────────── */
+
+function _updateBookmarkButtons(isBookmarked) {
+  readerState.bookmarked = Boolean(isBookmarked);
+  document
+    .querySelectorAll(
+      '#sidebar-bookmark, #eng-bookmark-mobile, #top-bar-bookmark, #sidebarBookmark'
+    )
+    .forEach((b) => {
+      b.dataset.active = String(readerState.bookmarked);
+      b.setAttribute(
+        'aria-label',
+        readerState.bookmarked ? 'Remove bookmark' : 'Bookmark this chapter'
+      );
+      b.setAttribute('title', readerState.bookmarked ? 'Remove bookmark' : 'Bookmark this chapter');
+    });
+}
+
+function _syncCurrentChapterBookmark() {
+  const isBookmarked = isChapterBookmarked({
+    userId: readerState.userId,
+    taleId: readerState.taleId,
+    chapterIndex: readerState.chapterIndex,
+  });
+  _updateBookmarkButtons(isBookmarked);
+}
 
 async function _handleBookmark() {
   const userId = readerState.userId;
   const taleId_ = readerState.taleId;
-  if (!userId || !taleId_) return;
+  if (!taleId_) return;
 
-  readerState.bookmarked = !readerState.bookmarked;
-
-  document
-    .querySelectorAll(
-      '#sidebar-bookmark, #eng-bookmark, #eng-bookmark-mobile, #sidebarBookmark, #engBookmark'
-    )
-    .forEach((b) => (b.dataset.active = String(readerState.bookmarked)));
+  const currentChapterIndex = readerState.chapterIndex;
+  const currentBookmark = getReaderBookmark({ userId, taleId: taleId_ });
+  const isCurrentlyBookmarkedHere =
+    currentBookmark && currentBookmark.chapterIndex === currentChapterIndex;
 
   try {
-    if (readerState.bookmarked) {
-      await addToBookmarks({
+    if (isCurrentlyBookmarkedHere) {
+      removeReaderBookmark({ userId, taleId: taleId_ });
+      _updateBookmarkButtons(false);
+      showToast('Bookmark removed.', 'info');
+    } else {
+      const scroller =
+        document.getElementById('scroller') || document.getElementById('main-scroll');
+      const chapterTitle = readerState.chapter?.title || `Fragment ${currentChapterIndex + 1}`;
+      saveReaderBookmark({
         userId,
         taleId: taleId_,
-        tale: {
-          title: readerState.taleTitle,
-          coverUrl: readerState.coverUrl,
-          authorName: readerState.authorName,
-        },
+        chapterIndex: currentChapterIndex,
+        chapterTitle,
+        scrollTop: scroller?.scrollTop || 0,
+        scrollPercent: Math.round(readerState.progress || 0),
       });
-      showToast('Saved to Library.', 'success');
-    } else {
-      await removeFromBookmarks({ userId, taleId: taleId_ });
-      showToast('Removed from Library.', 'info');
+      _updateBookmarkButtons(true);
+      showToast(`Bookmarked ${chapterTitle}.`, 'success');
+    }
+
+    if (readerState.openTool === 'toc') {
+      _refreshPanelContent();
     }
   } catch (err) {
     log.error('Bookmark failed:', err);
-    readerState.bookmarked = !readerState.bookmarked;
     showToast('Could not update bookmark.', 'error');
   }
 }
@@ -847,22 +1378,11 @@ initAuth(async (user) => {
   // Load cloud prefs (non-blocking — will override localStorage defaults when ready)
   _loadAndApplyCloudPrefs(user.uid);
 
-  // Check bookmark status
-  readerState.bookmarked = await isBookmarked({ userId: user.uid, taleId });
+  // Check reading bookmark status for current chapter
+  _syncCurrentChapterBookmark();
 
   // Load content
   await loadReaderMeta(taleId);
-
-  // Check resonance status
-  readerState.hasClapped = await getResonanceStatus(taleId);
-
-  // Check follow status
-  if (user.uid && readerState.authorId && user.uid !== readerState.authorId) {
-    readerState.isFollowingAuthor = await isFollowingAuthor({
-      userId: user.uid,
-      targetAuthorId: readerState.authorId,
-    });
-  }
 
   _loadHighlights();
   _loadComments();
@@ -871,51 +1391,109 @@ initAuth(async (user) => {
   readyReveal();
   if (!navigation) return;
 
+  applyDOMHighlights(readerState.highlights);
+  document.getElementById('article-body')?.addEventListener('click', (e) => {
+    const mark = e.target.closest('mark.reader-highlight');
+    if (!mark) return;
+    const hlId = mark.dataset.highlightId;
+    const highlight = readerState.highlights.find((h) => h.id === hlId);
+    if (highlight) {
+      openQuoteModal({
+        quote: highlight.text,
+        taleTitle: readerState.taleTitle,
+        authorName: readerState.authorName,
+        coverUrl: readerState.coverUrl,
+        chapterNum: readerState.chapterIndex + 1,
+      });
+    }
+  });
+
   applyNavigation(navigation);
+  _renderDiscussion();
   const localProgress = getChapterProgress({ userId: user.uid, taleId, chapterIndex });
-  restoreScrollProgress({ scrollPercent: localProgress?.scrollPercent ?? 0 });
+  const initialScrollPercent = localProgress?.scrollPercent ?? 0;
+  const initialScrollTop = localProgress?.scrollTop ?? 0;
+  readerState.progress = initialScrollPercent >= 100 ? 100 : initialScrollPercent;
+
+  updateReaderProgress({ scrollPercent: readerState.progress });
+  restoreScrollProgress({ scrollPercent: initialScrollPercent, scrollTop: initialScrollTop });
 
   // Scroll tracking
   bindScrollProgress({
-    onScroll(scrollPercent) {
-      readerState.progress = scrollPercent;
-      saveReaderProgress({ userId: user.uid, taleId, chapterIndex, scrollPercent });
-      scheduleProgressSync({ userId: user.uid, taleId, chapterIndex, scrollPercent });
+    initialPercent: readerState.progress,
+    onScroll(scrollPercent, scrollTop) {
+      if (readerState.progress >= 100 || scrollPercent >= 100) {
+        readerState.progress = 100;
+        scrollPercent = 100;
+      } else {
+        readerState.progress = scrollPercent;
+      }
+
+      const safeScrollTop =
+        typeof scrollTop === 'number'
+          ? scrollTop
+          : (document.getElementById('scroller')?.scrollTop ?? 0);
+
+      saveReaderProgress({
+        userId: user.uid,
+        taleId,
+        chapterIndex,
+        scrollPercent: readerState.progress,
+        scrollTop: safeScrollTop,
+      });
+      scheduleProgressSync({
+        userId: user.uid,
+        taleId,
+        chapterIndex,
+        scrollPercent: readerState.progress,
+      });
       updateTOCScrollSpy();
 
-      const pctEl = document.getElementById('top-bar-pct');
-      if (pctEl) pctEl.textContent = Math.round(scrollPercent) + '%';
-
-      const progressBar = document.getElementById('progress-bar');
-      if (progressBar) progressBar.style.width = scrollPercent + '%';
+      updateReaderProgress({ scrollPercent: readerState.progress });
 
       if (readerState.openTool === 'toc') _refreshPanelContent();
     },
   });
 
   initSidebar();
-  initEngagement();
   initSelectionToolbar();
-  _renderEngagement();
-  _renderFollowButton();
-
-  // Open TOC by default on desktop
-  if (window.innerWidth >= 1024) openPanel('toc');
 
   // Global action bindings
   document.getElementById('sidebar-bookmark')?.addEventListener('click', _handleBookmark);
-  document.getElementById('eng-bookmark')?.addEventListener('click', _handleBookmark);
   document.getElementById('eng-bookmark-mobile')?.addEventListener('click', _handleBookmark);
-  document.getElementById('sidebar-focus-mobile')?.addEventListener('click', toggleFocusMode);
+  document.getElementById('top-bar-bookmark')?.addEventListener('click', _handleBookmark);
+  document.getElementById('top-bar-focus')?.addEventListener('click', toggleFocusMode);
+
+  document.getElementById('top-bar-share')?.addEventListener('click', async (e) => {
+    e.preventDefault();
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: readerState.taleTitle || document.title || 'TaleTranscend',
+          url: window.location.href,
+        });
+        return;
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+      }
+    }
+    if (readerState.openTool === 'share' && _isPanelVisible()) {
+      closePanel();
+    } else {
+      openPanel('share');
+    }
+  });
+
   document.getElementById('close-panel')?.addEventListener('click', closePanel);
   document.getElementById('tool-panel-backdrop')?.addEventListener('click', closePanel);
-  document.getElementById('back-to-top')?.addEventListener('click', () => {
-    document.getElementById('scroller')?.scrollTo({ top: 0, behavior: 'smooth' });
-  });
+
   document.getElementById('back-btn')?.addEventListener('click', () => goBackToTale());
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && _isPanelVisible()) closePanel();
+    if (e.key === 'Escape') {
+      if (_isPanelVisible()) closePanel();
+      else if (readerState.focusMode) toggleFocusMode();
+    }
   });
 
   initIcons();
@@ -923,6 +1501,24 @@ initAuth(async (user) => {
 
 document.addEventListener('DOMContentLoaded', () => initIcons());
 
+function _saveCurrentScroll() {
+  const scroller = document.getElementById('scroller');
+  if (scroller && readerState.userId && taleId) {
+    saveReaderProgress({
+      userId: readerState.userId,
+      taleId,
+      chapterIndex,
+      scrollPercent: readerState.progress,
+      scrollTop: scroller.scrollTop,
+    });
+  }
+}
+
 window.addEventListener('beforeunload', () => {
+  _saveCurrentScroll();
   if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+});
+
+window.addEventListener('pagehide', () => {
+  _saveCurrentScroll();
 });

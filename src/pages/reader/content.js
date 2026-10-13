@@ -78,9 +78,6 @@ export async function loadReaderMeta(taleId) {
   // Populate UI elements
   setText('article-meta-title', readerState.taleTitle);
   setText('author-name', readerState.authorName);
-  setText('author-heading', readerState.authorName);
-  setText('author-handle', readerState.authorHandle);
-  setText('author-card-bio', readerState.authorBio);
   setText('top-bar-ch-title', 'Loading...');
 
   _renderBreadcrumbs(readerState.taleTitle);
@@ -267,9 +264,7 @@ function _renderAvatars(name) {
   const html = `<div style="display:flex;align-items:center;justify-content:center;border-radius:50%;color:#fff;width:40px;height:40px;font-size:13px;background:linear-gradient(135deg,rgba(99,102,241,0.85),rgba(168,85,247,0.85));box-shadow:0 0 18px -6px rgba(139,124,246,0.55);font-family:var(--font-serif);letter-spacing:0.08em">${initials}</div>`;
 
   const topAvatar = document.getElementById('author-avatar');
-  const cardAvatar = document.getElementById('author-card-avatar');
   if (topAvatar) topAvatar.innerHTML = html;
-  if (cardAvatar) cardAvatar.innerHTML = html;
 }
 
 function _createFigure(tint) {

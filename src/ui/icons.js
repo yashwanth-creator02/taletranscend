@@ -144,6 +144,7 @@ async function _loadIcons() {
     Settings2: L.Settings2,
     Signature: L.Signature,
     MoreHorizontal: L.MoreHorizontal,
+    MoreVertical: L.MoreVertical,
     Home: L.Home,
     // Writing & Editor
     PenTool: L.PenTool,

@@ -54,18 +54,35 @@ function writeStorage(data) {
  * @param {number} params.chapterIndex
  * @param {number} params.scrollPercent
  */
-export function saveReaderProgress({ userId, taleId, chapterIndex, scrollPercent }) {
+export function saveReaderProgress({ userId, taleId, chapterIndex, scrollPercent, scrollTop }) {
   if (!userId || !taleId || typeof chapterIndex !== 'number') return;
 
-  log.debug('Saving local progress', { taleId, chapterIndex, scrollPercent });
+  log.debug('Saving local progress', { taleId, chapterIndex, scrollPercent, scrollTop });
   const store = readStorage();
 
   // Initialize nested structure if it does not exist
   store[userId] ??= {};
   store[userId][taleId] ??= { chapters: {}, totalReadTimeMs: 0 };
 
+  const existingChapter = store[userId][taleId].chapters[chapterIndex];
+
+  // If chapter was already at 100% or reaches 100%, reading progress stays locked at 100%
+  const isCompleted =
+    (existingChapter && existingChapter.scrollPercent >= 100) ||
+    (typeof scrollPercent === 'number' && scrollPercent >= 100);
+
+  const safePercent = isCompleted
+    ? 100
+    : typeof scrollPercent === 'number'
+      ? Math.min(100, Math.max(0, scrollPercent))
+      : (existingChapter?.scrollPercent ?? 0);
+
+  const safeScrollTop =
+    typeof scrollTop === 'number' ? Math.max(0, scrollTop) : existingChapter?.scrollTop;
+
   store[userId][taleId].chapters[chapterIndex] = {
-    scrollPercent,
+    scrollPercent: safePercent,
+    ...(typeof safeScrollTop === 'number' ? { scrollTop: safeScrollTop } : {}),
     updatedAt: Date.now(),
   };
 
@@ -297,4 +314,95 @@ export function markAllChaptersUnread({ userId, taleId }) {
     store[userId][taleId].chapters = {};
     writeStorage(store);
   }
+}
+
+/* ================= Reader Bookmark ================= */
+
+/**
+ * Saves a reading bookmark for a specific tale to localStorage.
+ * Unlike shelf/library bookmarks which save the whole tale to user shelf,
+ * a reader bookmark marks the reader's current location within the story.
+ *
+ * @param {Object} params
+ * @param {string} [params.userId]
+ * @param {string} params.taleId
+ * @param {number} params.chapterIndex
+ * @param {string} [params.chapterTitle]
+ * @param {number} [params.scrollTop]
+ * @param {number} [params.scrollPercent]
+ * @returns {Object|null}
+ */
+export function saveReaderBookmark({
+  userId,
+  taleId,
+  chapterIndex,
+  chapterTitle = '',
+  scrollTop = 0,
+  scrollPercent = 0,
+}) {
+  if (!taleId) return null;
+  const uid = userId || 'anonymous';
+  const store = readStorage();
+
+  store[uid] ??= {};
+  store[uid][taleId] ??= { chapters: {}, totalReadTimeMs: 0 };
+
+  const bookmark = {
+    chapterIndex: typeof chapterIndex === 'number' ? chapterIndex : 0,
+    chapterTitle: String(chapterTitle || ''),
+    scrollTop: typeof scrollTop === 'number' ? Math.max(0, scrollTop) : 0,
+    scrollPercent:
+      typeof scrollPercent === 'number' ? Math.min(100, Math.max(0, scrollPercent)) : 0,
+    updatedAt: Date.now(),
+  };
+
+  store[uid][taleId].bookmark = bookmark;
+  writeStorage(store);
+  return bookmark;
+}
+
+/**
+ * Retrieves the stored reading bookmark for a tale.
+ *
+ * @param {Object} params
+ * @param {string} [params.userId]
+ * @param {string} params.taleId
+ * @returns {Object|null}
+ */
+export function getReaderBookmark({ userId, taleId }) {
+  if (!taleId) return null;
+  const uid = userId || 'anonymous';
+  return readStorage()[uid]?.[taleId]?.bookmark || null;
+}
+
+/**
+ * Removes the reading bookmark for a tale.
+ *
+ * @param {Object} params
+ * @param {string} [params.userId]
+ * @param {string} params.taleId
+ */
+export function removeReaderBookmark({ userId, taleId }) {
+  if (!taleId) return;
+  const uid = userId || 'anonymous';
+  const store = readStorage();
+  if (store[uid]?.[taleId]?.bookmark) {
+    delete store[uid][taleId].bookmark;
+    writeStorage(store);
+  }
+}
+
+/**
+ * Checks whether a specific chapter is bookmarked.
+ *
+ * @param {Object} params
+ * @param {string} [params.userId]
+ * @param {string} params.taleId
+ * @param {number} params.chapterIndex
+ * @returns {boolean}
+ */
+export function isChapterBookmarked({ userId, taleId, chapterIndex }) {
+  if (!taleId || typeof chapterIndex !== 'number') return false;
+  const bookmark = getReaderBookmark({ userId, taleId });
+  return Boolean(bookmark && bookmark.chapterIndex === chapterIndex);
 }

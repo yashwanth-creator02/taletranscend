@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   loadLocalProgress,
   saveLocalProgress,
+  saveReaderProgress,
   getOverallProgress,
   markChapterRead,
   markChapterUnread,
@@ -49,6 +50,61 @@ describe('localProgress.service', () => {
     const progress = loadLocalProgress('tale-123');
     expect(progress.chapterIndex).toBe(3);
     expect(progress.percent).toBe(80);
+  });
+
+  it('persists 100% progress and ignores subsequent lower scroll percentages', () => {
+    saveLocalProgress('tale-123', 1, 100);
+    const completed = loadLocalProgress('tale-123');
+    expect(completed.percent).toBe(100);
+
+    // Attempt to save lower progress on the same chapter
+    saveLocalProgress('tale-123', 1, 40);
+    const stillCompleted = loadLocalProgress('tale-123');
+    expect(stillCompleted.percent).toBe(100);
+  });
+
+  it('saves and updates scrollTop even when progress reaches 100%', () => {
+    const userId = 'user-scroll-test';
+    const taleId = 'tale-scroll-123';
+    const chapterIndex = 1;
+
+    saveReaderProgress({
+      userId,
+      taleId,
+      chapterIndex,
+      scrollPercent: 50,
+      scrollTop: 600,
+    });
+
+    const initial = getChapterProgress({ userId, taleId, chapterIndex });
+    expect(initial.scrollPercent).toBe(50);
+    expect(initial.scrollTop).toBe(600);
+
+    // Mark as 100%
+    saveReaderProgress({
+      userId,
+      taleId,
+      chapterIndex,
+      scrollPercent: 100,
+      scrollTop: 1500,
+    });
+
+    const at100 = getChapterProgress({ userId, taleId, chapterIndex });
+    expect(at100.scrollPercent).toBe(100);
+    expect(at100.scrollTop).toBe(1500);
+
+    // Reading progress stays locked at 100%, but scroll position continues to be remembered
+    saveReaderProgress({
+      userId,
+      taleId,
+      chapterIndex,
+      scrollPercent: 20,
+      scrollTop: 300,
+    });
+
+    const updated = getChapterProgress({ userId, taleId, chapterIndex });
+    expect(updated.scrollPercent).toBe(100);
+    expect(updated.scrollTop).toBe(300);
   });
 });
 
@@ -109,6 +165,54 @@ describe('getOverallProgress', () => {
       markAllChaptersUnread({ userId, taleId });
       const chaptersUnread = getAllLocalChapters({ userId, taleId });
       expect(Object.keys(chaptersUnread)).toHaveLength(0);
+    });
+  });
+
+  describe('reader bookmarks', () => {
+    it('saves and retrieves reading bookmark', async () => {
+      const { saveReaderBookmark, getReaderBookmark, isChapterBookmarked } =
+        await import('../localProgress.service.js');
+      const saved = saveReaderBookmark({
+        userId: 'u1',
+        taleId: 't1',
+        chapterIndex: 2,
+        chapterTitle: 'The Awakening',
+        scrollTop: 450,
+        scrollPercent: 40,
+      });
+
+      expect(saved.chapterIndex).toBe(2);
+      expect(saved.chapterTitle).toBe('The Awakening');
+      expect(saved.scrollTop).toBe(450);
+      expect(saved.scrollPercent).toBe(40);
+
+      const retrieved = getReaderBookmark({ userId: 'u1', taleId: 't1' });
+      expect(retrieved).toEqual(saved);
+      expect(isChapterBookmarked({ userId: 'u1', taleId: 't1', chapterIndex: 2 })).toBe(true);
+      expect(isChapterBookmarked({ userId: 'u1', taleId: 't1', chapterIndex: 1 })).toBe(false);
+    });
+
+    it('removes reading bookmark', async () => {
+      const { saveReaderBookmark, getReaderBookmark, removeReaderBookmark } =
+        await import('../localProgress.service.js');
+      saveReaderBookmark({ userId: 'u1', taleId: 't1', chapterIndex: 0 });
+      expect(getReaderBookmark({ userId: 'u1', taleId: 't1' })).toBeDefined();
+
+      removeReaderBookmark({ userId: 'u1', taleId: 't1' });
+      expect(getReaderBookmark({ userId: 'u1', taleId: 't1' })).toBeNull();
+    });
+
+    it('handles anonymous user bookmarking gracefully', async () => {
+      const { saveReaderBookmark, getReaderBookmark } = await import('../localProgress.service.js');
+      saveReaderBookmark({
+        taleId: 't2',
+        chapterIndex: 1,
+        chapterTitle: 'Fragment 2',
+      });
+
+      const anonBookmark = getReaderBookmark({ taleId: 't2' });
+      expect(anonBookmark.chapterIndex).toBe(1);
+      expect(anonBookmark.chapterTitle).toBe('Fragment 2');
     });
   });
 });
