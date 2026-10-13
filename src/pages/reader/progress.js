@@ -70,7 +70,7 @@ export function bindScrollProgress({ onScroll, initialPercent = 0 }) {
 
     updateReaderProgress({ scrollPercent });
 
-    // Show/hide back to top button
+    // Show/hide back to top button if present
     const backToTop =
       document.getElementById('backToTop') || document.getElementById('back-to-top');
     if (backToTop) {

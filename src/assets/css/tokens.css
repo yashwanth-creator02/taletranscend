@@ -78,6 +78,11 @@
   --danger-rgb: 239 68 68;
   --info-rgb: 56 189 248;
 
+  --success-light-rgb: 4 120 87;
+  --warning-light-rgb: 180 83 9;
+  --danger-light-rgb: 185 28 28;
+  --info-light-rgb: 3 105 161;
+
   /* ── Base greys ──────────────────────────────────────────────────────── */
   /* The "room" the interface sits in. Three depths, nothing more: going
      finer than this produced the near-identical #07070b / #0a0a10 / #0d0d14
@@ -186,6 +191,11 @@
   --warning: rgb(var(--warning-rgb));
   --danger: rgb(var(--danger-rgb));
   --info: rgb(var(--info-rgb));
+
+  --success-contrast: rgb(var(--success-light-rgb));
+  --warning-contrast: rgb(var(--warning-light-rgb));
+  --danger-contrast: rgb(var(--danger-light-rgb));
+  --info-contrast: rgb(var(--info-light-rgb));
 
   --success-subtle: rgb(var(--success-rgb) / var(--a-06));
   --warning-subtle: rgb(var(--warning-rgb) / var(--a-06));

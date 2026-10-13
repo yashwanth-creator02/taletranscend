@@ -1489,9 +1489,7 @@ initAuth(async (user) => {
 
   document.getElementById('close-panel')?.addEventListener('click', closePanel);
   document.getElementById('tool-panel-backdrop')?.addEventListener('click', closePanel);
-  document.getElementById('back-to-top')?.addEventListener('click', () => {
-    document.getElementById('scroller')?.scrollTo({ top: 0, behavior: 'smooth' });
-  });
+
   document.getElementById('back-btn')?.addEventListener('click', () => goBackToTale());
 
   document.addEventListener('keydown', (e) => {

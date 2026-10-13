@@ -1341,13 +1341,6 @@ body.focus-mode #top-bar-focus:hover {
     margin-left: 0.25rem;
     padding-left: 0.25rem;
   }
-
-  .back-to-top {
-    right: 0.75rem;
-    width: 40px;
-    height: 40px;
-    bottom: calc(4.25rem + env(safe-area-inset-bottom));
-  }
 }
 
 .comment-reply-card {
@@ -1982,30 +1975,198 @@ body.focus-mode #top-bar-focus:hover {
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
-   Miscellaneous
+   Scroll to Top (Unified Component Theme Integration)
    ────────────────────────────────────────────────────────────────────────── */
 
-.back-to-top {
-  position: fixed;
-  bottom: 1.5rem;
-  right: 1.5rem;
-  z-index: 40;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  color: var(--reader-fg);
-  cursor: pointer;
-  border: 1px solid var(--reader-border);
-  background: var(--reader-surface-glass);
-  backdrop-filter: blur(12px);
-  box-shadow: var(--reader-shadow);
+body[data-reader-theme] .scroll-to-top {
+  background: var(--reader-surface-glass, var(--reader-surface)) !important;
+  border: 1px solid var(--reader-border) !important;
+  color: var(--reader-fg) !important;
+  box-shadow:
+    0 10px 25px -5px var(--reader-shadow),
+    0 0 0 1px var(--reader-border-subtle) !important;
+}
+
+body[data-reader-theme] .scroll-to-top i {
+  color: var(--reader-fg) !important;
+}
+
+body[data-reader-theme] .scroll-to-top:hover {
+  background: var(--reader-surface) !important;
+  border-color: var(--reader-accent) !important;
+  color: var(--reader-accent) !important;
+}
+
+body[data-reader-theme] .scroll-to-top:hover i {
+  color: var(--reader-accent) !important;
+}
+
+@media (max-width: 1023px) {
+  body[data-reader-theme] .scroll-to-top {
+    bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px)) !important;
+    right: 0.875rem !important;
+  }
 }
 
 .focus-exit {
   display: none !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Theme-Sensitive Reader Toasts
+   ────────────────────────────────────────────────────────────────────────── */
+
+body[data-reader-theme] .toast-region {
+  top: calc(var(--reader-nav-height, 56px) + 0.75rem);
+  z-index: var(--z-toast, 900);
+}
+
+@media (max-width: 48rem) {
+  body[data-reader-theme] .toast-region {
+    top: calc(var(--reader-nav-height, 56px) + 0.5rem);
+    width: calc(100vw - 1.5rem);
+    max-width: min(24rem, calc(100vw - 1.5rem));
+  }
+}
+
+body[data-reader-theme] .toast-card {
+  background: var(--reader-surface-glass, var(--reader-surface)) !important;
+  border-color: var(--reader-border) !important;
+  box-shadow:
+    0 16px 36px -4px var(--reader-shadow),
+    0 0 0 1px var(--reader-border-subtle) !important;
+  color: var(--reader-fg) !important;
+}
+
+body[data-reader-theme] .toast-card__message {
+  color: var(--reader-fg) !important;
+}
+
+body[data-reader-theme] .toast-card__title {
+  color: var(--reader-fg) !important;
+}
+
+body[data-reader-theme] .toast-card__icon-badge {
+  background: var(--reader-card-bg) !important;
+  border-color: var(--reader-border) !important;
+  color: var(--reader-fg) !important;
+}
+
+body[data-reader-theme] .toast-card__close-btn {
+  color: var(--reader-muted) !important;
+}
+
+body[data-reader-theme] .toast-card__close-btn:hover {
+  color: var(--reader-fg) !important;
+  background: var(--reader-btn-hover) !important;
+}
+
+body[data-reader-theme] .toast-card__progress-track {
+  background: var(--reader-border-subtle) !important;
+}
+
+/* ── Light Reader Themes (Sepia, Light, Solar, Ink) ─────────────────── */
+body[data-reader-theme='sepia'] .toast-card,
+body[data-reader-theme='light'] .toast-card,
+body[data-reader-theme='solar'] .toast-card,
+body[data-reader-theme='ink'] .toast-card {
+  background: var(--reader-surface) !important;
+  border-color: var(--reader-border) !important;
+  box-shadow:
+    0 14px 30px -4px var(--reader-shadow),
+    0 0 0 1px var(--reader-border) !important;
+}
+
+body[data-reader-theme='sepia'] .toast-card--success .toast-card__icon-badge,
+body[data-reader-theme='light'] .toast-card--success .toast-card__icon-badge,
+body[data-reader-theme='solar'] .toast-card--success .toast-card__icon-badge,
+body[data-reader-theme='ink'] .toast-card--success .toast-card__icon-badge {
+  color: var(--success-contrast) !important;
+  background: rgb(var(--success-light-rgb) / var(--a-12)) !important;
+  border-color: rgb(var(--success-light-rgb) / var(--a-25)) !important;
+}
+
+body[data-reader-theme='sepia'] .toast-card--success,
+body[data-reader-theme='light'] .toast-card--success,
+body[data-reader-theme='solar'] .toast-card--success,
+body[data-reader-theme='ink'] .toast-card--success {
+  border-color: rgb(var(--success-light-rgb) / var(--a-30)) !important;
+}
+
+body[data-reader-theme='sepia'] .toast-card--success .toast-card__progress-bar,
+body[data-reader-theme='light'] .toast-card--success .toast-card__progress-bar,
+body[data-reader-theme='solar'] .toast-card--success .toast-card__progress-bar,
+body[data-reader-theme='ink'] .toast-card--success .toast-card__progress-bar {
+  background: var(--success-contrast) !important;
+}
+
+body[data-reader-theme='sepia'] .toast-card--error .toast-card__icon-badge,
+body[data-reader-theme='light'] .toast-card--error .toast-card__icon-badge,
+body[data-reader-theme='solar'] .toast-card--error .toast-card__icon-badge,
+body[data-reader-theme='ink'] .toast-card--error .toast-card__icon-badge {
+  color: var(--danger-contrast) !important;
+  background: rgb(var(--danger-light-rgb) / var(--a-12)) !important;
+  border-color: rgb(var(--danger-light-rgb) / var(--a-25)) !important;
+}
+
+body[data-reader-theme='sepia'] .toast-card--error,
+body[data-reader-theme='light'] .toast-card--error,
+body[data-reader-theme='solar'] .toast-card--error,
+body[data-reader-theme='ink'] .toast-card--error {
+  border-color: rgb(var(--danger-light-rgb) / var(--a-30)) !important;
+}
+
+body[data-reader-theme='sepia'] .toast-card--error .toast-card__progress-bar,
+body[data-reader-theme='light'] .toast-card--error .toast-card__progress-bar,
+body[data-reader-theme='solar'] .toast-card--error .toast-card__progress-bar,
+body[data-reader-theme='ink'] .toast-card--error .toast-card__progress-bar {
+  background: var(--danger-contrast) !important;
+}
+
+body[data-reader-theme='sepia'] .toast-card--warning .toast-card__icon-badge,
+body[data-reader-theme='light'] .toast-card--warning .toast-card__icon-badge,
+body[data-reader-theme='solar'] .toast-card--warning .toast-card__icon-badge,
+body[data-reader-theme='ink'] .toast-card--warning .toast-card__icon-badge {
+  color: var(--warning-contrast) !important;
+  background: rgb(var(--warning-light-rgb) / var(--a-12)) !important;
+  border-color: rgb(var(--warning-light-rgb) / var(--a-25)) !important;
+}
+
+body[data-reader-theme='sepia'] .toast-card--warning,
+body[data-reader-theme='light'] .toast-card--warning,
+body[data-reader-theme='solar'] .toast-card--warning,
+body[data-reader-theme='ink'] .toast-card--warning {
+  border-color: rgb(var(--warning-light-rgb) / var(--a-30)) !important;
+}
+
+body[data-reader-theme='sepia'] .toast-card--warning .toast-card__progress-bar,
+body[data-reader-theme='light'] .toast-card--warning .toast-card__progress-bar,
+body[data-reader-theme='solar'] .toast-card--warning .toast-card__progress-bar,
+body[data-reader-theme='ink'] .toast-card--warning .toast-card__progress-bar {
+  background: var(--warning-contrast) !important;
+}
+
+body[data-reader-theme='sepia'] .toast-card--info .toast-card__icon-badge,
+body[data-reader-theme='light'] .toast-card--info .toast-card__icon-badge,
+body[data-reader-theme='solar'] .toast-card--info .toast-card__icon-badge,
+body[data-reader-theme='ink'] .toast-card--info .toast-card__icon-badge {
+  color: var(--reader-accent) !important;
+  background: rgb(var(--reader-accent-rgb) / var(--a-12)) !important;
+  border-color: rgb(var(--reader-accent-rgb) / var(--a-25)) !important;
+}
+
+body[data-reader-theme='sepia'] .toast-card--info,
+body[data-reader-theme='light'] .toast-card--info,
+body[data-reader-theme='solar'] .toast-card--info,
+body[data-reader-theme='ink'] .toast-card--info {
+  border-color: rgb(var(--reader-accent-rgb) / var(--a-30)) !important;
+}
+
+body[data-reader-theme='sepia'] .toast-card--info .toast-card__progress-bar,
+body[data-reader-theme='light'] .toast-card--info .toast-card__progress-bar,
+body[data-reader-theme='solar'] .toast-card--info .toast-card__progress-bar,
+body[data-reader-theme='ink'] .toast-card--info .toast-card__progress-bar {
+  background: var(--reader-accent) !important;
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -2079,12 +2240,6 @@ body.focus-mode #top-bar-focus:hover {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-}
-
-@media (max-width: 1023px) {
-  .back-to-top {
-    bottom: calc(4.75rem + env(safe-area-inset-bottom));
-  }
 }
 
 .figure-placeholder {
