@@ -89,6 +89,7 @@ describe('TaleInteractions', () => {
           <button data-action="download-chapter" data-chapter-index="5"></button>
         </div>
       </div>
+      <button id="btn-sort-chronicles" data-sort-order="asc"><span id="sort-chronicles-label">Oldest First</span></button>
       <button id="btn-mark-all-read"></button>
       <button id="btn-mark-all-unread"></button>
       <button id="btn-download-all-chronicles"></button>
@@ -281,6 +282,24 @@ describe('TaleInteractions', () => {
       await document.getElementById('btn-download-all-chronicles').click();
 
       expect(downloadTale.downloadChronicle).not.toHaveBeenCalled();
+    });
+
+    it('toggles sort order between asc and desc on sort button click', () => {
+      const chapters = [{ title: 'C1' }, { title: 'C2' }];
+      setupChronicleBatchActions('u1', 't1', chapters);
+      const sortBtn = document.getElementById('btn-sort-chronicles');
+      const sortLabel = document.getElementById('sort-chronicles-label');
+
+      expect(sortBtn.dataset.sortOrder).toBe('asc');
+      expect(sortLabel.textContent).toBe('Oldest First');
+
+      sortBtn.click();
+      expect(sortBtn.dataset.sortOrder).toBe('desc');
+      expect(sortLabel.textContent).toBe('Newest First');
+
+      sortBtn.click();
+      expect(sortBtn.dataset.sortOrder).toBe('asc');
+      expect(sortLabel.textContent).toBe('Oldest First');
     });
   });
 

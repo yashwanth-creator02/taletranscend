@@ -4,16 +4,7 @@
 // - Reader View: Inquire of the Scribe form + list of dispatched inquiries and replies received.
 
 import { createLogger, escapeHtml } from '@/utils';
-import {
-  auth,
-  refs,
-  addDoc,
-  updateDoc,
-  getDocs,
-  query,
-  where,
-  serverTimestamp,
-} from '@fb/index.js';
+import { auth, refs, addDoc, updateDoc, serverTimestamp } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
 import { initIcons } from '@ui/components/icons.js';
 import { getAuthorStatus } from '@services/author.service.js';
@@ -177,7 +168,7 @@ export async function blockSender(taleId, inquiryId, moniker, senderId) {
    Author Mailroom Rendering
    ───────────────────────────────────────────── */
 
-function _renderAuthorMissiveCard(m, taleId, authorName) {
+function _renderAuthorMissiveCard(m, _taleId, _authorName) {
   const senderName = m.senderMoniker || 'Reader';
   const initials = getAuthorInitials(senderName);
   const dateStr = formatCommentDateTime(m.createdAt || m.timestamp);
@@ -551,7 +542,6 @@ export function setupInquire(taleId, tale, userId = null) {
   );
 
   const tabBtnLetter = document.getElementById('tab-btn-letter');
-  const contentLetter = document.getElementById('content-letter');
   const inviteCard = document.querySelector('.chronicler-invite-card');
   const authorView = document.getElementById('author-missives-view');
   const readerView = document.getElementById('reader-missives-view');

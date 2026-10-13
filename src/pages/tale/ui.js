@@ -342,11 +342,16 @@ export async function renderTale(userId, tale, taleId, isResonated = false) {
 /**
  * Renders the chronicles list with progress indicators.
  *
+/**
+ * Renders the chapters list with read/unread statuses and download actions.
+ * Supports sorting in ascending (Oldest First) or descending (Newest First) order.
+ *
  * @param {string} userId
  * @param {Array<Object>} chapters
  * @param {string} taleId
+ * @param {('asc'|'desc')} [sortOrder]
  */
-export function renderChapters(userId, chapters, taleId) {
+export function renderChapters(userId, chapters, taleId, sortOrder = null) {
   log.info(`Rendering ${chapters.length} chapters`, { taleId });
   const list = getEl('chapter-list');
   if (!list) return;
@@ -357,10 +362,19 @@ export function renderChapters(userId, chapters, taleId) {
     return;
   }
 
+  const effectiveSort =
+    sortOrder || document.getElementById('btn-sort-chronicles')?.dataset?.sortOrder || 'asc';
+
+  // Pair each chapter with its original 0-based index so progress and navigation remain stable
+  const indexedChapters = chapters.map((ch, idx) => ({ ch, originalIndex: idx }));
+  if (effectiveSort === 'desc') {
+    indexedChapters.reverse();
+  }
+
   let completedCount = 0;
 
-  list.innerHTML = chapters
-    .map((ch, idx) => {
+  list.innerHTML = indexedChapters
+    .map(({ ch, originalIndex: idx }) => {
       const progress = getChapterProgress({ userId, taleId, chapterIndex: idx });
       const state = getChapterState(progress);
       const isCompleted = state === 'completed';

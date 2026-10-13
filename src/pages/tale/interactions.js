@@ -278,6 +278,7 @@ export function bindChapterClicks(taleId, chapters = [], userId = null, tale = n
 
 /**
  * Wires batch action buttons in the Chronicles section:
+ * - Sort Fragments (Oldest First / Newest First)
  * - Mark All Read
  * - Mark All Unread
  * - Download All Chronicles
@@ -288,9 +289,34 @@ export function bindChapterClicks(taleId, chapters = [], userId = null, tale = n
  * @param {Object} [tale]
  */
 export function setupChronicleBatchActions(userId, taleId, chapters = [], tale = null) {
+  const sortChroniclesBtn = document.getElementById('btn-sort-chronicles');
   const markAllReadBtn = document.getElementById('btn-mark-all-read');
   const markAllUnreadBtn = document.getElementById('btn-mark-all-unread');
   const downloadAllBtn = document.getElementById('btn-download-all-chronicles');
+
+  if (sortChroniclesBtn) {
+    sortChroniclesBtn.addEventListener('click', () => {
+      const uid = userId || auth.currentUser?.uid;
+      const currentSort = sortChroniclesBtn.dataset.sortOrder === 'desc' ? 'desc' : 'asc';
+      const newSort = currentSort === 'asc' ? 'desc' : 'asc';
+      sortChroniclesBtn.dataset.sortOrder = newSort;
+
+      const labelEl = document.getElementById('sort-chronicles-label');
+      if (labelEl) {
+        labelEl.textContent = newSort === 'asc' ? 'Oldest First' : 'Newest First';
+      }
+      sortChroniclesBtn.title =
+        newSort === 'asc'
+          ? 'Toggle fragment order: Showing Oldest First (click for Newest First)'
+          : 'Toggle fragment order: Showing Newest First (click for Oldest First)';
+
+      renderChapters(uid, chapters, taleId, newSort);
+      showToast(
+        newSort === 'desc' ? 'Showing newest fragments first.' : 'Showing oldest fragments first.',
+        'info'
+      );
+    });
+  }
 
   if (markAllReadBtn) {
     markAllReadBtn.addEventListener('click', () => {

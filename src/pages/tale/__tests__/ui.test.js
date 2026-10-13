@@ -194,6 +194,24 @@ describe('TaleUI', () => {
       expect(items[1].innerHTML).toContain('circle'); // Not started
     });
 
+    it('renders chapters in reverse order when sortOrder is desc while preserving original indices', () => {
+      const chapters = [{ title: 'First Scroll' }, { title: 'Second Scroll' }];
+
+      renderChapters('user1', chapters, 't1', 'desc');
+
+      const items = document.querySelectorAll('.chapter-item');
+      expect(items).toHaveLength(2);
+      // First rendered item should be the second scroll (index 1)
+      expect(items[0].dataset.chapterIndex).toBe('1');
+      expect(items[0].innerHTML).toContain('Second Scroll');
+      expect(items[0].innerHTML).toContain('Scroll #2');
+
+      // Second rendered item should be the first scroll (index 0)
+      expect(items[1].dataset.chapterIndex).toBe('0');
+      expect(items[1].innerHTML).toContain('First Scroll');
+      expect(items[1].innerHTML).toContain('Scroll #1');
+    });
+
     it('renders empty state if no chapters', () => {
       renderChapters('user1', [], 't1');
       expect(document.getElementById('chapter-list').textContent).toContain(

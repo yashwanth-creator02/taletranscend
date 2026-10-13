@@ -601,6 +601,16 @@
                 <div class="flex items-center gap-2 flex-wrap">
                   <button
                     type="button"
+                    id="btn-sort-chronicles"
+                    data-sort-order="asc"
+                    class="px-3 py-1.5 rounded-xl border border-white/8 bg-white/4 hover:bg-white/10 hover:border-white/15 text-slate-300 hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
+                    title="Toggle fragment order: Showing Oldest First (click for Newest First)"
+                  >
+                    <i data-lucide="arrow-down-up" class="w-3.5 h-3.5 text-indigo-400"></i>
+                    <span id="sort-chronicles-label">Oldest First</span>
+                  </button>
+                  <button
+                    type="button"
                     id="btn-mark-all-read"
                     class="px-3 py-1.5 rounded-xl border border-indigo-500/20 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
                     title="Mark all fragments as read"

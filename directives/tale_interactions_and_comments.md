@@ -61,8 +61,13 @@ Define the standard operating procedures, data structures, and UI behaviors for 
 - **Edit Chronicle / Tale Control**:
   - Only render the "Edit Tale" or "Edit Chronicle" button if `auth.currentUser.uid === tale.authorId` (or `tale.authorUID`). Readers must never see edit controls.
 
-### 2. Fragment Reading Progress, Manual Toggles & Downloads
+### 2. Fragment Reading Progress, Manual Toggles, Sorting & Downloads
 
+- **Fragment Trail Sorting**:
+  - The Chronicle fragments toolbar includes `#btn-sort-chronicles` allowing readers to toggle display order between **Oldest First** (`asc`, Scroll #1 -> #N) and **Newest First** (`desc`, Scroll #N -> #1).
+  - Label `#sort-chronicles-label` reflects active order ("Oldest First" vs "Newest First").
+  - Preserves true 0-based chapter indices (`originalIndex`) on `data-chapter-index="${idx}"`, scroll numbering (`Scroll #${idx + 1}`), progress queries, and download triggers regardless of sort direction.
+  - Active sort order is preserved across individual and batch read/unread updates.
 - **Manual Fragment Read/Unread Toggles**:
   - Each fragment item in `#chapter-list` provides discrete read/unread triggers (`data-action="mark-read"`, `data-action="mark-unread"`).
   - Updates local progress cache (`markChapterRead`, `markChapterUnread`) and syncs to cloud progress service when authenticated (`syncMarkChapterRead`, `syncMarkChapterUnread`).
@@ -71,6 +76,7 @@ Define the standard operating procedures, data structures, and UI behaviors for 
   - Full Chronicle Download: Triggered by `#btn-download-all-chronicles` via `downloadChronicle(taleId, options)`. Exports the complete compiled chronicle.
 - **Chronicle Batch Actions**:
   - Chronicle TOC header provides batch actions:
+    - `#btn-sort-chronicles`: Toggles chronological sort order between ascending and descending.
     - `#btn-mark-all-read`: Marks all fragments as read in local storage and cloud progress.
     - `#btn-mark-all-unread`: Resets all fragment read states to unread.
     - `#btn-download-all-chronicles`: Initiates comprehensive offline download.
