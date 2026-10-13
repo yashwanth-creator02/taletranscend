@@ -50,4 +50,18 @@ describe('Icons Registry', () => {
       { timeout: 1000 }
     );
   });
+
+  it('registers MoreVertical icon for menus', async () => {
+    const { initIcons } = await import('../icons.js');
+    await initIcons();
+
+    await vi.waitFor(
+      () => {
+        expect(mockCreateIcons).toHaveBeenCalled();
+        const lastCall = mockCreateIcons.mock.calls[mockCreateIcons.mock.calls.length - 1][0];
+        expect(lastCall.icons.MoreVertical).toBeDefined();
+      },
+      { timeout: 1000 }
+    );
+  });
 });

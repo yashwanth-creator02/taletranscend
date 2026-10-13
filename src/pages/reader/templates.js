@@ -1,6 +1,6 @@
 // src/pages/reader/templates.js
 // UI Templates for the Reader Panels
-import { THEMES, readerState } from './state.js';
+import { THEMES, FONTS, readerState } from './state.js';
 import { getChapterProgress } from '@services/index.js';
 import { escapeText as escapeHtml } from '@/utils';
 
@@ -142,14 +142,23 @@ export function renderTypographyPanel(state) {
       <div>
         <div class="field-label">Font family</div>
         <div class="font-grid">
-          <button class="font-btn ${state.fontFamily === 'serif' ? 'active' : ''}" data-font="serif" style="font-family: var(--font-serif)">
-            <div class="text-lg">Aa</div>
-            <div class="mt-1 text-xs uppercase tracking-wide" style="color:var(--reader-muted)">Cinzel</div>
-          </button>
-          <button class="font-btn ${state.fontFamily === 'sans' ? 'active' : ''}" data-font="sans" style="font-family: var(--font-sans)">
-            <div class="text-lg">Aa</div>
-            <div class="mt-1 text-xs uppercase tracking-wide" style="color:var(--reader-muted)">Inter</div>
-          </button>
+          ${Object.entries(FONTS || {})
+            .map(
+              ([key, f]) => `
+            <button
+              class="font-btn ${state.fontFamily === key ? 'active' : ''}"
+              data-font="${key}"
+              style="font-family: ${f.css}"
+              title="${escapeHtml(f.label)}"
+              type="button"
+            >
+              <div class="text-base font-semibold">Aa</div>
+              <div class="mt-1 text-xs truncate" style="color:var(--reader-fg)">${escapeHtml(f.label)}</div>
+              <div class="text-[10px] uppercase tracking-wide truncate" style="color:var(--reader-muted)">${escapeHtml(f.sub || f.label)}</div>
+            </button>
+          `
+            )
+            .join('')}
         </div>
       </div>
       <div>

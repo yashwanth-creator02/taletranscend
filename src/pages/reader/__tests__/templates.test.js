@@ -46,6 +46,10 @@ describe('ReaderTemplates', () => {
       expect(html).toContain('18px');
       expect(html).toContain('1.75');
       expect(html).toContain('68ch');
+      expect(html).toContain('data-font="serif"');
+      expect(html).toContain('data-font="crimson"');
+      expect(html).toContain('data-font="spectral"');
+      expect(html).toContain('Crimson Pro');
     });
   });
 
