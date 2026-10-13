@@ -149,6 +149,27 @@ Define the standard operating procedures, data structures, and UI behaviors for 
 - **Reference**:
   - See `directives/author_registration_and_correspondence.md` for full registration wall and correspondence procedures.
 
+### 6. Custom Tale 404 Error Screen (Record Unresolved)
+
+- **Trigger Conditions**:
+  - Activated when an invalid or nonexistent chronicle ID is passed in the URL (e.g. `?id=GIup` or `/tales/GIup`) and Firestore returns `null` or throws upon hydration.
+- **Architectural Distinction vs Global 404**:
+  - **Global 404 (`src/views/404.html`)**: Generic page-level fallback with giant `404` typography, "Lost in the Archives" headline, and "Return Home" CTA.
+  - **Tale 404 (`#tale-not-found-view` in `tale.html`)**: Preserves the archive layout and navigation bar, displaying:
+    - Amber archival shield emblem (`book-x`).
+    - Technical rectangular badge: `CHRONICLE 404 // RECORD UNRESOLVED`.
+    - Searched ID code block: `#not-found-tale-id` showing the requested ID in monospace typography.
+    - Mythic archival copy: "The tale you are searching for is not recorded or might have been deleted under the Chronicle Preservation Policy."
+    - Primary CTA: "Navigate to Library" linking directly to `/library.html`.
+    - Secondary CTA: "Report Missing" button.
+- **Report Missing Flow (`setupReportMissingTale`)**:
+  - Clicking "Report Missing" opens an accessible glassmorphic confirmation modal (`showConfirmModal`) confirming the report dispatch for the specific chronicle ID.
+  - Upon user confirmation, dispatches the archival report, fires a feedback toast ("Missing chronicle report dispatched to the archivists."), and transitions the button into a disabled state displaying "Report Dispatched".
+- **Anti-FOUC & Skeleton Clearance (`renderTaleNotFound`)**:
+  - Hides `#hero-section` and `#tale-content-container`.
+  - Purges all `.skeleton` pulse classes so no loading skeletons linger.
+  - Calls `readyReveal()` immediately so `#app-boot-curtain` dissolves without waiting for the 3.5s fallback timer.
+
 ### 5. Anti-Vibecoding & Aesthetics Compliance
 
 - **Zero Emojis**: Never use emojis in button labels, badges, comment placeholders, or toasts.

@@ -1,6 +1,6 @@
 // src/pages/tale/__tests__/ui.test.js
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderTale, renderChapters, showArchiveSkeletons } from '../ui.js';
+import { renderTale, renderChapters, showArchiveSkeletons, renderTaleNotFound } from '../ui.js';
 import { getChapterProgress } from '@services/reader/localProgress.service.js';
 
 vi.mock('@services/index.js', () => ({
@@ -43,6 +43,11 @@ describe('TaleUI', () => {
       <div id="header-tale-title"></div>
       <img id="display-cover" />
       <div id="hero-section"></div>
+      <div id="tale-content-container"></div>
+      <div id="tale-not-found-view" class="hidden"></div>
+      <div id="not-found-tale-id"></div>
+      <div id="tale-action-bar"></div>
+      <div id="scroll-to-top"></div>
       <div id="lore-tag-list"></div>
       <div id="read-time"></div>
     `;
@@ -217,6 +222,27 @@ describe('TaleUI', () => {
       expect(document.getElementById('chapter-list').textContent).toContain(
         'No chronicles detected'
       );
+    });
+  });
+
+  describe('renderTaleNotFound', () => {
+    it('reveals not found view and hides hero and content container', () => {
+      document.body.innerHTML += '<div class="skeleton"></div><div class="skeleton"></div>';
+      expect(document.querySelectorAll('.skeleton').length).toBe(2);
+
+      renderTaleNotFound('invalid-tale-999');
+
+      const notFoundView = document.getElementById('tale-not-found-view');
+      const hero = document.getElementById('hero-section');
+      const contentContainer = document.getElementById('tale-content-container');
+      const taleIdSpan = document.getElementById('not-found-tale-id');
+
+      expect(notFoundView.classList.contains('hidden')).toBe(false);
+      expect(hero.classList.contains('hidden')).toBe(true);
+      expect(contentContainer.classList.contains('hidden')).toBe(true);
+      expect(taleIdSpan.textContent).toBe('invalid-tale-999');
+      expect(document.title).toBe('Chronicle Not Found | TaleTranscend');
+      expect(document.querySelectorAll('.skeleton').length).toBe(0);
     });
   });
 });

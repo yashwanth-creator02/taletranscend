@@ -1,5 +1,6 @@
 // src/pages/tale/__tests__/tale.test.js
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import * as utils from '@/utils';
 import * as index from '../index.js';
 
 vi.mock('@fb/index.js', () => ({
@@ -13,6 +14,7 @@ vi.mock('../index.js', () => ({
   renderTale: vi.fn(),
   renderChapters: vi.fn(),
   showArchiveSkeletons: vi.fn(),
+  renderTaleNotFound: vi.fn(),
   bindChapterClicks: vi.fn(),
   setupTabs: vi.fn(),
   setupStartReading: vi.fn(),
@@ -23,6 +25,7 @@ vi.mock('../index.js', () => ({
   initHeaderScroll: vi.fn(),
   setupChronicleBatchActions: vi.fn(),
   setupInquire: vi.fn(),
+  setupReportMissingTale: vi.fn(),
   listenToComments: vi.fn(),
   postComment: vi.fn(),
   initIcons: vi.fn(),
@@ -85,5 +88,18 @@ describe('Tale Page Controller', () => {
     expect(index.renderTale).toHaveBeenCalledWith('u1', expect.anything(), 'tale123', true);
     expect(index.setupResonance).toHaveBeenCalledWith('tale123', 0, true, 'u1');
     expect(index.listenToComments).toHaveBeenCalledWith('tale123', 'author-1');
+  });
+
+  it('renders custom Tale 404 screen when chronicle is not found', async () => {
+    vi.mocked(index.loadTale).mockResolvedValue(null);
+    const mockUser = { uid: 'u1' };
+    vi.mocked(index.initAuth).mockImplementation((cb) => cb(mockUser));
+
+    await initPage();
+
+    expect(index.renderTaleNotFound).toHaveBeenCalledWith('tale123');
+    expect(index.setupReportMissingTale).toHaveBeenCalledWith('tale123');
+    expect(utils.readyReveal).toHaveBeenCalled();
+    expect(index.renderTale).not.toHaveBeenCalled();
   });
 });

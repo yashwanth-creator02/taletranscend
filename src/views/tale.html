@@ -388,8 +388,101 @@
         </div>
       </section>
 
+      <!-- ── Custom Tale 404 Error Screen (Record Unresolved) ── -->
+      <section
+        id="tale-not-found-view"
+        class="hidden w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 my-4 text-center"
+        aria-labelledby="tale-not-found-title"
+      >
+        <div
+          class="glass-card-strong p-8 sm:p-12 md:p-16 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden backdrop-blur-xl"
+        >
+          <!-- Subtle background ambient illumination -->
+          <div
+            class="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"
+            aria-hidden="true"
+          ></div>
+          <div
+            class="absolute -bottom-24 right-1/4 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"
+            aria-hidden="true"
+          ></div>
+
+          <div class="relative z-10 flex flex-col items-center max-w-xl mx-auto space-y-6">
+            <!-- Archival Shield Emblem -->
+            <div
+              class="w-20 h-20 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center shadow-lg shadow-amber-500/10 text-amber-400"
+            >
+              <i data-lucide="book-x" class="w-10 h-10"></i>
+            </div>
+
+            <!-- Technical Rectangular Badge -->
+            <div
+              class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[11px] font-bold uppercase tracking-[0.2em]"
+            >
+              <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i>
+              <span>Chronicle 404 // Record Unresolved</span>
+            </div>
+
+            <!-- Heading -->
+            <h1
+              id="tale-not-found-title"
+              class="font-cinzel text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight"
+            >
+              Chronicle Not Found
+            </h1>
+
+            <!-- Requested Tale ID Badge -->
+            <div
+              class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-md bg-white/4 border border-white/8 text-slate-300 text-xs font-mono"
+            >
+              <span class="text-slate-500 font-sans uppercase text-[10px] tracking-wider"
+                >Searched ID:</span
+              >
+              <span id="not-found-tale-id" class="text-indigo-300 font-bold"></span>
+            </div>
+
+            <!-- Explanatory Message -->
+            <p class="text-sm sm:text-base text-slate-300 leading-relaxed font-sans max-w-lg">
+              The tale you are searching for is not recorded or might have been deleted under the
+              Chronicle Preservation Policy.
+            </p>
+
+            <p class="text-xs text-slate-400 leading-relaxed font-sans max-w-md">
+              If this chronicle previously existed, it may have been dissolved or archived. You can
+              dispatch a report to the archivists or navigate to the public library.
+            </p>
+
+            <!-- Actions -->
+            <div
+              class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full sm:w-auto"
+            >
+              <a
+                id="btn-not-found-library"
+                href="/library.html"
+                class="btn btn-primary w-full sm:w-auto px-6 py-3.5 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20"
+              >
+                <i data-lucide="library" class="w-4 h-4"></i>
+                <span>Navigate to Library</span>
+              </a>
+
+              <button
+                type="button"
+                id="btn-report-missing-tale"
+                class="btn btn-ghost w-full sm:w-auto px-6 py-3.5 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wider border border-white/10 hover:border-amber-500/40 hover:bg-amber-500/10 hover:text-amber-300 flex items-center justify-center gap-2 transition-all cursor-pointer"
+              >
+                <i data-lucide="flag" class="w-4 h-4"></i>
+                <span>Report Missing</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- ── Main Content: Sticky Hanging Cover Art + Interactive Tab Panes ── -->
-      <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pb-20 sm:pb-24">
+      <div
+        id="tale-content-container"
+        class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pb-20 sm:pb-24"
+      >
         <div
           class="grid grid-cols-1 lg:grid-cols-[250px_1fr] xl:grid-cols-[280px_1fr] gap-8 items-start"
         >

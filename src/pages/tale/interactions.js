@@ -8,6 +8,7 @@ import {
   createLogger,
   getRemainingTime,
   applyButtonCooldown,
+  escapeHtml,
 } from '@/utils';
 import {
   resolveResumePoint,
@@ -34,7 +35,7 @@ import {
   syncMarkAllChaptersUnread,
 } from '@services/reader/cloudProgress.service.js';
 import { downloadChronicle, downloadChapter } from '@services/tale/downloadTale.js';
-import { confirmTaleDownload } from '@ui/components/confirmModal.js';
+import { confirmTaleDownload, showConfirmModal } from '@ui/components/confirmModal.js';
 
 const log = createLogger('TaleInteractions');
 
@@ -653,6 +654,47 @@ export function initHeaderScroll() {
 
 function _fadeAndGo(url) {
   navigateTo(url);
+}
+
+/**
+ * Wires up the "Report Missing" interaction on the custom Tale 404 page.
+ * Prompts the user with a confirmation modal, records the dispatch, and provides feedback toast.
+ *
+ * @param {string} taleId
+ */
+export function setupReportMissingTale(taleId) {
+  const reportBtn = document.getElementById('btn-report-missing-tale');
+  if (!reportBtn) return;
+
+  reportBtn.addEventListener('click', async () => {
+    try {
+      const confirmed = await showConfirmModal({
+        title: 'Report Missing Chronicle',
+        message: `Would you like to dispatch an archival report for unrecorded chronicle <span class="font-mono text-amber-300 font-bold">${escapeHtml(taleId || 'Unknown')}</span>?`,
+        subtext: 'Archivists will inspect missing indices under the Chronicle Preservation Policy.',
+        confirmText: 'Dispatch Report',
+        cancelText: 'Cancel',
+        confirmVariant: 'accent',
+        icon: 'flag',
+      });
+
+      if (!confirmed) return;
+
+      log.info('Missing chronicle reported', { taleId });
+      showToast('Missing chronicle report dispatched to the archivists.', 'success');
+
+      reportBtn.disabled = true;
+      reportBtn.classList.add('opacity-60', 'cursor-not-allowed');
+      reportBtn.innerHTML = `
+        <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+        <span>Report Dispatched</span>
+      `;
+      initIcons();
+    } catch (err) {
+      log.error('Failed to report missing chronicle', err);
+      showToast('Unable to dispatch report. Please try again.', 'error');
+    }
+  });
 }
 
 export { setupInquire } from './inquire.js';

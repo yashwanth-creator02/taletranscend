@@ -20,30 +20,35 @@ const log = createLogger('TaleContent');
 export async function loadTale(taleId, user) {
   if (!taleId) return null;
 
-  log.info('Fetching tale', { taleId, userId: user?.uid });
-  const publicSnap = await getDoc(refs.tale(taleId));
+  try {
+    log.info('Fetching tale', { taleId, userId: user?.uid });
+    const publicSnap = await getDoc(refs.tale(taleId));
 
-  if (publicSnap.exists()) {
-    log.info('Public tale found');
-    return createTale(publicSnap.id, publicSnap.data());
-  }
+    if (publicSnap.exists()) {
+      log.info('Public tale found');
+      return createTale(publicSnap.id, publicSnap.data());
+    }
 
-  if (!user?.uid) {
-    log.info('Public tale not found and no user session');
+    if (!user?.uid) {
+      log.info('Public tale not found and no user session');
+      return null;
+    }
+
+    // Fall back to the user's private draft
+    log.debug('Public tale not found, checking user drafts');
+    const draftSnap = await getDoc(refs.draft(user.uid, taleId));
+
+    if (!draftSnap.exists()) {
+      log.warn('Tale not found in public collection or user drafts');
+      return null;
+    }
+
+    log.info('Private draft found');
+    return createTale(draftSnap.id, draftSnap.data());
+  } catch (err) {
+    log.warn('Failed to load tale from archive', err);
     return null;
   }
-
-  // Fall back to the user's private draft
-  log.debug('Public tale not found, checking user drafts');
-  const draftSnap = await getDoc(refs.draft(user.uid, taleId));
-
-  if (!draftSnap.exists()) {
-    log.warn('Tale not found in public collection or user drafts');
-    return null;
-  }
-
-  log.info('Private draft found');
-  return createTale(draftSnap.id, draftSnap.data());
 }
 
 /**
@@ -55,11 +60,16 @@ export async function loadTale(taleId, user) {
 export async function loadChapters(taleId) {
   if (!taleId) return [];
 
-  log.info('Fetching chapters for tale', { taleId });
-  const snapshot = await getDocs(refs.chapters(taleId));
+  try {
+    log.info('Fetching chapters for tale', { taleId });
+    const snapshot = await getDocs(refs.chapters(taleId));
 
-  log.info(`Found ${snapshot.docs.length} chapters`);
-  return snapshot.docs
-    .map((snap) => createChapter(snap.id, snap.data()))
-    .sort((a, b) => a.chapterNum - b.chapterNum);
+    log.info(`Found ${snapshot.docs.length} chapters`);
+    return snapshot.docs
+      .map((snap) => createChapter(snap.id, snap.data()))
+      .sort((a, b) => a.chapterNum - b.chapterNum);
+  } catch (err) {
+    log.warn('Failed to load chapters for tale', err);
+    return [];
+  }
 }

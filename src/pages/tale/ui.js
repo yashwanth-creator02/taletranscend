@@ -446,3 +446,44 @@ export function renderChapters(userId, chapters, taleId, sortOrder = null) {
 
   initIcons();
 }
+
+/**
+ * Renders the dedicated Tale 404 error screen when a chronicle is not found in the archives.
+ *
+ * @param {string} taleId
+ */
+export function renderTaleNotFound(taleId) {
+  log.warn('Rendering Tale 404 screen', { taleId });
+
+  // Hide the hero section and main chronicle content grid
+  const hero = getEl('hero-section');
+  if (hero) hero.classList.add('hidden');
+
+  const contentContainer = getEl('tale-content-container');
+  if (contentContainer) contentContainer.classList.add('hidden');
+
+  const actionBar = getEl('tale-action-bar');
+  if (actionBar) actionBar.classList.add('hidden');
+
+  const scrollTop = getEl('scroll-to-top');
+  if (scrollTop) scrollTop.classList.add('hidden');
+
+  // Strip skeleton pulse classes so nothing lingers in loading state
+  document.querySelectorAll('.skeleton').forEach((el) => {
+    el.classList.remove('skeleton');
+  });
+
+  // Display the dedicated chronicle 404 view
+  const notFoundView = getEl('tale-not-found-view');
+  if (notFoundView) {
+    notFoundView.classList.remove('hidden');
+  }
+
+  // Set the searched chronicle identifier
+  setTextIfExists('not-found-tale-id', taleId || 'Unknown');
+
+  // Update document title
+  document.title = 'Chronicle Not Found | TaleTranscend';
+
+  initIcons();
+}
