@@ -23,7 +23,9 @@ export const CONFIRM_MODAL_ID = 'tt-confirm-modal';
  * @param {string} [options.cancelText='Cancel'] - Cancel button label
  * @param {string} [options.confirmVariant='primary'] - 'primary' | 'danger' | 'accent' | 'mythic'
  * @param {string} [options.icon='alert-circle'] - Lucide icon name
- * @returns {Promise<boolean>}
+ * @param {boolean} [options.showFormatOptions=false] - Whether to show Markdown vs EPUB format choice
+ * @param {string} [options.defaultFormat='md'] - Default selected format ('md' | 'epub')
+ * @returns {Promise<boolean | { confirmed: boolean, format: string }>}
  */
 export function showConfirmModal({
   title = 'Confirm Action',
@@ -33,6 +35,8 @@ export function showConfirmModal({
   cancelText = 'Cancel',
   confirmVariant = 'primary',
   icon = 'alert-circle',
+  showFormatOptions = false,
+  defaultFormat = 'md',
 } = {}) {
   return new Promise((resolve) => {
     // Dismiss any existing confirmation modal
@@ -99,8 +103,59 @@ export function showConfirmModal({
 
         ${
           subtext
-            ? `<p class="text-xs text-zinc-400 leading-relaxed mb-6 italic">${escapeHtml(subtext)}</p>`
-            : '<div class="mb-6"></div>'
+            ? `<p class="text-xs text-zinc-400 leading-relaxed mb-4 italic">${escapeHtml(subtext)}</p>`
+            : '<div class="mb-4"></div>'
+        }
+
+        ${
+          showFormatOptions
+            ? `
+          <div class="format-choice-container mb-6 text-left" role="radiogroup" aria-label="Archive Format">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Archive Format</span>
+              <span id="${CONFIRM_MODAL_ID}-format-indicator" class="text-[9px] font-mono font-bold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-md uppercase">
+                ${defaultFormat.toUpperCase()} Selected
+              </span>
+            </div>
+            <div class="grid grid-cols-2 gap-2.5">
+              <button
+                type="button"
+                data-format="md"
+                role="radio"
+                aria-checked="${defaultFormat === 'md' ? 'true' : 'false'}"
+                class="format-choice-btn p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-1 ${
+                  defaultFormat === 'md'
+                    ? 'border-indigo-500/50 bg-indigo-500/15 text-white ring-1 ring-indigo-500/30'
+                    : 'border-white/8 bg-white/4 text-zinc-400 hover:text-zinc-200 hover:border-white/15 hover:bg-white/6'
+                }"
+              >
+                <div class="flex items-center justify-between w-full">
+                  <span class="text-xs font-bold text-white tracking-tight">Markdown</span>
+                  <span class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-white/10 text-indigo-300">.MD</span>
+                </div>
+                <p class="text-[10px] text-zinc-400 leading-snug">Plaintext archive for notes & Obsidian</p>
+              </button>
+              <button
+                type="button"
+                data-format="epub"
+                role="radio"
+                aria-checked="${defaultFormat === 'epub' ? 'true' : 'false'}"
+                class="format-choice-btn p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-1 ${
+                  defaultFormat === 'epub'
+                    ? 'border-indigo-500/50 bg-indigo-500/15 text-white ring-1 ring-indigo-500/30'
+                    : 'border-white/8 bg-white/4 text-zinc-400 hover:text-zinc-200 hover:border-white/15 hover:bg-white/6'
+                }"
+              >
+                <div class="flex items-center justify-between w-full">
+                  <span class="text-xs font-bold text-zinc-200 tracking-tight">EPUB Book</span>
+                  <span class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-white/10 text-amber-300">.EPUB</span>
+                </div>
+                <p class="text-[10px] text-zinc-400 leading-snug">Electronic book for Apple Books & e-readers</p>
+              </button>
+            </div>
+          </div>
+        `
+            : ''
         }
 
         <div class="flex flex-col sm:flex-row gap-3 justify-center">
@@ -126,6 +181,36 @@ export function showConfirmModal({
     const confirmBtn = overlay.querySelector('.confirm-modal-confirm');
     const cancelBtn = overlay.querySelector('.confirm-modal-cancel');
     const closeBtn = overlay.querySelector('.confirm-modal-close');
+
+    let selectedFormat = defaultFormat || 'md';
+
+    if (showFormatOptions) {
+      const formatBtns = overlay.querySelectorAll('.format-choice-btn');
+      const indicator = overlay.querySelector(`#${CONFIRM_MODAL_ID}-format-indicator`);
+
+      formatBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const fmt = btn.dataset.format || 'md';
+          selectedFormat = fmt;
+
+          formatBtns.forEach((b) => {
+            const isMatch = b.dataset.format === fmt;
+            b.setAttribute('aria-checked', isMatch ? 'true' : 'false');
+            if (isMatch) {
+              b.className =
+                'format-choice-btn p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-1 border-indigo-500/50 bg-indigo-500/15 text-white ring-1 ring-indigo-500/30';
+            } else {
+              b.className =
+                'format-choice-btn p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-1 border-white/8 bg-white/4 text-zinc-400 hover:text-zinc-200 hover:border-white/15 hover:bg-white/6';
+            }
+          });
+
+          if (indicator) {
+            indicator.textContent = `${fmt.toUpperCase()} Selected`;
+          }
+        });
+      });
+    }
 
     // Focus confirm button for quick keyboard interaction
     requestAnimationFrame(() => {
@@ -158,7 +243,13 @@ export function showConfirmModal({
       }
     });
 
-    confirmBtn?.addEventListener('click', () => cleanup(true));
+    confirmBtn?.addEventListener('click', () => {
+      if (showFormatOptions) {
+        cleanup({ confirmed: true, format: selectedFormat });
+      } else {
+        cleanup(true);
+      }
+    });
     cancelBtn?.addEventListener('click', () => cleanup(false));
     closeBtn?.addEventListener('click', () => cleanup(false));
 
@@ -195,14 +286,15 @@ export function showConfirmModal({
 
 /**
  * Displays a specialized download confirmation popup before compiling
- * and downloading a chronicle or fragment archive.
+ * and downloading a chronicle or fragment archive, offering Markdown (.md)
+ * and EPUB (.epub) format selection.
  *
  * @param {Object} [options]
  * @param {string} [options.title='Chronicle'] - Tale title
  * @param {boolean} [options.isFragment=false] - Whether downloading an individual fragment
  * @param {string} [options.fragmentTitle=''] - Fragment/chapter title
  * @param {number} [options.chapterCount=0] - Total chapters in chronicle
- * @returns {Promise<boolean>}
+ * @returns {Promise<boolean | { confirmed: boolean, format: string }>}
  */
 export async function confirmTaleDownload({
   title = 'Chronicle',
@@ -217,27 +309,30 @@ export async function confirmTaleDownload({
     return showConfirmModal({
       title: 'Download Fragment?',
       message: `Download <span class="text-amber-300 font-semibold font-serif">"${safeFrag}"</span> from <span class="text-white font-medium">${safeTitle}</span>?`,
-      subtext:
-        'The scroll will be compiled into a Markdown archive (.md) and saved to your device.',
+      subtext: 'Choose your desired archive format below to save on your device.',
       confirmText: 'Download Fragment',
       cancelText: 'Cancel',
       confirmVariant: 'primary',
       icon: 'download',
+      showFormatOptions: true,
+      defaultFormat: 'md',
     });
   }
 
   const subtext =
     chapterCount > 0
-      ? `All ${chapterCount} fragments will be compiled into a Markdown archive (.md) and stored offline.`
-      : 'The entire chronicle will be compiled into a Markdown archive (.md) and stored offline.';
+      ? `All ${chapterCount} fragments from <span class="text-amber-300 font-semibold font-serif">"${safeTitle}"</span> will be compiled for offline reading.`
+      : `Download <span class="text-amber-300 font-semibold font-serif">"${safeTitle}"</span> for offline reading?`;
 
   return showConfirmModal({
     title: 'Download Chronicle?',
-    message: `Download <span class="text-amber-300 font-semibold font-serif">"${safeTitle}"</span> for offline reading?`,
-    subtext,
+    message: subtext,
+    subtext: 'Choose your desired archive format below to save on your device.',
     confirmText: 'Download Archive',
     cancelText: 'Cancel',
     confirmVariant: 'primary',
     icon: 'download',
+    showFormatOptions: true,
+    defaultFormat: 'md',
   });
 }

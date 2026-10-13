@@ -230,9 +230,11 @@ export function bindChapterClicks(taleId, chapters = [], userId = null, tale = n
         title: taleTitle,
         isFragment: true,
         fragmentTitle,
-      }).then((confirmed) => {
-        if (confirmed) {
-          downloadChapter(taleId, idx, { taleTitle, chapter: ch });
+      }).then((res) => {
+        const isConfirmed = Boolean(res && (res === true || res.confirmed));
+        const format = typeof res === 'object' && res?.format ? res.format : 'md';
+        if (isConfirmed) {
+          downloadChapter(taleId, idx, { taleTitle, chapter: ch, format });
         }
       });
       return;
@@ -344,12 +346,14 @@ export function setupChronicleBatchActions(userId, taleId, chapters = [], tale =
     downloadAllBtn.addEventListener('click', async () => {
       const taleTitle =
         tale?.title || document.querySelector('h1')?.textContent?.trim() || 'Chronicle';
-      const confirmed = await confirmTaleDownload({
+      const res = await confirmTaleDownload({
         title: taleTitle,
         chapterCount: chapters?.length || 0,
       });
-      if (confirmed) {
-        downloadChronicle(taleId);
+      const isConfirmed = Boolean(res && (res === true || res.confirmed));
+      const format = typeof res === 'object' && res?.format ? res.format : 'md';
+      if (isConfirmed) {
+        downloadChronicle(taleId, { format });
       }
     });
   }

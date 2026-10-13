@@ -72,9 +72,11 @@ export function setupCardInteractions(userId) {
             card.getAttribute('aria-label') ||
             card.querySelector('h3')?.textContent?.trim() ||
             'Chronicle';
-          const confirmed = await confirmTaleDownload({ title: taleTitle });
-          if (confirmed) {
-            await downloadChronicle(taleId);
+          const res = await confirmTaleDownload({ title: taleTitle });
+          const isConfirmed = Boolean(res && (res === true || res.confirmed));
+          const format = typeof res === 'object' && res?.format ? res.format : 'md';
+          if (isConfirmed) {
+            await downloadChronicle(taleId, { format });
           }
           return;
         }

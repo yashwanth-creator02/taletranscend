@@ -183,7 +183,7 @@ describe('confirmModal component', () => {
   });
 
   describe('confirmTaleDownload', () => {
-    it('prompts confirmation for full chronicle download', async () => {
+    it('prompts confirmation for full chronicle download with default markdown format', async () => {
       const promise = confirmTaleDownload({
         title: 'Epic of Gilgamesh',
         chapterCount: 12,
@@ -193,14 +193,39 @@ describe('confirmModal component', () => {
       expect(modal).not.toBeNull();
       expect(modal?.textContent).toContain('Download Chronicle?');
       expect(modal?.textContent).toContain('Epic of Gilgamesh');
-      expect(modal?.textContent).toContain('All 12 fragments will be compiled');
+      expect(modal?.textContent).toContain('All 12 fragments');
       expect(modal?.textContent).toContain('Download Archive');
+      expect(modal?.textContent).toContain('Markdown');
+      expect(modal?.textContent).toContain('EPUB Book');
 
       const confirmBtn = modal?.querySelector('.confirm-modal-confirm');
       confirmBtn?.click();
       const res = await promise;
 
-      expect(res).toBe(true);
+      expect(res).toEqual({ confirmed: true, format: 'md' });
+    });
+
+    it('allows selecting epub format before confirmation', async () => {
+      const promise = confirmTaleDownload({
+        title: 'The Odyssey',
+        chapterCount: 24,
+      });
+
+      const modal = document.getElementById(CONFIRM_MODAL_ID);
+      const epubBtn = modal?.querySelector('[data-format="epub"]');
+      expect(epubBtn).not.toBeNull();
+      epubBtn?.click();
+
+      expect(epubBtn?.getAttribute('aria-checked')).toBe('true');
+      expect(modal?.querySelector('#tt-confirm-modal-format-indicator')?.textContent).toContain(
+        'EPUB'
+      );
+
+      const confirmBtn = modal?.querySelector('.confirm-modal-confirm');
+      confirmBtn?.click();
+      const res = await promise;
+
+      expect(res).toEqual({ confirmed: true, format: 'epub' });
     });
 
     it('prompts confirmation for single fragment download', async () => {

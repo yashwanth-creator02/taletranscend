@@ -12,6 +12,7 @@ vi.mock('../../reader/reader.service.js', () => ({
 
 vi.mock('@/utils', () => ({
   saveTaleOffline: vi.fn(() => Promise.resolve()),
+  buildEpubBlob: vi.fn(() => new Blob(['mock-epub'], { type: 'application/epub+zip' })),
   createLogger: vi.fn(() => ({
     info: vi.fn(),
     debug: vi.fn(),
@@ -55,6 +56,28 @@ describe('downloadTale service', () => {
       expect(toast.showToast).toHaveBeenCalledWith(expect.stringContaining('Epic Lore'), 'success');
     });
 
+    it('downloads chronicle as EPUB when format option is epub', async () => {
+      vi.mocked(readerService.getTaleMeta).mockResolvedValue({
+        id: 't1',
+        title: 'Epic Lore',
+        authorName: 'Scribe',
+        synopsis: 'A great journey',
+        era: 'Mythic',
+        genre: 'Epic',
+      });
+      vi.mocked(readerService.getChapters).mockResolvedValue([
+        { title: 'Ch 1', content: 'Once upon a time...' },
+      ]);
+
+      const res = await downloadChronicle('t1', { format: 'epub' });
+      expect(res).toBe(true);
+      expect(utils.buildEpubBlob).toHaveBeenCalled();
+      expect(toast.showToast).toHaveBeenCalledWith(
+        expect.stringContaining('downloaded as EPUB'),
+        'success'
+      );
+    });
+
     it('shows error toast when tale not found', async () => {
       vi.mocked(readerService.getTaleMeta).mockResolvedValue(null);
       vi.mocked(readerService.getChapters).mockResolvedValue([]);
@@ -80,6 +103,21 @@ describe('downloadTale service', () => {
       expect(res).toBe(true);
       expect(toast.showToast).toHaveBeenCalledWith(
         expect.stringContaining('First Scroll'),
+        'success'
+      );
+    });
+
+    it('downloads individual fragment as EPUB when format is epub', async () => {
+      const res = await downloadChapter('t1', 0, {
+        taleTitle: 'Epic Lore',
+        chapter: { title: 'First Scroll', content: 'Scroll text here.' },
+        format: 'epub',
+      });
+
+      expect(res).toBe(true);
+      expect(utils.buildEpubBlob).toHaveBeenCalled();
+      expect(toast.showToast).toHaveBeenCalledWith(
+        expect.stringContaining('downloaded as EPUB'),
         'success'
       );
     });

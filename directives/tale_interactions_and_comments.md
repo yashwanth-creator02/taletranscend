@@ -71,15 +71,21 @@ Define the standard operating procedures, data structures, and UI behaviors for 
 - **Manual Fragment Read/Unread Toggles**:
   - Each fragment item in `#chapter-list` provides discrete read/unread triggers (`data-action="mark-read"`, `data-action="mark-unread"`).
   - Updates local progress cache (`markChapterRead`, `markChapterUnread`) and syncs to cloud progress service when authenticated (`syncMarkChapterRead`, `syncMarkChapterUnread`).
-- **Fragment & Chronicle Downloads**:
-  - Single Fragment Download: Triggered by `data-action="download-chapter"` via `downloadChapter(taleId, chapterIndex, options)`. Exports markdown/text document of the individual fragment.
-  - Full Chronicle Download: Triggered by `#btn-download-all-chronicles` via `downloadChronicle(taleId, options)`. Exports the complete compiled chronicle.
+- **Fragment & Chronicle Downloads & Format Selection**:
+  - Single Fragment Download: Triggered by `data-action="download-chapter"` via `downloadChapter(taleId, chapterIndex, options)`. Exports the individual fragment in Markdown (`.md`) or EPUB (`.epub`).
+  - Full Chronicle Download: Triggered by `#btn-download-all-chronicles` via `downloadChronicle(taleId, options)`. Exports the complete compiled chronicle in Markdown (`.md`) or EPUB (`.epub`).
+  - **Archive Format Selection Popup**:
+    - Both single-fragment and full-chronicle download confirmations present an accessible format choice radiogroup offering:
+      - **Markdown Archive (`.md`)**: Plaintext format for note-taking and personal vaults.
+      - **EPUB Electronic Book (`.epub`)**: Valid EPUB 3 package generated via native zero-dependency ZIP archiver (`buildEpubBlob`, `createZipArchive`), complete with title page, navigation TOC, clean typography stylesheet, and semantic chapter XHTML.
+    - Active format defaults to `.md` and dynamically toggles indicators and confirmation button actions.
+    - Selected format is passed directly to `downloadChronicle(taleId, { format })` and `downloadChapter(taleId, chapterIndex, { format, ... })`.
 - **Chronicle Batch Actions**:
   - Chronicle TOC header provides batch actions:
     - `#btn-sort-chronicles`: Toggles chronological sort order between ascending and descending.
     - `#btn-mark-all-read`: Marks all fragments as read in local storage and cloud progress.
     - `#btn-mark-all-unread`: Resets all fragment read states to unread.
-    - `#btn-download-all-chronicles`: Initiates comprehensive offline download.
+    - `#btn-download-all-chronicles`: Initiates comprehensive offline download with format selection.
 
 ### 3. Comment & Reply Tree Architecture (Unified Design System)
 

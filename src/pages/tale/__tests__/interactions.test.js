@@ -273,7 +273,7 @@ describe('TaleInteractions', () => {
       await document.getElementById('btn-download-all-chronicles').click();
 
       expect(confirmModal.confirmTaleDownload).toHaveBeenCalled();
-      expect(downloadTale.downloadChronicle).toHaveBeenCalledWith('t1');
+      expect(downloadTale.downloadChronicle).toHaveBeenCalledWith('t1', { format: 'md' });
     });
 
     it('does not download all chronicles when confirmation cancelled', async () => {

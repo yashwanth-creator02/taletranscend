@@ -127,7 +127,7 @@ describe('ShelfInteractions', () => {
     await downloadBtn.click();
 
     expect(confirmModal.confirmTaleDownload).toHaveBeenCalled();
-    expect(services.downloadChronicle).toHaveBeenCalledWith('t1');
+    expect(services.downloadChronicle).toHaveBeenCalledWith('t1', { format: 'md' });
   });
 
   it('does not download when confirmation cancelled', async () => {
