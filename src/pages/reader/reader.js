@@ -1458,9 +1458,6 @@ initAuth(async (user) => {
   initSidebar();
   initSelectionToolbar();
 
-  // Open TOC by default on desktop
-  if (window.innerWidth >= 1024) openPanel('toc');
-
   // Global action bindings
   document.getElementById('sidebar-bookmark')?.addEventListener('click', _handleBookmark);
   document.getElementById('eng-bookmark-mobile')?.addEventListener('click', _handleBookmark);

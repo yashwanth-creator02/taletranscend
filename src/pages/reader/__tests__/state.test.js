@@ -8,7 +8,8 @@ describe('ReaderState', () => {
     expect(readerState.chapterIndex).toBe(0);
     expect(readerState.theme).toBe('noir');
     expect(readerState.fontSize).toBe(18);
-    expect(readerState.openTool).toBe('toc');
+    expect(readerState.openTool).toBeNull();
+    expect(readerState.isCollapsed).toBe(true);
   });
 
   it('is mutable', () => {
