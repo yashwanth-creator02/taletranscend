@@ -1302,7 +1302,9 @@ body.focus-mode #top-bar-focus:hover {
 .comment-replies-list {
   margin-top: 0.75rem;
   margin-left: 0.75rem;
+  margin-right: 0;
   padding-left: 0.5rem;
+  padding-right: 0;
   border-left: 1px solid var(--reader-border);
   display: flex;
   flex-direction: column;
@@ -1314,6 +1316,17 @@ body.focus-mode #top-bar-focus:hover {
     margin-left: 1.25rem;
     padding-left: 0.75rem;
   }
+}
+
+.comment-reply-card {
+  border-radius: 0.5rem;
+  padding: 0.625rem;
+}
+
+/* Nested replies: only left-side indentation is needed; no right-side insetting */
+.comment-reply-card .comment-replies-list {
+  margin-right: -0.625rem;
+  padding-right: 0;
 }
 
 @media (max-width: 639px) {
@@ -1334,6 +1347,8 @@ body.focus-mode #top-bar-focus:hover {
   .comment-replies-list {
     margin-left: 0.375rem;
     padding-left: 0.375rem;
+    margin-right: 0;
+    padding-right: 0;
     gap: 0.375rem;
   }
 
@@ -1341,11 +1356,15 @@ body.focus-mode #top-bar-focus:hover {
     margin-left: 0.25rem;
     padding-left: 0.25rem;
   }
-}
 
-.comment-reply-card {
-  border-radius: 0.5rem;
-  padding: 0.625rem;
+  .comment-reply-card {
+    padding: 0.5rem;
+  }
+
+  .comment-reply-card .comment-replies-list {
+    margin-right: -0.5rem;
+    padding-right: 0;
+  }
 }
 
 .reply-target-tag {
