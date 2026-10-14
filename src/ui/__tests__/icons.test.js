@@ -64,4 +64,25 @@ describe('Icons Registry', () => {
       { timeout: 1000 }
     );
   });
+
+  it('registers chronicle missives and newly required icons', async () => {
+    const { initIcons } = await import('../icons.js');
+    await initIcons();
+
+    await vi.waitFor(
+      () => {
+        expect(mockCreateIcons).toHaveBeenCalled();
+        const lastCall = mockCreateIcons.mock.calls[mockCreateIcons.mock.calls.length - 1][0];
+        expect(lastCall.icons.ArrowDownUp).toBeDefined();
+        expect(lastCall.icons.Inbox).toBeDefined();
+        expect(lastCall.icons.History).toBeDefined();
+        expect(lastCall.icons.Reply).toBeDefined();
+        expect(lastCall.icons.Ban).toBeDefined();
+        expect(lastCall.icons.Quote).toBeDefined();
+        expect(lastCall.icons.BookOpenCheck).toBeDefined();
+        expect(lastCall.icons.EyeOff).toBeDefined();
+      },
+      { timeout: 1000 }
+    );
+  });
 });
