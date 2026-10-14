@@ -345,7 +345,7 @@ describe('Chronicle Missives System', () => {
     );
     expect(document.getElementById('reader-missives-view').classList.contains('hidden')).toBe(true);
     expect(document.querySelector('.chronicler-invite-card').classList.contains('hidden')).toBe(
-      true
+      false
     );
   });
 

@@ -169,221 +169,329 @@
           <div class="hero-cover-backdrop-overlay"></div>
         </div>
 
-        <div class="relative z-10 space-y-6 max-w-4xl min-w-0">
-          <!-- Era & Provenance Pill -->
-          <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-            <span
-              class="px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase tracking-[0.25em]"
-            >
-              Tale Chronicle
-            </span>
-            <span
-              id="tale-era"
-              class="px-2.5 py-1 rounded-lg bg-white/4 border border-white/6 text-slate-300 text-[10px] font-bold uppercase tracking-[0.2em]"
-            >
-              —
-            </span>
-            <span
-              id="tale-genre"
-              class="px-2.5 py-1 rounded-lg bg-white/4 border border-white/6 text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]"
-            >
-              —
-            </span>
-            <span
-              id="tale-language"
-              class="px-2.5 py-1 rounded-lg bg-white/4 border border-white/6 text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] hidden sm:inline-block"
-            >
-              —
-            </span>
-          </div>
-
-          <!-- Title -->
-          <h1
-            id="display-title"
-            class="hero-title font-cinzel font-black text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white tracking-tight leading-[1.12] transition-opacity duration-300"
-          >
-            Loading Chronicle...
-          </h1>
-
-          <!-- Author & Metadata Row (with Ongoing / Completed / Hiatus / Stopped Status) -->
-          <div
-            id="hero-meta"
-            class="flex flex-wrap items-center gap-2 sm:gap-2.5 transition-opacity duration-300"
-          >
-            <div
-              class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/4 border border-white/8 shadow-sm backdrop-blur-xs"
-            >
-              <img
-                id="author-avatar-hero"
-                src=""
-                class="w-5 h-5 rounded-md bg-zinc-800 object-cover"
-                alt="Author"
-              />
-              <span id="display-author" class="text-xs font-semibold text-slate-200"> ... </span>
-            </div>
-
-            <div
-              id="display-status-pill"
-              class="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/4 border border-white/8 shadow-sm text-xs text-slate-200"
-            >
+        <div
+          class="relative z-10 flex flex-col lg:flex-row items-center lg:items-center justify-between gap-6 lg:gap-10"
+        >
+          <!-- Left Column: Details & Actions -->
+          <div class="space-y-6 flex-1 min-w-0 w-full">
+            <!-- Era & Provenance Pill -->
+            <div class="flex flex-wrap items-center gap-2 sm:gap-3">
               <span
-                id="display-status-dot"
-                class="w-1.5 h-1.5 rounded-xs bg-emerald-400 shrink-0"
-              ></span>
-              <span
-                id="display-status"
-                class="font-bold uppercase tracking-wider text-[10px] text-slate-200"
-                >Ongoing</span
+                class="px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase tracking-[0.25em]"
               >
+                Tale Chronicle
+              </span>
+              <span
+                id="tale-era"
+                class="px-2.5 py-1 rounded-lg bg-white/4 border border-white/6 text-slate-300 text-[10px] font-bold uppercase tracking-[0.2em]"
+              >
+                —
+              </span>
+              <span
+                id="tale-genre"
+                class="px-2.5 py-1 rounded-lg bg-white/4 border border-white/6 text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]"
+              >
+                —
+              </span>
+              <span
+                id="tale-language"
+                class="px-2.5 py-1 rounded-lg bg-white/4 border border-white/6 text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] hidden sm:inline-block"
+              >
+                —
+              </span>
             </div>
 
-            <div
-              class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/3 border border-white/6 shadow-sm backdrop-blur-xs text-xs text-slate-300"
+            <!-- Title -->
+            <h1
+              id="display-title"
+              class="hero-title font-cinzel font-black text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white tracking-tight leading-[1.12] transition-opacity duration-300"
             >
-              <i data-lucide="layers" class="w-3.5 h-3.5 text-indigo-400"></i>
-              <span id="display-chapters" class="font-medium text-slate-300">0 Fragments</span>
-            </div>
+              Loading Chronicle...
+            </h1>
 
+            <!-- Author & Metadata Row (with Ongoing / Completed / Hiatus / Stopped Status) -->
             <div
-              class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/3 border border-white/6 shadow-sm backdrop-blur-xs text-xs text-slate-300"
+              id="hero-meta"
+              class="flex flex-wrap items-center gap-2 sm:gap-2.5 transition-opacity duration-300"
             >
-              <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-400"></i>
-              <span id="read-time" class="font-medium text-slate-300">0 min read</span>
-            </div>
-          </div>
+              <div
+                class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/4 border border-white/8 shadow-sm backdrop-blur-xs"
+              >
+                <img
+                  id="author-avatar-hero"
+                  src=""
+                  class="w-5 h-5 rounded-md bg-zinc-800 object-cover"
+                  alt="Author"
+                />
+                <span id="display-author" class="text-xs font-semibold text-slate-200"> ... </span>
+              </div>
 
-          <!-- Mobile Quick Actions (Visible on screens < lg) -->
-          <div class="space-y-2 pt-2 lg:hidden w-full">
-            <div class="grid grid-cols-2 gap-2">
+              <div
+                id="display-status-pill"
+                class="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/4 border border-white/8 shadow-sm text-xs text-slate-200"
+              >
+                <span
+                  id="display-status-dot"
+                  class="w-1.5 h-1.5 rounded-xs bg-emerald-400 shrink-0"
+                ></span>
+                <span
+                  id="display-status"
+                  class="font-bold uppercase tracking-wider text-[10px] text-slate-200"
+                  >Ongoing</span
+                >
+              </div>
+
+              <div
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/3 border border-white/6 shadow-sm backdrop-blur-xs text-xs text-slate-300"
+              >
+                <i data-lucide="layers" class="w-3.5 h-3.5 text-indigo-400"></i>
+                <span id="display-chapters" class="font-medium text-slate-300">0 Fragments</span>
+              </div>
+
+              <div
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/3 border border-white/6 shadow-sm backdrop-blur-xs text-xs text-slate-300"
+              >
+                <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-400"></i>
+                <span id="read-time" class="font-medium text-slate-300">0 min read</span>
+              </div>
+            </div>
+
+            <!-- Mobile Quick Actions (Visible on screens < lg) -->
+            <div class="space-y-2 pt-2 lg:hidden w-full">
+              <div class="grid grid-cols-2 gap-2">
+                <button
+                  id="start-btn"
+                  class="btn btn-primary h-11 text-xs uppercase tracking-wider rounded-xl shadow-lg"
+                >
+                  <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+                  <span>Initiate</span>
+                </button>
+
+                <button
+                  id="resume-btn"
+                  class="btn btn-secondary h-11 text-xs uppercase tracking-wider rounded-xl"
+                >
+                  <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                  <span id="resume-text">Resume</span>
+                </button>
+              </div>
+
+              <div class="grid grid-cols-3 gap-2">
+                <button
+                  id="resonance-btn-mobile"
+                  class="btn btn-secondary h-10 px-2 rounded-xl text-xs font-semibold group"
+                  title="Soul Resonance"
+                  aria-label="Soul Resonance"
+                >
+                  <i
+                    data-lucide="heart"
+                    class="w-3.5 h-3.5 text-slate-400 group-hover:text-red-400 transition-colors"
+                  ></i>
+                  <span id="resonance-count-mobile" class="font-bold tracking-wide">0</span>
+                </button>
+
+                <button
+                  id="shelf-btn"
+                  class="btn btn-secondary h-10 px-2 rounded-xl text-xs font-semibold"
+                  title="Save to Shelf"
+                  aria-label="Save to Shelf"
+                >
+                  <i data-lucide="bookmark-plus" class="w-3.5 h-3.5"></i>
+                  <span>Shelf</span>
+                </button>
+
+                <button
+                  id="share-btn"
+                  class="btn btn-secondary h-10 px-2 rounded-xl text-xs font-semibold"
+                  title="Share Tale"
+                  aria-label="Share Tale"
+                >
+                  <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+                  <span>Share</span>
+                </button>
+              </div>
+
+              <!-- Author Quick Edit (Mobile) -->
+              <div id="author-actions-mobile" class="hidden pt-1" style="display: none">
+                <a
+                  id="edit-tale-btn-mobile"
+                  href="#"
+                  class="hidden btn btn-accent w-full h-10 px-3 rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm"
+                  style="display: none"
+                  title="Edit Chronicle"
+                >
+                  <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                  <span>Edit Chronicle</span>
+                </a>
+              </div>
+
+              <!-- Compact Author Inquire Bar (Mobile - Beside / Below Actions) -->
+              <div
+                class="chronicler-invite-card glass-card-strong px-3 py-2 rounded-xl border border-white/8 shadow-md flex items-center justify-between gap-3 w-full transition-all cursor-pointer"
+                title="Have a doubt about the tale? Ask author"
+              >
+                <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                  <a
+                    id="letter-author-profile-link-mobile"
+                    href="#"
+                    class="letter-author-profile-link group/avatar relative shrink-0 block cursor-pointer transition-transform hover:scale-105"
+                    title="View Author Profile"
+                    aria-label="View Author Profile"
+                  >
+                    <img
+                      id="letter-author-avatar-mobile"
+                      src=""
+                      alt="Author"
+                      class="letter-author-avatar w-7 h-7 rounded-full bg-zinc-800 object-cover border border-white/10 shadow-sm"
+                    />
+                  </a>
+                  <p class="text-xs font-medium text-slate-200 truncate leading-snug">
+                    Have a doubt about the tale? Ask author
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  id="btn-open-chronicler-letter-mobile"
+                  class="btn-open-chronicler-letter w-7 h-7 rounded-full bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white flex items-center justify-center shrink-0 shadow-md border border-indigo-400/30 group"
+                  title="Ask Author"
+                  aria-label="Ask Author"
+                >
+                  <i
+                    data-lucide="pen"
+                    class="w-3.5 h-3.5 text-white group-hover:scale-110 transition-transform"
+                  ></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Desktop Command Hub (Visible on lg+) -->
+            <div class="desktop-hero-actions hidden lg:flex flex-wrap items-center gap-3 pt-2">
               <button
-                id="start-btn"
-                class="btn btn-primary h-11 text-xs uppercase tracking-wider rounded-xl shadow-lg"
+                id="start-btn-desktop"
+                class="btn btn-primary py-3 px-6 rounded-xl text-xs uppercase tracking-wider shadow-lg shrink-0"
               >
-                <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
-                <span>Initiate</span>
+                <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+                <span>Initiate Reading</span>
               </button>
 
               <button
-                id="resume-btn"
-                class="btn btn-secondary h-11 text-xs uppercase tracking-wider rounded-xl"
+                id="resume-btn-desktop"
+                class="btn btn-secondary py-3 px-5 rounded-xl text-xs uppercase tracking-wider shrink-0"
               >
                 <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-                <span id="resume-text">Resume</span>
+                <span id="resume-text-desktop">Resume</span>
               </button>
-            </div>
 
-            <div class="grid grid-cols-3 gap-2">
               <button
-                id="resonance-btn-mobile"
-                class="btn btn-secondary h-10 px-2 rounded-xl text-xs font-semibold group"
+                id="resonance-btn-desktop"
+                class="btn btn-secondary py-3 px-4.5 rounded-xl text-xs font-semibold shrink-0 group"
                 title="Soul Resonance"
                 aria-label="Soul Resonance"
               >
                 <i
                   data-lucide="heart"
-                  class="w-3.5 h-3.5 text-slate-400 group-hover:text-red-400 transition-colors"
+                  class="w-4 h-4 text-slate-400 group-hover:text-red-400 transition-colors"
                 ></i>
-                <span id="resonance-count-mobile" class="font-bold tracking-wide">0</span>
+                <span id="resonance-count" class="font-bold tracking-wide">0</span>
               </button>
 
               <button
-                id="shelf-btn"
-                class="btn btn-secondary h-10 px-2 rounded-xl text-xs font-semibold"
+                id="shelf-btn-desktop"
+                class="btn btn-secondary py-3 px-4 rounded-xl text-xs font-semibold shrink-0"
                 title="Save to Shelf"
                 aria-label="Save to Shelf"
               >
                 <i data-lucide="bookmark-plus" class="w-3.5 h-3.5"></i>
-                <span>Shelf</span>
+                <span>Save to Shelf</span>
               </button>
 
               <button
-                id="share-btn"
-                class="btn btn-secondary h-10 px-2 rounded-xl text-xs font-semibold"
+                id="share-btn-desktop"
+                class="btn btn-secondary py-3 px-4 rounded-xl text-xs font-semibold shrink-0"
                 title="Share Tale"
                 aria-label="Share Tale"
               >
                 <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
                 <span>Share</span>
               </button>
-            </div>
 
-            <!-- Author Quick Edit (Mobile) -->
-            <div id="author-actions-mobile" class="hidden pt-1" style="display: none">
+              <!-- Author Quick Edit (Desktop) -->
               <a
-                id="edit-tale-btn-mobile"
+                id="edit-tale-btn-desktop"
                 href="#"
-                class="hidden btn btn-accent w-full h-10 px-3 rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm"
+                class="hidden btn btn-accent py-3 px-4.5 rounded-xl text-xs font-bold uppercase tracking-wider shrink-0 shadow-sm"
                 style="display: none"
                 title="Edit Chronicle"
               >
-                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                <i data-lucide="edit-3" class="w-4 h-4"></i>
                 <span>Edit Chronicle</span>
               </a>
+
+              <!-- Compact Author Inquire Bar (Beside Share Button) -->
+              <div
+                class="chronicler-invite-card glass-card-strong px-3.5 py-2 rounded-xl border border-white/8 shadow-md flex items-center justify-between gap-3 shrink-0 transition-all hover:border-indigo-500/30 cursor-pointer"
+                title="Have a doubt about the tale? Ask author"
+              >
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <a
+                    id="letter-author-profile-link"
+                    href="#"
+                    class="letter-author-profile-link group/avatar relative shrink-0 block cursor-pointer transition-transform hover:scale-105"
+                    title="View Author Profile"
+                    aria-label="View Author Profile"
+                  >
+                    <img
+                      id="letter-author-avatar"
+                      src=""
+                      alt="Author"
+                      class="letter-author-avatar w-7 h-7 rounded-full bg-zinc-800 object-cover border border-white/10 shadow-sm group-hover/avatar:border-indigo-400/50 transition-all duration-300"
+                    />
+                  </a>
+                  <span id="letter-author-name" class="hidden"></span>
+                  <p class="text-xs font-medium text-slate-200 truncate leading-snug">
+                    Have a doubt about the tale? Ask author
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  id="btn-open-chronicler-letter"
+                  class="btn-open-chronicler-letter w-7 h-7 rounded-full bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white flex items-center justify-center shrink-0 shadow-md transition-all cursor-pointer border border-indigo-400/30 group"
+                  title="Ask Author"
+                  aria-label="Ask Author"
+                >
+                  <i
+                    data-lucide="pen"
+                    class="w-3.5 h-3.5 text-white group-hover:scale-110 transition-transform"
+                  ></i>
+                </button>
+              </div>
+
+              <!-- Hidden semantic metadata hooks for correspondence -->
+              <p id="letter-author-bio" class="hidden" aria-hidden="true"></p>
+              <div id="letter-author-email-row" class="hidden" aria-hidden="true">
+                <span id="letter-author-email-display"></span>
+              </div>
+              <a id="letter-author-email-btn" class="hidden" href="#" aria-hidden="true"></a>
             </div>
           </div>
 
-          <!-- Desktop Command Hub (Visible on lg+) -->
-          <div class="desktop-hero-actions hidden lg:flex flex-wrap items-center gap-3 pt-2">
-            <button
-              id="start-btn-desktop"
-              class="btn btn-primary py-3 px-6 rounded-xl text-xs uppercase tracking-wider shadow-lg shrink-0"
+          <!-- Right Column: Cover Art Frame (Hangs in Hero Header) -->
+          <div
+            class="shrink-0 flex justify-center w-full lg:w-auto self-center order-first lg:order-last"
+          >
+            <div
+              class="glass-card p-2 sm:p-2.5 rounded-3xl shine-container group w-44 sm:w-52 lg:w-56 xl:w-64 aspect-3/4 max-h-[290px] sm:max-h-[330px] xl:max-h-[380px] overflow-hidden shadow-2xl border border-white/10 relative"
             >
-              <i data-lucide="play" class="w-4 h-4 fill-current"></i>
-              <span>Initiate Reading</span>
-            </button>
-
-            <button
-              id="resume-btn-desktop"
-              class="btn btn-secondary py-3 px-5 rounded-xl text-xs uppercase tracking-wider shrink-0"
-            >
-              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-              <span id="resume-text-desktop">Resume</span>
-            </button>
-
-            <button
-              id="resonance-btn-desktop"
-              class="btn btn-secondary py-3 px-4.5 rounded-xl text-xs font-semibold shrink-0 group"
-              title="Soul Resonance"
-              aria-label="Soul Resonance"
-            >
-              <i
-                data-lucide="heart"
-                class="w-4 h-4 text-slate-400 group-hover:text-red-400 transition-colors"
-              ></i>
-              <span id="resonance-count" class="font-bold tracking-wide">0</span>
-            </button>
-
-            <button
-              id="shelf-btn-desktop"
-              class="btn btn-secondary py-3 px-4 rounded-xl text-xs font-semibold shrink-0"
-              title="Save to Shelf"
-              aria-label="Save to Shelf"
-            >
-              <i data-lucide="bookmark-plus" class="w-3.5 h-3.5"></i>
-              <span>Save to Shelf</span>
-            </button>
-
-            <button
-              id="share-btn-desktop"
-              class="btn btn-secondary py-3 px-4 rounded-xl text-xs font-semibold shrink-0"
-              title="Share Tale"
-              aria-label="Share Tale"
-            >
-              <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
-              <span>Share</span>
-            </button>
-
-            <!-- Author Quick Edit (Desktop) -->
-            <a
-              id="edit-tale-btn-desktop"
-              href="#"
-              class="hidden btn btn-accent py-3 px-4.5 rounded-xl text-xs font-bold uppercase tracking-wider shrink-0 shadow-sm"
-              style="display: none"
-              title="Edit Chronicle"
-            >
-              <i data-lucide="edit-3" class="w-4 h-4"></i>
-              <span>Edit Chronicle</span>
-            </a>
+              <img
+                id="display-cover"
+                class="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-700 shadow-md"
+                src=""
+                alt="Cover"
+              />
+              <div class="shine-layer"></div>
+            </div>
           </div>
         </div>
       </section>
@@ -469,578 +577,494 @@
         id="tale-content-container"
         class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pb-20 sm:pb-24"
       >
-        <div
-          class="grid grid-cols-1 lg:grid-cols-[250px_1fr] xl:grid-cols-[280px_1fr] gap-8 items-start"
-        >
-          <!-- Sticky Hanging Cover Art Column (Hangs relative to viewport on scroll) -->
-          <aside
-            class="w-full flex flex-col items-center lg:items-stretch lg:sticky lg:top-8 self-start shrink-0 space-y-4"
+        <!-- Tab Panes Column -->
+        <div class="space-y-8 min-w-0 w-full">
+          <!-- Tab Navigation Strip -->
+          <div
+            class="flex items-center gap-2 sm:gap-3 border-b border-white/6 pb-2 overflow-x-auto no-scrollbar"
           >
-            <!-- Cover Art Frame -->
-            <div
-              class="glass-card p-2 sm:p-2.5 rounded-3xl shine-container group w-48 sm:w-56 lg:w-full aspect-3/4 max-h-[380px] xl:max-h-[420px] overflow-hidden shadow-2xl border border-white/8 relative"
+            <button
+              data-tab="about"
+              class="tab-btn active px-5 py-2.5 text-xs font-bold uppercase tracking-[0.2em] rounded-xl transition-all"
             >
-              <img
-                id="display-cover"
-                class="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-700"
-                src=""
-                alt="Cover"
-              />
-              <div class="shine-layer"></div>
+              Synopsis
+            </button>
+            <button
+              data-tab="chapters"
+              class="tab-btn px-5 py-2.5 text-xs font-bold uppercase tracking-[0.2em] rounded-xl transition-all"
+            >
+              Chronicles
+            </button>
+            <button
+              data-tab="comments"
+              class="tab-btn px-5 py-2.5 text-xs font-bold uppercase tracking-[0.2em] rounded-xl transition-all"
+            >
+              Echoes
+            </button>
+            <button
+              data-tab="letter"
+              id="tab-btn-letter"
+              class="tab-btn px-5 py-2.5 text-xs font-bold uppercase tracking-[0.2em] rounded-xl transition-all flex items-center gap-2"
+            >
+              <i data-lucide="mail" class="w-3.5 h-3.5 text-indigo-400"></i>
+              <span class="hidden sm:inline">Missives</span>
+              <span class="sm:hidden">Missives</span>
+            </button>
+          </div>
+
+          <!-- Tab 1: Synopsis Pane -->
+          <div id="content-about" class="tab-content space-y-6 animate-fade-in">
+            <div
+              class="glass-card-strong p-6 sm:p-8 rounded-3xl border border-white/6 shadow-xl relative overflow-hidden"
+            >
+              <div class="flex items-center gap-2.5 mb-4 text-indigo-400">
+                <i data-lucide="scroll-text" class="w-4 h-4"></i>
+                <span class="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-300">
+                  Narrative Lore
+                </span>
+              </div>
+              <div
+                id="display-description"
+                class="text-sm sm:text-base leading-relaxed text-slate-300 font-normal font-sans"
+              >
+                Unravelling chronicle lore...
+              </div>
             </div>
 
-            <!-- Compact Author Inquire Bar -->
+            <!-- Knowledge Tags -->
+            <div class="glass-card p-6 rounded-3xl border border-white/5 space-y-3">
+              <div class="flex items-center gap-2.5 text-slate-400">
+                <i data-lucide="tags" class="w-4 h-4 text-indigo-400"></i>
+                <span class="text-[10px] font-black uppercase tracking-[0.25em] text-slate-300">
+                  Archival Tags
+                </span>
+              </div>
+              <div id="lore-tag-list" class="flex flex-wrap gap-2"></div>
+            </div>
+          </div>
+
+          <!-- Tab 2: Chronicles (Chapters) Pane -->
+          <div id="content-chapters" class="tab-content hidden animate-fade-in space-y-4">
             <div
-              class="chronicler-invite-card glass-card-strong p-2.5 sm:p-3 rounded-2xl border border-white/8 shadow-md flex items-center justify-between gap-3 w-full max-w-xs sm:max-w-sm lg:max-w-none transition-all"
+              class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-2 mb-2 pb-3 border-b border-white/6"
             >
-              <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                <!-- Author Profile Link & Avatar -->
-                <a
-                  id="letter-author-profile-link"
-                  href="#"
-                  class="group/avatar relative shrink-0 block cursor-pointer transition-transform hover:scale-105"
-                  title="View Author Profile"
-                  aria-label="View Author Profile"
+              <div>
+                <h3 class="text-xs font-black uppercase tracking-[0.3em] text-slate-300">
+                  Fragment Trail
+                </h3>
+                <span
+                  id="chronicle-read-count"
+                  class="text-[10px] font-bold uppercase tracking-widest text-indigo-400/80"
                 >
-                  <img
-                    id="letter-author-avatar"
-                    src=""
-                    alt="Author"
-                    class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-zinc-800 object-cover border border-white/10 shadow-sm group-hover/avatar:border-indigo-400/50 transition-all duration-300"
-                  />
-                </a>
-
-                <!-- Doubt / Inquire Text Line -->
-                <div class="min-w-0 flex-1">
-                  <span id="letter-author-name" class="hidden"></span>
-                  <p
-                    class="text-xs sm:text-[13px] font-medium text-slate-200 truncate leading-snug"
-                  >
-                    Have a doubt about the tale? Ask author
-                  </p>
-                </div>
+                  Chronicle Sequence
+                </span>
               </div>
-
-              <!-- Single Circular Button with Pen Icon -->
-              <button
-                type="button"
-                id="btn-open-chronicler-letter"
-                class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white flex items-center justify-center shrink-0 shadow-md transition-all cursor-pointer border border-indigo-400/30 group"
-                title="Ask Author"
-                aria-label="Ask Author"
-              >
-                <i
-                  data-lucide="pen"
-                  class="w-4 h-4 text-white group-hover:scale-110 transition-transform"
-                ></i>
-              </button>
-
-              <!-- Hidden semantic metadata hooks for correspondence -->
-              <p id="letter-author-bio" class="hidden" aria-hidden="true"></p>
-              <div id="letter-author-email-row" class="hidden" aria-hidden="true">
-                <span id="letter-author-email-display"></span>
-              </div>
-              <a id="letter-author-email-btn" class="hidden" href="#" aria-hidden="true"></a>
-            </div>
-          </aside>
-
-          <!-- Tab Panes Column -->
-          <div class="space-y-8 min-w-0">
-            <!-- Tab Navigation Strip -->
-            <div
-              class="flex items-center gap-2 sm:gap-3 border-b border-white/6 pb-2 overflow-x-auto no-scrollbar"
-            >
-              <button
-                data-tab="about"
-                class="tab-btn active px-5 py-2.5 text-xs font-bold uppercase tracking-[0.2em] rounded-xl transition-all"
-              >
-                Synopsis
-              </button>
-              <button
-                data-tab="chapters"
-                class="tab-btn px-5 py-2.5 text-xs font-bold uppercase tracking-[0.2em] rounded-xl transition-all"
-              >
-                Chronicles
-              </button>
-              <button
-                data-tab="comments"
-                class="tab-btn px-5 py-2.5 text-xs font-bold uppercase tracking-[0.2em] rounded-xl transition-all"
-              >
-                Echoes
-              </button>
-              <button
-                data-tab="letter"
-                id="tab-btn-letter"
-                class="tab-btn px-5 py-2.5 text-xs font-bold uppercase tracking-[0.2em] rounded-xl transition-all flex items-center gap-2"
-              >
-                <i data-lucide="mail" class="w-3.5 h-3.5 text-indigo-400"></i>
-                <span class="hidden sm:inline">Missives</span>
-                <span class="sm:hidden">Missives</span>
-              </button>
-            </div>
-
-            <!-- Tab 1: Synopsis Pane -->
-            <div id="content-about" class="tab-content space-y-6 animate-fade-in">
-              <div
-                class="glass-card-strong p-6 sm:p-8 rounded-3xl border border-white/6 shadow-xl relative overflow-hidden"
-              >
-                <div class="flex items-center gap-2.5 mb-4 text-indigo-400">
-                  <i data-lucide="scroll-text" class="w-4 h-4"></i>
-                  <span class="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-300">
-                    Narrative Lore
-                  </span>
-                </div>
-                <div
-                  id="display-description"
-                  class="text-sm sm:text-base leading-relaxed text-slate-300 font-normal font-sans"
+              <!-- Batch Actions Toolbar -->
+              <div class="flex items-center gap-2 flex-wrap">
+                <button
+                  type="button"
+                  id="btn-sort-chronicles"
+                  data-sort-order="asc"
+                  class="px-3 py-1.5 rounded-xl border border-white/8 bg-white/4 hover:bg-white/10 hover:border-white/15 text-slate-300 hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
+                  title="Toggle fragment order: Showing Oldest First (click for Newest First)"
                 >
-                  Unravelling chronicle lore...
-                </div>
+                  <i data-lucide="arrow-down-up" class="w-3.5 h-3.5 text-indigo-400"></i>
+                  <span id="sort-chronicles-label">Oldest First</span>
+                </button>
+                <button
+                  type="button"
+                  id="btn-mark-all-read"
+                  class="px-3 py-1.5 rounded-xl border border-indigo-500/20 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
+                  title="Mark all fragments as read"
+                >
+                  <i data-lucide="check-check" class="w-3.5 h-3.5"></i>
+                  <span>Mark All Read</span>
+                </button>
+                <button
+                  type="button"
+                  id="btn-mark-all-unread"
+                  class="px-3 py-1.5 rounded-xl border border-white/8 bg-white/4 hover:bg-white/10 hover:border-white/15 text-slate-400 hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
+                  title="Mark all fragments as unread"
+                >
+                  <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                  <span>Mark All Unread</span>
+                </button>
+                <button
+                  type="button"
+                  id="btn-download-all-chronicles"
+                  class="px-3 py-1.5 rounded-xl border border-white/8 bg-white/4 hover:bg-white/10 hover:border-white/15 text-slate-400 hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
+                  title="Download entire chronicle (.md)"
+                >
+                  <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                  <span class="hidden sm:inline">Download All</span>
+                </button>
               </div>
+            </div>
+            <div id="chapter-list" class="space-y-3">
+              <!-- Rendered by ui.js -->
+            </div>
+          </div>
 
-              <!-- Knowledge Tags -->
-              <div class="glass-card p-6 rounded-3xl border border-white/5 space-y-3">
-                <div class="flex items-center gap-2.5 text-slate-400">
-                  <i data-lucide="tags" class="w-4 h-4 text-indigo-400"></i>
-                  <span class="text-[10px] font-black uppercase tracking-[0.25em] text-slate-300">
-                    Archival Tags
-                  </span>
-                </div>
-                <div id="lore-tag-list" class="flex flex-wrap gap-2"></div>
+          <!-- Tab 3: Echoes (Comments) Pane -->
+          <div id="content-comments" class="tab-content hidden animate-fade-in space-y-6">
+            <div
+              class="glass-card-strong p-6 sm:p-8 rounded-3xl border border-white/6 shadow-xl space-y-4"
+            >
+              <div class="flex items-center gap-2.5 text-indigo-400">
+                <i data-lucide="message-square-plus" class="w-4 h-4"></i>
+                <span class="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-300">
+                  Inscribe Reflection
+                </span>
+              </div>
+              <textarea
+                id="comment-text"
+                class="comment-input w-full p-4 rounded-2xl text-sm font-medium h-32 focus:ring-1 focus:ring-indigo-500/50"
+                placeholder="Leave an echo in this chronicle..."
+              ></textarea>
+              <div class="flex justify-end">
+                <button
+                  id="post-btn"
+                  class="px-6 py-2.5 bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-md shadow-indigo-500/20 active:scale-95 cursor-pointer"
+                >
+                  Post Echo
+                </button>
               </div>
             </div>
 
-            <!-- Tab 2: Chronicles (Chapters) Pane -->
-            <div id="content-chapters" class="tab-content hidden animate-fade-in space-y-4">
-              <div
-                class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-2 mb-2 pb-3 border-b border-white/6"
-              >
-                <div>
-                  <h3 class="text-xs font-black uppercase tracking-[0.3em] text-slate-300">
-                    Fragment Trail
-                  </h3>
-                  <span
-                    id="chronicle-read-count"
-                    class="text-[10px] font-bold uppercase tracking-widest text-indigo-400/80"
-                  >
-                    Chronicle Sequence
-                  </span>
+            <div id="comments-list" class="space-y-4">
+              <!-- Rendered by comments.js -->
+            </div>
+          </div>
+
+          <!-- Tab 4: Chronicle Missives (Author Mailroom / Reader Inquiries) Pane -->
+          <div id="content-letter" class="tab-content hidden animate-fade-in space-y-6">
+            <!-- 4A. Author Mailroom View (Rendered when viewing user is the tale author) -->
+            <div
+              id="author-missives-view"
+              class="hidden chronicler-letter-card glass-card-strong p-6 sm:p-8 md:p-10 rounded-3xl border border-white/6 shadow-2xl relative overflow-hidden space-y-6"
+            >
+              <!-- Header -->
+              <div class="space-y-3 relative z-10 border-b border-white/6 pb-6">
+                <div class="flex items-center justify-between flex-wrap gap-2">
+                  <div class="flex items-center gap-2.5 text-indigo-400">
+                    <i data-lucide="inbox" class="w-4 h-4 text-indigo-400"></i>
+                    <span
+                      class="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-300"
+                    >
+                      Author Mailroom
+                    </span>
+                    <span
+                      class="px-2 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-[9px] font-bold uppercase tracking-wider text-indigo-300"
+                    >
+                      Inbound Missives
+                    </span>
+                  </div>
                 </div>
-                <!-- Batch Actions Toolbar -->
-                <div class="flex items-center gap-2 flex-wrap">
-                  <button
-                    type="button"
-                    id="btn-sort-chronicles"
-                    data-sort-order="asc"
-                    class="px-3 py-1.5 rounded-xl border border-white/8 bg-white/4 hover:bg-white/10 hover:border-white/15 text-slate-300 hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
-                    title="Toggle fragment order: Showing Oldest First (click for Newest First)"
+                <h2
+                  class="font-cinzel text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight"
+                >
+                  Chronicle Missives Desk
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+                  Review queries and letters dispatched by readers of this chronicle. You can
+                  transmit responses back to readers, report inappropriate missives, or block
+                  problematic senders.
+                </p>
+              </div>
+
+              <!-- Stats & Filter Row -->
+              <div class="flex flex-wrap items-center justify-between gap-3 relative z-10">
+                <div class="flex items-center gap-2" id="author-missives-stats">
+                  <div
+                    class="px-3 py-1.5 rounded-xl bg-white/4 border border-white/8 text-xs text-slate-300 flex items-center gap-2"
                   >
-                    <i data-lucide="arrow-down-up" class="w-3.5 h-3.5 text-indigo-400"></i>
-                    <span id="sort-chronicles-label">Oldest First</span>
-                  </button>
-                  <button
-                    type="button"
-                    id="btn-mark-all-read"
-                    class="px-3 py-1.5 rounded-xl border border-indigo-500/20 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
-                    title="Mark all fragments as read"
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400"
+                      >Total</span
+                    >
+                    <span id="author-stat-total" class="font-bold text-white">0</span>
+                  </div>
+                  <div
+                    class="px-3 py-1.5 rounded-xl bg-white/4 border border-white/8 text-xs text-slate-300 flex items-center gap-2"
                   >
-                    <i data-lucide="check-check" class="w-3.5 h-3.5"></i>
-                    <span>Mark All Read</span>
-                  </button>
-                  <button
-                    type="button"
-                    id="btn-mark-all-unread"
-                    class="px-3 py-1.5 rounded-xl border border-white/8 bg-white/4 hover:bg-white/10 hover:border-white/15 text-slate-400 hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
-                    title="Mark all fragments as unread"
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400"
+                      >Pending</span
+                    >
+                    <span id="author-stat-pending" class="font-bold text-amber-300">0</span>
+                  </div>
+                  <div
+                    class="px-3 py-1.5 rounded-xl bg-white/4 border border-white/8 text-xs text-slate-300 flex items-center gap-2"
                   >
-                    <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-                    <span>Mark All Unread</span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400"
+                      >Replied</span
+                    >
+                    <span id="author-stat-replied" class="font-bold text-emerald-300">0</span>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-1.5 flex-wrap" id="author-missives-filter-chips">
+                  <button type="button" class="filter-chip active" data-filter="all">All</button>
+                  <button type="button" class="filter-chip" data-filter="unanswered">
+                    Unanswered
                   </button>
-                  <button
-                    type="button"
-                    id="btn-download-all-chronicles"
-                    class="px-3 py-1.5 rounded-xl border border-white/8 bg-white/4 hover:bg-white/10 hover:border-white/15 text-slate-400 hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
-                    title="Download entire chronicle (.md)"
-                  >
-                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                    <span class="hidden sm:inline">Download All</span>
-                  </button>
+                  <button type="button" class="filter-chip" data-filter="replied">Replied</button>
+                  <button type="button" class="filter-chip" data-filter="reported">Reported</button>
+                  <button type="button" class="filter-chip" data-filter="blocked">Blocked</button>
                 </div>
               </div>
-              <div id="chapter-list" class="space-y-3">
-                <!-- Rendered by ui.js -->
+
+              <!-- Author Missives List -->
+              <div id="author-missives-list" class="space-y-4 relative z-10 pt-2">
+                <!-- Rendered dynamically by inquire.js -->
               </div>
             </div>
 
-            <!-- Tab 3: Echoes (Comments) Pane -->
-            <div id="content-comments" class="tab-content hidden animate-fade-in space-y-6">
+            <!-- 4B. Reader Missives View (Rendered when viewing user is reader/guest) -->
+            <div id="reader-missives-view" class="space-y-6">
+              <!-- Main Inquire Card -->
               <div
-                class="glass-card-strong p-6 sm:p-8 rounded-3xl border border-white/6 shadow-xl space-y-4"
-              >
-                <div class="flex items-center gap-2.5 text-indigo-400">
-                  <i data-lucide="message-square-plus" class="w-4 h-4"></i>
-                  <span class="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-300">
-                    Inscribe Reflection
-                  </span>
-                </div>
-                <textarea
-                  id="comment-text"
-                  class="comment-input w-full p-4 rounded-2xl text-sm font-medium h-32 focus:ring-1 focus:ring-indigo-500/50"
-                  placeholder="Leave an echo in this chronicle..."
-                ></textarea>
-                <div class="flex justify-end">
-                  <button
-                    id="post-btn"
-                    class="px-6 py-2.5 bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-md shadow-indigo-500/20 active:scale-95 cursor-pointer"
-                  >
-                    Post Echo
-                  </button>
-                </div>
-              </div>
-
-              <div id="comments-list" class="space-y-4">
-                <!-- Rendered by comments.js -->
-              </div>
-            </div>
-
-            <!-- Tab 4: Chronicle Missives (Author Mailroom / Reader Inquiries) Pane -->
-            <div id="content-letter" class="tab-content hidden animate-fade-in space-y-6">
-              <!-- 4A. Author Mailroom View (Rendered when viewing user is the tale author) -->
-              <div
-                id="author-missives-view"
-                class="hidden chronicler-letter-card glass-card-strong p-6 sm:p-8 md:p-10 rounded-3xl border border-white/6 shadow-2xl relative overflow-hidden space-y-6"
+                class="chronicler-letter-card glass-card-strong p-6 sm:p-8 md:p-10 rounded-3xl border border-white/6 shadow-2xl relative overflow-hidden space-y-8"
               >
                 <!-- Header -->
                 <div class="space-y-3 relative z-10 border-b border-white/6 pb-6">
-                  <div class="flex items-center justify-between flex-wrap gap-2">
-                    <div class="flex items-center gap-2.5 text-indigo-400">
-                      <i data-lucide="inbox" class="w-4 h-4 text-indigo-400"></i>
-                      <span
-                        class="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-300"
-                      >
-                        Author Mailroom
-                      </span>
-                      <span
-                        class="px-2 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-[9px] font-bold uppercase tracking-wider text-indigo-300"
-                      >
-                        Inbound Missives
-                      </span>
-                    </div>
+                  <div class="flex items-center gap-2.5 text-indigo-400">
+                    <i data-lucide="feather" class="w-4 h-4 text-indigo-400"></i>
+                    <span
+                      class="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-300"
+                    >
+                      Chronicle Missives
+                    </span>
+                    <span
+                      class="px-2 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-[9px] font-bold uppercase tracking-wider text-indigo-300"
+                    >
+                      Inquire of Scribe
+                    </span>
                   </div>
                   <h2
                     class="font-cinzel text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight"
                   >
-                    Chronicle Missives Desk
+                    Inquire of the Scribe
                   </h2>
                   <p class="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-                    Review queries and letters dispatched by readers of this chronicle. You can
-                    transmit responses back to readers, report inappropriate missives, or block
-                    problematic senders.
+                    Have an unresolved question about character fates, worldbuilding mysteries, or
+                    plot threads? Dispatch your missive directly to
+                    <span id="inquire-author-display" class="font-semibold text-indigo-300"
+                      >the author</span
+                    ><span
+                      id="inquire-author-email-pill"
+                      class="hidden text-xs text-indigo-400 font-mono ml-1.5"
+                      >(&lt;<span id="inquire-author-email-target"></span>&gt;)</span
+                    >
+                    or track your previous inquiries below.
                   </p>
                 </div>
 
-                <!-- Stats & Filter Row -->
-                <div class="flex flex-wrap items-center justify-between gap-3 relative z-10">
-                  <div class="flex items-center gap-2" id="author-missives-stats">
+                <!-- Form View -->
+                <form id="chronicler-inquire-form" class="space-y-6 relative z-10" novalidate>
+                  <!-- Inquiry Category Selector -->
+                  <div class="space-y-2.5">
+                    <label class="block text-xs font-bold uppercase tracking-widest text-slate-300">
+                      Select Inquiry Type
+                    </label>
                     <div
-                      class="px-3 py-1.5 rounded-xl bg-white/4 border border-white/8 text-xs text-slate-300 flex items-center gap-2"
+                      id="inquiry-category-chips"
+                      class="grid grid-cols-2 sm:grid-cols-4 gap-2.5"
+                      role="radiogroup"
+                      aria-label="Inquiry Category"
                     >
-                      <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400"
-                        >Total</span
+                      <button
+                        type="button"
+                        role="radio"
+                        aria-checked="true"
+                        class="inquiry-category-chip active"
+                        data-category="lore"
                       >
-                      <span id="author-stat-total" class="font-bold text-white">0</span>
+                        <i data-lucide="compass" class="w-4 h-4"></i>
+                        <span>Lore & World</span>
+                      </button>
+                      <button
+                        type="button"
+                        role="radio"
+                        aria-checked="false"
+                        class="inquiry-category-chip"
+                        data-category="characters"
+                      >
+                        <i data-lucide="user" class="w-4 h-4"></i>
+                        <span>Character Doubts</span>
+                      </button>
+                      <button
+                        type="button"
+                        role="radio"
+                        aria-checked="false"
+                        class="inquiry-category-chip"
+                        data-category="plot"
+                      >
+                        <i data-lucide="help-circle" class="w-4 h-4"></i>
+                        <span>Plot & Theories</span>
+                      </button>
+                      <button
+                        type="button"
+                        role="radio"
+                        aria-checked="false"
+                        class="inquiry-category-chip"
+                        data-category="connect"
+                      >
+                        <i data-lucide="heart" class="w-4 h-4"></i>
+                        <span>Connect & Praise</span>
+                      </button>
                     </div>
-                    <div
-                      class="px-3 py-1.5 rounded-xl bg-white/4 border border-white/8 text-xs text-slate-300 flex items-center gap-2"
-                    >
-                      <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400"
-                        >Pending</span
+                    <input type="hidden" id="inquire-category" value="lore" />
+                  </div>
+
+                  <!-- Author & Sender Details Grid -->
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                      <label
+                        for="inquire-sender-name"
+                        class="block text-xs font-bold uppercase tracking-widest text-slate-300"
                       >
-                      <span id="author-stat-pending" class="font-bold text-amber-300">0</span>
+                        Your Reader Moniker <span class="text-indigo-400">*</span>
+                      </label>
+                      <div class="relative">
+                        <input
+                          type="text"
+                          id="inquire-sender-name"
+                          required
+                          maxlength="50"
+                          class="inquire-input w-full px-4 py-3 rounded-2xl text-sm font-medium"
+                          placeholder="e.g. Archivist Ronin"
+                        />
+                      </div>
                     </div>
-                    <div
-                      class="px-3 py-1.5 rounded-xl bg-white/4 border border-white/8 text-xs text-slate-300 flex items-center gap-2"
-                    >
-                      <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400"
-                        >Replied</span
+                    <div class="space-y-2">
+                      <label
+                        for="inquire-sender-contact"
+                        class="block text-xs font-bold uppercase tracking-widest text-slate-300"
                       >
-                      <span id="author-stat-replied" class="font-bold text-emerald-300">0</span>
+                        Contact / Handle
+                        <span class="text-slate-500 font-normal text-[10px] lowercase"
+                          >(optional for reply)</span
+                        >
+                      </label>
+                      <div class="relative">
+                        <input
+                          type="text"
+                          id="inquire-sender-contact"
+                          maxlength="80"
+                          class="inquire-input w-full px-4 py-3 rounded-2xl text-sm font-medium"
+                          placeholder="email@domain.com or @handle"
+                        />
+                      </div>
                     </div>
                   </div>
 
+                  <!-- Missive Question Textarea -->
+                  <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                      <label
+                        for="inquire-message"
+                        class="block text-xs font-bold uppercase tracking-widest text-slate-300"
+                      >
+                        Your Inquiry / Missive <span class="text-indigo-400">*</span>
+                      </label>
+                      <span
+                        id="inquire-char-counter"
+                        class="text-[10px] font-bold text-slate-500 tracking-wider"
+                      >
+                        0 / 800
+                      </span>
+                    </div>
+                    <textarea
+                      id="inquire-message"
+                      required
+                      minlength="10"
+                      maxlength="800"
+                      class="inquire-input w-full p-4 rounded-2xl text-sm font-medium h-36 resize-none focus:ring-1 focus:ring-indigo-500/50"
+                      placeholder="Inscribe your question, doubt, or message for the chronicler..."
+                    ></textarea>
+                    <p
+                      id="inquire-form-error"
+                      class="hidden text-xs text-rose-400 font-medium pt-1"
+                    ></p>
+                  </div>
+
+                  <!-- Footer / Dispatch Action -->
                   <div
-                    class="flex items-center gap-1.5 flex-wrap"
-                    id="author-missives-filter-chips"
+                    class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2 border-t border-white/6"
                   >
-                    <button type="button" class="filter-chip active" data-filter="all">All</button>
-                    <button type="button" class="filter-chip" data-filter="unanswered">
-                      Unanswered
-                    </button>
-                    <button type="button" class="filter-chip" data-filter="replied">Replied</button>
-                    <button type="button" class="filter-chip" data-filter="reported">
-                      Reported
-                    </button>
-                    <button type="button" class="filter-chip" data-filter="blocked">Blocked</button>
-                  </div>
-                </div>
+                    <div class="flex items-center gap-2 text-slate-400 text-xs">
+                      <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+                      <span
+                        >Missives are routed to the author's registered correspondence inbox.</span
+                      >
+                    </div>
 
-                <!-- Author Missives List -->
-                <div id="author-missives-list" class="space-y-4 relative z-10 pt-2">
-                  <!-- Rendered dynamically by inquire.js -->
+                    <button
+                      type="submit"
+                      id="inquire-submit-btn"
+                      class="btn btn-primary px-7 py-3 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shrink-0 shadow-lg shadow-indigo-500/20 active:scale-95 cursor-pointer"
+                    >
+                      <i data-lucide="send" class="w-3.5 h-3.5 fill-current"></i>
+                      <span id="inquire-submit-text">Dispatch Missive</span>
+                    </button>
+                  </div>
+                </form>
+
+                <!-- Success Confirmation View (Hidden by default) -->
+                <div
+                  id="chronicler-inquire-success"
+                  class="hidden space-y-6 py-6 text-center animate-fade-in relative z-10"
+                >
+                  <div
+                    class="w-16 h-16 mx-auto rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shadow-xl shadow-indigo-500/10"
+                  >
+                    <i data-lucide="check-check" class="w-8 h-8"></i>
+                  </div>
+                  <div class="space-y-2 max-w-lg mx-auto">
+                    <h3 class="font-cinzel text-xl sm:text-2xl font-black text-white">
+                      Missive Inscribed & Dispatched
+                    </h3>
+                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                      Your inquiry has been relayed across the archives to
+                      <span id="success-author-target" class="font-semibold text-indigo-300"
+                        >the author</span
+                      >. Thank you for engaging deeply with this chronicle.
+                    </p>
+                  </div>
+                  <div class="pt-2">
+                    <button
+                      type="button"
+                      id="btn-inquire-another"
+                      class="btn btn-secondary px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer"
+                    >
+                      <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                      <span>Inscribe Another Missive</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              <!-- 4B. Reader Missives View (Rendered when viewing user is reader/guest) -->
-              <div id="reader-missives-view" class="space-y-6">
-                <!-- Main Inquire Card -->
-                <div
-                  class="chronicler-letter-card glass-card-strong p-6 sm:p-8 md:p-10 rounded-3xl border border-white/6 shadow-2xl relative overflow-hidden space-y-8"
-                >
-                  <!-- Header -->
-                  <div class="space-y-3 relative z-10 border-b border-white/6 pb-6">
-                    <div class="flex items-center gap-2.5 text-indigo-400">
-                      <i data-lucide="feather" class="w-4 h-4 text-indigo-400"></i>
-                      <span
-                        class="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-300"
-                      >
-                        Chronicle Missives
-                      </span>
-                      <span
-                        class="px-2 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-[9px] font-bold uppercase tracking-wider text-indigo-300"
-                      >
-                        Inquire of Scribe
-                      </span>
-                    </div>
-                    <h2
-                      class="font-cinzel text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight"
-                    >
-                      Inquire of the Scribe
-                    </h2>
-                    <p class="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-                      Have an unresolved question about character fates, worldbuilding mysteries, or
-                      plot threads? Dispatch your missive directly to
-                      <span id="inquire-author-display" class="font-semibold text-indigo-300"
-                        >the author</span
-                      ><span
-                        id="inquire-author-email-pill"
-                        class="hidden text-xs text-indigo-400 font-mono ml-1.5"
-                        >(&lt;<span id="inquire-author-email-target"></span>&gt;)</span
-                      >
-                      or track your previous inquiries below.
-                    </p>
+              <!-- Reader Sent Inquiries & Responses Panel -->
+              <div
+                id="reader-sent-inquiries-container"
+                class="glass-card-strong p-6 sm:p-8 rounded-3xl border border-white/6 shadow-xl relative overflow-hidden space-y-5"
+              >
+                <div class="flex items-center justify-between border-b border-white/6 pb-4">
+                  <div class="flex items-center gap-2.5 text-indigo-400">
+                    <i data-lucide="history" class="w-4 h-4 text-indigo-400"></i>
+                    <h3 class="text-xs font-bold uppercase tracking-widest text-white">
+                      Your Dispatched Inquiries
+                    </h3>
                   </div>
-
-                  <!-- Form View -->
-                  <form id="chronicler-inquire-form" class="space-y-6 relative z-10" novalidate>
-                    <!-- Inquiry Category Selector -->
-                    <div class="space-y-2.5">
-                      <label
-                        class="block text-xs font-bold uppercase tracking-widest text-slate-300"
-                      >
-                        Select Inquiry Type
-                      </label>
-                      <div
-                        id="inquiry-category-chips"
-                        class="grid grid-cols-2 sm:grid-cols-4 gap-2.5"
-                        role="radiogroup"
-                        aria-label="Inquiry Category"
-                      >
-                        <button
-                          type="button"
-                          role="radio"
-                          aria-checked="true"
-                          class="inquiry-category-chip active"
-                          data-category="lore"
-                        >
-                          <i data-lucide="compass" class="w-4 h-4"></i>
-                          <span>Lore & World</span>
-                        </button>
-                        <button
-                          type="button"
-                          role="radio"
-                          aria-checked="false"
-                          class="inquiry-category-chip"
-                          data-category="characters"
-                        >
-                          <i data-lucide="user" class="w-4 h-4"></i>
-                          <span>Character Doubts</span>
-                        </button>
-                        <button
-                          type="button"
-                          role="radio"
-                          aria-checked="false"
-                          class="inquiry-category-chip"
-                          data-category="plot"
-                        >
-                          <i data-lucide="help-circle" class="w-4 h-4"></i>
-                          <span>Plot & Theories</span>
-                        </button>
-                        <button
-                          type="button"
-                          role="radio"
-                          aria-checked="false"
-                          class="inquiry-category-chip"
-                          data-category="connect"
-                        >
-                          <i data-lucide="heart" class="w-4 h-4"></i>
-                          <span>Connect & Praise</span>
-                        </button>
-                      </div>
-                      <input type="hidden" id="inquire-category" value="lore" />
-                    </div>
-
-                    <!-- Author & Sender Details Grid -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div class="space-y-2">
-                        <label
-                          for="inquire-sender-name"
-                          class="block text-xs font-bold uppercase tracking-widest text-slate-300"
-                        >
-                          Your Reader Moniker <span class="text-indigo-400">*</span>
-                        </label>
-                        <div class="relative">
-                          <input
-                            type="text"
-                            id="inquire-sender-name"
-                            required
-                            maxlength="50"
-                            class="inquire-input w-full px-4 py-3 rounded-2xl text-sm font-medium"
-                            placeholder="e.g. Archivist Ronin"
-                          />
-                        </div>
-                      </div>
-                      <div class="space-y-2">
-                        <label
-                          for="inquire-sender-contact"
-                          class="block text-xs font-bold uppercase tracking-widest text-slate-300"
-                        >
-                          Contact / Handle
-                          <span class="text-slate-500 font-normal text-[10px] lowercase"
-                            >(optional for reply)</span
-                          >
-                        </label>
-                        <div class="relative">
-                          <input
-                            type="text"
-                            id="inquire-sender-contact"
-                            maxlength="80"
-                            class="inquire-input w-full px-4 py-3 rounded-2xl text-sm font-medium"
-                            placeholder="email@domain.com or @handle"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Missive Question Textarea -->
-                    <div class="space-y-2">
-                      <div class="flex items-center justify-between">
-                        <label
-                          for="inquire-message"
-                          class="block text-xs font-bold uppercase tracking-widest text-slate-300"
-                        >
-                          Your Inquiry / Missive <span class="text-indigo-400">*</span>
-                        </label>
-                        <span
-                          id="inquire-char-counter"
-                          class="text-[10px] font-bold text-slate-500 tracking-wider"
-                        >
-                          0 / 800
-                        </span>
-                      </div>
-                      <textarea
-                        id="inquire-message"
-                        required
-                        minlength="10"
-                        maxlength="800"
-                        class="inquire-input w-full p-4 rounded-2xl text-sm font-medium h-36 resize-none focus:ring-1 focus:ring-indigo-500/50"
-                        placeholder="Inscribe your question, doubt, or message for the chronicler..."
-                      ></textarea>
-                      <p
-                        id="inquire-form-error"
-                        class="hidden text-xs text-rose-400 font-medium pt-1"
-                      ></p>
-                    </div>
-
-                    <!-- Footer / Dispatch Action -->
-                    <div
-                      class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2 border-t border-white/6"
-                    >
-                      <div class="flex items-center gap-2 text-slate-400 text-xs">
-                        <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400 shrink-0"></i>
-                        <span
-                          >Missives are routed to the author's registered correspondence
-                          inbox.</span
-                        >
-                      </div>
-
-                      <button
-                        type="submit"
-                        id="inquire-submit-btn"
-                        class="btn btn-primary px-7 py-3 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shrink-0 shadow-lg shadow-indigo-500/20 active:scale-95 cursor-pointer"
-                      >
-                        <i data-lucide="send" class="w-3.5 h-3.5 fill-current"></i>
-                        <span id="inquire-submit-text">Dispatch Missive</span>
-                      </button>
-                    </div>
-                  </form>
-
-                  <!-- Success Confirmation View (Hidden by default) -->
-                  <div
-                    id="chronicler-inquire-success"
-                    class="hidden space-y-6 py-6 text-center animate-fade-in relative z-10"
+                  <span
+                    id="reader-sent-count-badge"
+                    class="px-2.5 py-1 rounded-lg bg-white/4 border border-white/8 text-[10px] font-bold text-slate-300"
                   >
-                    <div
-                      class="w-16 h-16 mx-auto rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shadow-xl shadow-indigo-500/10"
-                    >
-                      <i data-lucide="check-check" class="w-8 h-8"></i>
-                    </div>
-                    <div class="space-y-2 max-w-lg mx-auto">
-                      <h3 class="font-cinzel text-xl sm:text-2xl font-black text-white">
-                        Missive Inscribed & Dispatched
-                      </h3>
-                      <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                        Your inquiry has been relayed across the archives to
-                        <span id="success-author-target" class="font-semibold text-indigo-300"
-                          >the author</span
-                        >. Thank you for engaging deeply with this chronicle.
-                      </p>
-                    </div>
-                    <div class="pt-2">
-                      <button
-                        type="button"
-                        id="btn-inquire-another"
-                        class="btn btn-secondary px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer"
-                      >
-                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-                        <span>Inscribe Another Missive</span>
-                      </button>
-                    </div>
-                  </div>
+                    0 Dispatched
+                  </span>
                 </div>
 
-                <!-- Reader Sent Inquiries & Responses Panel -->
-                <div
-                  id="reader-sent-inquiries-container"
-                  class="glass-card-strong p-6 sm:p-8 rounded-3xl border border-white/6 shadow-xl relative overflow-hidden space-y-5"
-                >
-                  <div class="flex items-center justify-between border-b border-white/6 pb-4">
-                    <div class="flex items-center gap-2.5 text-indigo-400">
-                      <i data-lucide="history" class="w-4 h-4 text-indigo-400"></i>
-                      <h3 class="text-xs font-bold uppercase tracking-widest text-white">
-                        Your Dispatched Inquiries
-                      </h3>
-                    </div>
-                    <span
-                      id="reader-sent-count-badge"
-                      class="px-2.5 py-1 rounded-lg bg-white/4 border border-white/8 text-[10px] font-bold text-slate-300"
-                    >
-                      0 Dispatched
-                    </span>
-                  </div>
-
-                  <div id="reader-sent-inquiries-list" class="space-y-4">
-                    <!-- Rendered dynamically by inquire.js -->
-                  </div>
+                <div id="reader-sent-inquiries-list" class="space-y-4">
+                  <!-- Rendered dynamically by inquire.js -->
                 </div>
               </div>
             </div>

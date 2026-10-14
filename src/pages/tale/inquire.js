@@ -571,10 +571,10 @@ export function setupInquire(taleId, tale, userId = null) {
     tabBtnLetter.style.removeProperty('display');
   }
 
-  // Synopsis teaser: hide for author since author doesn't need to inquire himself
-  if (inviteCard) {
-    inviteCard.classList.toggle('hidden', isAuthor);
-  }
+  // Invite card beside share button remains visible for all users to access missives
+  document.querySelectorAll('.chronicler-invite-card').forEach((card) => {
+    card.classList.remove('hidden');
+  });
 
   // ── A. Author Mailroom View ──
   if (isAuthor) {
@@ -649,19 +649,29 @@ export function setupInquire(taleId, tale, userId = null) {
       `Keeper of the chronicle archives and author of "${tale?.title || 'this chronicle'}".`;
   }
 
-  const letterAuthorAvatar = document.getElementById('letter-author-avatar');
-  if (letterAuthorAvatar) {
+  const letterAuthorAvatars = document.querySelectorAll(
+    'img[id^="letter-author-avatar"], .letter-author-avatar'
+  );
+  if (letterAuthorAvatars.length) {
     const seed = encodeURIComponent((authorId || 'scribe').slice(0, 8));
-    letterAuthorAvatar.src =
+    const avatarUrl =
       tale?.authorAvatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
-    letterAuthorAvatar.alt = authorName;
+    letterAuthorAvatars.forEach((img) => {
+      img.src = avatarUrl;
+      img.alt = authorName;
+    });
   }
 
-  const profileLink = document.getElementById('letter-author-profile-link');
-  if (profileLink) {
-    profileLink.href = authorId
+  const profileLinks = document.querySelectorAll(
+    'a[id^="letter-author-profile-link"], .letter-author-profile-link'
+  );
+  if (profileLinks.length) {
+    const profileHref = authorId
       ? `/profile.html?uid=${encodeURIComponent(authorId)}`
       : '/library.html';
+    profileLinks.forEach((link) => {
+      link.href = profileHref;
+    });
   }
 
   // 1b. Hydrate Author Correspondence Email Displays
@@ -764,9 +774,20 @@ export function setupInquire(taleId, tale, userId = null) {
     });
   }
 
-  // 5. Open Missive from Synopsis Teaser
-  if (openTeaserBtn) {
-    openTeaserBtn.addEventListener('click', () => {
+  // 5. Open Missive from Synopsis / Hero Teaser
+  const openTeaserBtns = document.querySelectorAll(
+    '#btn-open-chronicler-letter, #btn-open-chronicler-letter-mobile, .btn-open-chronicler-letter, .chronicler-invite-card'
+  );
+  openTeaserBtns.forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      // Don't intercept clicks on author profile link
+      if (
+        e.target.closest('#letter-author-profile-link') ||
+        e.target.closest('#letter-author-profile-link-mobile') ||
+        e.target.closest('.letter-author-profile-link')
+      ) {
+        return;
+      }
       const tabBtn = document.querySelector('[data-tab="letter"]');
       if (tabBtn) {
         tabBtn.click();
@@ -777,7 +798,7 @@ export function setupInquire(taleId, tale, userId = null) {
         messageInput?.focus();
       }
     });
-  }
+  });
 
   // 6. Quick Bookmark Button in Author Card
   if (quickBookmarkBtn) {
