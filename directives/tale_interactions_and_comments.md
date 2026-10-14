@@ -171,11 +171,22 @@ Define the standard operating procedures, data structures, and UI behaviors for 
   - Purges all `.skeleton` pulse classes so no loading skeletons linger.
   - Calls `readyReveal()` immediately so `#app-boot-curtain` dissolves without waiting for the 3.5s fallback timer.
 
-### 5. Anti-Vibecoding & Aesthetics Compliance
+### 5. Anti-Vibecoding, Motion & Aesthetics Compliance
 
 - **Zero Emojis**: Never use emojis in button labels, badges, comment placeholders, or toasts.
 - **Zero Pill Badges**: Use structural rectangular shields (`rounded-sm` or sharp geometry) rather than pills (`rounded-full`).
-- **Zero Glowing/Pulsing Dots**: Status and role indicators must use clean typographic labels.
+- **Zero Glowing/Pulsing Dots**: Status and role indicators must use clean static rectangular micro-badges (`w-1.5 h-1.5 rounded-xs`) without `animate-pulse` or `rounded-full`.
+- **Typographic Initials Avatars**: Use local SVG data URIs (`generateInitialsAvatarDataUrl`) with high-contrast serif typography (`Cinzel, serif`) and `rounded-2xl` matching card geometries. Never rely on external cartoon Dicebear avatars.
+- **Motion & CLS Elimination**:
+  - Zero translation jumps on hydration: Title and hero metadata crossfade smoothly via opacity (`transition-opacity duration-300`). Never animate 48px/32px vertical shifts (`translate-y-12`, `translate-y-8`) when swapping loading skeletons with actual chronicle data.
+  - Chapter hover smoothness: `.chapter-item:hover` styles background and border with soft drop shadow, omitting `translateY(-2px)` to prevent flutter in long scrollable lists.
+  - Throttled Scroll Tracking: `initHeaderScroll` wraps scroll updates in `requestAnimationFrame` with boolean lock to prevent layout thrashing and synchronous reflows.
+- **Mobile Responsive Layout & Safe Areas**:
+  - Layout re-ordering: On mobile screens (`< lg`), the main tab content container (`order-1 lg:order-2`) renders above the sticky hanging `<aside>` (`order-2 lg:order-1`) so readers immediately see chapters and synopsis without having to scroll past 800px of cover art and author card.
+  - Mobile button labels: Hero action grid maintains concise labels (`Initiate`, `Resume`, `Shelf`) to avoid multiline wrapping or overflow. Desktop retains expanded labels (`Initiate Reading`, `Resume Reading`, `Save to Shelf`).
+  - Safe-Area Insets: The mobile floating action bar incorporates `calc(var(--space-4) + env(safe-area-inset-bottom, 0px))` to clear modern gesture navigation bars and home indicators.
+- **Shared Navigation Integration**:
+  - Every page entry point (including `tale.js`) imports and calls `initNav()` from `@ui/components/nav/nav.js` on boot to initialize the global header, command palette (`⌘K`), and mobile dock.
 - **Design Tokens**: All background, text, border, and accent colors must reference CSS variables in `tokens.css`.
 
 ## Tools / Scripts to Use
