@@ -150,6 +150,7 @@ async function _loadIcons() {
     MoreVertical: L.MoreVertical,
     Home: L.Home,
     // Writing & Editor
+    Pen: L.Pen,
     PenTool: L.PenTool,
     PenLine: L.PenLine,
     List: L.List,
