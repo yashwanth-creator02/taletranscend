@@ -182,7 +182,7 @@ Define the standard operating procedures, data structures, and UI behaviors for 
   - Chapter hover smoothness: `.chapter-item:hover` styles background and border with soft drop shadow, omitting `translateY(-2px)` to prevent flutter in long scrollable lists.
   - Throttled Scroll Tracking: `initHeaderScroll` wraps scroll updates in `requestAnimationFrame` with boolean lock to prevent layout thrashing and synchronous reflows.
 - **Mobile Responsive Layout & Safe Areas**:
-  - Layout re-ordering: On mobile screens (`< lg`), the main tab content container (`order-1 lg:order-2`) renders above the sticky hanging `<aside>` (`order-2 lg:order-1`) so readers immediately see chapters and synopsis without having to scroll past 800px of cover art and author card.
+  - Cover art & Author Sanctuary layout: On mobile screens (`< lg`), the sticky hanging `<aside>` containing the Cover Art and Author Sanctuary/Inquire card comes directly above the content tabs (Synopsis, Chronicles, Echoes, Missives), presenting the chronicle identity prominently before readers explore the tabs.
   - Mobile button labels: Hero action grid maintains concise labels (`Initiate`, `Resume`, `Shelf`) to avoid multiline wrapping or overflow. Desktop retains expanded labels (`Initiate Reading`, `Resume Reading`, `Save to Shelf`).
   - Safe-Area Insets: The mobile floating action bar incorporates `calc(var(--space-4) + env(safe-area-inset-bottom, 0px))` to clear modern gesture navigation bars and home indicators.
 - **Dedicated Archival Reading Header**:
