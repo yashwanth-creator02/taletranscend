@@ -30,6 +30,7 @@ import {
   listenToComments,
   postComment,
   initIcons,
+  initNav,
 } from './index.js';
 import {
   addToBookmarks,
@@ -42,6 +43,7 @@ import { appState } from '@state/index.js';
 const log = createLogger('TaleArchive');
 
 initPageReveal();
+initNav();
 log.info('Initializing Tale Archive page');
 
 /* ─────────────────────────────────────────────

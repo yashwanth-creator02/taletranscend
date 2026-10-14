@@ -28,3 +28,4 @@ export {
 
 export { initAuth } from '@fb/index.js';
 export { initIcons } from '@ui/components/icons.js';
+export { initNav } from '@ui/components/nav/nav.js';

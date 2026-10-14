@@ -29,6 +29,7 @@ vi.mock('../index.js', () => ({
   listenToComments: vi.fn(),
   postComment: vi.fn(),
   initIcons: vi.fn(),
+  initNav: vi.fn(),
 }));
 
 vi.mock('@ui/components/nav/nav.js', () => ({

@@ -6,10 +6,25 @@ import { setText, escapeHtml, createLogger } from '@/utils';
 import { getTotalReadTime } from '@services/index.js';
 import { getChapterProgress } from '@services/reader/localProgress.service.js';
 import { MS_PER_MINUTE } from '@config/app.config.js';
+import { getAuthorInitials } from './comments.js';
 
 const log = createLogger('TaleUI');
 
 const FALLBACK_COVER = 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=800';
+
+/**
+ * Generates an SVG Data URI avatar featuring noble typographic initials.
+ *
+ * @param {string} name
+ * @param {string} [bg]
+ * @param {string} [fg]
+ * @returns {string} Data URI
+ */
+export function generateInitialsAvatarDataUrl(name, bg = '#312e81', fg = '#c7d2fe') {
+  const initials = getAuthorInitials(name);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="${bg}"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" fill="${fg}" font-family="Cinzel, serif, sans-serif" font-size="22" font-weight="bold" letter-spacing="1">${initials}</text></svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
 
 /* ─────────────────────────────────────────────
    Small DOM helpers
@@ -132,12 +147,12 @@ export async function renderTale(userId, tale, taleId, isResonated = false) {
 
   const titleEl = getEl('display-title');
   if (titleEl) {
-    titleEl.classList.remove('opacity-0', 'translate-y-12');
+    titleEl.classList.remove('opacity-0');
   }
 
   const metaHero = getEl('hero-meta');
   if (metaHero) {
-    metaHero.classList.remove('opacity-0', 'translate-y-8');
+    metaHero.classList.remove('opacity-0');
   }
 
   setTextIfExists('display-author', authorName);
@@ -172,7 +187,7 @@ export async function renderTale(userId, tale, taleId, isResonated = false) {
   setTextIfExists('display-status', statusLabel);
   const statusDot = getEl('display-status-dot');
   if (statusDot) {
-    statusDot.className = `w-2 h-2 rounded-full ${dotClass} animate-pulse`;
+    statusDot.className = `w-1.5 h-1.5 rounded-xs ${dotClass} shrink-0`;
   }
 
   // Author Edit Chronicle Action Buttons & Inquire Controls
@@ -218,16 +233,25 @@ export async function renderTale(userId, tale, taleId, isResonated = false) {
   setTextIfExists('tale-language', languageName);
   setTextIfExists('sidebar-creation', eraName);
 
-  const resumeTexts = document.querySelectorAll('[id^="resume-text"]');
-  resumeTexts.forEach((el) => {
-    el.innerText = 'Resume Reading';
-  });
+  const resumeDesktop = getEl('resume-text-desktop');
+  if (resumeDesktop) {
+    resumeDesktop.textContent = 'Resume Reading';
+  }
+  const resumeMobile = getEl('resume-text');
+  if (resumeMobile) {
+    resumeMobile.textContent = 'Resume';
+  }
+
+  const fallbackAuthorAvatar = generateInitialsAvatarDataUrl(authorName);
 
   const authorAvatar = getEl('author-avatar-hero');
   if (authorAvatar) {
-    const seed = encodeURIComponent((tale.authorId || 'scribe').slice(0, 8));
-    authorAvatar.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
+    authorAvatar.src = tale.authorAvatarUrl || fallbackAuthorAvatar;
     authorAvatar.alt = authorName;
+    authorAvatar.onerror = () => {
+      authorAvatar.onerror = null;
+      authorAvatar.src = fallbackAuthorAvatar;
+    };
   }
 
   const letterAuthorName = getEl('letter-author-name');
@@ -240,10 +264,12 @@ export async function renderTale(userId, tale, taleId, isResonated = false) {
 
   const letterAuthorAvatar = getEl('letter-author-avatar');
   if (letterAuthorAvatar) {
-    const seed = encodeURIComponent((tale.authorId || 'scribe').slice(0, 8));
-    letterAuthorAvatar.src =
-      tale.authorAvatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
+    letterAuthorAvatar.src = tale.authorAvatarUrl || fallbackAuthorAvatar;
     letterAuthorAvatar.alt = authorName;
+    letterAuthorAvatar.onerror = () => {
+      letterAuthorAvatar.onerror = null;
+      letterAuthorAvatar.src = fallbackAuthorAvatar;
+    };
   }
 
   const profileLink = getEl('letter-author-profile-link');

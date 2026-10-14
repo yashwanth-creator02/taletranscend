@@ -136,10 +136,9 @@
 }
 
 .chapter-item:hover {
-  transform: translateY(-2px);
   border-color: rgb(var(--accent-rgb) / var(--a-07));
   background: rgb(var(--accent-rgb) / var(--a-02));
-  box-shadow: 0 8px 24px rgb(var(--dark-rgb) / 0.3);
+  box-shadow: 0 4px 16px rgb(var(--dark-rgb) / 0.25);
 }
 
 .chapter-item.completed {
@@ -613,7 +612,7 @@
   }
 
   .floating-bar {
-    bottom: var(--space-4);
+    bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
     width: calc(100% - var(--space-4));
   }
 

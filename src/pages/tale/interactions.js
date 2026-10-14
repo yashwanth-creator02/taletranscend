@@ -608,7 +608,9 @@ export function initHeaderScroll() {
   const main = document.getElementById('main-content');
   const scrollToTopBtn = document.getElementById('scroll-to-top');
 
-  const onScroll = () => {
+  let ticking = false;
+
+  const updateHeaderScroll = () => {
     const scrollY = main ? main.scrollTop : window.scrollY;
 
     if (hero && bar) {
@@ -632,6 +634,16 @@ export function initHeaderScroll() {
     }
   };
 
+  const onScroll = () => {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        updateHeaderScroll();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  };
+
   if (scrollToTopBtn) {
     scrollToTopBtn.addEventListener('click', () => {
       if (main && main.scrollTop > 0) {
@@ -645,7 +657,7 @@ export function initHeaderScroll() {
   if (main) {
     main.addEventListener('scroll', onScroll, { passive: true });
   }
-  onScroll();
+  updateHeaderScroll();
 }
 
 /* ─────────────────────────────────────────────

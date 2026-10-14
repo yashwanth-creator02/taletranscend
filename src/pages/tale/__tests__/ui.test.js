@@ -1,6 +1,12 @@
 // src/pages/tale/__tests__/ui.test.js
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderTale, renderChapters, showArchiveSkeletons, renderTaleNotFound } from '../ui.js';
+import {
+  renderTale,
+  renderChapters,
+  showArchiveSkeletons,
+  renderTaleNotFound,
+  generateInitialsAvatarDataUrl,
+} from '../ui.js';
 import { getChapterProgress } from '@services/reader/localProgress.service.js';
 
 vi.mock('@services/index.js', () => ({
@@ -156,6 +162,34 @@ describe('TaleUI', () => {
       expect(document.getElementById('author-actions-mobile').style.display).toBe('none');
     });
 
+    it('preserves concise mobile button labels and configures initials avatars without Dicebear', async () => {
+      document.body.innerHTML += `
+        <span id="resume-text">Resume</span>
+        <span id="resume-text-desktop">Resume</span>
+        <img id="author-avatar-hero" />
+        <img id="letter-author-avatar" />
+      `;
+
+      const mockTale = {
+        title: 'Chronicle of Shadows',
+        authorName: 'Aria Vance',
+        authorId: 'user-aria',
+        tags: [],
+      };
+
+      await renderTale('user-aria', mockTale, 'tale-123');
+
+      expect(document.getElementById('resume-text').textContent).toBe('Resume');
+      expect(document.getElementById('resume-text-desktop').textContent).toBe('Resume Reading');
+
+      const heroAvatar = document.getElementById('author-avatar-hero');
+      const letterAvatar = document.getElementById('letter-author-avatar');
+      expect(heroAvatar.src).toContain('data:image/svg+xml');
+      expect(heroAvatar.src).toContain('AV');
+      expect(letterAvatar.src).toContain('data:image/svg+xml');
+      expect(letterAvatar.src).toContain('AV');
+    });
+
     it('populates resonance count and initial active state when isResonated is true', async () => {
       document.body.innerHTML += `
         <span id="resonance-count">0</span>
@@ -243,6 +277,23 @@ describe('TaleUI', () => {
       expect(taleIdSpan.textContent).toBe('invalid-tale-999');
       expect(document.title).toBe('Chronicle Not Found | TaleTranscend');
       expect(document.querySelectorAll('.skeleton').length).toBe(0);
+    });
+  });
+
+  describe('generateInitialsAvatarDataUrl', () => {
+    it('creates an SVG data URI with initials from author name', () => {
+      const dataUri = generateInitialsAvatarDataUrl('Lord Elden');
+      expect(dataUri.startsWith('data:image/svg+xml')).toBe(true);
+      expect(decodeURIComponent(dataUri)).toContain('LE');
+      expect(decodeURIComponent(dataUri)).toContain('<rect');
+    });
+
+    it('handles single word and empty names gracefully', () => {
+      const single = generateInitialsAvatarDataUrl('Scribe');
+      expect(decodeURIComponent(single)).toContain('SC');
+
+      const fallback = generateInitialsAvatarDataUrl('');
+      expect(decodeURIComponent(fallback)).toContain('??');
     });
   });
 });
