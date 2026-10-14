@@ -4,7 +4,6 @@ import { initPageReveal, readyReveal, setupAuthTimeout, createLogger } from '@/u
 // Orchestrates data hydration and all user interactions.
 
 import '@css/base.css';
-import '@css/nav.css';
 import '@css/components.css';
 import '@css/pages/tale.css';
 
@@ -15,6 +14,7 @@ import {
   renderTale,
   renderChapters,
   showArchiveSkeletons,
+  renderTaleNotFound,
   bindChapterClicks,
   setupTabs,
   setupStartReading,
@@ -25,6 +25,7 @@ import {
   initHeaderScroll,
   setupChronicleBatchActions,
   setupInquire,
+  setupReportMissingTale,
   listenToComments,
   postComment,
   initIcons,
@@ -85,14 +86,28 @@ export async function initTalePage(authUser = null) {
   const userId = user?.uid || appState.userId || 'anonymous';
 
   // 1. Data hydration
-  const [tale, chapters, isResonated] = await Promise.all([
-    loadTale(currentTaleId, user),
-    loadChapters(currentTaleId),
-    getResonanceStatus(currentTaleId, userId),
-  ]);
+  let tale = null;
+  let chapters = [];
+  let isResonated = false;
+
+  try {
+    const results = await Promise.all([
+      loadTale(currentTaleId, user),
+      loadChapters(currentTaleId).catch(() => []),
+      getResonanceStatus(currentTaleId, userId).catch(() => false),
+    ]);
+    tale = results[0];
+    chapters = results[1] || [];
+    isResonated = Boolean(results[2]);
+  } catch (err) {
+    log.error('Hydration failed', err);
+  }
 
   if (!tale) {
     log.error('Tale not found', { taleId: currentTaleId });
+    renderTaleNotFound(currentTaleId);
+    setupReportMissingTale(currentTaleId);
+    readyReveal();
     return;
   }
 

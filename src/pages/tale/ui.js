@@ -6,10 +6,25 @@ import { setText, escapeHtml, createLogger } from '@/utils';
 import { getTotalReadTime } from '@services/index.js';
 import { getChapterProgress } from '@services/reader/localProgress.service.js';
 import { MS_PER_MINUTE } from '@config/app.config.js';
+import { getAuthorInitials } from './comments.js';
 
 const log = createLogger('TaleUI');
 
 const FALLBACK_COVER = 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=800';
+
+/**
+ * Generates an SVG Data URI avatar featuring noble typographic initials.
+ *
+ * @param {string} name
+ * @param {string} [bg]
+ * @param {string} [fg]
+ * @returns {string} Data URI
+ */
+export function generateInitialsAvatarDataUrl(name, bg = '#312e81', fg = '#c7d2fe') {
+  const initials = getAuthorInitials(name);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="${bg}"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" fill="${fg}" font-family="Cinzel, serif, sans-serif" font-size="22" font-weight="bold" letter-spacing="1">${initials}</text></svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
 
 /* ─────────────────────────────────────────────
    Small DOM helpers
@@ -132,12 +147,12 @@ export async function renderTale(userId, tale, taleId, isResonated = false) {
 
   const titleEl = getEl('display-title');
   if (titleEl) {
-    titleEl.classList.remove('opacity-0', 'translate-y-12');
+    titleEl.classList.remove('opacity-0');
   }
 
   const metaHero = getEl('hero-meta');
   if (metaHero) {
-    metaHero.classList.remove('opacity-0', 'translate-y-8');
+    metaHero.classList.remove('opacity-0');
   }
 
   setTextIfExists('display-author', authorName);
@@ -172,7 +187,7 @@ export async function renderTale(userId, tale, taleId, isResonated = false) {
   setTextIfExists('display-status', statusLabel);
   const statusDot = getEl('display-status-dot');
   if (statusDot) {
-    statusDot.className = `w-2 h-2 rounded-full ${dotClass} animate-pulse`;
+    statusDot.className = `w-1.5 h-1.5 rounded-xs ${dotClass} shrink-0`;
   }
 
   // Author Edit Chronicle Action Buttons & Inquire Controls
@@ -203,14 +218,10 @@ export async function renderTale(userId, tale, taleId, isResonated = false) {
     authorActionsMobile.style.setProperty('display', isAuthor ? 'block' : 'none', 'important');
   }
 
-  // Inquire of the Author controls (hidden if user is the author)
+  // Missives controls: tab button is available for both author and readers.
   const tabBtnLetter = getEl('tab-btn-letter');
   if (tabBtnLetter) {
-    tabBtnLetter.classList.toggle('hidden', isAuthor);
-  }
-  const contentLetter = getEl('content-letter');
-  if (contentLetter && isAuthor) {
-    contentLetter.classList.add('hidden');
+    tabBtnLetter.classList.remove('hidden');
   }
   const inviteCard = document.querySelector('.chronicler-invite-card');
   if (inviteCard) {
@@ -222,16 +233,25 @@ export async function renderTale(userId, tale, taleId, isResonated = false) {
   setTextIfExists('tale-language', languageName);
   setTextIfExists('sidebar-creation', eraName);
 
-  const resumeTexts = document.querySelectorAll('[id^="resume-text"]');
-  resumeTexts.forEach((el) => {
-    el.innerText = 'Resume Reading';
-  });
+  const resumeDesktop = getEl('resume-text-desktop');
+  if (resumeDesktop) {
+    resumeDesktop.textContent = 'Resume Reading';
+  }
+  const resumeMobile = getEl('resume-text');
+  if (resumeMobile) {
+    resumeMobile.textContent = 'Resume';
+  }
+
+  const fallbackAuthorAvatar = generateInitialsAvatarDataUrl(authorName);
 
   const authorAvatar = getEl('author-avatar-hero');
   if (authorAvatar) {
-    const seed = encodeURIComponent((tale.authorId || 'scribe').slice(0, 8));
-    authorAvatar.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
+    authorAvatar.src = tale.authorAvatarUrl || fallbackAuthorAvatar;
     authorAvatar.alt = authorName;
+    authorAvatar.onerror = () => {
+      authorAvatar.onerror = null;
+      authorAvatar.src = fallbackAuthorAvatar;
+    };
   }
 
   const letterAuthorName = getEl('letter-author-name');
@@ -244,10 +264,12 @@ export async function renderTale(userId, tale, taleId, isResonated = false) {
 
   const letterAuthorAvatar = getEl('letter-author-avatar');
   if (letterAuthorAvatar) {
-    const seed = encodeURIComponent((tale.authorId || 'scribe').slice(0, 8));
-    letterAuthorAvatar.src =
-      tale.authorAvatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
+    letterAuthorAvatar.src = tale.authorAvatarUrl || fallbackAuthorAvatar;
     letterAuthorAvatar.alt = authorName;
+    letterAuthorAvatar.onerror = () => {
+      letterAuthorAvatar.onerror = null;
+      letterAuthorAvatar.src = fallbackAuthorAvatar;
+    };
   }
 
   const profileLink = getEl('letter-author-profile-link');
@@ -346,11 +368,16 @@ export async function renderTale(userId, tale, taleId, isResonated = false) {
 /**
  * Renders the chronicles list with progress indicators.
  *
+/**
+ * Renders the chapters list with read/unread statuses and download actions.
+ * Supports sorting in ascending (Oldest First) or descending (Newest First) order.
+ *
  * @param {string} userId
  * @param {Array<Object>} chapters
  * @param {string} taleId
+ * @param {('asc'|'desc')} [sortOrder]
  */
-export function renderChapters(userId, chapters, taleId) {
+export function renderChapters(userId, chapters, taleId, sortOrder = null) {
   log.info(`Rendering ${chapters.length} chapters`, { taleId });
   const list = getEl('chapter-list');
   if (!list) return;
@@ -361,10 +388,19 @@ export function renderChapters(userId, chapters, taleId) {
     return;
   }
 
+  const effectiveSort =
+    sortOrder || document.getElementById('btn-sort-chronicles')?.dataset?.sortOrder || 'asc';
+
+  // Pair each chapter with its original 0-based index so progress and navigation remain stable
+  const indexedChapters = chapters.map((ch, idx) => ({ ch, originalIndex: idx }));
+  if (effectiveSort === 'desc') {
+    indexedChapters.reverse();
+  }
+
   let completedCount = 0;
 
-  list.innerHTML = chapters
-    .map((ch, idx) => {
+  list.innerHTML = indexedChapters
+    .map(({ ch, originalIndex: idx }) => {
       const progress = getChapterProgress({ userId, taleId, chapterIndex: idx });
       const state = getChapterState(progress);
       const isCompleted = state === 'completed';
@@ -433,6 +469,47 @@ export function renderChapters(userId, chapters, taleId) {
     const percent = chapters.length ? Math.round((completedCount / chapters.length) * 100) : 0;
     readCountEl.textContent = `${completedCount} of ${chapters.length} read (${percent}%)`;
   }
+
+  initIcons();
+}
+
+/**
+ * Renders the dedicated Tale 404 error screen when a chronicle is not found in the archives.
+ *
+ * @param {string} taleId
+ */
+export function renderTaleNotFound(taleId) {
+  log.warn('Rendering Tale 404 screen', { taleId });
+
+  // Hide the hero section and main chronicle content grid
+  const hero = getEl('hero-section');
+  if (hero) hero.classList.add('hidden');
+
+  const contentContainer = getEl('tale-content-container');
+  if (contentContainer) contentContainer.classList.add('hidden');
+
+  const actionBar = getEl('tale-action-bar');
+  if (actionBar) actionBar.classList.add('hidden');
+
+  const scrollTop = getEl('scroll-to-top');
+  if (scrollTop) scrollTop.classList.add('hidden');
+
+  // Strip skeleton pulse classes so nothing lingers in loading state
+  document.querySelectorAll('.skeleton').forEach((el) => {
+    el.classList.remove('skeleton');
+  });
+
+  // Display the dedicated chronicle 404 view
+  const notFoundView = getEl('tale-not-found-view');
+  if (notFoundView) {
+    notFoundView.classList.remove('hidden');
+  }
+
+  // Set the searched chronicle identifier
+  setTextIfExists('not-found-tale-id', taleId || 'Unknown');
+
+  // Update document title
+  document.title = 'Chronicle Not Found | TaleTranscend';
 
   initIcons();
 }

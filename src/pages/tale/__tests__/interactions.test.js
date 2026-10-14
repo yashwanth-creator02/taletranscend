@@ -7,6 +7,7 @@ import {
   setupStartReading,
   setupShelfButton,
   setupChronicleBatchActions,
+  setupReportMissingTale,
 } from '../interactions.js';
 import * as services from '@services/index.js';
 import * as utils from '@/utils';
@@ -89,6 +90,7 @@ describe('TaleInteractions', () => {
           <button data-action="download-chapter" data-chapter-index="5"></button>
         </div>
       </div>
+      <button id="btn-sort-chronicles" data-sort-order="asc"><span id="sort-chronicles-label">Oldest First</span></button>
       <button id="btn-mark-all-read"></button>
       <button id="btn-mark-all-unread"></button>
       <button id="btn-download-all-chronicles"></button>
@@ -98,6 +100,7 @@ describe('TaleInteractions', () => {
       <div id="content-echoes" class="tab-content hidden"></div>
       <button id="start-btn"></button>
       <button id="shelf-btn"><i></i><span></span></button>
+      <button id="btn-report-missing-tale"></button>
     `;
   });
 
@@ -272,7 +275,7 @@ describe('TaleInteractions', () => {
       await document.getElementById('btn-download-all-chronicles').click();
 
       expect(confirmModal.confirmTaleDownload).toHaveBeenCalled();
-      expect(downloadTale.downloadChronicle).toHaveBeenCalledWith('t1');
+      expect(downloadTale.downloadChronicle).toHaveBeenCalledWith('t1', { format: 'md' });
     });
 
     it('does not download all chronicles when confirmation cancelled', async () => {
@@ -281,6 +284,24 @@ describe('TaleInteractions', () => {
       await document.getElementById('btn-download-all-chronicles').click();
 
       expect(downloadTale.downloadChronicle).not.toHaveBeenCalled();
+    });
+
+    it('toggles sort order between asc and desc on sort button click', () => {
+      const chapters = [{ title: 'C1' }, { title: 'C2' }];
+      setupChronicleBatchActions('u1', 't1', chapters);
+      const sortBtn = document.getElementById('btn-sort-chronicles');
+      const sortLabel = document.getElementById('sort-chronicles-label');
+
+      expect(sortBtn.dataset.sortOrder).toBe('asc');
+      expect(sortLabel.textContent).toBe('Oldest First');
+
+      sortBtn.click();
+      expect(sortBtn.dataset.sortOrder).toBe('desc');
+      expect(sortLabel.textContent).toBe('Newest First');
+
+      sortBtn.click();
+      expect(sortBtn.dataset.sortOrder).toBe('asc');
+      expect(sortLabel.textContent).toBe('Oldest First');
     });
   });
 
@@ -336,6 +357,46 @@ describe('TaleInteractions', () => {
       expect(mockService.addToBookmarks).toHaveBeenCalled();
       expect(btn.disabled).toBe(false);
       expect(btn.dataset.shelved).toBe('false');
+    });
+  });
+
+  describe('setupReportMissingTale', () => {
+    it('dispatches report and updates button state on confirmation', async () => {
+      confirmModal.showConfirmModal.mockResolvedValue(true);
+      const { showToast } = await import('@ui/components/toast.js');
+
+      setupReportMissingTale('missing-tale-abc');
+
+      const btn = document.getElementById('btn-report-missing-tale');
+      await btn.click();
+
+      expect(confirmModal.showConfirmModal).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Report Missing Chronicle',
+          icon: 'flag',
+          confirmVariant: 'accent',
+        })
+      );
+      expect(showToast).toHaveBeenCalledWith(
+        'Missing chronicle report dispatched to the archivists.',
+        'success'
+      );
+      expect(btn.disabled).toBe(true);
+      expect(btn.textContent).toContain('Report Dispatched');
+    });
+
+    it('does not dispatch report if user cancels confirmation modal', async () => {
+      confirmModal.showConfirmModal.mockResolvedValue(false);
+      const { showToast } = await import('@ui/components/toast.js');
+
+      setupReportMissingTale('missing-tale-abc');
+
+      const btn = document.getElementById('btn-report-missing-tale');
+      await btn.click();
+
+      expect(confirmModal.showConfirmModal).toHaveBeenCalled();
+      expect(showToast).not.toHaveBeenCalled();
+      expect(btn.disabled).toBe(false);
     });
   });
 });

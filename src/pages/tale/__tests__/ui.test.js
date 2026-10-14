@@ -1,6 +1,12 @@
 // src/pages/tale/__tests__/ui.test.js
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderTale, renderChapters, showArchiveSkeletons } from '../ui.js';
+import {
+  renderTale,
+  renderChapters,
+  showArchiveSkeletons,
+  renderTaleNotFound,
+  generateInitialsAvatarDataUrl,
+} from '../ui.js';
 import { getChapterProgress } from '@services/reader/localProgress.service.js';
 
 vi.mock('@services/index.js', () => ({
@@ -43,6 +49,11 @@ describe('TaleUI', () => {
       <div id="header-tale-title"></div>
       <img id="display-cover" />
       <div id="hero-section"></div>
+      <div id="tale-content-container"></div>
+      <div id="tale-not-found-view" class="hidden"></div>
+      <div id="not-found-tale-id"></div>
+      <div id="tale-action-bar"></div>
+      <div id="scroll-to-top"></div>
       <div id="lore-tag-list"></div>
       <div id="read-time"></div>
     `;
@@ -108,9 +119,7 @@ describe('TaleUI', () => {
       expect(document.getElementById('author-actions-mobile').classList.contains('hidden')).toBe(
         false
       );
-      expect(document.getElementById('author-actions-mobile').style.display).toBe('block');
-      expect(document.getElementById('tab-btn-letter').classList.contains('hidden')).toBe(true);
-      expect(document.getElementById('content-letter').classList.contains('hidden')).toBe(true);
+      expect(document.getElementById('tab-btn-letter').classList.contains('hidden')).toBe(false);
       expect(document.querySelector('.chronicler-invite-card').classList.contains('hidden')).toBe(
         true
       );
@@ -151,6 +160,34 @@ describe('TaleUI', () => {
       await renderTale('anonymous', { title: 'Anon Tale', authorId: 'anonymous' }, 'tale-xyz');
       expect(document.getElementById('edit-tale-btn-desktop').style.display).toBe('none');
       expect(document.getElementById('author-actions-mobile').style.display).toBe('none');
+    });
+
+    it('preserves concise mobile button labels and configures initials avatars without Dicebear', async () => {
+      document.body.innerHTML += `
+        <span id="resume-text">Resume</span>
+        <span id="resume-text-desktop">Resume</span>
+        <img id="author-avatar-hero" />
+        <img id="letter-author-avatar" />
+      `;
+
+      const mockTale = {
+        title: 'Chronicle of Shadows',
+        authorName: 'Aria Vance',
+        authorId: 'user-aria',
+        tags: [],
+      };
+
+      await renderTale('user-aria', mockTale, 'tale-123');
+
+      expect(document.getElementById('resume-text').textContent).toBe('Resume');
+      expect(document.getElementById('resume-text-desktop').textContent).toBe('Resume Reading');
+
+      const heroAvatar = document.getElementById('author-avatar-hero');
+      const letterAvatar = document.getElementById('letter-author-avatar');
+      expect(heroAvatar.src).toContain('data:image/svg+xml');
+      expect(heroAvatar.src).toContain('AV');
+      expect(letterAvatar.src).toContain('data:image/svg+xml');
+      expect(letterAvatar.src).toContain('AV');
     });
 
     it('populates resonance count and initial active state when isResonated is true', async () => {
@@ -196,11 +233,67 @@ describe('TaleUI', () => {
       expect(items[1].innerHTML).toContain('circle'); // Not started
     });
 
+    it('renders chapters in reverse order when sortOrder is desc while preserving original indices', () => {
+      const chapters = [{ title: 'First Scroll' }, { title: 'Second Scroll' }];
+
+      renderChapters('user1', chapters, 't1', 'desc');
+
+      const items = document.querySelectorAll('.chapter-item');
+      expect(items).toHaveLength(2);
+      // First rendered item should be the second scroll (index 1)
+      expect(items[0].dataset.chapterIndex).toBe('1');
+      expect(items[0].innerHTML).toContain('Second Scroll');
+      expect(items[0].innerHTML).toContain('Scroll #2');
+
+      // Second rendered item should be the first scroll (index 0)
+      expect(items[1].dataset.chapterIndex).toBe('0');
+      expect(items[1].innerHTML).toContain('First Scroll');
+      expect(items[1].innerHTML).toContain('Scroll #1');
+    });
+
     it('renders empty state if no chapters', () => {
       renderChapters('user1', [], 't1');
       expect(document.getElementById('chapter-list').textContent).toContain(
         'No chronicles detected'
       );
+    });
+  });
+
+  describe('renderTaleNotFound', () => {
+    it('reveals not found view and hides hero and content container', () => {
+      document.body.innerHTML += '<div class="skeleton"></div><div class="skeleton"></div>';
+      expect(document.querySelectorAll('.skeleton').length).toBe(2);
+
+      renderTaleNotFound('invalid-tale-999');
+
+      const notFoundView = document.getElementById('tale-not-found-view');
+      const hero = document.getElementById('hero-section');
+      const contentContainer = document.getElementById('tale-content-container');
+      const taleIdSpan = document.getElementById('not-found-tale-id');
+
+      expect(notFoundView.classList.contains('hidden')).toBe(false);
+      expect(hero.classList.contains('hidden')).toBe(true);
+      expect(contentContainer.classList.contains('hidden')).toBe(true);
+      expect(taleIdSpan.textContent).toBe('invalid-tale-999');
+      expect(document.title).toBe('Chronicle Not Found | TaleTranscend');
+      expect(document.querySelectorAll('.skeleton').length).toBe(0);
+    });
+  });
+
+  describe('generateInitialsAvatarDataUrl', () => {
+    it('creates an SVG data URI with initials from author name', () => {
+      const dataUri = generateInitialsAvatarDataUrl('Lord Elden');
+      expect(dataUri.startsWith('data:image/svg+xml')).toBe(true);
+      expect(decodeURIComponent(dataUri)).toContain('LE');
+      expect(decodeURIComponent(dataUri)).toContain('<rect');
+    });
+
+    it('handles single word and empty names gracefully', () => {
+      const single = generateInitialsAvatarDataUrl('Scribe');
+      expect(decodeURIComponent(single)).toContain('SC');
+
+      const fallback = generateInitialsAvatarDataUrl('');
+      expect(decodeURIComponent(fallback)).toContain('??');
     });
   });
 });

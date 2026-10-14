@@ -3,7 +3,6 @@ import {
   listenToComments,
   postComment,
   editComment,
-  editReply,
   deleteComment,
   deleteReply,
   buildReplyTree,

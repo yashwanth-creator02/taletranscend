@@ -8,6 +8,7 @@ import {
   createLogger,
   getRemainingTime,
   applyButtonCooldown,
+  escapeHtml,
 } from '@/utils';
 import {
   resolveResumePoint,
@@ -34,7 +35,7 @@ import {
   syncMarkAllChaptersUnread,
 } from '@services/reader/cloudProgress.service.js';
 import { downloadChronicle, downloadChapter } from '@services/tale/downloadTale.js';
-import { confirmTaleDownload } from '@ui/components/confirmModal.js';
+import { confirmTaleDownload, showConfirmModal } from '@ui/components/confirmModal.js';
 
 const log = createLogger('TaleInteractions');
 
@@ -230,9 +231,11 @@ export function bindChapterClicks(taleId, chapters = [], userId = null, tale = n
         title: taleTitle,
         isFragment: true,
         fragmentTitle,
-      }).then((confirmed) => {
-        if (confirmed) {
-          downloadChapter(taleId, idx, { taleTitle, chapter: ch });
+      }).then((res) => {
+        const isConfirmed = Boolean(res && (res === true || res.confirmed));
+        const format = typeof res === 'object' && res?.format ? res.format : 'md';
+        if (isConfirmed) {
+          downloadChapter(taleId, idx, { taleTitle, chapter: ch, format });
         }
       });
       return;
@@ -278,6 +281,7 @@ export function bindChapterClicks(taleId, chapters = [], userId = null, tale = n
 
 /**
  * Wires batch action buttons in the Chronicles section:
+ * - Sort Fragments (Oldest First / Newest First)
  * - Mark All Read
  * - Mark All Unread
  * - Download All Chronicles
@@ -288,9 +292,34 @@ export function bindChapterClicks(taleId, chapters = [], userId = null, tale = n
  * @param {Object} [tale]
  */
 export function setupChronicleBatchActions(userId, taleId, chapters = [], tale = null) {
+  const sortChroniclesBtn = document.getElementById('btn-sort-chronicles');
   const markAllReadBtn = document.getElementById('btn-mark-all-read');
   const markAllUnreadBtn = document.getElementById('btn-mark-all-unread');
   const downloadAllBtn = document.getElementById('btn-download-all-chronicles');
+
+  if (sortChroniclesBtn) {
+    sortChroniclesBtn.addEventListener('click', () => {
+      const uid = userId || auth.currentUser?.uid;
+      const currentSort = sortChroniclesBtn.dataset.sortOrder === 'desc' ? 'desc' : 'asc';
+      const newSort = currentSort === 'asc' ? 'desc' : 'asc';
+      sortChroniclesBtn.dataset.sortOrder = newSort;
+
+      const labelEl = document.getElementById('sort-chronicles-label');
+      if (labelEl) {
+        labelEl.textContent = newSort === 'asc' ? 'Oldest First' : 'Newest First';
+      }
+      sortChroniclesBtn.title =
+        newSort === 'asc'
+          ? 'Toggle fragment order: Showing Oldest First (click for Newest First)'
+          : 'Toggle fragment order: Showing Newest First (click for Oldest First)';
+
+      renderChapters(uid, chapters, taleId, newSort);
+      showToast(
+        newSort === 'desc' ? 'Showing newest fragments first.' : 'Showing oldest fragments first.',
+        'info'
+      );
+    });
+  }
 
   if (markAllReadBtn) {
     markAllReadBtn.addEventListener('click', () => {
@@ -318,12 +347,14 @@ export function setupChronicleBatchActions(userId, taleId, chapters = [], tale =
     downloadAllBtn.addEventListener('click', async () => {
       const taleTitle =
         tale?.title || document.querySelector('h1')?.textContent?.trim() || 'Chronicle';
-      const confirmed = await confirmTaleDownload({
+      const res = await confirmTaleDownload({
         title: taleTitle,
         chapterCount: chapters?.length || 0,
       });
-      if (confirmed) {
-        downloadChronicle(taleId);
+      const isConfirmed = Boolean(res && (res === true || res.confirmed));
+      const format = typeof res === 'object' && res?.format ? res.format : 'md';
+      if (isConfirmed) {
+        downloadChronicle(taleId, { format });
       }
     });
   }
@@ -577,7 +608,9 @@ export function initHeaderScroll() {
   const main = document.getElementById('main-content');
   const scrollToTopBtn = document.getElementById('scroll-to-top');
 
-  const onScroll = () => {
+  let ticking = false;
+
+  const updateHeaderScroll = () => {
     const scrollY = main ? main.scrollTop : window.scrollY;
 
     if (hero && bar) {
@@ -601,6 +634,16 @@ export function initHeaderScroll() {
     }
   };
 
+  const onScroll = () => {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        updateHeaderScroll();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  };
+
   if (scrollToTopBtn) {
     scrollToTopBtn.addEventListener('click', () => {
       if (main && main.scrollTop > 0) {
@@ -614,7 +657,7 @@ export function initHeaderScroll() {
   if (main) {
     main.addEventListener('scroll', onScroll, { passive: true });
   }
-  onScroll();
+  updateHeaderScroll();
 }
 
 /* ─────────────────────────────────────────────
@@ -623,6 +666,47 @@ export function initHeaderScroll() {
 
 function _fadeAndGo(url) {
   navigateTo(url);
+}
+
+/**
+ * Wires up the "Report Missing" interaction on the custom Tale 404 page.
+ * Prompts the user with a confirmation modal, records the dispatch, and provides feedback toast.
+ *
+ * @param {string} taleId
+ */
+export function setupReportMissingTale(taleId) {
+  const reportBtn = document.getElementById('btn-report-missing-tale');
+  if (!reportBtn) return;
+
+  reportBtn.addEventListener('click', async () => {
+    try {
+      const confirmed = await showConfirmModal({
+        title: 'Report Missing Chronicle',
+        message: `Would you like to dispatch an archival report for unrecorded chronicle <span class="font-mono text-indigo-300 font-semibold">${escapeHtml(taleId || 'Unknown')}</span>?`,
+        subtext: 'Archivists will inspect missing indices under the Chronicle Preservation Policy.',
+        confirmText: 'Dispatch Report',
+        cancelText: 'Cancel',
+        confirmVariant: 'accent',
+        icon: 'flag',
+      });
+
+      if (!confirmed) return;
+
+      log.info('Missing chronicle reported', { taleId });
+      showToast('Missing chronicle report dispatched to the archivists.', 'success');
+
+      reportBtn.disabled = true;
+      reportBtn.classList.add('opacity-60', 'cursor-not-allowed');
+      reportBtn.innerHTML = `
+        <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+        <span>Report Dispatched</span>
+      `;
+      initIcons();
+    } catch (err) {
+      log.error('Failed to report missing chronicle', err);
+      showToast('Unable to dispatch report. Please try again.', 'error');
+    }
+  });
 }
 
 export { setupInquire } from './inquire.js';

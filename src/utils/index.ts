@@ -15,5 +15,6 @@ export * from './dev.utils.ts';
 export * from './rate-limit.utils.ts';
 export * from './validation.utils.ts';
 export * from './offline-storage.utils.ts';
+export * from './epub.utils.ts';
 export * from './router.js';
 export { ROUTES, getRouteByUrl, isAppShellRoute } from './routes.js';
