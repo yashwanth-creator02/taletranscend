@@ -185,8 +185,8 @@ Define the standard operating procedures, data structures, and UI behaviors for 
   - Layout re-ordering: On mobile screens (`< lg`), the main tab content container (`order-1 lg:order-2`) renders above the sticky hanging `<aside>` (`order-2 lg:order-1`) so readers immediately see chapters and synopsis without having to scroll past 800px of cover art and author card.
   - Mobile button labels: Hero action grid maintains concise labels (`Initiate`, `Resume`, `Shelf`) to avoid multiline wrapping or overflow. Desktop retains expanded labels (`Initiate Reading`, `Resume Reading`, `Save to Shelf`).
   - Safe-Area Insets: The mobile floating action bar incorporates `calc(var(--space-4) + env(safe-area-inset-bottom, 0px))` to clear modern gesture navigation bars and home indicators.
-- **Shared Navigation Integration**:
-  - Every page entry point (including `tale.js`) imports and calls `initNav()` from `@ui/components/nav/nav.js` on boot to initialize the global header, command palette (`⌘K`), and mobile dock.
+- **Dedicated Archival Reading Header**:
+  - The Tale Archive page (`tale.html`) purposefully does not mount the shared Global Header (`#app-nav`) or Command Palette (`initNav()`). Instead, it features its own clean, dedicated breadcrumb top bar (`#btn-back-nav` returning to Library) and reader-first layout, eliminating visual header clutter and maximizing reading space.
 - **Design Tokens**: All background, text, border, and accent colors must reference CSS variables in `tokens.css`.
 
 ## Tools / Scripts to Use

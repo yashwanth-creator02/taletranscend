@@ -4,7 +4,6 @@ import { initPageReveal, readyReveal, setupAuthTimeout, createLogger } from '@/u
 // Orchestrates data hydration and all user interactions.
 
 import '@css/base.css';
-import '@css/nav.css';
 import '@css/components.css';
 import '@css/pages/tale.css';
 
@@ -30,7 +29,6 @@ import {
   listenToComments,
   postComment,
   initIcons,
-  initNav,
 } from './index.js';
 import {
   addToBookmarks,
@@ -43,7 +41,6 @@ import { appState } from '@state/index.js';
 const log = createLogger('TaleArchive');
 
 initPageReveal();
-initNav();
 log.info('Initializing Tale Archive page');
 
 /* ─────────────────────────────────────────────
