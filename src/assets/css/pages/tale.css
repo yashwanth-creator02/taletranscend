@@ -466,42 +466,79 @@
 }
 
 .chronicler-letter-card {
-  background: linear-gradient(
-    135deg,
-    rgb(var(--bg-overlay-rgb) / var(--a-10)),
-    rgb(var(--dark-rgb) / 0.7)
-  );
-  border: 1px solid rgb(var(--accent-rgb) / var(--a-08));
+  position: relative;
+  background:
+    radial-gradient(
+      ellipse 60% 40% at 20% 0%,
+      rgb(var(--accent-rgb) / var(--a-08)),
+      transparent 70%
+    ),
+    linear-gradient(
+      180deg,
+      rgb(var(--bg-overlay-rgb) / var(--a-12)) 0%,
+      rgb(var(--dark-rgb) / 0.85) 100%
+    );
+  border: 1px solid rgb(var(--accent-rgb) / var(--a-12));
+  backdrop-filter: blur(20px);
+  box-shadow:
+    0 24px 48px -12px rgb(var(--dark-rgb) / 0.6),
+    inset 0 1px 0 rgb(var(--light-rgb) / var(--a-06));
 }
 
 .inquiry-category-chip {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  padding: var(--space-2-5) var(--space-3);
+  gap: var(--space-3);
+  padding: 0.85rem 1rem;
   border-radius: var(--radius-xl);
-  background: rgb(var(--light-rgb) / var(--a-01));
-  border: 1px solid var(--border);
+  background: rgb(var(--light-rgb) / var(--a-02));
+  border: 1px solid rgb(var(--light-rgb) / var(--a-06));
   color: var(--text-secondary);
-  font-size: var(--text-xs);
-  font-weight: 600;
   cursor: pointer;
   transition: all var(--dur-base) ease;
   user-select: none;
 }
 
+.inquiry-category-chip .chip-title {
+  display: block;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: inherit;
+  line-height: 1.25;
+  letter-spacing: 0.01em;
+}
+
+.inquiry-category-chip .chip-desc {
+  display: block;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  opacity: 0.7;
+  line-height: 1.2;
+  margin-top: 2px;
+}
+
 .inquiry-category-chip:hover {
-  border-color: rgb(var(--accent-rgb) / var(--a-08));
+  border-color: rgb(var(--accent-rgb) / var(--a-16));
   color: white;
-  background: rgb(var(--accent-rgb) / var(--a-02));
+  background: rgb(var(--accent-rgb) / var(--a-04));
+  transform: translateY(-1px);
 }
 
 .inquiry-category-chip.active {
-  background: rgb(var(--accent-rgb) / var(--a-08));
-  border-color: rgb(var(--accent-rgb) / var(--a-16));
+  background: rgb(var(--accent-rgb) / var(--a-12));
+  border-color: rgb(var(--accent-rgb) / var(--a-40));
   color: white;
-  box-shadow: 0 0 16px rgb(var(--accent-rgb) / var(--a-05));
+  box-shadow: 0 4px 20px -4px rgb(var(--accent-rgb) / var(--a-20));
+}
+
+.inquiry-category-chip.active .chip-title {
+  color: white;
+}
+
+.inquiry-category-chip.active .chip-desc {
+  color: rgb(var(--accent-light-rgb));
+  opacity: 0.9;
 }
 
 .inquiry-category-chip.active svg {
@@ -509,21 +546,29 @@
 }
 
 .inquire-input {
-  background: rgb(var(--dark-rgb) / 0.4);
-  border: 1px solid rgb(var(--light-rgb) / var(--a-03));
+  background: rgb(var(--dark-rgb) / 0.5);
+  border: 1px solid rgb(var(--light-rgb) / var(--a-06));
   color: white;
   transition: all var(--dur-base) ease;
+  box-shadow: inset 0 2px 4px rgb(var(--dark-rgb) / 0.2);
 }
 
 .inquire-input::placeholder {
-  color: var(--text-secondary);
+  color: rgb(var(--light-rgb) / var(--a-20));
+  font-size: var(--text-xs);
+}
+
+.inquire-input:hover {
+  border-color: rgb(var(--light-rgb) / var(--a-12));
 }
 
 .inquire-input:focus {
   outline: none;
-  border-color: rgb(var(--accent-rgb) / var(--a-09));
-  background: rgb(var(--dark-rgb) / 0.6);
-  box-shadow: 0 0 0 3px rgb(var(--accent-rgb) / var(--a-03));
+  border-color: rgb(var(--accent-rgb) / var(--a-30));
+  background: rgb(var(--dark-rgb) / 0.7);
+  box-shadow:
+    0 0 0 3px rgb(var(--accent-rgb) / var(--a-08)),
+    inset 0 2px 4px rgb(var(--dark-rgb) / 0.3);
 }
 
 /* ── Missives & Author Mailroom ─────────────────────────────── */
