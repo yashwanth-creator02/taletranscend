@@ -156,9 +156,16 @@ export function updateSidebarUser(user, profile = {}) {
   const nameEl = document.getElementById('sidebar-user-name');
   const subEl = document.getElementById('sidebar-user-sub');
 
-  const seed = user.uid.slice(0, 8);
-  const avatarSrc = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
+  const uid = user?.uid || 'guest';
+  const seed = uid.slice(0, 8);
   const name = profile.name || user.displayName || `Scribe ${seed.slice(0, 4)}`;
+  const initial = (name.charAt(0) || 'S').toUpperCase();
+
+  const avatarSrc =
+    user?.photoURL ||
+    `data:image/svg+xml;utf8,${encodeURIComponent(
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" data-uid="${uid}"><rect width="32" height="32" rx="10" fill="#18181b"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="12" fill="#818cf8">${initial}</text></svg>`
+    )}`;
 
   if (avatarEl) avatarEl.src = avatarSrc;
   if (nameEl) nameEl.textContent = name;
@@ -181,7 +188,7 @@ export function showGridSkeleton(count = 8) {
     () => `
     <div class="tale-card animate-pulse rounded-2xl overflow-hidden border border-white/5 bg-white/2 p-2.5 sm:p-4 flex flex-col justify-between">
       <div class="mb-2 sm:mb-3 flex items-center justify-between gap-1.5 sm:gap-2">
-        <div class="skeleton h-4 sm:h-5 w-14 sm:w-20 rounded-full"></div>
+        <div class="skeleton h-4 sm:h-5 w-14 sm:w-20 rounded-sm"></div>
         <div class="skeleton h-6 w-6 sm:h-7 sm:w-7 rounded-lg"></div>
       </div>
       <div class="card-image-wrap skeleton rounded-xl mb-2.5 sm:mb-3.5"></div>

@@ -154,7 +154,7 @@
               <button
                 id="toggle-sidebar"
                 type="button"
-                class="shrink-0 w-10 h-10 flex items-center justify-center rounded-xl hover:bg-white/5 text-slate-500 hover:text-white transition-colors"
+                class="hidden md:flex shrink-0 w-10 h-10 items-center justify-center rounded-xl hover:bg-white/5 text-slate-500 hover:text-white transition-colors"
                 aria-label="Toggle sidebar"
               >
                 <i data-lucide="panel-left-close" class="w-4 h-4"></i>
@@ -254,15 +254,12 @@
               <div class="relative shrink-0">
                 <img
                   id="sidebar-user-avatar"
-                  src="https://api.dicebear.com/7.x/avataaars/svg?seed=guest"
+                  src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32'><rect width='32' height='32' rx='10' fill='%2318181b'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='800' font-size='12' fill='%23818cf8'>G</text></svg>"
                   alt="Avatar"
-                  class="w-8 h-8 rounded-xl bg-zinc-800 border border-white/8 object-cover"
+                  class="w-8 h-8 rounded-xl bg-zinc-900 border border-white/10 object-cover"
                   width="32"
                   height="32"
                 />
-                <div
-                  class="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-emerald-500 border border-[#030305] rounded-full"
-                ></div>
               </div>
               <div class="sidebar-user-text min-w-0 transition-all">
                 <p id="sidebar-user-name" class="text-xs font-bold text-white truncate">—</p>
@@ -311,15 +308,15 @@
 
             <!-- Search + Mobile Filter Trigger -->
             <div class="flex items-center gap-3 w-full md:w-auto">
-              <!-- Mobile Filters Button (Only visible on < md) -->
+              <!-- Mobile Navigation Drawer Button (Only visible on < md) -->
               <button
                 id="mobile-filter-toggle"
                 type="button"
-                class="md:hidden btn btn-ghost flex items-center justify-center gap-2 h-11 px-4 rounded-xl text-xs font-bold uppercase tracking-wider shrink-0"
-                aria-label="Open Archive Filters"
+                class="md:hidden btn btn-ghost inline-flex items-center justify-center gap-2 h-11 px-4 rounded-xl text-xs font-bold uppercase tracking-wider shrink-0"
+                aria-label="Open Archive Navigation"
               >
-                <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
-                <span>Filters</span>
+                <i data-lucide="compass" class="w-4 h-4"></i>
+                <span>Browse</span>
               </button>
 
               <!-- Search -->

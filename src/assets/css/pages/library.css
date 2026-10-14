@@ -159,10 +159,14 @@
 }
 
 /* ── Era chips ───────────────────────────────── */
+#era-filter-bar {
+  min-height: 34px;
+}
+
 .era-chip {
   flex-shrink: 0;
-  padding: 6px 14px;
-  border-radius: 999px;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm, 6px);
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -176,7 +180,7 @@
 .era-chip--active {
   background: var(--accent);
   color: white;
-  box-shadow: 0 2px 12px rgb(var(--accent-rgb) / var(--a-07));
+  box-shadow: 0 2px 10px rgb(var(--accent-rgb) / var(--a-06));
 }
 
 .era-chip--inactive {
@@ -191,10 +195,10 @@
   background: rgb(var(--light-rgb) / var(--a-03));
 }
 
-/* ── Filter Pills ───────────────────────────── */
+/* ── Filter Pills / Technical Chips ───────────── */
 .filter-pill {
-  padding: 5px 12px;
-  border-radius: 999px;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm, 6px);
   font-size: 10px;
   font-weight: 700;
   color: var(--text-muted);
@@ -300,6 +304,10 @@
 @media (min-width: 768px) {
   #cards-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  #mobile-filter-toggle {
+    display: none !important;
   }
 }
 

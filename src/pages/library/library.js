@@ -31,6 +31,8 @@ initNav();
 initPageReveal();
 log.debug('Module initialized');
 
+let initialLoadPromise = null;
+
 export async function initLibraryPage() {
   setupSidebarToggle();
   setupSearch();
@@ -57,23 +59,29 @@ export async function initLibraryPage() {
     setupCardInteractions(currentUid);
   }
 
-  try {
-    await loadTalesPage(1);
+  if (!initialLoadPromise) {
+    initialLoadPromise = (async () => {
+      try {
+        await loadTalesPage(1);
 
-    if (!libraryState.eraChipsBuilt) {
-      setupEraFilter(libraryState.allTales);
-      libraryState.eraChipsBuilt = true;
-    }
+        if (!libraryState.eraChipsBuilt) {
+          setupEraFilter(libraryState.allTales);
+          libraryState.eraChipsBuilt = true;
+        }
 
-    await applyAllFilters();
-    updatePaginationUI();
-    readyReveal();
-    initIcons();
-  } catch (err) {
-    log.error('Init failed:', err);
-    showGridError();
-    readyReveal();
+        await applyAllFilters({ showSkeleton: false });
+        updatePaginationUI();
+        readyReveal();
+        initIcons();
+      } catch (err) {
+        log.error('Init failed:', err);
+        showGridError();
+        readyReveal();
+      }
+    })();
   }
+
+  return initialLoadPromise;
 }
 
 if (document.readyState === 'loading') {
@@ -89,23 +97,23 @@ initAuth(async (user) => {
   updateSidebarUser(user);
   setupCardInteractions(user.uid);
 
-  try {
-    await loadTalesPage(1);
-
-    if (!libraryState.eraChipsBuilt) {
-      setupEraFilter(libraryState.allTales);
-      libraryState.eraChipsBuilt = true;
-    }
-
-    await applyAllFilters();
-    updatePaginationUI();
-    readyReveal();
+  if (initialLoadPromise) {
+    await initialLoadPromise;
+    await applyAllFilters({ showSkeleton: false });
     initIcons();
-  } catch (err) {
-    log.error('Init failed:', err);
-    showGridError();
+  } else {
+    await initLibraryPage();
   }
 });
+
+function scrollToCardsTop() {
+  const main = document.getElementById('library-main');
+  if (main) {
+    main.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
 
 function setupPagination() {
   const prevBtn = document.getElementById('pagination-prev');
@@ -117,8 +125,9 @@ function setupPagination() {
 
       setPaginationLoading(true);
       await prevPage();
-      await applyAllFilters();
+      await applyAllFilters({ showSkeleton: true });
       updatePaginationUI();
+      scrollToCardsTop();
       setPaginationLoading(false);
       initIcons();
     });
@@ -126,30 +135,31 @@ function setupPagination() {
 
   if (nextBtn) {
     nextBtn.addEventListener('click', async () => {
-      log.log(
+      log.debug(
         'Next clicked. Current page:',
         libraryState.currentPage,
         'Loading:',
         libraryState.isLoading
       );
       if (libraryState.isLoading) {
-        log.log('Blocked by isLoading');
+        log.debug('Blocked by isLoading');
         return;
       }
 
       const maxPage = Math.ceil(libraryState.totalTales / libraryState.talesPerPage);
-      log.log('Max page:', maxPage);
+      log.debug('Max page:', maxPage);
       if (libraryState.currentPage >= maxPage) {
-        log.log('Blocked by maxPage');
+        log.debug('Blocked by maxPage');
         return;
       }
 
       setPaginationLoading(true);
-      log.log('Loading page:', libraryState.currentPage + 1);
+      log.debug('Loading page:', libraryState.currentPage + 1);
       await nextPage();
-      log.log('Page loaded. New state page:', libraryState.currentPage);
-      await applyAllFilters();
+      log.debug('Page loaded. New state page:', libraryState.currentPage);
+      await applyAllFilters({ showSkeleton: true });
       updatePaginationUI();
+      scrollToCardsTop();
       setPaginationLoading(false);
       initIcons();
     });

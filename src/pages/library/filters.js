@@ -25,7 +25,7 @@ const log = createLogger('LibraryFilters');
  * @param {boolean} [options.append=false] - If true, only newly loaded tales are rendered
  * @returns {Promise<void>}
  */
-export async function applyAllFilters({ append = false } = {}) {
+export async function applyAllFilters({ _append = false, showSkeleton = false } = {}) {
   log.info('Applying filters...', {
     sidebar: libraryState.sidebarFilter,
     era: libraryState.activeEra,
@@ -74,15 +74,8 @@ export async function applyAllFilters({ append = false } = {}) {
 
   libraryState.filteredTales = result;
 
-  if (append) {
-    // When appending, we only care about the tales that aren't already in the DOM.
-    // However, applyAllFilters is usually called after fetching a new batch.
-    // To keep it simple and safe (matching user request), we re-render everything
-    // unless the user specifically wanted appendTaleCards logic.
-    // The user's prompt suggested:
-    // "if (append) { ... await renderCardsGrid(...) } else { await renderCardsGrid(...) }"
-    // which effectively re-renders everything in both cases.
-    await renderCardsGrid(libraryState.userId, result);
+  if (showSkeleton) {
+    await renderCardsGrid(libraryState.userId, result, { showSkeleton: true });
   } else {
     await renderCardsGrid(libraryState.userId, result);
   }
@@ -113,7 +106,7 @@ export function setupSearch() {
   const onSearch = debounce((e) => {
     libraryState.searchQuery = e.target.value.toLowerCase();
     log.info('Search query updated:', libraryState.searchQuery);
-    applyAllFilters();
+    applyAllFilters({ showSkeleton: false });
   }, 220);
 
   input.addEventListener('input', onSearch);
@@ -128,8 +121,19 @@ export function setupSearch() {
     if (e.key === 'Escape' && document.activeElement === input) {
       input.value = '';
       libraryState.searchQuery = '';
-      applyAllFilters();
+      applyAllFilters({ showSkeleton: false });
       input.blur();
+      return;
+    }
+
+    if (e.key === '/' && document.activeElement !== input) {
+      const tag = document.activeElement?.tagName?.toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || document.activeElement?.isContentEditable) {
+        return;
+      }
+      e.preventDefault();
+      input.focus();
+      input.select();
     }
   });
 }

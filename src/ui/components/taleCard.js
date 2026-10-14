@@ -53,7 +53,7 @@ export function renderCardsSkeleton(container, count = 8) {
         <div class="tale-card animate-pulse">
           <div class="p-2.5 sm:p-4 flex flex-col">
             <div class="mb-2 sm:mb-3 flex items-center justify-between gap-1.5 sm:gap-2">
-              <div class="h-4 sm:h-5 w-14 sm:w-20 rounded-full bg-white/6"></div>
+              <div class="h-4 sm:h-5 w-14 sm:w-20 rounded-sm bg-white/6"></div>
               <div class="h-6 w-6 sm:h-7 sm:w-7 rounded-lg bg-white/5"></div>
             </div>
             <div class="card-image-wrap mb-2.5 sm:mb-3.5 bg-white/6"></div>
@@ -189,7 +189,7 @@ export async function appendTaleCards(userId, tales) {
   if (window.lucide) window.lucide.createIcons();
 }
 
-export async function renderCardsGrid(userId, tales) {
+export async function renderCardsGrid(userId, tales, { showSkeleton = false } = {}) {
   const container = document.getElementById('cards-grid');
   if (!container) return;
 
@@ -205,7 +205,9 @@ export async function renderCardsGrid(userId, tales) {
     return;
   }
 
-  renderCardsSkeleton(container, Math.min(8, safeTales.length));
+  if (showSkeleton) {
+    renderCardsSkeleton(container, Math.min(8, safeTales.length));
+  }
 
   try {
     const metadata = await fetchTalesMetadata(userId, safeTales);
