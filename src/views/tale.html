@@ -366,106 +366,112 @@
             </div>
 
             <!-- Desktop Command Hub (Visible on lg+) -->
-            <div class="desktop-hero-actions hidden lg:flex flex-wrap items-center gap-3 pt-2">
-              <button
-                id="start-btn-desktop"
-                class="btn btn-primary py-3 px-6 rounded-xl text-xs uppercase tracking-wider shadow-lg shrink-0"
-              >
-                <i data-lucide="play" class="w-4 h-4 fill-current"></i>
-                <span>Initiate Reading</span>
-              </button>
-
-              <button
-                id="resume-btn-desktop"
-                class="btn btn-secondary py-3 px-5 rounded-xl text-xs uppercase tracking-wider shrink-0"
-              >
-                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-                <span id="resume-text-desktop">Resume</span>
-              </button>
-
-              <button
-                id="resonance-btn-desktop"
-                class="btn btn-secondary py-3 px-4.5 rounded-xl text-xs font-semibold shrink-0 group"
-                title="Soul Resonance"
-                aria-label="Soul Resonance"
-              >
-                <i
-                  data-lucide="heart"
-                  class="w-4 h-4 text-slate-400 group-hover:text-red-400 transition-colors"
-                ></i>
-                <span id="resonance-count" class="font-bold tracking-wide">0</span>
-              </button>
-
-              <button
-                id="shelf-btn-desktop"
-                class="btn btn-secondary py-3 px-4 rounded-xl text-xs font-semibold shrink-0"
-                title="Save to Shelf"
-                aria-label="Save to Shelf"
-              >
-                <i data-lucide="bookmark-plus" class="w-3.5 h-3.5"></i>
-                <span>Save to Shelf</span>
-              </button>
-
-              <button
-                id="share-btn-desktop"
-                class="btn btn-secondary py-3 px-4 rounded-xl text-xs font-semibold shrink-0"
-                title="Share Tale"
-                aria-label="Share Tale"
-              >
-                <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
-                <span>Share</span>
-              </button>
-
-              <!-- Author Quick Edit (Desktop) -->
-              <a
-                id="edit-tale-btn-desktop"
-                href="#"
-                class="hidden btn btn-accent py-3 px-4.5 rounded-xl text-xs font-bold uppercase tracking-wider shrink-0 shadow-sm"
-                style="display: none"
-                title="Edit Chronicle"
-              >
-                <i data-lucide="edit-3" class="w-4 h-4"></i>
-                <span>Edit Chronicle</span>
-              </a>
-
-              <!-- Compact Author Inquire Bar (Beside Share Button) -->
-              <div
-                class="chronicler-invite-card glass-card-strong px-3.5 py-2 rounded-xl border border-white/8 shadow-md flex items-center justify-between gap-3 shrink-0 transition-all hover:border-indigo-500/30 cursor-pointer"
-                title="Have a doubt about the tale? Ask author"
-              >
-                <div class="flex items-center gap-2.5 min-w-0">
-                  <a
-                    id="letter-author-profile-link"
-                    href="#"
-                    class="letter-author-profile-link group/avatar relative shrink-0 block cursor-pointer transition-transform hover:scale-105"
-                    title="View Author Profile"
-                    aria-label="View Author Profile"
-                  >
-                    <img
-                      id="letter-author-avatar"
-                      src=""
-                      alt="Author"
-                      class="letter-author-avatar w-7 h-7 rounded-full bg-zinc-800 object-cover border border-white/10 shadow-sm group-hover/avatar:border-indigo-400/50 transition-all duration-300"
-                    />
-                  </a>
-                  <span id="letter-author-name" class="hidden"></span>
-                  <p class="text-xs font-medium text-slate-200 truncate leading-snug">
-                    Have a doubt about the tale? Ask author
-                  </p>
-                </div>
+            <div class="desktop-hero-actions hidden lg:flex flex-col gap-3 pt-2">
+              <!-- Reading & Shelf Actions Row -->
+              <div class="flex flex-wrap items-center gap-3">
+                <button
+                  id="start-btn-desktop"
+                  class="btn btn-primary py-3 px-6 rounded-xl text-xs uppercase tracking-wider shadow-lg shrink-0"
+                >
+                  <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+                  <span>Initiate Reading</span>
+                </button>
 
                 <button
-                  type="button"
-                  id="btn-open-chronicler-letter"
-                  class="btn-open-chronicler-letter w-7 h-7 rounded-full bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white flex items-center justify-center shrink-0 shadow-md transition-all cursor-pointer border border-indigo-400/30 group"
-                  title="Ask Author"
-                  aria-label="Ask Author"
+                  id="resume-btn-desktop"
+                  class="btn btn-secondary py-3 px-5 rounded-xl text-xs uppercase tracking-wider shrink-0"
+                >
+                  <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                  <span id="resume-text-desktop">Resume</span>
+                </button>
+
+                <button
+                  id="resonance-btn-desktop"
+                  class="btn btn-secondary py-3 px-4.5 rounded-xl text-xs font-semibold shrink-0 group"
+                  title="Soul Resonance"
+                  aria-label="Soul Resonance"
                 >
                   <i
-                    data-lucide="pen"
-                    class="w-3.5 h-3.5 text-white group-hover:scale-110 transition-transform"
+                    data-lucide="heart"
+                    class="w-4 h-4 text-slate-400 group-hover:text-red-400 transition-colors"
                   ></i>
+                  <span id="resonance-count" class="font-bold tracking-wide">0</span>
                 </button>
+
+                <button
+                  id="shelf-btn-desktop"
+                  class="btn btn-secondary py-3 px-4 rounded-xl text-xs font-semibold shrink-0"
+                  title="Save to Shelf"
+                  aria-label="Save to Shelf"
+                >
+                  <i data-lucide="bookmark-plus" class="w-3.5 h-3.5"></i>
+                  <span>Save to Shelf</span>
+                </button>
+              </div>
+
+              <!-- Share & Author Inquire Row (Beside Share Button) -->
+              <div class="flex flex-wrap items-center gap-3">
+                <button
+                  id="share-btn-desktop"
+                  class="btn btn-secondary py-3 px-4 rounded-xl text-xs font-semibold shrink-0"
+                  title="Share Tale"
+                  aria-label="Share Tale"
+                >
+                  <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+                  <span>Share</span>
+                </button>
+
+                <!-- Author Quick Edit (Desktop) -->
+                <a
+                  id="edit-tale-btn-desktop"
+                  href="#"
+                  class="hidden btn btn-accent py-3 px-4.5 rounded-xl text-xs font-bold uppercase tracking-wider shrink-0 shadow-sm"
+                  style="display: none"
+                  title="Edit Chronicle"
+                >
+                  <i data-lucide="edit-3" class="w-4 h-4"></i>
+                  <span>Edit Chronicle</span>
+                </a>
+
+                <!-- Compact Author Inquire Bar (Directly Beside Share Button) -->
+                <div
+                  class="chronicler-invite-card glass-card-strong px-3.5 py-2 rounded-xl border border-white/8 shadow-md flex items-center justify-between gap-3 shrink-0 transition-all hover:border-indigo-500/30 cursor-pointer"
+                  title="Have a doubt about the tale? Ask author"
+                >
+                  <div class="flex items-center gap-2.5 min-w-0">
+                    <a
+                      id="letter-author-profile-link"
+                      href="#"
+                      class="letter-author-profile-link group/avatar relative shrink-0 block cursor-pointer transition-transform hover:scale-105"
+                      title="View Author Profile"
+                      aria-label="View Author Profile"
+                    >
+                      <img
+                        id="letter-author-avatar"
+                        src=""
+                        alt="Author"
+                        class="letter-author-avatar w-7 h-7 rounded-full bg-zinc-800 object-cover border border-white/10 shadow-sm group-hover/avatar:border-indigo-400/50 transition-all duration-300"
+                      />
+                    </a>
+                    <span id="letter-author-name" class="hidden"></span>
+                    <p class="text-xs font-medium text-slate-200 truncate leading-snug">
+                      Have a doubt about the tale? Ask author
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    id="btn-open-chronicler-letter"
+                    class="btn-open-chronicler-letter w-7 h-7 rounded-full bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white flex items-center justify-center shrink-0 shadow-md transition-all cursor-pointer border border-indigo-400/30 group"
+                    title="Ask Author"
+                    aria-label="Ask Author"
+                  >
+                    <i
+                      data-lucide="pen"
+                      class="w-3.5 h-3.5 text-white group-hover:scale-110 transition-transform"
+                    ></i>
+                  </button>
+                </div>
               </div>
 
               <!-- Hidden semantic metadata hooks for correspondence -->
