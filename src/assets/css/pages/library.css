@@ -92,8 +92,7 @@
 
   /* Labels / text that hide on collapse */
   #sidebar.sidebar--collapsed .sidebar-label,
-  #sidebar.sidebar--collapsed .sidebar-section-heading,
-  #sidebar.sidebar--collapsed .sidebar-user-text {
+  #sidebar.sidebar--collapsed .sidebar-section-heading {
     opacity: 0;
     pointer-events: none;
     width: 0;
