@@ -26,9 +26,7 @@ export function createLogger(context: string) {
       }
     },
     error: (message: string, ...args: any[]) => {
-      if (IS_DEV_MODE) {
-        console.error(`${prefix} ${message}`, style, reset, ...args);
-      }
+      console.error(`${prefix} ${message}`, style, reset, ...args);
     },
     info: (message: string, ...args: any[]) => {
       if (IS_DEV_MODE) {

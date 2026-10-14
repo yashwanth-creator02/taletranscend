@@ -771,7 +771,9 @@ service cloud.firestore {
           && isValidString('taleId', 1, 100)
           && isValidString('message', 1, 5000)
           && isValidTimestamp('createdAt');
-        allow update, delete: if isAdmin();
+        allow update: if isAdmin()
+          || (isAuthenticated() && resource.data.authorId == request.auth.uid);
+        allow delete: if isAdmin();
       }
 
       // ═════════════════════════════════════════════════════════════

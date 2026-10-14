@@ -53,41 +53,55 @@ Define the standard operating procedures, data contracts, and UI behaviors for a
   - Submission calls `saveAuthorRegistry(authorData)` in `sync.js`, updating both Firestore user record and local profile state.
   - Closes modal and issues confirmation toast without requiring full page reload.
 
-### 3. The Chronicler's Letter (Tale Archive & Inquiries)
+### 3. The Chronicler's Letter & Author Mailroom (Tale Archive & Inquiries)
 
 - **Location & Navigation**:
-  - Resides exclusively on the tale page under `#tab-inquire` (`data-tab="inquire"`) and panel `#letter-tab-panel`.
+  - Resides on the tale page under `#tab-inquire` (`data-tab="inquire"`) and panel `#letter-tab-panel`.
   - Completely detached from chapter reading views (removed from `reader.html`).
-- **Self-Inquiry Guard**:
-  - If the viewing user is the author of the tale (`userId === tale.authorId` or `tale.authorUID`), hide inquiry tab controls (`#tab-inquire`) or render a self-management notice. Authors cannot dispatch missives to themselves.
+- **Dual Perspective (Reader vs. Author)**:
+  - **Author View (`#author-missives-view`)**: If the viewing user is the author of the tale (`userId === tale.authorId` or `tale.authorUID`), the page renders the Author Mailroom rather than the sender form. Authors inspect inbound missives, see total/pending/replied counts, filter by status, and transmit responses that persist to Firestore.
+  - **Reader View (`#inquire-author-form`)**: If the viewing user is a reader, renders the missive dispatch form alongside their previously sent inquiries history (`#reader-inquiries-list`), which dynamically updates when the author replies.
 - **Inquiry Categories**:
-  - Radio pills: `Lore & World` (`'lore'`), `Character Doubts` (`'character'`), `Plot & Theories` (`'plot'`), `Connect & Praise` (`'connect'`).
+  - Shield options: `Lore & World` (`'lore'`), `Character Doubts` (`'character'`), `Plot & Theories` (`'plot'`), `Connect & Praise` (`'connect'`).
 - **Correspondence Routing**:
-  - Informational pill and banner inform readers: `"Missives are routed to the author's registered correspondence inbox."`
+  - Informational shield and banner inform readers: `"Missives are routed to the author's registered correspondence inbox."`
   - Form displays `#inquire-author-email-pill` showing destination author correspondence email if public.
   - Author bio card displays direct `mailto:` action button (`#letter-author-email-btn`), linking to `mailto:${authorEmail}?subject=...`.
 - **Data Persistence**:
-  - Inquiry missives write to Firestore subcollection:
-    `v1/taletranscend/projects/v1/tales/${taleId}/inquiries`
+  - Inquiry missives write to the root collection:
+    `v1/taletranscend/projects/v1/inquiries/{inquiryId}`
   - Document fields:
     - `taleId`: string
     - `taleTitle`: string
     - `authorId`: string
     - `authorName`: string
     - `authorEmail`: string
-    - `readerId`: string
-    - `readerName`: string
-    - `readerContact`: string
+    - `senderId`: string (or `readerId`)
+    - `senderName`: string (or `readerName`)
+    - `senderContact`: string
     - `category`: string
     - `message`: string
-    - `status`: `'unread'`
+    - `status`: `'pending'` | `'replied'` | `'archived'`
     - `createdAt`: ISO timestamp
+    - `replyText`: string (optional, populated upon author reply)
+    - `repliedAt`: ISO timestamp (optional, populated upon author reply)
+    - `updateTime`: Firestore server timestamp
 
 ### 4. Shared Services, Caching & Fallback Tolerance
 
 - **Author Service (`src/services/author.service.js`)**:
   - `getAuthorStatus(userId)`: Reads from memory cache (`user:author-status:${userId}`), falling back to Firestore user profile document, then local storage key `author_registry_${userId}`.
   - `registerAuthor(userId, registrationData)`: Validates via `AuthorRegistrationSchema`, writes to Firestore user doc, backs up to local storage, and invalidates both `user:author-status:${userId}` and `user:profile:${userId}` cache entries.
+- **Inquiry Service (`src/services/inquiry.service.js`)**:
+  - `fetchAuthorInquiries(taleId, authorId)`: Queries Firestore for inquiries where `authorId == authorId` and `taleId == taleId`.
+  - `subscribeAuthorInquiries(taleId, authorId, onUpdate, onError)`: Real-time listener (`onSnapshot`) streaming live missives to the Author Mailroom.
+  - `fetchReaderInquiries(taleId, senderId)`: Queries Firestore for inquiries dispatched by the reader for this tale.
+  - `subscribeReaderInquiries(taleId, senderId, onUpdate, onError)`: Real-time listener streaming dispatched missives and author replies to the reader.
+  - `createInquiry(taleId, payload)`: Validates schema and saves missive to Firestore root collection.
+  - `replyToInquiry(inquiryId, replyText, authorId)`: Author-authorized Firestore update recording `replyText`, `repliedAt`, and setting `status = 'replied'`.
+  - `mergeInquiries(local, remote)`: Reconciles local optimistic items with Firestore documents without duplicates or UI flicker.
+- **Security Rules (`firestore.rules`)**:
+  - `/inquiries/{inquiryId}` allows `update` if `isAdmin() || (isAuthenticated() && resource.data.authorId == request.auth.uid)`.
 - **Anti-Vibecoding & Aesthetics**:
   - Zero emojis in all form labels, buttons, toasts, and status indicators.
   - Zero pill badges; use sharp or technical shields (`rounded-lg`, `rounded-xl`).
@@ -101,13 +115,13 @@ Define the standard operating procedures, data contracts, and UI behaviors for a
   ```
 - Or run targeted Vitest test suites:
   ```powershell
-  npx vitest run src/services/__tests__/author.service.test.js src/pages/tale/__tests__/inquire.test.js src/pages/contribution/__tests__/publish.test.js src/pages/profile/__tests__/sync.test.js
+  npx vitest run src/services/__tests__/inquiry.service.test.js src/services/__tests__/author.service.test.js src/pages/tale/__tests__/inquire.test.js src/pages/contribution/__tests__/publish.test.js src/pages/profile/__tests__/sync.test.js
   ```
 
 ## Outputs
 
 - Gated tale publishing preventing unverified manuscripts.
-- Persistent author correspondence records in Firestore.
+- Real-time two-way correspondence between reader and author persisted to Firestore.
 - Complete unit test coverage across all registration, profile sync, and inquiry suites.
 
 ## Edge Cases & Error Handling

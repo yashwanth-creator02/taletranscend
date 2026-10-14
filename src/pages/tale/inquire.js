@@ -8,6 +8,14 @@ import { auth, refs, addDoc, updateDoc, serverTimestamp } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
 import { initIcons } from '@ui/components/icons.js';
 import { getAuthorStatus } from '@services/author.service.js';
+import {
+  fetchAuthorInquiries,
+  subscribeAuthorInquiries,
+  fetchReaderInquiries,
+  subscribeReaderInquiries,
+  createInquiry,
+  mergeInquiries,
+} from '@services/index.js';
 import { formatCommentDateTime, getAuthorInitials } from './comments.js';
 
 const log = createLogger('ChroniclerMissives');
@@ -15,6 +23,9 @@ const log = createLogger('ChroniclerMissives');
 const INQUIRE_COOLDOWN_MS = 4000;
 const MIN_MESSAGE_LENGTH = 10;
 const MAX_MESSAGE_LENGTH = 800;
+
+let _authorInquiryUnsub = null;
+let _readerInquiryUnsub = null;
 
 /* ─────────────────────────────────────────────
    Storage Helpers
@@ -91,9 +102,12 @@ export async function replyToMissive(taleId, inquiryId, replyText, authorName = 
         replyAuthorName: authorName,
         repliedAt: serverTimestamp ? serverTimestamp() : now,
       });
+      log.info('Firestore inquiry updated successfully', { inquiryId });
+    } else {
+      log.warn('Skipping Firestore update for invalid id', { inquiryId });
     }
   } catch (err) {
-    log.debug('Could not update inquiry in Firestore:', err);
+    log.error('Could not update inquiry in Firestore:', err);
   }
 
   return target;
@@ -341,6 +355,8 @@ function _renderAuthorMissives(taleId, authorName, activeFilter = 'all') {
 function _bindAuthorMailroomEvents(taleId, authorName) {
   const container = document.getElementById('author-missives-view');
   if (!container) return;
+  if (container.dataset.eventsBound === 'true') return;
+  container.dataset.eventsBound = 'true';
 
   // Filter chips
   const filterChips = container.querySelectorAll('#author-missives-filter-chips .filter-chip');
@@ -567,6 +583,47 @@ export function setupInquire(taleId, tale, userId = null) {
 
     _renderAuthorMissives(taleId, authorName, 'all');
     _bindAuthorMailroomEvents(taleId, authorName);
+
+    // Initial fetch from Firestore to hydrate immediately
+    fetchAuthorInquiries(taleId, authorId)
+      .then((remoteInquiries) => {
+        if (remoteInquiries && remoteInquiries.length > 0) {
+          const local = getStoredInquiries(taleId);
+          const merged = mergeInquiries(local, remoteInquiries);
+          saveStoredInquiries(taleId, merged);
+          const activeFilter =
+            authorView?.querySelector('#author-missives-filter-chips .filter-chip.active')?.dataset
+              .filter || 'all';
+          _renderAuthorMissives(taleId, authorName, activeFilter);
+        }
+      })
+      .catch((err) => {
+        log.debug('Initial author inquiries fetch notice:', err);
+      });
+
+    // Real-time subscription to author inquiries
+    if (_authorInquiryUnsub) {
+      _authorInquiryUnsub();
+      _authorInquiryUnsub = null;
+    }
+    _authorInquiryUnsub = subscribeAuthorInquiries(
+      taleId,
+      authorId,
+      (remoteInquiries) => {
+        log.info('Author inquiries stream updated', { count: remoteInquiries.length });
+        const local = getStoredInquiries(taleId);
+        const merged = mergeInquiries(local, remoteInquiries);
+        saveStoredInquiries(taleId, merged);
+        const activeFilter =
+          authorView?.querySelector('#author-missives-filter-chips .filter-chip.active')?.dataset
+            .filter || 'all';
+        _renderAuthorMissives(taleId, authorName, activeFilter);
+      },
+      (err) => {
+        log.warn('Could not stream author inquiries', err);
+      }
+    );
+
     log.info('Author Mailroom initialized for scribe', { authorId });
     return;
   }
@@ -753,6 +810,39 @@ export function setupInquire(taleId, tale, userId = null) {
   // 8. Render Reader's Sent Inquiries
   _renderReaderSentInquiries(taleId, currentUserId, authorName);
 
+  if (currentUserId && currentUserId !== 'anonymous') {
+    fetchReaderInquiries(taleId, currentUserId)
+      .then((remoteInquiries) => {
+        if (remoteInquiries && remoteInquiries.length > 0) {
+          const local = getStoredInquiries(taleId);
+          const merged = mergeInquiries(local, remoteInquiries);
+          saveStoredInquiries(taleId, merged);
+          _renderReaderSentInquiries(taleId, currentUserId, authorName);
+        }
+      })
+      .catch((err) => {
+        log.debug('Initial reader inquiries fetch notice:', err);
+      });
+
+    if (_readerInquiryUnsub) {
+      _readerInquiryUnsub();
+      _readerInquiryUnsub = null;
+    }
+    _readerInquiryUnsub = subscribeReaderInquiries(
+      taleId,
+      currentUserId,
+      (remoteInquiries) => {
+        const local = getStoredInquiries(taleId);
+        const merged = mergeInquiries(local, remoteInquiries);
+        saveStoredInquiries(taleId, merged);
+        _renderReaderSentInquiries(taleId, currentUserId, authorName);
+      },
+      (err) => {
+        log.warn('Could not stream reader inquiries', err);
+      }
+    );
+  }
+
   // 9. Form Submission Handling
   if (form) {
     form.addEventListener('submit', async (e) => {
@@ -811,11 +901,45 @@ export function setupInquire(taleId, tale, userId = null) {
       try {
         localStorage.setItem('tt_reader_moniker', moniker);
 
+        // Persist to Firestore archive inquiries collection
+        let remoteDoc = null;
+        const senderId = currentUserId || auth.currentUser?.uid || 'anonymous';
+        if (auth.currentUser) {
+          try {
+            if (typeof createInquiry === 'function') {
+              remoteDoc = await createInquiry({
+                taleId,
+                authorId,
+                senderId,
+                senderMoniker: moniker,
+                senderContact: contact,
+                category,
+                message,
+              });
+            } else if (refs.inquiries) {
+              const docRef = await addDoc(refs.inquiries(), {
+                taleId,
+                authorId: authorId || '',
+                senderId,
+                senderMoniker: moniker,
+                senderContact: contact,
+                category,
+                message,
+                status: 'sent',
+                createdAt: serverTimestamp ? serverTimestamp() : new Date(),
+              });
+              remoteDoc = { id: docRef?.id };
+            }
+          } catch (dbErr) {
+            log.debug('Could not persist missive to Firestore archive:', dbErr);
+          }
+        }
+
         const newInquiry = {
-          id: Date.now(),
+          id: remoteDoc?.id || Date.now(),
           taleId,
-          userId: currentUserId || auth.currentUser?.uid || 'anonymous',
-          senderId: currentUserId || auth.currentUser?.uid || 'anonymous',
+          userId: senderId,
+          senderId,
           authorId,
           authorName,
           authorEmail: authorEmail || '',
@@ -840,28 +964,6 @@ export function setupInquire(taleId, tale, userId = null) {
         existing.unshift(newInquiry);
         saveStoredInquiries(taleId, existing);
         sessionStorage.setItem(cooldownKey, String(Date.now()));
-
-        // Persist to Firestore archive inquiries collection (non-blocking)
-        const senderId = currentUserId || auth.currentUser?.uid || 'anonymous';
-        if (auth.currentUser) {
-          try {
-            if (refs.inquiries) {
-              await addDoc(refs.inquiries(), {
-                taleId,
-                authorId: authorId || '',
-                senderId,
-                senderMoniker: moniker,
-                senderContact: contact,
-                category,
-                message,
-                status: 'sent',
-                createdAt: serverTimestamp ? serverTimestamp() : new Date(),
-              });
-            }
-          } catch (dbErr) {
-            log.debug('Could not persist missive to Firestore archive:', dbErr);
-          }
-        }
 
         log.info('Missive dispatched successfully', { taleId, category, moniker });
         showToast('Your missive has been dispatched to the scribe!', 'success');
