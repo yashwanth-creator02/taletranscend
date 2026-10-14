@@ -417,6 +417,9 @@ export function buildCommandPalette() {
 export function buildNav() {
   const current = getCurrentPage();
   const primaryLinks = PRIMARY_LINKS.map((link) => buildPrimaryLink(link, current)).join('');
+  const settingsTarget = resolveHref('settings.html');
+  const isSettingsActive =
+    current === 'settings.html' || current === settingsTarget || settingsTarget === `/${current}`;
 
   return {
     headerHtml: `
@@ -460,6 +463,17 @@ export function buildNav() {
             >
               <i data-lucide="search" class="w-4 h-4" aria-hidden="true"></i>
             </button>
+
+            <a
+              href="${settingsTarget}"
+              class="nav-settings-btn${isSettingsActive ? ' nav-settings-btn--active' : ''}"
+              id="nav-settings-btn"
+              title="Settings"
+              aria-label="Settings"
+              ${isSettingsActive ? 'aria-current="page"' : ''}
+            >
+              <i data-lucide="settings" class="w-4 h-4" aria-hidden="true"></i>
+            </a>
 
             <div id="nav-user" class="flex items-center">
               ${buildUserSkeleton()}

@@ -35,6 +35,7 @@ const PAGES = [
   'contribution',
   'profile',
   'login',
+  'settings',
   'toc',
   '404',
 ];

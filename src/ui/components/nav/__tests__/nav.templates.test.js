@@ -7,6 +7,7 @@ import {
   buildGuestUser,
   buildMobileDock,
   buildCommandItem,
+  buildNav,
 } from '../nav.templates.js';
 
 describe('Nav Templates', () => {
@@ -68,6 +69,20 @@ describe('Nav Templates', () => {
       const html = buildCommandItem(item, 'index.html');
       expect(html).toContain('Go Home');
       expect(html).toContain('G H');
+    });
+  });
+
+  describe('buildNav', () => {
+    it('renders settings navigation icon between search bar and user profile', () => {
+      const { headerHtml } = buildNav();
+      expect(headerHtml).toContain('id="nav-settings-btn"');
+      expect(headerHtml).toContain('settings.html');
+      const searchIndex = headerHtml.indexOf('id="nav-command-button"');
+      const settingsIndex = headerHtml.indexOf('id="nav-settings-btn"');
+      const userIndex = headerHtml.indexOf('id="nav-user"');
+      expect(searchIndex).toBeGreaterThan(-1);
+      expect(settingsIndex).toBeGreaterThan(searchIndex);
+      expect(userIndex).toBeGreaterThan(settingsIndex);
     });
   });
 });

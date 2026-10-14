@@ -25,15 +25,15 @@ Define the standard operating procedures, data contracts, and UI patterns for ma
 
 ## Standard Operating Procedures
 
-### 1. Chronicler Profile Architecture & Modal Form
+### 1. Chronicler Profile Architecture & Settings Integration
 
-- **Profile Layout Structure**:
+- **Profile Page View (`profile.html`)**:
   - Three-column desktop layout: Identity Pillar (left), Living Archive & Contributions (center), Legacy Metrics & Chronicle Goal (right).
-  - Responsive drawer for mobile and tablet views.
-- **Edit Profile Modal Tabs**:
-  - Divided into 4 focused tabs: `Basic`, `Identity`, `Social`, and `Goals`.
-  - Tab navigation sits in a fixed modal header above `#profile-form`.
-  - `#profile-form` is an `overflow-y-auto` scrollable container allowing mobile access without viewport clipping.
+  - "Customise Identity" (`#btn-edit-desktop`) links directly to the dedicated Chronicler Profile section in Settings (`/settings.html#profile`).
+- **Settings Page Profile Editor (`settings.html#profile`)**:
+  - Full-featured chronicler identity configuration embedded in the living archive settings suite.
+  - Divided card rows: Avatar preview & URL, Display Name with Oracle AI name suggester (`#btn-suggest-name`), Reader Moniker / Signature (`#setting-reader-moniker`), Lore & Bio, Pronouns, Location / Realm, Favourite Genre chips (`#genre-selector`), Yearly Reading Milestone, Social URLs, and Gemini API Key configuration.
+  - Form commits directly to Firestore `refs.user(uid)` validated against `UserProfileSchema` via `validateData`.
 
 ### 2. Gemini API Key Storage & User Controls
 

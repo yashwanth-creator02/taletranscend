@@ -50,7 +50,9 @@ export function initProfileUI() {
 
 function _bindModalTriggers() {
   ['btn-edit-desktop', 'btn-edit-mobile'].forEach((id) => {
-    document.getElementById(id)?.addEventListener('click', openModal);
+    document.getElementById(id)?.addEventListener('click', () => {
+      window.location.href = '/settings.html#profile';
+    });
   });
 
   ['btn-close-modal', 'btn-cancel-modal'].forEach((id) => {

@@ -179,6 +179,36 @@
   color: rgb(var(--light-rgb) / var(--a-09));
 }
 
+.nav-settings-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-xl);
+  background: rgb(var(--light-rgb) / var(--a-02));
+  border: 1px solid rgb(var(--light-rgb) / var(--a-03));
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.nav-settings-btn:hover {
+  background: rgb(var(--light-rgb) / var(--a-04));
+  border-color: rgb(var(--accent-rgb) / var(--a-20));
+  color: white;
+  transform: translateY(-1px);
+}
+
+.nav-settings-btn--active {
+  background: rgb(var(--accent-rgb) / var(--a-12));
+  border-color: rgb(var(--accent-rgb) / var(--a-40));
+  color: rgb(var(--accent-light-rgb));
+  box-shadow: 0 0 12px rgb(var(--accent-rgb) / var(--a-15));
+}
+
 /* ── User Area ───────────────────────────────────────────────────── */
 
 .nav-user {

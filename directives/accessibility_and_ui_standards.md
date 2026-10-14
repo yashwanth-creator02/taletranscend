@@ -29,10 +29,19 @@ Define explicit standards for footer layout isolation, accessible toasting, keyb
 ### 1. Footer Isolation Policy (Home Page Only)
 
 - **Strict Rule**: ONLY the home page (`src/views/index.html`) may contain a full site footer (`.home-footer` / `.site-footer`).
-- **Inner Pages Forbidden**: Inner application pages (`library.html`, `shelf.html`, `reader.html`, `tale.html`, `contribution.html`, `profile.html`, `login.html`, `toc.html`, `404.html`) must NEVER contain a footer.
+- **Inner Pages Forbidden**: Inner application pages (`library.html`, `shelf.html`, `reader.html`, `tale.html`, `contribution.html`, `profile.html`, `login.html`, `toc.html`, `settings.html`, `404.html`) must NEVER contain a footer.
 - **Rationale**: Inner views are specialized application workspaces (reading sanctuaries, writing ateliers, archives). They rely on the persistent global top navbar (`app-nav`) on desktop and the mobile bottom dock (`mobile-dock`) on handheld devices. A footer adds clutter and disrupts full-height layouts.
 
-### 2. Accessible Toasting System (`src/ui/components/toast.js`)
+### 2. Settings Page Layout & Navigation Isolation (`src/views/settings.html`)
+
+- **Dedicated Header & History Back Navigation**: The Settings page intentionally omits the global navigation bar and mobile dock. Instead, it features a specialized fixed top bar with:
+  - A dedicated back button (`#settings-back-btn`) that navigates back to the previous address the page was opened from (`history.back()`), falling back gracefully to `/library.html`.
+  - A live search filter input (`#settings-search-input`) with clear button (`#settings-search-clear`).
+  - System reset trigger (`#btn-reset-settings`).
+- **Sidebar-Row Navigation**: Left sidebar provides a row for each section (`Reader Identity`, `Reading Themes`, `Codex Typography`, `Atmosphere & Motion`, `Archival Storage`, `System & Defaults`, `About Codex`) with smooth scrolling and `IntersectionObserver` scrollspy synchronization.
+- **Divided Card Rows**: Settings items are organized into elevated cards with horizontal row dividers, maintaining single-source design token compliance and WCAG accessibility standards.
+
+### 3. Accessible Toasting System (`src/ui/components/toast.js`)
 
 - **Live Region Announcement**: Toast container must define `aria-live="polite"` and `aria-atomic="true"` with `role="status"` (or `role="alert"` for high-severity errors) so screen readers announce notifications without stealing focus.
 - **Semantic Variants**: Supports `info`, `success`, `warning`, and `error` with Lucide icons (`info`, `circle-check`, `triangle-alert`, `circle-x`) and design-token-compliant accent borders.
@@ -41,7 +50,7 @@ Define explicit standards for footer layout isolation, accessible toasting, keyb
   - Pause-on-Interaction: Auto-dismiss timers MUST pause when the user hovers over or focuses inside the toast, resuming when pointer/focus exits (satisfies WCAG 2.2.1 Timing Adjustable).
   - Escape Dismiss: Pressing `Escape` while focused within a toast dismisses it immediately.
 
-### 3. Keyboard Navigation & ARIA Standards
+### 4. Keyboard Navigation & ARIA Standards
 
 - **Global Command Palette**:
   - Invoked via `Ctrl+K` (Windows/Linux) or `⌘K` (macOS).
@@ -57,7 +66,7 @@ Define explicit standards for footer layout isolation, accessible toasting, keyb
   - Decorative icons and marks must carry `aria-hidden="true"`.
   - Active navigation links must include `aria-current="page"`.
 
-### 4. Official Brand Emblem & Quill Assets
+### 5. Official Brand Emblem & Quill Assets
 
 The TaleTranscend brand mark is the mythical golden-trimmed black quill pen encircled by stardust rings:
 
@@ -74,6 +83,18 @@ The TaleTranscend brand mark is the mythical golden-trimmed black quill pen enci
 - **Home Footer**: `<span class="home-footer__mark"><img src="/logo.png" alt="" class="home-footer__logo-img" width="22" height="22" /></span>`.
 - **Login Screen Header**: `<div class="..."><img src="/logo.png" alt="" class="w-7 h-7 object-contain drop-shadow" aria-hidden="true" /></div>`.
 - **Page Boot Curtain**: `<div class="boot-crest"><img src="/logo.png" alt="" width="26" height="26" class="object-contain" /></div>` across all 10 HTML entry points.
+
+### 6. Settings Page Architecture & Dedicated Back Navigation
+
+- **No Global Header/Dock Navigation**: The settings page (`settings.html`) intentionally omits the global application navbar and dock to provide an uncluttered, focused Chrome-inspired settings view.
+- **Dedicated Back Button**: Navigation back to the user's prior screen uses `#settings-back-btn` running `handleNavigateBack()`, which verifies same-origin referrer and calls `window.history.back()` (with safe fallback to `/library.html`).
+- **Separate Section Views (Non-Continuous Scrolling)**:
+  - Each settings category (`Chronicler Profile`, `Reading Themes`, `Codex Typography`, `Atmosphere & Motion`, `Archival Storage`, `System & Defaults`, `About Codex`) is a separate section view. Only the active section is visible (`.hidden` class added to all inactive sections; `.settings-section.hidden { display: none !important; }`).
+  - Selecting a sidebar row or navigating via URL hash (`#profile`, `#themes`, etc.) dynamically switches visibility via `switchSettingsSection`.
+  - Settings search allows multi-section discovery during active typing, immediately restoring the single active section upon clearing the query.
+- **Centralized Chronicler Profile**:
+  - Profile identity editing is centralized under `settings.html#profile`.
+  - The profile page (`profile.html`) button "Customise Identity" (`#btn-edit-desktop`) redirects users cleanly to `/settings.html#profile`.
 
 ## Tools / Scripts to Use
 

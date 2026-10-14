@@ -24,6 +24,7 @@ export const USER_LINKS = [
   { href: 'shelf.html', icon: 'bookmark', label: 'My Shelf' },
   { href: 'contribution.html', icon: 'feather', label: 'Write' },
   { href: 'profile.html', icon: 'user', label: 'Profile' },
+  { href: 'settings.html', icon: 'settings', label: 'Settings' },
 ];
 
 /**
@@ -72,7 +73,15 @@ export const BASE_COMMANDS = [
     label: 'Profile',
     description: 'Your scribe rank, legacy & reading history',
     category: 'Scribe Sanctuary',
-    keywords: ['profile', 'account', 'me', 'settings', 'legacy', 'rank'],
+    keywords: ['profile', 'account', 'me', 'legacy', 'rank'],
+  },
+  {
+    href: 'settings.html',
+    icon: 'settings',
+    label: 'Settings',
+    description: 'Configure appearance, typography & archival preferences',
+    category: 'System & Preferences',
+    keywords: ['settings', 'preferences', 'theme', 'font', 'appearance', 'options'],
   },
 ];
 
