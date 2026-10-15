@@ -740,8 +740,8 @@ function _renderComment(c) {
     : '';
 
   const textDisplayHtml = isDeleted
-    ? `<p id="comment-text-display-${c.id}" class="text-sm md:text-base text-slate-400 italic font-medium">This has been deleted by the user.</p>`
-    : `<p id="comment-text-display-${c.id}" class="comment-body-text text-sm md:text-base text-slate-200 leading-relaxed font-medium">${escapeHtml(c.text)}</p>`;
+    ? `<p id="comment-text-display-${c.id}" class="text-sm md:text-base text-muted italic font-medium">This has been deleted by the user.</p>`
+    : `<p id="comment-text-display-${c.id}" class="comment-body-text text-sm md:text-base text-[var(--text-primary)] leading-relaxed font-medium">${escapeHtml(c.text)}</p>`;
 
   const editFormHtml = isDeleted
     ? ''
@@ -797,7 +797,7 @@ function _renderComment(c) {
           <div class="comment-avatar" style="display:flex;align-items:center;justify-content:center;border-radius:50%;color:var(--accent-contrast, #fff);width:32px;height:32px;font-size:11px;font-weight:700;background:var(--accent);box-shadow:0 0 16px -4px rgb(var(--accent-rgb) / var(--a-50, 0.5));font-family:var(--font-serif);letter-spacing:0.06em;flex-shrink:0">${initials}</div>
           <div class="min-w-0 leading-tight">
             <div class="flex items-center gap-2 flex-wrap" id="comment-tags-${c.id}">
-              <p class="text-sm font-semibold text-white truncate">${escapeHtml(c.authorName)}</p>
+              <p class="text-sm font-semibold text-[var(--text-primary)] truncate">${escapeHtml(c.authorName)}</p>
               ${authorBadgeHtml}
               ${editedBadgeHtml}
             </div>
@@ -932,8 +932,8 @@ function _renderReply(r, childrenHtml = '', currentDepth = 1) {
       : '';
 
   const replyTextHtml = isDeleted
-    ? `<p id="reply-text-display-${r.id || ''}" class="text-xs text-slate-400 italic font-medium">This has been deleted by the user.</p>`
-    : `<p id="reply-text-display-${r.id || ''}" class="comment-reply-text text-xs text-slate-300 leading-relaxed font-medium">${escapeHtml(r.text || '')}</p>`;
+    ? `<p id="reply-text-display-${r.id || ''}" class="text-xs text-muted italic font-medium">This has been deleted by the user.</p>`
+    : `<p id="reply-text-display-${r.id || ''}" class="comment-reply-text text-xs text-[var(--text-primary)] leading-relaxed font-medium">${escapeHtml(r.text || '')}</p>`;
 
   const replyEditFormHtml =
     isDeleted || !r.id
@@ -1000,7 +1000,7 @@ function _renderReply(r, childrenHtml = '', currentDepth = 1) {
           <div class="comment-reply-avatar" style="display:flex;align-items:center;justify-content:center;border-radius:50%;color:var(--accent-contrast, #fff);width:24px;height:24px;font-size:9px;font-weight:700;background:var(--accent);font-family:var(--font-serif);letter-spacing:0.06em;flex-shrink:0">${initials}</div>
           <div class="min-w-0 leading-tight">
             <div class="flex items-center gap-1.5 flex-wrap" id="reply-tags-${r.id || ''}">
-              <span class="text-xs font-semibold text-slate-200 truncate">${escapeHtml(r.authorName || 'Scribe')}</span>
+              <span class="text-xs font-semibold text-[var(--text-primary)] truncate">${escapeHtml(r.authorName || 'Scribe')}</span>
               ${authorBadgeHtml}
               ${replyToBadgeHtml}
               ${editedBadgeHtml}

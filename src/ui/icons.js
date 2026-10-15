@@ -147,6 +147,10 @@ async function _loadIcons() {
     Star: L.Star,
     Crown: L.Crown,
     Award: L.Award,
+    // Theme & Appearance
+    Moon: L.Moon,
+    Sun: L.Sun,
+    Monitor: L.Monitor,
     // Communication
     MessageSquare: L.MessageSquare,
     MessageSquarePlus: L.MessageSquarePlus,

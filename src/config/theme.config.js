@@ -362,6 +362,7 @@ export const READER_STORAGE_KEYS = {
    - 'transcendental' (signature mythic cosmic dark, default)
    - 'dark'           (midnight obsidian & luminous indigo)
    - 'light'          (illuminated manuscript parchment & imperial ink)
+   - 'system'         (automatic synchronization with device OS preference)
    ───────────────────────────────────────────── */
 
 /**
@@ -370,7 +371,7 @@ export const READER_STORAGE_KEYS = {
  * @property {string} name        - Display name shown in UI
  * @property {string} subtitle    - Secondary tagline
  * @property {string} description - Detailed visual description
- * @property {'dark'|'light'} colorScheme - Browser color-scheme
+ * @property {'dark'|'light'|'auto'} colorScheme - Browser color-scheme
  * @property {{ bg: string, surface: string, accent: string, text: string }} preview - Palette preview colors
  */
 
@@ -422,13 +423,78 @@ export const APP_THEMES = [
       text: '#1e293b',
     },
   },
+  {
+    id: 'system',
+    name: 'Sync with System',
+    subtitle: 'Automatic Device Preference',
+    description:
+      'Dynamically adapts to your operating system appearance (Light by day, Transcendental by night).',
+    colorScheme: 'auto',
+    tagStyle:
+      'background: rgb(15 23 42 / 0.7); color: #cbd5e1; border: 1px solid rgb(255 255 255 / 0.15);',
+    preview: {
+      bg: '#030305',
+      surface: '#0d0d14',
+      accent: '#6366f1',
+      text: '#e2e8f0',
+    },
+  },
 ];
 
 export const DEFAULT_APP_THEME = 'transcendental';
 export const APP_THEME_STORAGE_KEY = 'tt_app_theme';
 
+let _transitionTimer = null;
+let _mediaQueryListenerBound = false;
+
 /**
- * Retrieves the persisted application theme from localStorage, falling back to 'transcendental'.
+ * Triggers a temporary .theme-transitioning class on documentElement for a silky cross-fade.
+ * Respects prefers-reduced-motion.
+ * @param {Document} [doc]
+ */
+export function triggerThemeTransition(doc = typeof document !== 'undefined' ? document : null) {
+  if (!doc?.documentElement || typeof window === 'undefined') return;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    return;
+  }
+  doc.documentElement.classList.add('theme-transitioning');
+  if (_transitionTimer) clearTimeout(_transitionTimer);
+  _transitionTimer = setTimeout(() => {
+    doc.documentElement.classList.remove('theme-transitioning');
+    _transitionTimer = null;
+  }, 250);
+}
+
+/**
+ * Detects the OS color scheme preference.
+ * @returns {'transcendental'|'light'}
+ */
+export function getSystemAppTheme() {
+  if (typeof window !== 'undefined' && window.matchMedia) {
+    try {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'transcendental' : 'light';
+    } catch {
+      return DEFAULT_APP_THEME;
+    }
+  }
+  return DEFAULT_APP_THEME;
+}
+
+/**
+ * Resolves a given theme ID into an actual active theme attribute ('transcendental', 'dark', or 'light').
+ * When 'system' is requested, returns the OS resolved theme.
+ * @param {string} themeId
+ * @returns {string}
+ */
+export function resolveAppTheme(themeId) {
+  if (themeId === 'system') {
+    return getSystemAppTheme();
+  }
+  return APP_THEMES.some((t) => t.id === themeId) ? themeId : DEFAULT_APP_THEME;
+}
+
+/**
+ * Retrieves the persisted application theme preference from localStorage, falling back to 'transcendental'.
  * @returns {string}
  */
 export function getSavedAppTheme() {
@@ -449,12 +515,25 @@ export function getSavedAppTheme() {
  * Applies the application theme to the document root and persists to localStorage.
  * @param {string} themeId
  * @param {Document} [doc]
- * @returns {string} The active theme id that was applied.
+ * @param {boolean} [animate=true]
+ * @returns {string} The active theme preference that was applied ('transcendental', 'dark', 'light', or 'system').
  */
-export function applyAppTheme(themeId, doc = typeof document !== 'undefined' ? document : null) {
-  const targetTheme = APP_THEMES.some((t) => t.id === themeId) ? themeId : DEFAULT_APP_THEME;
+export function applyAppTheme(
+  themeId,
+  doc = typeof document !== 'undefined' ? document : null,
+  animate = true
+) {
+  const isKnown = APP_THEMES.some((t) => t.id === themeId);
+  const targetTheme = isKnown ? themeId : DEFAULT_APP_THEME;
+  const resolved = resolveAppTheme(targetTheme);
+
+  if (animate && doc?.documentElement) {
+    triggerThemeTransition(doc);
+  }
+
   if (doc?.documentElement) {
-    doc.documentElement.setAttribute('data-app-theme', targetTheme);
+    doc.documentElement.setAttribute('data-app-theme', resolved);
+    doc.documentElement.setAttribute('data-theme-preference', targetTheme);
     const metaTheme = doc.querySelector('meta[name="theme-color"]');
     if (metaTheme) {
       const themeColors = {
@@ -462,9 +541,10 @@ export function applyAppTheme(themeId, doc = typeof document !== 'undefined' ? d
         dark: '#0b0d13',
         light: '#f7f5f0',
       };
-      metaTheme.setAttribute('content', themeColors[targetTheme] || '#030305');
+      metaTheme.setAttribute('content', themeColors[resolved] || '#030305');
     }
   }
+
   try {
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem(APP_THEME_STORAGE_KEY, targetTheme);
@@ -472,9 +552,15 @@ export function applyAppTheme(themeId, doc = typeof document !== 'undefined' ? d
   } catch (err) {
     log.warn('Failed to persist app theme to localStorage', err);
   }
+
   if (typeof window !== 'undefined') {
-    window.dispatchEvent(new CustomEvent('appthemechange', { detail: { theme: targetTheme } }));
+    window.dispatchEvent(
+      new CustomEvent('appthemechange', {
+        detail: { theme: targetTheme, resolvedTheme: resolved },
+      })
+    );
   }
+
   return targetTheme;
 }
 
@@ -485,7 +571,8 @@ export function applyAppTheme(themeId, doc = typeof document !== 'undefined' ? d
  */
 export function initAppTheme(doc = typeof document !== 'undefined' ? document : null) {
   const theme = getSavedAppTheme();
-  const applied = applyAppTheme(theme, doc);
+  // Don't trigger transition animation on initial boot
+  const applied = applyAppTheme(theme, doc, false);
 
   // Wire cross-tab storage sync once
   if (typeof window !== 'undefined' && !window._appThemeStorageBound) {
@@ -495,6 +582,26 @@ export function initAppTheme(doc = typeof document !== 'undefined' ? document : 
         applyAppTheme(event.newValue, typeof document !== 'undefined' ? document : null);
       }
     });
+  }
+
+  // Wire live OS prefers-color-scheme listener once
+  if (typeof window !== 'undefined' && !_mediaQueryListenerBound && window.matchMedia) {
+    _mediaQueryListenerBound = true;
+    try {
+      const mql = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleSystemChange = () => {
+        if (getSavedAppTheme() === 'system') {
+          applyAppTheme('system', typeof document !== 'undefined' ? document : null);
+        }
+      };
+      if (mql.addEventListener) {
+        mql.addEventListener('change', handleSystemChange);
+      } else if (mql.addListener) {
+        mql.addListener(handleSystemChange);
+      }
+    } catch (err) {
+      log.debug('Could not bind system color scheme listener', err);
+    }
   }
 
   return applied;

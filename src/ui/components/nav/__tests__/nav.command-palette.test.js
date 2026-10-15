@@ -106,5 +106,13 @@ describe('Nav Command Palette', () => {
       executeCommand(btn);
       expect(window.location.href).toBe('/test.html');
     });
+
+    it('switches application theme on theme action dataset', () => {
+      const btn = document.createElement('button');
+      btn.dataset.action = 'theme:light';
+
+      executeCommand(btn);
+      expect(document.documentElement.getAttribute('data-app-theme')).toBe('light');
+    });
   });
 });

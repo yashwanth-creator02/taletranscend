@@ -625,6 +625,34 @@ html[data-app-theme='light'],
   --scrollbar-thumb: rgb(var(--accent-rgb) / 0.25);
   --scrollbar-thumb-hover: rgb(var(--accent-rgb) / var(--a-09));
 
+  /* ── Application Theme Specimen Cards ───────────────────────────────────
+     Invariant across active theme so all theme specimen previews in settings
+     render true-to-theme simultaneously. */
+
+  --specimen-transcendental-bg: #030305;
+  --specimen-transcendental-surface: #0d0d14;
+  --specimen-transcendental-sidebar: #07070b;
+  --specimen-transcendental-border: rgb(255 255 255 / 0.1);
+  --specimen-transcendental-line: #e2e8f0;
+  --specimen-transcendental-line-muted: #64748b;
+  --specimen-transcendental-accent: #6366f1;
+
+  --specimen-dark-bg: #0b0d13;
+  --specimen-dark-surface: #1c2132;
+  --specimen-dark-sidebar: #141724;
+  --specimen-dark-border: rgb(129 140 248 / 0.25);
+  --specimen-dark-line: #f8fafc;
+  --specimen-dark-line-muted: #94a3b8;
+  --specimen-dark-accent: #818cf8;
+
+  --specimen-light-bg: #f6f3ed;
+  --specimen-light-surface: #fbf9f5;
+  --specimen-light-sidebar: #ece5d8;
+  --specimen-light-border: rgb(26 31 44 / 0.15);
+  --specimen-light-line: #1c2530;
+  --specimen-light-line-muted: #64748b;
+  --specimen-light-accent: #4f46e5;
+
   /* ══ 9. READER DEFAULTS ═════════════════════════════════════════════════
      Starting values for the reading surface. Reader themes override these
      on [data-reader-theme] in reader-themes.css — scoped to the reader

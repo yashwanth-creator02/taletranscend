@@ -13,6 +13,7 @@ import { auth, signOut } from '@fb/index.js';
 import { BASE_COMMANDS } from './nav.config.js';
 import { getNavElements, getCurrentPage, renderIcons } from './nav.utils.js';
 import { navState } from './nav.state.js';
+import { applyAppTheme } from '@config/theme.config.js';
 import { escapeText as escapeHtml, resolveHref, navigateTo, createLogger } from '@/utils';
 
 const log = createLogger('NavCommandPalette');
@@ -300,6 +301,13 @@ export async function executeCommand(element) {
     } catch (error) {
       log.error('Sign out failed', error);
     }
+    return;
+  }
+
+  if (action && action.startsWith('theme:')) {
+    const themeId = action.replace('theme:', '');
+    applyAppTheme(themeId);
+    return;
   }
 }
 

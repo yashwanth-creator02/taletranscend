@@ -706,3 +706,60 @@
   background: rgb(var(--accent-rgb) / 0.1);
   border-color: var(--accent);
 }
+
+[data-app-theme='light'] .floating-bar__inner {
+  background: var(--bg-elevated);
+  border-color: rgb(var(--light-rgb) / 0.12);
+  box-shadow: 0 16px 40px rgb(var(--dark-rgb) / 0.12);
+}
+
+[data-app-theme='light'] .chapter-item {
+  background: var(--bg-elevated);
+  border-color: rgb(var(--light-rgb) / 0.08);
+}
+
+[data-app-theme='light'] .chapter-item:hover {
+  background: var(--surface-2);
+  border-color: rgb(var(--accent-rgb) / 0.3);
+  box-shadow: 0 4px 16px rgb(var(--dark-rgb) / 0.06);
+}
+
+[data-app-theme='light'] .comment-card {
+  background: var(--bg-elevated);
+  border-color: rgb(var(--light-rgb) / 0.08);
+  box-shadow: 0 4px 16px rgb(var(--dark-rgb) / 0.04);
+}
+
+[data-app-theme='light'] .comment-reply-card {
+  background: var(--surface-2);
+  border-color: rgb(var(--light-rgb) / 0.08);
+}
+
+[data-app-theme='light'] .glass-card,
+[data-app-theme='light'] .glass-card-strong {
+  background: var(--bg-elevated);
+  border-color: rgb(var(--light-rgb) / 0.08);
+  box-shadow: 0 8px 30px rgb(var(--dark-rgb) / 0.06);
+}
+
+[data-app-theme='light'] .filter-chip {
+  background: var(--surface-2);
+  border-color: rgb(var(--light-rgb) / 0.1);
+  color: var(--text-secondary);
+}
+
+[data-app-theme='light'] .filter-chip:hover {
+  color: var(--text-primary);
+  border-color: rgb(var(--light-rgb) / 0.2);
+}
+
+[data-app-theme='light'] .filter-chip.active {
+  background: rgb(var(--accent-rgb) / 0.12);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+[data-app-theme='light'] .missive-reply-bubble {
+  background: var(--surface-2);
+  border-color: rgb(var(--accent-rgb) / 0.2);
+}

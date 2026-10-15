@@ -429,7 +429,7 @@ export function renderChapters(userId, chapters, taleId, sortOrder = null) {
               <div class="flex items-center gap-2 mb-0.5">
                 <span class="text-[9px] font-black text-indigo-400/70 uppercase tracking-[0.2em] block">Scroll #${idx + 1}</span>
               </div>
-              <h4 class="text-xs sm:text-sm font-bold text-white uppercase tracking-tight truncate">${escapeHtml(ch.title || 'Untitled')}</h4>
+              <h4 class="text-xs sm:text-sm font-bold text-[var(--text-primary)] uppercase tracking-tight truncate">${escapeHtml(ch.title || 'Untitled')}</h4>
             </div>
           </div>
           <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
@@ -439,7 +439,7 @@ export function renderChapters(userId, chapters, taleId, sortOrder = null) {
               data-action="download-chapter"
               data-chapter-index="${idx}"
               title="Download fragment (.md)"
-              class="p-2 rounded-xl border border-white/6 bg-white/3 hover:bg-white/10 hover:border-white/15 text-slate-400 hover:text-white transition-all cursor-pointer active:scale-95"
+              class="p-2 rounded-xl border border-white/6 bg-white/3 hover:bg-white/10 hover:border-white/15 text-muted hover:text-[var(--text-primary)] transition-all cursor-pointer active:scale-95"
             >
               <i data-lucide="download" class="w-3.5 h-3.5"></i>
             </button>

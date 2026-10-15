@@ -45,7 +45,15 @@
       (function () {
         try {
           var t = localStorage.getItem('tt_app_theme') || 'transcendental';
-          document.documentElement.setAttribute('data-app-theme', t);
+          var resolved = t;
+          if (t === 'system') {
+            resolved =
+              window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'transcendental'
+                : 'light';
+          }
+          document.documentElement.setAttribute('data-app-theme', resolved);
+          document.documentElement.setAttribute('data-theme-preference', t);
         } catch (e) {}
       })();
     </script>
@@ -162,7 +170,7 @@
 
     <!-- ── Atelier Sticky Header ─────────────────────────── -->
     <header
-      class="sticky top-0 z-40 border-b border-white/6 bg-slate-950/90 backdrop-blur-2xl"
+      class="sticky top-0 z-40 border-b border-line bg-[var(--nav-bg)] backdrop-blur-2xl"
       style="height: var(--editor-header-height)"
     >
       <div
@@ -183,7 +191,7 @@
 
         <!-- Center: Workspace Mode Switcher -->
         <div
-          class="flex items-center rounded-full border border-white/10 bg-slate-900/80 backdrop-blur-xl p-1 shadow-inner shrink-0 gap-1"
+          class="flex items-center rounded-xs border border-line bg-surface-2 backdrop-blur-xl p-1 shadow-inner shrink-0 gap-1"
         >
           <button
             type="button"
@@ -258,20 +266,22 @@
       <!-- ════════════════════════════════════════
          LEFT PANE — Chapter Codex Strip
          ════════════════════════════════════════ -->
-      <aside
-        class="editor-pane custom-scrollbar hidden border-r border-white/6 bg-slate-950/40 p-4 lg:block"
-      >
+      <aside class="editor-pane custom-scrollbar hidden border-r border-line p-4 lg:block">
         <div class="space-y-4">
-          <div class="flex items-center justify-between pb-2 border-b border-white/6">
+          <div class="flex items-center justify-between pb-2 border-b border-line">
             <div>
               <p class="text-[9px] font-black uppercase tracking-[0.28em] text-indigo-400">
                 Manuscript Codex
               </p>
-              <h2 class="mt-0.5 text-xs font-bold text-white uppercase tracking-wider">Chapters</h2>
+              <h2
+                class="mt-0.5 text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider"
+              >
+                Chapters
+              </h2>
             </div>
             <span
               id="shelf-chapter-count"
-              class="rounded-full border border-white/8 bg-white/5 px-2.5 py-0.5 text-[9px] font-black text-slate-400"
+              class="rounded-xs border border-line bg-surface-2 px-2.5 py-0.5 text-[9px] font-black text-secondary"
             >
               0
             </span>
@@ -283,14 +293,14 @@
           <button
             id="add-chapter-btn"
             type="button"
-            class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/10 bg-white/2 py-2.5 text-[11px] font-bold text-slate-400 transition hover:border-indigo-400/40 hover:bg-white/4 hover:text-white"
+            class="inline-flex w-full items-center justify-center gap-2 rounded-xs border border-dashed border-line bg-surface-1 py-2.5 text-[11px] font-bold text-secondary transition hover:border-indigo-400/40 hover:bg-surface-2 hover:text-[var(--text-primary)]"
           >
             <i data-lucide="plus" class="h-3.5 w-3.5"></i>
             Add New Chapter
           </button>
 
           <!-- Quick Metrics Card -->
-          <div class="mt-6 rounded-2xl border border-white/6 bg-black/30 p-3.5">
+          <div class="mt-6 rounded-2xl border border-line bg-surface-2 p-3.5">
             <div class="flex items-center justify-between mb-2">
               <span class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">
                 Live Inscription
@@ -300,11 +310,21 @@
             <div class="grid grid-cols-2 gap-2 text-center">
               <div class="rounded-lg bg-white/2 p-2 border border-white/4">
                 <p class="text-[8px] uppercase tracking-wider text-slate-500">Words</p>
-                <p id="stat-words-right" class="text-sm font-bold text-white mt-0.5">0</p>
+                <p
+                  id="stat-words-right"
+                  class="text-sm font-bold text-[var(--text-primary)] mt-0.5"
+                >
+                  0
+                </p>
               </div>
               <div class="rounded-lg bg-white/2 p-2 border border-white/4">
                 <p class="text-[8px] uppercase tracking-wider text-slate-500">Read Time</p>
-                <p id="stat-reading-time" class="text-sm font-bold text-white mt-0.5">&lt; 1m</p>
+                <p
+                  id="stat-reading-time"
+                  class="text-sm font-bold text-[var(--text-primary)] mt-0.5"
+                >
+                  &lt; 1m
+                </p>
               </div>
             </div>
           </div>
@@ -466,7 +486,7 @@
          RIGHT PANE — Lore & Codex Dossier
          ════════════════════════════════════════ -->
       <aside
-        class="editor-pane custom-scrollbar atelier-lore-pane border-l border-white/6 bg-slate-950/40 p-4 sm:p-6 lg:block"
+        class="editor-pane custom-scrollbar atelier-lore-pane border-l border-line p-4 sm:p-6 lg:block"
       >
         <div class="mx-auto max-w-xl space-y-6">
           <!-- Grimoire Cover Showcase -->
@@ -476,12 +496,12 @@
                 <p class="text-[9px] font-black uppercase tracking-[0.28em] text-indigo-400">
                   Grimoire Artwork
                 </p>
-                <h3 class="mt-0.5 text-sm font-semibold text-white">Tome Cover</h3>
+                <h3 class="mt-0.5 text-sm font-semibold text-[var(--text-primary)]">Tome Cover</h3>
               </div>
               <button
                 id="btn-generate-cover"
                 type="button"
-                class="inline-flex items-center gap-1.5 rounded-full border border-white/8 bg-white/5 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.18em] text-slate-300 transition hover:bg-white/10 hover:text-white"
+                class="inline-flex items-center gap-1.5 rounded-xs border border-line bg-surface-2 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.18em] text-secondary transition hover:bg-surface-3 hover:text-[var(--text-primary)]"
               >
                 <i data-lucide="sparkles" class="h-3 w-3 text-amber-400"></i>
                 Suggest
@@ -562,7 +582,7 @@
                 type="url"
                 id="cover-url"
                 placeholder="Paste image URL or choose a preset above…"
-                class="shelf-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-400"
+                class="shelf-input w-full rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-muted"
               />
             </div>
           </section>
@@ -573,7 +593,7 @@
               <p class="text-[9px] font-black uppercase tracking-[0.28em] text-indigo-400">
                 Core Lore
               </p>
-              <h3 class="mt-0.5 text-sm font-semibold text-white">Story Genesis</h3>
+              <h3 class="mt-0.5 text-sm font-semibold text-[var(--text-primary)]">Story Genesis</h3>
             </div>
 
             <div class="space-y-1.5">
@@ -599,7 +619,7 @@
                 type="text"
                 id="tale-title"
                 placeholder="The Chronicles of the Sunken Citadel…"
-                class="shelf-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-400"
+                class="shelf-input w-full rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-muted"
               />
             </div>
 
@@ -626,7 +646,7 @@
                 id="tale-synopsis"
                 rows="3"
                 placeholder="The ancient bells echo as the sky turns into molten brass…"
-                class="shelf-input w-full resize-none rounded-xl border border-white/10 bg-black/30 px-3.5 py-2.5 text-sm leading-6 text-white placeholder:text-slate-400"
+                class="shelf-input w-full resize-none rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 text-sm leading-6 text-[var(--text-primary)] placeholder:text-muted"
               ></textarea>
             </div>
           </section>
@@ -637,7 +657,9 @@
               <p class="text-[9px] font-black uppercase tracking-[0.28em] text-indigo-400">
                 Classification
               </p>
-              <h3 class="mt-0.5 text-sm font-semibold text-white">Era & Mythic Identity</h3>
+              <h3 class="mt-0.5 text-sm font-semibold text-[var(--text-primary)]">
+                Era & Mythic Identity
+              </h3>
             </div>
 
             <!-- Era with quick pills -->
@@ -652,7 +674,7 @@
                 type="text"
                 id="tale-era"
                 placeholder="e.g. Ancient, Vedic, Norse…"
-                class="shelf-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-400"
+                class="shelf-input w-full rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-muted"
               />
               <div class="flex flex-wrap gap-1.5 pt-1">
                 <button type="button" class="era-pill" data-era-pill="Ancient">Ancient</button>
@@ -689,7 +711,7 @@
                 type="text"
                 id="genre-tags"
                 placeholder="Folklore, myth, adventure, quest…"
-                class="shelf-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-400"
+                class="shelf-input w-full rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-muted"
               />
               <p class="text-[10px] text-slate-600">Comma-separated tags.</p>
             </div>
@@ -705,7 +727,7 @@
                 </label>
                 <select
                   id="story-tone"
-                  class="shelf-input w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm text-white"
+                  class="shelf-input w-full rounded-xl border border-line bg-surface-2 px-3 py-2.5 text-sm text-[var(--text-primary)]"
                 >
                   <option>Mythic</option>
                   <option>Whimsical</option>
@@ -726,7 +748,7 @@
                 </label>
                 <select
                   id="story-language"
-                  class="shelf-input w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm text-white"
+                  class="shelf-input w-full rounded-xl border border-line bg-surface-2 px-3 py-2.5 text-sm text-[var(--text-primary)]"
                 >
                   <option>English</option>
                   <option>Kannada</option>
@@ -750,7 +772,7 @@
                 </label>
                 <select
                   id="story-visibility"
-                  class="shelf-input w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm text-white"
+                  class="shelf-input w-full rounded-xl border border-line bg-surface-2 px-3 py-2.5 text-sm text-[var(--text-primary)]"
                 >
                   <option>Public</option>
                   <option>Unlisted</option>
@@ -767,7 +789,7 @@
                 </label>
                 <select
                   id="target-audience"
-                  class="shelf-input w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm text-white"
+                  class="shelf-input w-full rounded-xl border border-line bg-surface-2 px-3 py-2.5 text-sm text-[var(--text-primary)]"
                 >
                   <option>General</option>
                   <option>Young Adult</option>
@@ -791,16 +813,12 @@
                   id="publication-status-indicator"
                   class="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400"
                 >
-                  <span
-                    id="publication-status-dot"
-                    class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"
-                  ></span>
                   <span id="publication-status-text">Ongoing</span>
                 </span>
               </div>
               <select
                 id="story-publication-status"
-                class="shelf-input w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm text-white"
+                class="shelf-input w-full rounded-xl border border-line bg-surface-2 px-3 py-2.5 text-sm text-[var(--text-primary)]"
               >
                 <option value="ongoing">Ongoing (Active Chronicles)</option>
                 <option value="completed">Completed (Finished Tale)</option>
@@ -855,7 +873,7 @@
                   type="text"
                   id="content-warnings"
                   placeholder="e.g. Grief, battle violence…"
-                  class="shelf-input w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-400"
+                  class="shelf-input w-full rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-muted"
                 />
               </div>
 
@@ -870,7 +888,7 @@
                   id="world-setting"
                   rows="2"
                   placeholder="The mountain kingdom, the ancient forest realm…"
-                  class="shelf-input w-full resize-none rounded-xl border border-white/10 bg-black/30 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-400"
+                  class="shelf-input w-full resize-none rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-muted"
                 ></textarea>
               </div>
 
@@ -885,7 +903,7 @@
                   id="story-notes"
                   rows="2"
                   placeholder="Historical references, mythic inspirations…"
-                  class="shelf-input w-full resize-none rounded-xl border border-white/10 bg-black/30 px-3.5 py-2.5 text-sm text-white placeholder:text-slate-400"
+                  class="shelf-input w-full resize-none rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-muted"
                 ></textarea>
               </div>
             </div>
@@ -897,7 +915,9 @@
               <p class="text-[9px] font-black uppercase tracking-[0.28em] text-indigo-400">
                 Archive Verification
               </p>
-              <h3 class="mt-0.5 text-sm font-semibold text-white">Seal of Readiness</h3>
+              <h3 class="mt-0.5 text-sm font-semibold text-[var(--text-primary)]">
+                Seal of Readiness
+              </h3>
             </div>
 
             <div class="space-y-2">
@@ -944,11 +964,11 @@
           </div>
           <h2
             id="wall-modal-title"
-            class="font-cinzel text-xl sm:text-2xl font-bold text-white tracking-wide"
+            class="font-cinzel text-xl sm:text-2xl font-bold text-[var(--text-primary)] tracking-wide"
           >
             Author Registration Wall
           </h2>
-          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+          <p class="text-xs sm:text-sm text-secondary leading-relaxed">
             Before sealing your legend into the eternal archives, register your Scribe identity.
             Readers of this tale will be able to dispatch inquiries to your registered email via The
             Chronicler's Letter.
@@ -969,7 +989,7 @@
               id="wall-pen-name"
               required
               maxlength="80"
-              class="shelf-input w-full px-3.5 py-2.5 rounded-xl border border-white/10 bg-black/30 text-sm text-white placeholder:text-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50"
+              class="shelf-input w-full px-3.5 py-2.5 rounded-xl border border-line bg-surface-2 text-sm text-[var(--text-primary)] placeholder:text-muted focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50"
               placeholder="e.g. Chronicler Valen"
             />
           </div>
@@ -986,7 +1006,7 @@
               id="wall-author-email"
               required
               maxlength="100"
-              class="shelf-input w-full px-3.5 py-2.5 rounded-xl border border-white/10 bg-black/30 text-sm text-white placeholder:text-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50"
+              class="shelf-input w-full px-3.5 py-2.5 rounded-xl border border-line bg-surface-2 text-sm text-[var(--text-primary)] placeholder:text-muted focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50"
               placeholder="author@example.com"
             />
             <p class="text-[10px] text-slate-400 leading-tight">
@@ -1006,7 +1026,7 @@
               id="wall-author-bio"
               rows="3"
               maxlength="500"
-              class="shelf-input w-full px-3.5 py-2.5 rounded-xl border border-white/10 bg-black/30 text-sm text-white placeholder:text-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 resize-none"
+              class="shelf-input w-full px-3.5 py-2.5 rounded-xl border border-line bg-surface-2 text-sm text-[var(--text-primary)] placeholder:text-muted focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 resize-none"
               placeholder="A few words about your chronicles, inspirations, or realm…"
             ></textarea>
           </div>

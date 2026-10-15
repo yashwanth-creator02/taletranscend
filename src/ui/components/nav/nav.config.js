@@ -83,6 +83,38 @@ export const BASE_COMMANDS = [
     category: 'System & Preferences',
     keywords: ['settings', 'preferences', 'theme', 'font', 'appearance', 'options'],
   },
+  {
+    action: 'theme:transcendental',
+    icon: 'sparkles',
+    label: 'Theme: Transcendental',
+    description: 'Signature cosmic dark with obsidian depth & amber runes',
+    category: 'Appearance & Theme',
+    keywords: ['theme', 'dark', 'transcendental', 'cosmic', 'appearance', 'mode'],
+  },
+  {
+    action: 'theme:dark',
+    icon: 'moon',
+    label: 'Theme: Midnight Dark',
+    description: 'Charcoal obsidian depths with luminous indigo accents',
+    category: 'Appearance & Theme',
+    keywords: ['theme', 'dark', 'midnight', 'indigo', 'appearance', 'mode'],
+  },
+  {
+    action: 'theme:light',
+    icon: 'sun',
+    label: 'Theme: Illuminated Light',
+    description: 'Warm manuscript parchment base with crisp royal ink',
+    category: 'Appearance & Theme',
+    keywords: ['theme', 'light', 'parchment', 'day', 'appearance', 'mode'],
+  },
+  {
+    action: 'theme:system',
+    icon: 'monitor',
+    label: 'Theme: Sync with System',
+    description: 'Automatically match device dark or light appearance',
+    category: 'Appearance & Theme',
+    keywords: ['theme', 'system', 'auto', 'device', 'match', 'appearance', 'mode'],
+  },
 ];
 
 /**

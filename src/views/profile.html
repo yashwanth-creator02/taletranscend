@@ -47,7 +47,15 @@
       (function () {
         try {
           var t = localStorage.getItem('tt_app_theme') || 'transcendental';
-          document.documentElement.setAttribute('data-app-theme', t);
+          var resolved = t;
+          if (t === 'system') {
+            resolved =
+              window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'transcendental'
+                : 'light';
+          }
+          document.documentElement.setAttribute('data-app-theme', resolved);
+          document.documentElement.setAttribute('data-theme-preference', t);
         } catch (e) {}
       })();
     </script>
@@ -183,11 +191,11 @@
                   class="avatar-container w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 mb-3 sm:mb-4 lg:mb-5 shrink-0"
                 >
                   <div
-                    class="relative z-10 w-full h-full bg-zinc-900 rounded-2xl sm:rounded-3xl lg:rounded-4xl flex items-center justify-center overflow-hidden border border-white/10"
+                    class="profile-avatar-frame relative z-10 w-full h-full rounded-2xl sm:rounded-3xl lg:rounded-4xl flex items-center justify-center overflow-hidden"
                   >
                     <i
                       data-lucide="user"
-                      class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-slate-700 avatar-placeholder"
+                      class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 profile-avatar-icon avatar-placeholder"
                     ></i>
                     <img
                       id="profile-avatar-desktop"
@@ -198,10 +206,6 @@
                     <!-- Hidden alias for mobile script sync -->
                     <img id="profile-avatar-mobile" src="" alt="Mobile avatar" class="hidden" />
                   </div>
-                  <!-- Online indicator -->
-                  <div
-                    class="absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5 bg-emerald-500 border-2 sm:border-3 lg:border-4 border-[var(--bg-base)] rounded-full shadow-[0_0_12px_rgb(var(--success-rgb)/var(--a-08))] z-20"
-                  ></div>
                 </div>
 
                 <!-- Identity text info -->
@@ -209,7 +213,7 @@
                   <div class="flex items-center justify-center gap-2 flex-wrap mb-1">
                     <h1
                       id="desktop-display-name"
-                      class="text-lg sm:text-xl xl:text-2xl font-cinzel font-bold text-white tracking-wide truncate"
+                      class="profile-user-name text-lg sm:text-xl xl:text-2xl font-cinzel font-bold tracking-wide truncate"
                     >
                       User_Name
                     </h1>
@@ -221,11 +225,11 @@
                   </div>
                   <p
                     id="profile-pronouns"
-                    class="text-[9px] sm:text-[9.5px] text-indigo-400 font-bold uppercase tracking-[0.2em] mb-1"
+                    class="profile-pronouns-tag text-[9px] sm:text-[9.5px] font-bold uppercase tracking-[0.2em] mb-1"
                   ></p>
                   <p
                     id="desktop-display-bio"
-                    class="text-slate-400 text-xs sm:text-sm leading-relaxed font-medium line-clamp-1 lg:line-clamp-none"
+                    class="profile-bio-text text-xs sm:text-sm leading-relaxed font-medium line-clamp-1 lg:line-clamp-none"
                   >
                     Whispering stories to the stars…
                   </p>
@@ -348,10 +352,10 @@
                   Scribe Registry
                 </span>
               </div>
-              <!-- Status Pill -->
+              <!-- Status Shield -->
               <span
                 id="profile-author-badge"
-                class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-slate-700 bg-slate-800/60 text-slate-400"
+                class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-xs border border-slate-700 bg-slate-800/60 text-slate-400"
               >
                 Reader
               </span>
@@ -381,7 +385,7 @@
                 </span>
                 <p
                   id="profile-author-pen-name"
-                  class="font-cinzel text-sm font-bold text-white tracking-wide"
+                  class="font-cinzel text-sm font-bold text-[var(--text-primary)] tracking-wide"
                 >
                   —
                 </p>
@@ -519,7 +523,7 @@
               <div>
                 <div class="flex items-center gap-2.5">
                   <h2
-                    class="text-xl sm:text-2xl md:text-3xl font-cinzel font-bold text-white tracking-wide"
+                    class="profile-section-heading text-xl sm:text-2xl md:text-3xl font-cinzel font-bold tracking-wide"
                   >
                     Continue Reading
                   </h2>
@@ -561,7 +565,7 @@
               <div>
                 <div class="flex items-center gap-2.5">
                   <h2
-                    class="text-xl sm:text-2xl md:text-3xl font-cinzel font-bold text-white tracking-wide"
+                    class="profile-section-heading text-xl sm:text-2xl md:text-3xl font-cinzel font-bold tracking-wide"
                   >
                     The Archive
                   </h2>
@@ -622,7 +626,7 @@
                     </div>
                     <div class="text-center">
                       <span
-                        class="block font-cinzel text-sm sm:text-base text-white font-bold group-hover:text-indigo-200 transition-colors"
+                        class="new-story-cta-title block font-cinzel text-sm sm:text-base font-bold transition-colors"
                         >Record a New Legend</span
                       >
                       <span
@@ -694,7 +698,7 @@
                   </div>
                   <span
                     id="stat-words-written"
-                    class="text-xl sm:text-2xl font-bold text-white tracking-tight"
+                    class="stat-value text-xl sm:text-2xl font-bold tracking-tight"
                     >—</span
                   >
                 </div>
@@ -710,7 +714,7 @@
                   </div>
                   <span
                     id="stat-total-readers"
-                    class="text-xl sm:text-2xl font-bold text-white tracking-tight"
+                    class="stat-value text-xl sm:text-2xl font-bold tracking-tight"
                     >—</span
                   >
                 </div>
@@ -728,7 +732,7 @@
                   </div>
                   <span
                     id="stat-reading-time-given"
-                    class="text-xl sm:text-2xl font-bold text-white tracking-tight"
+                    class="stat-value text-xl sm:text-2xl font-bold tracking-tight"
                     >—</span
                   >
                 </div>
@@ -746,7 +750,7 @@
                   </div>
                   <span
                     id="stat-streak"
-                    class="text-xl sm:text-2xl font-bold text-white tracking-tight"
+                    class="stat-value text-xl sm:text-2xl font-bold tracking-tight"
                     >—</span
                   >
                 </div>
@@ -782,7 +786,7 @@
             </header>
 
             <div
-              class="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-white/2 border border-white/5 relative overflow-hidden group"
+              class="chronicle-goal-card p-4 sm:p-5 rounded-2xl sm:rounded-3xl relative overflow-hidden group"
             >
               <div
                 class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-3xl pointer-events-none group-hover:bg-indigo-500/10 transition-colors"
@@ -813,7 +817,9 @@
           <!-- Quick Stats (Legacy) -->
           <div class="pt-6 border-t border-white/5 grid grid-cols-3 gap-2">
             <div class="text-center">
-              <span id="sidebar-tale-count" class="block text-lg sm:text-xl font-bold text-white"
+              <span
+                id="sidebar-tale-count"
+                class="block text-lg sm:text-xl font-bold text-[var(--text-primary)]"
                 >—</span
               >
               <span class="text-[8.5px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1"
@@ -821,7 +827,9 @@
               >
             </div>
             <div class="text-center border-x border-white/5">
-              <span id="sidebar-reader-count" class="block text-lg sm:text-xl font-bold text-white"
+              <span
+                id="sidebar-reader-count"
+                class="block text-lg sm:text-xl font-bold text-[var(--text-primary)]"
                 >—</span
               >
               <span class="text-[8.5px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1"
@@ -829,7 +837,9 @@
               >
             </div>
             <div class="text-center">
-              <span id="sidebar-saved-count" class="block text-lg sm:text-xl font-bold text-white"
+              <span
+                id="sidebar-saved-count"
+                class="block text-lg sm:text-xl font-bold text-[var(--text-primary)]"
                 >—</span
               >
               <span class="text-[8.5px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1"
@@ -863,8 +873,8 @@
         <!-- Modal header -->
         <div class="p-6 pb-0 flex justify-between items-start shrink-0">
           <div>
-            <h2 class="text-xl font-cinzel font-bold text-white">Edit Profile</h2>
-            <p class="text-xs text-slate-400 mt-1">Customise your chronicler identity</p>
+            <h2 class="text-xl font-cinzel font-bold text-[var(--text-primary)]">Edit Profile</h2>
+            <p class="text-xs text-muted mt-1">Customise your chronicler identity</p>
           </div>
           <button
             id="btn-close-modal"
@@ -931,7 +941,7 @@
                   />
                 </div>
                 <div class="flex-1 min-w-0">
-                  <p class="text-sm font-medium text-white mb-0.5">Avatar</p>
+                  <p class="text-sm font-medium text-[var(--text-primary)] mb-0.5">Avatar</p>
                   <input
                     type="url"
                     id="input-avatar-url"
@@ -1367,7 +1377,7 @@
               <!-- Request Tale Deletion to Admin -->
               <div class="p-4 rounded-2xl bg-white/3 border border-white/8 space-y-3">
                 <div>
-                  <h3 class="text-xs font-bold text-white uppercase tracking-wider">
+                  <h3 class="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">
                     Request Chronicle Removal
                   </h3>
                   <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">
@@ -1459,11 +1469,11 @@
           </div>
           <h2
             id="profile-author-modal-title"
-            class="font-cinzel text-xl sm:text-2xl font-bold text-white tracking-wide"
+            class="font-cinzel text-xl sm:text-2xl font-bold text-[var(--text-primary)] tracking-wide"
           >
             Author / Scribe Identity
           </h2>
-          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+          <p class="text-xs sm:text-sm text-secondary leading-relaxed">
             Configure your official pen name and correspondence email. Readers of your tales will be
             routed to your registered email when inquiring via The Chronicler's Letter.
           </p>
@@ -1569,11 +1579,11 @@
           </div>
           <h2
             id="tale-deletion-modal-title"
-            class="font-cinzel text-xl sm:text-2xl font-bold text-white tracking-wide"
+            class="font-cinzel text-xl sm:text-2xl font-bold text-[var(--text-primary)] tracking-wide"
           >
             Chronicle Removal Request
           </h2>
-          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+          <p class="text-xs sm:text-sm text-secondary leading-relaxed">
             Published chronicles are part of the living archive and cannot be deleted unilaterally.
             Please specify the chronicle ID and explain your reason for removal. The administration
             will review your petition.
@@ -1655,7 +1665,7 @@
           </div>
           <h2
             id="confirm-delete-modal-title"
-            class="font-cinzel text-xl sm:text-2xl font-bold text-white tracking-wide"
+            class="font-cinzel text-xl sm:text-2xl font-bold text-[var(--text-primary)] tracking-wide"
           >
             Dissolve Chronicler Identity
           </h2>

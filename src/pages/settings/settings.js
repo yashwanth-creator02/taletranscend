@@ -127,11 +127,21 @@ export function switchSettingsSection(targetId, updateHash = true) {
   const navItems = document.querySelectorAll('.settings-nav-item');
   if (!sections.length && !navItems.length) return;
 
-  let targetSection = document.getElementById(normalized);
+  // Resolve legacy alias targets if the target element does not directly exist in DOM
+  let resolvedId = normalized;
+  if (!document.getElementById(resolvedId)) {
+    if (resolvedId === 'section-themes' || resolvedId === 'section-system') {
+      resolvedId = 'section-general';
+    } else if (resolvedId === 'section-typography') {
+      resolvedId = 'section-reader';
+    }
+  }
+
+  let targetSection = document.getElementById(resolvedId);
   if (!targetSection) {
     targetSection = document.getElementById('section-profile') || sections[0];
   }
-  const finalId = targetSection ? targetSection.id : normalized;
+  const finalId = targetSection ? targetSection.id : resolvedId;
 
   // Show target section exclusively; hide all others
   sections.forEach((s) => {
@@ -336,9 +346,20 @@ export function saveSetting(key, value) {
 export function updatePreview(settings) {
   const previewBox = document.getElementById('settings-preview-box');
   const previewText = document.getElementById('settings-preview-text');
+  const previewTitle =
+    previewBox?.querySelector('.settings-preview-title') || previewBox?.querySelector('h3');
   if (!previewBox || !previewText) return;
 
   previewBox.setAttribute('data-reader-theme', settings.theme);
+  const themeDef = READER_THEMES.find((t) => t.id === settings.theme) || READER_THEMES[0];
+  if (themeDef) {
+    previewBox.style.backgroundColor = themeDef.bg;
+    previewBox.style.color = themeDef.fg;
+    if (previewTitle) {
+      previewTitle.style.color = themeDef.fg;
+    }
+    previewText.style.color = themeDef.fg;
+  }
   const fontDef = FONTS[settings.fontFamily] || FONTS[DEFAULT_FONT] || FONTS.serif;
   previewText.style.fontFamily = fontDef.css;
   previewText.style.fontSize = `${settings.fontSize}px`;
@@ -377,16 +398,80 @@ export function renderAppThemes(activeAppTheme) {
         title="${escapeHtml(theme.name)} — ${escapeHtml(theme.subtitle)}"
       >
         <div class="app-theme-card__swatch app-theme-swatch--${theme.id}">
-          <span class="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-sm" style="${theme.tagStyle}">
-            ${escapeHtml(theme.subtitle)}
-          </span>
+          ${
+            theme.id === 'system'
+              ? `
+            <div class="app-theme-preview app-theme-preview--system" aria-hidden="true">
+              <div class="app-theme-preview__half app-theme-preview__half--dark">
+                <div class="app-theme-preview__chrome">
+                  <div class="app-theme-preview__dots">
+                    <span class="app-theme-preview__dot"></span>
+                    <span class="app-theme-preview__dot"></span>
+                  </div>
+                </div>
+                <div class="app-theme-preview__body">
+                  <div class="app-theme-preview__sidebar">
+                    <span class="app-theme-preview__nav-bar"></span>
+                    <span class="app-theme-preview__nav-bar"></span>
+                  </div>
+                  <div class="app-theme-preview__main">
+                    <div class="app-theme-preview__card">
+                      <div class="app-theme-preview__line app-theme-preview__line--title"></div>
+                      <div class="app-theme-preview__line app-theme-preview__line--sub"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="app-theme-preview__divider"></div>
+              <div class="app-theme-preview__half app-theme-preview__half--light">
+                <div class="app-theme-preview__chrome">
+                  <div class="app-theme-preview__search"></div>
+                </div>
+                <div class="app-theme-preview__body">
+                  <div class="app-theme-preview__main">
+                    <div class="app-theme-preview__card">
+                      <div class="app-theme-preview__line app-theme-preview__line--title"></div>
+                      <div class="app-theme-preview__badge"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `
+              : `
+            <div class="app-theme-preview app-theme-preview--${theme.id}" aria-hidden="true">
+              <div class="app-theme-preview__chrome">
+                <div class="app-theme-preview__dots">
+                  <span class="app-theme-preview__dot"></span>
+                  <span class="app-theme-preview__dot"></span>
+                  <span class="app-theme-preview__dot"></span>
+                </div>
+                <div class="app-theme-preview__search"></div>
+              </div>
+              <div class="app-theme-preview__body">
+                <div class="app-theme-preview__sidebar">
+                  <span class="app-theme-preview__nav-bar"></span>
+                  <span class="app-theme-preview__nav-bar"></span>
+                  <span class="app-theme-preview__nav-bar"></span>
+                </div>
+                <div class="app-theme-preview__main">
+                  <div class="app-theme-preview__card">
+                    <div class="app-theme-preview__line app-theme-preview__line--title"></div>
+                    <div class="app-theme-preview__line app-theme-preview__line--sub"></div>
+                    <div class="app-theme-preview__btn"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `
+          }
           <div class="app-theme-card__indicator">
             <i data-lucide="check" class="w-3.5 h-3.5 ${isActive ? '' : 'hidden'}"></i>
           </div>
         </div>
         <div class="app-theme-card__header">
           <span class="app-theme-card__title">${escapeHtml(theme.name)}</span>
-          <span class="app-theme-card__sub">${theme.colorScheme}</span>
+          <span class="app-theme-card__sub">${escapeHtml(theme.colorScheme)}</span>
         </div>
         <p class="app-theme-card__desc">${escapeHtml(theme.description)}</p>
       </button>
@@ -398,7 +483,7 @@ export function renderAppThemes(activeAppTheme) {
 
 /**
  * Renders theme options into the settings theme grid.
- * Displays miniature manuscript specimens with genuine background, ink text sample, and mode badge.
+ * Displays miniature manuscript specimens with genuine background and ink text sample, without mode tags.
  * @param {string} activeTheme
  */
 export function renderThemes(activeTheme) {
@@ -408,7 +493,6 @@ export function renderThemes(activeTheme) {
   grid.innerHTML = READER_THEMES.map((theme) => {
     const isActive = theme.id === activeTheme;
     const isLightModeTheme = theme.mode === 'light';
-    const modeBadgeText = isLightModeTheme ? 'Light' : 'Dark';
 
     return `
       <button
@@ -417,19 +501,13 @@ export function renderThemes(activeTheme) {
         data-theme="${theme.id}"
         role="radio"
         aria-checked="${isActive ? 'true' : 'false'}"
-        title="${escapeHtml(theme.label)} — ${escapeHtml(theme.sub)} (${modeBadgeText} Mode)"
+        title="${escapeHtml(theme.label)} — ${escapeHtml(theme.sub)}"
       >
         <div
           class="theme-specimen"
           style="background: ${theme.bg}; color: ${theme.fg}; border-color: ${isLightModeTheme ? 'rgba(0,0,0,0.14)' : 'rgba(255,255,255,0.12)'};"
         >
           <div class="theme-specimen__header">
-            <span
-              class="theme-specimen__badge"
-              style="color: ${theme.fg}; background: ${isLightModeTheme ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.1)'};"
-            >
-              ${modeBadgeText}
-            </span>
             <span
               class="theme-specimen__accent-dot"
               style="background: ${theme.accent};"
@@ -445,12 +523,7 @@ export function renderThemes(activeTheme) {
           </div>
         </div>
         <div class="theme-option-card__info">
-          <div class="flex items-center justify-between gap-1 w-full">
-            <span class="theme-option-card__name">${escapeHtml(theme.label)}</span>
-            <span class="theme-option-card__mode-tag ${isLightModeTheme ? 'theme-option-card__mode-tag--light' : 'theme-option-card__mode-tag--dark'}">
-              ${modeBadgeText}
-            </span>
-          </div>
+          <span class="theme-option-card__name">${escapeHtml(theme.label)}</span>
           <span class="theme-option-card__sub">${escapeHtml(theme.sub)}</span>
         </div>
       </button>
@@ -459,7 +532,7 @@ export function renderThemes(activeTheme) {
 }
 
 /**
- * Renders available font family chips.
+ * Renders available font family chips with theme-aware contrast styling.
  * @param {string} activeFont
  */
 export function renderFonts(activeFont) {
@@ -478,10 +551,10 @@ export function renderFonts(activeFont) {
         aria-checked="${isActive ? 'true' : 'false'}"
       >
         <div class="min-w-0">
-          <span class="text-xs font-bold block text-slate-100" style="font-family: ${font.css};">
+          <span class="settings-font-chip__title text-xs font-bold block" style="font-family: ${font.css};">
             ${escapeHtml(font.label)}
           </span>
-          <span class="text-[10px] text-slate-400 block">${escapeHtml(font.sub || '')}</span>
+          <span class="settings-font-chip__sub text-[10px] block">${escapeHtml(font.sub || '')}</span>
         </div>
         <i data-lucide="check" class="w-4 h-4 text-indigo-400 font-check ${isActive ? '' : 'hidden'}"></i>
       </button>
@@ -960,6 +1033,17 @@ export function initSettingsInteractions() {
       updateActiveAppThemeBadge(themeId);
       const appliedTheme = APP_THEMES.find((t) => t.id === themeId);
       showToast(`Application theme set to ${appliedTheme?.name || themeId}`, 'info');
+    });
+  }
+
+  if (typeof window !== 'undefined' && !window._settingsAppThemeListenerBound) {
+    window._settingsAppThemeListenerBound = true;
+    window.addEventListener('appthemechange', (e) => {
+      const themeId = e.detail?.theme;
+      if (themeId) {
+        renderAppThemes(themeId);
+        updateActiveAppThemeBadge(themeId);
+      }
     });
   }
 

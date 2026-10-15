@@ -44,7 +44,15 @@
       (function () {
         try {
           var t = localStorage.getItem('tt_app_theme') || 'transcendental';
-          document.documentElement.setAttribute('data-app-theme', t);
+          var resolved = t;
+          if (t === 'system') {
+            resolved =
+              window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'transcendental'
+                : 'light';
+          }
+          document.documentElement.setAttribute('data-app-theme', resolved);
+          document.documentElement.setAttribute('data-theme-preference', t);
         } catch (e) {}
       })();
     </script>
@@ -202,7 +210,9 @@
           </div>
 
           <div class="login-visual__caption relative z-10 text-center mt-5">
-            <blockquote class="text-sm font-reading italic text-amber-200/80 max-w-sm mx-auto">
+            <blockquote
+              class="text-sm font-reading italic text-[var(--mythic-gold)] max-w-sm mx-auto"
+            >
               &ldquo;Every legend outlives an empire; every empire begins with a reader.&rdquo;
             </blockquote>
             <span

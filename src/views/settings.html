@@ -46,7 +46,15 @@
       (function () {
         try {
           var t = localStorage.getItem('tt_app_theme') || 'transcendental';
-          document.documentElement.setAttribute('data-app-theme', t);
+          var resolved = t;
+          if (t === 'system') {
+            resolved =
+              window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'transcendental'
+                : 'light';
+          }
+          document.documentElement.setAttribute('data-app-theme', resolved);
+          document.documentElement.setAttribute('data-theme-preference', t);
         } catch (e) {}
       })();
     </script>
@@ -235,25 +243,25 @@
           <button
             type="button"
             class="settings-nav-item"
-            data-target="section-themes"
+            data-target="section-general"
             role="tab"
             aria-selected="false"
-            aria-controls="section-themes"
+            aria-controls="section-general"
           >
-            <i data-lucide="palette" class="settings-nav-icon"></i>
-            <span class="settings-nav-label">Themes & Illumination</span>
+            <i data-lucide="sliders-horizontal" class="settings-nav-icon"></i>
+            <span class="settings-nav-label">General & Theme</span>
           </button>
 
           <button
             type="button"
             class="settings-nav-item"
-            data-target="section-typography"
+            data-target="section-reader"
             role="tab"
             aria-selected="false"
-            aria-controls="section-typography"
+            aria-controls="section-reader"
           >
-            <i data-lucide="type" class="settings-nav-icon"></i>
-            <span class="settings-nav-label">Codex Typography</span>
+            <i data-lucide="book-open" class="settings-nav-icon"></i>
+            <span class="settings-nav-label">Reader & Codex</span>
           </button>
 
           <button
@@ -278,18 +286,6 @@
           >
             <i data-lucide="database" class="settings-nav-icon"></i>
             <span class="settings-nav-label">Archival Storage</span>
-          </button>
-
-          <button
-            type="button"
-            class="settings-nav-item"
-            data-target="section-system"
-            role="tab"
-            aria-selected="false"
-            aria-controls="section-system"
-          >
-            <i data-lucide="sliders" class="settings-nav-icon"></i>
-            <span class="settings-nav-label">System & Defaults</span>
           </button>
 
           <button
@@ -636,55 +632,6 @@
               </div>
             </div>
 
-            <!-- Card 4: Oracle AI & Gemini Key (Configured via Accessible Popup Dialog) -->
-            <div class="settings-card">
-              <div
-                class="settings-row flex-col items-start sm:flex-row sm:items-center justify-between gap-4"
-                data-setting-item
-              >
-                <div class="settings-row__left">
-                  <div class="settings-row__icon-wrap">
-                    <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
-                  </div>
-                  <div class="settings-row__text">
-                    <div class="flex items-center gap-2">
-                      <span class="settings-row__label">Oracle AI & Gemini Key</span>
-                      <span class="settings-info-pill">Local Storage Only</span>
-                    </div>
-                    <span class="settings-row__sub"
-                      >Personal Google AI key used to conjure story titles, author monikers, and
-                      refine lore</span
-                    >
-                  </div>
-                </div>
-                <div
-                  class="settings-row__right flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end"
-                >
-                  <span
-                    id="gemini-key-status"
-                    class="settings-status-badge settings-status-badge--inactive"
-                  >
-                    <i data-lucide="key" class="w-3 h-3"></i>
-                    <span id="gemini-key-status-text">Not Configured</span>
-                  </span>
-                  <button
-                    type="button"
-                    id="btn-open-gemini-key-modal"
-                    class="settings-btn-secondary text-xs"
-                    aria-haspopup="dialog"
-                    aria-controls="modal-gemini-key"
-                  >
-                    <i data-lucide="key" class="w-3.5 h-3.5"></i>
-                    <span id="btn-open-gemini-text">Configure Key</span>
-                  </button>
-                  <!-- Hidden inputs to maintain backwards compatibility with existing test suites -->
-                  <input type="password" id="input-gemini-key" class="hidden" autocomplete="off" />
-                  <button type="button" id="btn-toggle-gemini-key" class="hidden"></button>
-                  <button type="button" id="btn-save-gemini-key" class="hidden"></button>
-                </div>
-              </div>
-            </div>
-
             <!-- Card 5: Account Identity & Save Actions -->
             <div class="settings-card">
               <div class="settings-row" data-setting-item>
@@ -718,16 +665,17 @@
           </form>
         </section>
 
-        <!-- 2. Themes & Illumination Section -->
+        <!-- 2. General & Theme Section -->
         <section
-          id="section-themes"
+          id="section-general"
           class="settings-section hidden"
-          data-section-name="Themes & Illumination"
+          data-section-name="General and Theme"
         >
           <div class="settings-section-header">
-            <h2 class="settings-section-title">Themes & Illumination</h2>
+            <h2 class="settings-section-title">General & Theme</h2>
             <p class="settings-section-desc">
-              Configure application interface illumination and manuscript reading atmosphere.
+              Configure overall application interface illumination, Oracle AI intelligence, and
+              system defaults.
             </p>
           </div>
 
@@ -762,8 +710,95 @@
             </div>
           </div>
 
-          <!-- Card 2: Default Reading Parchment -->
+          <!-- Card 2: Oracle AI & Gemini Key (Configured via Accessible Popup Dialog) -->
+          <div class="settings-card mb-6">
+            <div
+              class="settings-row flex-col items-start sm:flex-row sm:items-center justify-between gap-4"
+              data-setting-item
+            >
+              <div class="settings-row__left">
+                <div class="settings-row__icon-wrap">
+                  <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+                </div>
+                <div class="settings-row__text">
+                  <div class="flex items-center gap-2">
+                    <span class="settings-row__label">Oracle AI & Gemini Key</span>
+                    <span class="settings-info-pill">Local Storage Only</span>
+                  </div>
+                  <span class="settings-row__sub"
+                    >Personal Google AI key used to conjure story titles, author monikers, and
+                    refine lore</span
+                  >
+                </div>
+              </div>
+              <div
+                class="settings-row__right flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end"
+              >
+                <span
+                  id="gemini-key-status"
+                  class="settings-status-badge settings-status-badge--inactive"
+                >
+                  <i data-lucide="key" class="w-3 h-3"></i>
+                  <span id="gemini-key-status-text">Not Configured</span>
+                </span>
+                <button
+                  type="button"
+                  id="btn-open-gemini-key-modal"
+                  class="settings-btn-secondary text-xs"
+                  aria-haspopup="dialog"
+                  aria-controls="modal-gemini-key"
+                >
+                  <i data-lucide="key" class="w-3.5 h-3.5"></i>
+                  <span id="btn-open-gemini-text">Configure Key</span>
+                </button>
+                <!-- Hidden inputs to maintain backwards compatibility with existing test suites -->
+                <input type="password" id="input-gemini-key" class="hidden" autocomplete="off" />
+                <button type="button" id="btn-toggle-gemini-key" class="hidden"></button>
+                <button type="button" id="btn-save-gemini-key" class="hidden"></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: Restore Default Codex Settings -->
           <div class="settings-card">
+            <div class="settings-row" data-setting-item>
+              <div class="settings-row__left">
+                <div class="settings-row__icon-wrap">
+                  <i data-lucide="sliders" class="w-4 h-4 text-indigo-400"></i>
+                </div>
+                <div class="settings-row__text">
+                  <span class="settings-row__label">Restore Default Codex Settings</span>
+                  <span class="settings-row__sub"
+                    >Reset themes, fonts, sizing, and atmosphere to original factory defaults</span
+                  >
+                </div>
+              </div>
+              <div class="settings-row__right">
+                <button type="button" id="btn-reset-system-defaults" class="settings-btn-secondary">
+                  <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                  <span>Reset All</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. Reader & Codex Section -->
+        <section
+          id="section-reader"
+          class="settings-section hidden"
+          data-section-name="Reader and Codex"
+        >
+          <div class="settings-section-header">
+            <h2 class="settings-section-title">Reader & Codex</h2>
+            <p class="settings-section-desc">
+              Configure manuscript reading parchment illumination, typography, spacing, and live
+              preview.
+            </p>
+          </div>
+
+          <!-- Card 1: Default Reading Parchment -->
+          <div class="settings-card mb-6">
             <div class="settings-row flex-col items-start gap-3" data-setting-item>
               <div class="settings-row__left w-full">
                 <div class="settings-row__icon-wrap">
@@ -788,21 +823,8 @@
               </div>
             </div>
           </div>
-        </section>
 
-        <!-- 3. Codex Typography Section -->
-        <section
-          id="section-typography"
-          class="settings-section hidden"
-          data-section-name="Codex Typography"
-        >
-          <div class="settings-section-header">
-            <h2 class="settings-section-title">Codex Typography</h2>
-            <p class="settings-section-desc">
-              Choose script styles, body font sizing, vertical cadence, and line measure.
-            </p>
-          </div>
-
+          <!-- Card 2: Codex Typography & Readability -->
           <div class="settings-card">
             <!-- Row 1: Typeface Selection -->
             <div class="settings-row flex-col items-start gap-3" data-setting-item>
@@ -924,12 +946,12 @@
                   class="settings-preview-box"
                   data-reader-theme="noir"
                 >
-                  <h3 class="font-cinzel text-base font-black text-white mb-2">
+                  <h3 class="settings-preview-title font-cinzel text-base font-black mb-2">
                     The Skald's Awakening
                   </h3>
                   <p
                     id="settings-preview-text"
-                    class="leading-relaxed text-slate-200 font-serif text-sm"
+                    class="settings-preview-text leading-relaxed font-serif text-sm"
                   >
                     The Northern skald sang of constellations etched into celestial ice. Every rune
                     carried the weight of forgotten centuries, glowing faintly beneath the aurora as
@@ -1072,42 +1094,6 @@
                 >
                   <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i>
                   <span>Clear Cache</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- 6. System & Defaults Section -->
-        <section
-          id="section-system"
-          class="settings-section hidden"
-          data-section-name="System and Defaults"
-        >
-          <div class="settings-section-header">
-            <h2 class="settings-section-title">System & Defaults</h2>
-            <p class="settings-section-desc">
-              Restore factory archive configurations and preferences.
-            </p>
-          </div>
-
-          <div class="settings-card">
-            <div class="settings-row" data-setting-item>
-              <div class="settings-row__left">
-                <div class="settings-row__icon-wrap">
-                  <i data-lucide="sliders" class="w-4 h-4 text-indigo-400"></i>
-                </div>
-                <div class="settings-row__text">
-                  <span class="settings-row__label">Restore Default Codex Settings</span>
-                  <span class="settings-row__sub"
-                    >Reset themes, fonts, sizing, and atmosphere to original factory defaults</span
-                  >
-                </div>
-              </div>
-              <div class="settings-row__right">
-                <button type="button" id="btn-reset-system-defaults" class="settings-btn-secondary">
-                  <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-                  <span>Reset All</span>
                 </button>
               </div>
             </div>

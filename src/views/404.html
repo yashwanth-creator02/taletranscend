@@ -39,7 +39,15 @@
       (function () {
         try {
           var t = localStorage.getItem('tt_app_theme') || 'transcendental';
-          document.documentElement.setAttribute('data-app-theme', t);
+          var resolved = t;
+          if (t === 'system') {
+            resolved =
+              window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'transcendental'
+                : 'light';
+          }
+          document.documentElement.setAttribute('data-app-theme', resolved);
+          document.documentElement.setAttribute('data-theme-preference', t);
         } catch (e) {}
       })();
     </script>

@@ -45,7 +45,15 @@
       (function () {
         try {
           var t = localStorage.getItem('tt_app_theme') || 'transcendental';
-          document.documentElement.setAttribute('data-app-theme', t);
+          var resolved = t;
+          if (t === 'system') {
+            resolved =
+              window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'transcendental'
+                : 'light';
+          }
+          document.documentElement.setAttribute('data-app-theme', resolved);
+          document.documentElement.setAttribute('data-theme-preference', t);
         } catch (e) {}
       })();
     </script>
@@ -510,7 +518,7 @@
         </div>
         <h3
           id="confirm-title"
-          class="text-lg font-cinzel font-bold text-white uppercase tracking-tight mb-3"
+          class="text-lg font-cinzel font-bold text-[var(--text-primary)] uppercase tracking-tight mb-3"
         >
           Seal this <span class="text-emerald-400">Chronicle?</span>
         </h3>
@@ -556,7 +564,7 @@
           <div>
             <h3
               id="copy-link-title"
-              class="text-sm font-bold uppercase tracking-wider text-white font-cinzel"
+              class="text-sm font-bold uppercase tracking-wider text-[var(--text-primary)] font-cinzel"
             >
               Share Chronicle
             </h3>
@@ -570,7 +578,7 @@
             id="copy-link-input"
             readonly
             aria-label="Tale share URL"
-            class="w-full h-11 bg-black/40 border border-white/10 rounded-xl px-3.5 text-xs font-mono text-indigo-300 focus:outline-none focus:border-indigo-500/40 select-all"
+            class="w-full h-11 bg-surface-2 border border-line rounded-xl px-3.5 text-xs font-mono text-indigo-400 focus:outline-none focus:border-indigo-500/40 select-all"
           />
         </div>
         <div class="flex items-center justify-end gap-4">

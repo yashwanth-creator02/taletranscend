@@ -80,7 +80,7 @@ export function setGridEmpty(message) {
           <i data-lucide="archive" class="w-6 h-6 text-indigo-500/50"></i>
         </div>
         <div>
-          <h3 class="text-base font-cinzel font-bold text-white mb-2">Nothing here yet</h3>
+          <h3 class="text-base font-cinzel font-bold text-[var(--text-primary)] mb-2">Nothing here yet</h3>
           <p class="text-sm text-slate-400 max-w-sm leading-relaxed">${escapeHtml(message)}</p>
         </div>
         <a href="/library.html"
@@ -165,7 +165,7 @@ export function buildBookmarkCard(tale) {
           type="button"
           data-action="options"
           data-menu-id="${escapeHtml(menuId)}"
-          class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-zinc-300 transition-all hover:bg-indigo-500/20 hover:border-indigo-500/40 hover:text-white"
+          class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg bg-surface-2 backdrop-blur-md border border-line text-muted transition-all hover:bg-indigo-500/20 hover:border-indigo-500/40 hover:text-[var(--text-primary)]"
           aria-expanded="false"
           aria-haspopup="menu"
           aria-label="Chronicle Options"
@@ -184,13 +184,13 @@ export function buildBookmarkCard(tale) {
           </div>
 
           <button type="button" data-action="copy-link" data-id="${escapeHtml(id)}"
-            class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] text-zinc-300 transition-colors hover:bg-white/5 hover:text-white">
+            class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] text-secondary transition-colors hover:bg-surface-2 hover:text-[var(--text-primary)]">
             <i data-lucide="link" class="h-3.5 w-3.5"></i>
             <span>Copy Tale Link</span>
           </button>
 
           <button type="button" data-action="download" data-id="${escapeHtml(id)}"
-            class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] text-zinc-300 transition-colors hover:bg-white/5 hover:text-white">
+            class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] text-secondary transition-colors hover:bg-surface-2 hover:text-[var(--text-primary)]">
             <i data-lucide="download" class="h-3.5 w-3.5"></i>
             <span>Download Chronicle</span>
           </button>
@@ -198,7 +198,7 @@ export function buildBookmarkCard(tale) {
           <div class="h-px bg-white/5 my-1"></div>
 
           <button type="button"
-            class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] transition-colors ${isFinished ? 'opacity-40 text-zinc-600' : 'text-zinc-300 hover:bg-white/5 hover:text-white'}"
+            class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] transition-colors ${isFinished ? 'opacity-40 text-muted' : 'text-secondary hover:bg-surface-2 hover:text-[var(--text-primary)]'}"
             data-action="${isFinished ? '' : 'mark-finished'}" data-id="${escapeHtml(id)}">
             <i data-lucide="check-circle" class="h-3.5 w-3.5"></i>
             <span>${isFinished ? 'Already Sealed' : 'Seal Chronicle'}</span>
@@ -248,7 +248,7 @@ export function buildBookmarkCard(tale) {
 
       <div class="p-3 sm:p-3.5">
         <p class="text-[8px] sm:text-[9px] font-bold uppercase tracking-[0.16em] text-indigo-500/60 mb-1 truncate">${safeAuthor}</p>
-        <h3 class="font-bold text-white text-xs sm:text-sm leading-snug mb-1 group-hover:text-indigo-300 transition-colors line-clamp-1">
+        <h3 class="font-bold text-[var(--text-primary)] text-xs sm:text-sm leading-snug mb-1 group-hover:text-indigo-400 transition-colors line-clamp-1">
           ${safeTitle}
         </h3>
         <p class="text-[11px] text-slate-400 line-clamp-2 leading-relaxed mb-2.5">
@@ -324,7 +324,7 @@ export function buildDraftCard(draft) {
               type="button"
               data-action="options"
               data-menu-id="${escapeHtml(menuId)}"
-              class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg bg-white/5 border border-white/10 text-zinc-500 transition-all hover:bg-indigo-500/10 hover:border-indigo-500/30 hover:text-white"
+              class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg bg-surface-2 border border-line text-muted transition-all hover:bg-indigo-500/10 hover:border-indigo-500/30 hover:text-[var(--text-primary)]"
               aria-expanded="false"
               aria-haspopup="menu"
               aria-label="Draft Options"
@@ -343,7 +343,7 @@ export function buildDraftCard(draft) {
               </div>
 
               <button type="button" data-action="copy-link" data-id="${escapeHtml(id)}"
-                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] text-zinc-400 transition-colors hover:bg-white/5 hover:text-white">
+                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] text-secondary transition-colors hover:bg-surface-2 hover:text-[var(--text-primary)]">
                 <i data-lucide="link" class="h-3.5 w-3.5"></i>
                 <span>Copy Draft Link</span>
               </button>
@@ -359,7 +359,7 @@ export function buildDraftCard(draft) {
           </div>
         </div>
 
-        <h3 class="font-bold text-white text-xs sm:text-sm leading-snug mb-1 group-hover:text-indigo-300 transition-colors line-clamp-1">
+        <h3 class="font-bold text-[var(--text-primary)] text-xs sm:text-sm leading-snug mb-1 group-hover:text-indigo-400 transition-colors line-clamp-1">
           ${safeTitle}
         </h3>
 

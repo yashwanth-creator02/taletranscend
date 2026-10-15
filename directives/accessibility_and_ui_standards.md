@@ -150,20 +150,76 @@ The TaleTranscend brand mark is the mythical golden-trimmed black quill pen enci
 - **Scholar Scribe Tile**:
   - Scribe and authoring calls-to-action feature an elevated scholar plate with a burnished gold shield emblem (`feather` icon) and high-contrast call-to-action buttons.
 
-### 9. Settings Interface, Stacked Bio & Reader Theme Specimens
+### 9. Settings Interface, Architecture Sections & Codex Readability
 
+- **Unified Architectural Sections**:
+  - The settings interface is segmented into dedicated, modular views:
+    - **Chronicler Profile** (`#section-profile`): Persona avatar, display moniker, author lore bio, pronouns, location, reading goal, and cloud archive status.
+    - **General & Theme** (`#section-general`): Global application interface theme (Transcendental / Midnight Dark / Illuminated Light), Oracle AI & Gemini API key (status indicator and popup modal), and factory default restoration.
+    - **Reader & Codex** (`#section-reader`): Default reading parchment (12 authentic manuscript themes) and codex typography settings (typeface style, font size, line spacing, measure width, live preview).
+    - **Atmosphere & Motion** (`#section-atmosphere`), **Archival Storage** (`#section-storage`), and **About Codex** (`#section-about`).
+  - Hash navigation seamlessly resolves legacy hashes (`#themes` and `#system` -> `#section-general`, `#typography` -> `#section-reader`).
 - **Dedicated Sideheading & Below-Field Layout (`.settings-row--stacked`)**:
   - Full-width longform inputs, notably the Chronicler Lore / Bio textarea (`#input-bio`), must be stacked vertically below the sideheading, descriptive subtitle, and info shield rather than squeezed beside it in a split two-column row.
   - Includes a real-time character count indicator (`#bio-char-count`: e.g. `142 / 1000`) and field advice tips.
 - **Dedicated Popup Modal for Sensitive Settings**:
-  - Storage of sensitive credentials such as the Google Gemini API key must be initiated through an accessible popup modal window (`#modal-gemini-key`) instead of inline password fields.
+  - Storage of sensitive credentials such as the Google Gemini API key is housed in the General section and initiated through an accessible popup modal window (`#modal-gemini-key`) instead of inline password fields.
   - The modal provides security guidance regarding client-only local storage, password visibility toggling, direct links to Google AI Studio, and clear/remove functionality.
   - The settings row presents an accessible status badge (`#gemini-key-status`: `.settings-status-badge--active` vs `.settings-status-badge--inactive`).
-- **Reader Theme Manuscript Specimens (Light Mode Distinctiveness)**:
+- **Clean Reader Theme Specimens (Zero Light/Dark Tags)**:
   - Each of the 12 reader themes (`src/config/theme.config.js`) provides explicit palette metadata (`mode`, `bg`, `fg`, `accent`, `tint`).
-  - To prevent pale reading themes (Sepia, Cream, Solarized Light, Editorial) from looking identical or unreadable in Light Mode:
-    - Each theme option card (`.theme-option-card`) renders a miniature manuscript specimen (`.theme-specimen`) showcasing the genuine background color, ink foreground sample glyph `"Aa"`, accent pip dot, and an uppercase `LIGHT` or `DARK` badge.
-    - Card titles (`.theme-option-card__name`) and subtitles (`.theme-option-card__sub`) strictly inherit `--text-primary` and `--text-secondary`, guaranteeing crisp, dark charcoal contrast on light surfaces rather than washed-out white text.
+  - Specimen cards (`.theme-specimen`) display miniature manuscript specimens showcasing genuine parchment color, ink foreground sample glyph `"Aa"`, and accent pip dot, with all decorative "LIGHT" or "DARK" text badges removed for a clean, distraction-free aesthetic.
+- **Typography Filters & Live Codex Preview Contrast**:
+  - Font selector chips (`.settings-font-chip`) use semantic token-backed classes (`.settings-font-chip__title` with `var(--text-primary)`, `.settings-font-chip__sub` with `var(--text-muted)`) preventing washed-out white text on light surfaces.
+  - Column measure buttons (`.setting-measure-btn.btn-primary`) render solid royal indigo backgrounds (`rgb(var(--accent-rgb))`) with crisp white text (`var(--text-on-accent)`).
+  - The Live Codex Preview sandbox applies the active manuscript theme ink and parchment background dynamically, ensuring headers and paragraph text remain sharp and legible across all modes.
+
+### 10. Sticky Sidebar Navigation & Profile Light Mode Standards
+
+- **Sticky Sidebar Pinning in CSS Grid (`align-self: start`)**:
+  - In CSS Grid layouts, child grid columns default to `align-self: stretch`, expanding the navigation column to the height of the entire page content. This prevents `position: sticky` from travelling as the user scrolls.
+  - Sticky sidebars (such as `.settings-sidebar` in `settings.html` and `.pillar-left` in `profile.html`) must declare `align-self: start; position: sticky; top: calc(60px + var(--space-6)); max-height: calc(100vh - 80px); overflow-y: auto;`. This collapses the sidebar to its intrinsic content height, allowing it to stay pinned in the viewport while the main content scrolls.
+- **Profile Light Mode Contrast & Anti-Vibecoding Standards**:
+  - **Zero Glowing or Pulsing Indicator Dots**: Avatar containers must not contain neon green status indicator pips or pulsing dots (`bg-emerald-500 rounded-full`).
+  - **Zero Pill Badges**: Badges such as `.mythic-badge`, `.resize-handle-grip`, and `#profile-author-badge` must use crisp rectangular technical shield styling (`border-radius: var(--radius-xs);` or `rounded-xs`) instead of pill shapes (`border-radius: 9999px;` or `rounded-full`).
+  - **Semantic Theme Typography**: Never apply hardcoded `text-white` to titles or headings on page surfaces. Use semantic classes (`.profile-user-name`, `.profile-section-heading`, `.stat-value`, `.new-story-cta-title`) tied to `var(--text-primary)`, guaranteeing rich charcoal text in light mode and off-white in dark mode.
+  - **Alabaster & Parchment Card Hierarchy**: Profile cards (`.identity-card`, `#author-registry-card`, `.stat-card-mythic`, `.chronicle-goal-card`, `#btn-new-story`) render `rgb(var(--bg-overlay-rgb) / 0.94)` with subtle 1px borders in light mode for a distraction-free, archival feel.
+  - **Harmonious Resize Grips**: Multi-column separator handles (`.resize-handle-grip`) adapt to the theme ground (`var(--bg-overlay)` in light mode, `rgb(var(--dark-rgb) / var(--a-11))` in dark mode) avoiding harsh black pill artifacts.
+
+### 9. Site-Wide Multi-Page Theme Contrast & Surface Standards
+
+- **Prohibition of Hardcoded Ground Colors**: Never hardcode dark container utility classes (such as `bg-slate-950/90`, `bg-slate-950/40`, `bg-black/30`, `bg-black/40`) or hardcoded light text utility classes (`text-white`, `text-slate-200`, `text-slate-300`, `text-indigo-100`) directly on surfaces that exist in both dark and light themes.
+- **Semantic Replacements**:
+  - Headers and sticky navbars: Use `bg-[var(--nav-bg)] border-b border-line backdrop-blur-2xl`.
+  - Sidebars and workspace panes: Use `border-line bg-transparent` or `bg-[var(--bg-base)]`.
+  - Form inputs and textareas: Use `border-line bg-surface-2 text-[var(--text-primary)] placeholder:text-muted`.
+  - Titles, headings, and primary body: Use `text-[var(--text-primary)]`.
+  - Secondary metadata and subtext: Use `text-secondary` or `text-muted`.
+  - Accent quotes and runes: Use `text-[var(--mythic-gold)]` (resolves to `#fbbf24` in dark and `#b45309` in light).
+- **CSS Light Theme Elevation Overrides**: Every page stylesheet (`shelf.css`, `tale.css`, `toc.css`, `contribution.css`, `profile.css`, `settings.css`, `login.css`) must explicitly define `[data-app-theme='light']` rules for all cards, panels, popups, and inputs, assigning them `var(--bg-elevated)` or `var(--surface-2)` with `border-color: var(--border)`.
+
+### 10. Application Theming Architecture & Specimen Standards
+
+- **Core Theme Registry**: Registered in `src/config/theme.config.js`:
+  - `transcendental`: Signature mythic cosmic dark (default; `#030305` ground, starlight indigo & warm amber runes).
+  - `dark`: Midnight obsidian & luminous indigo (`#0b0d13` ground, high-contrast silver typography).
+  - `light`: Illuminated manuscript parchment (`#f6f3ed` ground, warm vellum, alabaster card surfaces & royal ink).
+  - `system`: Automatic device preference synchronization with live OS `prefers-color-scheme` listeners.
+- **Invariant Miniature Interface Specimens**:
+  - Theme cards in `settings.html` must render authentic miniature application window mockups (`.app-theme-preview`), not generic monospace text block tags or metadata badges.
+  - Every specimen displays window chrome with control dots, search notch, sidebar navigation bars, story card with title/body skeleton bars, and interactive accent buttons.
+  - Specimen cards use dedicated tokens in `tokens.css` (`--specimen-transcendental-*`, `--specimen-dark-*`, `--specimen-light-*`) so that all previews render true-to-theme simultaneously regardless of which theme is currently active.
+  - `system` preview renders a split half-dark / half-light layout (`.app-theme-preview--system`) with a technical hairline divider.
+- **Zero-FOUC Boot Invariant**:
+  - Every HTML template (`src/views/*.html`) executes an inline script in `<head>` before CSS and module bundles parse.
+  - If preference is `system`, the script resolves `matchMedia('(prefers-color-scheme: dark)')` to `'transcendental'` or `'light'` prior to initial layout, preventing flash of unstyled theme.
+- **Fluid Cross-Fade Transitions**:
+  - Runtime theme switches trigger a temporary `.theme-transitioning` class on `<html>` for 250ms (`base.css`).
+  - Transitions smooth background, border, text color, and box shadow over `var(--dur-base)` (240ms).
+  - Skips transition on boot or when `prefers-reduced-motion: reduce` is detected.
+- **Global Command Palette Integration**:
+  - Theme switches are registered as first-class actions (`theme:transcendental`, `theme:dark`, `theme:light`, `theme:system`) in `nav.config.js`.
+  - Users can switch themes instantly from any page via `Ctrl+K` / `⌘K` under the "Appearance & Theme" group.
 
 ## Tools / Scripts to Use
 

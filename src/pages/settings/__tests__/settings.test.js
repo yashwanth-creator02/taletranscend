@@ -185,6 +185,23 @@ describe('Settings Page Controller', () => {
       expect(navItems[1].classList.contains('active')).toBe(true);
       expect(navItems[1].getAttribute('aria-selected')).toBe('true');
     });
+
+    it('aliases legacy section targets to new unified sections when legacy sections do not exist', () => {
+      document.body.innerHTML = `
+        <button class="settings-nav-item active" data-target="section-profile" aria-selected="true">Profile</button>
+        <button class="settings-nav-item" data-target="section-general" aria-selected="false">General</button>
+        <button class="settings-nav-item" data-target="section-reader" aria-selected="false">Reader</button>
+        <section id="section-profile" class="settings-section"></section>
+        <section id="section-general" class="settings-section hidden"></section>
+        <section id="section-reader" class="settings-section hidden"></section>
+      `;
+
+      switchSettingsSection('section-themes', false);
+      expect(document.getElementById('section-general').classList.contains('hidden')).toBe(false);
+
+      switchSettingsSection('section-typography', false);
+      expect(document.getElementById('section-reader').classList.contains('hidden')).toBe(false);
+    });
   });
 
   describe('updatePreview', () => {
@@ -228,7 +245,7 @@ describe('Settings Page Controller', () => {
       expect(activeCard.getAttribute('aria-checked')).toBe('true');
     });
 
-    it('renders distinct manuscript specimens with mode badges and typographic glyphs', () => {
+    it('renders distinct manuscript specimens with genuine ink styling and no light/dark mode tags', () => {
       document.body.innerHTML = '<div id="settings-theme-grid"></div>';
       renderThemes('transcendental');
 
@@ -240,11 +257,33 @@ describe('Settings Page Controller', () => {
       expect(sepiaCard).toBeTruthy();
       expect(sepiaCard.querySelector('.theme-specimen')).toBeTruthy();
       expect(sepiaCard.querySelector('.theme-specimen__glyph').textContent).toBe('Aa');
-      expect(sepiaCard.querySelector('.theme-specimen__badge').textContent.trim()).toBe('Light');
+      expect(sepiaCard.querySelector('.theme-specimen__badge')).toBeNull();
+      expect(sepiaCard.querySelector('.theme-option-card__mode-tag')).toBeNull();
 
       const noirCard = grid.querySelector('[data-theme="noir"]');
       expect(noirCard).toBeTruthy();
-      expect(noirCard.querySelector('.theme-specimen__badge').textContent.trim()).toBe('Dark');
+      expect(noirCard.querySelector('.theme-specimen__badge')).toBeNull();
+      expect(noirCard.querySelector('.theme-option-card__mode-tag')).toBeNull();
+    });
+  });
+
+  describe('renderFonts', () => {
+    it('renders available font chips with accessible contrast classes', () => {
+      document.body.innerHTML = '<div id="settings-font-list"></div>';
+      renderFonts('serif');
+
+      const list = document.getElementById('settings-font-list');
+      const chips = list.querySelectorAll('.settings-font-chip');
+      expect(chips.length).toBeGreaterThan(0);
+
+      const activeChip = list.querySelector('.settings-font-chip.active');
+      expect(activeChip).toBeTruthy();
+      expect(activeChip.getAttribute('data-font')).toBe('serif');
+
+      const title = activeChip.querySelector('.settings-font-chip__title');
+      const sub = activeChip.querySelector('.settings-font-chip__sub');
+      expect(title).toBeTruthy();
+      expect(sub).toBeTruthy();
     });
   });
 
@@ -910,6 +949,20 @@ describe('Settings Page Controller', () => {
 
       updateActiveAppThemeBadge('transcendental');
       expect(document.getElementById('active-app-theme-badge').textContent).toBe('Transcendental');
+
+      updateActiveAppThemeBadge('system');
+      expect(document.getElementById('active-app-theme-badge').textContent).toBe(
+        'Sync with System'
+      );
+    });
+
+    it('handles system preference sync theme correctly', () => {
+      const applied = applyAppTheme('system');
+      expect(applied).toBe('system');
+      expect(localStorage.getItem(APP_THEME_STORAGE_KEY)).toBe('system');
+      expect(document.documentElement.getAttribute('data-theme-preference')).toBe('system');
+      const resolved = document.documentElement.getAttribute('data-app-theme');
+      expect(['transcendental', 'light']).toContain(resolved);
     });
 
     it('switches app theme when clicked in the theme grid', () => {
@@ -930,6 +983,17 @@ describe('Settings Page Controller', () => {
         'Illuminated Light'
       );
       expect(showToast).toHaveBeenCalledWith(expect.stringContaining('Illuminated Light'), 'info');
+
+      const systemCard = document.querySelector('.app-theme-card[data-app-theme="system"]');
+      expect(systemCard).toBeTruthy();
+      systemCard.click();
+
+      expect(localStorage.getItem(APP_THEME_STORAGE_KEY)).toBe('system');
+      expect(document.documentElement.getAttribute('data-theme-preference')).toBe('system');
+      expect(document.getElementById('active-app-theme-badge').textContent).toBe(
+        'Sync with System'
+      );
+      expect(showToast).toHaveBeenCalledWith(expect.stringContaining('Sync with System'), 'info');
     });
   });
 });
