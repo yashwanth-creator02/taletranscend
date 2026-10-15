@@ -1092,8 +1092,8 @@ a:focus-visible,
 [data-app-theme='light'] .continue-card,
 [data-app-theme='light'] .contribution-card,
 [data-app-theme='light'] .contribution-empty-state {
-  background: rgb(var(--bg-overlay-rgb) / 0.94);
-  border-color: rgb(var(--light-rgb) / var(--a-04));
+  background: var(--bg-elevated);
+  border-color: var(--border);
   box-shadow: var(--shadow-sm);
 }
 
@@ -1101,13 +1101,13 @@ a:focus-visible,
 [data-app-theme='light'] .stat-card-mythic:hover,
 [data-app-theme='light'] .continue-card:hover,
 [data-app-theme='light'] .contribution-card:hover {
-  border-color: rgb(var(--accent-rgb) / var(--a-07));
+  border-color: var(--border-accent);
   box-shadow: var(--shadow-md);
 }
 
 [data-app-theme='light'] .profile-avatar-frame {
-  background: rgb(var(--accent-rgb) / var(--a-03));
-  border-color: rgb(var(--accent-rgb) / var(--a-06));
+  background: var(--surface-4);
+  border: 1.5px solid var(--border);
 }
 
 [data-app-theme='light'] .profile-avatar-icon {
@@ -1115,9 +1115,53 @@ a:focus-visible,
 }
 
 [data-app-theme='light'] .mythic-badge {
-  background: rgb(var(--accent-rgb) / var(--a-04));
-  border-color: rgb(var(--accent-rgb) / var(--a-07));
+  background: var(--accent-subtle);
+  border-color: var(--border-accent);
   color: var(--accent);
+}
+
+[data-app-theme='light'] .insights-metric-grid > div:nth-child(1) .w-9 {
+  background: var(--mythic-lapis-bg) !important;
+  border: 1px solid var(--mythic-lapis-border);
+}
+
+[data-app-theme='light'] .insights-metric-grid > div:nth-child(1) .w-9 i,
+[data-app-theme='light'] .insights-metric-grid > div:nth-child(1) .w-9 svg {
+  color: var(--mythic-lapis) !important;
+}
+
+[data-app-theme='light'] .insights-metric-grid > div:nth-child(2) .w-9 {
+  background: var(--mythic-sage-bg) !important;
+  border: 1px solid var(--mythic-sage-border);
+}
+
+[data-app-theme='light'] .insights-metric-grid > div:nth-child(2) .w-9 i,
+[data-app-theme='light'] .insights-metric-grid > div:nth-child(2) .w-9 svg {
+  color: var(--mythic-sage) !important;
+}
+
+[data-app-theme='light'] .insights-metric-grid > div:nth-child(3) .w-9 {
+  background: var(--mythic-terracotta-bg) !important;
+  border: 1px solid var(--mythic-terracotta-border);
+}
+
+[data-app-theme='light'] .insights-metric-grid > div:nth-child(3) .w-9 i,
+[data-app-theme='light'] .insights-metric-grid > div:nth-child(3) .w-9 svg {
+  color: var(--mythic-terracotta) !important;
+}
+
+[data-app-theme='light'] .insights-metric-grid > div:nth-child(4) .w-9 {
+  background: var(--mythic-gold-bg) !important;
+  border: 1px solid var(--mythic-gold-border);
+}
+
+[data-app-theme='light'] .insights-metric-grid > div:nth-child(4) .w-9 i,
+[data-app-theme='light'] .insights-metric-grid > div:nth-child(4) .w-9 svg {
+  color: var(--rune) !important;
+}
+
+[data-app-theme='light'] .stat-value {
+  color: var(--text-primary);
 }
 
 [data-app-theme='light'] #btn-edit-desktop {

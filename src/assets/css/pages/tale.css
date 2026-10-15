@@ -683,10 +683,131 @@
 
 /* ── Light Mode Polish ───────────────────────────────────────────── */
 
+[data-app-theme='light'] .hero-gradient {
+  background: var(--surface-gradient-strong);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+}
+
+[data-app-theme='light'] .hero-cover-backdrop-img {
+  filter: blur(14px) brightness(1.05) saturate(1.15);
+  opacity: 0.25;
+}
+
+[data-app-theme='light'] .hero-cover-backdrop-overlay {
+  background:
+    radial-gradient(circle at 25% 20%, rgb(var(--accent-rgb) / 0.08), transparent 65%),
+    linear-gradient(
+      180deg,
+      rgb(var(--bg-overlay-rgb) / 0.82) 0%,
+      rgb(var(--bg-base-rgb) / 0.98) 100%
+    );
+}
+
+[data-app-theme='light'] #hero-section .hero-title,
+[data-app-theme='light'] #hero-section #display-title {
+  color: var(--text-primary) !important;
+}
+
+[data-app-theme='light'] #hero-section #display-author,
+[data-app-theme='light'] #hero-section #display-chapters,
+[data-app-theme='light'] #hero-section #read-time {
+  color: var(--text-secondary) !important;
+}
+
+[data-app-theme='light'] #hero-section #hero-meta > div {
+  background: var(--surface-2) !important;
+  border-color: var(--border) !important;
+  color: var(--text-secondary) !important;
+}
+
+[data-app-theme='light'] #hero-section #display-status-pill {
+  background: var(--mythic-sage-bg) !important;
+  border: 1px solid var(--mythic-sage-border) !important;
+  color: var(--mythic-sage) !important;
+  border-radius: var(--radius-xs) !important;
+  padding: 2px 8px !important;
+}
+
+[data-app-theme='light'] #hero-section #display-status {
+  color: var(--mythic-sage) !important;
+  font-weight: 700;
+}
+
+[data-app-theme='light'] #hero-section #display-status-dot {
+  display: none !important;
+}
+
+[data-app-theme='light'] #hero-section span.bg-indigo-500\/10 {
+  background: var(--accent-subtle) !important;
+  border-color: var(--border-accent) !important;
+  color: var(--accent) !important;
+}
+
+[data-app-theme='light'] #hero-section #tale-era,
+[data-app-theme='light'] #hero-section #tale-genre,
+[data-app-theme='light'] #hero-section #tale-language {
+  background: var(--surface-3) !important;
+  border-color: var(--border) !important;
+  color: var(--text-secondary) !important;
+}
+
+[data-app-theme='light'] #hero-section .btn-secondary {
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--border-strong) !important;
+  color: var(--text-primary) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+[data-app-theme='light'] #hero-section .btn-secondary i,
+[data-app-theme='light'] #hero-section .btn-secondary svg,
+[data-app-theme='light'] #hero-section .btn-secondary [data-lucide] {
+  color: var(--text-secondary) !important;
+}
+
+[data-app-theme='light'] #hero-section .btn-secondary:hover {
+  background: var(--surface-4) !important;
+  border-color: var(--border-accent) !important;
+  color: var(--accent) !important;
+}
+
+[data-app-theme='light'] #hero-section .btn-secondary:hover i,
+[data-app-theme='light'] #hero-section .btn-secondary:hover svg,
+[data-app-theme='light'] #hero-section .btn-secondary:hover [data-lucide] {
+  color: var(--accent) !important;
+}
+
+[data-app-theme='light'] #hero-section .btn-primary {
+  border-radius: var(--radius-md) !important;
+}
+
+[data-app-theme='light'] #hero-section .glass-card {
+  background: var(--surface-2) !important;
+  border-color: var(--border) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+[data-app-theme='light'] .chronicler-invite-card {
+  background: var(--bg-elevated) !important;
+  border-color: var(--border) !important;
+  box-shadow: var(--shadow-sm) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+[data-app-theme='light'] .chronicler-invite-card p {
+  color: var(--text-secondary) !important;
+}
+
+[data-app-theme='light'] .btn-open-chronicler-letter {
+  background: var(--accent) !important;
+  border-radius: var(--radius-sm) !important;
+  border-color: var(--border-accent) !important;
+}
+
 [data-app-theme='light'] .comment-input,
 [data-app-theme='light'] .inquire-input {
   background: var(--bg-elevated);
-  border-color: rgb(var(--light-rgb) / 0.14);
+  border-color: var(--border-strong);
   color: var(--text-primary);
 }
 
@@ -698,8 +819,8 @@
 
 [data-app-theme='light'] .missive-card {
   background: var(--bg-elevated);
-  border-color: rgb(var(--light-rgb) / 0.08);
-  box-shadow: 0 4px 16px rgb(var(--dark-rgb) / 0.06);
+  border-color: var(--border);
+  box-shadow: var(--shadow-sm);
 }
 
 [data-app-theme='light'] .inquiry-category-chip.active {
@@ -709,48 +830,48 @@
 
 [data-app-theme='light'] .floating-bar__inner {
   background: var(--bg-elevated);
-  border-color: rgb(var(--light-rgb) / 0.12);
-  box-shadow: 0 16px 40px rgb(var(--dark-rgb) / 0.12);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-xl);
 }
 
 [data-app-theme='light'] .chapter-item {
   background: var(--bg-elevated);
-  border-color: rgb(var(--light-rgb) / 0.08);
+  border-color: var(--border);
 }
 
 [data-app-theme='light'] .chapter-item:hover {
   background: var(--surface-2);
-  border-color: rgb(var(--accent-rgb) / 0.3);
-  box-shadow: 0 4px 16px rgb(var(--dark-rgb) / 0.06);
+  border-color: var(--border-accent);
+  box-shadow: var(--shadow-sm);
 }
 
 [data-app-theme='light'] .comment-card {
   background: var(--bg-elevated);
-  border-color: rgb(var(--light-rgb) / 0.08);
-  box-shadow: 0 4px 16px rgb(var(--dark-rgb) / 0.04);
+  border-color: var(--border);
+  box-shadow: var(--shadow-sm);
 }
 
 [data-app-theme='light'] .comment-reply-card {
   background: var(--surface-2);
-  border-color: rgb(var(--light-rgb) / 0.08);
+  border-color: var(--border);
 }
 
 [data-app-theme='light'] .glass-card,
 [data-app-theme='light'] .glass-card-strong {
   background: var(--bg-elevated);
-  border-color: rgb(var(--light-rgb) / 0.08);
-  box-shadow: 0 8px 30px rgb(var(--dark-rgb) / 0.06);
+  border-color: var(--border);
+  box-shadow: var(--shadow-md);
 }
 
 [data-app-theme='light'] .filter-chip {
   background: var(--surface-2);
-  border-color: rgb(var(--light-rgb) / 0.1);
+  border-color: var(--border);
   color: var(--text-secondary);
 }
 
 [data-app-theme='light'] .filter-chip:hover {
   color: var(--text-primary);
-  border-color: rgb(var(--light-rgb) / 0.2);
+  border-color: var(--border-strong);
 }
 
 [data-app-theme='light'] .filter-chip.active {
@@ -761,5 +882,5 @@
 
 [data-app-theme='light'] .missive-reply-bubble {
   background: var(--surface-2);
-  border-color: rgb(var(--accent-rgb) / 0.2);
+  border-color: var(--border-accent);
 }

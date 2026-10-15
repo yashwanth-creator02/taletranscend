@@ -1089,3 +1089,28 @@
     padding: var(--space-8);
   }
 }
+
+/* ── Error 404 Display ─────────────────────────────────────────────────── */
+
+.error-404-title {
+  font-size: 8rem;
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  user-select: none;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+[data-app-theme='light'] .error-404-title {
+  background: linear-gradient(
+    180deg,
+    var(--accent) 0%,
+    var(--accent-secondary) 50%,
+    var(--mythic-lapis) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 12px rgb(var(--accent-rgb) / 0.15));
+}

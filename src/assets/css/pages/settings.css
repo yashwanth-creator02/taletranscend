@@ -481,10 +481,10 @@
   display: inline-flex;
   align-items: center;
   padding: var(--space-1) var(--space-2-5);
-  border-radius: var(--radius-md);
-  background: rgb(var(--accent-rgb) / var(--a-10));
-  border: 1px solid rgb(var(--accent-rgb) / var(--a-20));
-  color: rgb(var(--accent-light-rgb));
+  border-radius: var(--radius-xs);
+  background: var(--accent-subtle);
+  border: 1px solid var(--accent-border);
+  color: var(--accent-tint);
   font-size: 11px;
   font-weight: 600;
 }
@@ -499,9 +499,9 @@
   text-transform: uppercase;
   letter-spacing: var(--tracking-wider);
   line-height: 1.4;
-  background: rgb(var(--accent-rgb) / var(--a-08));
-  color: rgb(var(--accent-light-rgb));
-  border: 1px solid rgb(var(--accent-rgb) / var(--a-20));
+  background: var(--accent-subtle);
+  color: var(--accent-tint);
+  border: 1px solid var(--accent-border);
 }
 
 .settings-status-badge {

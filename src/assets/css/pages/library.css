@@ -322,27 +322,53 @@
 
 /* ── Light Mode Polish ───────────────────────────────────────────── */
 
+[data-app-theme='light'] .sidebar-section-heading {
+  color: var(--text-secondary);
+  letter-spacing: var(--tracking-widest);
+  font-size: var(--text-xs);
+}
+
+[data-app-theme='light'] .sidebar-filter {
+  color: var(--text-secondary);
+}
+
+[data-app-theme='light'] .sidebar-filter svg {
+  color: var(--text-secondary);
+}
+
+[data-app-theme='light'] .sidebar-filter:hover {
+  background: var(--surface-4);
+  color: var(--text-primary);
+}
+
+[data-app-theme='light'] .sidebar-filter:hover svg {
+  color: var(--accent);
+}
+
 [data-app-theme='light'] .archive-filter-panel {
   background: var(--bg-elevated);
-  border-color: rgb(var(--light-rgb) / 0.08);
-  box-shadow: 0 4px 20px rgb(var(--dark-rgb) / 0.06);
+  border-color: var(--border);
+  box-shadow: var(--shadow-sm);
 }
 
 [data-app-theme='light'] .sidebar-filter--active {
   color: var(--accent);
-  background: rgb(var(--accent-rgb) / 0.08);
-  border-color: rgb(var(--accent-rgb) / 0.25);
+  background: var(--accent-subtle);
+  border-color: var(--border-accent);
 }
 
-[data-app-theme='light'] .sidebar-filter:hover {
-  background: rgb(var(--light-rgb) / 0.04);
+[data-app-theme='light'] .sidebar-filter--active svg {
+  color: var(--accent);
 }
 
 [data-app-theme='light'] .era-chip--inactive {
-  background: rgb(var(--light-rgb) / 0.04);
-  border-color: rgb(var(--light-rgb) / 0.08);
+  background: var(--bg-elevated);
+  border-color: var(--border);
+  color: var(--text-secondary);
 }
 
 [data-app-theme='light'] .era-chip--inactive:hover {
-  background: rgb(var(--light-rgb) / 0.07);
+  background: var(--surface-4);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
 }
