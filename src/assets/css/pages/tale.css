@@ -21,9 +21,11 @@
 .hero-gradient {
   position: relative;
   overflow: hidden;
-  background: rgb(var(--bg-overlay-rgb) / var(--a-08));
+  background: rgb(var(--bg-overlay-rgb) / 0.35);
   border-radius: var(--radius-3xl);
   border: 1px solid rgb(var(--light-rgb) / var(--a-03));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 /* ── Hero Blurred Cover Backdrop ────────────────────────────── */
@@ -39,12 +41,13 @@
 
 .hero-cover-backdrop-img {
   position: absolute;
-  inset: -12px;
+  inset: -30px;
   background-image: var(--bg-url);
   background-size: cover;
-  background-position: center 30%;
-  filter: blur(8px) brightness(0.42) saturate(1.25);
-  transform: scale(1.05);
+  background-position: center;
+  opacity: 0.75;
+  filter: blur(32px) saturate(1.35) brightness(0.85);
+  transform: scale(1.1);
   transition: opacity var(--dur-normal) ease;
 }
 
@@ -52,8 +55,27 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 25% 20%, rgb(var(--accent-rgb) / var(--a-06)), transparent 65%),
-    linear-gradient(180deg, rgb(var(--dark-rgb) / 0.4) 0%, rgb(var(--dark-rgb) / 0.82) 100%);
+    radial-gradient(circle at 75% 30%, rgb(var(--accent-rgb) / 0.12), transparent 65%),
+    linear-gradient(
+      90deg,
+      rgb(var(--dark-rgb) / 0.9) 0%,
+      rgb(var(--dark-rgb) / 0.78) 45%,
+      rgb(var(--dark-rgb) / 0.35) 80%,
+      rgb(var(--dark-rgb) / 0.5) 100%
+    );
+}
+
+@media (max-width: 64rem) {
+  .hero-cover-backdrop-overlay {
+    background:
+      radial-gradient(circle at 50% 20%, rgb(var(--accent-rgb) / 0.1), transparent 60%),
+      linear-gradient(
+        180deg,
+        rgb(var(--dark-rgb) / 0.4) 0%,
+        rgb(var(--dark-rgb) / 0.75) 45%,
+        rgb(var(--dark-rgb) / 0.92) 100%
+      );
+  }
 }
 
 .hero-title {
@@ -684,24 +706,42 @@
 /* ── Light Mode Polish ───────────────────────────────────────────── */
 
 [data-app-theme='light'] .hero-gradient {
-  background: var(--surface-gradient-strong);
+  background: rgb(var(--bg-overlay-rgb) / 0.35);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-md);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 [data-app-theme='light'] .hero-cover-backdrop-img {
-  filter: blur(14px) brightness(1.05) saturate(1.15);
-  opacity: 0.25;
+  opacity: 0.85;
+  filter: blur(32px) saturate(1.4) brightness(1.02);
+  transform: scale(1.1);
 }
 
 [data-app-theme='light'] .hero-cover-backdrop-overlay {
   background:
-    radial-gradient(circle at 25% 20%, rgb(var(--accent-rgb) / 0.08), transparent 65%),
+    radial-gradient(circle at 75% 30%, rgb(var(--accent-rgb) / 0.08), transparent 65%),
     linear-gradient(
-      180deg,
-      rgb(var(--bg-overlay-rgb) / 0.82) 0%,
-      rgb(var(--bg-base-rgb) / 0.98) 100%
+      90deg,
+      rgb(var(--bg-overlay-rgb) / 0.92) 0%,
+      rgb(var(--bg-overlay-rgb) / 0.82) 45%,
+      rgb(var(--bg-overlay-rgb) / 0.45) 80%,
+      rgb(var(--bg-overlay-rgb) / 0.55) 100%
     );
+}
+
+@media (max-width: 64rem) {
+  [data-app-theme='light'] .hero-cover-backdrop-overlay {
+    background:
+      radial-gradient(circle at 50% 20%, rgb(var(--accent-rgb) / 0.08), transparent 60%),
+      linear-gradient(
+        180deg,
+        rgb(var(--bg-overlay-rgb) / 0.45) 0%,
+        rgb(var(--bg-overlay-rgb) / 0.82) 45%,
+        rgb(var(--bg-overlay-rgb) / 0.94) 100%
+      );
+  }
 }
 
 [data-app-theme='light'] #hero-section .hero-title,
