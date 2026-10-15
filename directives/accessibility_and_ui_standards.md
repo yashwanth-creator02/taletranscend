@@ -220,6 +220,10 @@ The TaleTranscend brand mark is the mythical golden-trimmed black quill pen enci
 - **Global Command Palette Integration**:
   - Theme switches are registered as first-class actions (`theme:transcendental`, `theme:dark`, `theme:light`, `theme:system`) in `nav.config.js`.
   - Users can switch themes instantly from any page via `Ctrl+K` / `⌘K` under the "Appearance & Theme" group.
+- **Light Mode Content Contrast & Badge Readability**:
+  - Content panes (e.g., Synopsis descriptions, lore tags, chapter scrolls, reflections, and inquiry forms) often inherit legacy dark-mode utility classes like `text-slate-300`, `text-slate-400`, `bg-white/4`, and `border-white/6`.
+  - Under `[data-app-theme='light']`, all body text must explicitly map to `var(--text-primary)`, metadata tags/pills to `var(--surface-2)` or `var(--surface-3)` with `var(--border)` and `var(--text-secondary)`, and section badges/icons to `var(--accent)`.
+  - Ensures WCAG AA compliance (contrast ratio >= 4.5:1) on white/elevated cards without breaking dark theme obsidian surfaces.
 
 ## Tools / Scripts to Use
 
