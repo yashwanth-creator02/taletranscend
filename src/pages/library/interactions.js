@@ -328,7 +328,9 @@ async function _handleMarkFinished(userId, taleId) {
       }
 
       // 2. Set progress percentage and fill to 100%
-      const progressLabel = cardEl.querySelector('.text-indigo-300');
+      const progressLabel = cardEl.querySelector(
+        '.card-progress-val, .text-indigo-300, .text-accent-tint'
+      );
       if (progressLabel) {
         progressLabel.textContent = '100%';
       }

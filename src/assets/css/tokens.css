@@ -196,6 +196,26 @@ html[data-app-theme='transcendental'],
   --toast-info-bg: rgb(var(--info-rgb) / 0.12);
   --toast-info-border: rgb(var(--info-rgb) / 0.3);
 
+  /* Book Cover Presentation Tokens (Default / Transcendental Theme) */
+  --book-spine-gradient: linear-gradient(
+    90deg,
+    rgb(var(--dark-rgb) / var(--a-11)) 0%,
+    rgb(var(--dark-rgb) / var(--a-09)) 35%,
+    rgb(var(--light-rgb) / var(--a-03)) 65%,
+    transparent 100%
+  );
+  --book-cover-scrim: linear-gradient(
+    to top,
+    rgb(var(--dark-rgb) / 0.85) 0%,
+    rgb(var(--dark-rgb) / 0.35) 40%,
+    transparent 75%
+  );
+  --book-cover-meta-text: rgb(255 255 255 / 0.7);
+  --book-cover-meta-val: #a5b4fc;
+  --book-cover-progress-track: rgb(255 255 255 / 0.15);
+  --book-cover-shadow:
+    0 10px 25px rgb(var(--dark-rgb) / 0.4), inset 0 0 0 1px rgb(var(--light-rgb) / var(--a-02));
+
   color-scheme: dark;
 }
 
@@ -344,6 +364,26 @@ html[data-app-theme='dark'],
   --toast-info-bg: var(--mythic-lapis-bg);
   --toast-info-border: var(--mythic-lapis-border);
 
+  /* Book Cover Presentation Tokens (Dark Theme) */
+  --book-spine-gradient: linear-gradient(
+    90deg,
+    rgb(var(--dark-rgb) / var(--a-11)) 0%,
+    rgb(var(--dark-rgb) / var(--a-09)) 35%,
+    rgb(var(--light-rgb) / var(--a-03)) 65%,
+    transparent 100%
+  );
+  --book-cover-scrim: linear-gradient(
+    to top,
+    rgb(var(--dark-rgb) / 0.85) 0%,
+    rgb(var(--dark-rgb) / 0.35) 40%,
+    transparent 75%
+  );
+  --book-cover-meta-text: rgb(255 255 255 / 0.7);
+  --book-cover-meta-val: #a5b4fc;
+  --book-cover-progress-track: rgb(255 255 255 / 0.15);
+  --book-cover-shadow:
+    0 10px 25px rgb(var(--dark-rgb) / 0.45), inset 0 0 0 1px rgb(var(--light-rgb) / var(--a-02));
+
   color-scheme: dark;
 }
 
@@ -487,6 +527,25 @@ html[data-app-theme='light'],
   --toast-info-fg: #3730a3;
   --toast-info-bg: rgb(55 48 163 / 0.1);
   --toast-info-border: rgb(55 48 163 / 0.3);
+
+  /* Book Cover Presentation Tokens (Illuminated Light Theme) */
+  --book-spine-gradient: linear-gradient(
+    90deg,
+    rgb(0 0 0 / 0.14) 0%,
+    rgb(0 0 0 / 0.05) 35%,
+    rgb(255 255 255 / 0.45) 70%,
+    transparent 100%
+  );
+  --book-cover-scrim: linear-gradient(
+    to top,
+    rgb(15 23 42 / 0.62) 0%,
+    rgb(15 23 42 / 0.22) 35%,
+    transparent 70%
+  );
+  --book-cover-meta-text: rgb(255 255 255 / 0.92);
+  --book-cover-meta-val: #ffffff;
+  --book-cover-progress-track: rgb(255 255 255 / 0.28);
+  --book-cover-shadow: 0 6px 18px rgb(0 0 0 / 0.12), inset 0 0 0 1px rgb(26 31 44 / 0.08);
 
   color-scheme: light;
 }

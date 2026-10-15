@@ -324,7 +324,9 @@ async function _handleCardAction(action, id, e) {
           }
           const progressFill = cardEl.querySelector('.progress-fill');
           if (progressFill) progressFill.style.width = '100%';
-          const progressLabel = cardEl.querySelector('.text-indigo-300, .text-indigo-400');
+          const progressLabel = cardEl.querySelector(
+            '.card-progress-val, .text-indigo-300, .text-indigo-400'
+          );
           if (progressLabel) progressLabel.textContent = '100%';
         }
         showToast('Chronicle sealed in the Eternal Archives.', 'success');

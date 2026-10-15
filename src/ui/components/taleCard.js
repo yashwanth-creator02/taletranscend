@@ -247,10 +247,10 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
   const menuId = `menu-${id}`;
   const cover = coverUrl || _defaultCover();
 
-  const timeBadge = readTimeLabel ? _badge(readTimeLabel, 'bg-surface-2 text-muted') : '';
+  const timeBadge = readTimeLabel ? _badge(readTimeLabel, 'badge-subtle') : '';
   const statusBadgeClasses = isFinished
-    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-    : 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20';
+    ? 'badge-finished border-emerald-500/20'
+    : 'badge-era border-indigo-500/20';
   const bookmarkedAction = isBookmarked ? 'decouple' : 'couple';
   const bookmarkedLabel = isBookmarked ? 'Remove Bookmark' : 'Save to Shelf';
   const bookmarkedIcon = isBookmarked ? 'bookmark-minus' : 'bookmark-plus';
@@ -265,7 +265,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
         <!-- Top Bar: Era Badges & Options Menu -->
         <div class="mb-2 sm:mb-3 flex items-center justify-between gap-1.5 sm:gap-2 relative z-20 min-h-6 sm:min-h-7">
           <div class="flex items-center gap-1 sm:gap-1.5 flex-wrap min-w-0">
-            ${safeEra ? _badge(safeEra, 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20 max-w-[85px] sm:max-w-none truncate') : ''}
+            ${safeEra ? _badge(safeEra, 'badge-era max-w-[85px] sm:max-w-none truncate') : ''}
             ${isFinished ? _badge('Finished', statusBadgeClasses) : ''}
           </div>
 
@@ -331,13 +331,13 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
             loading="lazy"
             onerror="this.onerror=null;this.src='${escapeHtml(_defaultCover())}'"
           />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80 pointer-events-none"></div>
+          <div class="card-image-scrim"></div>
 
           <!-- Bottom of Cover: Progress Bar & Percentage -->
           <div class="absolute inset-x-0 bottom-0 p-2 sm:p-2.5 z-10">
             <div class="card-progress-meta">
-              <span class="text-muted">Progress</span>
-              <span class="text-accent-tint">${_progressLabel(progress)}</span>
+              <span class="card-progress-label">Progress</span>
+              <span class="card-progress-val text-accent-tint text-indigo-300">${_progressLabel(progress)}</span>
             </div>
             <div class="progress-bar">
               <div class="progress-fill" style="width: ${progress}%"></div>
