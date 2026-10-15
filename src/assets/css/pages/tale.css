@@ -924,3 +924,279 @@
   background: var(--surface-2);
   border-color: var(--border-accent);
 }
+
+/* ── Light Mode: Tab Navigation ─────────────────────────────────── */
+[data-app-theme='light'] #tale-tab-nav {
+  border-bottom-color: var(--border) !important;
+}
+
+[data-app-theme='light'] .tab-btn {
+  color: var(--text-secondary) !important;
+}
+
+[data-app-theme='light'] .tab-btn:hover {
+  color: var(--text-primary) !important;
+  background: var(--surface-2) !important;
+}
+
+[data-app-theme='light'] .tab-btn.active {
+  color: var(--accent) !important;
+  background: rgb(var(--accent-rgb) / 0.1) !important;
+  border-color: var(--border-accent) !important;
+  box-shadow: var(--shadow-sm);
+}
+
+[data-app-theme='light'] .tab-btn [data-lucide],
+[data-app-theme='light'] .tab-btn i {
+  color: inherit !important;
+}
+
+/* ── Light Mode: Synopsis & Lore Content ───────────────────────── */
+[data-app-theme='light'] #content-about #display-description {
+  color: var(--text-primary) !important;
+  line-height: 1.7;
+}
+
+[data-app-theme='light'] #content-about span.tracking-\[0\.3em\],
+[data-app-theme='light'] #content-about span.tracking-\[0\.25em\] {
+  color: var(--text-secondary) !important;
+  font-weight: 800;
+}
+
+[data-app-theme='light'] #content-about [data-lucide] {
+  color: var(--accent) !important;
+}
+
+.lore-tag-pill {
+  transition: all var(--dur-fast) ease;
+}
+
+[data-app-theme='light'] .lore-tag-pill,
+[data-app-theme='light'] #lore-tag-list span {
+  background: var(--surface-2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-secondary) !important;
+  font-weight: 700;
+}
+
+[data-app-theme='light'] .lore-tag-pill:hover,
+[data-app-theme='light'] #lore-tag-list span:hover {
+  background: var(--surface-3) !important;
+  border-color: var(--border-strong) !important;
+  color: var(--text-primary) !important;
+}
+
+/* ── Light Mode: Chronicles (Chapters) Pane ────────────────────── */
+[data-app-theme='light'] #content-chapters h3 {
+  color: var(--text-primary) !important;
+}
+
+[data-app-theme='light'] #chronicle-read-count {
+  color: var(--accent) !important;
+  font-weight: 700;
+}
+
+[data-app-theme='light'] #content-chapters .border-b {
+  border-bottom-color: var(--border) !important;
+}
+
+[data-app-theme='light'] #btn-sort-chronicles,
+[data-app-theme='light'] #btn-mark-all-unread,
+[data-app-theme='light'] #btn-download-all-chronicles {
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-secondary) !important;
+  box-shadow: var(--shadow-sm);
+}
+
+[data-app-theme='light'] #btn-sort-chronicles:hover,
+[data-app-theme='light'] #btn-mark-all-unread:hover,
+[data-app-theme='light'] #btn-download-all-chronicles:hover {
+  background: var(--surface-3) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-accent) !important;
+}
+
+[data-app-theme='light'] #btn-sort-chronicles [data-lucide],
+[data-app-theme='light'] #btn-sort-chronicles i {
+  color: var(--accent) !important;
+}
+
+[data-app-theme='light'] #btn-mark-all-read {
+  background: rgb(var(--accent-rgb) / 0.1) !important;
+  border: 1px solid var(--border-accent) !important;
+  color: var(--accent) !important;
+}
+
+[data-app-theme='light'] #btn-mark-all-read:hover {
+  background: rgb(var(--accent-rgb) / 0.18) !important;
+  color: var(--accent-hover) !important;
+}
+
+[data-app-theme='light'] .chapter-item .min-w-0 span.tracking-\[0\.2em\] {
+  color: var(--text-muted) !important;
+}
+
+[data-app-theme='light'] .chapter-item h4 {
+  color: var(--text-primary) !important;
+}
+
+[data-app-theme='light'] .chapter-item .w-8.h-8,
+[data-app-theme='light'] .chapter-item .w-9.h-9 {
+  background: var(--surface-3) !important;
+  border-color: var(--border) !important;
+  color: var(--accent) !important;
+}
+
+[data-app-theme='light'] .chapter-item:hover .w-8.h-8,
+[data-app-theme='light'] .chapter-item:hover .w-9.h-9 {
+  background: var(--accent) !important;
+  color: var(--text-on-accent) !important;
+}
+
+[data-app-theme='light'] .chapter-item [data-action='download-chapter'] {
+  background: var(--surface-2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-secondary) !important;
+}
+
+[data-app-theme='light'] .chapter-item [data-action='download-chapter']:hover {
+  background: var(--surface-3) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-accent) !important;
+}
+
+[data-app-theme='light'] .chapter-item [data-action='mark-read'] {
+  background: rgb(var(--accent-rgb) / 0.1) !important;
+  border: 1px solid var(--border-accent) !important;
+  color: var(--accent) !important;
+}
+
+[data-app-theme='light'] .chapter-item [data-action='mark-read']:hover {
+  background: rgb(var(--accent-rgb) / 0.18) !important;
+  color: var(--accent-hover) !important;
+}
+
+[data-app-theme='light'] .chapter-item [data-action='mark-unread'] {
+  background: var(--surface-2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-secondary) !important;
+}
+
+[data-app-theme='light'] .chapter-item [data-action='mark-unread']:hover {
+  background: var(--surface-3) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-strong) !important;
+}
+
+/* ── Light Mode: Echoes (Comments) Pane ────────────────────────── */
+[data-app-theme='light'] #content-comments span.tracking-\[0\.25em\] {
+  color: var(--text-secondary) !important;
+  font-weight: 800;
+}
+
+[data-app-theme='light'] #content-comments [data-lucide='message-square-plus'] {
+  color: var(--accent) !important;
+}
+
+[data-app-theme='light'] .comment-card .text-slate-400,
+[data-app-theme='light'] .comment-card .text-slate-500 {
+  color: var(--text-muted) !important;
+}
+
+[data-app-theme='light'] .comment-card .text-slate-200,
+[data-app-theme='light'] .comment-card .text-slate-300 {
+  color: var(--text-primary) !important;
+}
+
+[data-app-theme='light'] .comment-action-btn,
+[data-app-theme='light'] .comment-cancel-btn {
+  color: var(--text-secondary) !important;
+}
+
+[data-app-theme='light'] .comment-action-btn:hover,
+[data-app-theme='light'] .comment-cancel-btn:hover {
+  color: var(--accent) !important;
+}
+
+[data-app-theme='light'] .edited-badge {
+  background: var(--surface-3) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-muted) !important;
+}
+
+/* ── Light Mode: Missives Pane ─────────────────────────────────── */
+[data-app-theme='light'] #content-letter .border-b,
+[data-app-theme='light'] #content-letter .border-t {
+  border-color: var(--border) !important;
+}
+
+[data-app-theme='light'] #content-letter span.tracking-\[0\.25em\],
+[data-app-theme='light'] #content-letter span.tracking-\[0\.18em\] {
+  color: var(--accent) !important;
+}
+
+[data-app-theme='light'] #content-letter .text-slate-300,
+[data-app-theme='light'] #content-letter .text-slate-400 {
+  color: var(--text-secondary) !important;
+}
+
+[data-app-theme='light'] #content-letter .text-slate-500 {
+  color: var(--text-muted) !important;
+}
+
+[data-app-theme='light'] #content-letter label {
+  color: var(--text-primary) !important;
+}
+
+[data-app-theme='light'] #inquire-char-counter {
+  background: var(--surface-2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-muted) !important;
+}
+
+[data-app-theme='light'] .inquiry-category-chip {
+  background: var(--surface-2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-secondary) !important;
+}
+
+[data-app-theme='light'] .inquiry-category-chip .chip-title {
+  color: var(--text-primary) !important;
+}
+
+[data-app-theme='light'] .inquiry-category-chip .chip-desc {
+  color: var(--text-muted) !important;
+  opacity: 1 !important;
+}
+
+[data-app-theme='light'] .inquiry-category-chip:hover {
+  background: var(--surface-3) !important;
+  border-color: var(--border-accent) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-app-theme='light'] .inquiry-category-chip.active {
+  background: rgb(var(--accent-rgb) / 0.1) !important;
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+}
+
+[data-app-theme='light'] .inquiry-category-chip.active .chip-title {
+  color: var(--accent) !important;
+}
+
+[data-app-theme='light'] .inquiry-category-chip.active .chip-desc {
+  color: var(--accent) !important;
+  opacity: 0.85 !important;
+}
+
+[data-app-theme='light'] .inquiry-category-chip.active svg {
+  color: var(--accent) !important;
+}
+
+[data-app-theme='light'] #author-missives-stats > div {
+  background: var(--surface-2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-secondary) !important;
+}

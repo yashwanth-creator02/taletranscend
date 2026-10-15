@@ -302,7 +302,7 @@ export async function renderTale(userId, tale, taleId, isResonated = false) {
       tagList.innerHTML = tale.tags
         .map(
           (t) => `
-            <span class="px-2.5 py-1 rounded-lg bg-white/4 border border-white/6 text-[10px] font-bold uppercase tracking-wider text-slate-300">
+            <span class="lore-tag-pill px-2.5 py-1 rounded-lg bg-white/4 border border-white/6 text-[10px] font-bold uppercase tracking-wider text-slate-300">
               ${escapeHtml(t)}
             </span>
           `
