@@ -175,6 +175,27 @@ html[data-app-theme='transcendental'],
   --mythic-violet-bg: rgb(192 132 252 / 0.12);
   --mythic-violet-border: rgb(192 132 252 / 0.3);
 
+  /* Toast Notification Primitives (Default / Transcendental Theme) */
+  --toast-bg: rgb(13 13 20 / 0.88);
+  --toast-border: rgb(var(--light-rgb) / 0.12);
+  --toast-shadow: 0 16px 36px -4px rgb(0 0 0 / 0.7), 0 0 0 1px rgb(255 255 255 / 0.05);
+
+  --toast-success-fg: rgb(var(--success-rgb));
+  --toast-success-bg: rgb(var(--success-rgb) / 0.12);
+  --toast-success-border: rgb(var(--success-rgb) / 0.3);
+
+  --toast-error-fg: rgb(var(--danger-rgb));
+  --toast-error-bg: rgb(var(--danger-rgb) / 0.12);
+  --toast-error-border: rgb(var(--danger-rgb) / 0.3);
+
+  --toast-warning-fg: rgb(var(--warning-rgb));
+  --toast-warning-bg: rgb(var(--warning-rgb) / 0.12);
+  --toast-warning-border: rgb(var(--warning-rgb) / 0.3);
+
+  --toast-info-fg: rgb(var(--info-rgb));
+  --toast-info-bg: rgb(var(--info-rgb) / 0.12);
+  --toast-info-border: rgb(var(--info-rgb) / 0.3);
+
   color-scheme: dark;
 }
 
@@ -302,6 +323,27 @@ html[data-app-theme='dark'],
   --mythic-violet-bg: rgb(192 132 252 / 0.12);
   --mythic-violet-border: rgb(192 132 252 / 0.3);
 
+  /* Toast Notification Primitives (Dark Theme) */
+  --toast-bg: rgb(18 21 31 / 0.88);
+  --toast-border: rgb(var(--light-rgb) / 0.12);
+  --toast-shadow: 0 16px 36px -4px rgb(0 0 0 / 0.7), 0 0 0 1px rgb(255 255 255 / 0.05);
+
+  --toast-success-fg: var(--mythic-sage);
+  --toast-success-bg: var(--mythic-sage-bg);
+  --toast-success-border: var(--mythic-sage-border);
+
+  --toast-error-fg: #f87171;
+  --toast-error-bg: rgb(248 113 113 / 0.12);
+  --toast-error-border: rgb(248 113 113 / 0.3);
+
+  --toast-warning-fg: var(--mythic-gold);
+  --toast-warning-bg: var(--mythic-gold-bg);
+  --toast-warning-border: var(--mythic-gold-border);
+
+  --toast-info-fg: var(--mythic-lapis);
+  --toast-info-bg: var(--mythic-lapis-bg);
+  --toast-info-border: var(--mythic-lapis-border);
+
   color-scheme: dark;
 }
 
@@ -422,6 +464,29 @@ html[data-app-theme='light'],
   --nav-bg: rgb(248 246 241 / 0.92);
   --nav-bg-scrolled: rgb(248 246 241 / 0.98);
   --nav-border: rgb(26 31 44 / 0.12);
+
+  /* Toast Notification Primitives (Illuminated Light Theme) */
+  --toast-bg: rgb(251 249 245 / 0.96);
+  --toast-border: rgb(26 31 44 / 0.16);
+  --toast-shadow:
+    0 14px 32px -4px rgb(0 0 0 / 0.14), 0 2px 8px rgb(180 83 9 / 0.08),
+    0 0 0 1px rgb(26 31 44 / 0.1);
+
+  --toast-success-fg: #15803d;
+  --toast-success-bg: rgb(22 101 52 / 0.1);
+  --toast-success-border: rgb(22 101 52 / 0.3);
+
+  --toast-error-fg: #b91c1c;
+  --toast-error-bg: rgb(185 28 28 / 0.1);
+  --toast-error-border: rgb(185 28 28 / 0.3);
+
+  --toast-warning-fg: #b45309;
+  --toast-warning-bg: rgb(180 83 9 / 0.1);
+  --toast-warning-border: rgb(180 83 9 / 0.3);
+
+  --toast-info-fg: #3730a3;
+  --toast-info-bg: rgb(55 48 163 / 0.1);
+  --toast-info-border: rgb(55 48 163 / 0.3);
 
   color-scheme: light;
 }

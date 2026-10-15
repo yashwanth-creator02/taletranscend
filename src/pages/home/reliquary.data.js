@@ -17,6 +17,7 @@ import mapLightAsset from '@/assets/images/reliquary/map-light.svg?v=2';
 import quillAsset from '@/assets/images/reliquary/quill.svg';
 import quillLightAsset from '@/assets/images/reliquary/quill-light.svg';
 import spectaclesAsset from '@/assets/images/reliquary/spectacles.svg';
+import spectaclesLightAsset from '@/assets/images/reliquary/spectacles-light.svg';
 
 /**
  * @typedef {Object} ReliquaryArtifact
@@ -213,7 +214,7 @@ export function generateArtifactForTale(tale, index = 0) {
     {
       type: 'spectacles',
       asset: spectaclesAsset,
-      assetLight: spectaclesAsset,
+      assetLight: spectaclesLightAsset,
       animation: 'reliquary-item--spectacles',
     },
   ];
