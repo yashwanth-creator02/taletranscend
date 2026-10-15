@@ -96,6 +96,7 @@ async function _loadIcons() {
     AlertCircle: L.AlertCircle,
     AlertTriangle: L.AlertTriangle,
     TriangleAlert: L.TriangleAlert,
+    Shield: L.Shield,
     ShieldAlert: L.ShieldAlert,
     Flag: L.Flag,
     Ban: L.Ban,
@@ -110,6 +111,7 @@ async function _loadIcons() {
     Image: L.Image,
     // People
     User: L.User,
+    UserPen: L.UserPen,
     UserCheck: L.UserCheck,
     Users2: L.Users2,
     // Charts & Stats
@@ -126,8 +128,10 @@ async function _loadIcons() {
     History: L.History,
     // Discovery
     Search: L.Search,
+    SearchX: L.SearchX,
     Compass: L.Compass,
     Filter: L.Filter,
+    Sliders: L.Sliders,
     SlidersHorizontal: L.SlidersHorizontal,
     Hourglass: L.Hourglass,
     Tags: L.Tags,
@@ -137,6 +141,7 @@ async function _loadIcons() {
     Sparkles: L.Sparkles,
     WandSparkles: L.WandSparkles,
     Wand2: L.Wand2,
+    Zap: L.Zap,
     Flame: L.Flame,
     Heart: L.Heart,
     Star: L.Star,
@@ -163,6 +168,8 @@ async function _loadIcons() {
     PenLine: L.PenLine,
     List: L.List,
     Type: L.Type,
+    ALargeSmall: L.ALargeSmall,
+    AlignJustify: L.AlignJustify,
     Palette: L.Palette,
     Highlighter: L.Highlighter,
     // Social Platforms
@@ -172,6 +179,7 @@ async function _loadIcons() {
     // Auth
     LogIn: L.LogIn,
     LogOut: L.LogOut,
+    Key: L.Key,
     // Library / Achievements
     Library: L.Library,
     ShieldCheck: L.ShieldCheck,

@@ -18,6 +18,7 @@ import {
   serverTimestamp,
   refs,
 } from '@fb/index.js';
+import { initAppTheme } from '@config/theme.config.js';
 import { navigateTo, initPageReveal, readyReveal, createLogger, markUserVisited } from '@/utils';
 import { initIcons } from '@ui/components/icons.js';
 import { showToast } from '@ui/components/toast.js';
@@ -27,7 +28,8 @@ const log = createLogger('Login');
 // Current auth mode: 'signin' | 'signup'
 let authMode = 'signin';
 
-// Initialize page reveal animation
+// Initialize theme and page reveal animation
+initAppTheme();
 initPageReveal();
 
 /**

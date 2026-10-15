@@ -161,7 +161,7 @@
 .card-button:hover {
   background: rgb(var(--accent-rgb) / var(--a-07));
   border-color: rgb(var(--accent-rgb) / var(--a-09));
-  color: white;
+  color: var(--accent);
   transform: translateY(-1px);
   box-shadow: 0 4px 14px rgb(var(--accent-rgb) / var(--a-05));
 }
@@ -193,4 +193,51 @@
 
 .scroll-container:hover::-webkit-scrollbar-thumb {
   background: rgb(var(--accent-rgb) / var(--a-07));
+}
+
+/* ── Light Mode Polish ───────────────────────────────────────────── */
+
+[data-app-theme='light'] .tale-card {
+  background: var(--bg-elevated);
+  border-color: rgb(var(--light-rgb) / 0.08);
+  box-shadow:
+    0 4px 16px rgb(var(--dark-rgb) / 0.06),
+    0 1px 3px rgb(var(--dark-rgb) / 0.04);
+}
+
+[data-app-theme='light'] .tale-card:hover {
+  border-color: rgb(var(--accent-rgb) / 0.35);
+  box-shadow:
+    0 12px 28px rgb(var(--dark-rgb) / 0.1),
+    0 0 20px rgb(var(--accent-rgb) / 0.1);
+}
+
+[data-app-theme='light'] .card-image-wrap {
+  background: var(--bg-overlay);
+  box-shadow:
+    0 8px 20px rgb(var(--dark-rgb) / 0.12),
+    inset 0 0 0 1px rgb(var(--light-rgb) / 0.06);
+}
+
+[data-app-theme='light'] .card-button {
+  background: rgb(var(--light-rgb) / 0.04);
+  border-color: rgb(var(--light-rgb) / 0.08);
+  color: var(--text-primary);
+}
+
+[data-app-theme='light'] .card-button:hover {
+  background: rgb(var(--accent-rgb) / 0.08);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+[data-app-theme='light'] .options-menu {
+  background: var(--bg-elevated);
+  border-color: rgb(var(--light-rgb) / 0.12);
+  box-shadow: 0 16px 36px rgb(var(--dark-rgb) / 0.12);
+}
+
+[data-app-theme='light'] .options-menu .menu-btn:hover {
+  background: rgb(var(--accent-rgb) / 0.06);
+  color: var(--accent);
 }

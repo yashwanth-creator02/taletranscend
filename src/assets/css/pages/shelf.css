@@ -3,11 +3,6 @@
    Strictly compliant with tokens.css. Zero raw hex or rgb literals.
 */
 
-html {
-  opacity: 0;
-  transition: opacity 220ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 /* Ensure global nav and mobile dock never display on the shelf page */
 body.page-shelf #app-nav,
 body.page-shelf #mobile-dock-container {
@@ -305,4 +300,25 @@ body.page-shelf #mobile-dock-container {
   background: var(--rune);
   border-radius: 0 4px 4px 0;
   box-shadow: 0 0 15px var(--rune);
+}
+
+/* ── Light Mode Polish ───────────────────────────────────────────── */
+
+[data-app-theme='light'] .vault-hero-card {
+  background: var(--bg-elevated);
+  border: 1px solid rgb(var(--light-rgb) / 0.08);
+  box-shadow: 0 8px 30px rgb(var(--dark-rgb) / 0.06);
+}
+
+[data-app-theme='light'] .shelf-card {
+  background: var(--bg-elevated);
+  border-color: rgb(var(--light-rgb) / 0.08);
+  box-shadow: 0 4px 16px rgb(var(--dark-rgb) / 0.06);
+}
+
+[data-app-theme='light'] .shelf-card .options-menu,
+[data-app-theme='light'] .sort-menu {
+  background: var(--bg-elevated);
+  border-color: rgb(var(--light-rgb) / 0.12);
+  box-shadow: 0 16px 36px rgb(var(--dark-rgb) / 0.12);
 }

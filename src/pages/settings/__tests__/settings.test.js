@@ -22,10 +22,24 @@ import {
   updateAvatarPreview,
   handleSaveProfile,
   initProfileSettings,
+  renderAppThemes,
+  updateActiveAppThemeBadge,
+  updateBioCharCount,
+  updateGeminiKeyBadge,
+  initGeminiKeyModal,
 } from '../settings.js';
-import { READER_STORAGE_KEYS } from '@config/theme.config.js';
+import {
+  READER_STORAGE_KEYS,
+  APP_THEMES,
+  DEFAULT_APP_THEME,
+  APP_THEME_STORAGE_KEY,
+  getSavedAppTheme,
+  applyAppTheme,
+  initAppTheme,
+} from '@config/theme.config.js';
 import { auth, onAuthStateChanged, setDoc, getDoc } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
+import { getStoredApiKey } from '@/services/ai/apiKey.storage.js';
 
 vi.mock('@fb/index.js', () => ({
   auth: { currentUser: null },
@@ -212,6 +226,187 @@ describe('Settings Page Controller', () => {
       expect(activeCard).toBeTruthy();
       expect(activeCard.getAttribute('data-theme')).toBe('sepia');
       expect(activeCard.getAttribute('aria-checked')).toBe('true');
+    });
+
+    it('renders distinct manuscript specimens with mode badges and typographic glyphs', () => {
+      document.body.innerHTML = '<div id="settings-theme-grid"></div>';
+      renderThemes('transcendental');
+
+      const grid = document.getElementById('settings-theme-grid');
+      const cards = grid.querySelectorAll('.theme-option-card');
+      expect(cards.length).toBe(12);
+
+      const sepiaCard = grid.querySelector('[data-theme="sepia"]');
+      expect(sepiaCard).toBeTruthy();
+      expect(sepiaCard.querySelector('.theme-specimen')).toBeTruthy();
+      expect(sepiaCard.querySelector('.theme-specimen__glyph').textContent).toBe('Aa');
+      expect(sepiaCard.querySelector('.theme-specimen__badge').textContent.trim()).toBe('Light');
+
+      const noirCard = grid.querySelector('[data-theme="noir"]');
+      expect(noirCard).toBeTruthy();
+      expect(noirCard.querySelector('.theme-specimen__badge').textContent.trim()).toBe('Dark');
+    });
+  });
+
+  describe('updateBioCharCount', () => {
+    it('updates character count display correctly', () => {
+      document.body.innerHTML = '<span id="bio-char-count">0 / 1000</span>';
+      updateBioCharCount(142);
+      expect(document.getElementById('bio-char-count').textContent).toBe('142 / 1000');
+    });
+  });
+
+  describe('updateGeminiKeyBadge', () => {
+    beforeEach(() => {
+      document.body.innerHTML = `
+        <span id="gemini-key-status" class="settings-status-badge settings-status-badge--inactive">
+          <span id="gemini-key-status-text">Not Configured</span>
+        </span>
+        <button id="btn-open-gemini-key-modal">
+          <span id="btn-open-gemini-text">Configure Key</span>
+        </button>
+        <input type="password" id="input-gemini-key" value="" />
+      `;
+    });
+
+    it('sets active status when a key is present', () => {
+      getStoredApiKey.mockReturnValue('AIzaSy123456');
+      const input = document.getElementById('input-gemini-key');
+      input.value = 'AIzaSy123456';
+
+      updateGeminiKeyBadge();
+
+      const badge = document.getElementById('gemini-key-status');
+      expect(badge.classList.contains('settings-status-badge--active')).toBe(true);
+      expect(badge.classList.contains('settings-status-badge--inactive')).toBe(false);
+      expect(document.getElementById('gemini-key-status-text').textContent).toBe('Key Configured');
+      expect(document.getElementById('btn-open-gemini-text').textContent).toBe('Manage Key');
+    });
+
+    it('sets inactive status when no key is present', () => {
+      getStoredApiKey.mockReturnValue('');
+      const input = document.getElementById('input-gemini-key');
+      input.value = '';
+
+      updateGeminiKeyBadge();
+
+      const badge = document.getElementById('gemini-key-status');
+      expect(badge.classList.contains('settings-status-badge--inactive')).toBe(true);
+      expect(document.getElementById('gemini-key-status-text').textContent).toBe('Not Configured');
+      expect(document.getElementById('btn-open-gemini-text').textContent).toBe('Configure Key');
+    });
+  });
+
+  describe('initGeminiKeyModal', () => {
+    beforeEach(() => {
+      getStoredApiKey.mockReturnValue('');
+      document.body.innerHTML = `
+        <span id="gemini-key-status" class="settings-status-badge settings-status-badge--inactive">
+          <span id="gemini-key-status-text">Not Configured</span>
+        </span>
+        <button id="btn-open-gemini-key-modal">
+          <span id="btn-open-gemini-text">Configure Key</span>
+        </button>
+        <input type="password" id="input-gemini-key" value="" />
+        <div id="modal-gemini-key" class="settings-modal-overlay hidden" aria-hidden="true">
+          <div id="modal-gemini-backdrop"></div>
+          <button id="modal-gemini-close"></button>
+          <input type="password" id="input-gemini-key-modal" />
+          <button id="btn-toggle-modal-key">Show</button>
+          <button id="btn-clear-modal-key">Remove</button>
+          <button id="btn-cancel-modal-key">Cancel</button>
+          <button id="btn-save-modal-key">Save</button>
+        </div>
+      `;
+    });
+
+    it('opens modal and loads key on button click', () => {
+      getStoredApiKey.mockReturnValue('AIzaSyTestKey');
+      document.getElementById('input-gemini-key').value = 'AIzaSyTestKey';
+      initGeminiKeyModal();
+
+      const openBtn = document.getElementById('btn-open-gemini-key-modal');
+      const modal = document.getElementById('modal-gemini-key');
+      const modalInput = document.getElementById('input-gemini-key-modal');
+
+      openBtn.click();
+
+      expect(modal.classList.contains('hidden')).toBe(false);
+      expect(modal.getAttribute('aria-hidden')).toBe('false');
+      expect(modalInput.value).toBe('AIzaSyTestKey');
+    });
+
+    it('closes modal on cancel button and close button click', () => {
+      initGeminiKeyModal();
+
+      const openBtn = document.getElementById('btn-open-gemini-key-modal');
+      const closeBtn = document.getElementById('modal-gemini-close');
+      const cancelBtn = document.getElementById('btn-cancel-modal-key');
+      const modal = document.getElementById('modal-gemini-key');
+
+      openBtn.click();
+      expect(modal.classList.contains('hidden')).toBe(false);
+
+      closeBtn.click();
+      expect(modal.classList.contains('hidden')).toBe(true);
+
+      openBtn.click();
+      expect(modal.classList.contains('hidden')).toBe(false);
+
+      cancelBtn.click();
+      expect(modal.classList.contains('hidden')).toBe(true);
+    });
+
+    it('toggles password visibility in modal', () => {
+      initGeminiKeyModal();
+
+      const toggleBtn = document.getElementById('btn-toggle-modal-key');
+      const modalInput = document.getElementById('input-gemini-key-modal');
+
+      expect(modalInput.type).toBe('password');
+      toggleBtn.click();
+      expect(modalInput.type).toBe('text');
+      expect(toggleBtn.textContent).toBe('Hide');
+
+      toggleBtn.click();
+      expect(modalInput.type).toBe('password');
+      expect(toggleBtn.textContent).toBe('Show');
+    });
+
+    it('saves key and updates status badge on save click', () => {
+      initGeminiKeyModal();
+
+      const openBtn = document.getElementById('btn-open-gemini-key-modal');
+      const modalInput = document.getElementById('input-gemini-key-modal');
+      const saveBtn = document.getElementById('btn-save-modal-key');
+      const modal = document.getElementById('modal-gemini-key');
+
+      openBtn.click();
+      modalInput.value = 'AIzaSyNewSavedKey';
+      saveBtn.click();
+
+      expect(modal.classList.contains('hidden')).toBe(true);
+      expect(document.getElementById('input-gemini-key').value).toBe('AIzaSyNewSavedKey');
+      expect(showToast).toHaveBeenCalledWith(
+        'Gemini API key stored securely in local storage.',
+        'success'
+      );
+    });
+
+    it('clears key on remove button click', () => {
+      document.getElementById('input-gemini-key').value = 'AIzaSyExistingKey';
+      initGeminiKeyModal();
+
+      const openBtn = document.getElementById('btn-open-gemini-key-modal');
+      const clearBtn = document.getElementById('btn-clear-modal-key');
+      const modal = document.getElementById('modal-gemini-key');
+
+      openBtn.click();
+      clearBtn.click();
+
+      expect(modal.classList.contains('hidden')).toBe(true);
+      expect(document.getElementById('input-gemini-key').value).toBe('');
+      expect(showToast).toHaveBeenCalledWith('Gemini API key removed.', 'info');
     });
   });
 
@@ -654,6 +849,87 @@ describe('Settings Page Controller', () => {
 
       expect(document.getElementById('settings-auth-status').textContent).toBe('Scribe Ronin');
       expect(document.getElementById('settings-auth-uid').textContent).toBe('ID: user-456');
+    });
+  });
+
+  describe('Application Interface Themes', () => {
+    it('retrieves default app theme when localStorage is empty', () => {
+      expect(getSavedAppTheme()).toBe('transcendental');
+      expect(DEFAULT_APP_THEME).toBe('transcendental');
+    });
+
+    it('persists and applies chosen theme to document element', () => {
+      const applied = applyAppTheme('light');
+      expect(applied).toBe('light');
+      expect(localStorage.getItem(APP_THEME_STORAGE_KEY)).toBe('light');
+      expect(document.documentElement.getAttribute('data-app-theme')).toBe('light');
+
+      const appliedDark = applyAppTheme('dark');
+      expect(appliedDark).toBe('dark');
+      expect(localStorage.getItem(APP_THEME_STORAGE_KEY)).toBe('dark');
+      expect(document.documentElement.getAttribute('data-app-theme')).toBe('dark');
+    });
+
+    it('falls back to default transcendental for invalid theme IDs', () => {
+      const applied = applyAppTheme('unknown-invalid-theme');
+      expect(applied).toBe('transcendental');
+      expect(document.documentElement.getAttribute('data-app-theme')).toBe('transcendental');
+    });
+
+    it('initializes application theme correctly using initAppTheme', () => {
+      localStorage.setItem(APP_THEME_STORAGE_KEY, 'dark');
+      const theme = initAppTheme(document);
+      expect(theme).toBe('dark');
+      expect(document.documentElement.getAttribute('data-app-theme')).toBe('dark');
+    });
+
+    it('renders application theme cards with correct active state', () => {
+      document.body.innerHTML = `<div id="settings-app-theme-grid"></div>`;
+      renderAppThemes('dark');
+
+      const cards = document.querySelectorAll('.app-theme-card');
+      expect(cards.length).toBe(APP_THEMES.length);
+
+      const darkCard = document.querySelector('.app-theme-card[data-app-theme="dark"]');
+      expect(darkCard).toBeTruthy();
+      expect(darkCard.classList.contains('active')).toBe(true);
+      expect(darkCard.getAttribute('aria-checked')).toBe('true');
+
+      const transCard = document.querySelector('.app-theme-card[data-app-theme="transcendental"]');
+      expect(transCard).toBeTruthy();
+      expect(transCard.classList.contains('active')).toBe(false);
+      expect(transCard.getAttribute('aria-checked')).toBe('false');
+    });
+
+    it('updates theme badge text correctly', () => {
+      document.body.innerHTML = `<span id="active-app-theme-badge"></span>`;
+      updateActiveAppThemeBadge('light');
+      expect(document.getElementById('active-app-theme-badge').textContent).toBe(
+        'Illuminated Light'
+      );
+
+      updateActiveAppThemeBadge('transcendental');
+      expect(document.getElementById('active-app-theme-badge').textContent).toBe('Transcendental');
+    });
+
+    it('switches app theme when clicked in the theme grid', () => {
+      document.body.innerHTML = `
+        <div id="settings-app-theme-grid"></div>
+        <span id="active-app-theme-badge"></span>
+      `;
+
+      initSettingsInteractions();
+
+      const lightCard = document.querySelector('.app-theme-card[data-app-theme="light"]');
+      expect(lightCard).toBeTruthy();
+      lightCard.click();
+
+      expect(localStorage.getItem(APP_THEME_STORAGE_KEY)).toBe('light');
+      expect(document.documentElement.getAttribute('data-app-theme')).toBe('light');
+      expect(document.getElementById('active-app-theme-badge').textContent).toBe(
+        'Illuminated Light'
+      );
+      expect(showToast).toHaveBeenCalledWith(expect.stringContaining('Illuminated Light'), 'info');
     });
   });
 });

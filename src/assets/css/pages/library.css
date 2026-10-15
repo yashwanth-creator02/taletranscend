@@ -133,7 +133,7 @@
 }
 
 .sidebar-filter:hover {
-  color: white;
+  color: var(--text-primary);
   background: rgb(var(--light-rgb) / var(--a-03));
 }
 
@@ -144,7 +144,7 @@
 }
 
 .sidebar-filter--active {
-  color: white;
+  color: var(--text-primary);
   background: rgb(var(--accent-rgb) / var(--a-06));
   border-color: rgb(var(--accent-rgb) / var(--a-08));
   box-shadow: 0 2px 10px rgb(var(--dark-rgb) / 0.3);
@@ -178,7 +178,7 @@
 
 .era-chip--active {
   background: var(--accent);
-  color: white;
+  color: var(--text-on-accent);
   box-shadow: 0 2px 10px rgb(var(--accent-rgb) / var(--a-06));
 }
 
@@ -189,7 +189,7 @@
 }
 
 .era-chip--inactive:hover {
-  color: white;
+  color: var(--text-primary);
   border-color: rgb(var(--light-rgb) / var(--a-06));
   background: rgb(var(--light-rgb) / var(--a-03));
 }
@@ -318,4 +318,31 @@
     transition: none;
     animation: none;
   }
+}
+
+/* ── Light Mode Polish ───────────────────────────────────────────── */
+
+[data-app-theme='light'] .archive-filter-panel {
+  background: var(--bg-elevated);
+  border-color: rgb(var(--light-rgb) / 0.08);
+  box-shadow: 0 4px 20px rgb(var(--dark-rgb) / 0.06);
+}
+
+[data-app-theme='light'] .sidebar-filter--active {
+  color: var(--accent);
+  background: rgb(var(--accent-rgb) / 0.08);
+  border-color: rgb(var(--accent-rgb) / 0.25);
+}
+
+[data-app-theme='light'] .sidebar-filter:hover {
+  background: rgb(var(--light-rgb) / 0.04);
+}
+
+[data-app-theme='light'] .era-chip--inactive {
+  background: rgb(var(--light-rgb) / 0.04);
+  border-color: rgb(var(--light-rgb) / 0.08);
+}
+
+[data-app-theme='light'] .era-chip--inactive:hover {
+  background: rgb(var(--light-rgb) / 0.07);
 }

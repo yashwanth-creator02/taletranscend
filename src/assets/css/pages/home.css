@@ -94,17 +94,20 @@
   max-width: 30rem;
   margin: 0;
   padding: var(--space-2);
-  background: var(--surface-2);
+  background: var(--surface-1);
   border: 1px solid var(--border);
   border-radius: var(--radius-full);
   backdrop-filter: blur(var(--blur-lg));
   -webkit-backdrop-filter: blur(var(--blur-lg));
-  box-shadow: var(--shadow-md);
-  transition: border-color var(--transition-base);
+  box-shadow: var(--shadow-sm);
+  transition:
+    border-color var(--transition-base),
+    box-shadow var(--transition-base);
 }
 
 .home-search:focus-within {
   border-color: var(--accent-border);
+  box-shadow: var(--shadow-glow);
 }
 
 .home-search__icon {
@@ -191,6 +194,85 @@
   color: var(--text-primary);
   border-color: var(--accent-border);
   background: var(--accent-subtle);
+}
+
+/* Mythic Chromatic Modifiers for Topics */
+.home-tag--gold {
+  color: var(--mythic-gold);
+  border-color: var(--mythic-gold-border);
+  background: var(--mythic-gold-bg);
+}
+
+.home-tag--gold:hover,
+.home-tag--gold:focus-visible {
+  color: var(--mythic-gold);
+  border-color: var(--mythic-gold);
+  background: var(--mythic-gold-border);
+}
+
+.home-tag--sage {
+  color: var(--mythic-sage);
+  border-color: var(--mythic-sage-border);
+  background: var(--mythic-sage-bg);
+}
+
+.home-tag--sage:hover,
+.home-tag--sage:focus-visible {
+  color: var(--mythic-sage);
+  border-color: var(--mythic-sage);
+  background: var(--mythic-sage-border);
+}
+
+.home-tag--lapis {
+  color: var(--mythic-lapis);
+  border-color: var(--mythic-lapis-border);
+  background: var(--mythic-lapis-bg);
+}
+
+.home-tag--lapis:hover,
+.home-tag--lapis:focus-visible {
+  color: var(--mythic-lapis);
+  border-color: var(--mythic-lapis);
+  background: var(--mythic-lapis-border);
+}
+
+.home-tag--terracotta {
+  color: var(--mythic-terracotta);
+  border-color: var(--mythic-terracotta-border);
+  background: var(--mythic-terracotta-bg);
+}
+
+.home-tag--terracotta:hover,
+.home-tag--terracotta:focus-visible {
+  color: var(--mythic-terracotta);
+  border-color: var(--mythic-terracotta);
+  background: var(--mythic-terracotta-border);
+}
+
+.home-tag--cyan {
+  color: var(--mythic-cyan);
+  border-color: var(--mythic-cyan-border);
+  background: var(--mythic-cyan-bg);
+}
+
+.home-tag--cyan:hover,
+.home-tag--cyan:focus-visible {
+  color: var(--mythic-cyan);
+  border-color: var(--mythic-cyan);
+  background: var(--mythic-cyan-border);
+}
+
+.home-tag--violet {
+  color: var(--mythic-violet);
+  border-color: var(--mythic-violet-border);
+  background: var(--mythic-violet-bg);
+}
+
+.home-tag--violet:hover,
+.home-tag--violet:focus-visible {
+  color: var(--mythic-violet);
+  border-color: var(--mythic-violet);
+  background: var(--mythic-violet-border);
 }
 
 .home-hero__actions {
@@ -713,8 +795,16 @@
 /* ══ 4. SECTIONS ══════════════════════════════════════════════════════════ */
 
 .home-section {
+  position: relative;
+  width: 100%;
   padding-block: var(--space-7);
   border-top: 1px solid var(--border-subtle);
+}
+
+.home-section--alt {
+  background: var(--section-alt-bg);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
 
 @media (max-width: 64rem) {
@@ -825,15 +915,17 @@
   display: flex;
   flex-direction: column;
   padding: var(--space-4);
-  background: var(--surface-1);
+  background: var(--card-elevated-bg);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   text-decoration: none;
+  box-shadow: var(--shadow-sm);
   backdrop-filter: blur(var(--blur-md));
   -webkit-backdrop-filter: blur(var(--blur-md));
   transition:
     border-color var(--transition-fast),
     background var(--transition-fast),
+    box-shadow var(--transition-fast),
     transform var(--transition-fast);
 }
 
@@ -845,7 +937,7 @@
 
 .home-tale-card:hover {
   border-color: var(--accent-border);
-  background: var(--surface-2);
+  box-shadow: var(--shadow-md);
   transform: translateY(-2px);
 }
 
@@ -897,6 +989,44 @@
   border-radius: var(--radius-xs);
   background: var(--accent-subtle);
   color: var(--accent-tint);
+  border: 1px solid transparent;
+}
+
+/* Chromatic Era Badge Modifiers */
+.home-tale-card__era--gold {
+  background: var(--mythic-gold-bg);
+  color: var(--mythic-gold);
+  border-color: var(--mythic-gold-border);
+}
+
+.home-tale-card__era--sage {
+  background: var(--mythic-sage-bg);
+  color: var(--mythic-sage);
+  border-color: var(--mythic-sage-border);
+}
+
+.home-tale-card__era--lapis {
+  background: var(--mythic-lapis-bg);
+  color: var(--mythic-lapis);
+  border-color: var(--mythic-lapis-border);
+}
+
+.home-tale-card__era--terracotta {
+  background: var(--mythic-terracotta-bg);
+  color: var(--mythic-terracotta);
+  border-color: var(--mythic-terracotta-border);
+}
+
+.home-tale-card__era--cyan {
+  background: var(--mythic-cyan-bg);
+  color: var(--mythic-cyan);
+  border-color: var(--mythic-cyan-border);
+}
+
+.home-tale-card__era--violet {
+  background: var(--mythic-violet-bg);
+  color: var(--mythic-violet);
+  border-color: var(--mythic-violet-border);
 }
 
 .home-tale-card__count {
@@ -980,7 +1110,8 @@
   padding: var(--space-5) var(--space-6);
   border-radius: var(--radius-2xl);
   border: 1px solid var(--border);
-  background: var(--surface-1);
+  background: var(--surface-gradient);
+  box-shadow: var(--shadow-sm);
 }
 
 @media (max-width: 48rem) {
@@ -1102,8 +1233,17 @@
   padding: var(--space-4);
   border-radius: var(--radius-xl);
   border: 1px solid var(--border);
-  background: var(--surface-2);
+  background: var(--card-elevated-bg);
+  box-shadow: var(--shadow-sm);
   width: 100%;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.home-cta__scribe-box:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
 }
 
 .home-cta__scribe-icon {
@@ -1113,8 +1253,9 @@
   width: 2.25rem;
   height: 2.25rem;
   border-radius: var(--radius-md);
-  background: var(--accent-subtle);
-  color: var(--accent-tint);
+  background: var(--mythic-gold-bg);
+  color: var(--mythic-gold);
+  border: 1px solid var(--mythic-gold-border);
   flex: none;
 }
 

@@ -44,15 +44,32 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cinzel:wght@500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap"
     />
 
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('tt_app_theme') || 'transcendental';
+          document.documentElement.setAttribute('data-app-theme', t);
+        } catch (e) {}
+      })();
+    </script>
+
     <style>
       /* Critical Anti-FOUC Gate */
       html {
         background-color: #030305;
         color: #e2e8f0;
       }
+      html[data-app-theme='dark'] {
+        background-color: #0b0d13;
+        color: #f8fafc;
+      }
+      html[data-app-theme='light'] {
+        background-color: #f7f5f0;
+        color: #1e293b;
+      }
       body {
-        background-color: #030305;
-        color: #e2e8f0;
+        background-color: inherit;
+        color: inherit;
         font-family:
           'Inter',
           system-ui,
@@ -66,7 +83,7 @@
       #app-boot-curtain {
         position: fixed;
         inset: 0;
-        background-color: #030305;
+        background-color: inherit;
         z-index: 999999;
         display: flex;
         align-items: center;

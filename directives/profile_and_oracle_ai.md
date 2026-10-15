@@ -32,22 +32,24 @@ Define the standard operating procedures, data contracts, and UI patterns for ma
   - "Customise Identity" (`#btn-edit-desktop`) links directly to the dedicated Chronicler Profile section in Settings (`/settings.html#profile`).
 - **Settings Page Profile Editor (`settings.html#profile`)**:
   - Full-featured chronicler identity configuration embedded in the living archive settings suite.
-  - Divided card rows: Avatar preview & URL, Display Name with Oracle AI name suggester (`#btn-suggest-name`), Reader Moniker / Signature (`#setting-reader-moniker`), Lore & Bio, Pronouns, Location / Realm, Favourite Genre chips (`#genre-selector`), Yearly Reading Milestone, Social URLs, and Gemini API Key configuration.
+  - Divided card rows: Avatar preview & URL, Display Name with Oracle AI name suggester (`#btn-suggest-name`), Reader Moniker / Signature (`#setting-reader-moniker`), Lore & Bio (stacked layout `.settings-row--stacked` positioned cleanly below the sideheading with live character counter `#bio-char-count`), Pronouns, Location / Realm, Favourite Genre chips (`#genre-selector`), Yearly Reading Milestone, Social URLs, and Oracle AI & Gemini Key configuration via popup modal dialog (`#modal-gemini-key`).
   - Form commits directly to Firestore `refs.user(uid)` validated against `UserProfileSchema` via `validateData`.
 
-### 2. Gemini API Key Storage & User Controls
+### 2. Gemini API Key Storage & Popup Modal Window
 
 - **Security & Storage Principle**:
   - The Gemini API key belongs strictly to the user and is stored exclusively on the client in `localStorage` under `taletranscend_gemini_api_key`.
   - Never transmit, synchronize, or store the user's API key in Firestore user records or server logs.
-- **Dedicated Save Action**:
-  - Provide a distinct Save button (`#btn-save-gemini-key`) alongside the Show/Hide visibility toggle (`#btn-toggle-gemini-key`).
-  - Clicking Save immediately commits the trimmed key via `setStoredApiKey(val)` from `src/services/ai/apiKey.storage.js`.
-  - Provide immediate user feedback via success toast (`"Gemini API key saved."`).
-  - Emptying the input and clicking Save deletes the stored key and confirms removal.
-- **Key Visibility Toggle**:
-  - Default input state: `type="password"`.
-  - Clicking `#btn-toggle-gemini-key` toggles between `password` and `text`, updating button label between `"Show"` and `"Hide"`.
+- **Dedicated Modal Window UX**:
+  - Instead of inline form inputs, the Settings page displays a clean status badge (`#gemini-key-status`: "Key Configured" vs "Not Configured") with a dedicated trigger button (`#btn-open-gemini-key-modal`: "Manage Key" vs "Configure Key").
+  - Triggering the button opens an accessible modal dialog (`#modal-gemini-key`) with backdrop blur.
+  - Explanatory security callout (`.settings-info-box`) informs the user of private on-device archival storage and direct-to-Google communication.
+  - Direct external link to Google AI Studio to easily retrieve or generate a free API key.
+  - Interactive password visibility toggle button (`#btn-toggle-modal-key`: "Show" / "Hide").
+  - Clear / Remove Key button (`#btn-clear-modal-key`) alongside Save Key (`#btn-save-modal-key`) and Cancel (`#btn-cancel-modal-key`).
+  - Closing support via backdrop click, Close icon (`#modal-gemini-close`), and the `Escape` key.
+- **Backwards Compatibility**:
+  - Hidden inputs (`#input-gemini-key`, `#btn-toggle-gemini-key`, `#btn-save-gemini-key`) are maintained to ensure legacy scripts and test suites remain 100% interoperable.
 
 ### 3. Oracle AI Integration (Names & Text Refinement)
 

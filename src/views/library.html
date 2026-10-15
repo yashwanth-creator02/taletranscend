@@ -41,15 +41,32 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cinzel:wght@500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap"
     />
 
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('tt_app_theme') || 'transcendental';
+          document.documentElement.setAttribute('data-app-theme', t);
+        } catch (e) {}
+      })();
+    </script>
+
     <style>
       /* Critical Anti-FOUC Gate */
       html {
         background-color: #030305;
         color: #e2e8f0;
       }
+      html[data-app-theme='dark'] {
+        background-color: #0b0d13;
+        color: #f8fafc;
+      }
+      html[data-app-theme='light'] {
+        background-color: #f7f5f0;
+        color: #1e293b;
+      }
       body {
-        background-color: #030305;
-        color: #e2e8f0;
+        background-color: inherit;
+        color: inherit;
         font-family:
           'Inter',
           system-ui,
@@ -63,7 +80,7 @@
       #app-boot-curtain {
         position: fixed;
         inset: 0;
-        background-color: #030305;
+        background-color: inherit;
         z-index: 999999;
         display: flex;
         align-items: center;
@@ -124,7 +141,7 @@
   </head>
 
   <body
-    class="text-slate-300 antialiased selection:bg-indigo-500/30 page-fade-in flex flex-col h-screen overflow-hidden"
+    class="antialiased selection:bg-indigo-500/30 page-fade-in flex flex-col h-screen overflow-hidden"
   >
     <!-- App Boot Curtain (Prevents FOUC on slower networks) -->
     <div id="app-boot-curtain" aria-hidden="true">
@@ -149,18 +166,18 @@
       <aside id="sidebar" class="h-full overflow-hidden" aria-label="Library Navigation">
         <div class="sidebar-inner scroll-container">
           <!-- Header & Toggle button -->
-          <div class="flex items-center justify-between px-2 pb-4 border-b border-white/5 mb-4">
+          <div class="flex items-center justify-between px-2 pb-4 border-b border-line mb-4">
             <div class="flex items-center gap-3">
               <button
                 id="toggle-sidebar"
                 type="button"
-                class="hidden md:flex shrink-0 w-10 h-10 items-center justify-center rounded-xl hover:bg-white/5 text-slate-500 hover:text-white transition-colors"
+                class="hidden md:flex shrink-0 w-10 h-10 items-center justify-center rounded-xl hover:bg-surface-2 text-muted hover:text-ink transition-colors"
                 aria-label="Toggle sidebar"
               >
                 <i data-lucide="panel-left-close" class="w-4 h-4"></i>
               </button>
               <span
-                class="sidebar-label text-[10px] font-black uppercase tracking-widest text-white transition-all"
+                class="sidebar-label text-[10px] font-black uppercase tracking-widest text-ink transition-all"
                 >Navigation</span
               >
             </div>
@@ -168,7 +185,7 @@
             <button
               id="close-sidebar-mobile"
               type="button"
-              class="md:hidden w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+              class="md:hidden w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-2 text-muted hover:text-ink transition-colors"
               aria-label="Close navigation"
             >
               <i data-lucide="x" class="w-4 h-4"></i>
@@ -178,7 +195,7 @@
           <!-- Browse By -->
           <div class="mb-6">
             <p
-              class="sidebar-section-heading px-3 mb-2 text-[9px] font-black uppercase tracking-[0.25em] text-slate-500"
+              class="sidebar-section-heading px-3 mb-2 text-[9px] font-black uppercase tracking-[0.25em] text-muted"
             >
               Browse
             </p>
@@ -209,7 +226,7 @@
           <!-- Personal -->
           <div class="mb-6">
             <p
-              class="sidebar-section-heading px-3 mb-2 text-[9px] font-black uppercase tracking-[0.25em] text-slate-500"
+              class="sidebar-section-heading px-3 mb-2 text-[9px] font-black uppercase tracking-[0.25em] text-muted"
             >
               Personal
             </p>
@@ -262,20 +279,22 @@
             <div class="space-y-2">
               <div class="flex items-center gap-3">
                 <span class="h-px w-8 bg-indigo-500/60"></span>
-                <p class="text-indigo-400 text-[10px] font-black uppercase tracking-[0.4em]">
+                <p
+                  class="text-indigo-500 dark:text-indigo-400 text-[10px] font-black uppercase tracking-[0.4em]"
+                >
                   The Grand Archive
                 </p>
               </div>
               <h1
-                class="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight uppercase leading-none font-cinzel"
+                class="text-3xl sm:text-4xl md:text-5xl font-black text-ink tracking-tight uppercase leading-none font-cinzel"
               >
                 Chronicle
                 <span
-                  class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-300 to-indigo-200"
+                  class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-400"
                   >Repository</span
                 >
               </h1>
-              <p class="text-xs text-zinc-400 max-w-lg leading-relaxed">
+              <p class="text-xs text-muted max-w-lg leading-relaxed">
                 Explore ancient myths, timeless folklore, and cosmic fragments woven across all
                 eras.
               </p>
@@ -308,11 +327,11 @@
                   placeholder="Search the living archive…"
                   aria-label="Search stories in the library"
                   autocomplete="off"
-                  class="w-full h-11 rounded-xl bg-white/5 border border-white/10 pl-10 pr-14 text-xs text-white placeholder:text-zinc-500 transition-all focus:bg-white/10 focus:border-indigo-500/40"
+                  class="w-full h-11 rounded-xl bg-surface-2 border border-line pl-10 pr-14 text-xs text-ink placeholder:text-muted transition-all focus:bg-surface-3 focus:border-indigo-500/40"
                 />
                 <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
                   <kbd
-                    class="px-2 py-0.5 rounded bg-black/40 border border-white/8 text-[9px] font-bold text-zinc-500"
+                    class="px-2 py-0.5 rounded bg-surface-3 border border-line text-[9px] font-bold text-muted"
                     aria-hidden="true"
                   >
                     /
@@ -324,12 +343,12 @@
 
           <!-- Filter Command Bar -->
           <div
-            class="archive-filter-panel mb-8 p-4 rounded-2xl border border-white/8 bg-white/2 backdrop-blur-xl"
+            class="archive-filter-panel mb-8 p-4 rounded-2xl border border-line bg-surface-1 backdrop-blur-xl"
           >
             <!-- Era row -->
             <div class="flex items-center gap-3 mb-3">
               <span
-                class="text-[9px] font-black uppercase tracking-[0.25em] text-zinc-500 shrink-0 flex items-center gap-1.5"
+                class="text-[9px] font-black uppercase tracking-[0.25em] text-muted shrink-0 flex items-center gap-1.5"
               >
                 <i data-lucide="compass" class="w-3.5 h-3.5 text-indigo-400"></i>
                 Eras
@@ -345,7 +364,7 @@
               </div>
             </div>
 
-            <div class="h-px bg-white/5 my-2.5"></div>
+            <div class="h-px bg-line my-2.5"></div>
 
             <!-- Tone and Depth row -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">

@@ -40,28 +40,20 @@
    everywhere this app runs.
    ══════════════════════════════════════════════════════════════════════════ */
 
-:root {
-  /* ══ 1. PRIMITIVES ══════════════════════════════════════════════════════
-     The only place raw colour values exist. Change these to re-skin.
+:root,
+html[data-app-theme='transcendental'],
+[data-app-theme='transcendental'] {
+  /* ══ 1. PRIMITIVES & CHANNELS: TRANSCENDENTAL (DEFAULT) ══════════════
+     Signature mythic cosmic dark: obsidian floor, starlight & amber runes.
      ══════════════════════════════════════════════════════════════════════ */
-
-  /* ── Brand channels ──────────────────────────────────────────────────── */
 
   --accent-rgb: 99 102 241; /* Indigo — primary interactive        */
   --accent-2-rgb: 139 92 246; /* Violet — secondary / gradient pair  */
   --accent-3-rgb: 217 70 239; /* Fuchsia — gradient terminus         */
   --rune-rgb: 245 158 11; /* Amber — achievements, highlights    */
 
-  /* ── Neutral channels ────────────────────────────────────────────────── */
-
   --light-rgb: 255 255 255; /* Every translucent light surface     */
   --dark-rgb: 0 0 0; /* Every shadow and scrim              */
-
-  /* ── Secondary channels ──────────────────────────────────────────────── */
-  /* Surfaced by the token audit: colours that were inlined across page
-     stylesheets and had no home. The near-blacks in particular were seven
-     separate values (#08080c, #0a0a0f, #0a0a12, #0a0a14, #0a0a18, #0f0f19,
-     #0d0d14) that no display can tell apart — all now resolve here. */
 
   --bg-base-rgb: 3 3 5;
   --bg-overlay-rgb: 13 13 20;
@@ -70,8 +62,6 @@
   --reader-accent-rgb: 139 124 246; /* Reader default accent              */
   --text-primary-rgb: 226 232 240;
   --text-secondary-rgb: 148 163 184;
-
-  /* ── Status channels ─────────────────────────────────────────────────── */
 
   --success-rgb: 34 197 94;
   --warning-rgb: 245 158 11;
@@ -83,55 +73,21 @@
   --danger-light-rgb: 185 28 28;
   --info-light-rgb: 3 105 161;
 
-  /* ── Base greys ──────────────────────────────────────────────────────── */
-  /* The "room" the interface sits in. Three depths, nothing more: going
-     finer than this produced the near-identical #07070b / #0a0a10 / #0d0d14
-     family the old stylesheets were full of, none of which are
-     distinguishable at 100% zoom. */
-
   --grey-950: #030305; /* Page floor                          */
   --grey-900: #07070b; /* Lifted surface                      */
   --grey-850: #0d0d14; /* Floating layer (modals, dropdowns)  */
-
-  /* ── Alpha ladder ────────────────────────────────────────────────────── */
-  /* A fixed set of opacities, used everywhere. Before this existed the CSS
-     contained 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05, 0.06, 0.065 and
-     0.07 as separate values — ten steps no eye can tell apart, each one a
-     decision someone had to make again on the next component. */
-
-  --a-01: 0.02;
-  --a-02: 0.04;
-  --a-03: 0.06;
-  --a-04: 0.08;
-  --a-05: 0.1;
-  --a-06: 0.15;
-  --a-07: 0.2;
-  --a-08: 0.3;
-  --a-09: 0.4;
-  --a-10: 0.6;
-  --a-11: 0.8;
-
-  /* ══ 2. SEMANTIC ════════════════════════════════════════════════════════
-     What things mean. Components use these.
-     ══════════════════════════════════════════════════════════════════════ */
-
-  /* ── Backgrounds ─────────────────────────────────────────────────────── */
 
   --bg-base: var(--grey-950);
   --bg-elevated: var(--grey-900);
   --bg-overlay: var(--grey-850);
 
-  /* ── Surfaces — translucent layers stacked on the background ─────────── */
+  --surface-1: rgb(var(--light-rgb) / var(--a-01));
+  --surface-2: rgb(var(--light-rgb) / var(--a-02));
+  --surface-3: rgb(var(--light-rgb) / var(--a-03));
+  --surface-4: rgb(var(--light-rgb) / var(--a-04));
+  --surface-scrim: rgb(var(--dark-rgb) / var(--a-10));
+  --surface-veil: rgb(13 13 20 / 0.85);
 
-  --surface-1: rgb(var(--light-rgb) / var(--a-01)); /* Base glass      */
-  --surface-2: rgb(var(--light-rgb) / var(--a-02)); /* Raised card     */
-  --surface-3: rgb(var(--light-rgb) / var(--a-03)); /* Elevated panel  */
-  --surface-4: rgb(var(--light-rgb) / var(--a-04)); /* Hover / active  */
-  --surface-scrim: rgb(var(--dark-rgb) / var(--a-10)); /* Modal backdrop  */
-  --surface-veil: rgb(13 13 20 / 0.85); /* Drawer fill     */
-
-  /* Gradient fills for glass components — the two-stop wash that gives a
-     card the illusion of a light source above and to the left. */
   --surface-gradient: linear-gradient(
     135deg,
     rgb(var(--light-rgb) / var(--a-02)) 0%,
@@ -143,26 +99,20 @@
     rgb(var(--light-rgb) / var(--a-01)) 100%
   );
 
-  /* ── Text ────────────────────────────────────────────────────────────── */
-
   --text-primary: #e2e8f0;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
   --text-disabled: #334155;
   --text-on-accent: #ffffff;
 
-  /* ── Borders ─────────────────────────────────────────────────────────── */
-
   --border-subtle: rgb(var(--light-rgb) / var(--a-01));
   --border: rgb(var(--light-rgb) / var(--a-03));
   --border-strong: rgb(var(--light-rgb) / var(--a-05));
   --border-accent: rgb(var(--accent-rgb) / var(--a-08));
 
-  /* ── Accent ──────────────────────────────────────────────────────────── */
-
   --accent: rgb(var(--accent-rgb));
   --accent-hover: #7c7ff5;
-  --accent-tint: rgb(var(--accent-light-rgb)); /* Accent as *text* on dark  */
+  --accent-tint: rgb(var(--accent-light-rgb));
   --accent-secondary: rgb(var(--accent-2-rgb));
   --rune: rgb(var(--rune-rgb));
 
@@ -171,8 +121,6 @@
   --accent-active: rgb(var(--accent-rgb) / var(--a-08));
   --accent-border: rgb(var(--accent-rgb) / var(--a-07));
 
-  /* The signature gradient. Defined once; used by every primary button,
-     every heading wash, every progress bar. */
   --accent-gradient: linear-gradient(
     135deg,
     rgb(var(--accent-rgb)) 0%,
@@ -185,7 +133,313 @@
     rgb(var(--accent-3-rgb)) 100%
   );
 
-  /* ── Status ──────────────────────────────────────────────────────────── */
+  --shadow-sm: 0 2px 8px rgb(var(--dark-rgb) / 0.24);
+  --shadow-md: 0 8px 24px rgb(var(--dark-rgb) / 0.36);
+  --shadow-lg: 0 16px 48px rgb(var(--dark-rgb) / 0.48);
+  --shadow-xl: 0 24px 64px rgb(var(--dark-rgb) / 0.56);
+  --shadow-inset-hairline: inset 0 1px 0 rgb(var(--light-rgb) / var(--a-02));
+  --shadow-glow: 0 0 20px rgb(var(--accent-rgb) / var(--a-06));
+  --shadow-glow-lg: 0 18px 40px rgb(var(--accent-rgb) / var(--a-07));
+
+  --nav-bg: rgb(3 3 5 / 0.75);
+  --nav-bg-scrolled: rgb(3 3 5 / 0.96);
+  --nav-border: rgb(var(--light-rgb) / var(--a-02));
+
+  /* Section pacing & atmospheric grounds */
+  --section-alt-bg: rgb(7 7 12 / 0.6);
+  --footer-bg: #020204;
+  --card-elevated-bg: var(--grey-900);
+
+  /* Diversified Mythic Accents */
+  --mythic-gold: #fbbf24;
+  --mythic-gold-bg: rgb(251 191 36 / 0.12);
+  --mythic-gold-border: rgb(251 191 36 / 0.3);
+
+  --mythic-sage: #4ade80;
+  --mythic-sage-bg: rgb(74 222 128 / 0.1);
+  --mythic-sage-border: rgb(74 222 128 / 0.25);
+
+  --mythic-lapis: #818cf8;
+  --mythic-lapis-bg: rgb(129 140 248 / 0.12);
+  --mythic-lapis-border: rgb(129 140 248 / 0.3);
+
+  --mythic-terracotta: #fb923c;
+  --mythic-terracotta-bg: rgb(251 146 60 / 0.12);
+  --mythic-terracotta-border: rgb(251 146 60 / 0.3);
+
+  --mythic-cyan: #38bdf8;
+  --mythic-cyan-bg: rgb(56 189 248 / 0.12);
+  --mythic-cyan-border: rgb(56 189 248 / 0.3);
+
+  --mythic-violet: #c084fc;
+  --mythic-violet-bg: rgb(192 132 252 / 0.12);
+  --mythic-violet-border: rgb(192 132 252 / 0.3);
+
+  color-scheme: dark;
+}
+
+html[data-app-theme='dark'],
+[data-app-theme='dark'] {
+  /* ══ 1. PRIMITIVES & CHANNELS: MIDNIGHT DARK MODE ══════════════════════
+     Sleek obsidian charcoal depths, high contrast silver & indigo.
+     ══════════════════════════════════════════════════════════════════════ */
+
+  --accent-rgb: 129 140 248; /* Luminous Indigo                       */
+  --accent-2-rgb: 167 139 250; /* Soft Royal Violet                  */
+  --accent-3-rgb: 192 132 252;
+  --rune-rgb: 251 191 36; /* Amber Rune                              */
+
+  --light-rgb: 255 255 255;
+  --dark-rgb: 0 0 0;
+
+  --bg-base-rgb: 11 13 19;
+  --bg-overlay-rgb: 18 21 31;
+  --accent-light-rgb: 199 210 254;
+  --indigo-border-rgb: 129 140 248;
+  --reader-accent-rgb: 129 140 248;
+  --text-primary-rgb: 248 250 252;
+  --text-secondary-rgb: 203 213 225;
+
+  --grey-950: #0b0d13;
+  --grey-900: #141724;
+  --grey-850: #1c2132;
+
+  --bg-base: var(--grey-950);
+  --bg-elevated: var(--grey-900);
+  --bg-overlay: var(--grey-850);
+
+  --surface-1: rgb(var(--light-rgb) / 0.03);
+  --surface-2: rgb(var(--light-rgb) / 0.05);
+  --surface-3: rgb(var(--light-rgb) / 0.08);
+  --surface-4: rgb(var(--light-rgb) / 0.12);
+  --surface-scrim: rgb(var(--dark-rgb) / 0.75);
+  --surface-veil: rgb(18 21 31 / 0.92);
+
+  --surface-gradient: linear-gradient(
+    135deg,
+    rgb(var(--light-rgb) / 0.05) 0%,
+    rgb(var(--light-rgb) / 0.02) 100%
+  );
+  --surface-gradient-strong: linear-gradient(
+    145deg,
+    rgb(var(--light-rgb) / 0.08) 0%,
+    rgb(var(--light-rgb) / 0.03) 100%
+  );
+
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-disabled: #475569;
+  --text-on-accent: #ffffff;
+
+  --border-subtle: rgb(var(--light-rgb) / 0.04);
+  --border: rgb(var(--light-rgb) / 0.08);
+  --border-strong: rgb(var(--light-rgb) / 0.14);
+  --border-accent: rgb(var(--accent-rgb) / 0.25);
+
+  --accent: rgb(var(--accent-rgb));
+  --accent-hover: #93a0fc;
+  --accent-tint: rgb(var(--accent-light-rgb));
+  --accent-secondary: rgb(var(--accent-2-rgb));
+  --rune: rgb(var(--rune-rgb));
+
+  --accent-subtle: rgb(var(--accent-rgb) / 0.06);
+  --accent-muted: rgb(var(--accent-rgb) / 0.1);
+  --accent-active: rgb(var(--accent-rgb) / 0.15);
+  --accent-border: rgb(var(--accent-rgb) / 0.3);
+
+  --accent-gradient: linear-gradient(
+    135deg,
+    rgb(var(--accent-rgb)) 0%,
+    rgb(var(--accent-2-rgb)) 100%
+  );
+  --accent-gradient-wide: linear-gradient(
+    90deg,
+    rgb(var(--accent-rgb)) 0%,
+    rgb(var(--accent-2-rgb)) 50%,
+    rgb(var(--accent-3-rgb)) 100%
+  );
+
+  --shadow-sm: 0 2px 8px rgb(0 0 0 / 0.35);
+  --shadow-md: 0 8px 24px rgb(0 0 0 / 0.5);
+  --shadow-lg: 0 16px 48px rgb(0 0 0 / 0.65);
+  --shadow-xl: 0 24px 64px rgb(0 0 0 / 0.75);
+  --shadow-inset-hairline: inset 0 1px 0 rgb(var(--light-rgb) / 0.08);
+  --shadow-glow: 0 0 20px rgb(var(--accent-rgb) / 0.15);
+  --shadow-glow-lg: 0 18px 40px rgb(var(--accent-rgb) / 0.2);
+
+  --nav-bg: rgb(11 13 19 / 0.85);
+  --nav-bg-scrolled: rgb(11 13 19 / 0.98);
+  --nav-border: rgb(var(--light-rgb) / 0.06);
+
+  /* Section pacing & atmospheric grounds */
+  --section-alt-bg: rgb(16 20 30 / 0.6);
+  --footer-bg: #07090e;
+  --card-elevated-bg: var(--grey-900);
+
+  /* Diversified Mythic Accents */
+  --mythic-gold: #fbbf24;
+  --mythic-gold-bg: rgb(251 191 36 / 0.12);
+  --mythic-gold-border: rgb(251 191 36 / 0.3);
+
+  --mythic-sage: #4ade80;
+  --mythic-sage-bg: rgb(74 222 128 / 0.1);
+  --mythic-sage-border: rgb(74 222 128 / 0.25);
+
+  --mythic-lapis: #818cf8;
+  --mythic-lapis-bg: rgb(129 140 248 / 0.12);
+  --mythic-lapis-border: rgb(129 140 248 / 0.3);
+
+  --mythic-terracotta: #fb923c;
+  --mythic-terracotta-bg: rgb(251 146 60 / 0.12);
+  --mythic-terracotta-border: rgb(251 146 60 / 0.3);
+
+  --mythic-cyan: #38bdf8;
+  --mythic-cyan-bg: rgb(56 189 248 / 0.12);
+  --mythic-cyan-border: rgb(56 189 248 / 0.3);
+
+  --mythic-violet: #c084fc;
+  --mythic-violet-bg: rgb(192 132 252 / 0.12);
+  --mythic-violet-border: rgb(192 132 252 / 0.3);
+
+  color-scheme: dark;
+}
+
+html[data-app-theme='light'],
+[data-app-theme='light'] {
+  /* ══ 1. PRIMITIVES & CHANNELS: ILLUMINATED LIGHT MODE ══════════════════
+     Warm manuscript parchment, soft alabaster card surfaces & royal ink.
+     Designed for prolonged reading comfort without eye-strain or harsh glare.
+     ══════════════════════════════════════════════════════════════════════ */
+
+  --accent-rgb: 79 70 229; /* Royal Imperial Indigo                */
+  --accent-2-rgb: 109 40 217; /* Deep Royal Violet                 */
+  --accent-3-rgb: 180 83 9; /* Burnished Gold                      */
+  --rune-rgb: 217 119 6; /* Warm Amber Rune                        */
+
+  --light-rgb: 26 31 44; /* Dark ink overlay on light ground       */
+  --dark-rgb: 0 0 0; /* Drop shadows                               */
+
+  --bg-base-rgb: 246 243 237; /* Soothing warm vellum              */
+  --bg-overlay-rgb: 251 249 245; /* Soft alabaster ivory           */
+  --accent-light-rgb: 67 56 202;
+  --indigo-border-rgb: 79 70 229;
+  --reader-accent-rgb: 79 70 229;
+  --text-primary-rgb: 28 37 48;
+  --text-secondary-rgb: 71 85 105;
+
+  --grey-950: #f6f3ed; /* Page floor: warm archival vellum         */
+  --grey-900: #fbf9f5; /* Elevated card surface: soft alabaster    */
+  --grey-850: #ece5d8; /* Deeper antique vellum layer (drawers)    */
+
+  --bg-base: var(--grey-950);
+  --bg-elevated: var(--grey-900);
+  --bg-overlay: var(--grey-850);
+
+  --surface-1: rgb(251 249 245 / 0.88);
+  --surface-2: rgb(251 249 245 / 0.96);
+  --surface-3: #fbf9f5;
+  --surface-4: rgb(79 70 229 / 0.06);
+  --surface-scrim: rgb(15 23 42 / 0.35);
+  --surface-veil: rgb(246 243 237 / 0.95);
+
+  --surface-gradient: linear-gradient(135deg, #fbf9f5 0%, #f3eee4 100%);
+  --surface-gradient-strong: linear-gradient(145deg, #fbf9f5 0%, #ece4d4 100%);
+
+  --text-primary: #1c2530;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-disabled: #94a3b8;
+  --text-on-accent: #ffffff;
+
+  --border-subtle: rgb(26 31 44 / 0.07);
+  --border: rgb(26 31 44 / 0.12);
+  --border-strong: rgb(26 31 44 / 0.2);
+  --border-accent: rgb(79 70 229 / 0.25);
+
+  --accent: rgb(var(--accent-rgb));
+  --accent-hover: #4338ca;
+  --accent-tint: rgb(var(--accent-light-rgb));
+  --accent-secondary: rgb(var(--accent-2-rgb));
+  --rune: rgb(var(--rune-rgb));
+
+  --accent-subtle: rgb(var(--accent-rgb) / 0.06);
+  --accent-muted: rgb(var(--accent-rgb) / 0.1);
+  --accent-active: rgb(var(--accent-rgb) / 0.15);
+  --accent-border: rgb(var(--accent-rgb) / 0.3);
+
+  --accent-gradient: linear-gradient(
+    135deg,
+    rgb(var(--accent-rgb)) 0%,
+    rgb(var(--accent-2-rgb)) 100%
+  );
+  --accent-gradient-wide: linear-gradient(
+    90deg,
+    rgb(var(--accent-rgb)) 0%,
+    rgb(var(--accent-2-rgb)) 50%,
+    rgb(var(--accent-3-rgb)) 100%
+  );
+
+  /* Section pacing & atmospheric grounds */
+  --section-alt-bg: rgb(238 232 220 / 0.45);
+  --footer-bg: #eae3d4;
+  --card-elevated-bg: var(--grey-900);
+
+  /* Diversified Mythic Accents — soothing, archival, nature & lore */
+  --mythic-gold: #b45309; /* Burnished amber rune */
+  --mythic-gold-bg: rgb(180 83 9 / 0.08);
+  --mythic-gold-border: rgb(180 83 9 / 0.22);
+
+  --mythic-sage: #166534; /* Folklore forest / herbalist green */
+  --mythic-sage-bg: rgb(22 101 52 / 0.08);
+  --mythic-sage-border: rgb(22 101 52 / 0.2);
+
+  --mythic-lapis: #3730a3; /* Royal lapis lazuli / imperial indigo */
+  --mythic-lapis-bg: rgb(55 48 163 / 0.08);
+  --mythic-lapis-border: rgb(55 48 163 / 0.22);
+
+  --mythic-terracotta: #9a3412; /* Rubric terracotta / oral tradition red */
+  --mythic-terracotta-bg: rgb(154 52 18 / 0.08);
+  --mythic-terracotta-border: rgb(154 52 18 / 0.22);
+
+  --mythic-cyan: #0369a1; /* Glacial ice / northern sky */
+  --mythic-cyan-bg: rgb(3 105 161 / 0.08);
+  --mythic-cyan-border: rgb(3 105 161 / 0.22);
+
+  --mythic-violet: #6b21a8; /* Mystic elder / celestial violet */
+  --mythic-violet-bg: rgb(107 33 168 / 0.08);
+  --mythic-violet-border: rgb(107 33 168 / 0.22);
+
+  --shadow-sm: 0 2px 8px rgb(0 0 0 / 0.06);
+  --shadow-md: 0 8px 24px rgb(0 0 0 / 0.08);
+  --shadow-lg: 0 16px 40px rgb(0 0 0 / 0.12);
+  --shadow-xl: 0 24px 60px rgb(0 0 0 / 0.16);
+  --shadow-inset-hairline: inset 0 1px 0 rgb(255 255 255 / 0.9);
+
+  --shadow-glow: 0 0 20px rgb(79 70 229 / 0.1);
+  --shadow-glow-lg: 0 18px 40px rgb(79 70 229 / 0.15);
+
+  --nav-bg: rgb(246 243 237 / 0.88);
+  --nav-bg-scrolled: rgb(246 243 237 / 0.98);
+  --nav-border: rgb(26 31 44 / 0.08);
+
+  color-scheme: light;
+}
+
+:root {
+  /* ══ SHARED TOKENS (Shared across all chromatic modes) ══════════════════ */
+
+  --a-01: 0.02;
+  --a-02: 0.04;
+  --a-03: 0.06;
+  --a-04: 0.08;
+  --a-05: 0.1;
+  --a-06: 0.15;
+  --a-07: 0.2;
+  --a-08: 0.3;
+  --a-09: 0.4;
+  --a-10: 0.6;
+  --a-11: 0.8;
 
   --success: rgb(var(--success-rgb));
   --warning: rgb(var(--warning-rgb));
@@ -201,8 +455,6 @@
   --warning-subtle: rgb(var(--warning-rgb) / var(--a-06));
   --danger-subtle: rgb(var(--danger-rgb) / var(--a-06));
   --info-subtle: rgb(var(--info-rgb) / var(--a-06));
-
-  /* ── Atmospheric glow ────────────────────────────────────────────────── */
 
   --glow-indigo: rgb(var(--accent-rgb) / var(--a-05));
   --glow-violet: rgb(var(--accent-2-rgb) / var(--a-04));
@@ -284,19 +536,10 @@
   --radius-3xl: 2.5rem;
   --radius-full: 9999px;
 
-  /* ══ 5. ELEVATION ═══════════════════════════════════════════════════════ */
-
-  --shadow-sm: 0 2px 8px rgb(var(--dark-rgb) / 0.24);
-  --shadow-md: 0 8px 24px rgb(var(--dark-rgb) / 0.36);
-  --shadow-lg: 0 16px 48px rgb(var(--dark-rgb) / 0.48);
-  --shadow-xl: 0 24px 64px rgb(var(--dark-rgb) / 0.56);
-
-  /* The inset hairline that sells a glass edge. Paired with every shadow
-     on a translucent surface. */
-  --shadow-inset-hairline: inset 0 1px 0 rgb(var(--light-rgb) / var(--a-02));
-
-  --shadow-glow: 0 0 20px rgb(var(--accent-rgb) / var(--a-06));
-  --shadow-glow-lg: 0 18px 40px rgb(var(--accent-rgb) / var(--a-07));
+  /* ══ 5. ELEVATION ═══════════════════════════════════════════════════════
+     Theme-specific shadows (--shadow-sm .. --shadow-xl, --shadow-glow,
+     --shadow-inset-hairline) are defined in each [data-app-theme] block.
+     Shared blur filters are defined below. */
 
   --blur-sm: 12px;
   --blur-md: 20px;
@@ -365,9 +608,6 @@
 
   --nav-height: 64px;
   --nav-dock-height: 68px; /* Mobile bottom dock  */
-  --nav-bg: rgb(3 3 5 / 0.75);
-  --nav-bg-scrolled: rgb(3 3 5 / 0.96);
-  --nav-border: rgb(var(--light-rgb) / var(--a-02));
   --nav-blur: 32px;
   --nav-transition: var(--transition-base);
 
@@ -413,8 +653,6 @@
   --reader-line-height: 1.75;
   --reader-measure: 68ch;
   --reader-nav-height: 56px; /* Matches .top-bar in reader.css — see there */
-
-  color-scheme: dark;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -436,6 +674,23 @@
     --dur-slow: 1ms;
     --dur-slower: 1ms;
   }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Application Theme Swatches
+   Pre-composed gradients for the global application theme selector cards.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.app-theme-swatch--transcendental {
+  background: linear-gradient(135deg, #030305 0%, #0d0d14 55%, #1e1b4b 100%);
+}
+
+.app-theme-swatch--dark {
+  background: linear-gradient(135deg, #0b0d13 0%, #1c2132 55%, #1e293b 100%);
+}
+
+.app-theme-swatch--light {
+  background: linear-gradient(135deg, #f7f5f0 0%, #ffffff 55%, #e2e8f0 100%);
 }
 
 /* ══════════════════════════════════════════════════════════════════════════

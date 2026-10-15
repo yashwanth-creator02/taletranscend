@@ -35,15 +35,32 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cinzel:wght@500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap"
     />
 
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('tt_app_theme') || 'transcendental';
+          document.documentElement.setAttribute('data-app-theme', t);
+        } catch (e) {}
+      })();
+    </script>
+
     <style>
       /* Critical Anti-FOUC Gate */
       html {
         background-color: #030305;
         color: #e2e8f0;
       }
+      html[data-app-theme='dark'] {
+        background-color: #0b0d13;
+        color: #f8fafc;
+      }
+      html[data-app-theme='light'] {
+        background-color: #f7f5f0;
+        color: #1e293b;
+      }
       body {
-        background-color: #030305;
-        color: #e2e8f0;
+        background-color: inherit;
+        color: inherit;
         font-family:
           'Inter',
           system-ui,
@@ -57,7 +74,7 @@
       #app-boot-curtain {
         position: fixed;
         inset: 0;
-        background-color: #030305;
+        background-color: inherit;
         z-index: 999999;
         display: flex;
         align-items: center;
@@ -118,7 +135,7 @@
   </head>
 
   <body
-    class="text-slate-300 antialiased selection:bg-indigo-500/30 page-fade-in flex flex-col h-screen overflow-hidden"
+    class="antialiased selection:bg-indigo-500/30 page-fade-in flex flex-col h-screen overflow-hidden"
   >
     <!-- App Boot Curtain (Prevents FOUC on slower networks) -->
     <div id="app-boot-curtain" aria-hidden="true">
@@ -128,8 +145,8 @@
     </div>
 
     <a class="skip-link" href="#main-content">Skip to content</a>
-    <!-- Background (matches your existing pages) -->
-    <div class="fixed inset-0 -z-10 bg-slate-950">
+    <!-- Background -->
+    <div class="fixed inset-0 -z-10 bg-bg-base">
       <div
         class="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(99,102,241,0.08),transparent_50%)]"
       ></div>
@@ -143,14 +160,14 @@
       <div class="text-center max-w-md">
         <!-- 404 Number -->
         <h1
-          class="text-[8rem] leading-none font-black text-transparent bg-clip-text bg-linear-to-b from-slate-100 via-slate-300 to-indigo-400 tracking-tighter select-none"
+          class="text-[8rem] leading-none font-black text-transparent bg-clip-text bg-linear-to-b from-indigo-500 via-purple-400 to-indigo-300 tracking-tighter select-none"
         >
           404
         </h1>
 
         <!-- Message -->
-        <h2 class="mt-4 text-2xl font-bold text-slate-100 font-cinzel">Lost in the Archives</h2>
-        <p class="mt-3 text-sm text-slate-400 leading-relaxed">
+        <h2 class="mt-4 text-2xl font-bold text-ink font-cinzel">Lost in the Archives</h2>
+        <p class="mt-3 text-sm text-muted leading-relaxed">
           The tale you seek has vanished into the mists of time. Perhaps it was never written, or
           the pages have turned to dust.
         </p>

@@ -96,6 +96,75 @@ The TaleTranscend brand mark is the mythical golden-trimmed black quill pen enci
   - Profile identity editing is centralized under `settings.html#profile`.
   - The profile page (`profile.html`) button "Customise Identity" (`#btn-edit-desktop`) redirects users cleanly to `/settings.html#profile`.
 
+### 7. Global Multi-Theme Architecture (Transcendental, Midnight Dark, Illuminated Light)
+
+- **Three Centralized Interface Themes**:
+  1. **Transcendental (`transcendental`, Default)**: Signature cosmic starlight dark theme featuring deep obsidian floors (`#030305`), ambient cosmic gradients, and glowing warm amber/rune accents.
+  2. **Midnight Dark (`dark`)**: Crisp, high-contrast obsidian-indigo dark theme (`#0b0d13`) with electric indigo highlights, crisp silver typography, and deep slate card elevations.
+  3. **Illuminated Light (`light`)**: Authentic mythic archival parchment theme (`#f7f5f0`) featuring ivory and vellum card surfaces, warm slate borders, and imperial dark slate ink typography (`#1e293b`).
+- **Single-Source Cascading Tokens**:
+  - All theme palettes are strictly defined in `src/assets/css/tokens.css` under `html[data-app-theme='transcendental']`, `html[data-app-theme='dark']`, and `html[data-app-theme='light']`.
+  - Shared geometric constants and typography variables reside in the subsequent `:root` block without clobbering color schemes, elevation shadows, or navigation backgrounds.
+- **Synchronous Anti-FOUC Theme Hydration**:
+  - Every HTML document (`index`, `library`, `shelf`, `tale`, `reader`, `profile`, `settings`, `contribution`, `toc`, `login`, `404`) includes an immediate `<script>` tag in `<head>` before stylesheets load:
+    ```html
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('tt_app_theme') || 'transcendental';
+          document.documentElement.setAttribute('data-app-theme', t);
+        } catch (e) {}
+      })();
+    </script>
+    ```
+  - Followed by the Critical Anti-FOUC Gate `<style>` styling `html`, `html[data-app-theme='dark']`, and `html[data-app-theme='light']` to guarantee zero white or dark flash during page transitions.
+- **Cross-Tab & System Synchronization**:
+  - Managed by `src/config/theme.config.js` (`applyAppTheme`, `getAppTheme`, `initAppTheme`).
+  - Automatically updates `<meta name="theme-color">` dynamically.
+  - Window `storage` event listener keeps all opened tabs in sync when theme preferences change in Settings.
+- **Zero Hardcoded Dark Classes**:
+  - No page body or container should use hardcoded `bg-slate-950`, `bg-[#030305]`, `text-white`, or `text-slate-300`.
+  - Use bridged Tailwind tokens: `bg-bg-base`, `bg-surface-1`, `bg-surface-2`, `text-ink`, `text-muted`, and `border-line`.
+
+### 8. Section Pacing & Light Mode Visual Comfort Standards
+
+- **Soothing Archival Parchment (Zero Harsh Glare)**:
+  - In Illuminated Light mode (`html[data-app-theme='light']`), avoid stark pure-white (`#ffffff`) on massive surface areas.
+  - Page ground is calibrated to warm archival manuscript vellum (`--bg-base`: `#f6f3ed`).
+  - Elevated card surfaces use soft alabaster ivory (`--card-elevated-bg` / `--grey-900`: `#fbf9f5`).
+  - Secondary drawers and footer foundations use deeper antique vellum (`--footer-bg`: `#eae3d4`).
+  - Primary text uses deep charcoal carbon (`--text-primary`: `#1c2530`), providing optimal contrast and readability without high-glare retinal fatigue.
+- **Section Pacing & Atmospheric Alternation**:
+  - Long landing and reading pages feature rhythmic visual pacing down the viewport.
+  - Alternating section bands use `--section-alt-bg` (`rgb(238 232 220 / 0.45)` in light; `rgb(16 20 30 / 0.6)` in dark) with subtle 1px border dividers to frame grids such as Trending Chronicles.
+  - Colophon footers are anchored with `--footer-bg` and top border dividers to cleanly terminate the reading surface.
+- **Diversified Mythic Chromatic Palette**:
+  - Topic tags and era badges derive their identities from six centralized mythic color tokens defined in `tokens.css` across all three themes:
+    1. **Mythic Gold** (`--mythic-gold`): Burnished amber rune / brass.
+    2. **Mythic Sage** (`--mythic-sage`): Folklore forest / herbalist green.
+    3. **Mythic Lapis** (`--mythic-lapis`): Royal lapis lazuli / imperial indigo.
+    4. **Mythic Terracotta** (`--mythic-terracotta`): Rubric terracotta / oral tradition red.
+    5. **Mythic Cyan** (`--mythic-cyan`): Glacial ice / northern sky.
+    6. **Mythic Violet** (`--mythic-violet`): Mystic elder / celestial violet.
+  - Each chromatic token provides corresponding `--mythic-*-bg` and `--mythic-*-border` variables for tags, badges, and icon shields without inline hex or rgb overrides.
+- **Scholar Scribe Tile**:
+  - Scribe and authoring calls-to-action feature an elevated scholar plate with a burnished gold shield emblem (`feather` icon) and high-contrast call-to-action buttons.
+
+### 9. Settings Interface, Stacked Bio & Reader Theme Specimens
+
+- **Dedicated Sideheading & Below-Field Layout (`.settings-row--stacked`)**:
+  - Full-width longform inputs, notably the Chronicler Lore / Bio textarea (`#input-bio`), must be stacked vertically below the sideheading, descriptive subtitle, and info shield rather than squeezed beside it in a split two-column row.
+  - Includes a real-time character count indicator (`#bio-char-count`: e.g. `142 / 1000`) and field advice tips.
+- **Dedicated Popup Modal for Sensitive Settings**:
+  - Storage of sensitive credentials such as the Google Gemini API key must be initiated through an accessible popup modal window (`#modal-gemini-key`) instead of inline password fields.
+  - The modal provides security guidance regarding client-only local storage, password visibility toggling, direct links to Google AI Studio, and clear/remove functionality.
+  - The settings row presents an accessible status badge (`#gemini-key-status`: `.settings-status-badge--active` vs `.settings-status-badge--inactive`).
+- **Reader Theme Manuscript Specimens (Light Mode Distinctiveness)**:
+  - Each of the 12 reader themes (`src/config/theme.config.js`) provides explicit palette metadata (`mode`, `bg`, `fg`, `accent`, `tint`).
+  - To prevent pale reading themes (Sepia, Cream, Solarized Light, Editorial) from looking identical or unreadable in Light Mode:
+    - Each theme option card (`.theme-option-card`) renders a miniature manuscript specimen (`.theme-specimen`) showcasing the genuine background color, ink foreground sample glyph `"Aa"`, accent pip dot, and an uppercase `LIGHT` or `DARK` badge.
+    - Card titles (`.theme-option-card__name`) and subtitles (`.theme-option-card__sub`) strictly inherit `--text-primary` and `--text-secondary`, guaranteeing crisp, dark charcoal contrast on light surfaces rather than washed-out white text.
+
 ## Tools / Scripts to Use
 
 - Run the UI and navigation verification suite:
@@ -116,8 +185,10 @@ The TaleTranscend brand mark is the mythical golden-trimmed black quill pen enci
 - Single-page footer isolation strictly maintained (only `index.html` has a footer).
 - Zero broken image links across navbar, footer, auth, or boot curtains.
 - Accessible toast alerts and complete keyboard shortcuts operational.
+- Seamless, flicker-free multi-theme support across all 11 application views.
 
 ## Edge Cases & Error Handling
 
 - **Focus Restoration**: When dismissing a toast or modal, return focus to the last active element or document body to prevent keyboard focus from getting lost.
 - **Reduced Motion**: All toast animations and boot crest pulses must respect `prefers-reduced-motion: reduce`.
+- **LocalStorage Failure**: When `localStorage` is disabled or restricted in private browsing modes, `applyAppTheme` and the inline script catch exceptions gracefully and fall back to the default `transcendental` theme.

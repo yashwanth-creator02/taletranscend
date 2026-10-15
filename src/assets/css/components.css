@@ -522,7 +522,8 @@
 
 .site-footer,
 .home-footer {
-  border-top: 1px solid var(--border-subtle);
+  background: var(--footer-bg);
+  border-top: 1px solid var(--border);
   padding-block: var(--space-8) var(--space-6);
   position: relative;
   z-index: 10;

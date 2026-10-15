@@ -40,15 +40,32 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cinzel:wght@500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap"
     />
 
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('tt_app_theme') || 'transcendental';
+          document.documentElement.setAttribute('data-app-theme', t);
+        } catch (e) {}
+      })();
+    </script>
+
     <style>
       /* Critical Anti-FOUC Gate */
       html {
         background-color: #030305;
         color: #e2e8f0;
       }
+      html[data-app-theme='dark'] {
+        background-color: #0b0d13;
+        color: #f8fafc;
+      }
+      html[data-app-theme='light'] {
+        background-color: #f7f5f0;
+        color: #1e293b;
+      }
       body {
-        background-color: #030305;
-        color: #e2e8f0;
+        background-color: inherit;
+        color: inherit;
         font-family:
           'Inter',
           system-ui,
@@ -62,7 +79,7 @@
       #app-boot-curtain {
         position: fixed;
         inset: 0;
-        background-color: #030305;
+        background-color: inherit;
         z-index: 999999;
         display: flex;
         align-items: center;
@@ -161,7 +178,7 @@
             aria-hidden="true"
           />
         </div>
-        <span class="text-xl font-cinzel font-bold tracking-wider text-white">TaleTranscend</span>
+        <span class="text-xl font-cinzel font-bold tracking-wider text-ink">TaleTranscend</span>
       </div>
     </header>
 
@@ -170,7 +187,7 @@
       <div class="w-full min-h-screen grid grid-cols-1 lg:grid-cols-12 items-stretch">
         <!-- ── Left Column: Boy Reading Under Lamp Illustration ── -->
         <section
-          class="login-visual lg:col-span-6 xl:col-span-7 flex flex-col items-center justify-center relative p-6 sm:p-10 lg:p-12 overflow-hidden border-b lg:border-b-0 lg:border-r border-white/5 pt-4 lg:pt-16"
+          class="login-visual lg:col-span-6 xl:col-span-7 flex flex-col items-center justify-center relative p-6 sm:p-10 lg:p-12 overflow-hidden border-b lg:border-b-0 lg:border-r border-line pt-4 lg:pt-16"
         >
           <div class="login-visual__glow" aria-hidden="true"></div>
 
@@ -209,18 +226,18 @@
             <div class="login-panel__header mb-4">
               <h1
                 id="login-heading"
-                class="text-2xl sm:text-3xl font-cinzel font-bold text-white tracking-wide mb-1.5"
+                class="text-2xl sm:text-3xl font-cinzel font-bold text-ink tracking-wide mb-1.5"
               >
                 Welcome to TaleTranscend !!
               </h1>
-              <p id="login-subheading" class="text-xs sm:text-sm text-slate-400 leading-relaxed">
+              <p id="login-subheading" class="text-xs sm:text-sm text-muted leading-relaxed">
                 An embedded mythic archive and storytelling platform for seekers and scribes.
               </p>
             </div>
 
             <!-- Auth Mode Tabs (Email | Phone) — Centered horizontally matching reference -->
             <div
-              class="auth-tabs flex items-center justify-center border-b border-white/10 mb-5"
+              class="auth-tabs flex items-center justify-center border-b border-line mb-5"
               role="tablist"
               aria-label="Sign in options"
             >
@@ -241,7 +258,7 @@
                 role="tab"
                 aria-selected="false"
                 aria-controls="panel-phone"
-                class="auth-tab pb-2.5 px-6 text-sm font-semibold text-slate-400 hover:text-slate-200 transition-all relative"
+                class="auth-tab pb-2.5 px-6 text-sm font-semibold text-muted hover:text-ink transition-all relative"
               >
                 <span>Phone</span>
                 <span class="auth-tab__indicator"></span>
@@ -258,7 +275,7 @@
               <form id="email-login-form" class="space-y-4" novalidate>
                 <!-- Name field (revealed only in Create Account mode) -->
                 <div id="field-name-group" class="hidden">
-                  <label for="input-name" class="block text-sm font-medium text-slate-200 mb-1.5">
+                  <label for="input-name" class="block text-sm font-medium text-ink-soft mb-1.5">
                     Scribe / Reader name
                   </label>
                   <div class="relative">
@@ -268,14 +285,14 @@
                       type="text"
                       autocomplete="name"
                       placeholder="E.g. Enkidu of Uruk"
-                      class="auth-input w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all"
+                      class="auth-input w-full px-4 py-3 rounded-xl bg-surface-2 border border-line text-ink placeholder-muted text-sm focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all"
                     />
                   </div>
                 </div>
 
                 <!-- Email address -->
                 <div>
-                  <label for="input-email" class="block text-sm font-medium text-slate-200 mb-1.5">
+                  <label for="input-email" class="block text-sm font-medium text-ink-soft mb-1.5">
                     Email address
                   </label>
                   <div class="relative">
@@ -286,7 +303,7 @@
                       autocomplete="email"
                       required
                       placeholder="scribe@taletranscend.org"
-                      class="auth-input w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all"
+                      class="auth-input w-full px-4 py-3 rounded-xl bg-surface-2 border border-line text-ink placeholder-muted text-sm focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all"
                     />
                   </div>
                 </div>
@@ -295,7 +312,7 @@
                 <div>
                   <label
                     for="input-password"
-                    class="block text-sm font-medium text-slate-200 mb-1.5"
+                    class="block text-sm font-medium text-ink-soft mb-1.5"
                   >
                     Password
                   </label>
@@ -307,12 +324,12 @@
                       autocomplete="current-password"
                       required
                       placeholder="••••••••••••"
-                      class="auth-input w-full px-4 py-3 pr-11 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all"
+                      class="auth-input w-full px-4 py-3 pr-11 rounded-xl bg-surface-2 border border-line text-ink placeholder-muted text-sm focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all"
                     />
                     <button
                       type="button"
                       id="btn-toggle-password"
-                      class="btn-toggle-password absolute right-3 p-1.5 text-slate-400 hover:text-white transition-colors focus:outline-none"
+                      class="btn-toggle-password absolute right-3 p-1.5 text-muted hover:text-ink transition-colors focus:outline-none"
                       aria-label="Toggle password visibility"
                     >
                       <i data-lucide="eye" id="icon-password-toggle" class="w-4 h-4"></i>
@@ -323,13 +340,13 @@
                 <!-- Options row: Keep me signed in & Forgot password? -->
                 <div class="flex items-center justify-between text-xs pt-1">
                   <label
-                    class="inline-flex items-center gap-2 cursor-pointer select-none text-slate-300 hover:text-white transition-colors"
+                    class="inline-flex items-center gap-2 cursor-pointer select-none text-muted hover:text-ink transition-colors"
                   >
                     <input
                       id="checkbox-remember"
                       type="checkbox"
                       checked
-                      class="auth-checkbox rounded border-white/20 bg-white/5 text-indigo-500 focus:ring-indigo-400 focus:ring-offset-0"
+                      class="auth-checkbox rounded border-line bg-surface-2 text-indigo-500 focus:ring-indigo-400 focus:ring-offset-0"
                     />
                     <span>Keep me signed in</span>
                   </label>
@@ -343,7 +360,7 @@
                 </div>
 
                 <!-- Switch prompt: First time here? Sign up instead -->
-                <div class="text-xs text-slate-400 pt-1">
+                <div class="text-xs text-muted pt-1">
                   <span id="auth-switch-label">First time here?</span>
                   <button
                     type="button"
@@ -391,15 +408,15 @@
             >
               <form id="phone-login-form" class="space-y-4" novalidate>
                 <div>
-                  <label for="input-phone" class="block text-sm font-medium text-slate-200 mb-1.5">
+                  <label for="input-phone" class="block text-sm font-medium text-ink-soft mb-1.5">
                     Phone number
                   </label>
                   <div class="relative flex items-center">
                     <div
-                      class="absolute left-3.5 flex items-center gap-1.5 text-xs font-semibold text-slate-400 pointer-events-none"
+                      class="absolute left-3.5 flex items-center gap-1.5 text-xs font-semibold text-muted pointer-events-none"
                     >
                       <span>+1</span>
-                      <span class="text-slate-600">|</span>
+                      <span class="text-faint">|</span>
                     </div>
                     <input
                       id="input-phone"
@@ -407,7 +424,7 @@
                       type="tel"
                       autocomplete="tel"
                       placeholder="(555) 000-0000"
-                      class="auth-input w-full pl-12 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all"
+                      class="auth-input w-full pl-12 pr-4 py-3 rounded-xl bg-surface-2 border border-line text-ink placeholder-muted text-sm focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all"
                     />
                   </div>
                 </div>
@@ -453,10 +470,10 @@
             <!-- ── Social / Alternative Logins (Preserving Active Working Integrations) ── -->
             <div class="auth-divider relative my-4">
               <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                <div class="w-full border-t border-white/10"></div>
+                <div class="w-full border-t border-line"></div>
               </div>
               <div class="relative flex justify-center text-xs uppercase">
-                <span class="auth-divider__text px-3 text-slate-400 font-semibold tracking-wider"
+                <span class="auth-divider__text px-3 text-muted font-semibold tracking-wider"
                   >Or continue with</span
                 >
               </div>
@@ -467,7 +484,7 @@
               <button
                 id="btn-google-login"
                 type="button"
-                class="auth-alt-btn py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-bold tracking-wider flex items-center justify-center gap-2 hover:bg-white/10 hover:border-white/20 transition-all active:scale-[0.98]"
+                class="auth-alt-btn py-2.5 px-4 rounded-xl bg-surface-2 border border-line text-ink text-xs font-bold tracking-wider flex items-center justify-center gap-2 hover:bg-surface-3 hover:border-line-strong transition-all active:scale-[0.98]"
                 aria-label="Sign in with Google"
               >
                 <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
@@ -512,7 +529,7 @@
               <button
                 id="btn-guest-login"
                 type="button"
-                class="auth-alt-btn py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-slate-300 text-xs font-bold tracking-wider flex items-center justify-center gap-2 hover:bg-white/10 hover:text-white hover:border-white/20 transition-all active:scale-[0.98]"
+                class="auth-alt-btn py-2.5 px-4 rounded-xl bg-surface-2 border border-line text-ink text-xs font-bold tracking-wider flex items-center justify-center gap-2 hover:bg-surface-3 hover:border-line-strong transition-all active:scale-[0.98]"
                 aria-label="Enter as Guest"
               >
                 <i data-lucide="user" class="w-4 h-4 shrink-0"></i>

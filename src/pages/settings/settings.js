@@ -24,6 +24,12 @@ import {
   DEFAULT_FONT,
   TYPOGRAPHY_BOUNDS,
   READER_STORAGE_KEYS,
+  APP_THEMES,
+  DEFAULT_APP_THEME,
+  APP_THEME_STORAGE_KEY,
+  getSavedAppTheme,
+  applyAppTheme,
+  initAppTheme,
   loadReaderFontStylesheets,
 } from '@config/theme.config.js';
 import { GENRE_OPTIONS } from '@pages/profile/state.js';
@@ -341,7 +347,58 @@ export function updatePreview(settings) {
 }
 
 /**
+ * Updates the text badge showing the currently active application theme.
+ * @param {string} themeId
+ */
+export function updateActiveAppThemeBadge(themeId) {
+  const badge = document.getElementById('active-app-theme-badge');
+  if (!badge) return;
+  const theme = APP_THEMES.find((t) => t.id === themeId);
+  badge.textContent = theme ? theme.name : 'Transcendental';
+}
+
+/**
+ * Renders application theme cards into the app theme grid.
+ * @param {string} activeAppTheme
+ */
+export function renderAppThemes(activeAppTheme) {
+  const grid = document.getElementById('settings-app-theme-grid');
+  if (!grid) return;
+
+  grid.innerHTML = APP_THEMES.map((theme) => {
+    const isActive = theme.id === activeAppTheme;
+    return `
+      <button
+        type="button"
+        class="app-theme-card${isActive ? ' active' : ''}"
+        data-app-theme="${theme.id}"
+        role="radio"
+        aria-checked="${isActive ? 'true' : 'false'}"
+        title="${escapeHtml(theme.name)} — ${escapeHtml(theme.subtitle)}"
+      >
+        <div class="app-theme-card__swatch app-theme-swatch--${theme.id}">
+          <span class="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-sm" style="${theme.tagStyle}">
+            ${escapeHtml(theme.subtitle)}
+          </span>
+          <div class="app-theme-card__indicator">
+            <i data-lucide="check" class="w-3.5 h-3.5 ${isActive ? '' : 'hidden'}"></i>
+          </div>
+        </div>
+        <div class="app-theme-card__header">
+          <span class="app-theme-card__title">${escapeHtml(theme.name)}</span>
+          <span class="app-theme-card__sub">${theme.colorScheme}</span>
+        </div>
+        <p class="app-theme-card__desc">${escapeHtml(theme.description)}</p>
+      </button>
+    `;
+  }).join('');
+
+  initIcons(grid);
+}
+
+/**
  * Renders theme options into the settings theme grid.
+ * Displays miniature manuscript specimens with genuine background, ink text sample, and mode badge.
  * @param {string} activeTheme
  */
 export function renderThemes(activeTheme) {
@@ -350,6 +407,9 @@ export function renderThemes(activeTheme) {
 
   grid.innerHTML = READER_THEMES.map((theme) => {
     const isActive = theme.id === activeTheme;
+    const isLightModeTheme = theme.mode === 'light';
+    const modeBadgeText = isLightModeTheme ? 'Light' : 'Dark';
+
     return `
       <button
         type="button"
@@ -357,12 +417,41 @@ export function renderThemes(activeTheme) {
         data-theme="${theme.id}"
         role="radio"
         aria-checked="${isActive ? 'true' : 'false'}"
-        title="${escapeHtml(theme.label)} — ${escapeHtml(theme.sub)}"
+        title="${escapeHtml(theme.label)} — ${escapeHtml(theme.sub)} (${modeBadgeText} Mode)"
       >
-        <div class="theme-option-swatch" style="background: ${theme.tint};"></div>
-        <div class="min-w-0">
-          <span class="text-xs font-bold text-white block leading-tight truncate">${escapeHtml(theme.label)}</span>
-          <span class="text-[10px] text-slate-400 block truncate">${escapeHtml(theme.sub)}</span>
+        <div
+          class="theme-specimen"
+          style="background: ${theme.bg}; color: ${theme.fg}; border-color: ${isLightModeTheme ? 'rgba(0,0,0,0.14)' : 'rgba(255,255,255,0.12)'};"
+        >
+          <div class="theme-specimen__header">
+            <span
+              class="theme-specimen__badge"
+              style="color: ${theme.fg}; background: ${isLightModeTheme ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.1)'};"
+            >
+              ${modeBadgeText}
+            </span>
+            <span
+              class="theme-specimen__accent-dot"
+              style="background: ${theme.accent};"
+              title="Accent: ${theme.accent}"
+            ></span>
+          </div>
+          <div class="theme-specimen__body">
+            <div class="theme-specimen__glyph" style="color: ${theme.fg};">Aa</div>
+            <div class="theme-specimen__lines" aria-hidden="true">
+              <span class="theme-specimen__line" style="background: ${theme.fg};"></span>
+              <span class="theme-specimen__line theme-specimen__line--short" style="background: ${theme.fg};"></span>
+            </div>
+          </div>
+        </div>
+        <div class="theme-option-card__info">
+          <div class="flex items-center justify-between gap-1 w-full">
+            <span class="theme-option-card__name">${escapeHtml(theme.label)}</span>
+            <span class="theme-option-card__mode-tag ${isLightModeTheme ? 'theme-option-card__mode-tag--light' : 'theme-option-card__mode-tag--dark'}">
+              ${modeBadgeText}
+            </span>
+          </div>
+          <span class="theme-option-card__sub">${escapeHtml(theme.sub)}</span>
         </div>
       </button>
     `;
@@ -389,7 +478,7 @@ export function renderFonts(activeFont) {
         aria-checked="${isActive ? 'true' : 'false'}"
       >
         <div class="min-w-0">
-          <span class="text-xs font-bold text-white block" style="font-family: ${font.css};">
+          <span class="text-xs font-bold block text-slate-100" style="font-family: ${font.css};">
             ${escapeHtml(font.label)}
           </span>
           <span class="text-[10px] text-slate-400 block">${escapeHtml(font.sub || '')}</span>
@@ -555,6 +644,7 @@ export async function handleSaveProfile() {
       } else if (keyInput.value === '') {
         clearStoredApiKey();
       }
+      updateGeminiKeyBadge();
     }
 
     showToast('Chronicler profile saved to living archive.', 'success');
@@ -570,6 +660,139 @@ export async function handleSaveProfile() {
       initIcons(saveBtn);
     }
   }
+}
+
+/**
+ * Updates the bio character count display element.
+ * @param {number} count
+ */
+export function updateBioCharCount(count = 0) {
+  const counter = document.getElementById('bio-char-count');
+  if (counter) {
+    counter.textContent = `${count} / 1000`;
+  }
+}
+
+/**
+ * Updates the Gemini API Key status badge and modal trigger button text.
+ */
+export function updateGeminiKeyBadge() {
+  const key = getStoredApiKey() || document.getElementById('input-gemini-key')?.value?.trim();
+  const statusBadge = document.getElementById('gemini-key-status');
+  const statusText = document.getElementById('gemini-key-status-text');
+  const openBtnText = document.getElementById('btn-open-gemini-text');
+
+  const isConfigured = Boolean(key && key.length > 0);
+
+  if (statusBadge) {
+    statusBadge.classList.toggle('settings-status-badge--active', isConfigured);
+    statusBadge.classList.toggle('settings-status-badge--inactive', !isConfigured);
+  }
+  if (statusText) {
+    statusText.textContent = isConfigured ? 'Key Configured' : 'Not Configured';
+  }
+  if (openBtnText) {
+    openBtnText.textContent = isConfigured ? 'Manage Key' : 'Configure Key';
+  }
+}
+
+/**
+ * Initializes the popup modal dialog for managing the Google Gemini API key.
+ */
+export function initGeminiKeyModal() {
+  const modal = document.getElementById('modal-gemini-key');
+  const openBtn = document.getElementById('btn-open-gemini-key-modal');
+  const closeBtn = document.getElementById('modal-gemini-close');
+  const backdrop = document.getElementById('modal-gemini-backdrop');
+  const cancelBtn = document.getElementById('btn-cancel-modal-key');
+  const saveBtn = document.getElementById('btn-save-modal-key');
+  const clearBtn = document.getElementById('btn-clear-modal-key');
+  const toggleBtn = document.getElementById('btn-toggle-modal-key');
+  const modalInput = document.getElementById('input-gemini-key-modal');
+  const hiddenInput = document.getElementById('input-gemini-key');
+
+  if (!modal) return;
+
+  function openModal() {
+    const currentKey = getStoredApiKey() || hiddenInput?.value?.trim() || '';
+    if (modalInput) {
+      modalInput.value = currentKey;
+      modalInput.type = 'password';
+    }
+    if (toggleBtn) {
+      toggleBtn.textContent = 'Show';
+    }
+    modal.classList.remove('hidden');
+    modal.setAttribute('aria-hidden', 'false');
+    if (modalInput) {
+      setTimeout(() => modalInput.focus(), 50);
+    }
+  }
+
+  function closeModal() {
+    modal.classList.add('hidden');
+    modal.setAttribute('aria-hidden', 'true');
+    if (openBtn) {
+      openBtn.focus();
+    }
+  }
+
+  if (openBtn) {
+    openBtn.addEventListener('click', openModal);
+  }
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closeModal);
+  }
+  if (backdrop) {
+    backdrop.addEventListener('click', closeModal);
+  }
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', closeModal);
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+      closeModal();
+    }
+  });
+
+  if (toggleBtn && modalInput) {
+    toggleBtn.addEventListener('click', () => {
+      const isPassword = modalInput.type === 'password';
+      modalInput.type = isPassword ? 'text' : 'password';
+      toggleBtn.textContent = isPassword ? 'Hide' : 'Show';
+    });
+  }
+
+  if (saveBtn && modalInput) {
+    saveBtn.addEventListener('click', () => {
+      const val = modalInput.value.trim();
+      if (val) {
+        setStoredApiKey(val);
+        if (hiddenInput) hiddenInput.value = val;
+        showToast('Gemini API key stored securely in local storage.', 'success');
+      } else {
+        clearStoredApiKey();
+        if (hiddenInput) hiddenInput.value = '';
+        showToast('Gemini API key removed.', 'info');
+      }
+      updateGeminiKeyBadge();
+      closeModal();
+    });
+  }
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      clearStoredApiKey();
+      if (hiddenInput) hiddenInput.value = '';
+      if (modalInput) modalInput.value = '';
+      updateGeminiKeyBadge();
+      showToast('Gemini API key removed.', 'info');
+      closeModal();
+    });
+  }
+
+  updateGeminiKeyBadge();
 }
 
 /**
@@ -623,11 +846,19 @@ export function initProfileSettings() {
     });
   }
 
+  const bioInput = document.getElementById('input-bio');
+  if (bioInput) {
+    updateBioCharCount(bioInput.value.length);
+    bioInput.addEventListener('input', () => {
+      updateBioCharCount(bioInput.value.length);
+    });
+  }
+
   const suggestBtn = document.getElementById('btn-suggest-name');
   if (suggestBtn) {
     suggestBtn.addEventListener('click', async () => {
-      const bioInput = document.getElementById('input-bio');
-      const bio = bioInput?.value?.trim();
+      const currentBioInput = document.getElementById('input-bio');
+      const bio = currentBioInput?.value?.trim();
       if (!bio) {
         showToast(
           'Please record lore or a short bio first so the Oracle can suggest a moniker.',
@@ -689,8 +920,11 @@ export function initProfileSettings() {
         clearStoredApiKey();
         showToast('Gemini API key cleared.', 'info');
       }
+      updateGeminiKeyBadge();
     });
   }
+
+  initGeminiKeyModal();
 }
 
 /**
@@ -704,9 +938,30 @@ export function initSettingsInteractions() {
   initSettingsSearch();
   initProfileSettings();
 
+  const currentAppTheme = getSavedAppTheme();
+  renderAppThemes(currentAppTheme);
+  updateActiveAppThemeBadge(currentAppTheme);
+
   renderThemes(settings.theme);
   renderFonts(settings.fontFamily);
   updatePreview(settings);
+
+  // App Theme Clicks
+  const appThemeGrid = document.getElementById('settings-app-theme-grid');
+  if (appThemeGrid) {
+    appThemeGrid.addEventListener('click', (e) => {
+      const card = e.target.closest('.app-theme-card');
+      if (!card) return;
+      const themeId = card.dataset.appTheme;
+      if (!themeId) return;
+
+      applyAppTheme(themeId);
+      renderAppThemes(themeId);
+      updateActiveAppThemeBadge(themeId);
+      const appliedTheme = APP_THEMES.find((t) => t.id === themeId);
+      showToast(`Application theme set to ${appliedTheme?.name || themeId}`, 'info');
+    });
+  }
 
   // Sliders and Value Displays
   const sizeSlider = document.getElementById('setting-font-size');
@@ -879,6 +1134,11 @@ export function initSettingsInteractions() {
     localStorage.removeItem('tt_settings_particles');
     localStorage.removeItem('tt_settings_audio');
     localStorage.removeItem('tt_settings_reduced_motion');
+    localStorage.removeItem(APP_THEME_STORAGE_KEY);
+
+    applyAppTheme(DEFAULT_APP_THEME);
+    renderAppThemes(DEFAULT_APP_THEME);
+    updateActiveAppThemeBadge(DEFAULT_APP_THEME);
 
     const freshSettings = getSavedSettings();
     renderThemes(freshSettings.theme);
@@ -947,7 +1207,10 @@ export function setupAuthDisplay() {
           const readingGoalInput = document.getElementById('input-reading-goal');
 
           if (nameInput) nameInput.value = d.name || user.displayName || '';
-          if (bioInput) bioInput.value = d.bio || '';
+          if (bioInput) {
+            bioInput.value = d.bio || '';
+            updateBioCharCount(bioInput.value.length);
+          }
           if (pronounsInput) pronounsInput.value = d.pronouns || '';
           if (avatarUrlInput) {
             avatarUrlInput.value = d.avatarUrl || user.photoURL || '';
@@ -984,6 +1247,7 @@ initPageReveal();
  * NOTE: Global navigation is intentionally omitted in favor of the dedicated back button.
  */
 export function initSettingsPage() {
+  initAppTheme();
   loadReaderFontStylesheets();
   initSettingsInteractions();
   setupAuthDisplay();

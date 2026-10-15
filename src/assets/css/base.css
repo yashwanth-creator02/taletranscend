@@ -67,6 +67,16 @@
   --color-line: var(--border);
   --color-line-strong: var(--border-strong);
 
+  --color-section-alt: var(--section-alt-bg);
+  --color-footer-bg: var(--footer-bg);
+
+  --color-mythic-gold: var(--mythic-gold);
+  --color-mythic-sage: var(--mythic-sage);
+  --color-mythic-lapis: var(--mythic-lapis);
+  --color-mythic-terracotta: var(--mythic-terracotta);
+  --color-mythic-cyan: var(--mythic-cyan);
+  --color-mythic-violet: var(--mythic-violet);
+
   --font-sans: var(--font-sans);
   --font-display: var(--font-display);
   --font-mono: var(--font-mono);

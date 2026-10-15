@@ -74,9 +74,12 @@ import {
 import { showToast } from '@ui/components/toast.js';
 import { initPageReveal, readyReveal, setupAuthTimeout, createLogger } from '@/utils';
 import { TTS_CHAR_LIMIT } from '@config/app.config.js';
+import { initAppTheme } from '@config/theme.config.js';
 
 const log = createLogger('Reader');
 
+// Initialize global app theme
+initAppTheme();
 // Hide body immediately to prevent flash of unstyled content
 initPageReveal();
 
