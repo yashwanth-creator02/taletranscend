@@ -3,7 +3,7 @@
 // Renders individual, animated mythic artifacts (grimoire, lamp, watch, map, spectacles, quill, spirits).
 // Completely borderless, seamless blend with transparent SVGs and dynamic hover reveals.
 
-import { getReliquaryArtifacts } from './reliquary.data.js';
+import { getReliquaryArtifacts, getArtifactAsset } from './reliquary.data.js';
 import { escapeHtml, createLogger } from '@/utils';
 import { initIcons } from '@ui/components/icons.js';
 
@@ -107,20 +107,13 @@ function _buildReliquaryMarkup(artifacts) {
  * @returns {string}
  */
 function _buildArtifactNode(artifact) {
-  const {
-    id,
-    type,
-    title,
-    era,
-    taleTitle,
-    asset,
-    readUrl,
-    position,
-    zIndex,
-    animation,
-    pillPlacement,
-  } = artifact;
+  const { id, type, title, era, taleTitle, readUrl, position, zIndex, animation, pillPlacement } =
+    artifact;
   const isSelected = id === activeRelicId;
+  const isLight =
+    typeof document !== 'undefined' &&
+    document.documentElement.getAttribute('data-app-theme') === 'light';
+  const assetSrc = getArtifactAsset(artifact, isLight);
   const pillModifier =
     pillPlacement === 'top' ? 'reliquary-item__pill--top' : 'reliquary-item__pill--bottom';
 
@@ -146,7 +139,7 @@ function _buildArtifactNode(artifact) {
     >
       <div class="reliquary-item__glow" aria-hidden="true"></div>
       <img
-        src="${asset}"
+        src="${assetSrc}"
         alt="${escapeHtml(title)}"
         class="reliquary-item__asset reliquary-item__asset--${type}"
         loading="eager"
@@ -184,35 +177,43 @@ function _setupInteractivity(container, artifacts) {
   // In-memory offscreen canvases for alpha transparency hit testing
   const artifactBitmaps = new Map();
 
-  artifacts.forEach((artifact) => {
-    if (!artifact.asset) return;
-    try {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.src = artifact.asset;
-      img.onload = () => {
-        try {
-          const offCanvas = document.createElement('canvas');
-          offCanvas.width = 120;
-          offCanvas.height =
-            Math.round(120 * ((img.naturalHeight || 300) / (img.naturalWidth || 400))) || 120;
-          const ctx = offCanvas.getContext('2d', { willReadFrequently: true });
-          if (ctx) {
-            ctx.drawImage(img, 0, 0, offCanvas.width, offCanvas.height);
-            artifactBitmaps.set(artifact.id, {
-              ctx,
-              width: offCanvas.width,
-              height: offCanvas.height,
-            });
+  function loadArtifactBitmaps(isLight) {
+    artifacts.forEach((artifact) => {
+      const assetSrc = getArtifactAsset(artifact, isLight);
+      if (!assetSrc) return;
+      try {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.src = assetSrc;
+        img.onload = () => {
+          try {
+            const offCanvas = document.createElement('canvas');
+            offCanvas.width = 120;
+            offCanvas.height =
+              Math.round(120 * ((img.naturalHeight || 300) / (img.naturalWidth || 400))) || 120;
+            const ctx = offCanvas.getContext('2d', { willReadFrequently: true });
+            if (ctx) {
+              ctx.drawImage(img, 0, 0, offCanvas.width, offCanvas.height);
+              artifactBitmaps.set(artifact.id, {
+                ctx,
+                width: offCanvas.width,
+                height: offCanvas.height,
+              });
+            }
+          } catch {
+            // Gracefully fallback if canvas context is unavailable
           }
-        } catch {
-          // Gracefully fallback if canvas context is unavailable
-        }
-      };
-    } catch {
-      // Fallback
-    }
-  });
+        };
+      } catch {
+        // Fallback
+      }
+    });
+  }
+
+  const initialIsLight =
+    typeof document !== 'undefined' &&
+    document.documentElement.getAttribute('data-app-theme') === 'light';
+  loadArtifactBitmaps(initialIsLight);
 
   function selectArtifact(artifact, showInspector = true) {
     if (!artifact) return;
@@ -406,6 +407,32 @@ function _setupInteractivity(container, artifacts) {
       item.removeEventListener('keydown', onKey);
     });
   });
+
+  const onThemeChange = () => {
+    const isLight =
+      typeof document !== 'undefined' &&
+      document.documentElement.getAttribute('data-app-theme') === 'light';
+    items.forEach((item) => {
+      const relicId = item.dataset.relicId;
+      const art = artifacts.find((a) => a.id === relicId);
+      if (!art) return;
+      const imgEl = item.querySelector('.reliquary-item__asset');
+      if (imgEl) {
+        const newSrc = getArtifactAsset(art, isLight);
+        if (imgEl.getAttribute('src') !== newSrc) {
+          imgEl.src = newSrc;
+        }
+      }
+    });
+    loadArtifactBitmaps(isLight);
+  };
+
+  if (typeof window !== 'undefined') {
+    window.addEventListener('appthemechange', onThemeChange);
+    cleanupFns.push(() => {
+      window.removeEventListener('appthemechange', onThemeChange);
+    });
+  }
 }
 
 /**

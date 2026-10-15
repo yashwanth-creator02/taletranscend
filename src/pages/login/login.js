@@ -359,6 +359,35 @@ function _setupDismissLinks() {
 }
 
 /**
+ * Keeps authentication vector illustration aligned with the active theme.
+ */
+function _setupResponsiveSvgArt() {
+  const imgEl = document.getElementById('login-visual-img');
+  const sourceEl = document.getElementById('login-visual-source');
+  if (!imgEl) return;
+
+  const updateIllustration = () => {
+    const isLight =
+      typeof document !== 'undefined' &&
+      document.documentElement.getAttribute('data-app-theme') === 'light';
+    const targetSrc = isLight
+      ? '/images/auth/boy-reading-light.svg'
+      : '/images/auth/boy-reading.svg';
+    if (sourceEl) {
+      sourceEl.srcset = targetSrc;
+    }
+    if (imgEl.getAttribute('src') !== targetSrc) {
+      imgEl.src = targetSrc;
+    }
+  };
+
+  updateIllustration();
+  if (typeof window !== 'undefined') {
+    window.addEventListener('appthemechange', updateIllustration);
+  }
+}
+
+/**
  * Initializes all login page components, tabs, forms, and auth listeners.
  */
 export function initLoginPage() {
@@ -366,6 +395,7 @@ export function initLoginPage() {
   initIcons();
   readyReveal();
 
+  _setupResponsiveSvgArt();
   _setupAuthTabs();
   _setupPasswordToggle();
   _setupAuthModeToggle();

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 440" width="320" height="440" fill="none">
+  <defs>
+    <!-- Warm golden bulb glow for light mode -->
+    <radialGradient id="bulbGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fffbeb" stop-opacity="1"/>
+      <stop offset="25%" stop-color="#fef08a" stop-opacity="0.95"/>
+      <stop offset="55%" stop-color="#f59e0b" stop-opacity="0.65"/>
+      <stop offset="85%" stop-color="#d97706" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#b45309" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Lamp outer aura for light mode -->
+    <radialGradient id="lampAura" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.45"/>
+      <stop offset="50%" stop-color="#d97706" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="lightBloom" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Ambient Light Bloom around bulb -->
+  <circle cx="160" cy="190" r="100" fill="url(#lampAura)"/>
+
+  <!-- Ornate Brass Top Finial -->
+  <g transform="translate(160, 25)">
+    <circle cx="0" cy="0" r="7" fill="#fbbf24" stroke="#d4af37" stroke-width="1.5"/>
+    <path d="M -9 7 C -9 7, 0 14, 9 7 L 12 18 L -12 18 Z" fill="#b45309" stroke="#fbbf24" stroke-width="1"/>
+    <!-- Vents / Louvre slits -->
+    <line x1="-8" y1="13" x2="8" y2="13" stroke="#f59e0b" stroke-width="1"/>
+    <line x1="-6" y1="16" x2="6" y2="16" stroke="#f59e0b" stroke-width="1"/>
+  </g>
+
+  <!-- Fluted Brass Lamp Shade in Polished Amber Brass -->
+  <path d="M 148 43 L 172 43 L 265 130 C 265 140, 55 140, 55 130 Z" 
+        fill="#78350f" stroke="#fbbf24" stroke-width="2.2"/>
+  <path d="M 55 130 Q 160 142, 265 130" stroke="#fbbf24" stroke-width="2"/>
+
+  <!-- Shade Fluting Lines (Etching) -->
+  <g stroke="#d97706" stroke-width="1" stroke-opacity="0.85">
+    <line x1="160" y1="43" x2="160" y2="136"/>
+    <line x1="154" y1="43" x2="135" y2="134"/>
+    <line x1="166" y1="43" x2="185" y2="134"/>
+    <line x1="150" y1="43" x2="105" y2="132"/>
+    <line x1="170" y1="43" x2="215" y2="132"/>
+    <line x1="148" y1="43" x2="75" y2="130"/>
+    <line x1="172" y1="43" x2="245" y2="130"/>
+  </g>
+
+  <!-- Glowing Glass Bulb (Spherical incandescent) -->
+  <circle cx="160" cy="190" r="46" fill="url(#bulbGlow)" filter="url(#lightBloom)"/>
+  <circle cx="160" cy="190" r="46" stroke="#fbbf24" stroke-width="1.5" stroke-opacity="0.85"/>
+
+  <!-- Glowing Filament (Woven Edison filament coils) -->
+  <g stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" filter="url(#lightBloom)">
+    <path d="M 148 165 C 148 185, 154 210, 156 215"/>
+    <path d="M 172 165 C 172 185, 166 210, 164 215"/>
+    <!-- Filament loops -->
+    <path d="M 156 215 Q 160 218, 164 215" stroke-width="2"/>
+    <path d="M 152 185 Q 160 178, 168 185" stroke="#fef08a" stroke-width="1.4"/>
+    <path d="M 150 195 Q 160 188, 170 195" stroke="#fef08a" stroke-width="1.4"/>
+  </g>
+
+  <!-- Central Filament Spark / Incandescence -->
+  <circle cx="160" cy="190" r="5" fill="#ffffff" filter="url(#lightBloom)"/>
+
+  <!-- Bulb Socket / Threaded Brass Collar -->
+  <g transform="translate(160, 140)">
+    <rect x="-18" y="0" width="36" height="12" fill="#b45309" stroke="#fbbf24" stroke-width="1"/>
+    <line x1="-16" y1="4" x2="16" y2="4" stroke="#fbbf24" stroke-width="0.8"/>
+    <line x1="-16" y1="8" x2="16" y2="8" stroke="#fbbf24" stroke-width="0.8"/>
+  </g>
+
+  <!-- Swan Neck Lamp Stem / Curved Cast Arm -->
+  <path d="M 160 40 C 160 15, 230 10, 245 60 C 260 110, 230 240, 225 310 L 225 370" 
+        stroke="#78350f" stroke-width="8" stroke-linecap="round"/>
+  <path d="M 160 40 C 160 15, 230 10, 245 60 C 260 110, 230 240, 225 310 L 225 370" 
+        stroke="#d4af37" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 160 40 C 160 15, 230 10, 245 60 C 260 110, 230 240, 225 310 L 225 370" 
+        stroke="#fde68a" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="12 18"/>
+
+  <!-- Heavy Cast Brass Base (Tiered Pedestal) -->
+  <g transform="translate(225, 375)">
+    <!-- Base Lower Foot -->
+    <ellipse cx="0" cy="25" rx="55" ry="14" fill="#78350f" stroke="#fbbf24" stroke-width="2"/>
+    <!-- Stepped Tier -->
+    <ellipse cx="0" cy="18" rx="42" ry="10" fill="#92400e" stroke="#d4af37" stroke-width="1.5"/>
+    <ellipse cx="0" cy="10" rx="28" ry="7" fill="#b45309" stroke="#fbbf24" stroke-width="1.2"/>
+    <rect x="-10" y="-8" width="20" height="16" fill="#78350f" stroke="#fbbf24" stroke-width="1"/>
+    <!-- Rotary Switch / Key on Base -->
+    <circle cx="30" cy="18" r="4" fill="#fbbf24"/>
+    <line x1="26" y1="18" x2="34" y2="18" stroke="#78350f" stroke-width="1.5"/>
+  </g>
+</svg>

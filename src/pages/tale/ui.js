@@ -20,9 +20,14 @@ const FALLBACK_COVER = 'https://images.unsplash.com/photo-1518709268805-4e9042af
  * @param {string} [fg]
  * @returns {string} Data URI
  */
-export function generateInitialsAvatarDataUrl(name, bg = '#312e81', fg = '#c7d2fe') {
+export function generateInitialsAvatarDataUrl(name, bg, fg) {
+  const isLight =
+    typeof document !== 'undefined' &&
+    document.documentElement.getAttribute('data-app-theme') === 'light';
+  const effectiveBg = bg !== undefined ? bg : isLight ? '#e0e7ff' : '#312e81';
+  const effectiveFg = fg !== undefined ? fg : isLight ? '#3730a3' : '#c7d2fe';
   const initials = getAuthorInitials(name);
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="${bg}"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" fill="${fg}" font-family="Cinzel, serif, sans-serif" font-size="22" font-weight="bold" letter-spacing="1">${initials}</text></svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="${effectiveBg}"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" fill="${effectiveFg}" font-family="Cinzel, serif, sans-serif" font-size="22" font-weight="bold" letter-spacing="1">${initials}</text></svg>`;
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 

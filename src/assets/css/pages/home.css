@@ -470,7 +470,7 @@
   white-space: nowrap;
   padding: 2px var(--space-3);
   border-radius: var(--radius-full);
-  background: var(--surface-overlay);
+  background: rgb(var(--bg-overlay-rgb) / 0.88);
   border: 1px solid var(--border-strong);
   backdrop-filter: blur(var(--blur-md));
   -webkit-backdrop-filter: blur(var(--blur-md));
@@ -624,7 +624,7 @@
   padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-full);
   border: 1px solid var(--border-strong);
-  background: var(--surface-overlay);
+  background: rgb(var(--bg-overlay-rgb) / 0.88);
   backdrop-filter: blur(var(--blur-md));
   -webkit-backdrop-filter: blur(var(--blur-md));
   z-index: 40;
@@ -1298,3 +1298,36 @@
 
 /* ══ 8. TOASTS ═══════════════════════════════════════════════════════════ */
 /* Shared .toast-region and .toast-card styles are defined in components.css */
+
+/* ══ 9. LIGHT MODE RELIQUARY & VECTOR ADJUSTMENTS ═════════════════════════ */
+
+[data-app-theme='light'] .reliquary-lamp-halo {
+  background: radial-gradient(
+    circle at 35% 35%,
+    rgb(var(--rune-rgb) / 0.16) 0%,
+    rgb(var(--rune-rgb) / 0.05) 45%,
+    transparent 70%
+  );
+  opacity: 0.85;
+}
+
+[data-app-theme='light'] .reliquary-item__asset {
+  filter: drop-shadow(0 4px 10px rgb(var(--rune-rgb) / 0.18))
+    drop-shadow(0 2px 4px rgb(var(--dark-rgb) / 0.08));
+}
+
+[data-app-theme='light'] .reliquary-item:hover .reliquary-item__asset,
+[data-app-theme='light'] .reliquary-item:focus .reliquary-item__asset,
+[data-app-theme='light'] .reliquary-item.is-selected .reliquary-item__asset {
+  filter: drop-shadow(0 0 16px rgb(var(--rune-rgb) / 0.45))
+    drop-shadow(0 4px 10px rgb(var(--dark-rgb) / 0.12));
+}
+
+[data-app-theme='light'] .reliquary-item__glow {
+  background: radial-gradient(
+    circle,
+    rgb(var(--rune-rgb) / 0.22) 0%,
+    rgb(var(--accent-rgb) / 0.06) 50%,
+    transparent 70%
+  );
+}
