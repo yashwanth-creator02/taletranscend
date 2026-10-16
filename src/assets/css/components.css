@@ -993,12 +993,12 @@
   background: rgb(var(--bg-overlay-rgb) / 0.88);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgb(var(--light-rgb) / 0.12);
-  color: rgb(var(--light-rgb) / 0.85);
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
   box-shadow:
-    0 10px 25px -5px rgb(var(--dark-rgb) / 0.6),
+    var(--shadow-md),
     0 0 15px rgb(var(--accent-rgb) / 0.15),
-    inset 0 1px 0 rgb(var(--light-rgb) / 0.15);
+    var(--shadow-inset-hairline);
   cursor: pointer;
   opacity: 0;
   pointer-events: none;
@@ -1021,15 +1021,29 @@
   }
 }
 
+.scroll-to-top i,
+.scroll-to-top svg {
+  color: inherit;
+  stroke: currentColor;
+  transition:
+    color 180ms ease,
+    transform 180ms ease;
+}
+
 .scroll-to-top:hover {
   transform: translateY(-2px) scale(1.04);
-  color: rgb(var(--light-rgb));
+  color: var(--accent);
   background: rgb(var(--bg-overlay-rgb) / 0.95);
-  border-color: rgb(var(--accent-rgb) / 0.45);
+  border-color: var(--accent);
   box-shadow:
-    0 14px 32px rgb(var(--dark-rgb) / 0.7),
+    var(--shadow-lg),
     0 0 20px rgb(var(--accent-rgb) / 0.3),
-    inset 0 1px 0 rgb(var(--light-rgb) / 0.25);
+    var(--shadow-inset-hairline);
+}
+
+.scroll-to-top:hover i,
+.scroll-to-top:hover svg {
+  color: var(--accent);
 }
 
 .scroll-to-top:active {

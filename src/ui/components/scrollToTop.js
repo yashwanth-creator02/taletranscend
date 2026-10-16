@@ -28,7 +28,7 @@ export function initScrollToTop() {
     btn.innerHTML = `
       <i
         data-lucide="arrow-up"
-        class="w-4 h-4 sm:w-5 sm:h-5 group-hover:-translate-y-0.5 transition-transform text-indigo-300 group-hover:text-white"
+        class="w-4 h-4 sm:w-5 sm:h-5 group-hover:-translate-y-0.5 transition-transform"
       ></i>
     `;
     document.body.appendChild(btn);
