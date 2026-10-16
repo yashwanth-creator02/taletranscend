@@ -406,49 +406,42 @@
           <div
             class="footer-theme-control"
             id="footer-theme-control"
-            role="group"
-            aria-label="Theme selector"
+            role="radiogroup"
+            aria-label="Interface theme selector"
           >
-            <span class="footer-theme-control__label">Theme</span>
-            <div
-              class="footer-theme-control__boxes"
-              role="radiogroup"
-              aria-label="Interface theme options"
+            <button
+              type="button"
+              class="footer-theme-control__box"
+              data-theme-id="transcendental"
+              role="radio"
+              aria-checked="false"
+              title="Transcendental (Signature Cosmic Dark)"
+              aria-label="Transcendental theme"
             >
-              <button
-                type="button"
-                class="footer-theme-control__box"
-                data-theme-id="transcendental"
-                role="radio"
-                aria-checked="false"
-                title="Transcendental (Signature Cosmic Dark)"
-                aria-label="Transcendental theme"
-              >
-                <i data-lucide="sparkles" class="footer-theme-control__icon" aria-hidden="true"></i>
-              </button>
-              <button
-                type="button"
-                class="footer-theme-control__box"
-                data-theme-id="dark"
-                role="radio"
-                aria-checked="false"
-                title="Midnight Dark"
-                aria-label="Midnight Dark theme"
-              >
-                <i data-lucide="moon" class="footer-theme-control__icon" aria-hidden="true"></i>
-              </button>
-              <button
-                type="button"
-                class="footer-theme-control__box"
-                data-theme-id="light"
-                role="radio"
-                aria-checked="false"
-                title="Illuminated Light"
-                aria-label="Illuminated Light theme"
-              >
-                <i data-lucide="sun" class="footer-theme-control__icon" aria-hidden="true"></i>
-              </button>
-            </div>
+              <i data-lucide="sparkles" class="footer-theme-control__icon" aria-hidden="true"></i>
+            </button>
+            <button
+              type="button"
+              class="footer-theme-control__box"
+              data-theme-id="dark"
+              role="radio"
+              aria-checked="false"
+              title="Midnight Dark"
+              aria-label="Midnight Dark theme"
+            >
+              <i data-lucide="moon" class="footer-theme-control__icon" aria-hidden="true"></i>
+            </button>
+            <button
+              type="button"
+              class="footer-theme-control__box"
+              data-theme-id="light"
+              role="radio"
+              aria-checked="false"
+              title="Illuminated Light"
+              aria-label="Illuminated Light theme"
+            >
+              <i data-lucide="sun" class="footer-theme-control__icon" aria-hidden="true"></i>
+            </button>
           </div>
         </div>
       </footer>

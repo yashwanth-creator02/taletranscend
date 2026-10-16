@@ -97,12 +97,12 @@ describe('footerTheme component', () => {
 
     cleanup = initFooterTheme(container.querySelector('#footer-theme-control'));
 
-    const boxesContainer = container.querySelector('.footer-theme-control__boxes');
+    const themeControl = container.querySelector('#footer-theme-control');
     const transBtn = container.querySelector('[data-theme-id="transcendental"]');
     transBtn.focus();
 
     // ArrowRight moves to 'dark'
-    boxesContainer.dispatchEvent(
+    themeControl.dispatchEvent(
       new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true })
     );
 
@@ -111,13 +111,13 @@ describe('footerTheme component', () => {
     expect(darkBtn.classList.contains('active')).toBe(true);
 
     // ArrowRight again moves to 'light'
-    boxesContainer.dispatchEvent(
+    themeControl.dispatchEvent(
       new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true })
     );
     expect(applySpy).toHaveBeenCalledWith('light');
 
     // Home moves back to 'transcendental'
-    boxesContainer.dispatchEvent(
+    themeControl.dispatchEvent(
       new KeyboardEvent('keydown', { key: 'Home', bubbles: true, cancelable: true })
     );
     expect(applySpy).toHaveBeenCalledWith('transcendental');

@@ -1,6 +1,6 @@
 // src/ui/components/footerTheme.js
-// 3-box segmented theme control button for the site footer.
-// Allows users to switch between Transcendental, Midnight Dark, and Illuminated Light.
+// Segmented theme control toggle for the site footer.
+// Renders an icon-only segmented toggle matching the tab-nav design, with hover tooltips.
 
 import {
   applyAppTheme,
@@ -14,48 +14,45 @@ import { initIcons } from './icons.js';
 const log = createLogger('FooterTheme');
 
 /**
- * Generates the markup for the 3-box footer theme control.
+ * Generates the markup for the footer theme toggle.
  * @returns {string} HTML markup
  */
 export function buildFooterThemeControl() {
   return `
-    <div class="footer-theme-control" id="footer-theme-control" role="group" aria-label="Theme selector">
-      <span class="footer-theme-control__label">Theme</span>
-      <div class="footer-theme-control__boxes" role="radiogroup" aria-label="Interface theme options">
-        <button
-          type="button"
-          class="footer-theme-control__box"
-          data-theme-id="transcendental"
-          role="radio"
-          aria-checked="false"
-          title="Transcendental (Signature Cosmic Dark)"
-          aria-label="Transcendental theme"
-        >
-          <i data-lucide="sparkles" class="footer-theme-control__icon" aria-hidden="true"></i>
-        </button>
-        <button
-          type="button"
-          class="footer-theme-control__box"
-          data-theme-id="dark"
-          role="radio"
-          aria-checked="false"
-          title="Midnight Dark"
-          aria-label="Midnight Dark theme"
-        >
-          <i data-lucide="moon" class="footer-theme-control__icon" aria-hidden="true"></i>
-        </button>
-        <button
-          type="button"
-          class="footer-theme-control__box"
-          data-theme-id="light"
-          role="radio"
-          aria-checked="false"
-          title="Illuminated Light"
-          aria-label="Illuminated Light theme"
-        >
-          <i data-lucide="sun" class="footer-theme-control__icon" aria-hidden="true"></i>
-        </button>
-      </div>
+    <div class="footer-theme-control" id="footer-theme-control" role="radiogroup" aria-label="Interface theme selector">
+      <button
+        type="button"
+        class="footer-theme-control__box"
+        data-theme-id="transcendental"
+        role="radio"
+        aria-checked="false"
+        title="Transcendental (Signature Cosmic Dark)"
+        aria-label="Transcendental theme"
+      >
+        <i data-lucide="sparkles" class="footer-theme-control__icon" aria-hidden="true"></i>
+      </button>
+      <button
+        type="button"
+        class="footer-theme-control__box"
+        data-theme-id="dark"
+        role="radio"
+        aria-checked="false"
+        title="Midnight Dark"
+        aria-label="Midnight Dark theme"
+      >
+        <i data-lucide="moon" class="footer-theme-control__icon" aria-hidden="true"></i>
+      </button>
+      <button
+        type="button"
+        class="footer-theme-control__box"
+        data-theme-id="light"
+        role="radio"
+        aria-checked="false"
+        title="Illuminated Light"
+        aria-label="Illuminated Light theme"
+      >
+        <i data-lucide="sun" class="footer-theme-control__icon" aria-hidden="true"></i>
+      </button>
     </div>
   `.trim();
 }
@@ -142,8 +139,7 @@ export function initFooterTheme(target = '#footer-theme-control') {
     btn.addEventListener('click', handleButtonClick);
   });
 
-  const boxesContainer = container.querySelector('.footer-theme-control__boxes') || container;
-  boxesContainer.addEventListener('keydown', handleKeyDown);
+  container.addEventListener('keydown', handleKeyDown);
 
   const onThemeChange = () => {
     syncActiveTheme();
@@ -167,7 +163,7 @@ export function initFooterTheme(target = '#footer-theme-control') {
     buttons.forEach((btn) => {
       btn.removeEventListener('click', handleButtonClick);
     });
-    boxesContainer.removeEventListener('keydown', handleKeyDown);
+    container.removeEventListener('keydown', handleKeyDown);
     if (typeof window !== 'undefined') {
       window.removeEventListener('appthemechange', onThemeChange);
       window.removeEventListener('storage', onStorage);
