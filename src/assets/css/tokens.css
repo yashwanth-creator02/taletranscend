@@ -853,6 +853,21 @@ html[data-app-theme='light'],
   background: linear-gradient(135deg, #f7f5f0 0%, #ffffff 55%, #e2e8f0 100%);
 }
 
+.footer-theme-control__box[data-theme-id='transcendental'] {
+  background: linear-gradient(135deg, #030305 0%, #1e1b4b 100%);
+  color: #a5b4fc;
+}
+
+.footer-theme-control__box[data-theme-id='dark'] {
+  background: linear-gradient(135deg, #0b0d13 0%, #1e293b 100%);
+  color: #cbd5e1;
+}
+
+.footer-theme-control__box[data-theme-id='light'] {
+  background: linear-gradient(135deg, #f7f5f0 0%, #ffffff 100%);
+  color: #1e293b;
+}
+
 /* ══════════════════════════════════════════════════════════════════════════
    The two places a raw colour is still allowed, and why
 
