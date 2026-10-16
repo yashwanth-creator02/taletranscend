@@ -219,6 +219,68 @@ function _hideTrendingSection() {
 }
 
 /**
+ * Maps an era string to a mythic chromatic modifier class.
+ *
+ * @param {string} era
+ * @returns {string}
+ */
+function _getEraBadgeClass(era) {
+  const normalized = (era || '').toLowerCase();
+  if (
+    normalized.includes('ancient') ||
+    normalized.includes('bronze') ||
+    normalized.includes('gold')
+  ) {
+    return 'home-tale-card__era--gold';
+  }
+  if (
+    normalized.includes('mythic') ||
+    normalized.includes('celtic') ||
+    normalized.includes('sage') ||
+    normalized.includes('forest')
+  ) {
+    return 'home-tale-card__era--sage';
+  }
+  if (
+    normalized.includes('classic') ||
+    normalized.includes('lapis') ||
+    normalized.includes('imperial') ||
+    normalized.includes('iron')
+  ) {
+    return 'home-tale-card__era--lapis';
+  }
+  if (
+    normalized.includes('oral') ||
+    normalized.includes('folk') ||
+    normalized.includes('terracotta') ||
+    normalized.includes('flame')
+  ) {
+    return 'home-tale-card__era--terracotta';
+  }
+  if (
+    normalized.includes('primordial') ||
+    normalized.includes('frost') ||
+    normalized.includes('ice') ||
+    normalized.includes('glacial')
+  ) {
+    return 'home-tale-card__era--cyan';
+  }
+  const variants = [
+    'home-tale-card__era--gold',
+    'home-tale-card__era--sage',
+    'home-tale-card__era--lapis',
+    'home-tale-card__era--cyan',
+    'home-tale-card__era--violet',
+    'home-tale-card__era--terracotta',
+  ];
+  let hash = 0;
+  for (let i = 0; i < normalized.length; i++) {
+    hash = (hash + normalized.charCodeAt(i)) % variants.length;
+  }
+  return variants[hash] || 'home-tale-card__era--lapis';
+}
+
+/**
  * Renders a single trending tale card.
  *
  * @param {import('@state/schemas/tale.schema.js').Tale} tale
@@ -234,6 +296,7 @@ function _renderTrendingCard(tale) {
   );
   const safeEra = escapeHtml(tale.era || 'Unknown Era');
   const safeAuthor = escapeHtml(tale.authorName || 'Unknown Scribe');
+  const eraClass = _getEraBadgeClass(tale.era);
 
   return `
     <a
@@ -252,7 +315,7 @@ function _renderTrendingCard(tale) {
       </div>
 
       <div class="home-tale-card__meta">
-        <span class="home-tale-card__era">
+        <span class="home-tale-card__era ${eraClass}">
           ${safeEra}
         </span>
         <span class="home-tale-card__count">

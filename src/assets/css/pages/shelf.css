@@ -3,11 +3,6 @@
    Strictly compliant with tokens.css. Zero raw hex or rgb literals.
 */
 
-html {
-  opacity: 0;
-  transition: opacity 220ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 /* Ensure global nav and mobile dock never display on the shelf page */
 body.page-shelf #app-nav,
 body.page-shelf #mobile-dock-container {
@@ -305,4 +300,78 @@ body.page-shelf #mobile-dock-container {
   background: var(--rune);
   border-radius: 0 4px 4px 0;
   box-shadow: 0 0 15px var(--rune);
+}
+
+/* ── Light Mode Polish ───────────────────────────────────────────── */
+
+[data-app-theme='light'] .vault-hero-card {
+  background: var(--bg-elevated);
+  border: 1px solid rgb(var(--light-rgb) / 0.08);
+  box-shadow: 0 8px 30px rgb(var(--dark-rgb) / 0.06);
+}
+
+[data-app-theme='light'] .shelf-card {
+  background: var(--bg-elevated);
+  border-color: rgb(var(--light-rgb) / 0.08);
+  box-shadow: 0 4px 16px rgb(var(--dark-rgb) / 0.06);
+}
+
+[data-app-theme='light'] .shelf-card .options-menu,
+[data-app-theme='light'] .sort-menu,
+[data-app-theme='light'] #sort-panel {
+  background: var(--bg-elevated) !important;
+  border-color: rgb(var(--light-rgb) / 0.12) !important;
+  box-shadow: 0 16px 36px rgb(var(--dark-rgb) / 0.12) !important;
+}
+
+[data-app-theme='light'] .control-chip {
+  background: var(--surface-2);
+  border-color: rgb(var(--light-rgb) / 0.12);
+  color: var(--text-primary);
+}
+
+[data-app-theme='light'] .control-chip:hover {
+  background: var(--surface-3);
+  border-color: rgb(var(--rune-rgb) / 0.4);
+  color: var(--text-primary);
+}
+
+[data-app-theme='light'] #shelf-filter-input {
+  background: var(--bg-elevated);
+  border-color: rgb(var(--light-rgb) / 0.12);
+  color: var(--text-primary);
+}
+
+[data-app-theme='light'] .shelf-tab {
+  color: var(--text-secondary);
+}
+
+[data-app-theme='light'] .shelf-tab:hover {
+  color: var(--text-primary);
+  background: rgb(var(--light-rgb) / 0.05);
+}
+
+[data-app-theme='light'] .shelf-tab-active {
+  color: var(--text-primary) !important;
+  background: rgb(var(--rune-rgb) / 0.15) !important;
+  border-color: rgb(var(--rune-rgb) / 0.4) !important;
+  box-shadow: 0 2px 8px rgb(var(--rune-rgb) / 0.15) !important;
+}
+
+[data-app-theme='light'] .options-menu button {
+  color: var(--text-primary) !important;
+}
+
+[data-app-theme='light'] .options-menu button:hover {
+  background: rgb(var(--rune-rgb) / 0.12) !important;
+  color: rgb(var(--rune-rgb) / 1) !important;
+}
+
+[data-app-theme='light'] .sort-option {
+  color: var(--text-primary) !important;
+}
+
+[data-app-theme='light'] .sort-option:hover {
+  background: rgb(var(--light-rgb) / 0.05) !important;
+  color: var(--text-primary) !important;
 }

@@ -1,0 +1,1237 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <base href="/" />
+
+    <title>Settings | TaleTranscend</title>
+    <meta
+      name="description"
+      content="Configure reading themes, typography, profile identity, archival atmosphere, and storage preferences."
+    />
+    <link rel="canonical" href="https://taletranscend.web.app/settings" />
+
+    <meta name="theme-color" content="#030305" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="TaleTranscend" />
+    <meta property="og:url" content="https://taletranscend.web.app/settings" />
+    <meta property="og:title" content="Settings | TaleTranscend" />
+    <meta
+      property="og:description"
+      content="Configure reading themes, typography, profile identity, archival atmosphere, and storage preferences."
+    />
+    <meta property="og:image" content="https://taletranscend.web.app/logo-wide.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://taletranscend.web.app/logo-wide.png" />
+    <meta name="twitter:title" content="Settings | TaleTranscend" />
+    <meta
+      name="twitter:description"
+      content="Configure reading themes, typography, profile identity, archival atmosphere, and storage preferences."
+    />
+
+    <!-- Google Fonts identical on all pages -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cinzel:wght@500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap"
+    />
+
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('tt_app_theme') || 'transcendental';
+          var resolved = t;
+          if (t === 'system') {
+            resolved =
+              window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'transcendental'
+                : 'light';
+          }
+          document.documentElement.setAttribute('data-app-theme', resolved);
+          document.documentElement.setAttribute('data-theme-preference', t);
+        } catch (e) {}
+      })();
+    </script>
+
+    <style>
+      /* Critical Anti-FOUC Gate */
+      html {
+        background-color: #030305;
+        color: #e2e8f0;
+      }
+      html[data-app-theme='dark'] {
+        background-color: #0b0d13;
+        color: #f8fafc;
+      }
+      html[data-app-theme='light'] {
+        background-color: #f6f3ed;
+        color: #1c2530;
+      }
+      body {
+        background-color: inherit;
+        color: inherit;
+        font-family:
+          'Inter',
+          system-ui,
+          -apple-system,
+          sans-serif;
+      }
+      body:not(.booted) > *:not(#app-boot-curtain) {
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
+      #app-boot-curtain {
+        position: fixed;
+        inset: 0;
+        background-color: #030305;
+        z-index: 999999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          opacity 0.3s cubic-bezier(0, 0, 0.2, 1),
+          visibility 0.3s cubic-bezier(0, 0, 0.2, 1);
+        pointer-events: none;
+      }
+      body.booted #app-boot-curtain {
+        opacity: 0;
+        visibility: hidden;
+      }
+      .boot-crest {
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        background: rgba(99, 102, 241, 0.08);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        box-shadow: 0 0 25px rgba(99, 102, 241, 0.2);
+        animation: boot-pulse 1.4s ease-in-out infinite;
+      }
+      @keyframes boot-pulse {
+        0%,
+        100% {
+          transform: scale(0.96);
+          opacity: 0.6;
+        }
+        50% {
+          transform: scale(1.04);
+          opacity: 1;
+        }
+      }
+    </style>
+    <script>
+      setTimeout(function () {
+        if (document.body && !document.body.classList.contains('booted')) {
+          document.body.classList.add('booted');
+        }
+      }, 3500);
+    </script>
+
+    <noscript>
+      <style>
+        body:not(.booted) > *:not(#app-boot-curtain) {
+          opacity: 1 !important;
+          visibility: visible !important;
+        }
+        #app-boot-curtain {
+          display: none !important;
+        }
+      </style>
+    </noscript>
+
+    <script type="module" src="../pages/settings/settings.js"></script>
+  </head>
+
+  <body
+    class="antialiased selection:bg-indigo-500/30 page-fade-in flex flex-col min-h-screen settings-page-body"
+  >
+    <!-- App Boot Curtain (Prevents FOUC on slower networks) -->
+    <div id="app-boot-curtain" aria-hidden="true">
+      <div class="boot-crest">
+        <img src="/logo.png" alt="" width="26" height="26" class="object-contain" />
+      </div>
+    </div>
+
+    <a class="skip-link" href="#settings-content">Skip to content</a>
+    <!-- Global Atmosphere -->
+    <div class="atmosphere-base"></div>
+    <div class="particle-field"></div>
+
+    <!-- Settings Top Navigation Bar (Chrome-style header with Back button & Search) -->
+    <header class="settings-top-bar" id="settings-header">
+      <div class="settings-top-bar__inner">
+        <div class="settings-top-bar__left">
+          <button
+            type="button"
+            id="settings-back-btn"
+            class="settings-back-btn"
+            aria-label="Back to previous page"
+            title="Navigate back"
+          >
+            <i data-lucide="arrow-left" class="w-5 h-5 text-slate-300"></i>
+          </button>
+          <div class="settings-title-group">
+            <span class="settings-page-title">Settings</span>
+          </div>
+        </div>
+
+        <div class="settings-top-bar__search">
+          <div class="settings-search-wrapper">
+            <i
+              data-lucide="search"
+              class="w-4 h-4 text-slate-400 settings-search-icon"
+              aria-hidden="true"
+            ></i>
+            <input
+              type="search"
+              id="settings-search-input"
+              class="settings-search-input"
+              placeholder="Search settings"
+              aria-label="Search settings"
+              autocomplete="off"
+            />
+            <button
+              type="button"
+              id="settings-search-clear"
+              class="settings-search-clear hidden"
+              aria-label="Clear search"
+            >
+              <i data-lucide="x" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="settings-top-bar__right">
+          <button
+            type="button"
+            id="btn-reset-settings"
+            class="settings-reset-btn"
+            title="Reset all settings to defaults"
+          >
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-slate-400"></i>
+            <span class="hidden sm:inline">Reset Defaults</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Settings Container (Sidebar + Content) -->
+    <div class="settings-container">
+      <!-- Left Sidebar: Each section has its own row -->
+      <aside class="settings-sidebar" id="settings-sidebar" aria-label="Settings navigation">
+        <nav class="settings-sidebar__nav" role="tablist">
+          <button
+            type="button"
+            class="settings-nav-item active"
+            data-target="section-profile"
+            role="tab"
+            aria-selected="true"
+            aria-controls="section-profile"
+          >
+            <i data-lucide="user" class="settings-nav-icon"></i>
+            <span class="settings-nav-label">Chronicler Profile</span>
+          </button>
+
+          <button
+            type="button"
+            class="settings-nav-item"
+            data-target="section-general"
+            role="tab"
+            aria-selected="false"
+            aria-controls="section-general"
+          >
+            <i data-lucide="sliders-horizontal" class="settings-nav-icon"></i>
+            <span class="settings-nav-label">General & Theme</span>
+          </button>
+
+          <button
+            type="button"
+            class="settings-nav-item"
+            data-target="section-reader"
+            role="tab"
+            aria-selected="false"
+            aria-controls="section-reader"
+          >
+            <i data-lucide="book-open" class="settings-nav-icon"></i>
+            <span class="settings-nav-label">Reader & Codex</span>
+          </button>
+
+          <button
+            type="button"
+            class="settings-nav-item"
+            data-target="section-atmosphere"
+            role="tab"
+            aria-selected="false"
+            aria-controls="section-atmosphere"
+          >
+            <i data-lucide="sparkles" class="settings-nav-icon"></i>
+            <span class="settings-nav-label">Atmosphere & Motion</span>
+          </button>
+
+          <button
+            type="button"
+            class="settings-nav-item"
+            data-target="section-storage"
+            role="tab"
+            aria-selected="false"
+            aria-controls="section-storage"
+          >
+            <i data-lucide="database" class="settings-nav-icon"></i>
+            <span class="settings-nav-label">Archival Storage</span>
+          </button>
+
+          <button
+            type="button"
+            class="settings-nav-item"
+            data-target="section-about"
+            role="tab"
+            aria-selected="false"
+            aria-controls="section-about"
+          >
+            <i data-lucide="info" class="settings-nav-icon"></i>
+            <span class="settings-nav-label">About Codex</span>
+          </button>
+        </nav>
+      </aside>
+
+      <!-- Right Main Content Area: Separate Section Views -->
+      <main id="settings-content" class="settings-content">
+        <div id="settings-no-results" class="settings-no-results hidden">
+          <i data-lucide="search-x" class="w-8 h-8 text-slate-500 mb-2"></i>
+          <p class="text-sm font-semibold text-slate-300">No settings found</p>
+          <p class="text-xs text-slate-500 mt-1">Try searching with a different term or query.</p>
+        </div>
+
+        <!-- 1. Chronicler Profile Section (Moved from user profile page) -->
+        <section
+          id="section-profile"
+          class="settings-section"
+          data-section-name="Chronicler Profile"
+        >
+          <div class="settings-section-header">
+            <h2 class="settings-section-title">Chronicler Profile</h2>
+            <p class="settings-section-desc">
+              Customise your author identity, public moniker, lore, avatar, and correspondence.
+            </p>
+          </div>
+
+          <form id="settings-profile-form" class="space-y-6">
+            <!-- Card 1: Avatar & Identity -->
+            <div class="settings-card">
+              <!-- Avatar row -->
+              <div class="settings-row" data-setting-item>
+                <div class="settings-row__left">
+                  <div class="settings-avatar-preview">
+                    <img
+                      id="modal-avatar-preview"
+                      src=""
+                      alt="Avatar preview"
+                      class="settings-avatar-img hidden"
+                    />
+                    <i
+                      id="modal-avatar-fallback"
+                      data-lucide="user"
+                      class="w-6 h-6 text-slate-600"
+                    ></i>
+                  </div>
+                  <div class="settings-row__text">
+                    <span class="settings-row__label">Chronicler Avatar</span>
+                    <span class="settings-row__sub">Enter an image URL for your profile crest</span>
+                  </div>
+                </div>
+                <div class="settings-row__right">
+                  <input
+                    type="url"
+                    id="input-avatar-url"
+                    class="settings-input"
+                    placeholder="https://images.unsplash.com/..."
+                    aria-label="Avatar image URL"
+                  />
+                </div>
+              </div>
+
+              <!-- Display Name -->
+              <div class="settings-row" data-setting-item>
+                <div class="settings-row__left">
+                  <div class="settings-row__icon-wrap">
+                    <i data-lucide="user-pen" class="w-4 h-4 text-indigo-400"></i>
+                  </div>
+                  <div class="settings-row__text">
+                    <span class="settings-row__label">Display Name</span>
+                    <span class="settings-row__sub"
+                      >Your public name displayed across the living archive</span
+                    >
+                  </div>
+                </div>
+                <div class="settings-row__right flex items-center gap-2">
+                  <input
+                    type="text"
+                    id="input-name"
+                    class="settings-input"
+                    placeholder="Enter chronicler name"
+                    maxlength="100"
+                    aria-label="Display Name"
+                  />
+                  <button
+                    type="button"
+                    id="btn-suggest-name"
+                    class="settings-btn-secondary whitespace-nowrap text-[11px]"
+                    title="Conjure a name suggestion using Oracle AI based on your bio"
+                  >
+                    <i data-lucide="sparkles" class="w-3 h-3 text-amber-400"></i>
+                    <span>Suggest</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Moniker & Signature -->
+              <div class="settings-row" data-setting-item>
+                <div class="settings-row__left">
+                  <div class="settings-row__icon-wrap">
+                    <i data-lucide="feather" class="w-4 h-4 text-indigo-400"></i>
+                  </div>
+                  <div class="settings-row__text">
+                    <span class="settings-row__label">Preferred Scribe Signature</span>
+                    <span class="settings-row__sub"
+                      >Pre-populates your moniker when inquiring with chroniclers</span
+                    >
+                  </div>
+                </div>
+                <div class="settings-row__right">
+                  <input
+                    type="text"
+                    id="setting-reader-moniker"
+                    class="settings-input"
+                    placeholder="e.g. Archivist Ronin"
+                    maxlength="50"
+                    aria-label="Preferred Scribe Signature"
+                  />
+                </div>
+              </div>
+
+              <!-- Short Bio (Stacked Layout: Below sideheading, full width) -->
+              <div class="settings-row settings-row--stacked" data-setting-item>
+                <div class="settings-row__header">
+                  <div class="settings-row__left">
+                    <div class="settings-row__icon-wrap">
+                      <i data-lucide="scroll" class="w-4 h-4 text-indigo-400"></i>
+                    </div>
+                    <div class="settings-row__text">
+                      <div class="flex items-center gap-2">
+                        <label for="input-bio" class="settings-row__label"
+                          >Chronicler Lore / Bio</label
+                        >
+                        <span class="settings-info-pill">Lore & AI Context</span>
+                      </div>
+                      <span class="settings-row__sub"
+                        >Brief chronicle about your persona. Used by Oracle AI to conjure story
+                        titles, tags, and monikers.</span
+                      >
+                    </div>
+                  </div>
+                  <div class="settings-row__right">
+                    <span id="bio-char-count" class="settings-badge font-mono text-[10px]"
+                      >0 / 1000</span
+                    >
+                  </div>
+                </div>
+                <div class="settings-row__body mt-2 w-full">
+                  <textarea
+                    id="input-bio"
+                    rows="4"
+                    class="settings-input settings-textarea w-full resize-y text-xs leading-relaxed"
+                    placeholder="Whispering stories to the stars, chronicling fragments of the forgotten age…"
+                    maxlength="1000"
+                    aria-label="Chronicler Lore / Bio"
+                  ></textarea>
+                  <p class="settings-field-tip mt-1.5">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400 shrink-0"></i>
+                    <span
+                      >Rich lore helps the Oracle AI summon unique names and stylistic suggestions
+                      tailored to your voice.</span
+                    >
+                  </p>
+                </div>
+              </div>
+
+              <!-- Pronouns -->
+              <div class="settings-row" data-setting-item>
+                <div class="settings-row__left">
+                  <div class="settings-row__icon-wrap">
+                    <i data-lucide="user-check" class="w-4 h-4 text-indigo-400"></i>
+                  </div>
+                  <div class="settings-row__text">
+                    <span class="settings-row__label">Pronouns</span>
+                    <span class="settings-row__sub"
+                      >How fellow scribes and readers address your spirit</span
+                    >
+                  </div>
+                </div>
+                <div class="settings-row__right">
+                  <input
+                    type="text"
+                    id="input-pronouns"
+                    class="settings-input"
+                    placeholder="they/them, she/her, he/him…"
+                    maxlength="50"
+                    aria-label="Pronouns"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2: Lore & Preferences -->
+            <div class="settings-card">
+              <!-- Location -->
+              <div class="settings-row" data-setting-item>
+                <div class="settings-row__left">
+                  <div class="settings-row__icon-wrap">
+                    <i data-lucide="map-pin" class="w-4 h-4 text-indigo-400"></i>
+                  </div>
+                  <div class="settings-row__text">
+                    <span class="settings-row__label">Location / Realm</span>
+                    <span class="settings-row__sub">Your city, country, or mythic realm</span>
+                  </div>
+                </div>
+                <div class="settings-row__right">
+                  <input
+                    type="text"
+                    id="input-location"
+                    class="settings-input"
+                    placeholder="City, Country or 'The Void'"
+                    maxlength="100"
+                    aria-label="Location"
+                  />
+                </div>
+              </div>
+
+              <!-- Favourite Genres -->
+              <div class="settings-row flex-col items-start gap-3" data-setting-item>
+                <div class="settings-row__left w-full">
+                  <div class="settings-row__icon-wrap">
+                    <i data-lucide="tags" class="w-4 h-4 text-indigo-400"></i>
+                  </div>
+                  <div class="settings-row__text">
+                    <span class="settings-row__label">Favourite Genres</span>
+                    <span class="settings-row__sub"
+                      >Genres you enjoy reading or writing, used to tailor chronicles in your
+                      feed</span
+                    >
+                  </div>
+                </div>
+                <div class="w-full pt-1">
+                  <div id="genre-selector" class="flex flex-wrap gap-2">
+                    <!-- Populated dynamically by settings.js -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Yearly Reading Goal -->
+              <div class="settings-row" data-setting-item>
+                <div class="settings-row__left">
+                  <div class="settings-row__icon-wrap">
+                    <i data-lucide="target" class="w-4 h-4 text-indigo-400"></i>
+                  </div>
+                  <div class="settings-row__text">
+                    <span class="settings-row__label">Yearly Reading Milestone</span>
+                    <span class="settings-row__sub"
+                      >How many tales and chronicles you aim to read this year</span
+                    >
+                  </div>
+                </div>
+                <div class="settings-row__right">
+                  <input
+                    type="number"
+                    id="input-reading-goal"
+                    min="1"
+                    max="365"
+                    class="settings-input w-28 text-center"
+                    placeholder="12"
+                    aria-label="Yearly Reading Goal"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 3: Social & External Presence -->
+            <div class="settings-card">
+              <!-- Website -->
+              <div class="settings-row" data-setting-item>
+                <div class="settings-row__left">
+                  <div class="settings-row__icon-wrap">
+                    <i data-lucide="globe" class="w-4 h-4 text-indigo-400"></i>
+                  </div>
+                  <div class="settings-row__text">
+                    <span class="settings-row__label">Website / Sanctuary</span>
+                    <span class="settings-row__sub"
+                      >Link to your personal website or portfolio</span
+                    >
+                  </div>
+                </div>
+                <div class="settings-row__right">
+                  <input
+                    type="url"
+                    id="input-website"
+                    class="settings-input"
+                    placeholder="https://yoursite.com"
+                    aria-label="Website URL"
+                  />
+                </div>
+              </div>
+
+              <!-- Twitter / X -->
+              <div class="settings-row" data-setting-item>
+                <div class="settings-row__left">
+                  <div class="settings-row__icon-wrap">
+                    <i data-lucide="badge-x" class="w-4 h-4 text-indigo-400"></i>
+                  </div>
+                  <div class="settings-row__text">
+                    <span class="settings-row__label">Twitter / X</span>
+                    <span class="settings-row__sub">Your X handle for social connection</span>
+                  </div>
+                </div>
+                <div class="settings-row__right">
+                  <input
+                    type="text"
+                    id="input-twitter"
+                    class="settings-input"
+                    placeholder="handle"
+                    aria-label="Twitter handle"
+                  />
+                </div>
+              </div>
+
+              <!-- Instagram -->
+              <div class="settings-row" data-setting-item>
+                <div class="settings-row__left">
+                  <div class="settings-row__icon-wrap">
+                    <i data-lucide="instagram" class="w-4 h-4 text-indigo-400"></i>
+                  </div>
+                  <div class="settings-row__text">
+                    <span class="settings-row__label">Instagram</span>
+                    <span class="settings-row__sub">Your Instagram profile handle</span>
+                  </div>
+                </div>
+                <div class="settings-row__right">
+                  <input
+                    type="text"
+                    id="input-instagram"
+                    class="settings-input"
+                    placeholder="handle"
+                    aria-label="Instagram handle"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 5: Account Identity & Save Actions -->
+            <div class="settings-card">
+              <div class="settings-row" data-setting-item>
+                <div class="settings-row__left">
+                  <div class="settings-row__icon-wrap">
+                    <i data-lucide="shield" class="w-4 h-4 text-indigo-400"></i>
+                  </div>
+                  <div class="settings-row__text">
+                    <span class="settings-row__label">Account Identity & UID</span>
+                    <span id="settings-auth-uid" class="settings-row__sub font-mono"
+                      >Resolving...</span
+                    >
+                  </div>
+                </div>
+                <div class="settings-row__right">
+                  <span id="settings-auth-status" class="settings-badge">Resolving...</span>
+                </div>
+              </div>
+
+              <!-- Submit Button Row -->
+              <div class="p-4 sm:p-5 flex items-center justify-between bg-white/[0.02]">
+                <p class="text-[11px] text-slate-400">
+                  Changes persist to your chronicler profile and cloud archive.
+                </p>
+                <button type="button" id="btn-save-profile" class="settings-btn-primary">
+                  <i data-lucide="check" class="w-4 h-4"></i>
+                  <span>Save Profile Changes</span>
+                </button>
+              </div>
+            </div>
+          </form>
+        </section>
+
+        <!-- 2. General & Theme Section -->
+        <section
+          id="section-general"
+          class="settings-section hidden"
+          data-section-name="General and Theme"
+        >
+          <div class="settings-section-header">
+            <h2 class="settings-section-title">General & Theme</h2>
+            <p class="settings-section-desc">
+              Configure overall application interface illumination, Oracle AI intelligence, and
+              system defaults.
+            </p>
+          </div>
+
+          <!-- Card 1: Application Interface Theme -->
+          <div class="settings-card mb-6">
+            <div class="settings-row flex-col items-start gap-4" data-setting-item>
+              <div class="settings-row__left w-full flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="settings-row__icon-wrap">
+                    <i data-lucide="palette" class="w-4 h-4 text-indigo-400"></i>
+                  </div>
+                  <div class="settings-row__text">
+                    <span class="settings-row__label">Application Interface Theme</span>
+                    <span class="settings-row__sub"
+                      >Choose your global visual theme: Transcendental (default), Midnight Dark, or
+                      Illuminated Light</span
+                    >
+                  </div>
+                </div>
+                <span id="active-app-theme-badge" class="settings-badge">Transcendental</span>
+              </div>
+              <div class="w-full pt-1">
+                <div
+                  id="settings-app-theme-grid"
+                  class="app-theme-grid"
+                  role="radiogroup"
+                  aria-label="Application Interface Theme"
+                >
+                  <!-- Populated dynamically by settings.js -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Oracle AI & Gemini Key (Configured via Accessible Popup Dialog) -->
+          <div class="settings-card mb-6">
+            <div
+              class="settings-row flex-col items-start sm:flex-row sm:items-center justify-between gap-4"
+              data-setting-item
+            >
+              <div class="settings-row__left">
+                <div class="settings-row__icon-wrap">
+                  <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+                </div>
+                <div class="settings-row__text">
+                  <div class="flex items-center gap-2">
+                    <span class="settings-row__label">Oracle AI & Gemini Key</span>
+                    <span class="settings-info-pill">Local Storage Only</span>
+                  </div>
+                  <span class="settings-row__sub"
+                    >Personal Google AI key used to conjure story titles, author monikers, and
+                    refine lore</span
+                  >
+                </div>
+              </div>
+              <div
+                class="settings-row__right flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end"
+              >
+                <span
+                  id="gemini-key-status"
+                  class="settings-status-badge settings-status-badge--inactive"
+                >
+                  <i data-lucide="key" class="w-3 h-3"></i>
+                  <span id="gemini-key-status-text">Not Configured</span>
+                </span>
+                <button
+                  type="button"
+                  id="btn-open-gemini-key-modal"
+                  class="settings-btn-secondary text-xs"
+                  aria-haspopup="dialog"
+                  aria-controls="modal-gemini-key"
+                >
+                  <i data-lucide="key" class="w-3.5 h-3.5"></i>
+                  <span id="btn-open-gemini-text">Configure Key</span>
+                </button>
+                <!-- Hidden inputs to maintain backwards compatibility with existing test suites -->
+                <input type="password" id="input-gemini-key" class="hidden" autocomplete="off" />
+                <button type="button" id="btn-toggle-gemini-key" class="hidden"></button>
+                <button type="button" id="btn-save-gemini-key" class="hidden"></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: Restore Default Codex Settings -->
+          <div class="settings-card">
+            <div class="settings-row" data-setting-item>
+              <div class="settings-row__left">
+                <div class="settings-row__icon-wrap">
+                  <i data-lucide="sliders" class="w-4 h-4 text-indigo-400"></i>
+                </div>
+                <div class="settings-row__text">
+                  <span class="settings-row__label">Restore Default Codex Settings</span>
+                  <span class="settings-row__sub"
+                    >Reset themes, fonts, sizing, and atmosphere to original factory defaults</span
+                  >
+                </div>
+              </div>
+              <div class="settings-row__right">
+                <button type="button" id="btn-reset-system-defaults" class="settings-btn-secondary">
+                  <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                  <span>Reset All</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. Reader & Codex Section -->
+        <section
+          id="section-reader"
+          class="settings-section hidden"
+          data-section-name="Reader and Codex"
+        >
+          <div class="settings-section-header">
+            <h2 class="settings-section-title">Reader & Codex</h2>
+            <p class="settings-section-desc">
+              Configure manuscript reading parchment illumination, typography, spacing, and live
+              preview.
+            </p>
+          </div>
+
+          <!-- Card 1: Default Reading Parchment -->
+          <div class="settings-card mb-6">
+            <div class="settings-row flex-col items-start gap-3" data-setting-item>
+              <div class="settings-row__left w-full">
+                <div class="settings-row__icon-wrap">
+                  <i data-lucide="book-open" class="w-4 h-4 text-indigo-400"></i>
+                </div>
+                <div class="settings-row__text">
+                  <span class="settings-row__label">Default Reading Parchment</span>
+                  <span class="settings-row__sub"
+                    >Select your primary illumination and paper atmosphere for manuscripts</span
+                  >
+                </div>
+              </div>
+              <div class="w-full pt-1">
+                <div
+                  id="settings-theme-grid"
+                  class="settings-theme-grid"
+                  role="radiogroup"
+                  aria-label="Reading Themes"
+                >
+                  <!-- Populated dynamically by settings.js -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Codex Typography & Readability -->
+          <div class="settings-card">
+            <!-- Row 1: Typeface Selection -->
+            <div class="settings-row flex-col items-start gap-3" data-setting-item>
+              <div class="settings-row__left w-full">
+                <div class="settings-row__icon-wrap">
+                  <i data-lucide="type" class="w-4 h-4 text-indigo-400"></i>
+                </div>
+                <div class="settings-row__text">
+                  <span class="settings-row__label">Typeface Style</span>
+                  <span class="settings-row__sub"
+                    >Choose font face for reading long-form manuscripts and fragments</span
+                  >
+                </div>
+              </div>
+              <div class="w-full pt-1">
+                <div
+                  id="settings-font-list"
+                  class="settings-font-list"
+                  role="radiogroup"
+                  aria-label="Typeface Selection"
+                >
+                  <!-- Populated dynamically by settings.js -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Row 2: Font Size Slider -->
+            <div class="settings-row" data-setting-item>
+              <div class="settings-row__left">
+                <div class="settings-row__icon-wrap">
+                  <i data-lucide="a-large-small" class="w-4 h-4 text-indigo-400"></i>
+                </div>
+                <div class="settings-row__text">
+                  <span class="settings-row__label">Font Size</span>
+                  <span class="settings-row__sub">Text sizing for chronicle paragraphs</span>
+                </div>
+              </div>
+              <div class="settings-row__right flex items-center gap-3">
+                <span id="setting-font-size-val" class="settings-slider-value">18px</span>
+                <input
+                  type="range"
+                  id="setting-font-size"
+                  class="settings-range-slider w-32 sm:w-44"
+                  min="12"
+                  max="32"
+                  step="1"
+                  value="18"
+                  aria-label="Font Size"
+                />
+              </div>
+            </div>
+
+            <!-- Row 3: Line Spacing Slider -->
+            <div class="settings-row" data-setting-item>
+              <div class="settings-row__left">
+                <div class="settings-row__icon-wrap">
+                  <i data-lucide="align-justify" class="w-4 h-4 text-indigo-400"></i>
+                </div>
+                <div class="settings-row__text">
+                  <span class="settings-row__label">Line Spacing</span>
+                  <span class="settings-row__sub">Vertical cadence and paragraph line height</span>
+                </div>
+              </div>
+              <div class="settings-row__right flex items-center gap-3">
+                <span id="setting-line-height-val" class="settings-slider-value">1.75</span>
+                <input
+                  type="range"
+                  id="setting-line-height"
+                  class="settings-range-slider w-32 sm:w-44"
+                  min="1.2"
+                  max="2.5"
+                  step="0.05"
+                  value="1.75"
+                  aria-label="Line Spacing"
+                />
+              </div>
+            </div>
+
+            <!-- Row 4: Column Width Measure -->
+            <div class="settings-row" data-setting-item>
+              <div class="settings-row__left">
+                <div class="settings-row__icon-wrap">
+                  <i data-lucide="columns-2" class="w-4 h-4 text-indigo-400"></i>
+                </div>
+                <div class="settings-row__text">
+                  <span class="settings-row__label">Column Width Measure</span>
+                  <span class="settings-row__sub"
+                    >Maximum reading measure for comfortable line length</span
+                  >
+                </div>
+              </div>
+              <div class="settings-row__right">
+                <div class="settings-btn-group" role="group" aria-label="Column Measure">
+                  <button type="button" class="setting-measure-btn" data-measure="52">52ch</button>
+                  <button type="button" class="setting-measure-btn" data-measure="68">68ch</button>
+                  <button type="button" class="setting-measure-btn" data-measure="84">84ch</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Row 5: Live Codex Preview Sandbox -->
+            <div class="settings-row flex-col items-start gap-3" data-setting-item>
+              <div class="settings-row__left w-full flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="settings-row__icon-wrap">
+                    <i data-lucide="eye" class="w-4 h-4 text-indigo-400"></i>
+                  </div>
+                  <div class="settings-row__text">
+                    <span class="settings-row__label">Live Codex Preview</span>
+                    <span class="settings-row__sub"
+                      >Preview changes instantly as applied to reading manuscripts</span
+                    >
+                  </div>
+                </div>
+              </div>
+              <div class="w-full">
+                <div
+                  id="settings-preview-box"
+                  class="settings-preview-box"
+                  data-reader-theme="noir"
+                >
+                  <h3 class="settings-preview-title font-cinzel text-base font-black mb-2">
+                    The Skald's Awakening
+                  </h3>
+                  <p
+                    id="settings-preview-text"
+                    class="settings-preview-text leading-relaxed font-serif text-sm"
+                  >
+                    The Northern skald sang of constellations etched into celestial ice. Every rune
+                    carried the weight of forgotten centuries, glowing faintly beneath the aurora as
+                    the chronicle unfolded.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. Atmosphere & Motion Section -->
+        <section
+          id="section-atmosphere"
+          class="settings-section hidden"
+          data-section-name="Atmosphere and Motion"
+        >
+          <div class="settings-section-header">
+            <h2 class="settings-section-title">Atmosphere & Motion</h2>
+            <p class="settings-section-desc">
+              Manage particles, auditory cues, and accessibility motion settings.
+            </p>
+          </div>
+
+          <div class="settings-card">
+            <!-- Row 1: Starlight Particles -->
+            <div class="settings-row" data-setting-item>
+              <div class="settings-row__left">
+                <div class="settings-row__icon-wrap">
+                  <i data-lucide="sparkles" class="w-4 h-4 text-indigo-400"></i>
+                </div>
+                <div class="settings-row__text">
+                  <span class="settings-row__label">Starlight & Atmospheric Particles</span>
+                  <span class="settings-row__sub"
+                    >Render ambient floating stardust particles behind manuscripts</span
+                  >
+                </div>
+              </div>
+              <div class="settings-row__right">
+                <label class="settings-switch">
+                  <input
+                    type="checkbox"
+                    id="setting-particles"
+                    checked
+                    aria-label="Starlight and atmospheric particles"
+                  />
+                  <span class="settings-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Row 2: Auditory Cues -->
+            <div class="settings-row" data-setting-item>
+              <div class="settings-row__left">
+                <div class="settings-row__icon-wrap">
+                  <i data-lucide="volume-2" class="w-4 h-4 text-indigo-400"></i>
+                </div>
+                <div class="settings-row__text">
+                  <span class="settings-row__label">Auditory Cues & Soundscapes</span>
+                  <span class="settings-row__sub"
+                    >Enable ambient audio feedback and atmospheric cues</span
+                  >
+                </div>
+              </div>
+              <div class="settings-row__right">
+                <label class="settings-switch">
+                  <input
+                    type="checkbox"
+                    id="setting-audio"
+                    checked
+                    aria-label="Auditory cues and soundscapes"
+                  />
+                  <span class="settings-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Row 3: Reduced Motion Mode -->
+            <div class="settings-row" data-setting-item>
+              <div class="settings-row__left">
+                <div class="settings-row__icon-wrap">
+                  <i data-lucide="zap" class="w-4 h-4 text-indigo-400"></i>
+                </div>
+                <div class="settings-row__text">
+                  <span class="settings-row__label">Reduced Motion Mode</span>
+                  <span class="settings-row__sub"
+                    >Minimize decorative animations for smoother accessibility</span
+                  >
+                </div>
+              </div>
+              <div class="settings-row__right">
+                <label class="settings-switch">
+                  <input
+                    type="checkbox"
+                    id="setting-reduced-motion"
+                    aria-label="Reduced motion mode"
+                  />
+                  <span class="settings-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. Archival Storage Section -->
+        <section
+          id="section-storage"
+          class="settings-section hidden"
+          data-section-name="Archival Storage"
+        >
+          <div class="settings-section-header">
+            <h2 class="settings-section-title">Archival Storage</h2>
+            <p class="settings-section-desc">
+              Manage local storage cache and offline reading positions.
+            </p>
+          </div>
+
+          <div class="settings-card">
+            <div class="settings-row" data-setting-item>
+              <div class="settings-row__left">
+                <div class="settings-row__icon-wrap">
+                  <i data-lucide="database" class="w-4 h-4 text-indigo-400"></i>
+                </div>
+                <div class="settings-row__text">
+                  <span class="settings-row__label">Local Reading Progress & Cache</span>
+                  <span class="settings-row__sub"
+                    >Reading positions and fragment drafts cached on this device</span
+                  >
+                </div>
+              </div>
+              <div class="settings-row__right flex items-center gap-3">
+                <span id="settings-cache-count" class="settings-badge font-mono"
+                  >0 Cached Items</span
+                >
+                <button
+                  type="button"
+                  id="btn-clear-reading-cache"
+                  class="settings-btn-secondary"
+                  title="Clear local cached progress"
+                >
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i>
+                  <span>Clear Cache</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. About Codex Section -->
+        <section id="section-about" class="settings-section hidden" data-section-name="About Codex">
+          <div class="settings-section-header">
+            <h2 class="settings-section-title">About Codex</h2>
+            <p class="settings-section-desc">
+              Architecture information, engine versions, and archive links.
+            </p>
+          </div>
+
+          <div class="settings-card">
+            <div class="settings-row" data-setting-item>
+              <div class="settings-row__left">
+                <div class="settings-row__icon-wrap">
+                  <i data-lucide="info" class="w-4 h-4 text-indigo-400"></i>
+                </div>
+                <div class="settings-row__text">
+                  <span class="settings-row__label">TaleTranscend Codex Engine</span>
+                  <span class="settings-row__sub"
+                    >Version 1.0.0 — Vanilla ES2022 Multi-Page Application</span
+                  >
+                </div>
+              </div>
+              <div class="settings-row__right">
+                <a href="/toc.html" class="settings-row-link">
+                  <span>Living Codex</span>
+                  <i data-lucide="external-link" class="w-3.5 h-3.5 ml-1"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Modal: Configure Gemini API Key -->
+    <div
+      id="modal-gemini-key"
+      class="settings-modal-overlay hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-gemini-title"
+    >
+      <div class="settings-modal-backdrop" id="modal-gemini-backdrop"></div>
+      <div class="settings-modal-card">
+        <header class="settings-modal-header">
+          <div class="flex items-center gap-2.5">
+            <div class="settings-row__icon-wrap">
+              <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+            </div>
+            <div>
+              <h3 id="modal-gemini-title" class="settings-modal-title">Google Gemini API Key</h3>
+              <p class="settings-modal-sub">Oracle AI & Manuscript Intelligence</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            id="modal-gemini-close"
+            class="settings-modal-close"
+            aria-label="Close dialog"
+          >
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </header>
+
+        <div class="settings-modal-body space-y-4">
+          <div class="settings-info-box">
+            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+            <div class="text-xs text-slate-300 space-y-1">
+              <p class="font-semibold text-slate-100">Private Archival Storage</p>
+              <p class="text-slate-400 text-[11px] leading-relaxed">
+                Your key is stored strictly on your device inside your browser's private local
+                storage. It is never transmitted to TaleTranscend servers, and only communicates
+                directly with Google's Gemini API endpoints.
+              </p>
+            </div>
+          </div>
+
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <label for="input-gemini-key-modal" class="text-xs font-semibold text-slate-200">
+                Gemini API Key
+              </label>
+              <a
+                href="https://aistudio.google.com/app/apikey"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-[11px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-medium"
+              >
+                Get free key from Google AI Studio
+                <i data-lucide="external-link" class="w-2.5 h-2.5"></i>
+              </a>
+            </div>
+            <div class="relative flex items-center">
+              <input
+                type="password"
+                id="input-gemini-key-modal"
+                class="settings-input font-mono text-xs w-full pr-16"
+                placeholder="AIzaSy…"
+                autocomplete="off"
+                spellcheck="false"
+              />
+              <button
+                type="button"
+                id="btn-toggle-modal-key"
+                class="settings-modal-toggle-btn"
+                aria-label="Toggle key visibility"
+              >
+                Show
+              </button>
+            </div>
+            <p id="modal-gemini-hint" class="text-[11px] text-slate-400">
+              Keys typically begin with <code class="font-mono text-amber-300/80">AIzaSy</code>.
+            </p>
+          </div>
+        </div>
+
+        <footer class="settings-modal-footer">
+          <button type="button" id="btn-clear-modal-key" class="settings-btn-danger text-xs">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            <span>Remove Key</span>
+          </button>
+          <div class="flex items-center gap-2">
+            <button type="button" id="btn-cancel-modal-key" class="settings-btn-secondary text-xs">
+              Cancel
+            </button>
+            <button type="button" id="btn-save-modal-key" class="settings-btn-primary text-xs">
+              <i data-lucide="check" class="w-3.5 h-3.5"></i>
+              <span>Save Key</span>
+            </button>
+          </div>
+        </footer>
+      </div>
+    </div>
+  </body>
+</html>

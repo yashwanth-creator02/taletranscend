@@ -43,15 +43,40 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cinzel:wght@500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap"
     />
 
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('tt_app_theme') || 'transcendental';
+          var resolved = t;
+          if (t === 'system') {
+            resolved =
+              window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'transcendental'
+                : 'light';
+          }
+          document.documentElement.setAttribute('data-app-theme', resolved);
+          document.documentElement.setAttribute('data-theme-preference', t);
+        } catch (e) {}
+      })();
+    </script>
+
     <style>
       /* Critical Anti-FOUC Gate */
       html {
         background-color: #030305;
         color: #e2e8f0;
       }
+      html[data-app-theme='dark'] {
+        background-color: #0b0d13;
+        color: #f8fafc;
+      }
+      html[data-app-theme='light'] {
+        background-color: #f6f3ed;
+        color: #1c2530;
+      }
       body {
-        background-color: #030305;
-        color: #e2e8f0;
+        background-color: inherit;
+        color: inherit;
         font-family:
           'Inter',
           system-ui,
@@ -65,7 +90,7 @@
       #app-boot-curtain {
         position: fixed;
         inset: 0;
-        background-color: #030305;
+        background-color: inherit;
         z-index: 999999;
         display: flex;
         align-items: center;
@@ -181,13 +206,25 @@
             </form>
 
             <ul class="home-tags" aria-label="Suggested topics">
-              <li><a class="home-tag" href="/library.html?search=folklore">Folklore</a></li>
               <li>
-                <a class="home-tag" href="/library.html?search=mythic%20fiction">Mythic Fiction</a>
+                <a class="home-tag home-tag--sage" href="/library.html?search=folklore">Folklore</a>
               </li>
-              <li><a class="home-tag" href="/library.html?search=sacred">Sacred Archives</a></li>
               <li>
-                <a class="home-tag" href="/library.html?search=oral%20tradition">Oral Tradition</a>
+                <a class="home-tag home-tag--violet" href="/library.html?search=mythic%20fiction"
+                  >Mythic Fiction</a
+                >
+              </li>
+              <li>
+                <a class="home-tag home-tag--gold" href="/library.html?search=sacred"
+                  >Sacred Archives</a
+                >
+              </li>
+              <li>
+                <a
+                  class="home-tag home-tag--terracotta"
+                  href="/library.html?search=oral%20tradition"
+                  >Oral Tradition</a
+                >
               </li>
             </ul>
 
@@ -205,67 +242,78 @@
       </section>
 
       <!-- ══ Trending ══════════════════════════════════════════════════ -->
-      <section id="trending-section" class="page-shell home-section">
-        <header class="home-section__head">
-          <div>
-            <span class="home-section__context">Featured Chronicles</span>
-            <h2 class="section-title">Trending Chronicles</h2>
-            <p class="section-lede">
-              Oral histories and mythic fragments recently surfacing from the archive.
-            </p>
+      <section id="trending-section" class="home-section home-section--alt">
+        <div class="page-shell">
+          <header class="home-section__head">
+            <div>
+              <span class="home-section__context">Featured Chronicles</span>
+              <h2 class="section-title">Trending Chronicles</h2>
+              <p class="section-lede">
+                Oral histories and mythic fragments recently surfacing from the archive.
+              </p>
+            </div>
+
+            <a href="/library.html" class="btn btn-ghost home-section__cta">
+              Browse archive
+              <i data-lucide="arrow-right" class="home-section__cta-icon" aria-hidden="true"></i>
+            </a>
+          </header>
+
+          <div id="trending-grid" class="home-grid fade-in-stagger">
+            <!-- Rendered by home.js -->
           </div>
-
-          <a href="/library.html" class="btn btn-ghost home-section__cta">
-            Browse archive
-            <i data-lucide="arrow-right" class="home-section__cta-icon" aria-hidden="true"></i>
-          </a>
-        </header>
-
-        <div id="trending-grid" class="home-grid fade-in-stagger">
-          <!-- Rendered by home.js -->
         </div>
       </section>
 
       <!-- ══ Call to action ════════════════════════════════════════════ -->
-      <section class="page-shell home-section home-section--tight">
-        <div class="home-cta glass-strong">
-          <div class="home-cta__wash" aria-hidden="true"></div>
+      <section class="home-section home-section--tight">
+        <div class="page-shell">
+          <div class="home-cta glass-strong">
+            <div class="home-cta__wash" aria-hidden="true"></div>
 
-          <div class="home-cta__inner">
-            <div class="home-cta__newsletter">
-              <span class="home-section__context">Dispatches</span>
-              <h2 class="home-cta__title">The Reading Circle</h2>
-              <p class="section-lede home-cta__lede">
-                Receive newly translated and recovered myth fragments periodically. No spam.
-              </p>
+            <div class="home-cta__inner">
+              <div class="home-cta__newsletter">
+                <span class="home-section__context">Dispatches</span>
+                <h2 class="home-cta__title">The Reading Circle</h2>
+                <p class="section-lede home-cta__lede">
+                  Receive newly translated and recovered myth fragments periodically. No spam.
+                </p>
 
-              <form id="newsletter-form" class="home-cta__form">
-                <label class="sr-only" for="newsletter-email">Email address</label>
-                <input
-                  id="newsletter-email"
-                  name="email"
-                  type="email"
-                  autocomplete="email"
-                  required
-                  class="input-mythic"
-                  placeholder="you@example.com"
-                />
-                <button type="submit" class="btn btn-primary">Subscribe</button>
-              </form>
-            </div>
+                <form id="newsletter-form" class="home-cta__form">
+                  <label class="sr-only" for="newsletter-email">Email address</label>
+                  <input
+                    id="newsletter-email"
+                    name="email"
+                    type="email"
+                    autocomplete="email"
+                    required
+                    class="input-mythic"
+                    placeholder="you@example.com"
+                  />
+                  <button type="submit" class="btn btn-primary">Subscribe</button>
+                </form>
+              </div>
 
-            <div class="home-cta__scribe">
-              <div class="home-cta__scribe-box glass">
-                <div>
-                  <h3 class="home-cta__scribe-title">Inscribe a Legend</h3>
-                  <p class="home-cta__scribe-text">Open to all who preserve folklore and memory.</p>
+              <div class="home-cta__scribe">
+                <div class="home-cta__scribe-box glass">
+                  <div class="flex items-center gap-3">
+                    <div class="home-cta__scribe-icon" aria-hidden="true">
+                      <i data-lucide="feather"></i>
+                    </div>
+                    <div>
+                      <h3 class="home-cta__scribe-title">Inscribe a Legend</h3>
+                      <p class="home-cta__scribe-text">
+                        Open to all who preserve folklore and memory.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    id="home-start-writing-btn"
+                    class="btn btn-primary btn-sm home-cta__scribe-btn"
+                  >
+                    Start writing
+                  </button>
                 </div>
-                <button
-                  id="home-start-writing-btn"
-                  class="btn btn-primary btn-sm home-cta__scribe-btn"
-                >
-                  Start writing
-                </button>
               </div>
             </div>
           </div>

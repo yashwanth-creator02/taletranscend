@@ -81,8 +81,44 @@ describe('Icons Registry', () => {
         expect(lastCall.icons.Quote).toBeDefined();
         expect(lastCall.icons.BookOpenCheck).toBeDefined();
         expect(lastCall.icons.EyeOff).toBeDefined();
+        // Settings & controls icons
+        expect(lastCall.icons.Sliders).toBeDefined();
+        expect(lastCall.icons.SearchX).toBeDefined();
+        expect(lastCall.icons.UserPen).toBeDefined();
+        expect(lastCall.icons.Shield).toBeDefined();
+        expect(lastCall.icons.ALargeSmall).toBeDefined();
+        expect(lastCall.icons.AlignJustify).toBeDefined();
+        expect(lastCall.icons.Zap).toBeDefined();
       },
       { timeout: 1000 }
     );
+  });
+
+  it('has all static data-lucide icons across all views registered in the icon map', async () => {
+    const fs = await import('node:fs');
+    const path = await import('node:path');
+    const { initIcons } = await import('../icons.js');
+    await initIcons();
+
+    const lastCall = mockCreateIcons.mock.calls[mockCreateIcons.mock.calls.length - 1][0];
+    const registered = new Set(Object.keys(lastCall.icons).map((k) => k.toLowerCase()));
+
+    const viewsDir = path.resolve(__dirname, '../../views');
+    const htmlFiles = fs.readdirSync(viewsDir).filter((f) => f.endsWith('.html'));
+
+    const missingInViews = [];
+    for (const file of htmlFiles) {
+      const content = fs.readFileSync(path.join(viewsDir, file), 'utf8');
+      const matches = content.matchAll(/data-lucide=["']([^"'${}]+)["']/g);
+      for (const m of matches) {
+        const iconName = m[1].trim();
+        const normalized = iconName.replace(/-/g, '').toLowerCase();
+        if (!registered.has(normalized)) {
+          missingInViews.push(`${file}: ${iconName}`);
+        }
+      }
+    }
+
+    expect(missingInViews).toEqual([]);
   });
 });

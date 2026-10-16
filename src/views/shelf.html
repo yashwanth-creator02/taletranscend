@@ -42,15 +42,40 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cinzel:wght@500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap"
     />
 
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('tt_app_theme') || 'transcendental';
+          var resolved = t;
+          if (t === 'system') {
+            resolved =
+              window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'transcendental'
+                : 'light';
+          }
+          document.documentElement.setAttribute('data-app-theme', resolved);
+          document.documentElement.setAttribute('data-theme-preference', t);
+        } catch (e) {}
+      })();
+    </script>
+
     <style>
       /* Critical Anti-FOUC Gate */
       html {
         background-color: #030305;
         color: #e2e8f0;
       }
+      html[data-app-theme='dark'] {
+        background-color: #0b0d13;
+        color: #f8fafc;
+      }
+      html[data-app-theme='light'] {
+        background-color: #f7f5f0;
+        color: #1e293b;
+      }
       body {
-        background-color: #030305;
-        color: #e2e8f0;
+        background-color: inherit;
+        color: inherit;
         font-family:
           'Inter',
           system-ui,
@@ -64,7 +89,7 @@
       #app-boot-curtain {
         position: fixed;
         inset: 0;
-        background-color: #030305;
+        background-color: inherit;
         z-index: 999999;
         display: flex;
         align-items: center;
@@ -125,7 +150,7 @@
   </head>
 
   <body
-    class="page-shelf antialiased selection:bg-amber-500/30 selection:text-white page-fade-in flex flex-col h-screen overflow-hidden bg-slate-950 text-slate-100"
+    class="page-shelf antialiased selection:bg-amber-500/30 selection:text-white page-fade-in flex flex-col h-screen overflow-hidden"
   >
     <!-- App Boot Curtain (Prevents FOUC on slower networks) -->
     <div id="app-boot-curtain" aria-hidden="true">
@@ -142,7 +167,7 @@
     <div class="ambient-orb w-96 h-96 bg-indigo-500/10 -bottom-20 -left-20"></div>
 
     <!-- ── Vault Sticky Header (Replaces global nav & floating dock) ─────────────────────────── -->
-    <header class="sticky top-0 z-40 border-b border-white/6 bg-slate-950/90 backdrop-blur-2xl">
+    <header class="sticky top-0 z-40 border-b border-line bg-[var(--nav-bg)] backdrop-blur-2xl">
       <div
         class="mx-auto flex h-14 sm:h-16 max-w-7xl items-center justify-between px-2.5 sm:px-6 lg:px-8 gap-1.5 sm:gap-4"
       >
@@ -161,13 +186,13 @@
 
         <!-- Center: Vault Tabs (Bookmarks, Drafts, Recent) -->
         <div
-          class="flex items-center rounded-full border border-white/10 bg-slate-900/80 backdrop-blur-xl p-0.5 sm:p-1 shadow-inner shrink-0 gap-0.5 sm:gap-1"
+          class="flex items-center rounded-xs border border-line bg-surface-2 backdrop-blur-xl p-0.5 sm:p-1 shadow-inner shrink-0 gap-0.5 sm:gap-1"
         >
           <button
             id="tab-bookmarked"
             data-tab="bookmarked"
             type="button"
-            class="shelf-tab shelf-tab-active inline-flex items-center gap-1 sm:gap-2 rounded-full px-2 sm:px-3.5 py-1 sm:py-1.5 text-[11px] sm:text-xs font-semibold transition cursor-pointer"
+            class="shelf-tab shelf-tab-active inline-flex items-center gap-1 sm:gap-2 rounded-xs px-2 sm:px-3.5 py-1 sm:py-1.5 text-[11px] sm:text-xs font-semibold transition cursor-pointer"
           >
             <i data-lucide="bookmark" class="h-3 w-3 sm:h-3.5 sm:w-3.5"></i>
             <span class="hidden sm:inline">Bookmarks</span>
@@ -178,7 +203,7 @@
             id="tab-drafts"
             data-tab="drafts"
             type="button"
-            class="shelf-tab inline-flex items-center gap-1 sm:gap-2 rounded-full px-2 sm:px-3.5 py-1 sm:py-1.5 text-[11px] sm:text-xs font-semibold transition text-slate-400 hover:text-white cursor-pointer"
+            class="shelf-tab inline-flex items-center gap-1 sm:gap-2 rounded-xs px-2 sm:px-3.5 py-1 sm:py-1.5 text-[11px] sm:text-xs font-semibold transition text-slate-400 hover:text-[var(--text-primary)] cursor-pointer"
           >
             <i data-lucide="scroll-text" class="h-3 w-3 sm:h-3.5 sm:w-3.5"></i>
             <span>Drafts</span>
@@ -188,7 +213,7 @@
             id="tab-recent"
             data-tab="recent"
             type="button"
-            class="shelf-tab inline-flex items-center gap-1 sm:gap-2 rounded-full px-2 sm:px-3.5 py-1 sm:py-1.5 text-[11px] sm:text-xs font-semibold transition text-slate-400 hover:text-white cursor-pointer"
+            class="shelf-tab inline-flex items-center gap-1 sm:gap-2 rounded-xs px-2 sm:px-3.5 py-1 sm:py-1.5 text-[11px] sm:text-xs font-semibold transition text-slate-400 hover:text-[var(--text-primary)] cursor-pointer"
           >
             <i data-lucide="clock-3" class="h-3 w-3 sm:h-3.5 sm:w-3.5"></i>
             <span class="hidden sm:inline">Recent</span>
@@ -241,7 +266,7 @@
           >
             <div class="max-w-3xl">
               <h1
-                class="archive-title text-3xl sm:text-5xl md:text-6xl font-cinzel font-black text-white tracking-tight leading-tight"
+                class="archive-title text-3xl sm:text-5xl md:text-6xl font-cinzel font-black text-[var(--text-primary)] tracking-tight leading-tight"
               >
                 The Scribe's Vault
               </h1>
@@ -260,7 +285,7 @@
                 >
                   <p
                     id="hero-stat-drafts"
-                    class="text-xl sm:text-2xl md:text-3xl font-bold font-cinzel text-white leading-none"
+                    class="hero-stat-num text-xl sm:text-2xl md:text-3xl font-bold font-cinzel text-[var(--text-primary)] leading-none"
                   >
                     —
                   </p>
@@ -276,7 +301,7 @@
                 >
                   <p
                     id="hero-stat-bookmarks"
-                    class="text-xl sm:text-2xl md:text-3xl font-bold font-cinzel text-white leading-none"
+                    class="hero-stat-num text-xl sm:text-2xl md:text-3xl font-bold font-cinzel text-[var(--text-primary)] leading-none"
                   >
                     —
                   </p>
@@ -292,7 +317,7 @@
                 >
                   <p
                     id="hero-stat-words"
-                    class="text-xl sm:text-2xl md:text-3xl font-bold font-cinzel text-white leading-none"
+                    class="hero-stat-num text-xl sm:text-2xl md:text-3xl font-bold font-cinzel text-[var(--text-primary)] leading-none"
                   >
                     —
                   </p>
@@ -343,7 +368,7 @@
               type="text"
               placeholder="Filter fragments, drafts..."
               aria-label="Filter saved fragments and drafts"
-              class="w-full pl-10 pr-3 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-black/40 border border-white/8 text-xs sm:text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/30 transition"
+              class="w-full pl-10 pr-3 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border border-line text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-muted bg-surface-2 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/30 transition"
             />
           </div>
 
@@ -354,7 +379,7 @@
               aria-haspopup="listbox"
               aria-expanded="false"
               aria-label="Sort saved stories"
-              class="control-chip px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-slate-300 font-bold flex items-center gap-1.5 sm:gap-2 hover:text-white cursor-pointer"
+              class="control-chip px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-secondary font-bold flex items-center gap-1.5 sm:gap-2 hover:text-[var(--text-primary)] cursor-pointer"
             >
               <i data-lucide="arrow-up-down" class="w-3.5 h-3.5 text-amber-400"></i>
               <span>Sort</span>
@@ -390,7 +415,9 @@
                   ></div>
                 </div>
 
-                <h3 class="mt-6 text-xl font-cinzel font-bold text-white">Accessing the Archive</h3>
+                <h3 class="mt-6 text-xl font-cinzel font-bold text-[var(--text-primary)]">
+                  Accessing the Archive
+                </h3>
 
                 <p class="mt-2 text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
                   Gathering preserved fragments, unfinished chronicles, and sacred manuscripts from
@@ -416,7 +443,9 @@
                 class="w-full control-chip rounded-2xl p-3.5 flex items-center justify-between text-left transition hover:border-amber-500/30 group cursor-pointer"
               >
                 <div>
-                  <p class="text-xs font-semibold text-white group-hover:text-amber-300 transition">
+                  <p
+                    class="text-xs font-semibold text-[var(--text-primary)] group-hover:text-amber-300 transition"
+                  >
                     Start New Tale
                   </p>
                   <p class="text-[10px] text-slate-500 mt-0.5">Open fresh manuscript</p>
@@ -433,7 +462,9 @@
                 class="w-full control-chip rounded-2xl p-3.5 flex items-center justify-between text-left transition hover:border-amber-500/30 group cursor-pointer"
               >
                 <div>
-                  <p class="text-xs font-semibold text-white group-hover:text-amber-300 transition">
+                  <p
+                    class="text-xs font-semibold text-[var(--text-primary)] group-hover:text-amber-300 transition"
+                  >
                     Oral Chronicle
                   </p>
                   <p class="text-[10px] text-slate-500 mt-0.5">Voice recording hook</p>
@@ -450,7 +481,9 @@
                 class="w-full control-chip rounded-2xl p-3.5 flex items-center justify-between text-left transition hover:border-amber-500/30 group cursor-pointer"
               >
                 <div>
-                  <p class="text-xs font-semibold text-white group-hover:text-amber-300 transition">
+                  <p
+                    class="text-xs font-semibold text-[var(--text-primary)] group-hover:text-amber-300 transition"
+                  >
                     Publishing Chamber
                   </p>
                   <p class="text-[10px] text-slate-500 mt-0.5">Prepare for lore release</p>

@@ -41,15 +41,40 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cinzel:wght@500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap"
     />
 
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('tt_app_theme') || 'transcendental';
+          var resolved = t;
+          if (t === 'system') {
+            resolved =
+              window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'transcendental'
+                : 'light';
+          }
+          document.documentElement.setAttribute('data-app-theme', resolved);
+          document.documentElement.setAttribute('data-theme-preference', t);
+        } catch (e) {}
+      })();
+    </script>
+
     <style>
       /* Critical Anti-FOUC Gate */
       html {
         background-color: #030305;
         color: #e2e8f0;
       }
+      html[data-app-theme='dark'] {
+        background-color: #0b0d13;
+        color: #f8fafc;
+      }
+      html[data-app-theme='light'] {
+        background-color: #f7f5f0;
+        color: #1e293b;
+      }
       body {
-        background-color: #030305;
-        color: #e2e8f0;
+        background-color: inherit;
+        color: inherit;
         font-family:
           'Inter',
           system-ui,
@@ -63,7 +88,7 @@
       #app-boot-curtain {
         position: fixed;
         inset: 0;
-        background-color: #030305;
+        background-color: inherit;
         z-index: 999999;
         display: flex;
         align-items: center;
@@ -124,7 +149,7 @@
   </head>
 
   <body
-    class="min-h-screen antialiased selection:bg-indigo-500/30 selection:text-white page-fade-in flex flex-col h-screen overflow-hidden text-slate-200"
+    class="min-h-screen antialiased selection:bg-indigo-500/30 selection:text-white page-fade-in flex flex-col h-screen overflow-hidden"
   >
     <!-- App Boot Curtain (Prevents FOUC on slower networks) -->
     <div id="app-boot-curtain" aria-hidden="true">
@@ -767,11 +792,11 @@
                   </div>
                 </div>
                 <h2
-                  class="font-cinzel text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight"
+                  class="font-cinzel text-xl sm:text-2xl md:text-3xl font-black text-[var(--text-primary)] tracking-tight"
                 >
                   Chronicle Missives Desk
                 </h2>
-                <p class="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+                <p class="text-xs sm:text-sm text-secondary max-w-2xl leading-relaxed">
                   Review queries and letters dispatched by readers of this chronicle. You can
                   transmit responses back to readers, report inappropriate missives, or block
                   problematic senders.
@@ -782,12 +807,14 @@
               <div class="flex flex-wrap items-center justify-between gap-3 relative z-10">
                 <div class="flex items-center gap-2" id="author-missives-stats">
                   <div
-                    class="px-3 py-1.5 rounded-xl bg-white/4 border border-white/8 text-xs text-slate-300 flex items-center gap-2"
+                    class="px-3 py-1.5 rounded-xl bg-white/4 border border-white/8 text-xs text-secondary flex items-center gap-2"
                   >
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400"
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-muted"
                       >Total</span
                     >
-                    <span id="author-stat-total" class="font-bold text-white">0</span>
+                    <span id="author-stat-total" class="font-bold text-[var(--text-primary)]"
+                      >0</span
+                    >
                   </div>
                   <div
                     class="px-3 py-1.5 rounded-xl bg-white/4 border border-white/8 text-xs text-slate-300 flex items-center gap-2"
@@ -847,11 +874,11 @@
                       </span>
                     </div>
                     <h2
-                      class="font-cinzel text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight"
+                      class="font-cinzel text-xl sm:text-2xl md:text-3xl font-black text-[var(--text-primary)] tracking-tight"
                     >
                       Inquire of the Scribe
                     </h2>
-                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
+                    <p class="text-xs sm:text-sm text-secondary leading-relaxed font-normal">
                       Have an unresolved question about character fates, worldbuilding mysteries, or
                       plot threads? Dispatch your missive directly to the chronicler.
                     </p>
@@ -882,7 +909,7 @@
                       >
                       <span
                         id="inquire-author-display"
-                        class="font-bold text-sm text-white truncate block max-w-[160px]"
+                        class="font-bold text-sm text-[var(--text-primary)] truncate block max-w-[160px]"
                         >The Scribe</span
                       >
                       <span
@@ -1084,10 +1111,12 @@
                     <i data-lucide="check-check" class="w-8 h-8"></i>
                   </div>
                   <div class="space-y-2 max-w-lg mx-auto">
-                    <h3 class="font-cinzel text-xl sm:text-2xl font-black text-white">
+                    <h3
+                      class="font-cinzel text-xl sm:text-2xl font-black text-[var(--text-primary)]"
+                    >
                       Missive Inscribed & Dispatched
                     </h3>
-                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                    <p class="text-xs sm:text-sm text-secondary leading-relaxed">
                       Your inquiry has been relayed across the archives to
                       <span id="success-author-target" class="font-semibold text-indigo-300"
                         >the author</span
@@ -1115,13 +1144,15 @@
                 <div class="flex items-center justify-between border-b border-white/6 pb-4">
                   <div class="flex items-center gap-2.5 text-indigo-400">
                     <i data-lucide="history" class="w-4 h-4 text-indigo-400"></i>
-                    <h3 class="text-xs font-bold uppercase tracking-widest text-white">
+                    <h3
+                      class="text-xs font-bold uppercase tracking-widest text-[var(--text-primary)]"
+                    >
                       Your Dispatched Inquiries
                     </h3>
                   </div>
                   <span
                     id="reader-sent-count-badge"
-                    class="px-2.5 py-1 rounded-lg bg-white/4 border border-white/8 text-[10px] font-bold text-slate-300"
+                    class="px-2.5 py-1 rounded-lg bg-white/4 border border-white/8 text-[10px] font-bold text-secondary"
                   >
                     0 Dispatched
                   </span>
@@ -1147,7 +1178,10 @@
                 <i data-lucide="scroll" class="w-4 h-4 text-indigo-400"></i>
               </div>
               <div class="min-w-0">
-                <h2 id="header-tale-title" class="text-white font-bold text-xs sm:text-sm truncate">
+                <h2
+                  id="header-tale-title"
+                  class="text-[var(--text-primary)] font-bold text-xs sm:text-sm truncate"
+                >
                   Loading Archive...
                 </h2>
                 <p

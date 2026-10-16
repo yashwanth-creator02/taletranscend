@@ -253,7 +253,7 @@ function _renderAuthorMissiveCard(m, _taleId, _authorName) {
           </div>
           <div class="min-w-0 leading-tight">
             <div class="flex items-center gap-2 flex-wrap">
-              <span class="text-sm font-semibold text-white truncate">${escapeHtml(senderName)}</span>
+              <span class="text-sm font-semibold text-[var(--text-primary)] truncate">${escapeHtml(senderName)}</span>
               <span class="px-2 py-0.5 rounded-md bg-white/4 border border-white/8 text-[9px] font-bold uppercase tracking-wider text-indigo-300">${categoryLabel}</span>
               ${statusBadgeHtml}
             </div>
@@ -505,11 +505,11 @@ function _renderReaderSentInquiries(taleId, currentUserId, authorName = 'The Scr
                 <div class="w-5 h-5 rounded-full bg-indigo-600 text-white font-bold text-[9px] flex items-center justify-center font-serif">
                   ${getAuthorInitials(m.replyAuthorName || authorName)}
                 </div>
-                <span class="text-xs font-semibold text-white">${escapeHtml(m.replyAuthorName || authorName)}</span>
+                <span class="text-xs font-semibold text-[var(--text-primary)]">${escapeHtml(m.replyAuthorName || authorName)}</span>
               </div>
               <span class="text-[10px] text-slate-400">${formatCommentDateTime(m.repliedAt)}</span>
             </div>
-            <p class="text-xs text-indigo-100 leading-relaxed font-medium">${escapeHtml(m.replyText)}</p>
+            <p class="text-xs text-[var(--text-primary)] leading-relaxed font-medium">${escapeHtml(m.replyText)}</p>
           </div>`
         : '';
 

@@ -41,15 +41,40 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cinzel:wght@500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap"
     />
 
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('tt_app_theme') || 'transcendental';
+          var resolved = t;
+          if (t === 'system') {
+            resolved =
+              window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'transcendental'
+                : 'light';
+          }
+          document.documentElement.setAttribute('data-app-theme', resolved);
+          document.documentElement.setAttribute('data-theme-preference', t);
+        } catch (e) {}
+      })();
+    </script>
+
     <style>
       /* Critical Anti-FOUC Gate */
       html {
         background-color: #030305;
         color: #e2e8f0;
       }
+      html[data-app-theme='dark'] {
+        background-color: #0b0d13;
+        color: #f8fafc;
+      }
+      html[data-app-theme='light'] {
+        background-color: #f7f5f0;
+        color: #1e293b;
+      }
       body {
-        background-color: #030305;
-        color: #e2e8f0;
+        background-color: inherit;
+        color: inherit;
         font-family:
           'Inter',
           system-ui,
@@ -63,7 +88,7 @@
       #app-boot-curtain {
         position: fixed;
         inset: 0;
-        background-color: #030305;
+        background-color: inherit;
         z-index: 999999;
         display: flex;
         align-items: center;
@@ -123,9 +148,7 @@
     <script type="module" src="../pages/toc/toc.js"></script>
   </head>
 
-  <body
-    class="text-slate-300 antialiased selection:bg-indigo-500/30 page-fade-in min-h-screen bg-[#030305]"
-  >
+  <body class="antialiased selection:bg-indigo-500/30 page-fade-in min-h-screen">
     <!-- App Boot Curtain -->
     <div id="app-boot-curtain" aria-hidden="true">
       <div class="boot-crest">
@@ -172,7 +195,7 @@
         </div>
 
         <h1
-          class="font-cinzel text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight mb-4"
+          class="font-cinzel text-3xl sm:text-4xl lg:text-5xl font-bold text-[var(--text-primary)] tracking-tight mb-4"
         >
           Table of Contents
         </h1>
@@ -207,7 +230,7 @@
       <section class="mb-14" aria-labelledby="heading-core-portals">
         <h2
           id="heading-core-portals"
-          class="font-cinzel text-xl font-bold text-white mb-4 flex items-center gap-2"
+          class="font-cinzel text-xl font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2"
         >
           <i data-lucide="compass" class="w-5 h-5 text-indigo-400"></i>
           Core Sanctuaries & Portals
@@ -219,7 +242,7 @@
                 <i data-lucide="home" class="w-4 h-4"></i>
               </span>
               <h3
-                class="font-cinzel font-semibold text-white group-hover:text-indigo-300 transition-colors"
+                class="font-cinzel font-semibold text-[var(--text-primary)] group-hover:text-indigo-400 transition-colors"
               >
                 Home Portal
               </h3>
@@ -235,7 +258,7 @@
                 <i data-lucide="library" class="w-4 h-4"></i>
               </span>
               <h3
-                class="font-cinzel font-semibold text-white group-hover:text-indigo-300 transition-colors"
+                class="font-cinzel font-semibold text-[var(--text-primary)] group-hover:text-indigo-400 transition-colors"
               >
                 Grand Library
               </h3>
@@ -251,7 +274,7 @@
                 <i data-lucide="bookmark" class="w-4 h-4"></i>
               </span>
               <h3
-                class="font-cinzel font-semibold text-white group-hover:text-indigo-300 transition-colors"
+                class="font-cinzel font-semibold text-[var(--text-primary)] group-hover:text-indigo-400 transition-colors"
               >
                 Your Shelf
               </h3>
@@ -267,7 +290,7 @@
                 <i data-lucide="feather" class="w-4 h-4"></i>
               </span>
               <h3
-                class="font-cinzel font-semibold text-white group-hover:text-indigo-300 transition-colors"
+                class="font-cinzel font-semibold text-[var(--text-primary)] group-hover:text-indigo-400 transition-colors"
               >
                 Scribe Sanctuary
               </h3>
@@ -294,7 +317,7 @@
               id="toc-search"
               placeholder="Search chronicles, authors, or eras..."
               aria-label="Search chronicles, authors, or eras"
-              class="w-full pl-10 pr-4 py-2 bg-black/40 border border-white/10 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-hidden focus:border-indigo-500/50"
+              class="w-full pl-10 pr-4 py-2 bg-surface-2 border border-line rounded-lg text-sm text-[var(--text-primary)] placeholder:text-muted focus:outline-hidden focus:border-indigo-500/50"
             />
           </div>
           <div
@@ -311,7 +334,7 @@
         <div class="flex items-center justify-between mb-6">
           <h2
             id="heading-chronicles"
-            class="font-cinzel text-xl font-bold text-white flex items-center gap-2"
+            class="font-cinzel text-xl font-bold text-[var(--text-primary)] flex items-center gap-2"
           >
             <i data-lucide="scroll" class="w-5 h-5 text-indigo-400"></i>
             Chronicles & Chapter Hierarchies

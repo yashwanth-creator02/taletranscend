@@ -209,15 +209,15 @@ function _renderChroniclesList(tales) {
               <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-3">
                 <div class="space-y-1">
                   <div class="flex items-center gap-2 flex-wrap">
-                    <h4 class="font-cinzel text-base sm:text-lg font-bold text-white hover:text-indigo-300 transition-colors">
+                    <h4 class="font-cinzel text-base sm:text-lg font-bold text-[var(--text-primary)] hover:text-indigo-400 transition-colors">
                       <a href="${taleCanonicalUrl}">${safeTitle}</a>
                     </h4>
-                    <span class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-400">
+                    <span class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-xs bg-white/5 border border-white/10 text-slate-400">
                       ${escapeHtml(tale.genre || 'Mythology')}
                     </span>
                   </div>
                   <p class="text-xs text-slate-400">
-                    Penned by <span class="text-slate-300 font-medium">${safeAuthor}</span>
+                    Penned by <span class="text-secondary font-medium">${safeAuthor}</span>
                     ${tale.wordCount ? ` • ${tale.wordCount.toLocaleString()} words` : ''}
                   </p>
                 </div>
@@ -254,7 +254,7 @@ function _renderChroniclesList(tales) {
         <div class="toc-era-group">
           <div class="toc-era-header">
             <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
-            <h3 class="font-cinzel text-base sm:text-lg font-bold text-white tracking-wide">
+            <h3 class="font-cinzel text-base sm:text-lg font-bold text-[var(--text-primary)] tracking-wide">
               ${escapeHtml(era)}
             </h3>
             <span class="text-xs text-slate-500">(${eraTales.length} chronicle${eraTales.length === 1 ? '' : 's'})</span>
@@ -279,7 +279,7 @@ function _renderError() {
       <p class="text-sm text-rose-300 mb-2">Failed to load the archive table of contents.</p>
       <button
         onclick="location.reload()"
-        class="text-xs text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg transition-colors"
+        class="text-xs text-[var(--text-primary)] bg-surface-2 hover:bg-surface-3 px-3 py-1.5 rounded-xs transition-colors"
       >
         Retry
       </button>

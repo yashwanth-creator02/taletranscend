@@ -108,6 +108,16 @@ example, added because the profile page's motion needed a step the
 original four-step duration scale didn't have) — not be worked around with
 a page-local re-declaration of the same name.
 
+### Multi-Theme System
+
+TaleTranscend features three global interface themes configured in `src/assets/css/tokens.css` and managed via `src/config/theme.config.js`:
+
+1. **Transcendental (`transcendental`, default)**: Signature cosmic dark theme with deep obsidian floors (`#030305`), subtle cosmic gradients, and glowing warm amber runes.
+2. **Midnight Dark (`dark`)**: High-contrast charcoal obsidian theme (`#0b0d13`) with electric indigo highlights and silver typography.
+3. **Illuminated Light (`light`)**: Authentic mythic archival parchment theme (`#f7f5f0`) with ivory surfaces, warm slate borders, and imperial dark slate ink typography.
+
+All 11 HTML entry points employ a synchronous `<head>` script and critical anti-FOUC gate `<style>` block to eliminate visual flash during boot. Theme changes in Settings synchronize across active tabs via the `storage` event.
+
 ## Security Model
 
 - **Anonymous Auth:** All users are authenticated anonymously by default to ensure data ownership without requiring a sign-up wall.

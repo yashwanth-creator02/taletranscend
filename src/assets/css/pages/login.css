@@ -12,7 +12,7 @@
   background: rgb(var(--bg-overlay-rgb) / 0.85);
   backdrop-filter: blur(var(--blur-xl));
   -webkit-backdrop-filter: blur(var(--blur-xl));
-  border: 1px solid rgb(var(--border) / 0.5);
+  border: 1px solid var(--border);
   border-bottom-width: 0px;
   border-radius: var(--radius-2xl);
   box-shadow:
@@ -284,4 +284,30 @@
   .login-visual blockquote {
     font-size: var(--text-xs);
   }
+}
+
+/* ── Light Mode Polish ───────────────────────────────────────────── */
+
+[data-app-theme='light'] .login-card {
+  background: var(--bg-elevated);
+  border: 1px solid rgb(var(--light-rgb) / 0.1);
+  box-shadow:
+    0 10px 40px -10px rgb(var(--dark-rgb) / 0.08),
+    0 0 24px rgb(var(--accent-rgb) / 0.04);
+}
+
+[data-app-theme='light'] .login-panel {
+  background: transparent;
+}
+
+[data-app-theme='light'] .auth-alt-btn {
+  background: var(--surface-2);
+  border: 1px solid rgb(var(--light-rgb) / 0.1);
+  color: var(--text-primary);
+  box-shadow: 0 2px 8px rgb(var(--dark-rgb) / 0.04);
+}
+
+[data-app-theme='light'] .auth-alt-btn:hover {
+  background: var(--surface-3);
+  border-color: rgb(var(--light-rgb) / 0.18);
 }

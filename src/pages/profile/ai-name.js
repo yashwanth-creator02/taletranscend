@@ -24,7 +24,7 @@ export async function suggestNameFromBio(bio, apiKey) {
   try {
     const prompt = `Based on this user bio: "${bio}", suggest ONE unique, mythic, or folklore-inspired name for a storyteller/chronicler. Return ONLY the name, no punctuation or explanation.`;
 
-    const res = await fetch(`${GEMINI_ENDPOINT}?key=${encodeURIComponent(apiKey)}`, {
+    const res = await fetch(`${GEMINI_ENDPOINT}?key=${encodeURIComponent(resolvedKey)}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

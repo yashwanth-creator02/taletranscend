@@ -650,3 +650,88 @@
     box-shadow: 0 0 0 6px rgb(var(--accent-rgb) / var(--a-01));
   }
 }
+
+/* ── Light Mode Polish ───────────────────────────────────────────── */
+
+[data-app-theme='light'] .shelf-card,
+[data-app-theme='light'] .readiness-seal-card {
+  background: var(--bg-elevated);
+  border-color: rgb(var(--light-rgb) / 0.08);
+  box-shadow: 0 4px 16px rgb(var(--dark-rgb) / 0.04);
+}
+
+[data-app-theme='light'] .shelf-input {
+  background: var(--bg-elevated) !important;
+  border-color: rgb(var(--light-rgb) / 0.12) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-app-theme='light'] .shelf-input::placeholder {
+  color: var(--text-muted) !important;
+}
+
+[data-app-theme='light'] .shelf-input:focus {
+  background: var(--bg-elevated) !important;
+  border-color: var(--accent) !important;
+}
+
+[data-app-theme='light'] .atelier-nav-pill {
+  color: var(--text-secondary);
+}
+
+[data-app-theme='light'] .atelier-nav-pill:hover {
+  color: var(--text-primary);
+  background: rgb(var(--light-rgb) / 0.05);
+}
+
+[data-app-theme='light'] .atelier-nav-pill--active {
+  color: var(--text-primary) !important;
+  background: rgb(var(--accent-rgb) / 0.12) !important;
+  border-color: var(--accent) !important;
+}
+
+[data-app-theme='light'] .era-pill {
+  background: var(--surface-2);
+  border-color: rgb(var(--light-rgb) / 0.1);
+  color: var(--text-secondary);
+}
+
+[data-app-theme='light'] .era-pill:hover {
+  color: var(--text-primary);
+  border-color: rgb(var(--rune-rgb) / 0.3);
+}
+
+[data-app-theme='light'] .era-pill--active {
+  color: var(--text-primary) !important;
+  background: rgb(var(--rune-rgb) / 0.15) !important;
+  border-color: rgb(var(--rune-rgb) / 0.4) !important;
+}
+
+[data-app-theme='light'] .editor-pane {
+  background: var(--bg-base);
+  border-color: var(--border);
+}
+
+[data-app-theme='light'] .manuscript-card {
+  background: var(--bg-elevated);
+  border-color: var(--border);
+  box-shadow: var(--shadow-md);
+}
+
+[data-app-theme='light'] .manuscript-title {
+  color: var(--text-primary);
+  text-shadow: none;
+}
+
+[data-app-theme='light'] .manuscript-parchment-frame {
+  background: var(--surface-1);
+  border-color: var(--border);
+}
+
+[data-app-theme='light'] .manuscript-textarea {
+  color: var(--text-primary);
+}
+
+[data-app-theme='light'] .manuscript-textarea::placeholder {
+  color: var(--text-muted);
+}

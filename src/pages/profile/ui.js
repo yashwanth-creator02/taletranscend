@@ -50,7 +50,9 @@ export function initProfileUI() {
 
 function _bindModalTriggers() {
   ['btn-edit-desktop', 'btn-edit-mobile'].forEach((id) => {
-    document.getElementById(id)?.addEventListener('click', openModal);
+    document.getElementById(id)?.addEventListener('click', () => {
+      window.location.href = '/settings.html#profile';
+    });
   });
 
   ['btn-close-modal', 'btn-cancel-modal'].forEach((id) => {
@@ -646,7 +648,7 @@ function _buildContinueReadingCard(tale) {
       </div>
 
       <div class="p-3 sm:p-3.5 space-y-2">
-        <h3 class="font-cinzel text-sm sm:text-base font-bold text-white group-hover:text-indigo-400 transition-colors truncate">
+        <h3 class="font-cinzel text-sm sm:text-base font-bold text-[var(--text-primary)] group-hover:text-indigo-400 transition-colors truncate">
           ${safeTitle}
         </h3>
         <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed font-medium">
@@ -693,7 +695,7 @@ export function renderPublishedTales(tales) {
   if (!tales || !tales.length) {
     const emptyHtml = `
       <div class="contribution-empty-state flex flex-col justify-center p-5 sm:p-6 rounded-2xl bg-white/2 border border-white/5 text-slate-400">
-        <div class="flex items-center gap-2.5 text-white font-cinzel font-bold text-sm mb-1.5">
+        <div class="flex items-center gap-2.5 text-[var(--text-primary)] font-cinzel font-bold text-sm mb-1.5">
           <i data-lucide="scroll" class="w-4 h-4 text-indigo-400"></i>
           <span>No Published Legends Yet</span>
         </div>
@@ -759,10 +761,10 @@ function _buildPublishedCard(tale) {
           class="w-full h-full object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-500" loading="lazy" />
         <div class="absolute inset-0 bg-linear-to-t from-black/90 via-black/30 to-transparent"></div>
         <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap">
-          <span class="px-2.5 py-0.5 bg-emerald-500/15 text-emerald-400 text-[8.5px] font-black uppercase tracking-widest rounded-full border border-emerald-500/25 backdrop-blur-md">
+          <span class="px-2.5 py-0.5 bg-emerald-500/15 text-emerald-400 text-[8.5px] font-black uppercase tracking-widest rounded-xs border border-emerald-500/25 backdrop-blur-md">
             Published
           </span>
-          <span class="px-2 py-0.5 ${statusBadgeClass} text-[8.5px] font-bold uppercase tracking-widest rounded-full border backdrop-blur-md">
+          <span class="px-2 py-0.5 ${statusBadgeClass} text-[8.5px] font-bold uppercase tracking-widest rounded-xs border backdrop-blur-md">
             ${statusLabel}
           </span>
         </div>
@@ -835,12 +837,12 @@ function _buildDraftCard(draft) {
       class="group block bg-white/2 border border-white/5 rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 hover:bg-white/4 hover:border-amber-500/30 hover:-translate-y-1 transition-all duration-300"
     >
       <div class="flex items-center justify-between gap-2 mb-2.5">
-        <span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 text-[8.5px] font-black uppercase tracking-widest rounded-full border border-amber-500/20">
+        <span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 text-[8.5px] font-black uppercase tracking-widest rounded-xs border border-amber-500/20">
           Draft
         </span>
         <span class="text-[9.5px] font-medium text-slate-400 uppercase tracking-wider">${updated}</span>
       </div>
-      <h3 class="font-cinzel font-bold text-white text-sm sm:text-base group-hover:text-amber-300 transition-colors truncate mb-1">
+      <h3 class="font-cinzel font-bold text-[var(--text-primary)] text-sm sm:text-base group-hover:text-amber-400 transition-colors truncate mb-1">
         ${safeTitle}
       </h3>
       <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed mb-3 font-medium">

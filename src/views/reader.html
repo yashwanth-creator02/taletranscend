@@ -44,15 +44,40 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cinzel:wght@500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap"
     />
 
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('tt_app_theme') || 'transcendental';
+          var resolved = t;
+          if (t === 'system') {
+            resolved =
+              window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'transcendental'
+                : 'light';
+          }
+          document.documentElement.setAttribute('data-app-theme', resolved);
+          document.documentElement.setAttribute('data-theme-preference', t);
+        } catch (e) {}
+      })();
+    </script>
+
     <style>
       /* Critical Anti-FOUC Gate */
       html {
         background-color: #030305;
         color: #e2e8f0;
       }
+      html[data-app-theme='dark'] {
+        background-color: #0b0d13;
+        color: #f8fafc;
+      }
+      html[data-app-theme='light'] {
+        background-color: #f7f5f0;
+        color: #1e293b;
+      }
       body {
-        background-color: #030305;
-        color: #e2e8f0;
+        background-color: inherit;
+        color: inherit;
         font-family:
           'Inter',
           system-ui,
@@ -66,7 +91,7 @@
       #app-boot-curtain {
         position: fixed;
         inset: 0;
-        background-color: #030305;
+        background-color: inherit;
         z-index: 999999;
         display: flex;
         align-items: center;
@@ -465,13 +490,13 @@
       <!-- Backdrop -->
       <div
         class="absolute inset-0"
-        style="background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px)"
+        style="background: var(--surface-scrim); backdrop-filter: blur(4px)"
       ></div>
 
       <!-- Drawer panel -->
       <div
-        class="absolute bottom-0 inset-x-0 rounded-t-[2rem] border-t border-white/[0.08] p-6"
-        style="background: rgba(7, 7, 11, 0.98); max-height: 80vh; overflow-y: auto"
+        class="absolute bottom-0 inset-x-0 rounded-t-[2rem] border-t border-line p-6"
+        style="background: var(--bg-elevated); max-height: 80vh; overflow-y: auto"
       >
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-300">
@@ -481,7 +506,7 @@
           <button
             id="reader-settings-close"
             type="button"
-            class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-white hover:bg-white/[0.06] transition-all"
+            class="w-8 h-8 rounded-lg flex items-center justify-center text-muted hover:text-[var(--text-primary)] hover:bg-surface-2 transition-all"
             aria-label="Close settings"
           >
             <i data-lucide="x" style="width: 16px; height: 16px"></i>
@@ -504,7 +529,11 @@
               >
                 <i data-lucide="minus" style="width: 14px; height: 14px"></i>
               </button>
-              <span id="size-val" class="text-sm font-bold text-white w-12 text-center">18px</span>
+              <span
+                id="size-val"
+                class="text-sm font-bold text-[var(--text-primary)] w-12 text-center"
+                >18px</span
+              >
               <button
                 id="fs-plus"
                 type="button"

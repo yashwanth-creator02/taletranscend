@@ -25,9 +25,11 @@ import {
 import { initShelfLayout } from './layout.js';
 
 import { appState } from '@state/index.js';
+import { initAppTheme } from '@config/theme.config.js';
 
 const log = createLogger('Shelf');
 
+initAppTheme();
 initPageReveal();
 log.info('Initializing Shelf page');
 
