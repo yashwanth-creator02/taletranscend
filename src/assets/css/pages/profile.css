@@ -7,8 +7,8 @@
  Page-specific layout tokens
  ═══════════════════════════════════════════════ */
 :root {
-  --left-panel-width: 320px;
-  --right-panel-width: 320px;
+  --left-panel-width: 430px;
+  --right-panel-width: 340px;
 }
 
 /* ═══════════════════════════════════════════════
@@ -147,11 +147,11 @@ body {
 @media (min-width: 1200px) {
   .profile-main-layout {
     display: grid;
-    grid-template-columns: var(--left-panel-width, 320px) 4px minmax(0, 1fr) 4px var(
+    grid-template-columns: var(--left-panel-width, 430px) 4px minmax(0, 1fr) 4px var(
         --right-panel-width,
-        320px
+        340px
       );
-    height: calc(100vh - var(--nav-height, 4.5rem));
+    height: 100vh;
     overflow: hidden;
   }
 
@@ -182,7 +182,7 @@ body {
     gap: var(--space-5);
     padding: var(--space-5);
     height: auto;
-    min-height: calc(100vh - var(--nav-height, 4.5rem));
+    min-height: 100vh;
     overflow-y: auto;
   }
 
@@ -193,7 +193,7 @@ body {
     top: var(--space-5);
     align-self: start;
     height: fit-content;
-    max-height: calc(100vh - var(--nav-height, 4.5rem) - var(--space-8));
+    max-height: calc(100vh - var(--space-8));
     overflow-y: auto;
   }
 
@@ -305,20 +305,17 @@ body {
     font-size: 0.5625rem;
   }
 
-  /* Customise button placed inline right */
-  #btn-edit-desktop {
-    width: auto !important;
+  /* Edit button corner on mobile */
+  #btn-edit-desktop,
+  .identity-edit-btn-corner {
+    position: absolute !important;
+    top: var(--space-3) !important;
+    right: var(--space-3) !important;
+    width: 32px !important;
+    height: 32px !important;
     margin-top: 0 !important;
-    padding: 0.45rem 0.75rem !important;
-    font-size: 0.625rem !important;
-    letter-spacing: 0.12em;
-    border-radius: var(--radius-md) !important;
-    white-space: nowrap;
-    align-self: center !important;
-  }
-
-  .edit-btn-text {
-    display: none;
+    padding: 0 !important;
+    border-radius: var(--radius-sm) !important;
   }
 
   /* Upgrade button full width row */
@@ -479,6 +476,33 @@ body {
     touch-action: none;
   }
 
+  /* Full-height luminous dividing line on hover, focus, and resizing */
+  .resize-handle::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    transform: translateX(-50%);
+    background: transparent;
+    opacity: 0;
+    transition:
+      opacity var(--transition-fast),
+      background var(--transition-fast),
+      box-shadow var(--transition-fast);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .resize-handle:hover::before,
+  .resize-handle:focus-visible::before,
+  body.resizing .resize-handle::before {
+    opacity: 1;
+    background: var(--accent);
+    box-shadow: 0 0 10px rgb(var(--accent-rgb) / 0.6);
+  }
+
   .resize-handle-grip {
     display: flex;
     align-items: center;
@@ -492,6 +516,8 @@ body {
     box-shadow: 0 2px 8px rgb(var(--dark-rgb) / var(--a-10));
     transition: all var(--transition-fast);
     pointer-events: none;
+    position: relative;
+    z-index: 2;
   }
 
   .resize-handle:hover .resize-handle-grip,
@@ -549,6 +575,37 @@ body {
   box-shadow:
     0 20px 48px rgb(var(--dark-rgb) / 0.45),
     0 0 24px rgb(var(--accent-rgb) / var(--a-02));
+}
+
+.sanctuary-nav-bar {
+  border-color: rgb(var(--light-rgb) / var(--a-04));
+}
+
+.identity-edit-btn-corner,
+#btn-edit-desktop {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  z-index: 20;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: rgb(var(--light-rgb) / var(--a-04));
+  border: 1px solid rgb(var(--light-rgb) / var(--a-06));
+  color: rgb(var(--light-rgb) / var(--a-07));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.identity-edit-btn-corner:hover,
+#btn-edit-desktop:hover {
+  background: rgb(var(--accent-rgb) / 0.15);
+  border-color: rgb(var(--accent-rgb) / 0.4);
+  color: var(--accent);
+  transform: scale(1.05);
 }
 
 .avatar-container {
@@ -612,13 +669,17 @@ body {
  Compact Story Cards & CTAs
  ═══════════════════════════════════════════════ */
 .continue-card {
-  width: 240px;
+  width: 250px;
+  height: 295px;
   background: var(--surface-1);
   border: 1px solid rgb(var(--light-rgb) / var(--a-04));
   border-radius: var(--radius-lg);
   overflow: hidden;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   transition:
     transform var(--transition-normal),
     border-color var(--transition-normal),
@@ -633,9 +694,10 @@ body {
     0 0 20px rgb(var(--accent-rgb) / var(--a-04));
 }
 
+.continue-card .relative.h-32,
 .continue-card .card-image-wrap {
-  height: 105px;
-  max-height: 105px;
+  height: 128px;
+  max-height: 128px;
   position: relative;
   overflow: hidden;
   background: rgb(var(--dark-rgb) / var(--a-06));
@@ -691,6 +753,108 @@ body {
   box-shadow:
     0 12px 30px rgb(var(--dark-rgb) / 0.4),
     0 0 20px rgb(var(--accent-rgb) / var(--a-04));
+}
+
+/* ═══════════════════════════════════════════════
+ Achievements Section
+ ═══════════════════════════════════════════════ */
+.achievement-card {
+  background: var(--surface-1);
+  border: 1px solid rgb(var(--light-rgb) / var(--a-04));
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.achievement-card:hover {
+  transform: translateY(-2px);
+  border-color: rgb(var(--light-rgb) / var(--a-08));
+  box-shadow: 0 10px 24px rgb(var(--dark-rgb) / 0.25);
+}
+
+.achievement-card--unlocked {
+  background: linear-gradient(
+    135deg,
+    rgb(var(--accent-rgb) / 0.08) 0%,
+    rgb(var(--accent-2-rgb) / 0.04) 50%,
+    var(--surface-1) 100%
+  );
+  border-color: rgb(var(--accent-rgb) / 0.25);
+}
+
+.achievement-card--unlocked:hover {
+  border-color: rgb(var(--accent-rgb) / 0.45);
+  box-shadow: 0 10px 28px rgb(var(--accent-rgb) / 0.15);
+}
+
+.achievement-card--locked {
+  opacity: 0.72;
+}
+
+.achievement-card--locked:hover {
+  opacity: 0.95;
+}
+
+.achievement-card[data-tier='bronze'] .achievement-icon-wrap {
+  background: rgb(var(--rune-rgb) / 0.12);
+  border: 1px solid rgb(var(--rune-rgb) / 0.25);
+  color: var(--rune);
+}
+.achievement-card[data-tier='bronze'] .achievement-tier-shield {
+  background: rgb(var(--rune-rgb) / 0.12);
+  color: var(--rune);
+  border: 1px solid rgb(var(--rune-rgb) / 0.25);
+}
+.achievement-card[data-tier='bronze'] .achievement-progress-bar {
+  background: var(--rune);
+}
+
+.achievement-card[data-tier='silver'] .achievement-icon-wrap {
+  background: rgb(var(--light-rgb) / 0.08);
+  border: 1px solid rgb(var(--light-rgb) / 0.18);
+  color: rgb(var(--light-rgb) / 0.85);
+}
+.achievement-card[data-tier='silver'] .achievement-tier-shield {
+  background: rgb(var(--light-rgb) / 0.06);
+  color: rgb(var(--light-rgb) / 0.85);
+  border: 1px solid rgb(var(--light-rgb) / 0.15);
+}
+.achievement-card[data-tier='silver'] .achievement-progress-bar {
+  background: rgb(var(--light-rgb) / 0.75);
+}
+
+.achievement-card[data-tier='gold'] .achievement-icon-wrap {
+  background: var(--mythic-gold-bg);
+  border: 1px solid var(--mythic-gold-border);
+  color: var(--mythic-gold);
+}
+.achievement-card[data-tier='gold'] .achievement-tier-shield {
+  background: var(--mythic-gold-bg);
+  color: var(--mythic-gold);
+  border: 1px solid var(--mythic-gold-border);
+}
+.achievement-card[data-tier='gold'] .achievement-progress-bar {
+  background: var(--mythic-gold);
+}
+
+.achievement-card[data-tier='platinum'] .achievement-icon-wrap {
+  background: rgb(var(--accent-rgb) / 0.15);
+  border: 1px solid rgb(var(--accent-rgb) / 0.35);
+  color: var(--accent);
+}
+.achievement-card[data-tier='platinum'] .achievement-tier-shield {
+  background: rgb(var(--accent-rgb) / 0.12);
+  color: var(--accent);
+  border: 1px solid rgb(var(--accent-rgb) / 0.3);
+}
+.achievement-card[data-tier='platinum'] .achievement-progress-bar {
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
 }
 
 /* ═══════════════════════════════════════════════
@@ -1164,15 +1328,18 @@ a:focus-visible,
   color: var(--text-primary);
 }
 
+[data-app-theme='light'] .identity-edit-btn-corner,
 [data-app-theme='light'] #btn-edit-desktop {
-  background: rgb(var(--accent-rgb) / var(--a-04)) !important;
-  border-color: rgb(var(--accent-rgb) / var(--a-07)) !important;
-  color: var(--accent) !important;
+  background: rgb(var(--dark-rgb) / var(--a-03)) !important;
+  border-color: rgb(var(--dark-rgb) / var(--a-06)) !important;
+  color: var(--text-secondary) !important;
 }
 
+[data-app-theme='light'] .identity-edit-btn-corner:hover,
 [data-app-theme='light'] #btn-edit-desktop:hover {
-  background: rgb(var(--accent-rgb) / var(--a-06)) !important;
-  color: var(--accent-hover) !important;
+  background: rgb(var(--accent-rgb) / 0.12) !important;
+  border-color: rgb(var(--accent-rgb) / 0.35) !important;
+  color: var(--accent) !important;
 }
 
 [data-app-theme='light'] #btn-upgrade-account {
@@ -1261,6 +1428,44 @@ a:focus-visible,
   border-color: rgb(var(--accent-rgb) / var(--a-08));
   color: var(--accent);
   box-shadow: 0 0 10px rgb(var(--accent-rgb) / var(--a-07));
+}
+
+[data-app-theme='light'] .resize-handle:hover::before,
+[data-app-theme='light'] .resize-handle:focus-visible::before,
+[data-app-theme='light'] body.resizing .resize-handle::before {
+  background: var(--accent);
+  box-shadow: 0 0 8px rgb(var(--accent-rgb) / 0.4);
+}
+
+[data-app-theme='light'] .achievement-card {
+  background: var(--surface-1);
+  border-color: rgb(var(--dark-rgb) / var(--a-04));
+}
+
+[data-app-theme='light'] .achievement-card--unlocked {
+  background: linear-gradient(
+    135deg,
+    rgb(var(--accent-rgb) / 0.08) 0%,
+    rgb(var(--accent-2-rgb) / 0.04) 50%,
+    var(--surface-1) 100%
+  );
+  border-color: rgb(var(--accent-rgb) / 0.25);
+}
+
+[data-app-theme='light'] .achievement-card[data-tier='silver'] .achievement-icon-wrap {
+  background: rgb(var(--dark-rgb) / 0.06);
+  border: 1px solid rgb(var(--dark-rgb) / 0.12);
+  color: var(--text-primary);
+}
+
+[data-app-theme='light'] .achievement-card[data-tier='silver'] .achievement-tier-shield {
+  background: rgb(var(--dark-rgb) / 0.05);
+  color: var(--text-secondary);
+  border: 1px solid rgb(var(--dark-rgb) / 0.1);
+}
+
+[data-app-theme='light'] .achievement-card[data-tier='silver'] .achievement-progress-bar {
+  background: var(--text-secondary);
 }
 
 [data-app-theme='light'] .info-tooltip-wrap .info-tooltip-box {

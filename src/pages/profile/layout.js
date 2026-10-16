@@ -9,25 +9,26 @@ export function initProfileLayout() {
   initIcons();
   /* ── LocalStorage Panel Widths ── */
   const LEFT_MIN = 280;
-  const LEFT_MAX = 500;
+  const LEFT_MAX = 520;
   const RIGHT_MIN = 280;
   const RIGHT_MAX = 500;
+  const LEFT_DEFAULT = 430;
+  const RIGHT_DEFAULT = 340;
 
   const savedLeft = localStorage.getItem('profile_left_width');
   const savedRight = localStorage.getItem('profile_right_width');
 
-  if (savedLeft) {
-    document.documentElement.style.setProperty(
-      '--left-panel-width',
-      Math.max(LEFT_MIN, Math.min(LEFT_MAX, parseInt(savedLeft))) + 'px'
-    );
-  }
-  if (savedRight) {
-    document.documentElement.style.setProperty(
-      '--right-panel-width',
-      Math.max(RIGHT_MIN, Math.min(RIGHT_MAX, parseInt(savedRight))) + 'px'
-    );
-  }
+  document.documentElement.style.setProperty(
+    '--left-panel-width',
+    (savedLeft ? Math.max(LEFT_MIN, Math.min(LEFT_MAX, parseInt(savedLeft, 10))) : LEFT_DEFAULT) +
+      'px'
+  );
+  document.documentElement.style.setProperty(
+    '--right-panel-width',
+    (savedRight
+      ? Math.max(RIGHT_MIN, Math.min(RIGHT_MAX, parseInt(savedRight, 10)))
+      : RIGHT_DEFAULT) + 'px'
+  );
 
   /* ── Resize Handles ── */
   const handles = document.querySelectorAll('.resize-handle');
@@ -42,7 +43,9 @@ export function initProfileLayout() {
 
     const prop = side === 'left' ? '--left-panel-width' : '--right-panel-width';
     const style = getComputedStyle(document.documentElement);
-    startWidth = parseInt(style.getPropertyValue(prop)) || 320;
+    startWidth =
+      parseInt(style.getPropertyValue(prop), 10) ||
+      (side === 'left' ? LEFT_DEFAULT : RIGHT_DEFAULT);
 
     document.body.classList.add('resizing');
 
@@ -104,7 +107,8 @@ export function initProfileLayout() {
       if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
       const prop = side === 'left' ? '--left-panel-width' : '--right-panel-width';
       const current =
-        parseInt(getComputedStyle(document.documentElement).getPropertyValue(prop)) || 320;
+        parseInt(getComputedStyle(document.documentElement).getPropertyValue(prop), 10) ||
+        (side === 'left' ? LEFT_DEFAULT : RIGHT_DEFAULT);
       const step = 20;
       let newWidth = current;
 

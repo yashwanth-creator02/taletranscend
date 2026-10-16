@@ -15,8 +15,8 @@ vi.mock('firebase/auth', () => ({
   signOut: vi.fn(),
 }));
 
-vi.mock('@ui/components/nav/nav.js', () => ({
-  initNav: vi.fn(),
+vi.mock('@ui/components/nav/nav.global.js', () => ({
+  initGlobalPaletteShortcut: vi.fn(),
 }));
 
 vi.mock('@/utils', () => ({
@@ -41,6 +41,7 @@ vi.mock('../index.js', () => ({
   renderContinueReading: vi.fn(),
   renderPublishedTales: vi.fn(),
   renderDrafts: vi.fn(),
+  renderAchievements: vi.fn(),
   showContinueReadingSkeleton: vi.fn(),
   showContributionsSkeleton: vi.fn(),
   switchContribTab: vi.fn(),

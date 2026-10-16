@@ -181,8 +181,57 @@
            ══════════════════════════════════════════════ -->
       <aside id="column-identity" class="pillar-left scroll-container no-scrollbar">
         <div class="p-4 sm:p-6 lg:p-7 space-y-6">
+          <!-- Sanctuary Brand & Navigation Bar -->
+          <div
+            class="sanctuary-nav-bar flex items-center justify-between pb-3.5 border-b border-white/6"
+          >
+            <a
+              href="/index.html"
+              class="flex items-center gap-2.5 group transition-opacity hover:opacity-90"
+              aria-label="TaleTranscend Home"
+            >
+              <img src="/logo.png" alt="" width="22" height="22" class="object-contain" />
+              <span class="font-cinzel text-xs font-bold tracking-widest text-[var(--text-primary)]"
+                >TALETRANSCEND</span
+              >
+            </a>
+            <div class="flex items-center gap-1">
+              <a
+                href="/index.html"
+                class="p-1.5 px-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all text-xs font-medium flex items-center gap-1.5"
+                title="Home"
+              >
+                <i data-lucide="home" class="w-3.5 h-3.5 text-indigo-400"></i>
+                <span class="text-[10px] font-bold uppercase tracking-wider">Home</span>
+              </a>
+              <a
+                href="/library.html"
+                class="p-1.5 px-2.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all text-xs font-medium flex items-center gap-1.5"
+                title="Library"
+              >
+                <i data-lucide="library" class="w-3.5 h-3.5 text-indigo-400"></i>
+                <span class="text-[10px] font-bold uppercase tracking-wider">Library</span>
+              </a>
+            </div>
+          </div>
+
           <!-- Identity card -->
           <div class="identity-card p-4 sm:p-6 lg:p-7 relative">
+            <!-- Edit Identity Button: Top right corner -->
+            <button
+              id="btn-edit-desktop"
+              type="button"
+              class="identity-edit-btn-corner absolute top-4 right-4 z-20 w-8 h-8 rounded-lg flex items-center justify-center border border-white/10 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all cursor-pointer group"
+              aria-label="Customise Identity"
+              title="Customise Identity"
+            >
+              <i
+                data-lucide="edit-3"
+                class="w-3.5 h-3.5 group-hover:scale-110 transition-transform"
+              ></i>
+            </button>
+            <button id="btn-edit-mobile" type="button" class="hidden"></button>
+
             <div class="flex flex-col items-center text-center relative z-10 w-full">
               <!-- Top identity cluster -->
               <div class="identity-cluster-top w-full flex flex-col items-center text-center">
@@ -235,21 +284,6 @@
                   </p>
                   <span id="mobile-display-bio" class="hidden"></span>
                 </div>
-
-                <!-- Edit Action -->
-                <button
-                  id="btn-edit-desktop"
-                  class="identity-edit-btn mt-4 lg:mt-6 w-full py-3 sm:py-3.5 rounded-xl sm:rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] hover:bg-indigo-500/20 hover:text-indigo-300 transition-all group btn-secondary cursor-pointer shrink-0"
-                >
-                  <span class="flex items-center justify-center gap-2">
-                    <i
-                      data-lucide="settings"
-                      class="w-3.5 h-3.5 group-hover:rotate-90 transition-transform duration-500"
-                    ></i>
-                    <span class="edit-btn-text">Customise Identity</span>
-                  </span>
-                </button>
-                <button id="btn-edit-mobile" type="button" class="hidden"></button>
               </div>
 
               <!-- Metadata & details (Desktop or tablet drawer) -->
@@ -642,6 +676,59 @@
             <!-- Drafts -->
             <div id="contrib-panel-drafts" hidden>
               <div id="drafts-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5"></div>
+            </div>
+          </section>
+
+          <!-- ── Achievements ───────────────────────── -->
+          <section id="profile-achievements-section" class="pb-10">
+            <header
+              class="section-header flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-6 mb-5 sm:mb-6"
+            >
+              <div>
+                <div class="flex items-center gap-2.5">
+                  <h2
+                    class="profile-section-heading text-xl sm:text-2xl md:text-3xl font-cinzel font-bold tracking-wide"
+                  >
+                    Achievements
+                  </h2>
+                  <div class="info-tooltip-wrap">
+                    <button
+                      type="button"
+                      class="p-1 text-slate-500 hover:text-indigo-400 transition-colors cursor-help"
+                      aria-label="Achievements section info"
+                    >
+                      <i data-lucide="info" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <div class="info-tooltip-box">
+                      Honors earned through reading chronicles, authoring legends, and building
+                      community.
+                    </div>
+                  </div>
+                </div>
+                <div class="rune-divider"></div>
+                <p class="text-slate-500 text-xs sm:text-sm mt-2 max-w-md font-medium">
+                  Milestones forged through reading and authorship.
+                </p>
+              </div>
+
+              <!-- Unlocked Counter Shield -->
+              <div
+                id="achievements-unlocked-badge"
+                class="mythic-badge flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/10 bg-white/3 shrink-0"
+              >
+                <i data-lucide="award" class="w-3.5 h-3.5 text-amber-400"></i>
+                <span class="text-xs font-bold text-slate-300">
+                  <span id="achievements-unlocked-count">0</span> / 12 Unlocked
+                </span>
+              </div>
+            </header>
+
+            <!-- Achievements Grid -->
+            <div
+              id="achievements-grid"
+              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4"
+            >
+              <!-- Cards dynamically populated by renderAchievements -->
             </div>
           </section>
         </div>
