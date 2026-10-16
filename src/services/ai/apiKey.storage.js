@@ -44,11 +44,3 @@ export function clearStoredApiKey() {
     // Ignore storage errors
   }
 }
-
-/**
- * Checks if a Gemini API key is available.
- * @returns {boolean}
- */
-export function hasApiKey() {
-  return Boolean(getStoredApiKey());
-}

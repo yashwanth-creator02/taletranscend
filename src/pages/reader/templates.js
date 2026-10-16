@@ -1,6 +1,7 @@
 // src/pages/reader/templates.js
 // UI Templates for the Reader Panels
-import { THEMES, FONTS, readerState } from './state.js';
+import { readerState } from './state.js';
+import { READER_THEMES as THEMES, FONTS } from '@config/theme.config.js';
 import { getChapterProgress } from '@services/index.js';
 import { escapeText as escapeHtml } from '@/utils';
 

@@ -22,7 +22,6 @@ import {
   initIcons,
   initAuth,
 } from './index.js';
-import { initShelfLayout } from './layout.js';
 
 import { appState } from '@state/index.js';
 import { initAppTheme } from '@config/theme.config.js';
@@ -47,7 +46,6 @@ let _pageInitialized = false;
 
 export async function initShelfPage() {
   if (!_pageInitialized) {
-    initShelfLayout();
     initShelfInteractions();
     initIcons();
     _pageInitialized = true;
@@ -66,7 +64,7 @@ export async function initShelfPage() {
 
     computeAndRenderHeroStats();
     readyReveal();
-    initShelfLayout();
+    initIcons();
   } else {
     readyReveal();
   }

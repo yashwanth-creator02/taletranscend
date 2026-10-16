@@ -2,16 +2,6 @@
 // Centralised mutable state for the reader page.
 // All reader modules read/write through this object.
 //
-// THEMES and FONTS are no longer defined here — they live in
-// src/config/theme.config.js and are imported below.
-// Any module that previously imported THEMES or FONTS from this file
-// should now import from @config/theme.config.js directly.
-
-import { READER_THEMES, FONTS as _FONTS } from '@config/theme.config.js';
-
-// Re-export so existing imports that come from state.js continue to work
-// during the migration period. Remove these once all callsites are updated.
-export { READER_THEMES as THEMES, _FONTS as FONTS };
 
 /**
  * @typedef {Object} ReaderState

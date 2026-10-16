@@ -22,7 +22,6 @@ export * from './reader/resume.service.js';
 
 // Read time selectors and aggregators
 export * from './reader/readTime.selector.js';
-export * from './reader/getTotalReadTimes.service.js';
 
 // ── Bookmarks ─────────────────────────────────────────────────────────
 // Add, remove, and fetch user bookmarks

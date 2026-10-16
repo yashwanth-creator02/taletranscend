@@ -44,28 +44,6 @@ export async function getUserNotifications(userId, maxCount = 20) {
 }
 
 /**
- * Fetches the count of unread notifications for a user.
- *
- * @param {string} userId
- * @returns {Promise<number>}
- */
-export async function getUnreadNotificationCount(userId) {
-  if (!userId) return 0;
-
-  return safeAsync(
-    (async () => {
-      const q = query(refs.notifications(userId), where('isRead', '==', false), limit(50));
-      const snap = await getDocs(q);
-      return snap.size;
-    })(),
-    {
-      fallback: 0,
-      logContext: 'services.notification.getUnreadNotificationCount',
-    }
-  );
-}
-
-/**
  * Subscribes to real-time changes in the unread notifications count.
  *
  * @param {string} userId
@@ -114,30 +92,6 @@ export async function markAllNotificationsAsRead(userId) {
     {
       fallback: false,
       logContext: 'services.notification.markAllNotificationsAsRead',
-    }
-  );
-}
-
-/**
- * Marks a notification as read.
- *
- * @param {string} userId
- * @param {string} notificationId
- * @returns {Promise<boolean>}
- */
-export async function markNotificationAsRead(userId, notificationId) {
-  if (!userId || !notificationId) return false;
-
-  return safeAsync(
-    (async () => {
-      await updateDoc(refs.notification(userId, notificationId), {
-        isRead: true,
-      });
-      return true;
-    })(),
-    {
-      fallback: false,
-      logContext: 'services.notification.markNotificationAsRead',
     }
   );
 }
