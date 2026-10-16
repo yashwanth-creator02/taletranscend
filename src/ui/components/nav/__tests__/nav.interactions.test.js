@@ -29,6 +29,21 @@ vi.mock('../nav.command-palette.js', () => ({
   renderCommandList: vi.fn(),
 }));
 
+vi.mock('../notifications.popover.js', () => ({
+  toggleNotificationsPopover: vi.fn(),
+  closeNotificationsPopover: vi.fn(),
+  initNotifications: vi.fn(),
+  destroyNotifications: vi.fn(),
+  updateNotificationBadge: vi.fn(),
+  loadAndRenderNotifications: vi.fn(),
+}));
+
+vi.mock('@services/notification.service.js', () => ({
+  markAllNotificationsAsRead: vi.fn(() => Promise.resolve(true)),
+  subscribeUnreadNotifications: vi.fn(() => vi.fn()),
+  getUserNotifications: vi.fn(() => Promise.resolve([])),
+}));
+
 vi.mock('@fb/index.js', () => ({
   auth: { currentUser: { uid: 'u1' } },
   upgradeAnonymousToGoogle: vi.fn(),

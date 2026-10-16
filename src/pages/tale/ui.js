@@ -2,7 +2,7 @@
 // Presentation layer for the tale summary page (Chronicle Codex).
 
 import { initIcons } from '@ui/components/icons.js';
-import { setText, escapeHtml, createLogger } from '@/utils';
+import { setText, escapeHtml, createLogger, updatePageMeta } from '@/utils';
 import { getTotalReadTime } from '@services/index.js';
 import { getChapterProgress } from '@services/reader/localProgress.service.js';
 import { MS_PER_MINUTE } from '@config/app.config.js';
@@ -144,6 +144,12 @@ export async function renderTale(userId, tale, taleId, isResonated = false) {
   const languageName = tale.language || 'Unknown Language';
 
   log.debug('Updating UI elements for tale');
+  updatePageMeta({
+    title,
+    description,
+    image: tale.coverUrl || FALLBACK_COVER,
+    url: typeof window !== 'undefined' ? window.location.href : '',
+  });
   setText('loading-indicator', 'Archive Link Synchronised');
   setText('header-tale-title', title);
 

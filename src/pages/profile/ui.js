@@ -379,8 +379,12 @@ function _bindApiKeyInput() {
  */
 export function updateProfileUI(data) {
   // Display fields
-  setText('desktop-display-name', data.name || 'Explorer');
-  setText('mobile-display-name', data.name || 'Explorer');
+  const cleanName =
+    !data.name || data.name === 'User_Name' || data.name === 'Anonymous Reader'
+      ? 'Wandering Chronicler'
+      : data.name;
+  setText('desktop-display-name', cleanName);
+  setText('mobile-display-name', cleanName);
   setText('desktop-display-bio', data.bio || 'Whispering stories to the stars…');
   setText('mobile-display-bio', data.bio || 'Whispering stories to the stars…');
   setText('profile-location', data.location || '');
@@ -623,8 +627,22 @@ export function renderContinueReading(tales) {
   initIcons(container);
 }
 
+function _cleanDisplayTitle(title, id) {
+  if (!title || typeof title !== 'string') return 'Untitled Chronicle';
+  const trimmed = title.trim();
+  if (
+    !trimmed ||
+    trimmed === id ||
+    trimmed === 'Untitled Tale' ||
+    /^[a-zA-Z0-9_-]{20,}$/.test(trimmed)
+  ) {
+    return 'Untitled Chronicle';
+  }
+  return trimmed;
+}
+
 function _buildContinueReadingCard(tale) {
-  const safeTitle = escapeHtml(tale.title || 'Untitled Tale');
+  const safeTitle = escapeHtml(_cleanDisplayTitle(tale.title, tale.id));
   const safeDescription = escapeHtml(tale.description || '');
 
   const cover =

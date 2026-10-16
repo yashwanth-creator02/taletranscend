@@ -15,6 +15,7 @@
     <meta name="color-scheme" content="dark" />
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="TaleTranscend" />
@@ -133,7 +134,7 @@
         if (document.body && !document.body.classList.contains('booted')) {
           document.body.classList.add('booted');
         }
-      }, 3500);
+      }, 1500);
     </script>
     <noscript>
       <style>
@@ -264,7 +265,7 @@
                       id="desktop-display-name"
                       class="profile-user-name text-lg sm:text-xl xl:text-2xl font-cinzel font-bold tracking-wide truncate"
                     >
-                      User_Name
+                      Wandering Chronicler
                     </h1>
                     <span id="mobile-display-name" class="hidden"></span>
                     <div class="mythic-badge text-[8.5px] px-2 py-0.5">
@@ -401,6 +402,60 @@
                 Register proactively as a verified author to seal chronicles into the eternal
                 archives and receive missives from readers via The Chronicler's Letter.
               </p>
+
+              <!-- What is a Scribe Accordion -->
+              <details
+                class="group rounded-xl border border-white/8 bg-white/3 overflow-hidden text-xs"
+              >
+                <summary
+                  class="flex items-center justify-between p-3 cursor-pointer text-slate-300 font-medium hover:text-white transition-colors"
+                >
+                  <span class="flex items-center gap-2">
+                    <i data-lucide="help-circle" class="w-3.5 h-3.5 text-indigo-400"></i>
+                    <span>What is a Verified Scribe?</span>
+                  </span>
+                  <i
+                    data-lucide="chevron-down"
+                    class="w-3.5 h-3.5 text-slate-400 group-open:rotate-180 transition-transform"
+                  ></i>
+                </summary>
+                <div
+                  class="px-3 pb-3 pt-1 space-y-2 text-[11px] text-slate-400 border-t border-white/5"
+                >
+                  <div class="flex items-start gap-2">
+                    <i
+                      data-lucide="shield-check"
+                      class="w-3 h-3 text-emerald-400 mt-0.5 shrink-0"
+                    ></i>
+                    <p>
+                      <strong class="text-slate-200">Archival Crest:</strong> Distinctive Verified
+                      Scribe badge affixed to all your chronicles and chapters.
+                    </p>
+                  </div>
+                  <div class="flex items-start gap-2">
+                    <i data-lucide="mail" class="w-3 h-3 text-indigo-400 mt-0.5 shrink-0"></i>
+                    <p>
+                      <strong class="text-slate-200">Reader Missives:</strong> Receive reader
+                      questions and appreciations directly to your correspondence inbox.
+                    </p>
+                  </div>
+                  <div class="flex items-start gap-2">
+                    <i data-lucide="sparkles" class="w-3 h-3 text-amber-400 mt-0.5 shrink-0"></i>
+                    <p>
+                      <strong class="text-slate-200">Oracle AI Atelier:</strong> Priority access to
+                      Gemini generative title suggestions and prose elevation tools.
+                    </p>
+                  </div>
+                  <div class="flex items-start gap-2">
+                    <i data-lucide="book-marked" class="w-3 h-3 text-sky-400 mt-0.5 shrink-0"></i>
+                    <p>
+                      <strong class="text-slate-200">Eternal Preservation:</strong> Chapters are
+                      sealed under the Chronicle Preservation Policy.
+                    </p>
+                  </div>
+                </div>
+              </details>
+
               <button
                 type="button"
                 id="btn-register-scribe-open"
@@ -1564,6 +1619,24 @@
             Configure your official pen name and correspondence email. Readers of your tales will be
             routed to your registered email when inquiring via The Chronicler's Letter.
           </p>
+        </div>
+
+        <!-- Scribe Verification Steps Shield -->
+        <div
+          class="grid grid-cols-3 gap-2 py-2 px-3 rounded-xl bg-white/2 border border-white/5 text-[10px] text-center"
+          aria-label="Registration steps"
+        >
+          <div
+            class="p-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 font-bold"
+          >
+            1. Identity &amp; Inbox
+          </div>
+          <div class="p-1.5 rounded-lg bg-white/2 border border-white/5 text-slate-400 font-medium">
+            2. Creed &amp; Style
+          </div>
+          <div class="p-1.5 rounded-lg bg-white/2 border border-white/5 text-slate-400 font-medium">
+            3. Archive Sealed
+          </div>
         </div>
 
         <!-- Form -->

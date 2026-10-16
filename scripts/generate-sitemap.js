@@ -50,10 +50,22 @@ function generateXml() {
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>`);
+    urls.push(`  <url>
+    <loc>${BASE_URL}/tale.html?id=${tale.id}</loc>
+    <lastmod>${TODAY}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`);
 
     for (let i = 0; i < tale.chapters; i++) {
       urls.push(`  <url>
     <loc>${BASE_URL}/tales/${tale.id}/read/${i}</loc>
+    <lastmod>${TODAY}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>`);
+      urls.push(`  <url>
+    <loc>${BASE_URL}/reader.html?id=${tale.id}&amp;chapter=${i}</loc>
     <lastmod>${TODAY}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>

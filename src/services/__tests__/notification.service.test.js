@@ -11,6 +11,10 @@ vi.mock('@fb/index.js', () => ({
   orderBy: vi.fn((field, dir) => ({ field, dir })),
   limit: vi.fn((n) => ({ limit: n })),
   where: vi.fn((field, op, val) => ({ field, op, val })),
+  onSnapshot: vi.fn((q, cb) => {
+    cb({ size: 4 });
+    return vi.fn();
+  }),
 }));
 
 vi.mock('@/utils', async (importOriginal) => {
@@ -32,6 +36,8 @@ import {
   getUserNotifications,
   getUnreadNotificationCount,
   markNotificationAsRead,
+  subscribeUnreadNotifications,
+  markAllNotificationsAsRead,
 } from '../notification.service.js';
 
 describe('notification.service', () => {
@@ -97,6 +103,35 @@ describe('notification.service', () => {
         expect.objectContaining({ path: 'users/u1/notifications/n1' }),
         { isRead: true }
       );
+    });
+  });
+
+  describe('subscribeUnreadNotifications', () => {
+    it('returns noop if userId is missing', () => {
+      const unsub = subscribeUnreadNotifications(null, vi.fn());
+      expect(typeof unsub).toBe('function');
+    });
+
+    it('subscribes to onSnapshot and triggers callback', () => {
+      const cb = vi.fn();
+      const unsub = subscribeUnreadNotifications('u1', cb);
+      expect(cb).toHaveBeenCalledWith(4);
+      expect(typeof unsub).toBe('function');
+    });
+  });
+
+  describe('markAllNotificationsAsRead', () => {
+    it('returns false if userId is missing', async () => {
+      expect(await markAllNotificationsAsRead(null)).toBe(false);
+    });
+
+    it('marks all fetched unread notifications as read', async () => {
+      vi.mocked(getDocs).mockResolvedValueOnce({
+        docs: [{ id: 'n1' }, { id: 'n2' }],
+      });
+      const res = await markAllNotificationsAsRead('u1');
+      expect(res).toBe(true);
+      expect(updateDoc).toHaveBeenCalledTimes(2);
     });
   });
 });

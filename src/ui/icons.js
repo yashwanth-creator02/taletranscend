@@ -75,6 +75,7 @@ async function _loadIcons() {
     Book: L.Book,
     BookOpen: L.BookOpen,
     BookOpenCheck: L.BookOpenCheck,
+    BookMarked: L.BookMarked,
     BookType: L.BookType,
     BookX: L.BookX,
     ScrollText: L.ScrollText,

@@ -62,8 +62,22 @@ Define the standard operating procedures, data contracts, and UI patterns for ma
   - When clicked, inspects the current bio field (`#input-bio`).
   - Invokes `generateMythicNameSuggestions(bio, apiKey)` from `src/services/ai.service.js`.
   - If no custom API key is stored, gracefully falls back to system suggestions or informs the user to provide a key.
-- **Contribution Atelier Prose Refinement**:
-  - In `contribution.html`, authors can invoke Oracle refinement to enhance prose with mythic diction and tone adjustments.
+- **Contribution Atelier Oracle AI Suite**:
+  - In `contribution.html`, authors can access the dedicated Oracle AI assistance panel (`#oracle-ai-panel`):
+    - "Suggest Title" (`#btn-oracle-title`): Analyzes the current story synopsis/content and generates thematic titles using `generateMythicNameSuggestions` or AI completion.
+    - "Elevate Passage" (`#btn-oracle-polish`): Refines selected or active draft prose with mythic diction and cadence using `refineProseWithOracle`.
+    - "Continue Chronicle" (`#btn-oracle-continue`): Extends narrative arcs based on current lore using `generateTaleContinuation`.
+  - **Scribe's Primer & Word Goal**:
+    - Live word counter and target goal progress shield (`#stat-word-goal-status`) tracking progress against a target of 1,500 words per chapter.
+    - Collapsible Scribe's Primer panel (`#scribes-primer-panel`) detailing narrative conventions, chapter formatting, and pacing.
+- **Chronicler Moniker & Title Guards**:
+  - Uninitialized or anonymous user profiles must gracefully default to the mythic moniker `Wandering Chronicler` rather than machine placeholders like `User_Name` or empty strings.
+  - Profile and chronicle title renders must pass through sanitizing title guards (`_cleanDisplayTitle`) to ensure internal Firestore document IDs (e.g. `user_123abc` or arbitrary hash IDs) are never exposed directly to the reader as document titles.
+- **Avatar Presets Palette**:
+  - In `settings.html`, below `#input-avatar-url`, an avatar preset palette offers instant mythic avatars ("Scribe", "Oracle", "Archivist", "Wanderer") to quickly equip stylized avatars without requiring external image hosting.
+- **Scribe Registry Guide & Application**:
+  - Profile includes a collapsible "What is a Verified Scribe?" disclosure detailing the 4 concrete benefits (Archival Crest, Reader Missives, Oracle Atelier, Eternal Preservation).
+  - The Scribe Registry application modal features a 3-step progress shield (Eligibility, Sample Chronicle, Oath) ensuring transparent requirements before submission.
 
 ### 4. Interactive Info Tooltip Standard
 

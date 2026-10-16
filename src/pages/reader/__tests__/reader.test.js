@@ -104,6 +104,7 @@ vi.mock('@/utils', () => ({
     error: vi.fn(),
   })),
   navigateTo: vi.fn(),
+  updatePageMeta: vi.fn(),
 }));
 
 describe('Reader Page Controller', () => {

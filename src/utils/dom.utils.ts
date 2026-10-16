@@ -111,4 +111,53 @@ export function setText(id: string, value: string | number | null | undefined): 
   if (el) el.textContent = String(value ?? '');
 }
 
+/**
+ * Updates document title and OpenGraph / Twitter metadata tags dynamically.
+ *
+ * @param meta - Object with title, description, image, and url
+ */
+export function updatePageMeta(meta: {
+  title?: string;
+  description?: string;
+  image?: string;
+  url?: string;
+}): void {
+  if (typeof document === 'undefined') return;
+
+  if (meta.title) {
+    document.title = `${meta.title} | TaleTranscend`;
+    _setMetaTag('property', 'og:title', meta.title);
+    _setMetaTag('name', 'twitter:title', meta.title);
+  }
+
+  if (meta.description) {
+    _setMetaTag('name', 'description', meta.description);
+    _setMetaTag('property', 'og:description', meta.description);
+    _setMetaTag('name', 'twitter:description', meta.description);
+  }
+
+  if (meta.image) {
+    _setMetaTag('property', 'og:image', meta.image);
+    _setMetaTag('name', 'twitter:image', meta.image);
+  }
+
+  if (meta.url) {
+    _setMetaTag('property', 'og:url', meta.url);
+    const canonical = document.querySelector('link[rel="canonical"]');
+    if (canonical) {
+      canonical.setAttribute('href', meta.url);
+    }
+  }
+}
+
+function _setMetaTag(attrName: 'name' | 'property', attrValue: string, content: string): void {
+  let tag = document.querySelector(`meta[${attrName}="${attrValue}"]`);
+  if (!tag) {
+    tag = document.createElement('meta');
+    tag.setAttribute(attrName, attrValue);
+    document.head.appendChild(tag);
+  }
+  tag.setAttribute('content', content);
+}
+
 log.debug('DomUtils initialized');

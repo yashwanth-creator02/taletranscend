@@ -11,6 +11,7 @@ import {
   orderBy,
   limit,
   where,
+  onSnapshot,
   refs,
 } from '@fb/index.js';
 import { createNotification } from '@state/index.js';
@@ -60,6 +61,59 @@ export async function getUnreadNotificationCount(userId) {
     {
       fallback: 0,
       logContext: 'services.notification.getUnreadNotificationCount',
+    }
+  );
+}
+
+/**
+ * Subscribes to real-time changes in the unread notifications count.
+ *
+ * @param {string} userId
+ * @param {(count: number) => void} onUpdate
+ * @returns {() => void} Unsubscribe function
+ */
+export function subscribeUnreadNotifications(userId, onUpdate) {
+  if (!userId || typeof onUpdate !== 'function') return () => {};
+
+  try {
+    const q = query(refs.notifications(userId), where('isRead', '==', false), limit(50));
+    return onSnapshot(
+      q,
+      (snap) => {
+        onUpdate(snap ? snap.size : 0);
+      },
+      (error) => {
+        log.error('Error in unread notifications snapshot listener:', error);
+      }
+    );
+  } catch (err) {
+    log.error('Failed to attach unread notifications listener:', err);
+    return () => {};
+  }
+}
+
+/**
+ * Marks all unread notifications as read.
+ *
+ * @param {string} userId
+ * @returns {Promise<boolean>}
+ */
+export async function markAllNotificationsAsRead(userId) {
+  if (!userId) return false;
+
+  return safeAsync(
+    (async () => {
+      const q = query(refs.notifications(userId), where('isRead', '==', false), limit(50));
+      const snap = await getDocs(q);
+      const updates = snap.docs.map((docSnap) =>
+        updateDoc(refs.notification(userId, docSnap.id), { isRead: true })
+      );
+      await Promise.all(updates);
+      return true;
+    })(),
+    {
+      fallback: false,
+      logContext: 'services.notification.markAllNotificationsAsRead',
     }
   );
 }

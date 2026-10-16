@@ -42,13 +42,14 @@ src/
 │   ├── ai.service.js    # Gemini integration
 │   ├── author.service.js # Author registration, status, and caching
 │   ├── bookmark.service.js
+│   ├── notification.service.js # Notification dispatch and real-time subscription
 │   ├── profile.service.js
 │   └── resonance.service.js
 ├── state/               # Schema factories and runtime state
 │   └── schemas/         # Data shape definitions (tale, user, progress, etc.)
-├── ui/components/       # Shared components (cards, nav, toast, feedback)
+├── ui/components/       # Shared components (cards, nav, toast, feedback, popovers)
 ├── utils/               # TypeScript utilities (dom, format, sanitize, etc.)
-└── views/               # HTML entry points (10 pages)
+└── views/               # HTML entry points (11 pages)
 ```
 
 ## Development

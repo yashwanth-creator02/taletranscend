@@ -917,6 +917,16 @@ export function initProfileSettings() {
     avatarInput.addEventListener('input', (e) => {
       updateAvatarPreview(e.target.value);
     });
+
+    document.querySelectorAll('.avatar-preset-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const presetUrl = btn.dataset.avatarPreset;
+        if (presetUrl) {
+          avatarInput.value = presetUrl;
+          updateAvatarPreview(presetUrl);
+        }
+      });
+    });
   }
 
   const bioInput = document.getElementById('input-bio');

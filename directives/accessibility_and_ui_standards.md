@@ -225,6 +225,16 @@ The TaleTranscend brand mark is the mythical golden-trimmed black quill pen enci
   - Content panes (e.g., Synopsis descriptions, lore tags, chapter scrolls, reflections, and inquiry forms) often inherit legacy dark-mode utility classes like `text-slate-300`, `text-slate-400`, `bg-white/4`, and `border-white/6`.
   - Under `[data-app-theme='light']`, all body text must explicitly map to `var(--text-primary)`, metadata tags/pills to `var(--surface-2)` or `var(--surface-3)` with `var(--border)` and `var(--text-secondary)`, and section badges/icons to `var(--accent)`.
   - Ensures WCAG AA compliance (contrast ratio >= 4.5:1) on white/elevated cards without breaking dark theme obsidian surfaces.
+- **Boot Curtain Fallback Window**:
+  - Across all 11 HTML entry templates, the hard fallback safety timeout on the boot curtain (`#boot-curtain`) is calibrated to 1500ms (reduced from legacy 3500ms).
+  - This ensures users are never blocked by an unresponsive boot scrim during cold loads, network stalls, or slow mobile connections.
+- **Card Progress Bar Display Rule**:
+  - Library cards (`taleCard.js`) and shelf continue-reading rows must only render progress bars and percentage text when `progress > 0`.
+  - Unstarted chronicles must never display misleading "PROGRESS 0%" indicators.
+- **Animation Safety in Test Environments**:
+  - Dynamic count-up animations, such as the Shelf hero statistics (`_animateStatCount`), use `requestAnimationFrame` with cubic ease-out in the browser.
+  - In unit and integration test runners (e.g. Vitest JSDOM), RAF evaluation can be deferred while assertions execute synchronously.
+  - All counter and RAF routines must check `import.meta.env?.MODE === 'test'` or `process.env.NODE_ENV === 'test'` to set destination values synchronously during test runs.
 - **Scroll-to-Top Floating Button Standard**:
   - Floating utility controls (like `#scroll-to-top`) must NEVER hardcode dark-mode utility classes (e.g. `text-indigo-300`, `group-hover:text-white`).
   - Icons inside `#scroll-to-top` must inherit `currentColor` (`stroke: currentColor`), tied to `var(--text-primary)` (default) and `var(--accent)` (hover).

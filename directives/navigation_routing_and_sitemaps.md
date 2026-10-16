@@ -57,7 +57,14 @@ In an MPA served at deep hierarchical paths (such as `/tales/tale-007`), bare re
 
 TaleTranscend maintains dual sitemaps:
 
-- **Machine-Readable XML Sitemap** (`public/sitemap.xml`): Contains indexed static entry points and dynamic tales with canonical `<loc>`, `<lastmod>`, `<changefreq>`, and `<priority>`.
+- **Machine-Readable XML Sitemap** (`public/sitemap.xml`): Generated via `scripts/generate-sitemap.js`. Contains indexed static entry points and dynamic tale pages with both pretty routes (`/tales/{id}`) and canonical HTML fallback routes (`/tale.html?id={id}`, `/reader.html?id={id}&chapter={idx}`) with canonical `<loc>`, `<lastmod>`, `<changefreq>`, and `<priority>`.
+- **Primary Navigation Links & Notification Bell**:
+  - `src/ui/components/nav/nav.config.js` configures primary links (`Home`, `Library`, `Vault`, `Write`).
+  - Bell trigger button (`#nav-btn-notifications`) mounts in the navigation bar alongside search.
+  - Interactive popover (`#nav-notifications-popover`) integrates real-time snapshot listener `subscribeUnreadNotifications` from `notification.service.js`, updating unread badge count and listing recent missives with a "Mark all read" action.
+- **Search Empty State & Instant Suggestions**:
+  - `renderEmptySearchState(query, container)` in `src/ui/components/feedback.js` displays a dedicated technical state when zero results match, providing the active query term, suggested search tags, and a "Clear filters" reset action.
+  - Home hero search bar includes an instant suggestions dropdown (`#hero-search-suggestions`) that reveals matching chronicles as the user types without requiring navigation.
 - **Human-Readable Living Codex** (`src/views/toc.html` & `src/pages/toc/`): A rich interactive Table of Contents categorizing chronicles by pantheon (Greek, Norse, Egyptian, Urban Myths, etc.), chapter count, resonance score, and reading duration.
 
 ### 5. Fixed Overlays & Stacking Context / Containing Block Trap

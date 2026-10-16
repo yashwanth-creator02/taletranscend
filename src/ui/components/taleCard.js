@@ -5,7 +5,7 @@
 import { getTotalReadTime, getBookmarks, getTaleProgressData } from '@services/index.js';
 import { getOverallProgress, formatMs, escapeHtml as escapeHtml, createLogger } from '@/utils';
 import { DEFAULT_COVER_URL } from '@config/app.config.js';
-import { renderEmptyState, renderErrorState } from './feedback.js';
+import { renderEmptyState, renderErrorState, renderEmptySearchState } from './feedback.js';
 
 const log = createLogger('TaleCard');
 import '@css/pages/tale-cards.css';
@@ -196,6 +196,27 @@ export async function renderCardsGrid(userId, tales, { showSkeleton = false } = 
   const safeTales = Array.isArray(tales) ? tales : [];
 
   if (!safeTales.length) {
+    const searchInput = document.getElementById('search-input');
+    const query = searchInput?.value?.trim() || '';
+    if (query) {
+      renderEmptySearchState(container, {
+        query,
+        onClear: () => {
+          if (searchInput) {
+            searchInput.value = '';
+            searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        },
+        onSelectSuggestion: (topic) => {
+          if (searchInput) {
+            searchInput.value = topic;
+            searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        },
+      });
+      return;
+    }
+
     renderEmptyState(container, {
       message: 'No tales found in the archives.',
       subMessage: 'Try a different filter or come back later.',
@@ -235,7 +256,20 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
     chapterCount = 0,
   } = tale || {};
 
-  const safeTitle = escapeHtml(title);
+  const cleanTitle = (function () {
+    if (!title || typeof title !== 'string') return 'Untitled Echo';
+    const trimmed = title.trim();
+    if (
+      !trimmed ||
+      trimmed === id ||
+      trimmed === 'Untitled Tale' ||
+      /^[a-zA-Z0-9_-]{20,}$/.test(trimmed)
+    ) {
+      return 'Untitled Echo';
+    }
+    return trimmed;
+  })();
+  const safeTitle = escapeHtml(cleanTitle);
   const safeDescription = escapeHtml(description);
   const trimmedEra = typeof era === 'string' ? era.trim() : '';
   const safeEra = trimmedEra ? escapeHtml(trimmedEra) : '';
@@ -333,7 +367,10 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
           />
           <div class="card-image-scrim"></div>
 
-          <!-- Bottom of Cover: Progress Bar & Percentage -->
+          <!-- Bottom of Cover: Progress Bar & Percentage (Only shown once reading has started) -->
+          ${
+            progress > 0
+              ? `
           <div class="absolute inset-x-0 bottom-0 p-2 sm:p-2.5 z-10">
             <div class="card-progress-meta">
               <span class="card-progress-label">Progress</span>
@@ -343,6 +380,9 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
               <div class="progress-fill" style="width: ${progress}%"></div>
             </div>
           </div>
+          `
+              : ''
+          }
         </div>
 
         <!-- Middle: Fragment Tag, Title, and Description -->

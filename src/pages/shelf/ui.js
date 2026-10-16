@@ -4,7 +4,7 @@
 
 import { shelfState } from './state.js';
 import { initIcons } from '@ui/components/icons.js';
-import { setText, formatNumber, timeAgo, escapeHtml as escapeHtml } from '@/utils';
+import { formatNumber, timeAgo, escapeHtml as escapeHtml } from '@/utils';
 
 /* ─────────────────────────────────────────────
    Helpers
@@ -397,13 +397,41 @@ export function buildDraftCard(draft) {
    Hero Stats
    ───────────────────────────────────────────── */
 
+function _animateStatCount(id, target, isFormatted = false) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const num = Number(target) || 0;
+  const isTest =
+    (typeof import.meta !== 'undefined' && import.meta.env?.MODE === 'test') ||
+    (typeof process !== 'undefined' && process.env?.NODE_ENV === 'test');
+  if (num === 0 || typeof requestAnimationFrame === 'undefined' || isTest) {
+    el.textContent = isFormatted ? formatNumber(num) : String(num);
+    return;
+  }
+  const duration = 500;
+  const start = performance.now();
+  function tick(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    const val = Math.round(num * ease);
+    el.textContent = isFormatted ? formatNumber(val) : String(val);
+    if (progress < 1) {
+      requestAnimationFrame(tick);
+    } else {
+      el.textContent = isFormatted ? formatNumber(num) : String(num);
+    }
+  }
+  requestAnimationFrame(tick);
+}
+
 /**
  * @param {{ draftCount: number, bookmarkCount: number, wordsPreserved: number }} stats
  */
 export function renderHeroStats({ draftCount, bookmarkCount, wordsPreserved }) {
-  setText('hero-stat-drafts', String(draftCount));
-  setText('hero-stat-bookmarks', String(bookmarkCount));
-  setText('hero-stat-words', formatNumber(wordsPreserved));
+  _animateStatCount('hero-stat-drafts', draftCount);
+  _animateStatCount('hero-stat-bookmarks', bookmarkCount);
+  _animateStatCount('hero-stat-words', wordsPreserved, true);
 }
 
 /* ─────────────────────────────────────────────
