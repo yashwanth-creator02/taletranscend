@@ -322,14 +322,43 @@
 
 /* ── Light Mode Polish ───────────────────────────────────────────── */
 
+[data-app-theme='light'] .sidebar-inner {
+  background: var(--grey-850);
+  border-right: 1px solid var(--border);
+  box-shadow: 2px 0 12px rgb(var(--dark-rgb) / 0.04);
+}
+
+[data-app-theme='light'] #toggle-sidebar {
+  color: var(--text-secondary);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+[data-app-theme='light'] #toggle-sidebar:hover {
+  color: var(--text-primary);
+  background: var(--surface-3);
+  border-color: var(--border-strong);
+}
+
+[data-app-theme='light'] .sidebar-inner .border-b {
+  border-bottom-color: var(--border) !important;
+}
+
+[data-app-theme='light'] .sidebar-label.text-ink {
+  color: var(--text-primary) !important;
+}
+
 [data-app-theme='light'] .sidebar-section-heading {
   color: var(--text-secondary);
   letter-spacing: var(--tracking-widest);
   font-size: var(--text-xs);
+  font-weight: 800;
 }
 
 [data-app-theme='light'] .sidebar-filter {
-  color: var(--text-secondary);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 700;
 }
 
 [data-app-theme='light'] .sidebar-filter svg {
@@ -337,11 +366,24 @@
 }
 
 [data-app-theme='light'] .sidebar-filter:hover {
-  background: var(--surface-4);
+  background: var(--surface-2);
   color: var(--text-primary);
+  border-color: var(--border);
 }
 
 [data-app-theme='light'] .sidebar-filter:hover svg {
+  color: var(--accent);
+}
+
+[data-app-theme='light'] .sidebar-filter--active {
+  color: var(--accent);
+  background: var(--bg-elevated);
+  border-color: var(--accent);
+  font-weight: 800;
+  box-shadow: var(--shadow-sm);
+}
+
+[data-app-theme='light'] .sidebar-filter--active svg {
   color: var(--accent);
 }
 
@@ -349,16 +391,6 @@
   background: var(--bg-elevated);
   border-color: var(--border);
   box-shadow: var(--shadow-sm);
-}
-
-[data-app-theme='light'] .sidebar-filter--active {
-  color: var(--accent);
-  background: var(--accent-subtle);
-  border-color: var(--border-accent);
-}
-
-[data-app-theme='light'] .sidebar-filter--active svg {
-  color: var(--accent);
 }
 
 [data-app-theme='light'] .era-chip--inactive {
