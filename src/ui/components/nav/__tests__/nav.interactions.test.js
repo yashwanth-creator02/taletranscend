@@ -172,6 +172,16 @@ describe('Nav Interactions', () => {
       expect(openCommandPalette).toHaveBeenCalled();
     });
 
+    it('does not open command palette on tapping /', () => {
+      const event = new KeyboardEvent('keydown', {
+        key: '/',
+        bubbles: true,
+      });
+      document.dispatchEvent(event);
+
+      expect(openCommandPalette).not.toHaveBeenCalled();
+    });
+
     it('clears command input on first Escape if value exists', () => {
       navState.commandPaletteOpen = true;
       const input = document.getElementById('nav-command-input');

@@ -315,33 +315,6 @@ function handleDocumentKeydown(event) {
       }
     }
   }
-
-  // ── Quick search shortcut: "/" ─────────────────
-  if (
-    event.key === '/' &&
-    !event.ctrlKey &&
-    !event.metaKey &&
-    !event.altKey &&
-    !(
-      event.target instanceof HTMLInputElement ||
-      event.target instanceof HTMLTextAreaElement ||
-      (event.target instanceof HTMLElement && event.target.isContentEditable)
-    )
-  ) {
-    event.preventDefault();
-    const pageSearch =
-      document.getElementById('library-search-input') ||
-      document.getElementById('shelf-filter-input') ||
-      document.getElementById('toc-search');
-
-    if (pageSearch instanceof HTMLInputElement) {
-      pageSearch.focus();
-      pageSearch.select();
-    } else {
-      openCommandPalette(true);
-    }
-    return;
-  }
 }
 
 /**
