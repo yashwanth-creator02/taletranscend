@@ -482,7 +482,6 @@ export function buildNav() {
         </div>
 
         <div class="nav-progress"></div>
-        ${buildCommandPalette()}
       </header>
     `,
     dockHtml: `
@@ -490,5 +489,6 @@ export function buildNav() {
         ${buildMobileDock(current, null)}
       </div>
     `,
+    paletteHtml: buildCommandPalette(),
   };
 }

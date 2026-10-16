@@ -7,11 +7,17 @@ import { taleUrl } from '@/utils';
 
 // Centerpiece SVG vector assets with transparent backgrounds
 import bookAsset from '@/assets/images/reliquary/book.svg';
+import bookLightAsset from '@/assets/images/reliquary/book-light.svg';
 import lampAsset from '@/assets/images/reliquary/lamp.svg';
+import lampLightAsset from '@/assets/images/reliquary/lamp-light.svg';
 import watchAsset from '@/assets/images/reliquary/watch.svg';
+import watchLightAsset from '@/assets/images/reliquary/watch-light.svg';
 import mapAsset from '@/assets/images/reliquary/map.svg?v=2';
+import mapLightAsset from '@/assets/images/reliquary/map-light.svg?v=2';
 import quillAsset from '@/assets/images/reliquary/quill.svg';
+import quillLightAsset from '@/assets/images/reliquary/quill-light.svg';
 import spectaclesAsset from '@/assets/images/reliquary/spectacles.svg';
+import spectaclesLightAsset from '@/assets/images/reliquary/spectacles-light.svg';
 
 /**
  * @typedef {Object} ReliquaryArtifact
@@ -22,7 +28,8 @@ import spectaclesAsset from '@/assets/images/reliquary/spectacles.svg';
  * @property {string} taleTitle Title of the chronicle it embodies
  * @property {string} era Cultural or mythological origin
  * @property {string} lore Archival snippet / description
- * @property {string} [asset] Image/SVG source URL
+ * @property {string} [asset] Image/SVG source URL for dark mode
+ * @property {string} [assetLight] Image/SVG source URL for illuminated light mode
  * @property {string} readUrl Navigation link
  * @property {{ left: string, top: string, width: string }} position Responsive coordinates
  * @property {number} zIndex Layer stacking order
@@ -45,6 +52,7 @@ export const DEFAULT_ARTIFACTS = [
     era: 'Mesopotamian • Tablet XI',
     lore: 'Ancient cuneiform grimoire containing the decrees of the gods and cosmic fate.',
     asset: bookAsset,
+    assetLight: bookLightAsset,
     readUrl: 'library.html?search=gilgamesh',
     position: { left: '18%', top: '34%', width: '56%' },
     zIndex: 4,
@@ -60,6 +68,7 @@ export const DEFAULT_ARTIFACTS = [
     era: 'Ptolemaic Egypt • 280 BCE',
     lore: 'Ornate brass lamp whose incandescent amber flame illuminates invisible archival palimpsests.',
     asset: lampAsset,
+    assetLight: lampLightAsset,
     readUrl: 'library.html?search=alexandria',
     position: { left: '2%', top: '2%', width: '34%' },
     zIndex: 6,
@@ -75,6 +84,7 @@ export const DEFAULT_ARTIFACTS = [
     era: 'Persian Astronomy • 1050 CE',
     lore: 'Open brass chronometer with exposed gearwork and a hanging fob chain tracking mythological eclipses.',
     asset: watchAsset,
+    assetLight: watchLightAsset,
     readUrl: 'library.html?search=astronomy',
     position: { left: '60%', top: '42%', width: '36%' },
     zIndex: 7,
@@ -90,6 +100,7 @@ export const DEFAULT_ARTIFACTS = [
     era: 'Oceanic Oral Tradition',
     lore: 'Curled vellum map with rhumb lines and compass rose tracing forgotten archipelagos.',
     asset: mapAsset,
+    assetLight: mapLightAsset,
     readUrl: 'library.html?search=isles',
     position: { left: '52%', top: '6%', width: '42%' },
     zIndex: 2,
@@ -105,6 +116,7 @@ export const DEFAULT_ARTIFACTS = [
     era: 'Egyptian Dynastic Era',
     lore: 'Golden quill dipped in runic lapis ink used by chroniclers of eternity.',
     asset: quillAsset,
+    assetLight: quillLightAsset,
     readUrl: 'contribution.html',
     position: { left: '36%', top: '2%', width: '18%' },
     zIndex: 3,
@@ -120,6 +132,7 @@ export const DEFAULT_ARTIFACTS = [
     era: 'Medieval Manuscript Era',
     lore: 'Wire-frame reading glasses worn by monks illuminating sacred folios.',
     asset: spectaclesAsset,
+    assetLight: spectaclesAsset,
     readUrl: 'library.html',
     position: { left: '6%', top: '70%', width: '24%' },
     zIndex: 8,
@@ -127,6 +140,18 @@ export const DEFAULT_ARTIFACTS = [
     pillPlacement: 'bottom',
   },
 ];
+
+/**
+ * Resolves the appropriate artifact asset URL based on whether light mode is active.
+ *
+ * @param {ReliquaryArtifact} artifact
+ * @param {boolean} [isLight=false]
+ * @returns {string}
+ */
+export function getArtifactAsset(artifact, isLight = false) {
+  if (!artifact) return '';
+  return isLight && artifact.assetLight ? artifact.assetLight : artifact.asset || '';
+}
 
 /**
  * Derives or generates a reliquary artifact entry for a tale.
@@ -150,6 +175,7 @@ export function generateArtifactForTale(tale, index = 0) {
       era: tale.era || 'Archival Era',
       lore: tale.artifact.lore || tale.description || 'A preserved fragment from the oral archive.',
       asset: tale.artifact.asset || bookAsset,
+      assetLight: tale.artifact.assetLight || bookLightAsset,
       readUrl: taleUrl(tale.id),
       position:
         tale.artifact.position || DEFAULT_ARTIFACTS[index % DEFAULT_ARTIFACTS.length].position,
@@ -160,12 +186,37 @@ export function generateArtifactForTale(tale, index = 0) {
 
   // Type selection heuristic based on tale themes/era
   const typeCatalog = [
-    { type: 'map', asset: mapAsset, animation: 'reliquary-item--map' },
-    { type: 'book', asset: bookAsset, animation: 'reliquary-item--book' },
-    { type: 'watch', asset: watchAsset, animation: 'reliquary-item--watch' },
-    { type: 'lamp', asset: lampAsset, animation: 'reliquary-item--lamp' },
-    { type: 'quill', asset: quillAsset, animation: 'reliquary-item--quill' },
-    { type: 'spectacles', asset: spectaclesAsset, animation: 'reliquary-item--spectacles' },
+    { type: 'map', asset: mapAsset, assetLight: mapLightAsset, animation: 'reliquary-item--map' },
+    {
+      type: 'book',
+      asset: bookAsset,
+      assetLight: bookLightAsset,
+      animation: 'reliquary-item--book',
+    },
+    {
+      type: 'watch',
+      asset: watchAsset,
+      assetLight: watchLightAsset,
+      animation: 'reliquary-item--watch',
+    },
+    {
+      type: 'lamp',
+      asset: lampAsset,
+      assetLight: lampLightAsset,
+      animation: 'reliquary-item--lamp',
+    },
+    {
+      type: 'quill',
+      asset: quillAsset,
+      assetLight: quillLightAsset,
+      animation: 'reliquary-item--quill',
+    },
+    {
+      type: 'spectacles',
+      asset: spectaclesAsset,
+      assetLight: spectaclesLightAsset,
+      animation: 'reliquary-item--spectacles',
+    },
   ];
 
   const matched = typeCatalog[index % typeCatalog.length];
@@ -182,6 +233,7 @@ export function generateArtifactForTale(tale, index = 0) {
       ? `${tale.description.slice(0, 110)}...`
       : 'A newly discovered fragment preserved in the archive.',
     asset: matched.asset,
+    assetLight: matched.assetLight,
     readUrl: taleUrl(tale.id),
     position: templatePosition,
     zIndex: 5,

@@ -175,6 +175,47 @@ html[data-app-theme='transcendental'],
   --mythic-violet-bg: rgb(192 132 252 / 0.12);
   --mythic-violet-border: rgb(192 132 252 / 0.3);
 
+  /* Toast Notification Primitives (Default / Transcendental Theme) */
+  --toast-bg: rgb(13 13 20 / 0.88);
+  --toast-border: rgb(var(--light-rgb) / 0.12);
+  --toast-shadow: 0 16px 36px -4px rgb(0 0 0 / 0.7), 0 0 0 1px rgb(255 255 255 / 0.05);
+
+  --toast-success-fg: rgb(var(--success-rgb));
+  --toast-success-bg: rgb(var(--success-rgb) / 0.12);
+  --toast-success-border: rgb(var(--success-rgb) / 0.3);
+
+  --toast-error-fg: rgb(var(--danger-rgb));
+  --toast-error-bg: rgb(var(--danger-rgb) / 0.12);
+  --toast-error-border: rgb(var(--danger-rgb) / 0.3);
+
+  --toast-warning-fg: rgb(var(--warning-rgb));
+  --toast-warning-bg: rgb(var(--warning-rgb) / 0.12);
+  --toast-warning-border: rgb(var(--warning-rgb) / 0.3);
+
+  --toast-info-fg: rgb(var(--info-rgb));
+  --toast-info-bg: rgb(var(--info-rgb) / 0.12);
+  --toast-info-border: rgb(var(--info-rgb) / 0.3);
+
+  /* Book Cover Presentation Tokens (Default / Transcendental Theme) */
+  --book-spine-gradient: linear-gradient(
+    90deg,
+    rgb(var(--dark-rgb) / var(--a-11)) 0%,
+    rgb(var(--dark-rgb) / var(--a-09)) 35%,
+    rgb(var(--light-rgb) / var(--a-03)) 65%,
+    transparent 100%
+  );
+  --book-cover-scrim: linear-gradient(
+    to top,
+    rgb(var(--dark-rgb) / 0.85) 0%,
+    rgb(var(--dark-rgb) / 0.35) 40%,
+    transparent 75%
+  );
+  --book-cover-meta-text: rgb(255 255 255 / 0.7);
+  --book-cover-meta-val: #a5b4fc;
+  --book-cover-progress-track: rgb(255 255 255 / 0.15);
+  --book-cover-shadow:
+    0 10px 25px rgb(var(--dark-rgb) / 0.4), inset 0 0 0 1px rgb(var(--light-rgb) / var(--a-02));
+
   color-scheme: dark;
 }
 
@@ -302,6 +343,47 @@ html[data-app-theme='dark'],
   --mythic-violet-bg: rgb(192 132 252 / 0.12);
   --mythic-violet-border: rgb(192 132 252 / 0.3);
 
+  /* Toast Notification Primitives (Dark Theme) */
+  --toast-bg: rgb(18 21 31 / 0.88);
+  --toast-border: rgb(var(--light-rgb) / 0.12);
+  --toast-shadow: 0 16px 36px -4px rgb(0 0 0 / 0.7), 0 0 0 1px rgb(255 255 255 / 0.05);
+
+  --toast-success-fg: var(--mythic-sage);
+  --toast-success-bg: var(--mythic-sage-bg);
+  --toast-success-border: var(--mythic-sage-border);
+
+  --toast-error-fg: #f87171;
+  --toast-error-bg: rgb(248 113 113 / 0.12);
+  --toast-error-border: rgb(248 113 113 / 0.3);
+
+  --toast-warning-fg: var(--mythic-gold);
+  --toast-warning-bg: var(--mythic-gold-bg);
+  --toast-warning-border: var(--mythic-gold-border);
+
+  --toast-info-fg: var(--mythic-lapis);
+  --toast-info-bg: var(--mythic-lapis-bg);
+  --toast-info-border: var(--mythic-lapis-border);
+
+  /* Book Cover Presentation Tokens (Dark Theme) */
+  --book-spine-gradient: linear-gradient(
+    90deg,
+    rgb(var(--dark-rgb) / var(--a-11)) 0%,
+    rgb(var(--dark-rgb) / var(--a-09)) 35%,
+    rgb(var(--light-rgb) / var(--a-03)) 65%,
+    transparent 100%
+  );
+  --book-cover-scrim: linear-gradient(
+    to top,
+    rgb(var(--dark-rgb) / 0.85) 0%,
+    rgb(var(--dark-rgb) / 0.35) 40%,
+    transparent 75%
+  );
+  --book-cover-meta-text: rgb(255 255 255 / 0.7);
+  --book-cover-meta-val: #a5b4fc;
+  --book-cover-progress-track: rgb(255 255 255 / 0.15);
+  --book-cover-shadow:
+    0 10px 25px rgb(var(--dark-rgb) / 0.45), inset 0 0 0 1px rgb(var(--light-rgb) / var(--a-02));
+
   color-scheme: dark;
 }
 
@@ -339,7 +421,7 @@ html[data-app-theme='light'],
   --surface-1: rgb(251 249 245 / 0.88);
   --surface-2: rgb(251 249 245 / 0.96);
   --surface-3: #fbf9f5;
-  --surface-4: rgb(79 70 229 / 0.06);
+  --surface-4: rgb(79 70 229 / 0.09);
   --surface-scrim: rgb(15 23 42 / 0.35);
   --surface-veil: rgb(246 243 237 / 0.95);
 
@@ -352,9 +434,9 @@ html[data-app-theme='light'],
   --text-disabled: #94a3b8;
   --text-on-accent: #ffffff;
 
-  --border-subtle: rgb(26 31 44 / 0.07);
-  --border: rgb(26 31 44 / 0.12);
-  --border-strong: rgb(26 31 44 / 0.2);
+  --border-subtle: rgb(26 31 44 / 0.1);
+  --border: rgb(26 31 44 / 0.16);
+  --border-strong: rgb(26 31 44 / 0.26);
   --border-accent: rgb(79 70 229 / 0.25);
 
   --accent: rgb(var(--accent-rgb));
@@ -381,7 +463,7 @@ html[data-app-theme='light'],
   );
 
   /* Section pacing & atmospheric grounds */
-  --section-alt-bg: rgb(238 232 220 / 0.45);
+  --section-alt-bg: rgb(232 226 214 / 0.6);
   --footer-bg: #eae3d4;
   --card-elevated-bg: var(--grey-900);
 
@@ -410,18 +492,60 @@ html[data-app-theme='light'],
   --mythic-violet-bg: rgb(107 33 168 / 0.08);
   --mythic-violet-border: rgb(107 33 168 / 0.22);
 
-  --shadow-sm: 0 2px 8px rgb(0 0 0 / 0.06);
-  --shadow-md: 0 8px 24px rgb(0 0 0 / 0.08);
-  --shadow-lg: 0 16px 40px rgb(0 0 0 / 0.12);
-  --shadow-xl: 0 24px 60px rgb(0 0 0 / 0.16);
+  --shadow-sm: 0 1px 3px rgb(0 0 0 / 0.08), 0 2px 8px rgb(0 0 0 / 0.06);
+  --shadow-md: 0 4px 12px rgb(0 0 0 / 0.1), 0 8px 24px rgb(0 0 0 / 0.07);
+  --shadow-lg: 0 8px 24px rgb(0 0 0 / 0.1), 0 16px 48px rgb(0 0 0 / 0.14);
+  --shadow-xl: 0 16px 40px rgb(0 0 0 / 0.12), 0 32px 64px rgb(0 0 0 / 0.18);
   --shadow-inset-hairline: inset 0 1px 0 rgb(255 255 255 / 0.9);
 
   --shadow-glow: 0 0 20px rgb(79 70 229 / 0.1);
   --shadow-glow-lg: 0 18px 40px rgb(79 70 229 / 0.15);
 
-  --nav-bg: rgb(246 243 237 / 0.88);
-  --nav-bg-scrolled: rgb(246 243 237 / 0.98);
-  --nav-border: rgb(26 31 44 / 0.08);
+  --nav-bg: rgb(248 246 241 / 0.92);
+  --nav-bg-scrolled: rgb(248 246 241 / 0.98);
+  --nav-border: rgb(26 31 44 / 0.12);
+
+  /* Toast Notification Primitives (Illuminated Light Theme) */
+  --toast-bg: rgb(251 249 245 / 0.96);
+  --toast-border: rgb(26 31 44 / 0.16);
+  --toast-shadow:
+    0 14px 32px -4px rgb(0 0 0 / 0.14), 0 2px 8px rgb(180 83 9 / 0.08),
+    0 0 0 1px rgb(26 31 44 / 0.1);
+
+  --toast-success-fg: #15803d;
+  --toast-success-bg: rgb(22 101 52 / 0.1);
+  --toast-success-border: rgb(22 101 52 / 0.3);
+
+  --toast-error-fg: #b91c1c;
+  --toast-error-bg: rgb(185 28 28 / 0.1);
+  --toast-error-border: rgb(185 28 28 / 0.3);
+
+  --toast-warning-fg: #b45309;
+  --toast-warning-bg: rgb(180 83 9 / 0.1);
+  --toast-warning-border: rgb(180 83 9 / 0.3);
+
+  --toast-info-fg: #3730a3;
+  --toast-info-bg: rgb(55 48 163 / 0.1);
+  --toast-info-border: rgb(55 48 163 / 0.3);
+
+  /* Book Cover Presentation Tokens (Illuminated Light Theme) */
+  --book-spine-gradient: linear-gradient(
+    90deg,
+    rgb(0 0 0 / 0.14) 0%,
+    rgb(0 0 0 / 0.05) 35%,
+    rgb(255 255 255 / 0.45) 70%,
+    transparent 100%
+  );
+  --book-cover-scrim: linear-gradient(
+    to top,
+    rgb(15 23 42 / 0.62) 0%,
+    rgb(15 23 42 / 0.22) 35%,
+    transparent 70%
+  );
+  --book-cover-meta-text: rgb(255 255 255 / 0.92);
+  --book-cover-meta-val: #ffffff;
+  --book-cover-progress-track: rgb(255 255 255 / 0.28);
+  --book-cover-shadow: 0 6px 18px rgb(0 0 0 / 0.12), inset 0 0 0 1px rgb(26 31 44 / 0.08);
 
   color-scheme: light;
 }
@@ -440,6 +564,14 @@ html[data-app-theme='light'],
   --a-09: 0.4;
   --a-10: 0.6;
   --a-11: 0.8;
+
+  /* Semantic percentage opacity aliases */
+  --a-15: 0.15;
+  --a-20: 0.2;
+  --a-25: 0.25;
+  --a-30: 0.3;
+  --a-40: 0.4;
+  --a-50: 0.5;
 
   --success: rgb(var(--success-rgb));
   --warning: rgb(var(--warning-rgb));

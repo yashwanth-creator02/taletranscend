@@ -299,9 +299,19 @@ select:focus-visible {
   padding-bottom: var(--space-6);
 }
 
+.dock-clearance:has(> footer),
+.dock-clearance:has(footer:last-child) {
+  padding-bottom: 0;
+}
+
 @media (max-width: 63.99rem) {
   .dock-clearance {
     padding-bottom: calc(var(--space-8) + 5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .dock-clearance:has(> footer),
+  .dock-clearance:has(footer:last-child) {
+    padding-bottom: 0;
   }
 }
 

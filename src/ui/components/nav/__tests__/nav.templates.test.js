@@ -84,5 +84,12 @@ describe('Nav Templates', () => {
       expect(settingsIndex).toBeGreaterThan(searchIndex);
       expect(userIndex).toBeGreaterThan(settingsIndex);
     });
+
+    it('returns headerHtml, dockHtml, and paletteHtml with command palette unnested from header', () => {
+      const { headerHtml, dockHtml, paletteHtml } = buildNav();
+      expect(headerHtml).not.toContain('id="nav-command-palette"');
+      expect(paletteHtml).toContain('id="nav-command-palette"');
+      expect(dockHtml).toContain('id="mobile-dock-container"');
+    });
   });
 });

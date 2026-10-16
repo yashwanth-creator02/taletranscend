@@ -22,6 +22,7 @@ import { getTales } from '@services/index.js';
 import { cacheService } from '@services/cache.service.js';
 import { DEFAULT_COVER_URL } from '@config/app.config.js';
 import { initReliquary } from './reliquary.js';
+import { initFooterTheme } from '@ui/components/footerTheme.js';
 
 const log = createLogger('Home');
 
@@ -38,6 +39,7 @@ function init() {
   log.info('Home page initialized');
   initIcons();
   initReliquary('archive-reliquary-container');
+  initFooterTheme('#footer-theme-control');
   _initInteractions();
   _loadTrendingTales();
 }

@@ -202,11 +202,19 @@
           <div
             class="login-visual__art relative z-10 w-full max-w-lg flex items-center justify-center"
           >
-            <img
-              src="/images/auth/boy-reading.svg"
-              alt="A young scholar boy reading an open illuminated book under a warm brass lamp"
-              class="login-visual__img w-full max-w-[440px] h-auto object-contain select-none pointer-events-none drop-shadow-2xl"
-            />
+            <picture class="w-full flex justify-center">
+              <source
+                id="login-visual-source"
+                srcset="/images/auth/boy-reading-light.svg"
+                media="(prefers-color-scheme: light)"
+              />
+              <img
+                id="login-visual-img"
+                src="/images/auth/boy-reading.svg"
+                alt="A young scholar boy reading an open illuminated book under a warm brass lamp"
+                class="login-visual__img w-full max-w-[440px] h-auto object-contain select-none pointer-events-none drop-shadow-2xl"
+              />
+            </picture>
           </div>
 
           <div class="login-visual__caption relative z-10 text-center mt-5">

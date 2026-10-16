@@ -60,6 +60,16 @@ TaleTranscend maintains dual sitemaps:
 - **Machine-Readable XML Sitemap** (`public/sitemap.xml`): Contains indexed static entry points and dynamic tales with canonical `<loc>`, `<lastmod>`, `<changefreq>`, and `<priority>`.
 - **Human-Readable Living Codex** (`src/views/toc.html` & `src/pages/toc/`): A rich interactive Table of Contents categorizing chronicles by pantheon (Greek, Norse, Egyptian, Urban Myths, etc.), chapter count, resonance score, and reading duration.
 
+### 5. Fixed Overlays & Stacking Context / Containing Block Trap
+
+Fixed-position modal overlays (such as the Quick Navigation Command Palette `.command-overlay`) require `position: fixed; inset: 0;` to shade and blur the full viewport (`100vw` × `100vh`).
+
+- **CSS Containing Block Trap**: Per CSS specifications, applying `backdrop-filter: blur(...)`, `transform`, `filter`, or `perspective` to an ancestor container (such as `<header id="app-nav" class="app-nav">`) causes that ancestor to act as the containing block for all `position: fixed` descendants.
+- **Trap Consequence**: If `#nav-command-palette` is nested inside `<header id="app-nav">`, `.command-overlay` (`inset: 0`) is trapped within the header's bounds (~64px height), leaving the entire remainder of the viewport (sidebars, repository grids, content) unshaded and unblurred.
+- **Rule**: All viewport-spanning modal overlays, palettes, and backdrop scrims (`#nav-command-palette`, `#mobile-dock-container`, dialogs) MUST be mounted directly to `document.body` (`insertAdjacentHTML('beforeend', ...)`).
+- **Template Separation**: `buildNav()` in `src/ui/components/nav/nav.templates.js` must return distinct HTML fragments: `{ headerHtml, dockHtml, paletteHtml }`.
+- **Teardown**: `destroyNav()` in `src/ui/components/nav/nav.js` must cleanly remove all mounted body nodes: `document.getElementById('nav-command-palette')?.remove()`.
+
 ## Tools / Scripts to Use
 
 - Run the navigation and routing test suite:

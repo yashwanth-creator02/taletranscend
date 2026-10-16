@@ -3,6 +3,7 @@
 // genre multi-select, avatar preview, toast notifications.
 
 import { profileState, GENRE_OPTIONS } from './state.js';
+import { ACHIEVEMENT_REGISTRY } from '@state/schemas/achievement.schema.js';
 import { suggestNameFromBio } from './ai-name.js';
 import { debounce } from '@/utils';
 import { initIcons } from '@ui/components/icons.js';
@@ -448,6 +449,9 @@ export function updateProfileUI(data) {
 
   // Scribe / Author Registry Card
   _renderAuthorRegistry(data);
+
+  // Render Feats & Achievements
+  renderAchievements(data);
 }
 
 function _renderAuthorRegistry(data) {
@@ -630,9 +634,9 @@ function _buildContinueReadingCard(tale) {
   return `
     <a
       href="${readerUrl(tale.id, tale.lastChapterIndex)}"
-      class="continue-card group snap-start shrink-0 w-60 sm:w-64 bg-white/2 border border-white/5 rounded-2xl overflow-hidden hover:bg-white/4 hover:border-white/10 transition-all duration-300"
+      class="continue-card group snap-start shrink-0 w-60 sm:w-64 bg-white/2 border border-white/5 rounded-2xl overflow-hidden hover:bg-white/4 hover:border-white/10 transition-all duration-300 flex flex-col justify-between"
     >
-      <div class="relative h-28 w-full bg-zinc-950 overflow-hidden">
+      <div class="relative h-32 w-full bg-zinc-950 overflow-hidden shrink-0">
         <img
           src="${cover}"
           alt="${safeTitle}"
@@ -647,15 +651,17 @@ function _buildContinueReadingCard(tale) {
         </div>
       </div>
 
-      <div class="p-3 sm:p-3.5 space-y-2">
-        <h3 class="font-cinzel text-sm sm:text-base font-bold text-[var(--text-primary)] group-hover:text-indigo-400 transition-colors truncate">
-          ${safeTitle}
-        </h3>
-        <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed font-medium">
-          ${safeDescription}
-        </p>
+      <div class="p-3.5 flex flex-col flex-1 justify-between gap-2.5">
+        <div class="space-y-1">
+          <h3 class="font-cinzel text-sm sm:text-base font-bold text-[var(--text-primary)] group-hover:text-indigo-400 transition-colors truncate h-6 leading-6">
+            ${safeTitle}
+          </h3>
+          <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed font-medium h-9 overflow-hidden">
+            ${safeDescription}
+          </p>
+        </div>
 
-        <div class="pt-1.5 space-y-1.5 border-t border-white/5">
+        <div class="pt-2 space-y-1.5 border-t border-white/5 mt-auto">
           <div class="flex items-center justify-between text-[9px] font-black text-slate-500 uppercase tracking-[0.15em]">
             <span>Progress</span>
             <span class="text-indigo-400">${tale.percent}%</span>
@@ -670,6 +676,148 @@ function _buildContinueReadingCard(tale) {
       </div>
     </a>
   `;
+}
+
+/* ─────────────────────────────────────────────
+   Achievements Section
+   ───────────────────────────────────────────── */
+
+/**
+ * Renders user achievements into #achievements-grid and updates the unlocked count shield.
+ *
+ * @param {Object} [context={}]
+ */
+export function renderAchievements(context = {}) {
+  const grid = document.getElementById('achievements-grid');
+  const countEl = document.getElementById('achievements-unlocked-count');
+  if (!grid) return;
+
+  const words = context.totalWordsWritten ?? profileState.totalWordsWritten ?? 0;
+  const readers = context.totalReaders ?? profileState.totalReaders ?? 0;
+  const publishedCount =
+    context.publishedTalesCount ?? (context.publishedTales ? context.publishedTales.length : 0);
+  const continueCount =
+    context.continueReadingCount ?? (context.continueReading ? context.continueReading.length : 0);
+
+  let unlockedCount = 0;
+
+  const cardsHtml = ACHIEVEMENT_REGISTRY.map((def) => {
+    let isUnlocked = false;
+    let progress = 0;
+    let progressLabel = '';
+
+    switch (def.id) {
+      case 'first_tale_read':
+        isUnlocked = continueCount > 0;
+        progress = isUnlocked ? 100 : 0;
+        progressLabel = isUnlocked ? 'Unlocked' : '0/1 Read';
+        break;
+      case 'ten_tales_complete':
+        progress = Math.min(100, Math.round((continueCount / 10) * 100));
+        isUnlocked = continueCount >= 10;
+        progressLabel = `${Math.min(continueCount, 10)}/10 Tales`;
+        break;
+      case 'fifty_tales_complete':
+        progress = Math.min(100, Math.round((continueCount / 50) * 100));
+        isUnlocked = continueCount >= 50;
+        progressLabel = `${Math.min(continueCount, 50)}/50 Tales`;
+        break;
+      case 'century_reader':
+        progress = Math.min(100, Math.round((continueCount / 100) * 100));
+        isUnlocked = continueCount >= 100;
+        progressLabel = `${Math.min(continueCount, 100)}/100 Tales`;
+        break;
+      case 'night_reader':
+        isUnlocked = false;
+        progress = 0;
+        progressLabel = '0/10 Hours';
+        break;
+      case 'first_tale_published':
+        isUnlocked = publishedCount > 0;
+        progress = isUnlocked ? 100 : 0;
+        progressLabel = isUnlocked ? 'Unlocked' : '0/1 Published';
+        break;
+      case 'ten_tales_published':
+        progress = Math.min(100, Math.round((publishedCount / 10) * 100));
+        isUnlocked = publishedCount >= 10;
+        progressLabel = `${Math.min(publishedCount, 10)}/10 Tales`;
+        break;
+      case 'ten_thousand_words':
+        progress = Math.min(100, Math.round((words / 10000) * 100));
+        isUnlocked = words >= 10000;
+        progressLabel = `${formatNumber(Math.min(words, 10000))}/10,000 Words`;
+        break;
+      case 'hundred_thousand_words':
+        progress = Math.min(100, Math.round((words / 100000) * 100));
+        isUnlocked = words >= 100000;
+        progressLabel = `${formatNumber(Math.min(words, 100000))}/100,000 Words`;
+        break;
+      case 'first_bookmark':
+        isUnlocked = false;
+        progress = 0;
+        progressLabel = '0/1 Saved';
+        break;
+      case 'first_follower':
+        progress = Math.min(100, Math.round((readers / 1) * 100));
+        isUnlocked = readers >= 1;
+        progressLabel = isUnlocked ? 'Unlocked' : '0/1 Follower';
+        break;
+      case 'hundred_readers':
+        progress = Math.min(100, Math.round((readers / 100) * 100));
+        isUnlocked = readers >= 100;
+        progressLabel = `${Math.min(readers, 100)}/100 Readers`;
+        break;
+      default:
+        isUnlocked = false;
+        progress = 0;
+        progressLabel = 'In Progress';
+    }
+
+    if (isUnlocked) unlockedCount++;
+
+    return `
+      <div
+        class="achievement-card ${isUnlocked ? 'achievement-card--unlocked' : 'achievement-card--locked'} p-3.5 sm:p-4 flex flex-col justify-between"
+        data-tier="${def.tier}"
+      >
+        <div class="flex items-start gap-3">
+          <div class="achievement-icon-wrap w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
+            <i data-lucide="${def.icon}" class="w-5 h-5"></i>
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center justify-between gap-1 mb-1">
+              <h4 class="font-cinzel text-xs sm:text-sm font-bold text-[var(--text-primary)] truncate">
+                ${escapeHtml(def.title)}
+              </h4>
+              <span class="achievement-tier-shield text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded">
+                ${def.tier}
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+              ${escapeHtml(def.description)}
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-3 pt-2.5 border-t border-white/5 space-y-1.5">
+          <div class="flex items-center justify-between text-[8.5px] font-bold text-slate-500 uppercase tracking-wider">
+            <span>${isUnlocked ? 'Earned' : progressLabel}</span>
+            <span>${progress}%</span>
+          </div>
+          <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+            <div
+              class="h-full achievement-progress-bar rounded-full transition-all duration-700"
+              style="width: ${progress}%"
+            ></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  grid.innerHTML = cardsHtml;
+  if (countEl) countEl.textContent = String(unlockedCount);
+  initIcons(grid);
 }
 
 /* ─────────────────────────────────────────────

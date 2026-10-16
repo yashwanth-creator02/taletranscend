@@ -8,6 +8,7 @@ import {
   renderContinueReading,
   renderPublishedTales,
   renderDrafts,
+  renderAchievements,
 } from '../ui.js';
 import { profileState } from '../state.js';
 
@@ -50,6 +51,8 @@ describe('ProfileUI', () => {
       <div id="continue-reading-list"></div>
       <div id="contributions-grid"></div>
       <div id="drafts-grid"></div>
+      <div id="achievements-grid"></div>
+      <span id="achievements-unlocked-count">0</span>
       <input id="input-name" />
       <div class="mythic-badge"></div>
     `;
@@ -140,6 +143,27 @@ describe('ProfileUI', () => {
       const grid = document.getElementById('drafts-grid');
       renderDrafts([]);
       expect(grid.textContent).toContain('No drafts awaiting preservation');
+    });
+  });
+
+  describe('renderAchievements', () => {
+    it('renders achievement cards and calculates unlock counts', () => {
+      renderAchievements({
+        continueReading: [{ id: 't1' }],
+        publishedTales: [{ id: 'p1' }],
+        totalWordsWritten: 12000,
+        totalReaders: 5,
+      });
+
+      const grid = document.getElementById('achievements-grid');
+      const countEl = document.getElementById('achievements-unlocked-count');
+
+      expect(grid.querySelectorAll('.achievement-card').length).toBe(12);
+      expect(grid.innerHTML).toContain('First Legend');
+      expect(grid.innerHTML).toContain('Voice of Legend');
+      expect(grid.innerHTML).toContain('Wordsmith');
+      expect(grid.innerHTML).toContain('Rising Voice');
+      expect(parseInt(countEl.textContent, 10)).toBeGreaterThanOrEqual(4);
     });
   });
 });

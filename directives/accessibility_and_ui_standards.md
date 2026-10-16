@@ -30,6 +30,7 @@ Define explicit standards for footer layout isolation, accessible toasting, keyb
 
 - **Strict Rule**: ONLY the home page (`src/views/index.html`) may contain a full site footer (`.home-footer` / `.site-footer`).
 - **Inner Pages Forbidden**: Inner application pages (`library.html`, `shelf.html`, `reader.html`, `tale.html`, `contribution.html`, `profile.html`, `login.html`, `toc.html`, `settings.html`, `404.html`) must NEVER contain a footer.
+- **Dock Clearance Invariant**: Scrollable containers wrapping the footer (e.g., `<main class="dock-clearance">`) must NOT add extra `padding-bottom` beneath the footer. The footer represents the absolute floor of the document and already handles its own internal clearance. In `base.css`, `.dock-clearance:has(> footer), .dock-clearance:has(footer:last-child)` enforces `padding-bottom: 0` to prevent an unsightly canvas-colored gap beneath the footer.
 - **Rationale**: Inner views are specialized application workspaces (reading sanctuaries, writing ateliers, archives). They rely on the persistent global top navbar (`app-nav`) on desktop and the mobile bottom dock (`mobile-dock`) on handheld devices. A footer adds clutter and disrupts full-height layouts.
 
 ### 2. Settings Page Layout & Navigation Isolation (`src/views/settings.html`)
@@ -220,6 +221,14 @@ The TaleTranscend brand mark is the mythical golden-trimmed black quill pen enci
 - **Global Command Palette Integration**:
   - Theme switches are registered as first-class actions (`theme:transcendental`, `theme:dark`, `theme:light`, `theme:system`) in `nav.config.js`.
   - Users can switch themes instantly from any page via `Ctrl+K` / `⌘K` under the "Appearance & Theme" group.
+- **Light Mode Content Contrast & Badge Readability**:
+  - Content panes (e.g., Synopsis descriptions, lore tags, chapter scrolls, reflections, and inquiry forms) often inherit legacy dark-mode utility classes like `text-slate-300`, `text-slate-400`, `bg-white/4`, and `border-white/6`.
+  - Under `[data-app-theme='light']`, all body text must explicitly map to `var(--text-primary)`, metadata tags/pills to `var(--surface-2)` or `var(--surface-3)` with `var(--border)` and `var(--text-secondary)`, and section badges/icons to `var(--accent)`.
+  - Ensures WCAG AA compliance (contrast ratio >= 4.5:1) on white/elevated cards without breaking dark theme obsidian surfaces.
+- **Scroll-to-Top Floating Button Standard**:
+  - Floating utility controls (like `#scroll-to-top`) must NEVER hardcode dark-mode utility classes (e.g. `text-indigo-300`, `group-hover:text-white`).
+  - Icons inside `#scroll-to-top` must inherit `currentColor` (`stroke: currentColor`), tied to `var(--text-primary)` (default) and `var(--accent)` (hover).
+  - Backgrounds, borders, and shadows must derive exclusively from design tokens (`var(--bg-overlay)`, `var(--border-strong)`, `var(--shadow-md)`, `var(--shadow-glow)`), ensuring high contrast across both light and dark themes.
 
 ## Tools / Scripts to Use
 

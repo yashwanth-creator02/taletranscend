@@ -161,10 +161,16 @@ export function updateSidebarUser(user, profile = {}) {
   const name = profile.name || user.displayName || `Scribe ${seed.slice(0, 4)}`;
   const initial = (name.charAt(0) || 'S').toUpperCase();
 
+  const isLight =
+    typeof document !== 'undefined' &&
+    document.documentElement.getAttribute('data-app-theme') === 'light';
+  const bgFill = isLight ? '#e0e7ff' : '#18181b';
+  const textFill = isLight ? '#4338ca' : '#818cf8';
+
   const avatarSrc =
     user?.photoURL ||
     `data:image/svg+xml;utf8,${encodeURIComponent(
-      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" data-uid="${uid}"><rect width="32" height="32" rx="10" fill="#18181b"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="12" fill="#818cf8">${initial}</text></svg>`
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" data-uid="${uid}"><rect width="32" height="32" rx="10" fill="${bgFill}"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="12" fill="${textFill}">${initial}</text></svg>`
     )}`;
 
   if (avatarEl) avatarEl.src = avatarSrc;

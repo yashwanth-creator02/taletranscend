@@ -21,9 +21,11 @@
 .hero-gradient {
   position: relative;
   overflow: hidden;
-  background: rgb(var(--bg-overlay-rgb) / var(--a-08));
+  background: rgb(var(--bg-overlay-rgb) / 0.35);
   border-radius: var(--radius-3xl);
   border: 1px solid rgb(var(--light-rgb) / var(--a-03));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 /* ── Hero Blurred Cover Backdrop ────────────────────────────── */
@@ -39,12 +41,13 @@
 
 .hero-cover-backdrop-img {
   position: absolute;
-  inset: -12px;
+  inset: -30px;
   background-image: var(--bg-url);
   background-size: cover;
-  background-position: center 30%;
-  filter: blur(8px) brightness(0.42) saturate(1.25);
-  transform: scale(1.05);
+  background-position: center;
+  opacity: 0.75;
+  filter: blur(32px) saturate(1.35) brightness(0.85);
+  transform: scale(1.1);
   transition: opacity var(--dur-normal) ease;
 }
 
@@ -52,8 +55,27 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 25% 20%, rgb(var(--accent-rgb) / var(--a-06)), transparent 65%),
-    linear-gradient(180deg, rgb(var(--dark-rgb) / 0.4) 0%, rgb(var(--dark-rgb) / 0.82) 100%);
+    radial-gradient(circle at 75% 30%, rgb(var(--accent-rgb) / 0.12), transparent 65%),
+    linear-gradient(
+      90deg,
+      rgb(var(--dark-rgb) / 0.9) 0%,
+      rgb(var(--dark-rgb) / 0.78) 45%,
+      rgb(var(--dark-rgb) / 0.35) 80%,
+      rgb(var(--dark-rgb) / 0.5) 100%
+    );
+}
+
+@media (max-width: 64rem) {
+  .hero-cover-backdrop-overlay {
+    background:
+      radial-gradient(circle at 50% 20%, rgb(var(--accent-rgb) / 0.1), transparent 60%),
+      linear-gradient(
+        180deg,
+        rgb(var(--dark-rgb) / 0.4) 0%,
+        rgb(var(--dark-rgb) / 0.75) 45%,
+        rgb(var(--dark-rgb) / 0.92) 100%
+      );
+  }
 }
 
 .hero-title {
@@ -683,10 +705,149 @@
 
 /* ── Light Mode Polish ───────────────────────────────────────────── */
 
+[data-app-theme='light'] .hero-gradient {
+  background: rgb(var(--bg-overlay-rgb) / 0.35);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+[data-app-theme='light'] .hero-cover-backdrop-img {
+  opacity: 0.85;
+  filter: blur(32px) saturate(1.4) brightness(1.02);
+  transform: scale(1.1);
+}
+
+[data-app-theme='light'] .hero-cover-backdrop-overlay {
+  background:
+    radial-gradient(circle at 75% 30%, rgb(var(--accent-rgb) / 0.08), transparent 65%),
+    linear-gradient(
+      90deg,
+      rgb(var(--bg-overlay-rgb) / 0.92) 0%,
+      rgb(var(--bg-overlay-rgb) / 0.82) 45%,
+      rgb(var(--bg-overlay-rgb) / 0.45) 80%,
+      rgb(var(--bg-overlay-rgb) / 0.55) 100%
+    );
+}
+
+@media (max-width: 64rem) {
+  [data-app-theme='light'] .hero-cover-backdrop-overlay {
+    background:
+      radial-gradient(circle at 50% 20%, rgb(var(--accent-rgb) / 0.08), transparent 60%),
+      linear-gradient(
+        180deg,
+        rgb(var(--bg-overlay-rgb) / 0.45) 0%,
+        rgb(var(--bg-overlay-rgb) / 0.82) 45%,
+        rgb(var(--bg-overlay-rgb) / 0.94) 100%
+      );
+  }
+}
+
+[data-app-theme='light'] #hero-section .hero-title,
+[data-app-theme='light'] #hero-section #display-title {
+  color: var(--text-primary) !important;
+}
+
+[data-app-theme='light'] #hero-section #display-author,
+[data-app-theme='light'] #hero-section #display-chapters,
+[data-app-theme='light'] #hero-section #read-time {
+  color: var(--text-secondary) !important;
+}
+
+[data-app-theme='light'] #hero-section #hero-meta > div {
+  background: var(--surface-2) !important;
+  border-color: var(--border) !important;
+  color: var(--text-secondary) !important;
+}
+
+[data-app-theme='light'] #hero-section #display-status-pill {
+  background: var(--mythic-sage-bg) !important;
+  border: 1px solid var(--mythic-sage-border) !important;
+  color: var(--mythic-sage) !important;
+  border-radius: var(--radius-xs) !important;
+  padding: 2px 8px !important;
+}
+
+[data-app-theme='light'] #hero-section #display-status {
+  color: var(--mythic-sage) !important;
+  font-weight: 700;
+}
+
+[data-app-theme='light'] #hero-section #display-status-dot {
+  display: none !important;
+}
+
+[data-app-theme='light'] #hero-section span.bg-indigo-500\/10 {
+  background: var(--accent-subtle) !important;
+  border-color: var(--border-accent) !important;
+  color: var(--accent) !important;
+}
+
+[data-app-theme='light'] #hero-section #tale-era,
+[data-app-theme='light'] #hero-section #tale-genre,
+[data-app-theme='light'] #hero-section #tale-language {
+  background: var(--surface-3) !important;
+  border-color: var(--border) !important;
+  color: var(--text-secondary) !important;
+}
+
+[data-app-theme='light'] #hero-section .btn-secondary {
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--border-strong) !important;
+  color: var(--text-primary) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+[data-app-theme='light'] #hero-section .btn-secondary i,
+[data-app-theme='light'] #hero-section .btn-secondary svg,
+[data-app-theme='light'] #hero-section .btn-secondary [data-lucide] {
+  color: var(--text-secondary) !important;
+}
+
+[data-app-theme='light'] #hero-section .btn-secondary:hover {
+  background: var(--surface-4) !important;
+  border-color: var(--border-accent) !important;
+  color: var(--accent) !important;
+}
+
+[data-app-theme='light'] #hero-section .btn-secondary:hover i,
+[data-app-theme='light'] #hero-section .btn-secondary:hover svg,
+[data-app-theme='light'] #hero-section .btn-secondary:hover [data-lucide] {
+  color: var(--accent) !important;
+}
+
+[data-app-theme='light'] #hero-section .btn-primary {
+  border-radius: var(--radius-md) !important;
+}
+
+[data-app-theme='light'] #hero-section .glass-card {
+  background: var(--surface-2) !important;
+  border-color: var(--border) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+[data-app-theme='light'] .chronicler-invite-card {
+  background: var(--bg-elevated) !important;
+  border-color: var(--border) !important;
+  box-shadow: var(--shadow-sm) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+[data-app-theme='light'] .chronicler-invite-card p {
+  color: var(--text-secondary) !important;
+}
+
+[data-app-theme='light'] .btn-open-chronicler-letter {
+  background: var(--accent) !important;
+  border-radius: var(--radius-sm) !important;
+  border-color: var(--border-accent) !important;
+}
+
 [data-app-theme='light'] .comment-input,
 [data-app-theme='light'] .inquire-input {
   background: var(--bg-elevated);
-  border-color: rgb(var(--light-rgb) / 0.14);
+  border-color: var(--border-strong);
   color: var(--text-primary);
 }
 
@@ -698,8 +859,8 @@
 
 [data-app-theme='light'] .missive-card {
   background: var(--bg-elevated);
-  border-color: rgb(var(--light-rgb) / 0.08);
-  box-shadow: 0 4px 16px rgb(var(--dark-rgb) / 0.06);
+  border-color: var(--border);
+  box-shadow: var(--shadow-sm);
 }
 
 [data-app-theme='light'] .inquiry-category-chip.active {
@@ -709,48 +870,48 @@
 
 [data-app-theme='light'] .floating-bar__inner {
   background: var(--bg-elevated);
-  border-color: rgb(var(--light-rgb) / 0.12);
-  box-shadow: 0 16px 40px rgb(var(--dark-rgb) / 0.12);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-xl);
 }
 
 [data-app-theme='light'] .chapter-item {
   background: var(--bg-elevated);
-  border-color: rgb(var(--light-rgb) / 0.08);
+  border-color: var(--border);
 }
 
 [data-app-theme='light'] .chapter-item:hover {
   background: var(--surface-2);
-  border-color: rgb(var(--accent-rgb) / 0.3);
-  box-shadow: 0 4px 16px rgb(var(--dark-rgb) / 0.06);
+  border-color: var(--border-accent);
+  box-shadow: var(--shadow-sm);
 }
 
 [data-app-theme='light'] .comment-card {
   background: var(--bg-elevated);
-  border-color: rgb(var(--light-rgb) / 0.08);
-  box-shadow: 0 4px 16px rgb(var(--dark-rgb) / 0.04);
+  border-color: var(--border);
+  box-shadow: var(--shadow-sm);
 }
 
 [data-app-theme='light'] .comment-reply-card {
   background: var(--surface-2);
-  border-color: rgb(var(--light-rgb) / 0.08);
+  border-color: var(--border);
 }
 
 [data-app-theme='light'] .glass-card,
 [data-app-theme='light'] .glass-card-strong {
   background: var(--bg-elevated);
-  border-color: rgb(var(--light-rgb) / 0.08);
-  box-shadow: 0 8px 30px rgb(var(--dark-rgb) / 0.06);
+  border-color: var(--border);
+  box-shadow: var(--shadow-md);
 }
 
 [data-app-theme='light'] .filter-chip {
   background: var(--surface-2);
-  border-color: rgb(var(--light-rgb) / 0.1);
+  border-color: var(--border);
   color: var(--text-secondary);
 }
 
 [data-app-theme='light'] .filter-chip:hover {
   color: var(--text-primary);
-  border-color: rgb(var(--light-rgb) / 0.2);
+  border-color: var(--border-strong);
 }
 
 [data-app-theme='light'] .filter-chip.active {
@@ -761,5 +922,281 @@
 
 [data-app-theme='light'] .missive-reply-bubble {
   background: var(--surface-2);
-  border-color: rgb(var(--accent-rgb) / 0.2);
+  border-color: var(--border-accent);
+}
+
+/* ── Light Mode: Tab Navigation ─────────────────────────────────── */
+[data-app-theme='light'] #tale-tab-nav {
+  border-bottom-color: var(--border) !important;
+}
+
+[data-app-theme='light'] .tab-btn {
+  color: var(--text-secondary) !important;
+}
+
+[data-app-theme='light'] .tab-btn:hover {
+  color: var(--text-primary) !important;
+  background: var(--surface-2) !important;
+}
+
+[data-app-theme='light'] .tab-btn.active {
+  color: var(--accent) !important;
+  background: rgb(var(--accent-rgb) / 0.1) !important;
+  border-color: var(--border-accent) !important;
+  box-shadow: var(--shadow-sm);
+}
+
+[data-app-theme='light'] .tab-btn [data-lucide],
+[data-app-theme='light'] .tab-btn i {
+  color: inherit !important;
+}
+
+/* ── Light Mode: Synopsis & Lore Content ───────────────────────── */
+[data-app-theme='light'] #content-about #display-description {
+  color: var(--text-primary) !important;
+  line-height: 1.7;
+}
+
+[data-app-theme='light'] #content-about span.tracking-\[0\.3em\],
+[data-app-theme='light'] #content-about span.tracking-\[0\.25em\] {
+  color: var(--text-secondary) !important;
+  font-weight: 800;
+}
+
+[data-app-theme='light'] #content-about [data-lucide] {
+  color: var(--accent) !important;
+}
+
+.lore-tag-pill {
+  transition: all var(--dur-fast) ease;
+}
+
+[data-app-theme='light'] .lore-tag-pill,
+[data-app-theme='light'] #lore-tag-list span {
+  background: var(--surface-2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-secondary) !important;
+  font-weight: 700;
+}
+
+[data-app-theme='light'] .lore-tag-pill:hover,
+[data-app-theme='light'] #lore-tag-list span:hover {
+  background: var(--surface-3) !important;
+  border-color: var(--border-strong) !important;
+  color: var(--text-primary) !important;
+}
+
+/* ── Light Mode: Chronicles (Chapters) Pane ────────────────────── */
+[data-app-theme='light'] #content-chapters h3 {
+  color: var(--text-primary) !important;
+}
+
+[data-app-theme='light'] #chronicle-read-count {
+  color: var(--accent) !important;
+  font-weight: 700;
+}
+
+[data-app-theme='light'] #content-chapters .border-b {
+  border-bottom-color: var(--border) !important;
+}
+
+[data-app-theme='light'] #btn-sort-chronicles,
+[data-app-theme='light'] #btn-mark-all-unread,
+[data-app-theme='light'] #btn-download-all-chronicles {
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-secondary) !important;
+  box-shadow: var(--shadow-sm);
+}
+
+[data-app-theme='light'] #btn-sort-chronicles:hover,
+[data-app-theme='light'] #btn-mark-all-unread:hover,
+[data-app-theme='light'] #btn-download-all-chronicles:hover {
+  background: var(--surface-3) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-accent) !important;
+}
+
+[data-app-theme='light'] #btn-sort-chronicles [data-lucide],
+[data-app-theme='light'] #btn-sort-chronicles i {
+  color: var(--accent) !important;
+}
+
+[data-app-theme='light'] #btn-mark-all-read {
+  background: rgb(var(--accent-rgb) / 0.1) !important;
+  border: 1px solid var(--border-accent) !important;
+  color: var(--accent) !important;
+}
+
+[data-app-theme='light'] #btn-mark-all-read:hover {
+  background: rgb(var(--accent-rgb) / 0.18) !important;
+  color: var(--accent-hover) !important;
+}
+
+[data-app-theme='light'] .chapter-item .min-w-0 span.tracking-\[0\.2em\] {
+  color: var(--text-muted) !important;
+}
+
+[data-app-theme='light'] .chapter-item h4 {
+  color: var(--text-primary) !important;
+}
+
+[data-app-theme='light'] .chapter-item .w-8.h-8,
+[data-app-theme='light'] .chapter-item .w-9.h-9 {
+  background: var(--surface-3) !important;
+  border-color: var(--border) !important;
+  color: var(--accent) !important;
+}
+
+[data-app-theme='light'] .chapter-item:hover .w-8.h-8,
+[data-app-theme='light'] .chapter-item:hover .w-9.h-9 {
+  background: var(--accent) !important;
+  color: var(--text-on-accent) !important;
+}
+
+[data-app-theme='light'] .chapter-item [data-action='download-chapter'] {
+  background: var(--surface-2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-secondary) !important;
+}
+
+[data-app-theme='light'] .chapter-item [data-action='download-chapter']:hover {
+  background: var(--surface-3) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-accent) !important;
+}
+
+[data-app-theme='light'] .chapter-item [data-action='mark-read'] {
+  background: rgb(var(--accent-rgb) / 0.1) !important;
+  border: 1px solid var(--border-accent) !important;
+  color: var(--accent) !important;
+}
+
+[data-app-theme='light'] .chapter-item [data-action='mark-read']:hover {
+  background: rgb(var(--accent-rgb) / 0.18) !important;
+  color: var(--accent-hover) !important;
+}
+
+[data-app-theme='light'] .chapter-item [data-action='mark-unread'] {
+  background: var(--surface-2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-secondary) !important;
+}
+
+[data-app-theme='light'] .chapter-item [data-action='mark-unread']:hover {
+  background: var(--surface-3) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-strong) !important;
+}
+
+/* ── Light Mode: Echoes (Comments) Pane ────────────────────────── */
+[data-app-theme='light'] #content-comments span.tracking-\[0\.25em\] {
+  color: var(--text-secondary) !important;
+  font-weight: 800;
+}
+
+[data-app-theme='light'] #content-comments [data-lucide='message-square-plus'] {
+  color: var(--accent) !important;
+}
+
+[data-app-theme='light'] .comment-card .text-slate-400,
+[data-app-theme='light'] .comment-card .text-slate-500 {
+  color: var(--text-muted) !important;
+}
+
+[data-app-theme='light'] .comment-card .text-slate-200,
+[data-app-theme='light'] .comment-card .text-slate-300 {
+  color: var(--text-primary) !important;
+}
+
+[data-app-theme='light'] .comment-action-btn,
+[data-app-theme='light'] .comment-cancel-btn {
+  color: var(--text-secondary) !important;
+}
+
+[data-app-theme='light'] .comment-action-btn:hover,
+[data-app-theme='light'] .comment-cancel-btn:hover {
+  color: var(--accent) !important;
+}
+
+[data-app-theme='light'] .edited-badge {
+  background: var(--surface-3) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-muted) !important;
+}
+
+/* ── Light Mode: Missives Pane ─────────────────────────────────── */
+[data-app-theme='light'] #content-letter .border-b,
+[data-app-theme='light'] #content-letter .border-t {
+  border-color: var(--border) !important;
+}
+
+[data-app-theme='light'] #content-letter span.tracking-\[0\.25em\],
+[data-app-theme='light'] #content-letter span.tracking-\[0\.18em\] {
+  color: var(--accent) !important;
+}
+
+[data-app-theme='light'] #content-letter .text-slate-300,
+[data-app-theme='light'] #content-letter .text-slate-400 {
+  color: var(--text-secondary) !important;
+}
+
+[data-app-theme='light'] #content-letter .text-slate-500 {
+  color: var(--text-muted) !important;
+}
+
+[data-app-theme='light'] #content-letter label {
+  color: var(--text-primary) !important;
+}
+
+[data-app-theme='light'] #inquire-char-counter {
+  background: var(--surface-2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-muted) !important;
+}
+
+[data-app-theme='light'] .inquiry-category-chip {
+  background: var(--surface-2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-secondary) !important;
+}
+
+[data-app-theme='light'] .inquiry-category-chip .chip-title {
+  color: var(--text-primary) !important;
+}
+
+[data-app-theme='light'] .inquiry-category-chip .chip-desc {
+  color: var(--text-muted) !important;
+  opacity: 1 !important;
+}
+
+[data-app-theme='light'] .inquiry-category-chip:hover {
+  background: var(--surface-3) !important;
+  border-color: var(--border-accent) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-app-theme='light'] .inquiry-category-chip.active {
+  background: rgb(var(--accent-rgb) / 0.1) !important;
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+}
+
+[data-app-theme='light'] .inquiry-category-chip.active .chip-title {
+  color: var(--accent) !important;
+}
+
+[data-app-theme='light'] .inquiry-category-chip.active .chip-desc {
+  color: var(--accent) !important;
+  opacity: 0.85 !important;
+}
+
+[data-app-theme='light'] .inquiry-category-chip.active svg {
+  color: var(--accent) !important;
+}
+
+[data-app-theme='light'] #author-missives-stats > div {
+  background: var(--surface-2) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-secondary) !important;
 }

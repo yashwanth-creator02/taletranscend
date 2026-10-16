@@ -156,7 +156,7 @@ export function buildBookmarkCard(tale) {
 
   return `
     <article
-      class="shelf-card group relative rounded-2xl overflow-visible border border-white/[0.05] bg-white/[0.025] hover:border-indigo-500/25 transition-all duration-400 cursor-pointer"
+      class="shelf-card group relative overflow-visible cursor-pointer"
       data-id="${id}"
     >
       <!-- Dedicated options button & menu at card level so it is not clipped -->
@@ -215,31 +215,31 @@ export function buildBookmarkCard(tale) {
         </div>
       </div>
 
-      <div class="relative aspect-[16/10] max-h-44 bg-zinc-900 rounded-t-2xl overflow-hidden">
+      <div class="shelf-card__media">
         <img
           src="${cover}"
           alt="${safeTitle}"
-          class="w-full h-full object-cover opacity-55 group-hover:opacity-80 group-hover:scale-105 transition-all duration-700"
+          class="shelf-card__img"
           loading="lazy"
         />
-        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+        <div class="shelf-card__scrim"></div>
 
         <!-- Header: Badges -->
         <div class="absolute top-0 left-0 right-14 p-2.5 sm:p-3 flex items-start justify-between gap-2 z-10">
           <div class="flex flex-wrap items-center gap-1.5">
-            ${_badge(safeEra, 'bg-indigo-500/5 text-indigo-300 text-[8px] sm:text-[9px] px-2 py-0.5')}
+            ${_badge(safeEra, 'badge-era text-[8px] sm:text-[9px] px-2 py-0.5')}
             ${isFinished ? _badge('Finished', `${statusBadgeClasses} text-[8px] sm:text-[9px] px-2 py-0.5`) : ''}
           </div>
         </div>
 
-        <div class="absolute bottom-0 left-0 right-0 px-2.5 sm:px-3 pb-2 pt-4 bg-gradient-to-t from-black/70 to-transparent">
+        <div class="absolute bottom-0 left-0 right-0 px-2.5 sm:px-3 pb-2 pt-4 z-10">
           <div class="flex items-center justify-between mb-1">
-            <span class="text-[8px] sm:text-[9px] font-bold uppercase tracking-wider text-white/40">Progress</span>
-            <span class="text-[8px] sm:text-[9px] font-bold text-indigo-400">${isFinished ? 'Done' : `${progressPercent}%`}</span>
+            <span class="card-progress-label text-[8px] sm:text-[9px] font-bold uppercase tracking-wider">Progress</span>
+            <span class="card-progress-val text-[8px] sm:text-[9px] font-bold text-indigo-400">${isFinished ? 'Done' : `${progressPercent}%`}</span>
           </div>
-          <div class="h-1 w-full bg-white/10 rounded-full overflow-hidden">
+          <div class="progress-bar h-1 w-full rounded-full overflow-hidden">
             <div
-              class="h-full rounded-full transition-all duration-700 ${isFinished ? 'bg-indigo-400 shadow-[0_0_8px_rgba(99,102,241,0.6)]' : 'bg-gradient-to-r from-indigo-500 to-violet-500'}"
+              class="progress-fill h-full rounded-full transition-all duration-700 ${isFinished ? 'bg-indigo-400 shadow-[0_0_8px_rgba(99,102,241,0.6)]' : 'bg-gradient-to-r from-indigo-500 to-violet-500'}"
               style="width: ${Math.max(isFinished ? 100 : 2, progressPercent)}%"
             ></div>
           </div>
@@ -308,15 +308,15 @@ export function buildDraftCard(draft) {
 
   return `
     <article
-      class="shelf-card group relative rounded-2xl border border-white/[0.05] bg-white/[0.025] hover:border-indigo-500/25 transition-all duration-400 overflow-visible cursor-pointer"
+      class="shelf-card group relative overflow-visible cursor-pointer"
       data-id="${id}"
     >
       <div class="relative p-3 sm:p-3.5">
         <!-- Header: Badges & Actions -->
         <div class="flex items-start justify-between gap-2 mb-2.5">
           <div class="flex flex-wrap items-center gap-1.5">
-            ${_badge('Draft', 'bg-amber-500/10 text-amber-400 border-amber-500/20 text-[8px] sm:text-[9px] px-2 py-0.5')}
-            ${safeEra ? _badge(safeEra, 'bg-indigo-500/5 text-indigo-300 text-[8px] sm:text-[9px] px-2 py-0.5') : ''}
+            ${_badge('Draft', 'badge-draft text-[8px] sm:text-[9px] px-2 py-0.5')}
+            ${safeEra ? _badge(safeEra, 'badge-era text-[8px] sm:text-[9px] px-2 py-0.5') : ''}
           </div>
 
           <div class="relative shrink-0">

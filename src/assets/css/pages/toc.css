@@ -72,7 +72,7 @@
 
 .era-pill {
   padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-sm);
   font-size: var(--text-xs);
   font-weight: 600;
   color: var(--text-muted);
@@ -158,58 +158,74 @@
 
 /* ── Light Mode Polish ───────────────────────────────────────────── */
 
+[data-app-theme='light'] #stat-total-tales {
+  color: var(--accent) !important;
+}
+
+[data-app-theme='light'] #stat-total-chapters {
+  color: var(--rune) !important;
+}
+
+[data-app-theme='light'] #stat-total-eras {
+  color: var(--mythic-sage) !important;
+}
+
+[data-app-theme='light'] #stat-total-words {
+  color: var(--mythic-terracotta) !important;
+}
+
 [data-app-theme='light'] .toc-stat-card,
 [data-app-theme='light'] .toc-portal-card,
 [data-app-theme='light'] .toc-chronicle-item {
   background: var(--bg-elevated);
-  border-color: rgb(var(--light-rgb) / 0.08);
-  box-shadow: 0 4px 16px rgb(var(--dark-rgb) / 0.04);
+  border-color: var(--border);
+  box-shadow: var(--shadow-sm);
 }
 
 [data-app-theme='light'] .toc-portal-card:hover,
 [data-app-theme='light'] .toc-stat-card:hover,
 [data-app-theme='light'] .toc-chronicle-item:hover {
   background: var(--surface-2);
-  border-color: rgb(var(--accent-rgb) / 0.3);
-  box-shadow: 0 8px 24px rgb(var(--dark-rgb) / 0.06);
+  border-color: var(--border-accent);
+  box-shadow: var(--shadow-md);
 }
 
 [data-app-theme='light'] .toc-portal-icon {
-  background: rgb(var(--accent-rgb) / 0.08);
-  border-color: rgb(var(--accent-rgb) / 0.2);
+  background: var(--surface-4);
+  border-color: var(--border-accent);
 }
 
 [data-app-theme='light'] .toc-chapter-pill {
   background: var(--surface-2);
-  border-color: rgb(var(--light-rgb) / 0.1);
+  border-color: var(--border);
   color: var(--text-secondary);
 }
 
 [data-app-theme='light'] .toc-chapter-pill:hover {
-  background: rgb(var(--accent-rgb) / 0.1);
-  border-color: var(--accent);
-  color: var(--text-primary);
+  background: var(--surface-4);
+  border-color: var(--border-accent);
+  color: var(--accent);
 }
 
 [data-app-theme='light'] .era-pill {
   background: var(--surface-2);
-  border-color: rgb(var(--light-rgb) / 0.1);
+  border-color: var(--border);
   color: var(--text-secondary);
 }
 
 [data-app-theme='light'] .era-pill:hover {
   color: var(--text-primary);
-  border-color: rgb(var(--light-rgb) / 0.2);
+  border-color: var(--border-strong);
 }
 
 [data-app-theme='light'] .era-pill.active {
-  background: rgb(var(--accent-rgb) / 0.12);
+  background: var(--accent);
   border-color: var(--accent);
-  color: var(--accent);
+  color: var(--text-on-accent);
 }
 
 [data-app-theme='light'] #toc-search {
   background: var(--bg-elevated);
-  border-color: rgb(var(--light-rgb) / 0.12);
+  border-color: var(--border-strong);
   color: var(--text-primary);
 }

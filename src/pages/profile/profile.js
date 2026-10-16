@@ -7,7 +7,7 @@ import '@css/nav.css';
 import '@css/components.css';
 import '@css/pages/profile.css';
 
-import { initNav } from '@ui/components/nav/nav.js';
+import { initGlobalPaletteShortcut } from '@ui/components/nav/nav.global.js';
 import { initAuth, auth, upgradeAnonymousToGoogle } from '@fb/index.js';
 import { signOut } from 'firebase/auth';
 import { navigateTo, initPageReveal, readyReveal, setupAuthTimeout, createLogger } from '@/utils';
@@ -26,6 +26,7 @@ import {
   renderContinueReading,
   renderPublishedTales,
   renderDrafts,
+  renderAchievements,
   showContinueReadingSkeleton,
   showContributionsSkeleton,
   switchContribTab,
@@ -45,7 +46,7 @@ import {
 
 log.info('Initializing Profile page');
 initPageReveal();
-initNav();
+initGlobalPaletteShortcut();
 
 /* ─────────────────────────────────────────────
    Auth Timeout
@@ -74,6 +75,7 @@ import { appState } from '@state/index.js';
 export async function initProfilePage(currentUser = auth?.currentUser) {
   initProfileLayout();
   initProfileUI();
+  renderAchievements();
 
   // Profile form submit
   document.getElementById('profile-form')?.addEventListener('submit', async (e) => {
@@ -199,11 +201,13 @@ export async function initProfilePage(currentUser = auth?.currentUser) {
       renderPublishedTales(publishedTales || []);
       renderDrafts(drafts || []);
       updateStatsUI(stats);
+      renderAchievements({ continueReading, publishedTales, drafts, stats });
     } catch (err) {
       log.error('Unexpected error fetching profile subsets', err);
       renderContinueReading([]);
       renderPublishedTales([]);
       renderDrafts([]);
+      renderAchievements({});
     } finally {
       readyReveal();
       initIcons();

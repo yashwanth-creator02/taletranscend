@@ -28,8 +28,12 @@ Define the standard operating procedures, data contracts, and UI patterns for ma
 ### 1. Chronicler Profile Architecture & Settings Integration
 
 - **Profile Page View (`profile.html`)**:
-  - Three-column desktop layout: Identity Pillar (left), Living Archive & Contributions (center), Legacy Metrics & Chronicle Goal (right).
-  - "Customise Identity" (`#btn-edit-desktop`) links directly to the dedicated Chronicler Profile section in Settings (`/settings.html#profile`).
+  - **Standalone Full-Height Layout**: Does not inject the universal navigation header (`#app-nav`) or mobile dock (`#app-dock`). Global command palette is mounted on-demand via `initGlobalPaletteShortcut()`. Top of the Identity Pillar features a dedicated Sanctuary Brand header (`.sanctuary-nav-bar`) with direct links to Home and Library.
+  - **Three-Column Desktop Grid**: Fluid 3-column workspace with defaults set to `430px` (left identity panel), `minmax(0, 1fr)` (central flow), and `340px` (right metrics panel), persistently adjustable via draggable resize handles.
+  - **Resize Handle Hover Dividers**: Hovering, focusing, or dragging the resize handle renders a full-height luminous vertical dividing line (`.resize-handle::before`) using `var(--accent)`.
+  - **Top-Right Edit Button**: Replaced the full-width button below the bio with a compact, accessible icon button (`#btn-edit-desktop` / `.identity-edit-btn-corner`) positioned at the top-right corner of the identity card.
+  - **Continue Reading Card Consistency**: Every card in the horizontal scrolling row uses fixed card height (`295px`), fixed image height (`128px`), uniform title line height & truncation (`h-6 leading-6 truncate`), clamped description (`h-9 line-clamp-2`), and pinned bottom progress bar (`mt-auto`).
+  - **Achievements Section (`#profile-achievements-section`)**: Located directly below The Archive in the central column. Displays an unlocked milestone counter badge and renders cards for all items in `ACHIEVEMENT_REGISTRY` (`bronze`, `silver`, `gold`, `platinum` tiers) with dynamic progress bars and status shields.
 - **Settings Page Profile Editor (`settings.html#profile`)**:
   - Full-featured chronicler identity configuration embedded in the living archive settings suite.
   - Divided card rows: Avatar preview & URL, Display Name with Oracle AI name suggester (`#btn-suggest-name`), Reader Moniker / Signature (`#setting-reader-moniker`), Lore & Bio (stacked layout `.settings-row--stacked` positioned cleanly below the sideheading with live character counter `#bio-char-count`), Pronouns, Location / Realm, Favourite Genre chips (`#genre-selector`), Yearly Reading Milestone, Social URLs, and Oracle AI & Gemini Key configuration via popup modal dialog (`#modal-gemini-key`).

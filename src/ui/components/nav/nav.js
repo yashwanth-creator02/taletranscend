@@ -53,19 +53,28 @@ export function initNav() {
   initAppTheme();
 
   // Guard: Check if either component is already mounted
-  if (document.getElementById('app-nav') || document.getElementById('mobile-dock-container'))
+  if (
+    document.getElementById('app-nav') ||
+    document.getElementById('mobile-dock-container') ||
+    document.getElementById('nav-command-palette')
+  )
     return;
 
   log.info('Initializing Navigation');
 
   // 1. Build HTML and destructure parts
-  const { headerHtml, dockHtml } = buildNav();
+  const { headerHtml, dockHtml, paletteHtml } = buildNav();
 
-  // 3. Mount Header at the top of <body>
+  // 2. Mount Header at the top of <body>
   document.body.insertAdjacentHTML('afterbegin', headerHtml);
 
-  // 4. Mount Dock at the very end of <body> (Ensures true fixed positioning)
+  // 3. Mount Dock at the very end of <body> (Ensures true fixed positioning)
   document.body.insertAdjacentHTML('beforeend', dockHtml);
+
+  // 4. Mount Command Palette at the very end of <body> (Ensures true viewport-fixed overlay unconstrained by header backdrop-filter)
+  if (paletteHtml && !document.getElementById('nav-command-palette')) {
+    document.body.insertAdjacentHTML('beforeend', paletteHtml);
+  }
 
   // 5. Initialize Lucide icons
   renderIcons();
@@ -97,9 +106,10 @@ export function destroyNav() {
   // Remove DOM listeners
   detachGlobalListeners();
 
-  // Remove both DOM nodes
+  // Remove mounted DOM nodes
   document.getElementById('app-nav')?.remove();
-  document.getElementById('mobile-dock-container')?.remove(); // Cleanup the dock too
+  document.getElementById('mobile-dock-container')?.remove();
+  document.getElementById('nav-command-palette')?.remove();
 
   // Reset runtime state
   navState.currentUser = null;

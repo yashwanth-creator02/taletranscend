@@ -71,6 +71,7 @@ async function _loadIcons() {
     RotateCcw: L.RotateCcw,
     // Files & Content
     FileText: L.FileText,
+    FileCode: L.FileCode,
     Book: L.Book,
     BookOpen: L.BookOpen,
     BookOpenCheck: L.BookOpenCheck,

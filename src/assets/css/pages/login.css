@@ -290,10 +290,8 @@
 
 [data-app-theme='light'] .login-card {
   background: var(--bg-elevated);
-  border: 1px solid rgb(var(--light-rgb) / 0.1);
-  box-shadow:
-    0 10px 40px -10px rgb(var(--dark-rgb) / 0.08),
-    0 0 24px rgb(var(--accent-rgb) / 0.04);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
 }
 
 [data-app-theme='light'] .login-panel {
@@ -302,12 +300,30 @@
 
 [data-app-theme='light'] .auth-alt-btn {
   background: var(--surface-2);
-  border: 1px solid rgb(var(--light-rgb) / 0.1);
+  border: 1.5px solid var(--border-strong);
   color: var(--text-primary);
-  box-shadow: 0 2px 8px rgb(var(--dark-rgb) / 0.04);
+  box-shadow: var(--shadow-sm);
 }
 
 [data-app-theme='light'] .auth-alt-btn:hover {
-  background: var(--surface-3);
-  border-color: rgb(var(--light-rgb) / 0.18);
+  background: var(--surface-4);
+  border-color: var(--border-accent);
+}
+
+[data-app-theme='light'] .login-visual {
+  background: var(--bg-base);
+}
+
+[data-app-theme='light'] .login-visual__glow {
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgb(var(--rune-rgb) / 0.12) 0%,
+    rgb(var(--accent-rgb) / 0.04) 45%,
+    transparent 70%
+  );
+}
+
+[data-app-theme='light'] .login-visual__img {
+  filter: drop-shadow(0 14px 28px rgb(var(--rune-rgb) / 0.12))
+    drop-shadow(0 4px 10px rgb(var(--dark-rgb) / 0.08));
 }

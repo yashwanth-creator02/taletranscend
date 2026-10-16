@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 140" width="260" height="140" fill="none">
+  <defs>
+    <!-- Warm crystal lens reflection gradient for light parchment ground -->
+    <linearGradient id="lensGlassLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.6"/>
+      <stop offset="35%" stop-color="#e0e7ff" stop-opacity="0.25"/>
+      <stop offset="70%" stop-color="#fef3c7" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.45"/>
+    </linearGradient>
+    <radialGradient id="rimGlowLight" cx="50%" cy="50%" r="50%">
+      <stop offset="75%" stop-color="#d97706" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#78350f" stop-opacity="0.25"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Wire-frame Scholar Spectacles (Illuminated Light Mode Masterpiece) -->
+  <!-- Left Rim and Glass -->
+  <g transform="translate(10, 10)">
+    <!-- Lens surface with luminous crystal clarity -->
+    <ellipse cx="65" cy="60" rx="42" ry="34" fill="url(#lensGlassLight)" stroke="#78350f" stroke-width="2.6"/>
+    <ellipse cx="65" cy="60" rx="40" ry="32" stroke="#b45309" stroke-width="1.2" stroke-opacity="0.8"/>
+    <ellipse cx="65" cy="60" rx="38" ry="30" stroke="#f59e0b" stroke-width="0.6" stroke-opacity="0.5"/>
+    <!-- Glare streak -->
+    <path d="M 45 42 Q 65 36, 85 45" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-opacity="0.85"/>
+
+    <!-- Left Temple / Arm -->
+    <path d="M 23 60 C 12 55, 2 40, 0 20" stroke="#78350f" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M 23 60 C 13 56, 4 41, 2 22" stroke="#b45309" stroke-width="1.2" stroke-linecap="round"/>
+    <circle cx="23" cy="60" r="3" fill="#78350f"/>
+    <circle cx="23" cy="60" r="1.5" fill="#f59e0b"/>
+
+    <!-- Bridge Arch -->
+    <path d="M 107 54 Q 120 43, 133 54" stroke="#78350f" stroke-width="2.8" stroke-linecap="round"/>
+    <path d="M 108 55 Q 120 46, 132 55" stroke="#d97706" stroke-width="1.5" stroke-linecap="round"/>
+
+    <!-- Right Rim and Glass -->
+    <ellipse cx="175" cy="60" rx="42" ry="34" fill="url(#lensGlassLight)" stroke="#78350f" stroke-width="2.6"/>
+    <ellipse cx="175" cy="60" rx="40" ry="32" stroke="#b45309" stroke-width="1.2" stroke-opacity="0.8"/>
+    <ellipse cx="175" cy="60" rx="38" ry="30" stroke="#f59e0b" stroke-width="0.6" stroke-opacity="0.5"/>
+    <!-- Glare streak -->
+    <path d="M 155 42 Q 175 36, 195 45" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-opacity="0.85"/>
+
+    <!-- Right Temple / Arm -->
+    <path d="M 217 60 C 228 55, 238 40, 240 20" stroke="#78350f" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M 217 60 C 227 56, 236 41, 238 22" stroke="#b45309" stroke-width="1.2" stroke-linecap="round"/>
+    <circle cx="217" cy="60" r="3" fill="#78350f"/>
+    <circle cx="217" cy="60" r="1.5" fill="#f59e0b"/>
+  </g>
+</svg>
