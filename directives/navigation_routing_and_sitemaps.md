@@ -59,9 +59,10 @@ TaleTranscend maintains dual sitemaps:
 
 - **Machine-Readable XML Sitemap** (`public/sitemap.xml`): Generated via `scripts/generate-sitemap.js`. Contains indexed static entry points and dynamic tale pages with both pretty routes (`/tales/{id}`) and canonical HTML fallback routes (`/tale.html?id={id}`, `/reader.html?id={id}&chapter={idx}`) with canonical `<loc>`, `<lastmod>`, `<changefreq>`, and `<priority>`.
 - **Primary Navigation Links & Notification Bell**:
-  - `src/ui/components/nav/nav.config.js` configures primary links (`Home`, `Library`, `Vault`, `Write`).
-  - Bell trigger button (`#nav-btn-notifications`) mounts in the navigation bar alongside search.
-  - Interactive popover (`#nav-notifications-popover`) integrates real-time snapshot listener `subscribeUnreadNotifications` from `notification.service.js`, updating unread badge count and listing recent missives with a "Mark all read" action.
+  - `src/ui/components/nav/nav.config.js` configures primary links (`Home`, `Library` on desktop navigation bar with `gap: var(--space-7)` between brand logo and links; secondary routes in Quick Command palette).
+  - Bell trigger button (`#nav-btn-notifications` / `#nav-notifications-btn`) mounts in the navigation bar alongside search.
+  - Interactive popover (`#nav-notifications-popover`) integrates real-time snapshot listener `subscribeUnreadNotifications` from `notification.service.js`, updating unread badge count and listing recent missives with a "Mark all read" action. Popover and items use semantic CSS classes (`.nav-notifications-*`) mapped to design tokens (`var(--bg-elevated)`, `var(--border)`).
+  - **Dynamic Theme Synchronization**: Navigation bar styles in `src/assets/css/nav.css` cleanly adapt to the active website theme (`[data-app-theme='transcendental']`, `[data-app-theme='dark']`, `[data-app-theme='light']`) using design tokens. The navbar relies on the site-wide theme controls (footer and settings) and does not contain a duplicate navbar toggle.
 - **Search Empty State & Instant Suggestions**:
   - `renderEmptySearchState(query, container)` in `src/ui/components/feedback.js` displays a dedicated technical state when zero results match, providing the active query term, suggested search tags, and a "Clear filters" reset action.
   - Home hero search bar includes an instant suggestions dropdown (`#hero-search-suggestions`) that reveals matching chronicles as the user types without requiring navigation.
