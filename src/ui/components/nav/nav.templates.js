@@ -455,7 +455,7 @@ export function buildNav() {
 
             <button
               type="button"
-              class="command-trigger mobile-shell p-3 rounded-xl bg-white/5 border border-white/10"
+              class="command-trigger mobile-shell"
               id="nav-command-button-mobile"
               aria-label="Search pages and actions"
               aria-haspopup="dialog"
@@ -476,29 +476,29 @@ export function buildNav() {
                 aria-expanded="false"
               >
                 <i data-lucide="bell" class="w-4 h-4" aria-hidden="true"></i>
-                <span id="nav-notifications-badge" class="hidden absolute -top-1 -right-1 text-[10px] font-bold px-1.5 py-0.2 rounded bg-indigo-600 text-white leading-tight"></span>
+                <span id="nav-notifications-badge" class="nav-notifications-badge hidden"></span>
               </button>
               <div
                 id="nav-notifications-popover"
-                class="hidden absolute right-0 top-full mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-white/10 bg-slate-950/95 backdrop-blur-xl shadow-2xl p-4 z-50 space-y-3"
+                class="nav-notifications-popover hidden"
                 role="dialog"
                 aria-label="Notifications"
               >
-                <div class="flex items-center justify-between pb-2 border-b border-white/5">
-                  <div class="flex items-center gap-2">
-                    <i data-lucide="bell" class="w-3.5 h-3.5 text-indigo-400"></i>
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-white">Chronicle Notices</h3>
+                <div class="nav-notifications-popover__header">
+                  <div class="nav-notifications-popover__title-wrap">
+                    <i data-lucide="bell" class="nav-notifications-popover__icon" aria-hidden="true"></i>
+                    <h3 class="nav-notifications-popover__title">Chronicle Notices</h3>
                   </div>
                   <button
                     type="button"
                     id="nav-notifications-mark-read"
-                    class="text-[10px] uppercase tracking-wider text-slate-400 hover:text-indigo-400 transition-colors"
+                    class="nav-notifications-popover__mark-read"
                   >
                     Mark read
                   </button>
                 </div>
-                <div id="nav-notifications-list" class="max-h-72 overflow-y-auto space-y-2 text-xs divide-y divide-white/5">
-                  <div class="py-6 text-center text-slate-500">No notices in the archive</div>
+                <div id="nav-notifications-list" class="nav-notifications-list">
+                  <div class="nav-notifications-empty">No notices in the archive</div>
                 </div>
               </div>
             </div>

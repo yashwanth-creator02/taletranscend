@@ -39,17 +39,16 @@ export async function loadAndRenderNotifications(userId) {
   if (!listEl) return;
 
   listEl.innerHTML = `
-    <div class="py-6 text-center text-slate-500">
-      <div class="inline-block w-4 h-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin mb-2"></div>
-      <p class="text-[11px]">Reading sacred chronicles...</p>
+    <div class="nav-notifications-loading">
+      <div class="nav-notifications-spinner"></div>
+      <p class="nav-notifications-loading__text">Reading sacred chronicles...</p>
     </div>
   `;
 
   const notifications = await getUserNotifications(userId, 20);
 
   if (!notifications || notifications.length === 0) {
-    listEl.innerHTML =
-      '<div class="py-6 text-center text-slate-500">No notices in the archive</div>';
+    listEl.innerHTML = '<div class="nav-notifications-empty">No notices in the archive</div>';
     return;
   }
 
@@ -62,14 +61,12 @@ export async function loadAndRenderNotifications(userId) {
       const href = item.link || '#';
 
       return `
-        <a href="${href}" class="block p-2.5 rounded-lg transition-colors hover:bg-white/5 ${
-          isUnread ? 'bg-indigo-950/20' : ''
-        }">
-          <div class="flex items-start justify-between gap-2">
-            <h4 class="font-medium text-slate-200 text-xs leading-snug">${safeTitle}</h4>
-            <span class="text-[10px] text-slate-500 shrink-0">${formattedTime}</span>
+        <a href="${href}" class="nav-notifications-item${isUnread ? ' nav-notifications-item--unread' : ''}">
+          <div class="nav-notifications-item__header">
+            <h4 class="nav-notifications-item__title">${safeTitle}</h4>
+            <span class="nav-notifications-item__time">${formattedTime}</span>
           </div>
-          ${safeBody ? `<p class="mt-1 text-[11px] text-slate-400 leading-normal line-clamp-2">${safeBody}</p>` : ''}
+          ${safeBody ? `<p class="nav-notifications-item__body">${safeBody}</p>` : ''}
         </a>
       `;
     })
