@@ -135,6 +135,7 @@ TaleTranscend adopts the 3-Layer Architecture (`directives/`, `execution/`, `.tm
   - `deploy_application.md`: Production build and Firebase/Vercel deployment workflows.
   - `developer_verification.md`: Mandatory formatting, token linting, TypeScript, and testing pipeline.
   - `firestore_management.md`: Firestore indexes, database paths, and collection schemas.
+  - `mcp_servers.md`: Project-local MCP server setup for Chrome DevTools debugging and Firebase project access.
   - `navigation_routing_and_sitemaps.md`: Hierarchical clean URLs, `resolveHref` asset safety, XML sitemap, and Table of Contents (Living Codex).
   - `profile_and_oracle_ai.md`: Chronicler profile, client-side Gemini API key storage, Oracle AI, and non-clipping tooltips.
   - `tale_interactions_and_comments.md`: Consolidated hero action deck, red soul resonance, fragment progress/downloads, and comments.
