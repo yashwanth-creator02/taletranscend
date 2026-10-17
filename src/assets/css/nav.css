@@ -36,6 +36,12 @@
 
 /* ── Branding ─────────────────────────────────────────────────────── */
 
+.nav-brand-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-7);
+}
+
 .nav-logo {
   display: flex;
   align-items: center;

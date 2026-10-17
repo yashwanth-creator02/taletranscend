@@ -12,8 +12,6 @@
 export const PRIMARY_LINKS = [
   { href: 'index.html', icon: 'home', label: 'Home' },
   { href: 'library.html', icon: 'book-open', label: 'Library' },
-  { href: 'shelf.html', icon: 'bookmark', label: 'Vault' },
-  { href: 'contribution.html', icon: 'feather', label: 'Write' },
 ];
 
 /**

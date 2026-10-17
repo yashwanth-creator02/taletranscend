@@ -425,7 +425,7 @@ export function buildNav() {
     headerHtml: `
       <header id="app-nav" class="app-nav">
         <div class="nav-inner">
-          <div class="flex items-center gap-10">
+          <div class="nav-brand-group">
             <a href="${resolveHref('index.html')}" class="nav-logo" aria-label="TaleTranscend home">
               <div class="nav-logo__mark">
                 <img src="${resolveHref('/logo.png')}" alt="" class="nav-logo__img" aria-hidden="true" width="28" height="28" />
