@@ -4,8 +4,8 @@
 
 import { state } from './state.js';
 import { updateStats } from './editor.js';
-import { initIcons } from '@ui/components/icons.js';
-import { escapeText as escapeHtml, createLogger } from '@/utils';
+import { initIcons } from '@ui/icons.js';
+import { escapeHtml, createLogger } from '@/utils';
 
 const log = createLogger('Chapters');
 
@@ -97,17 +97,17 @@ export function renderChapterList() {
     const isOnly = state.chapters.length === 1;
 
     const item = document.createElement('div');
-    item.className = `chapter-item${isActive ? ' chapter-item--active' : ''}`;
+    item.className = `chapter-row${isActive ? ' chapter-row--active' : ''}`;
     item.setAttribute('data-index', index);
 
     item.innerHTML = `
-      <button class="chapter-item__select" type="button" aria-label="Select chapter ${index + 1}">
-        <span class="chapter-item__num">${index + 1}</span>
-        <span class="chapter-item__title">${escapeHtml(ch.title || 'Untitled Chapter')}</span>
+      <button class="chapter-row__select" type="button" aria-label="Select chapter ${index + 1}">
+        <span class="chapter-row__num">${index + 1}</span>
+        <span class="chapter-row__title">${escapeHtml(ch.title || 'Untitled Chapter')}</span>
       </button>
-      <div class="chapter-item__actions">
+      <div class="chapter-row__actions">
         <button
-          class="chapter-item__action"
+          class="chapter-row__action"
           type="button"
           aria-label="Move up"
           data-move="up"
@@ -115,7 +115,7 @@ export function renderChapterList() {
           ${index === 0 ? 'disabled' : ''}
         ><i data-lucide="chevron-up"></i></button>
         <button
-          class="chapter-item__action"
+          class="chapter-row__action"
           type="button"
           aria-label="Move down"
           data-move="down"
@@ -123,7 +123,7 @@ export function renderChapterList() {
           ${index === state.chapters.length - 1 ? 'disabled' : ''}
         ><i data-lucide="chevron-down"></i></button>
         <button
-          class="chapter-item__action chapter-item__action--danger"
+          class="chapter-row__action chapter-row__action--danger"
           type="button"
           aria-label="Delete chapter"
           data-delete="${index}"
@@ -133,7 +133,7 @@ export function renderChapterList() {
     `;
 
     // Select chapter
-    item.querySelector('.chapter-item__select').addEventListener('click', () => {
+    item.querySelector('.chapter-row__select').addEventListener('click', () => {
       saveCurrentChapterToState();
       state.currentChapterIndex = index;
       renderChapterList();

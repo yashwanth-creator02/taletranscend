@@ -11,7 +11,7 @@ import { initGlobalPaletteShortcut } from '@ui/components/nav/nav.global.js';
 import { initAuth, auth, upgradeAnonymousToGoogle } from '@fb/index.js';
 import { signOut } from 'firebase/auth';
 import { navigateTo, initPageReveal, readyReveal, setupAuthTimeout, createLogger } from '@/utils';
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@ui/icons.js';
 import { showToast } from '@ui/components/toast.js';
 
 const log = createLogger('Profile');

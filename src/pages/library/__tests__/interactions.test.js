@@ -35,7 +35,7 @@ vi.mock('@ui/components/toast.js', () => ({
   showToast: vi.fn(),
 }));
 
-vi.mock('@ui/components/icons.js', () => ({
+vi.mock('@ui/icons.js', () => ({
   initIcons: vi.fn(),
 }));
 

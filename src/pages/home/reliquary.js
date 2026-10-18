@@ -5,7 +5,7 @@
 
 import { getReliquaryArtifacts, getArtifactAsset } from './reliquary.data.js';
 import { escapeHtml, createLogger } from '@/utils';
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@ui/icons.js';
 
 const log = createLogger('Reliquary');
 

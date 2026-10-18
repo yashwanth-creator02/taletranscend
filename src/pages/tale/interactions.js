@@ -20,7 +20,7 @@ import {
 } from '@services/index.js';
 import { auth } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@ui/icons.js';
 import { renderChapters } from './ui.js';
 import {
   markChapterRead,

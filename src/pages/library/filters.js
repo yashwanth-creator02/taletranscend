@@ -8,7 +8,7 @@ import { debounce, createLogger } from '@/utils';
 import { getBookmarks } from '@services/index.js';
 import { buildEraChips, setActiveEraChip, setActiveSidebarBtn } from './ui.js';
 import { renderCardsGrid } from '@ui/components/taleCard.js';
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@ui/icons.js';
 
 const log = createLogger('LibraryFilters');
 

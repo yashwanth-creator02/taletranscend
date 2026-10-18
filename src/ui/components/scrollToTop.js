@@ -2,7 +2,7 @@
 // Shared scroll-to-top button component for every page in TaleTranscend.
 // Appears on scroll (>120px) and smoothly returns user to the very top.
 
-import { initIcons } from './icons.js';
+import { initIcons } from '@ui/icons.js';
 import { createLogger } from '@/utils';
 
 const log = createLogger('ScrollToTop');

@@ -6,6 +6,7 @@ import { getTotalReadTime, getBookmarks, getTaleProgressData } from '@services/i
 import { getOverallProgress, formatMs, escapeHtml as escapeHtml, createLogger } from '@/utils';
 import { DEFAULT_COVER_URL } from '@config/app.config.js';
 import { renderEmptyState, renderErrorState, renderEmptySearchState } from './feedback.js';
+import { renderBadge } from './badge.js';
 
 const log = createLogger('TaleCard');
 import '@css/pages/tale-cards.css';
@@ -20,10 +21,6 @@ function _defaultCover() {
 
 function _formatReadTime(totalMs = 0) {
   return formatMs(Number(totalMs || 0));
-}
-
-function _badge(text, classes = '') {
-  return `<span class="badge ${classes}">${escapeHtml(text)}</span>`;
 }
 
 function _metaItem(icon, label) {
@@ -150,45 +147,6 @@ export function renderTaleCards(container, tales, metadata) {
   if (window.lucide) window.lucide.createIcons();
 }
 
-/**
- * Appends additional tale cards to the grid without wiping existing ones.
- * Used by the library "Load More" flow.
- *
- * @param {string} userId
- * @param {import('@state/schemas/tale.schema.js').Tale[]} tales
- */
-export async function appendTaleCards(userId, tales) {
-  const container = document.getElementById('cards-grid');
-  if (!container || !tales.length) return;
-
-  // Remove empty-state placeholder if present
-  const emptyState = container.querySelector('.empty-state');
-  if (emptyState) emptyState.remove();
-
-  const metadata = await fetchTalesMetadata(userId, tales);
-
-  const html = tales
-    .map((tale, index) => {
-      const chaptersProgress = metadata.progressSnapshots[index] || {};
-      const progressStats = getOverallProgress({
-        chapterCount: Number(tale.chapterCount) || 0,
-        chaptersProgress,
-      });
-      const displayPercent = tale.status === 'finished' ? 100 : progressStats.percent || 0;
-      return _createTaleCard(tale, displayPercent, metadata.readTimeMap, metadata.bookmarkMap);
-    })
-    .join('');
-
-  // Append instead of replace
-  const temp = document.createElement('div');
-  temp.innerHTML = html;
-  while (temp.firstChild) {
-    container.appendChild(temp.firstChild);
-  }
-
-  if (window.lucide) window.lucide.createIcons();
-}
-
 export async function renderCardsGrid(userId, tales, { showSkeleton = false } = {}) {
   const container = document.getElementById('cards-grid');
   if (!container) return;
@@ -281,7 +239,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
   const menuId = `menu-${id}`;
   const cover = coverUrl || _defaultCover();
 
-  const timeBadge = readTimeLabel ? _badge(readTimeLabel, 'badge-subtle') : '';
+  const timeBadge = readTimeLabel ? renderBadge(readTimeLabel, 'badge-subtle') : '';
   const statusBadgeClasses = isFinished
     ? 'badge-finished border-emerald-500/20'
     : 'badge-era border-indigo-500/20';
@@ -299,8 +257,8 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
         <!-- Top Bar: Era Badges & Options Menu -->
         <div class="mb-2 sm:mb-3 flex items-center justify-between gap-1.5 sm:gap-2 relative z-20 min-h-6 sm:min-h-7">
           <div class="flex items-center gap-1 sm:gap-1.5 flex-wrap min-w-0">
-            ${safeEra ? _badge(safeEra, 'badge-era max-w-[85px] sm:max-w-none truncate') : ''}
-            ${isFinished ? _badge('Finished', statusBadgeClasses) : ''}
+            ${safeEra ? renderBadge(safeEra, 'badge-era max-w-[85px] sm:max-w-none truncate') : ''}
+            ${isFinished ? renderBadge('Finished', statusBadgeClasses) : ''}
           </div>
 
           <div class="relative shrink-0">

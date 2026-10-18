@@ -8,7 +8,7 @@ vi.mock('@/utils', () => ({
   safeCall: vi.fn(async (promise, fallback) => {
     try {
       return await promise;
-    } catch (e) {
+    } catch {
       return fallback;
     }
   }),

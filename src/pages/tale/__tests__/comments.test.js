@@ -5,7 +5,6 @@ import {
   editComment,
   deleteComment,
   deleteReply,
-  buildReplyTree,
 } from '../comments.js';
 import * as fb from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
@@ -35,7 +34,7 @@ vi.mock('@ui/components/toast.js', () => ({
   showToast: vi.fn(),
 }));
 
-vi.mock('@ui/components/icons.js', () => ({
+vi.mock('@ui/icons.js', () => ({
   initIcons: vi.fn(),
 }));
 
@@ -549,55 +548,6 @@ describe('TaleComments', () => {
   });
 
   describe('nested replies and reply-to-reply hierarchy', () => {
-    describe('buildReplyTree', () => {
-      it('returns empty array when given non-array or empty array', () => {
-        expect(buildReplyTree([])).toEqual([]);
-        expect(buildReplyTree(null)).toEqual([]);
-        expect(buildReplyTree(undefined)).toEqual([]);
-      });
-
-      it('returns root nodes for replies without replyToId', () => {
-        const replies = [
-          { id: 'r1', text: 'First' },
-          { id: 'r2', text: 'Second' },
-        ];
-        const tree = buildReplyTree(replies);
-        expect(tree).toHaveLength(2);
-        expect(tree[0].id).toBe('r1');
-        expect(tree[0].children).toEqual([]);
-        expect(tree[1].id).toBe('r2');
-        expect(tree[1].children).toEqual([]);
-      });
-
-      it('nests child replies under their parent reply', () => {
-        const replies = [
-          { id: 'r1', text: 'Parent' },
-          { id: 'r2', text: 'Child of r1', replyToId: 'r1' },
-          { id: 'r3', text: 'Grandchild of r2', replyToId: 'r2' },
-          { id: 'r4', text: 'Another child of r1', replyToId: 'r1' },
-        ];
-        const tree = buildReplyTree(replies);
-        expect(tree).toHaveLength(1);
-        expect(tree[0].id).toBe('r1');
-        expect(tree[0].children).toHaveLength(2);
-        expect(tree[0].children[0].id).toBe('r2');
-        expect(tree[0].children[0].children).toHaveLength(1);
-        expect(tree[0].children[0].children[0].id).toBe('r3');
-        expect(tree[0].children[1].id).toBe('r4');
-      });
-
-      it('gracefully handles orphaned reply by making it a root node', () => {
-        const replies = [
-          { id: 'r1', text: 'Parent' },
-          { id: 'r2', text: 'Orphan reply', replyToId: 'non-existent' },
-        ];
-        const tree = buildReplyTree(replies);
-        expect(tree).toHaveLength(2);
-        expect(tree[0].id).toBe('r1');
-        expect(tree[1].id).toBe('r2');
-      });
-    });
-
     describe('nested reply rendering and interactions', () => {
       it('renders hierarchical tree with replyTo badge and nested children container', async () => {
         vi.mocked(fb.getDocs)

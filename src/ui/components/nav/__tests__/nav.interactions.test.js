@@ -17,7 +17,7 @@ vi.mock('../nav.utils.js', () => ({
   renderIcons: vi.fn(),
   getCurrentPage: vi.fn(() => 'index.html'),
   getAvatarSeed: vi.fn(() => 'seed'),
-  escapeText: vi.fn((s) => s),
+  escapeHtml: vi.fn((s) => s),
 }));
 
 vi.mock('../nav.command-palette.js', () => ({

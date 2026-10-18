@@ -1,5 +1,5 @@
 // src/state/__tests__/app.state.test.js
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { appState, setAppUser, setAppProfile, setAppReaderPrefs } from '../app.state.js';
 
 describe('AppState', () => {

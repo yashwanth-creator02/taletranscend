@@ -3,17 +3,8 @@
    Strictly compliant with tokens.css. Zero raw hex or rgb literals.
 */
 
-:root {
-  --editor-header-height: 64px;
-  --atelier-left-width: 290px;
-  --atelier-right-width: 380px;
-}
-
-@media (max-width: 639px) {
-  :root {
-    --editor-header-height: 58px;
-  }
-}
+/* Page-layout variables live in tokens.css (section 8) so there is exactly
+   one place to grep token definitions. */
 
 /* Ensure global nav and mobile floating dock never render on contribution page */
 #app-nav,
@@ -40,7 +31,7 @@
 }
 
 /* ── Shelf & Atelier Surfaces ───────────────────────── */
-.shelf-card {
+.atelier-card {
   background: var(--surface-gradient);
   border: 1px solid rgb(var(--light-rgb) / var(--a-03));
   backdrop-filter: blur(24px) saturate(160%);
@@ -48,7 +39,7 @@
   transition: all var(--transition-spring);
 }
 
-.shelf-card:focus-within {
+.atelier-card:focus-within {
   border-color: rgb(var(--accent-rgb) / var(--a-07));
   box-shadow: 0 0 35px rgb(var(--accent-rgb) / var(--a-02));
 }
@@ -427,7 +418,7 @@
 }
 
 /* ── Chapter List Items (Contract with chapters.js) ─────────────────── */
-.chapter-item {
+.chapter-row {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -438,18 +429,18 @@
   margin-bottom: 4px;
 }
 
-.chapter-item:hover {
+.chapter-row:hover {
   background: rgb(var(--light-rgb) / var(--a-02));
   border-color: rgb(var(--light-rgb) / var(--a-03));
 }
 
-.chapter-item--active {
+.chapter-row--active {
   background: rgb(var(--accent-rgb) / var(--a-03));
   border-color: rgb(var(--accent-rgb) / var(--a-07));
   box-shadow: inset 0 0 20px rgb(var(--accent-rgb) / var(--a-01));
 }
 
-.chapter-item__select {
+.chapter-row__select {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -462,7 +453,7 @@
   padding: 4px 0;
 }
 
-.chapter-item__num {
+.chapter-row__num {
   font-size: 0.65rem;
   font-weight: 900;
   letter-spacing: 0.12em;
@@ -479,13 +470,13 @@
   transition: all var(--transition-base);
 }
 
-.chapter-item--active .chapter-item__num {
+.chapter-row--active .chapter-row__num {
   background: rgb(var(--accent-rgb) / var(--a-11));
   color: var(--text-on-accent);
   box-shadow: 0 0 15px rgb(var(--accent-rgb) / var(--a-08));
 }
 
-.chapter-item__title {
+.chapter-row__title {
   font-size: 0.8125rem;
   font-weight: 600;
   color: var(--text-muted);
@@ -495,12 +486,12 @@
   transition: color var(--transition-base);
 }
 
-.chapter-item--active .chapter-item__title {
+.chapter-row--active .chapter-row__title {
   color: var(--text-primary);
   font-weight: 700;
 }
 
-.chapter-item__actions {
+.chapter-row__actions {
   display: flex;
   gap: 3px;
   opacity: 0;
@@ -508,13 +499,13 @@
   transition: all var(--transition-base);
 }
 
-.chapter-item:hover .chapter-item__actions,
-.chapter-item--active .chapter-item__actions {
+.chapter-row:hover .chapter-row__actions,
+.chapter-row--active .chapter-row__actions {
   opacity: 1;
   transform: translateX(0);
 }
 
-.chapter-item__action {
+.chapter-row__action {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -528,17 +519,17 @@
   transition: all var(--transition-fast);
 }
 
-.chapter-item__action:hover:not(:disabled) {
+.chapter-row__action:hover:not(:disabled) {
   background: rgb(var(--light-rgb) / var(--a-03));
   color: var(--text-primary);
 }
 
-.chapter-item__action:disabled {
+.chapter-row__action:disabled {
   opacity: 0.15;
   cursor: not-allowed;
 }
 
-.chapter-item__action--danger:hover:not(:disabled) {
+.chapter-row__action--danger:hover:not(:disabled) {
   background: rgb(var(--danger-rgb) / var(--a-05));
   color: rgb(var(--danger-rgb) / var(--a-11));
 }
@@ -585,7 +576,7 @@
 }
 
 /* ── Mythic Era Pills ───────────────────────── */
-.era-pill {
+.era-chip {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
@@ -602,14 +593,14 @@
   cursor: pointer;
 }
 
-.era-pill:hover {
+.era-chip:hover {
   color: var(--text-primary);
   background: rgb(var(--light-rgb) / var(--a-04));
   border-color: rgb(var(--rune-rgb) / var(--a-07));
   box-shadow: 0 0 12px rgb(var(--rune-rgb) / var(--a-02));
 }
 
-.era-pill--active {
+.era-chip--active {
   color: rgb(var(--rune-rgb) / var(--a-11));
   background: rgb(var(--rune-rgb) / var(--a-04));
   border-color: rgb(var(--rune-rgb) / var(--a-08));
@@ -653,7 +644,7 @@
 
 /* ── Light Mode Polish ───────────────────────────────────────────── */
 
-[data-app-theme='light'] .shelf-card,
+[data-app-theme='light'] .atelier-card,
 [data-app-theme='light'] .readiness-seal-card {
   background: var(--bg-elevated);
   border-color: var(--border);
@@ -692,19 +683,19 @@
   box-shadow: var(--shadow-sm) !important;
 }
 
-[data-app-theme='light'] .era-pill {
+[data-app-theme='light'] .era-chip {
   background: var(--surface-2);
   border-color: var(--border);
   color: var(--text-secondary);
   border-radius: var(--radius-sm);
 }
 
-[data-app-theme='light'] .era-pill:hover {
+[data-app-theme='light'] .era-chip:hover {
   color: var(--text-primary);
   border-color: var(--border-strong);
 }
 
-[data-app-theme='light'] .era-pill--active {
+[data-app-theme='light'] .era-chip--active {
   color: var(--text-primary) !important;
   background: var(--surface-3) !important;
   border-color: var(--border-accent) !important;

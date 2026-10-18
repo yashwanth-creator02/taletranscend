@@ -33,7 +33,7 @@ vi.mock('@/utils', () => ({
   safeAsync: vi.fn(async (p, options = {}) => {
     try {
       return await p;
-    } catch (e) {
+    } catch {
       if (options.fallback !== undefined) return options.fallback;
       return null;
     }
@@ -47,7 +47,7 @@ vi.mock('@/utils', () => ({
   })),
   initPageReveal: vi.fn(),
   readyReveal: vi.fn(),
-  escapeText: vi.fn((s) => s),
+  escapeHtml: vi.fn((s) => s),
   validateData: vi.fn((schema, data) => ({ success: true, data })),
   TaleSchema: {},
   DraftChapterSchema: {},

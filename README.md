@@ -83,6 +83,10 @@ npm run format
 # Verify no raw colour literals exist outside the design-token files
 npm run lint:tokens
 
+# Seed the 24 sample tales + chapters into Firestore (needs a configured .env;
+# safe to re-run — the seeder is idempotent)
+npm run seed:tales
+
 # Run every check CI would run (format, lint, tokens, types, tests)
 npm run verify
 ```

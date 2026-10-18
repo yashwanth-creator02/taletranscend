@@ -95,7 +95,7 @@ Define the standard operating procedures, data structures, and UI behaviors for 
   - Instead of external Dicebear avatar images, avatars use circular typography chips rendering the user's uppercase initials (extracted via `getAuthorInitials(authorName)`).
   - Background uses `var(--accent)`, font uses `var(--font-serif)`, with `border-radius: 50%` and high-contrast letterforms.
 - **Date-Time Formatting Standard**:
-  - All timestamps use `formatCommentDateTime(at)` rendering both formatted date and time (`MMM D, YYYY at h:mm A`, e.g., "Oct 12, 2026 at 11:05 PM").
+  - All timestamps use `formatCommentDateTime(at)` (shared in `src/utils/comment.utils.ts`; unwraps Firestore `{ seconds }` timestamps) rendering both formatted date and time (`MMM D, YYYY at h:mm A`, e.g., "Oct 12, 2026 at 11:05 PM").
 - **Rectangular Technical Badges (Anti-Vibecoding)**:
   - **Author Tag** (`.author-tag`): Structural rectangular shield with `var(--accent)` background and border, indicating the tale author. Never use rounded pill badges.
   - **Edited Badge** (`.edited-badge`): Clean rectangular badge with `var(--border)` and `var(--text-muted)` indicating modified reflections.
@@ -109,7 +109,7 @@ Define the standard operating procedures, data structures, and UI behaviors for 
   - Replies: `parentId: rootCommentId`, `replyToId: immediateCommentOrReplyId`, `replyToAuthorName: string`.
   - Security Rules requirement: All replies under a comment must adhere to Firestore rules validating that `parentId` matches the parent chain.
 - **Tree Construction**:
-  - Group flat or hierarchical reply records using `buildReplyTree(comments)`.
+  - Group flat or hierarchical reply records using `buildReplyTree(comments)` (shared in `src/utils/comment.utils.ts`; import the module directly, not via the `@/utils` barrel).
   - Recursively render reply nodes with nested child lists (`_renderReplyNode`).
 - **Inline Editing & Forms**:
   - Comments and replies can be edited by their original author via `.comment-inline-form` with `.comment-textarea`, `.comment-cancel-btn`, and save action.

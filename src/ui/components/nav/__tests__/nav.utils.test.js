@@ -1,5 +1,5 @@
 // src/ui/components/nav/__tests__/nav.utils.test.js
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { getCurrentPage, getAvatarSeed, getNavElements } from '../nav.utils.js';
 
 describe('Nav Utils', () => {

@@ -25,7 +25,7 @@ import {
   setGridError,
   buildBookmarkCard,
 } from './ui.js';
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@ui/icons.js';
 
 const log = createLogger('ShelfContent');
 

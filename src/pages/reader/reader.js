@@ -1336,6 +1336,8 @@ async function _handleBookmark() {
 
 /* ─────────────────────────────────────────────
    Reader Prefs — Firestore Sync
+   Loading lives here; saving is handled by theme.js's debounced write,
+   which fires after every user-initiated theme/typography change.
    ───────────────────────────────────────────── */
 
 /**
@@ -1354,32 +1356,6 @@ async function _loadAndApplyCloudPrefs(userId) {
     applyCloudPrefs(appState.readerPrefs);
   } catch (err) {
     log.warn('Could not load cloud prefs, using local defaults:', err);
-  }
-}
-
-/**
- * Persists current reader preferences to Firestore.
- * Called after any theme or typography change if the user is authenticated.
- *
- * @param {string} userId
- */
-export async function saveReaderPrefs(userId) {
-  if (!userId) return;
-  try {
-    await setDoc(
-      refs.readerPrefs(userId),
-      {
-        theme: readerState.theme,
-        fontFamily: readerState.fontFamily,
-        fontSize: readerState.fontSize,
-        lineHeight: readerState.lineHeight,
-        measure: readerState.measure,
-        updatedAt: serverTimestamp(),
-      },
-      { merge: true }
-    );
-  } catch (err) {
-    log.warn('Could not save prefs to cloud:', err);
   }
 }
 

@@ -1303,23 +1303,10 @@ body.focus-mode #top-bar-focus:hover {
   box-sizing: border-box;
 }
 
+/* Thread geometry lives in components.css (shared); the reader adds its
+   theme-aware border only. */
 .comment-replies-list {
-  margin-top: 0.75rem;
-  margin-left: 0.75rem;
-  margin-right: 0;
-  padding-left: 0.5rem;
-  padding-right: 0;
   border-left: 1px solid var(--reader-border);
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-@media (min-width: 640px) {
-  .comment-replies-list {
-    margin-left: 1.25rem;
-    padding-left: 0.75rem;
-  }
 }
 
 .comment-reply-card {
@@ -1348,19 +1335,6 @@ body.focus-mode #top-bar-focus:hover {
     max-width: 100%;
   }
 
-  .comment-replies-list {
-    margin-left: 0.375rem;
-    padding-left: 0.375rem;
-    margin-right: 0;
-    padding-right: 0;
-    gap: 0.375rem;
-  }
-
-  .comment-replies-list .comment-replies-list {
-    margin-left: 0.25rem;
-    padding-left: 0.25rem;
-  }
-
   .comment-reply-card {
     padding: 0.5rem;
   }
@@ -1369,16 +1343,6 @@ body.focus-mode #top-bar-focus:hover {
     margin-right: -0.5rem;
     padding-right: 0;
   }
-}
-
-.reply-target-tag {
-  font-size: 9px;
-  padding: 1px 5px;
-  border-radius: 3px;
-  background: rgb(var(--accent-rgb) / var(--a-04));
-  border: 1px solid rgb(var(--accent-rgb) / var(--a-07));
-  color: var(--accent-tint);
-  font-weight: 600;
 }
 
 .highlight-text {

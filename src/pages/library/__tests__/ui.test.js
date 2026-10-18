@@ -4,7 +4,6 @@ import {
   setupSidebarToggle,
   setActiveSidebarBtn,
   buildEraChips,
-  setActiveEraChip,
   updateSidebarUser,
   showGridSkeleton,
   showGridEmpty,
@@ -12,7 +11,7 @@ import {
 } from '../ui.js';
 import { libraryState } from '../state.js';
 
-vi.mock('@ui/components/icons.js', () => ({
+vi.mock('@ui/icons.js', () => ({
   initIcons: vi.fn(),
 }));
 

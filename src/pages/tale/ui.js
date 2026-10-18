@@ -1,7 +1,7 @@
 // src/pages/tale/ui.js
 // Presentation layer for the tale summary page (Chronicle Codex).
 
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@ui/icons.js';
 import { setText, escapeHtml, createLogger, updatePageMeta } from '@/utils';
 import { getTotalReadTime } from '@services/index.js';
 import { getChapterProgress } from '@services/reader/localProgress.service.js';

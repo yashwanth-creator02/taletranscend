@@ -2,7 +2,7 @@
 // Shared UI utilities used across all pages.
 
 export { formatJoinDate } from './format.utils.ts';
-import { escapeText } from './sanitize.utils.ts';
+import { escapeHtml } from './string.utils.ts';
 
 /* ─────────────────────────────────────────────
    Auth Timeout Guard
@@ -27,7 +27,7 @@ export function setupAuthTimeout(
     if (container) {
       container.innerHTML = `
         <div class="col-span-full text-center py-20 text-red-500 font-medium">
-          ${escapeText(message)}
+          ${escapeHtml(message)}
         </div>
       `;
     }

@@ -106,6 +106,7 @@ The TaleTranscend brand mark is the mythical golden-trimmed black quill pen enci
 - **Single-Source Cascading Tokens**:
   - All theme palettes are strictly defined in `src/assets/css/tokens.css` under `html[data-app-theme='transcendental']`, `html[data-app-theme='dark']`, and `html[data-app-theme='light']`.
   - Shared geometric constants and typography variables reside in the subsequent `:root` block without clobbering color schemes, elevation shadows, or navigation backgrounds.
+  - Page-layout tokens (`--sidebar-width`, `--editor-header-height`, `--left-panel-width`, `--action-bar-height`, `--atelier-*-width`, `--scrollbar-*`) also live in that shared `:root` area (the "Page Layout" group inside section 8 of `tokens.css`). Page stylesheets must not declare their own `:root` token blocks — the 2026-10-18 audit (F14) consolidated the contribution/library/profile/tale blocks into `tokens.css`; add new tokens there instead.
 - **Synchronous Anti-FOUC Theme Hydration**:
   - Every HTML document (`index`, `library`, `shelf`, `tale`, `reader`, `profile`, `settings`, `contribution`, `toc`, `login`, `404`) includes an immediate `<script>` tag in `<head>` before stylesheets load:
     ```html
@@ -187,7 +188,7 @@ The TaleTranscend brand mark is the mythical golden-trimmed black quill pen enci
   - **Alabaster & Parchment Card Hierarchy**: Profile cards (`.identity-card`, `#author-registry-card`, `.stat-card-mythic`, `.chronicle-goal-card`, `#btn-new-story`) render `rgb(var(--bg-overlay-rgb) / 0.94)` with subtle 1px borders in light mode for a distraction-free, archival feel.
   - **Harmonious Resize Grips**: Multi-column separator handles (`.resize-handle-grip`) adapt to the theme ground (`var(--bg-overlay)` in light mode, `rgb(var(--dark-rgb) / var(--a-11))` in dark mode) avoiding harsh black pill artifacts.
 
-### 9. Site-Wide Multi-Page Theme Contrast & Surface Standards
+### 11. Site-Wide Multi-Page Theme Contrast & Surface Standards
 
 - **Prohibition of Hardcoded Ground Colors**: Never hardcode dark container utility classes (such as `bg-slate-950/90`, `bg-slate-950/40`, `bg-black/30`, `bg-black/40`) or hardcoded light text utility classes (`text-white`, `text-slate-200`, `text-slate-300`, `text-indigo-100`) directly on surfaces that exist in both dark and light themes.
 - **Semantic Replacements**:
@@ -199,7 +200,7 @@ The TaleTranscend brand mark is the mythical golden-trimmed black quill pen enci
   - Accent quotes and runes: Use `text-[var(--mythic-gold)]` (resolves to `#fbbf24` in dark and `#b45309` in light).
 - **CSS Light Theme Elevation Overrides**: Every page stylesheet (`shelf.css`, `tale.css`, `toc.css`, `contribution.css`, `profile.css`, `settings.css`, `login.css`) must explicitly define `[data-app-theme='light']` rules for all cards, panels, popups, and inputs, assigning them `var(--bg-elevated)` or `var(--surface-2)` with `border-color: var(--border)`.
 
-### 10. Application Theming Architecture & Specimen Standards
+### 12. Application Theming Architecture & Specimen Standards
 
 - **Core Theme Registry**: Registered in `src/config/theme.config.js`:
   - `transcendental`: Signature mythic cosmic dark (default; `#030305` ground, starlight indigo & warm amber runes).
@@ -239,6 +240,13 @@ The TaleTranscend brand mark is the mythical golden-trimmed black quill pen enci
   - Floating utility controls (like `#scroll-to-top`) must NEVER hardcode dark-mode utility classes (e.g. `text-indigo-300`, `group-hover:text-white`).
   - Icons inside `#scroll-to-top` must inherit `currentColor` (`stroke: currentColor`), tied to `var(--text-primary)` (default) and `var(--accent)` (hover).
   - Backgrounds, borders, and shadows must derive exclusively from design tokens (`var(--bg-overlay)`, `var(--border-strong)`, `var(--shadow-md)`, `var(--shadow-glow)`), ensuring high contrast across both light and dark themes.
+
+### 13. CSS Architecture: Class Ownership & Shared Surfaces (Audit F9, 2026-10-18)
+
+- **Single-Owner Class Names**: A class defined in a page stylesheet is owned by that page. Never reuse another page's class name for a different visual treatment. Renames completed in the audit: the contribution page uses `.atelier-card` (editor panels), `.era-chip` (+ `data-era-chip`), and `.chapter-row*` (chapter list); `shelf.css` keeps `.shelf-card`, `toc.css` keeps `.era-pill`, and `tale.css` keeps `.chapter-item`.
+- **Shared Components Live in `components.css`**: Genuinely identical rules go in `src/assets/css/components.css`. The comment-thread geometry (`.comment-replies-list` base, indentation and both breakpoints, `.reply-target-tag`) lives in its `COMMENT SURFACE (SHARED LAYOUT)` section; colour/theme-dependent comment rules stay page-local (`reader.css` uses reader-theme tokens, `tale.css` uses app tokens).
+- **Profile Skins Are Documented Shadowing**: `profile.css` intentionally overrides the shared `.btn-ghost` / `.input-mythic` components (the file loads only on the profile page). Its hover rule carries only the declarations that actually win the cascade (colour, transform); read the in-file comments before removing or restyling those overrides.
+- **No Dead Orphan Rules**: When a component stops being used on a page, delete its page-level overrides (e.g. the `.stat-value` no-op removed from `profile.css`, the dead `.theme-btn` block removed from `components.css`) instead of leaving them for a future reader to reconcile.
 
 ## Tools / Scripts to Use
 

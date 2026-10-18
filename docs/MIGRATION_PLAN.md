@@ -12,6 +12,14 @@ This file was regenerated after the fact from the real history of the work — s
 happened across a long back-and-forth with real debugging, real mistakes, and real fixes, not
 a clean linear plan executed exactly as written. Where that's relevant, it's noted.
 
+> **Scope note (added 2026-10-18).** Parts of this plan describe the sandbox environment the
+> migration work happened in, not this repository. In _this_ repo the differences that matter:
+> aliases are still `@ui/*` and `@pages/*` (directories stayed `src/ui/` and `src/pages/`;
+> neither `shared/` nor `features/` exists), Firestore rules and indexes live at the repository
+> root (`firestore.rules`, `firestore.indexes.json`), `AGENTS.md` is present and maintained,
+> and the `ui/components/icons.js` re-export shim survived until the 2026-10-18 code audit
+> (finding F7) deleted it. Where the text below disagrees with the code, trust the code.
+
 ---
 
 ## Phase 1 — Flatten Firestore data paths 🚫 VOIDED
@@ -44,8 +52,10 @@ being applied to the real repo. See `docs/decisions/0001-keep-nested-firestore-p
      (`'field' in request.resource.data &&` before any dot-notation access) is now the standing
      convention, see `docs/CONVENTIONS.md`
   4. `rules_version = '3'` doesn't exist (only `'2'` does) — caught independently
-- Moved to `firestore/firestore.rules` + `firestore/firestore.indexes.json` +
-  `firestore/tests/rules.emulator.test.ts` (previously all at repo root)
+- Emulator tests live at `firestore/tests/rules.emulator.test.ts` (the sandbox moved the rules
+  themselves under `firestore/`; this repository keeps the authoritative `firestore.rules` +
+  `firestore.indexes.json` at the repo root, and the duplicated `firestore/` copies that had
+  drifted from them were deleted in the 2026-10-18 code audit, findings F1/F2)
 - `vitest.rules.config.js` added — a separate Vitest config (Node environment) for the rules
   emulator tests, since they can't share a config with the jsdom-environment app tests
 
@@ -55,19 +65,26 @@ One folder per domain. `markFinish.service.js`/`progress.utils.service.js` joine
 `reader/` domain rather than each getting a single-file folder of their own — a folder with one
 file isn't really a domain.
 
-## Phase 4 — `ui/` → `shared/` ✅
+## Phase 4 — `ui/` → `shared/` ✅ (sandbox only — not applied in this repo)
 
 Components grouped one-per-folder under `shared/components/`. The old
 `ui/components/icons.js` — a one-line re-export shim every consumer imported through instead of
 the real file — was deleted; everyone now imports the real file directly.
 
-## Phase 5 — `pages/` → `features/` ✅
+- In this repository the folder stayed `src/ui/` under the `@ui/*` alias, and the shim deletion
+  above only landed here with the 2026-10-18 code audit (finding F7).
+
+## Phase 5 — `pages/` → `features/` ✅ (sandbox only — not applied in this repo)
 
 Mechanical rename. Alias updated in all four places it's independently defined
 (`vite.config.js`, `tsconfig.json`, `vitest.config.js`, `jsconfig.json` — see
 `docs/CONVENTIONS.md`'s note on this; `jsconfig.json` was missed on the first pass here and had
 to be caught with a repo-wide grep afterward). HTML `<script src>` paths updated separately,
 since those are relative paths resolved by Vite's HTML transform, not the JS-side alias config.
+
+- In this repository the folder stayed `src/pages/` under the `@pages/*` alias, and
+  `jsconfig.json` no longer exists at all (deleted in the 2026-10-18 code audit, finding F15 —
+  `docs/CONVENTIONS.md`'s alias note now lists three config files, not four).
 
 ## Phase 6 — Cloud Functions, then BYOK ✅
 
@@ -108,6 +125,10 @@ agent-tool-oriented format, and was concretely proven drift-prone — missed by 
 phases' doc updates before being caught). Kept `CONTRIBUTING.md` (genuinely distinct content).
 Added `functions/README.md` (deployment/secrets setup, specific to the new package, not
 duplicated anywhere else).
+
+- In this repository `AGENTS.md` was kept and is actively maintained as the agent-guidance
+  entry point (the removal above happened in the sandbox, where that guidance was duplicated
+  elsewhere).
 
 ## Phase 7 — CI/CD ✅
 

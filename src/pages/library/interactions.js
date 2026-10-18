@@ -4,7 +4,7 @@
 // Everything else (search, filters, sidebar toggle) lives in filters.js / ui.js.
 
 import { showToast } from '@ui/components/toast.js';
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@ui/icons.js';
 import { confirmTaleDownload } from '@ui/components/confirmModal.js';
 import { navigateTo, taleUrl, readerUrl, createLogger } from '@/utils';
 

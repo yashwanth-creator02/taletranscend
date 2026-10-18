@@ -30,10 +30,12 @@ to an existing domain, like `markFinish.service.js` joining `services/reader/`) 
 inside an existing one. Don't create a folder for exactly one file with no sibling in sight —
 that's indirection without payoff.
 
-## Path aliases exist in **four** separate config files — update all four or nothing works
+## Path aliases exist in **three** separate config files — update all three or nothing works
 
-`vite.config.js`, `tsconfig.json`, `vitest.config.js`, and `jsconfig.json` each define the same
-alias list independently. There's no single source of truth for them at the tooling level.
+`vite.config.js`, `tsconfig.json`, and `vitest.config.js` each define the same alias list
+independently. There's no single source of truth for them at the tooling level. (A fourth
+copy, `jsconfig.json`, was deleted in the 2026-10-18 audit — it duplicated `tsconfig.json`
+verbatim, nothing in the build read it, and it had already drifted once.)
 This bit us twice during the migration — an alias rename applied to three of the four files,
 with `jsconfig.json` silently left stale each time, only caught later by a repo-wide grep.
 **Whenever you add, rename, or remove a path alias, grep the whole repo for the old alias
@@ -43,7 +45,8 @@ config file.
 ## Escaping discipline: every innerHTML assignment goes through the sanitize layer
 
 Any HTML string built from data that came from Firestore, user input, or anywhere outside this
-codebase's own literal strings must go through `escapeHtml()`/`escapeText()` (for plain text)
+codebase's own literal strings must go through `escapeHtml()` (the single escaping helper —
+the DOM-based `escapeText()` duplicate was removed in the 2026-10-18 audit, finding F13)
 or `sanitizeHtml()` (for the few places actual HTML formatting is intentional, like chapter
 content) before it's assigned to `innerHTML` or interpolated into a template string that becomes
 `innerHTML`. This was a genuine strength found in the original repo audit — keep it that way.

@@ -8,7 +8,7 @@
  * 3. High-craft, editorial Quote Share Card modal.
  */
 
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@ui/icons.js';
 import { showToast } from '@ui/components/toast.js';
 import { renderQuoteCardModal } from './templates.js';
 

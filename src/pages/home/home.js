@@ -16,7 +16,7 @@ import {
   taleUrl,
   createLogger,
 } from '@/utils';
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@ui/icons.js';
 import { showToast } from '@ui/components/toast.js';
 import { getTales } from '@services/index.js';
 import { cacheService } from '@services/cache.service.js';

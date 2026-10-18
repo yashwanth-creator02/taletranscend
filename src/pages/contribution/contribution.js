@@ -642,9 +642,9 @@ function bindPresetEvents() {
   });
 
   // Mythic Era pills click
-  document.querySelectorAll('[data-era-pill]').forEach((btn) => {
+  document.querySelectorAll('[data-era-chip]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const era = btn.dataset.eraPill;
+      const era = btn.dataset.eraChip;
       const eraInput = document.getElementById('tale-era');
       if (eraInput) {
         eraInput.value = era;
@@ -652,8 +652,8 @@ function bindPresetEvents() {
       }
       state.era = era;
       state.isDirty = true;
-      document.querySelectorAll('[data-era-pill]').forEach((p) => {
-        p.classList.toggle('era-pill--active', p.dataset.eraPill === era);
+      document.querySelectorAll('[data-era-chip]').forEach((p) => {
+        p.classList.toggle('era-chip--active', p.dataset.eraChip === era);
       });
       updateChecklist();
     });

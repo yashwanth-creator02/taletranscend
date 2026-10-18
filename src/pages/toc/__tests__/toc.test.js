@@ -6,7 +6,7 @@ vi.mock('@ui/components/nav/nav.js', () => ({
   initNav: vi.fn(),
 }));
 
-vi.mock('@ui/components/icons.js', () => ({
+vi.mock('@ui/icons.js', () => ({
   initIcons: vi.fn(),
 }));
 

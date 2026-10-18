@@ -6,7 +6,7 @@
 import { createLogger, escapeHtml } from '@/utils';
 import { auth, refs, addDoc, updateDoc, serverTimestamp } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@ui/icons.js';
 import { getAuthorStatus } from '@services/author.service.js';
 import {
   fetchAuthorInquiries,
@@ -16,7 +16,8 @@ import {
   createInquiry,
   mergeInquiries,
 } from '@services/index.js';
-import { formatCommentDateTime, getAuthorInitials } from './comments.js';
+import { getAuthorInitials } from './comments.js';
+import { formatCommentDateTime } from '@/utils/comment.utils.ts';
 
 const log = createLogger('ChroniclerMissives');
 
@@ -558,7 +559,6 @@ export function setupInquire(taleId, tale, userId = null) {
   );
 
   const tabBtnLetter = document.getElementById('tab-btn-letter');
-  const inviteCard = document.querySelector('.chronicler-invite-card');
   const authorView = document.getElementById('author-missives-view');
   const readerView = document.getElementById('reader-missives-view');
 
@@ -726,7 +726,6 @@ export function setupInquire(taleId, tale, userId = null) {
   const submitBtn = document.getElementById('inquire-submit-btn');
   const submitText = document.getElementById('inquire-submit-text');
   const inquireAnotherBtn = document.getElementById('btn-inquire-another');
-  const openTeaserBtn = document.getElementById('btn-open-chronicler-letter');
   const quickBookmarkBtn = document.getElementById('letter-shelf-quick-btn');
 
   if (senderNameInput && !senderNameInput.value) {

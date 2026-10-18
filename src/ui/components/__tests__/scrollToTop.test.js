@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { initScrollToTop } from '../scrollToTop.js';
 
-vi.mock('@ui/components/icons.js', () => ({
+vi.mock('@ui/icons.js', () => ({
   initIcons: vi.fn(),
 }));
 

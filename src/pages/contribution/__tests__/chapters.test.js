@@ -15,7 +15,7 @@ vi.mock('../editor.js', () => ({
 }));
 
 // Mock initIcons
-vi.mock('@ui/components/icons.js', () => ({
+vi.mock('@ui/icons.js', () => ({
   initIcons: vi.fn(),
 }));
 
@@ -27,7 +27,7 @@ vi.mock('@/utils', () => ({
     warn: vi.fn(),
     error: vi.fn(),
   })),
-  escapeText: vi.fn((t) => t),
+  escapeHtml: vi.fn((t) => t),
 }));
 
 describe('Contribution Chapters', () => {
@@ -89,7 +89,7 @@ describe('Contribution Chapters', () => {
     renderChapterList();
     const list = document.getElementById('chapter-list');
     expect(list.children).toHaveLength(2);
-    expect(list.querySelector('.chapter-item--active').textContent).toContain('Chapter 1');
+    expect(list.querySelector('.chapter-row--active').textContent).toContain('Chapter 1');
   });
 
   it('loads the current chapter into editor', () => {
@@ -103,13 +103,13 @@ describe('Contribution Chapters', () => {
     updateSidebarTitle('New Title');
     expect(state.chapters[0].title).toBe('New Title');
     const list = document.getElementById('chapter-list');
-    expect(list.querySelector('.chapter-item--active').textContent).toContain('New Title');
+    expect(list.querySelector('.chapter-row--active').textContent).toContain('New Title');
   });
 
   it('switches chapters when clicked in sidebar', () => {
     renderChapterList();
     const list = document.getElementById('chapter-list');
-    const secondChapterBtn = list.querySelectorAll('.chapter-item__select')[1];
+    const secondChapterBtn = list.querySelectorAll('.chapter-row__select')[1];
 
     // Set some content to see if it saves
     document.getElementById('chapter-content').value = 'Updated Content 1';

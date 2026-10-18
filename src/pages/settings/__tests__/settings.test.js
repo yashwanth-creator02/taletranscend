@@ -50,7 +50,7 @@ vi.mock('@fb/index.js', () => ({
   serverTimestamp: vi.fn(() => 'MOCK_TIMESTAMP'),
 }));
 
-vi.mock('@ui/components/icons.js', () => ({
+vi.mock('@ui/icons.js', () => ({
   initIcons: vi.fn(),
 }));
 

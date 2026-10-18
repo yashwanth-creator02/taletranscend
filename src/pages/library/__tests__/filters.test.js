@@ -1,16 +1,8 @@
 // src/pages/library/__tests__/filters.test.js
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import {
-  applyAllFilters,
-  setupSearch,
-  setupEraFilter,
-  setupToneFilter,
-  setupLengthFilter,
-  setupSidebarFilter,
-} from '../filters.js';
+import { applyAllFilters, setupSearch } from '../filters.js';
 import { libraryState } from '../state.js';
 import * as services from '@services/index.js';
-import * as ui from '../ui.js';
 import { renderCardsGrid } from '@ui/components/taleCard.js';
 
 vi.mock('@services/index.js', () => ({
@@ -27,7 +19,7 @@ vi.mock('@ui/components/taleCard.js', () => ({
   renderCardsGrid: vi.fn(),
 }));
 
-vi.mock('@ui/components/icons.js', () => ({
+vi.mock('@ui/icons.js', () => ({
   initIcons: vi.fn(),
 }));
 

@@ -6,11 +6,6 @@
 /* ═══════════════════════════════════════════════
  Page-specific layout tokens
  ═══════════════════════════════════════════════ */
-:root {
-  --left-panel-width: 430px;
-  --right-panel-width: 340px;
-}
-
 /* ═══════════════════════════════════════════════
  Base & Typography
  ═══════════════════════════════════════════════ */
@@ -978,6 +973,9 @@ body {
   box-shadow: 0 4px 16px rgb(var(--light-rgb) / var(--a-03));
 }
 
+/* Profile skin for the shared ghost button. This file loads only on the
+   profile page, so these values intentionally shadow the components.css
+   base and are the authoritative look there. */
 .btn-ghost {
   background: transparent;
   border: 1px solid rgb(var(--light-rgb) / var(--a-04));
@@ -985,9 +983,10 @@ body {
   transition: all var(--transition-normal);
 }
 
+/* The shared .btn-ghost:hover rule in components.css out-specifies this one
+   (it carries :not(:disabled)), so only colour and transform take effect
+   here; background and border are intentionally left to the shared rule. */
 .btn-ghost:hover {
-  background: rgb(var(--light-rgb) / var(--a-03));
-  border-color: rgb(var(--light-rgb) / var(--a-06));
   color: rgb(var(--light-rgb));
   transform: scale(1.02);
 }
@@ -995,6 +994,8 @@ body {
 /* ═══════════════════════════════════════════════
  Inputs
  ═══════════════════════════════════════════════ */
+/* Profile skin for the shared input field — same page-scoped shadowing
+   rationale as .btn-ghost above. */
 .input-mythic {
   background: rgb(var(--light-rgb) / var(--a-01));
   border: 1px solid rgb(var(--light-rgb) / var(--a-04));
@@ -1221,10 +1222,6 @@ a:focus-visible,
 
 .profile-pronouns-tag {
   color: var(--accent);
-}
-
-.stat-value {
-  color: var(--text-primary);
 }
 
 .new-story-cta-title {

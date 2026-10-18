@@ -1,7 +1,6 @@
 // src/utils/__tests__/dev.utils.test.js
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { initDevMode } from '../dev.utils.ts';
-import * as config from '@config/app.config.js';
 
 vi.mock('@config/app.config.js', () => ({
   IS_DEV_MODE: true,

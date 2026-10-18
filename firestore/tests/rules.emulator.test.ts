@@ -33,7 +33,9 @@ beforeAll(async () => {
   testEnv = await initializeTestEnvironment({
     projectId: PROJECT_ID,
     firestore: {
-      rules: readFileSync('firestore/firestore.rules', 'utf8'),
+      // Read the SAME file the deploy config ships (firebase.json: "firestore.rules"),
+      // so these tests always describe the deployed ruleset.
+      rules: readFileSync('firestore.rules', 'utf8'),
       host: '127.0.0.1',
       port: 8080,
     },
@@ -235,6 +237,62 @@ describe('users/{userId}/followers/{followerUid} — cross-user write (proactive
     await assertFails(
       setDoc(doc(ctxA.firestore(), `${ROOT}/users/user-b/followers/user-c`), {
         followedAt: serverTimestamp(),
+      })
+    );
+  });
+});
+
+describe('inquiries/{inquiryId} — author reply/report/block allowance', () => {
+  /** Seeds an inquiry sent by `senderUid` to `authorUid`, bypassing rules (admin SDK context). */
+  async function seedInquiry(inquiryId: string, authorUid: string, senderUid: string) {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), `${ROOT}/inquiries/${inquiryId}`), {
+        authorId: authorUid,
+        senderId: senderUid,
+        taleId: 'tale-1',
+        message: 'A question about the second fragment.',
+        status: 'sent',
+        createdAt: new Date(),
+      });
+    });
+  }
+
+  it('the author CAN mark an inquiry replied (the replyToMissive flow)', async () => {
+    await seedInquiry('inq-1', 'author-1', 'reader-1');
+    const authorCtx = testEnv.authenticatedContext('author-1');
+    await assertSucceeds(
+      updateDoc(doc(authorCtx.firestore(), `${ROOT}/inquiries/inq-1`), {
+        status: 'replied',
+        replyText: 'Thank you for asking.',
+        replyAuthorName: 'author-1',
+        repliedAt: serverTimestamp(),
+      })
+    );
+  });
+
+  it('a different user CANNOT update someone else’s inquiry', async () => {
+    await seedInquiry('inq-1', 'author-1', 'reader-1');
+    const otherCtx = testEnv.authenticatedContext('reader-2');
+    await assertFails(
+      updateDoc(doc(otherCtx.firestore(), `${ROOT}/inquiries/inq-1`), { status: 'blocked' })
+    );
+  });
+
+  it('the sender CANNOT update their own inquiry', async () => {
+    await seedInquiry('inq-1', 'author-1', 'reader-1');
+    const senderCtx = testEnv.authenticatedContext('reader-1');
+    await assertFails(
+      updateDoc(doc(senderCtx.firestore(), `${ROOT}/inquiries/inq-1`), { status: 'blocked' })
+    );
+  });
+
+  it('an admin CAN update any inquiry', async () => {
+    await seedInquiry('inq-1', 'author-1', 'reader-1');
+    const adminCtx = testEnv.authenticatedContext('admin-1', { admin: true });
+    await assertSucceeds(
+      updateDoc(doc(adminCtx.firestore(), `${ROOT}/inquiries/inq-1`), {
+        status: 'reported',
+        isReported: true,
       })
     );
   });

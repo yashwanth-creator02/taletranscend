@@ -6,7 +6,7 @@ import { profileState, GENRE_OPTIONS } from './state.js';
 import { ACHIEVEMENT_REGISTRY } from '@state/schemas/achievement.schema.js';
 import { suggestNameFromBio } from './ai-name.js';
 import { debounce } from '@/utils';
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@ui/icons.js';
 import { showToast } from '@ui/components/toast.js';
 import {
   getStoredApiKey,

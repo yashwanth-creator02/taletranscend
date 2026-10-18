@@ -31,7 +31,7 @@ vi.mock('@/utils', async (importOriginal) => {
   };
 });
 
-vi.mock('@ui/components/icons.js', () => ({
+vi.mock('@ui/icons.js', () => ({
   initIcons: vi.fn(),
 }));
 

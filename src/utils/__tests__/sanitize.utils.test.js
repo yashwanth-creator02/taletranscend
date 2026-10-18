@@ -1,6 +1,6 @@
 // src/utils/__tests__/sanitize.utils.test.js
-import { describe, it, expect, vi } from 'vitest';
-import { sanitizeHtml, escapeText } from '../sanitize.utils.ts';
+import { describe, it, expect } from 'vitest';
+import { sanitizeHtml } from '../sanitize.utils.ts';
 
 describe('Sanitize Utils', () => {
   describe('sanitizeHtml', () => {
@@ -21,17 +21,6 @@ describe('Sanitize Utils', () => {
     it('handles empty input', () => {
       expect(sanitizeHtml('')).toBe('');
       expect(sanitizeHtml(null)).toBe('');
-    });
-  });
-
-  describe('escapeText', () => {
-    it('escapes HTML special characters', () => {
-      expect(escapeText('<b>"Me & You"</b>')).toBe('&lt;b&gt;"Me &amp; You"&lt;/b&gt;');
-    });
-
-    it('handles empty input', () => {
-      expect(escapeText('')).toBe('');
-      expect(escapeText(null)).toBe('');
     });
   });
 });

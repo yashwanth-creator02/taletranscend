@@ -3,7 +3,8 @@
 import { readerState } from './state.js';
 import { READER_THEMES as THEMES, FONTS } from '@config/theme.config.js';
 import { getChapterProgress } from '@services/index.js';
-import { escapeText as escapeHtml } from '@/utils';
+import { escapeHtml } from '@/utils';
+import { formatCommentDateTime, buildReplyTree } from '@/utils/comment.utils.ts';
 
 export function renderTocPanel(
   chapters,
@@ -334,57 +335,6 @@ export function renderQuoteCardModal({
       </div>
     </div>
   `;
-}
-
-/**
- * Formats a comment timestamp to include both date and time.
- * E.g., "Oct 12, 2026 at 11:05 PM"
- *
- * @param {number|Date} at
- * @returns {string}
- */
-export function formatCommentDateTime(at) {
-  if (!at) return 'Recently';
-  const d = new Date(at);
-  if (isNaN(d.getTime())) return 'Recently';
-  const dateStr = d.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-  const timeStr = d.toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-  return `${dateStr} at ${timeStr}`;
-}
-
-/**
- * Builds a hierarchical tree from a flat array of replies containing replyToId.
- *
- * @param {Array<Object>} replies
- * @returns {Array<Object>} Root replies with nested children arrays
- */
-export function buildReplyTree(replies) {
-  if (!Array.isArray(replies) || replies.length === 0) return [];
-
-  const map = new Map();
-  const roots = [];
-
-  replies.forEach((r) => {
-    map.set(r.id, { ...r, children: [] });
-  });
-
-  replies.forEach((r) => {
-    const node = map.get(r.id);
-    if (r.replyToId && map.has(r.replyToId)) {
-      map.get(r.replyToId).children.push(node);
-    } else {
-      roots.push(node);
-    }
-  });
-
-  return roots;
 }
 
 function _renderReplyNode(r, commentId, currentUserId) {

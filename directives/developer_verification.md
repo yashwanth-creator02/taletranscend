@@ -12,7 +12,7 @@ Execute static analysis, code formatting, design token linting, TypeScript type-
 
 ## Inputs
 
-- Node.js runtime environment (v18+).
+- Node.js runtime environment (v20+; see `engines` in `package.json`).
 - Project dependencies installed via `npm install`.
 
 ## Git Safety (If Modifying Code)
@@ -40,6 +40,7 @@ Or run individual npm scripts:
 - `npm run lint`: Runs ESLint across JavaScript and TypeScript files.
 - `npm run lint:tokens`: Fails on any raw colour literals outside design token definitions (`tokens.css`).
 - `npm run type-check`: Validates TypeScript type safety without emitting build output.
+- `npm run test:rules`: Runs the Firestore security-rules emulator suite (`firestore/tests/rules.emulator.test.ts` against the root `firestore.rules`). Requires Java and a free port 8080; stop any orphaned `java.exe` emulator process if the port is taken.
 
 ## Outputs
 

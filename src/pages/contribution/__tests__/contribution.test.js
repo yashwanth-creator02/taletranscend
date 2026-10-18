@@ -1,5 +1,5 @@
 // src/pages/contribution/__tests__/contribution.test.js
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { setStatus, updateChecklist } from '../contribution.js';
 import { state } from '../state.js';
 

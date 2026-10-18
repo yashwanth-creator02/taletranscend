@@ -14,8 +14,10 @@ Manage Cloud Firestore database indexes, security rules validation, and environm
 
 - `.env` configuration file populated with Firebase credentials (copied from `.env.example`).
 - Firebase CLI (`npx -y firebase-tools@latest` or global `firebase`).
-- Rules file: `firestore.rules`.
-- Index definition file: `firestore.indexes.json`.
+- Rules file: `firestore.rules` (repository root is the single source of truth).
+- Index definition file: `firestore.indexes.json` (repository root).
+- Rules emulator suite: `firestore/tests/rules.emulator.test.ts` (reads the root
+  `firestore.rules`).
 
 ## Git Safety (If Modifying Code)
 
@@ -31,6 +33,15 @@ Manage Cloud Firestore database indexes, security rules validation, and environm
 - Deploy rules:
   ```powershell
   firebase deploy --only firestore:rules
+  ```
+- Run the rules emulator suite (requires Java; port 8080 must be free):
+  ```powershell
+  npm run test:rules
+  ```
+- Seed sample tales into Firestore (requires a configured `.env`; safe to re-run, the seeder is
+  idempotent):
+  ```powershell
+  npm run seed:tales
   ```
 - Skills:
   - `firebase-firestore` for querying and collection setup.
@@ -73,6 +84,9 @@ v1/taletranscend/projects/v1/
    - Path: `v1/taletranscend/projects/v1/tales/${taleId}/inquiries/${inquiryId}`
    - Records reader inquiries sent to authors.
    - Contains: `taleId`, `taleTitle`, `authorId`, `authorName`, `authorEmail`, `readerId`, `readerName`, `readerContact`, `category`, `message`, `status: 'unread'`, and `createdAt`.
+   - Update permissions: the addressed author can update inquiries on their own tales (status,
+     replies via `replyToMissive`); the sending reader and unrelated users cannot. Covered by
+     emulator tests in `firestore/tests/rules.emulator.test.ts`.
 
 7. **User Profile & Scribe Registry**:
    - Path: `v1/taletranscend/projects/v1/users/${userId}`
@@ -91,3 +105,5 @@ v1/taletranscend/projects/v1/
 - Anonymous Auth: Every user receives a persistent anonymous UID from Firebase Auth. All ownership queries must reference `request.auth.uid`.
 - Nested Reply Rules Match: Always ensure `parentId` matches the top-level comment ID in payload when posting nested replies, otherwise Firestore rules reject with permission-denied.
 - Test vs Production Rules: Never deploy test-mode open rules to production. Run the test emulator suite prior to rules deployment.
+- Single rules source: keep `firestore.rules` / `firestore.indexes.json` at the repository root. Do not create copies under `firestore/` — a drifted duplicate was deleted in the 2026-10-18 audit (F1/F2), and the emulator suite reads the root file.
+- Orphaned emulator processes: if `npm run test:rules` reports port 8080 taken, a previous emulator JVM is still alive — find and stop the `java.exe` process holding the port before re-running.
