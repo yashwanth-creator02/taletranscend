@@ -21,6 +21,7 @@ import {
 import { initAppTheme } from '@config/theme.config.js';
 import { navigateTo, initPageReveal, readyReveal, createLogger, markUserVisited } from '@/utils';
 import { initIcons } from '@ui/components/icons.js';
+import { mountReadingScene } from '@ui/components/reading-scene.js';
 import { showToast } from '@ui/components/toast.js';
 
 const log = createLogger('Login');
@@ -359,31 +360,15 @@ function _setupDismissLinks() {
 }
 
 /**
- * Keeps authentication vector illustration aligned with the active theme.
+ * Mounts the Scholar's Reading Scene into the left panel.
+ *
+ * The scene is generated at runtime (seeded book layout) and themed through
+ * CSS custom properties, so it follows the active app theme on its own — no
+ * light/dark asset swap needed here.
  */
-function _setupResponsiveSvgArt() {
-  const imgEl = document.getElementById('login-visual-img');
-  const sourceEl = document.getElementById('login-visual-source');
-  if (!imgEl) return;
-
-  const updateIllustration = () => {
-    const isLight =
-      typeof document !== 'undefined' &&
-      document.documentElement.getAttribute('data-app-theme') === 'light';
-    const targetSrc = isLight
-      ? '/images/auth/boy-reading-light.svg'
-      : '/images/auth/boy-reading.svg';
-    if (sourceEl) {
-      sourceEl.srcset = targetSrc;
-    }
-    if (imgEl.getAttribute('src') !== targetSrc) {
-      imgEl.src = targetSrc;
-    }
-  };
-
-  updateIllustration();
-  if (typeof window !== 'undefined') {
-    window.addEventListener('appthemechange', updateIllustration);
+function _mountReadingScene() {
+  if (!mountReadingScene()) {
+    log.warn('Reading scene mount point #login-scene not found');
   }
 }
 
@@ -395,7 +380,7 @@ export function initLoginPage() {
   initIcons();
   readyReveal();
 
-  _setupResponsiveSvgArt();
+  _mountReadingScene();
   _setupAuthTabs();
   _setupPasswordToggle();
   _setupAuthModeToggle();
