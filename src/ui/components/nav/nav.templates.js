@@ -297,8 +297,11 @@ export function buildCommandItem(item, current, isFocused = false, index = 0) {
 }
 
 /**
- * Builds the command palette dialog shell (input + list container + footer).
- * The list is populated dynamically by command-palette.js.
+ * Builds the command palette shell in a lookup layout: the search field is the
+ * first row and visual anchor (with the inline close control), followed by the
+ * results list and a keyboard-hint footer. The list is populated dynamically
+ * by command-palette.js. The h2 is visually hidden and exists purely to name
+ * the dialog for assistive technology.
  *
  * @returns {string}
  */
@@ -319,29 +322,7 @@ export function buildCommandPalette() {
         aria-modal="true"
         aria-labelledby="nav-command-title"
       >
-        <div class="command-header">
-          <div class="command-header__badge-wrap">
-            <span class="command-header__badge" aria-hidden="true">
-              <i data-lucide="compass" class="command-header__badge-icon"></i>
-            </span>
-            <div class="command-header__text">
-              <div class="command-header__title-row">
-                <h2 id="nav-command-title" class="command-title">Quick Navigation</h2>
-              </div>
-              <p class="command-subtitle">Jump directly to chronicles, archives & scribe tools</p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            class="command-close"
-            id="nav-command-close"
-            aria-label="Close command palette (Escape)"
-          >
-            <span class="command-close__kbd" aria-hidden="true">Esc</span>
-            <i data-lucide="x" class="command-close__icon" aria-hidden="true"></i>
-          </button>
-        </div>
+        <h2 id="nav-command-title" class="command-title">Quick tools</h2>
 
         <div class="command-search" role="search">
           <div class="command-search__icon-wrap" aria-hidden="true">
@@ -356,8 +337,8 @@ export function buildCommandPalette() {
             aria-haspopup="listbox"
             autocomplete="off"
             spellcheck="false"
-            placeholder="Type a chronicle, page, or action…"
-            aria-label="Search pages and actions"
+            placeholder="Look up a page, theme, or action…"
+            aria-label="Look up pages, themes, and actions"
             aria-autocomplete="list"
             aria-controls="nav-command-list"
           />
@@ -365,11 +346,20 @@ export function buildCommandPalette() {
             type="button"
             class="command-search__clear"
             id="nav-command-clear"
-            aria-label="Clear search query"
+            aria-label="Clear look-up query"
             tabindex="-1"
             hidden
           >
             <i data-lucide="x" class="command-search__clear-icon" aria-hidden="true"></i>
+          </button>
+          <button
+            type="button"
+            class="command-close"
+            id="nav-command-close"
+            aria-label="Close quick tools (Escape)"
+          >
+            <span class="command-close__kbd" aria-hidden="true">Esc</span>
+            <i data-lucide="x" class="command-close__icon" aria-hidden="true"></i>
           </button>
         </div>
 

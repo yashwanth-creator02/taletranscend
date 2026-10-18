@@ -572,10 +572,6 @@ body {
     0 0 24px rgb(var(--accent-rgb) / var(--a-02));
 }
 
-.sanctuary-nav-bar {
-  border-color: rgb(var(--light-rgb) / var(--a-04));
-}
-
 .identity-edit-btn-corner,
 #btn-edit-desktop {
   position: absolute;

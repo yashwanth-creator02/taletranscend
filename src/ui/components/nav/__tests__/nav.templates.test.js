@@ -6,6 +6,7 @@ import {
   buildGuestUser,
   buildMobileDock,
   buildCommandItem,
+  buildCommandPalette,
   buildNav,
 } from '../nav.templates.js';
 
@@ -68,6 +69,28 @@ describe('Nav Templates', () => {
       const html = buildCommandItem(item, 'index.html');
       expect(html).toContain('Go Home');
       expect(html).toContain('G H');
+    });
+  });
+
+  describe('buildCommandPalette', () => {
+    it('renders a lookup layout: field row first, results below, close control inline', () => {
+      const html = buildCommandPalette();
+      const searchIndex = html.indexOf('class="command-search"');
+      const inputIndex = html.indexOf('id="nav-command-input"');
+      const closeIndex = html.indexOf('id="nav-command-close"');
+      const listIndex = html.indexOf('id="nav-command-list"');
+
+      expect(searchIndex).toBeGreaterThan(-1);
+      expect(inputIndex).toBeGreaterThan(searchIndex);
+      expect(closeIndex).toBeGreaterThan(inputIndex);
+      expect(listIndex).toBeGreaterThan(closeIndex);
+      expect(html).not.toContain('command-header');
+    });
+
+    it('names the dialog for assistive technology', () => {
+      const html = buildCommandPalette();
+      expect(html).toContain('id="nav-command-title"');
+      expect(html).toContain('aria-labelledby="nav-command-title"');
     });
   });
 

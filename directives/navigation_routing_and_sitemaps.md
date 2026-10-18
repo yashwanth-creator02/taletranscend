@@ -78,6 +78,14 @@ Fixed-position modal overlays (such as the Quick Navigation Command Palette `.co
 - **Template Separation**: `buildNav()` in `src/ui/components/nav/nav.templates.js` must return distinct HTML fragments: `{ headerHtml, dockHtml, paletteHtml }`.
 - **Teardown**: `destroyNav()` in `src/ui/components/nav/nav.js` must cleanly remove all mounted body nodes: `document.getElementById('nav-command-palette')?.remove()`.
 
+### 6. Lookup-Style Command Palette & Page Back Navigation
+
+- **Palette Layout Rule**: `#nav-command-palette` is a lookup surface, not a titled search panel. The search field row (`#nav-command-input` with `#nav-command-clear` and the inline `#nav-command-close`) is the panel's first child and visual anchor; results (`#nav-command-list`) follow directly, then the keyboard-hint footer. Do not reintroduce a visible title/header block above the field.
+- **Accessible Dialog Name**: The palette dialog is named by a visually hidden `<h2 id="nav-command-title">` styled through `.command-title` in `nav.css` (same technique as `.sr-only`) — never rely on `base.css` utilities here, because standalone views load `nav.css` alone via `nav.global.js`.
+- **Match Highlighting**: `highlightMatch()` in `src/ui/components/nav/nav.command-palette.js` wraps query matches in `<mark class="command-item__match">`. It matches against the raw label/description and escapes every fragment before injection, so HTML entities and hostile queries cannot break rendering.
+- **Palette Contract**: `#nav-command-input`, `#nav-command-list`, `#nav-command-clear`, `#nav-command-close`, `.command-panel`, `[data-command-close]`, and `.command-item` are load-bearing selectors for `nav.interactions.js` delegation and must survive any palette restyle.
+- **Page Back Navigation**: Pages that are not reached through the universal nav (profile, settings, shelf, tale) provide their own Back control. The profile page ships only a single `#profile-back-btn` (`.btn-back-pill`) in the identity pillar. `handleProfileBack()` calls `history.back()` only when an in-app origin is provable (same-origin `document.referrer`, or `history.state.url` pushed by `router.js` soft navigation) and otherwise falls back to `/library.html`. Bind via `initProfileBackButton()`, which is idempotent per DOM node so soft-navigation re-inits and the auth re-init cannot double-fire.
+
 ## Tools / Scripts to Use
 
 - Run the navigation and routing test suite:

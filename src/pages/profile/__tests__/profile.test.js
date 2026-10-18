@@ -109,3 +109,78 @@ describe('Profile Page Controller', () => {
     expect(signOut).toHaveBeenCalled();
   });
 });
+
+describe('Profile Back Button', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.resetModules();
+    document.body.innerHTML = '';
+  });
+
+  it('calls history.back() when the visitor came from a same-origin page', async () => {
+    const { handleProfileBack } = await import('../profile.js');
+    const backSpy = vi.spyOn(window.history, 'back').mockImplementation(() => {});
+
+    Object.defineProperty(document, 'referrer', {
+      value: `${window.location.origin}/library.html`,
+      configurable: true,
+    });
+    Object.defineProperty(window.history, 'length', { value: 3, configurable: true });
+
+    handleProfileBack();
+
+    expect(backSpy).toHaveBeenCalled();
+    backSpy.mockRestore();
+  });
+
+  it('calls history.back() when the router soft-navigated to the profile', async () => {
+    const { handleProfileBack } = await import('../profile.js');
+    const backSpy = vi.spyOn(window.history, 'back').mockImplementation(() => {});
+
+    Object.defineProperty(document, 'referrer', { value: '', configurable: true });
+    Object.defineProperty(window.history, 'length', { value: 2, configurable: true });
+    Object.defineProperty(window.history, 'state', {
+      value: { url: 'http://localhost/profile.html' },
+      configurable: true,
+    });
+
+    handleProfileBack();
+
+    expect(backSpy).toHaveBeenCalled();
+    backSpy.mockRestore();
+  });
+
+  it('binds the back button exactly once per DOM node', async () => {
+    const { initProfileBackButton } = await import('../profile.js');
+    const backSpy = vi.spyOn(window.history, 'back').mockImplementation(() => {});
+
+    document.body.innerHTML = '<button id="profile-back-btn"></button>';
+    Object.defineProperty(document, 'referrer', {
+      value: `${window.location.origin}/index.html`,
+      configurable: true,
+    });
+    Object.defineProperty(window.history, 'length', { value: 3, configurable: true });
+
+    initProfileBackButton();
+    initProfileBackButton();
+    document.getElementById('profile-back-btn').click();
+
+    expect(backSpy).toHaveBeenCalledTimes(1);
+    backSpy.mockRestore();
+  });
+
+  it('falls back to the library when there is no in-app history', async () => {
+    const { handleProfileBack } = await import('../profile.js');
+
+    delete window.location;
+    window.location = { origin: 'http://localhost:3000', href: '' };
+
+    Object.defineProperty(document, 'referrer', { value: '', configurable: true });
+    Object.defineProperty(window.history, 'length', { value: 1, configurable: true });
+    Object.defineProperty(window.history, 'state', { value: null, configurable: true });
+
+    handleProfileBack();
+
+    expect(window.location.href).toBe('/library.html');
+  });
+});

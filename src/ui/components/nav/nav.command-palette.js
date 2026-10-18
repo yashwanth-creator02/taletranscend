@@ -23,6 +23,38 @@ const log = createLogger('NavCommandPalette');
    ───────────────────────────────────────────── */
 
 /**
+ * Escapes `text` and wraps every case-insensitive occurrence of `query`
+ * in a highlight element. Matching runs on the raw text so HTML entities
+ * can never be split apart; every fragment is escaped before injection.
+ *
+ * @param {string} text
+ * @param {string} [query='']
+ * @returns {string} Safe HTML string
+ */
+function highlightMatch(text, query = '') {
+  const raw = String(text ?? '');
+  const needle = String(query ?? '').trim();
+  if (!needle) return escapeHtml(raw);
+
+  const lowerRaw = raw.toLowerCase();
+  const lowerNeedle = needle.toLowerCase();
+  let result = '';
+  let cursor = 0;
+  let idx = lowerRaw.indexOf(lowerNeedle);
+
+  while (idx !== -1) {
+    result += escapeHtml(raw.slice(cursor, idx));
+    result += `<mark class="command-item__match">${escapeHtml(
+      raw.slice(idx, idx + needle.length)
+    )}</mark>`;
+    cursor = idx + needle.length;
+    idx = lowerRaw.indexOf(lowerNeedle, cursor);
+  }
+
+  return result + escapeHtml(raw.slice(cursor));
+}
+
+/**
  * Returns the full list of available commands for the current auth state.
  * Auth-sensitive items (Sign In / Sign Out) are appended dynamically.
  *
@@ -61,9 +93,10 @@ function getCommandItems() {
  * @param {string} current - Current page filename
  * @param {boolean} isFocused - Whether this item has keyboard focus
  * @param {number} index - Index for aria-activedescendant
+ * @param {string} [query=''] - Active look-up query, used for match highlighting
  * @returns {string}
  */
-function buildCommandItem(item, current, isFocused = false, index = 0) {
+function buildCommandItem(item, current, isFocused = false, index = 0, query = '') {
   const isActive = item.href ? item.href === current : false;
   const hrefAttr = item.href ? `data-href="${item.href}"` : '';
   const actionAttr = item.action ? `data-action="${item.action}"` : '';
@@ -87,8 +120,8 @@ function buildCommandItem(item, current, isFocused = false, index = 0) {
         <i data-lucide="${item.icon}" class="command-item__icon"></i>
       </span>
       <span class="command-item__content">
-        <span class="command-item__label">${escapeHtml(item.label)}</span>
-        ${item.description ? `<span class="command-item__desc">${escapeHtml(item.description)}</span>` : ''}
+        <span class="command-item__label">${highlightMatch(item.label, query)}</span>
+        ${item.description ? `<span class="command-item__desc">${highlightMatch(item.description, query)}</span>` : ''}
       </span>
       ${item.shortcut ? `<span class="command-item__shortcut" aria-label="Shortcut: ${item.shortcut}">${item.shortcut}</span>` : ''}
       ${isActive ? '<span class="command-item__badge">Current</span>' : ''}
@@ -114,7 +147,8 @@ export function renderCommandList(query = '') {
   if (!commandList) return;
 
   const current = getCurrentPage();
-  const normalized = query.trim().toLowerCase();
+  const rawQuery = query.trim();
+  const normalized = rawQuery.toLowerCase();
   const focusedIndex = navState.commandFocusedIndex;
 
   const clearBtn = document.getElementById('nav-command-clear');
@@ -140,7 +174,7 @@ export function renderCommandList(query = '') {
         </div>
         <p class="command-empty__title">No results found</p>
         <p class="command-empty__desc">
-          No results for "<strong>${escapeHtml(query)}</strong>". Try searching for archives, shelf, or actions.
+          No results for "<strong>${escapeHtml(query)}</strong>". Try a page, theme, or action instead.
         </p>
       </div>
     `;
@@ -162,7 +196,7 @@ export function renderCommandList(query = '') {
       `;
       lastCategory = category;
     }
-    html += buildCommandItem(item, current, i === focusedIndex, i);
+    html += buildCommandItem(item, current, i === focusedIndex, i, rawQuery);
   });
 
   commandList.innerHTML = html;

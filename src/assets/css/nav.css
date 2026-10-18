@@ -800,81 +800,18 @@ body:has(#sidebar.sidebar--mobile-open) .scroll-to-top {
   }
 }
 
-.command-header {
-  padding: 20px 24px 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid rgb(var(--light-rgb) / var(--a-02));
-}
-
-.command-header__badge-wrap {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.command-header__badge {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  background: linear-gradient(
-    135deg,
-    rgb(var(--accent-rgb) / var(--a-07)),
-    rgb(var(--accent-2-rgb) / var(--a-05))
-  );
-  border: 1px solid rgb(var(--accent-rgb) / var(--a-08));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--accent);
-  box-shadow: 0 0 16px var(--glow-indigo);
-}
-
-.command-header__badge-icon {
-  width: 20px;
-  height: 20px;
-}
-
-.command-header__text {
-  display: flex;
-  flex-direction: column;
-}
-
-.command-header__title-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
+/* Visually hidden dialog title — the look-up field is the palette's only
+   visible header, so the heading exists purely to name the dialog for AT. */
 .command-title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.15rem;
-  color: var(--text-primary);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-wide);
-  margin: 0;
-  line-height: 1.2;
-}
-
-.command-header__pill {
-  font-size: 9px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-widest);
-  padding: 2px 7px;
-  border-radius: 9999px;
-  background: rgb(var(--rune-rgb) / var(--a-06));
-  color: var(--rune);
-  border: 1px solid rgb(var(--rune-rgb) / var(--a-08));
-}
-
-.command-subtitle {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-top: 3px;
-  font-family: var(--font-sans);
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 .command-close {
@@ -922,23 +859,17 @@ body:has(#sidebar.sidebar--mobile-open) .scroll-to-top {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 18px;
-  margin: 14px 18px 6px;
-  background: rgb(var(--dark-rgb) / 0.45);
-  border: 1px solid rgb(var(--light-rgb) / var(--a-03));
-  border-radius: var(--radius-xl, 16px);
+  padding: 16px 18px;
+  background: rgb(var(--dark-rgb) / 0.35);
+  border-bottom: 1px solid rgb(var(--light-rgb) / var(--a-03));
   transition:
-    border-color var(--transition-fast),
-    box-shadow var(--transition-fast),
-    background var(--transition-fast);
+    background var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .command-search:focus-within {
-  border-color: rgb(var(--accent-rgb) / var(--a-08));
-  background: rgb(var(--dark-rgb) / 0.65);
-  box-shadow:
-    0 0 0 1px rgb(var(--accent-rgb) / var(--a-08)),
-    0 0 20px var(--glow-indigo);
+  background: rgb(var(--dark-rgb) / 0.5);
+  border-bottom-color: rgb(var(--accent-rgb) / var(--a-08));
 }
 
 .command-search__icon-wrap {
@@ -964,7 +895,7 @@ body:has(#sidebar.sidebar--mobile-open) .scroll-to-top {
   outline: none;
   color: var(--text-primary);
   font-family: var(--font-sans);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 500;
   width: 100%;
 }
@@ -1115,6 +1046,13 @@ body:has(#sidebar.sidebar--mobile-open) .scroll-to-top {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.command-item__match {
+  color: var(--accent-tint);
+  background: rgb(var(--accent-rgb) / var(--a-06));
+  border-radius: 3px;
+  padding: 0 1px;
 }
 
 .command-item__desc {
@@ -1288,41 +1226,13 @@ body:has(#sidebar.sidebar--mobile-open) .scroll-to-top {
     box-shadow: 0 20px 60px rgb(var(--dark-rgb) / 0.95);
   }
 
-  .command-header {
-    padding: 14px 16px 10px;
-  }
-
-  .command-header__badge {
-    width: 32px;
-    height: 32px;
-    border-radius: 10px;
-  }
-
-  .command-header__badge-icon {
-    width: 16px;
-    height: 16px;
-  }
-
-  .command-title {
-    font-size: 1rem;
-  }
-
-  .command-subtitle {
-    font-size: 11px;
-  }
-
   .command-search {
-    margin: 8px 12px 2px;
-    padding: 10px 14px;
+    padding: 12px 14px;
     gap: 10px;
   }
 
-  .command-input {
-    font-size: 14px;
-  }
-
   .command-list {
-    max-height: 56vh;
+    max-height: 60vh;
     padding: 6px 8px 10px;
   }
 
@@ -1739,12 +1649,12 @@ body:has(#sidebar.sidebar--mobile-open) .scroll-to-top {
 
 [data-app-theme='light'] .command-search {
   background: var(--surface-2);
-  border-color: var(--border-strong);
+  border-bottom-color: var(--border-strong);
 }
 
 [data-app-theme='light'] .command-search:focus-within {
   background: var(--bg-elevated);
-  border-color: var(--accent);
+  border-bottom-color: var(--accent);
 }
 
 [data-app-theme='light'] .command-close__kbd {

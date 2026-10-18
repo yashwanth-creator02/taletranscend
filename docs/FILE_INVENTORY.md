@@ -69,7 +69,7 @@ One-line duty for every file tracked by git in this repository, grouped by area 
 - `src/views/index.html` — Landing-page shell with hero search, trending grid, newsletter CTA and theme footer; loads `../pages/home/home.js`.
 - `src/views/library.html` — Library shell with sidebar navigation, era/tone/depth filters, pagination and share modal; loads `../pages/library/library.js`.
 - `src/views/login.html` — Split-screen sign-in and sign-up shell with email, phone, Google and guest options; loads `../pages/login/login.js`.
-- `src/views/profile.html` — Chronicler profile shell with identity pillar, scribe registry card and sign-out; loads `../pages/profile/profile.js`.
+- `src/views/profile.html` — Chronicler profile shell with back pill, identity pillar, scribe registry card and sign-out; loads `../pages/profile/profile.js`.
 - `src/views/reader.html` — Distraction-free reader shell whose `#app` carries `reader-surface` and `data-reader-theme`; loads `../pages/reader/reader.js`.
 - `src/views/settings.html` — Settings shell with back button, settings search, sidebar sections and section views; loads `../pages/settings/settings.js`.
 - `src/views/shelf.html` — Scribe's Vault shell for drafts, fragments and published chronicles; loads `../pages/shelf/shelf.js` plus tale-cards styles.
@@ -162,11 +162,11 @@ Each directory under `src/pages/` holds the JavaScript for one HTML shell in `sr
 - `src/pages/profile/ai-name.js` — Calls Gemini to suggest a mythic storyteller name from the user bio.
 - `src/pages/profile/index.js` — Barrel re-exporting profile sync, ui, profileState, and GENRE_OPTIONS.
 - `src/pages/profile/layout.js` — Profile layout: resizable panel widths, modal focus trap/Escape/backdrop, tab triggers, genre chips, goal bar.
-- `src/pages/profile/profile.js` — Profile page entry: auth, profile sync, continue reading, contributions, drafts, account deletion, sign-out.
+- `src/pages/profile/profile.js` — Profile page entry: auth, profile sync, continue reading, contributions, drafts, account deletion, sign-out, and back-pill navigation (`handleProfileBack` / `initProfileBackButton`).
 - `src/pages/profile/state.js` — `profileState` singleton and the GENRE_OPTIONS list used by the profile form.
 - `src/pages/profile/sync.js` — Firestore profile listener, profile save with validation, author registry save, computed stats.
 - `src/pages/profile/ui.js` — Profile UI: modal/tabs, genre chips, avatar preview, AI name button, achievements, continue reading, contributions, drafts, skeletons.
-- `src/pages/profile/__tests__/profile.test.js` — Vitest tests for `src/pages/profile/profile.js` — auth init, sync start, form submit, sign-out.
+- `src/pages/profile/__tests__/profile.test.js` — Vitest tests for `src/pages/profile/profile.js` — auth init, sync start, form submit, sign-out, back-pill navigation.
 - `src/pages/profile/__tests__/sync.test.js` — Vitest tests for `src/pages/profile/sync.js` — profile listener, saveProfile, saveAuthorRegistry, computeAndSyncStats.
 - `src/pages/profile/__tests__/ui.test.js` — Vitest tests for `src/pages/profile/ui.js` — modal, tabs, field population, continue reading, contributions, drafts, achievements.
 
@@ -221,19 +221,19 @@ Global UI layer: the icon registry, shared components, and the nav shell; each c
 - `src/ui/components/__tests__/scrollToTop.test.js` — Vitest tests for `src/ui/components/scrollToTop.js` — button creation, icon normalization, click scrolling, scroll-position visibility toggling.
 - `src/ui/components/__tests__/taleCard.test.js` — Vitest tests for `src/ui/components/taleCard.js` — renderCardsSkeleton counts, fetchTalesMetadata maps, renderTaleCards output.
 - `src/ui/components/__tests__/toast.test.js` — Vitest tests for `src/ui/components/toast.js` — container creation, legacy adoption, types, auto-dismiss, hover pause, action buttons, queue limit, swipe dismiss.
-- `src/ui/components/nav/nav.command-palette.js` — Manages command palette open/close, fuzzy list rendering, keyboard focus movement, and command execution (navigation, sign out, themes).
+- `src/ui/components/nav/nav.command-palette.js` — Manages command palette open/close, fuzzy list rendering with `<mark>` query highlighting, keyboard focus movement, and command execution (navigation, sign out, themes).
 - `src/ui/components/nav/nav.config.js` — Declares primary header links, user dropdown links, mobile dock items, and base command palette entries.
 - `src/ui/components/nav/nav.global.js` — Dynamically mounts the command palette and registers the global Ctrl/Cmd+K shortcut on pages lacking the full nav.
 - `src/ui/components/nav/nav.interactions.js` — Delegated nav click/keydown handling, scroll progress bar, dropdown and notification toggles, auth-to-DOM user updates, listener lifecycle.
 - `src/ui/components/nav/nav.js` — Public nav lifecycle: initNav injects header, mobile dock, and palette and starts the auth watch; destroyNav tears everything down.
 - `src/ui/components/nav/nav.state.js` — Shared mutable nav state singleton holding the current user, palette open/focus flags, listener and cleanup handles.
-- `src/ui/components/nav/nav.templates.js` — Pure HTML string builders for header links, user dropdown/guest area, mobile dock, command items, palette, and nav shell.
+- `src/ui/components/nav/nav.templates.js` — Pure HTML string builders for header links, user dropdown/guest area, mobile dock, command items, the lookup-style palette shell, and nav shell.
 - `src/ui/components/nav/nav.utils.js` — Nav helpers: getCurrentPage path resolution, getAvatarSeed, live getNavElements lookups, and escapeHtml/renderIcons re-exports.
 - `src/ui/components/nav/notifications.popover.js` — Notifications bell popover: unread badge, list rendering, toggle/close, and real-time unread count subscription lifecycle.
-- `src/ui/components/nav/__tests__/nav.command-palette.test.js` — Vitest tests for `src/ui/components/nav/nav.command-palette.js` — palette open/close state, query filtering, focus movement wrapping, href/theme command execution.
+- `src/ui/components/nav/__tests__/nav.command-palette.test.js` — Vitest tests for `src/ui/components/nav/nav.command-palette.js` — palette open/close state, query filtering, match highlighting and escaping, focus movement wrapping, href/theme command execution.
 - `src/ui/components/nav/__tests__/nav.global.test.js` — Vitest tests for `src/ui/components/nav/nav.global.js` — global palette shortcut listener attachment and dynamic palette mounting/opening on standalone pages.
 - `src/ui/components/nav/__tests__/nav.interactions.test.js` — Vitest tests for `src/ui/components/nav/nav.interactions.js` — dropdown open/close, click delegation (palette, upgrade), updateNavUser rendering, keyboard shortcuts/focus navigation.
-- `src/ui/components/nav/__tests__/nav.templates.test.js` — Vitest tests for `src/ui/components/nav/nav.templates.js` — template builders for active links, user/guest areas, mobile dock, command items, nav shell ordering.
+- `src/ui/components/nav/__tests__/nav.templates.test.js` — Vitest tests for `src/ui/components/nav/nav.templates.js` — template builders for active links, user/guest areas, mobile dock, command items, lookup palette shell ordering, nav shell ordering.
 - `src/ui/components/nav/__tests__/nav.test.js` — Vitest tests for `src/ui/components/nav/nav.js` — initNav header/dock injection, idempotency, destroyNav DOM and auth-unsubscribe cleanup.
 - `src/ui/components/nav/__tests__/nav.utils.test.js` — Vitest tests for `src/ui/components/nav/nav.utils.js` — getCurrentPage pathname fallbacks, getAvatarSeed derivation, getNavElements DOM lookups.
 
@@ -383,7 +383,7 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 
 - `src/assets/css/base.css` — Imports tokens and Tailwind, then defines resets, boot reveal, focus rings, layout primitives, skeletons and theme cross-fade.
 - `src/assets/css/components.css` — Shared component primitives: glass surfaces, buttons, inputs, progress, dividers, footer, toasts, modals and 404 styles.
-- `src/assets/css/nav.css` — Styles the global top nav, user dropdown, mobile bottom dock, command palette, notifications drawer and scroll progress.
+- `src/assets/css/nav.css` — Styles the global top nav, user dropdown, mobile bottom dock, lookup-style command palette (field row, match highlights), notifications drawer and scroll progress.
 - `src/assets/css/reader-themes.css` — Twelve reader colour themes scoped to [data-reader-theme], plus light-theme atmosphere and glow adjustments.
 - `src/assets/css/tokens.css` — Single source of design tokens: colour channels, semantic roles, the three app themes and reader typography defaults.
 - `src/assets/css/pages/contribution.css` — Styles the Scribe's Atelier workspace: tool sidebar, manuscript canvas, lore cards, chips and readiness seals.
