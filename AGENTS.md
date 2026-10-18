@@ -124,6 +124,13 @@ Directives are living documents. When you discover API constraints, better appro
 - Ensure directives remain living documents, preserving discovered patterns, edge cases, and design constraints permanently for future sessions.
 - Always keep directives and documentation relevant, accurate, and up-to-date with current code implementations.
 
+**10. Value Reporting — "What I Gained"**
+
+- End every response with a closing section titled `What I Gained` (exact heading text), written from the user's perspective.
+- State what this turn concretely delivered: working features, fixed bugs, removed risks, time saved, future problems avoided, or knowledge gained. Ground every bullet in the turn's actual output (files, commands, verification results).
+- Keep it to 2-5 tight bullets. No generic filler, no marketing fluff, zero emojis.
+- If a turn produced no user-visible gain (pure research, an answered question), state the knowledge or decision gained instead of inventing value.
+
 ## Self-annealing loop
 
 Errors are learning opportunities. When something breaks:
