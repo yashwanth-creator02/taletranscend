@@ -111,6 +111,7 @@ Directives are living documents. When you discover API constraints, better appro
 
 - Always update the relevant documentation (`README.md`, `docs/`, `directives/`) as part of any code change, feature, or refactor. Documentation must never be left stale.
 - If no relevant documentation exists, create it. Never skip the documentation update because no suitable file exists yet.
+- Keep `docs/FILE_INVENTORY.md` current: whenever a tracked file is added, renamed, moved, or deleted, update its entry in the same change.
 - If you have any doubt — about which documentation is relevant, what it should say, or any other decision — ask the user with the question tool before proceeding. If the user does not provide input, pause execution and wait; never resolve doubt by guessing.
 - Exception: when the user has explicitly said to complete the process without interruptions, proceed autonomously with the best and most suitable option available. In that case, clearly flag every decision you made on the user's behalf, together with the situation it accounted for, in the final response so the user can review and reverse it.
 
