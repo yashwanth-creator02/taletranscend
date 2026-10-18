@@ -100,3 +100,4 @@ later.firestore.rules
 # brand-leo-utils: managed skills (source of truth lives in the brand-leo-utils repo)
 agents/skills/
 .tmp/
+.vercel
