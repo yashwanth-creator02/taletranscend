@@ -107,10 +107,12 @@ Directives are living documents. When you discover API constraints, better appro
 - Proactively inspect `agents/skills/` (and all available environment skills) before writing custom code, scripts, or reinventing patterns.
 - Leverage matching skills whenever applicable rather than writing ad-hoc implementations.
 
-**7. Maintain Documentation & Proactive Inception**
+**7. Documentation Maintenance & Clarification Protocol**
 
-- Always maintain and update project documentation (`README.md`, `docs/`) with every code change, feature, or refactor.
-- If no documentation is present in the project, proactively ask the user to initiate the creation of documentation.
+- Always update the relevant documentation (`README.md`, `docs/`, `directives/`) as part of any code change, feature, or refactor. Documentation must never be left stale.
+- If no relevant documentation exists, create it. Never skip the documentation update because no suitable file exists yet.
+- If you have any doubt — about which documentation is relevant, what it should say, or any other decision — ask the user with the question tool before proceeding. If the user does not provide input, pause execution and wait; never resolve doubt by guessing.
+- Exception: when the user has explicitly said to complete the process without interruptions, proceed autonomously with the best and most suitable option available. In that case, clearly flag every decision you made on the user's behalf, together with the situation it accounted for, in the final response so the user can review and reverse it.
 
 **8. Destination Setup & 3-Layer Infrastructure Population**
 
