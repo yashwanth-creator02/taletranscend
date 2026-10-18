@@ -31,6 +31,7 @@ Configured servers:
 | ----------------- | --------- | ----------------------------------------------- | ----------------------------------------------------------------- |
 | `chrome-devtools` | stdio     | `npx -y chrome-devtools-mcp@latest`             | Chrome DevTools protocol: console, network, screenshots, tracing. |
 | `firebase`        | stdio     | `npx -y firebase-tools@latest experimental:mcp` | Firebase project, Firestore, Auth, Functions, Hosting operations. |
+| `vercel`          | remote    | `https://mcp.vercel.com`                        | Vercel deployments, domains, env vars, project and team settings. |
 
 Inspect connection state:
 
@@ -38,12 +39,18 @@ Inspect connection state:
 opencode mcp list
 ```
 
-Expected output reports both servers as `connected`. Inside a session, `/mcps` shows live status and allows connect, disconnect, and authenticate.
+Expected output reports every server as `connected`, except `vercel`, which reports `needs authentication` until OAuth sign-in completes. Inside a session, `/mcps` shows live status and allows connect, disconnect, and authenticate. Run the OAuth flow from `/mcps`, not from the CLI, so the authorization link stays visible.
 
 Add a new server (project-local, since this repository is the scope):
 
 ```powershell
 opencode mcp add <name> -- <command> [args]
+```
+
+Add a remote OAuth server (no secret goes in the file):
+
+```powershell
+opencode mcp add <name> --url https://<host>/mcp
 ```
 
 Verify the Firebase project the server resolves against:
@@ -71,3 +78,6 @@ firebase use
 - Firebase auth: The server acts with the credentials of the logged-in Firebase CLI user, or Application Default Credentials where present. A `permission-denied` result usually means the wrong account or project, not a broken server. Use `firebase logout` and `firebase login` to switch.
 - Firestore safety: Destructive Firestore operations (delete, purge, backup removal) are reachable through these tools. Treat any such call as irreversible and confirm intent before invoking.
 - Emulator isolation: `.firebaserc` pins the default project to the live `taletranscend`. `firebase emulators:exec` redirects Firestore only for the commands it wraps, so an MCP tool call made outside that wrapper reaches live Firestore. Confirm the emulator is running before any tool-driven Firestore test, and never assume the default project id means emulator.
+- Local versus remote servers: `chrome-devtools` and `firebase` are local stdio servers launched by OpenCode; `vercel` is a remote Streamable HTTP server reached over OAuth. Remote servers need no `oauth: false`, since OAuth is the default and the only supported credential path for Vercel.
+- Vercel project linkage: the repository is not linked to a Vercel project, since `.vercel/project.json` is absent. Until `vercel link` runs, the `vercel` server acts at account or team scope, so project-scoped operations have no target to resolve and deploys cannot be attributed. Link before relying on any deploy tool.
+- Deployment target split: `vercel.json` defines the Vercel target and `firebase.json` the Firebase Hosting target, and both are live deploy paths for this project. Confirm which platform is authoritative before triggering a production deploy through either MCP server.

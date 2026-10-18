@@ -12,6 +12,10 @@
         "timeout": {
           "startup": 120000
         }
+      },
+      "vercel": {
+        "type": "remote",
+        "url": "https://mcp.vercel.com"
       }
     }
   }
