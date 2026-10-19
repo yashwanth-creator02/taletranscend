@@ -156,13 +156,31 @@ What the runner restores, and why each is required:
 | `node_modules/`        | yes        | `npx` re-resolves remotely on every MCP start                                                     |
 | `.agents/skills/`      | yes        | Brand skills vanish; agents lose `populate`, `discernment-nudge`, `frontend-design`, and the rest |
 | `.vercel/project.json` | yes        | Vercel project link lost; `vercel` MCP drops to team scope                                        |
-| `.env`                 | yes        | Firebase config absent; app boots broken                                                          |
+| `.env`, `.env.local`   | yes        | Firebase credentials absent; app boots broken                                                     |
+| `.dev-port`            | yes        | Dev server and E2E fall back to 5173 and collide with other worktrees                             |
 
 Use `--check` to report state without changing anything, and `--source <path>` when the primary checkout is not the git main worktree.
 
-Never hand-author `.vercel/project.json` or copy `.env` into a commit. Both stay ignored. If a worktree is created outside this repository's own tooling, treat the four artifacts above as the minimum viable set and confirm each explicitly rather than assuming.
+Never hand-author `.vercel/project.json` or commit any env file. The runner refuses to copy a destination git would track, so a secret cannot reach a commit even by mistake; it reports byte counts and key names only, never values.
 
 The `chrome-devtools` MCP server needs nothing copied: it auto-provisions Chrome for Testing and caches the binary and profile outside the repository.
+
+**Per-worktree dev ports.** Each worktree is assigned its own dev server port so several can run simultaneously. The registry lives at `.git/worktree-ports.json`, shared by every worktree of this repository, and `.dev-port` holds the current worktree's value. Both `vite.config.js` and `playwright.config.js` read `.dev-port`, falling back to 5173 when absent, so `npm run dev` and `npm run e2e` need no manual port flags.
+
+```powershell
+python execution/setup_worktree.py --list-ports        # show every allocation
+python execution/setup_worktree.py --release-port     # free this worktree's port
+python execution/setup_worktree.py --release-port <path>   # free another worktree's port
+```
+
+**Release the port once the branch is merged.** A merged worktree has served its purpose and its port must be freed:
+
+```powershell
+git worktree remove <path>
+python execution/setup_worktree.py --release-port <path>
+```
+
+Allocation also prunes entries whose worktree directory no longer exists, so a forgotten release self-heals on the next setup run. Never hardcode a port in a committed config file.
 
 ## Self-annealing loop
 

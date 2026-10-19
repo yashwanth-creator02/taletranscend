@@ -1,9 +1,27 @@
 import { defineConfig, devices } from '@playwright/test';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Local runs default to the standard Vite port. Set E2E_PORT when another
-// worktree's dev server already owns 5173, so this suite never reuses a
-// different checkout's server and silently tests the wrong code.
-const port = Number(process.env.E2E_PORT || 5173);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Match the port this worktree was allocated by execution/setup_worktree.py so
+// E2E never collides with another worktree's dev server. E2E_PORT overrides the
+// allocation for a one-off run; both fall back to 5173.
+const DEV_PORT = (() => {
+  const override = Number.parseInt(process.env.E2E_PORT ?? '', 10);
+  if (Number.isInteger(override) && override > 0 && override < 65536) return override;
+  try {
+    const raw = fs.readFileSync(path.join(__dirname, '.dev-port'), 'utf-8').trim();
+    const port = Number.parseInt(raw, 10);
+    if (Number.isInteger(port) && port > 0 && port < 65536) return port;
+  } catch {
+    // no allocation file
+  }
+  return 5173;
+})();
+
+const BASE_URL = `http://127.0.0.1:${DEV_PORT}`;
 
 export default defineConfig({
   testDir: './e2e',
@@ -14,7 +32,7 @@ export default defineConfig({
   reporter: 'html',
 
   use: {
-    baseURL: `http://127.0.0.1:${port}`,
+    baseURL: BASE_URL,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
@@ -43,8 +61,8 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: `npx vite --host 127.0.0.1 --port ${port}`,
-    url: `http://127.0.0.1:${port}/library.html`,
+    command: `npx vite --host 127.0.0.1 --port ${DEV_PORT}`,
+    url: `${BASE_URL}/library.html`,
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
   },
