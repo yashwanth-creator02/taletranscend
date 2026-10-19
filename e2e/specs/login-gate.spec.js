@@ -9,6 +9,7 @@
 import { test, expect } from '@playwright/test';
 
 const AUTH_MEMORY_KEY = 'tt_auth';
+const WAIT = { timeout: 15000 };
 
 /** Opens a URL without failing the test if the gate replaces the navigation. */
 async function gotoAllowingRedirect(page, url) {
@@ -19,10 +20,15 @@ async function gotoAllowingRedirect(page, url) {
   }
 }
 
+/** Asserts the current path, ignoring host and port. */
+async function expectPath(page, pathname) {
+  await expect.poll(() => new URL(page.url()).pathname, WAIT).toBe(pathname);
+}
+
 test.describe('First-visit login gate', () => {
   test('sends a first-time visitor to the login page', async ({ page }) => {
     await gotoAllowingRedirect(page, '/');
-    await expect(page).toHaveURL(/\/login\.html/, { timeout: 15000 });
+    await expectPath(page, '/login.html');
   });
 
   test('acknowledges the gate on the login page, so it does not fire again', async ({ page }) => {
@@ -35,10 +41,10 @@ test.describe('First-visit login gate', () => {
 
     // The next visit goes straight through, whichever page is opened.
     await gotoAllowingRedirect(page, '/');
-    await expect(page).toHaveURL(/5173\/$/, { timeout: 15000 });
+    await expectPath(page, '/');
 
     await gotoAllowingRedirect(page, '/library.html');
-    await expect(page).toHaveURL(/library\.html/, { timeout: 15000 });
+    await expectPath(page, '/library.html');
   });
 
   test('skips the gate for a remembered durable login', async ({ page }) => {
@@ -50,7 +56,7 @@ test.describe('First-visit login gate', () => {
     }, AUTH_MEMORY_KEY);
 
     await gotoAllowingRedirect(page, '/');
-    await expect(page).toHaveURL(/5173\/$/, { timeout: 15000 });
+    await expectPath(page, '/');
   });
 
   test('skips the gate for a session-only login', async ({ page }) => {
@@ -62,7 +68,7 @@ test.describe('First-visit login gate', () => {
     }, AUTH_MEMORY_KEY);
 
     await gotoAllowingRedirect(page, '/');
-    await expect(page).toHaveURL(/5173\/$/, { timeout: 15000 });
+    await expectPath(page, '/');
   });
 
   test('still gates a visitor whose record is corrupt', async ({ page }) => {
@@ -71,7 +77,7 @@ test.describe('First-visit login gate', () => {
     }, AUTH_MEMORY_KEY);
 
     await gotoAllowingRedirect(page, '/');
-    await expect(page).toHaveURL(/\/login\.html/, { timeout: 15000 });
+    await expectPath(page, '/login.html');
   });
 
   test('gates again once the remembered login is cleared', async ({ page }) => {
@@ -86,9 +92,9 @@ test.describe('First-visit login gate', () => {
     }, AUTH_MEMORY_KEY);
 
     await gotoAllowingRedirect(page, '/');
-    await expect(page).toHaveURL(/5173\/$/, { timeout: 15000 });
+    await expectPath(page, '/');
 
-    // This is what signOutAndForget() does before signing out.
+    // Exactly what signOutAndForget() does before signing out.
     await page.evaluate((key) => {
       localStorage.removeItem(key);
       localStorage.removeItem('tt_has_visited');
@@ -96,6 +102,6 @@ test.describe('First-visit login gate', () => {
     }, AUTH_MEMORY_KEY);
 
     await gotoAllowingRedirect(page, '/');
-    await expect(page).toHaveURL(/\/login\.html/, { timeout: 15000 });
+    await expectPath(page, '/login.html');
   });
 });

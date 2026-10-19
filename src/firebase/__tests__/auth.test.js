@@ -117,6 +117,50 @@ describe('firebase/auth', () => {
       expect(localStorage.getItem('tt_auth')).toBeNull();
     });
 
+    it('keeps a session-only login session-only when its session is restored', async () => {
+      // Regression guard: the login page hands over to another page, which
+      // restores the session. Promoting it here would silently defeat the
+      // unchecked "Keep me signed in" checkbox.
+      sessionStorage.setItem(
+        'tt_auth',
+        JSON.stringify({ v: 1, uid: 'u9', anonymous: false, method: 'google', at: 1 })
+      );
+      const mockUser = { uid: 'u9', isAnonymous: false };
+      onAuthStateChanged.mockImplementation((auth, callback) => {
+        Promise.resolve().then(() => callback(mockUser));
+        return vi.fn();
+      });
+
+      initAuth(vi.fn());
+
+      await vi.waitFor(() =>
+        expect(JSON.parse(sessionStorage.getItem('tt_auth')).method).toBe('restore')
+      );
+      expect(localStorage.getItem('tt_auth')).toBeNull();
+    });
+
+    it('keeps a durable login durable when its session is restored', async () => {
+      const mockUser = { uid: 'u12', isAnonymous: false };
+      onAuthStateChanged.mockImplementation((auth, callback) => {
+        Promise.resolve().then(() => callback(mockUser));
+        return vi.fn();
+      });
+      initAuth(vi.fn());
+      await vi.waitFor(() => expect(localStorage.getItem('tt_auth')).not.toBeNull());
+
+      // A second page load restores the same session again.
+      onAuthStateChanged.mockImplementation((auth, callback) => {
+        Promise.resolve().then(() => callback(mockUser));
+        return vi.fn();
+      });
+      initAuth(vi.fn());
+
+      await vi.waitFor(() =>
+        expect(JSON.parse(localStorage.getItem('tt_auth')).method).toBe('restore')
+      );
+      expect(sessionStorage.getItem('tt_auth')).toBeNull();
+    });
+
     it('does not remember a freshly created anonymous session', async () => {
       const mockUser = { uid: 'u11', isAnonymous: true };
       onAuthStateChanged.mockImplementation((auth, callback) => {
@@ -160,6 +204,16 @@ describe('firebase/auth', () => {
       expect(localStorage.getItem('tt_auth')).toBeNull();
       expect(localStorage.getItem('tt_has_visited')).toBeNull();
       expect(signOut).toHaveBeenCalledWith(mockAuth);
+    });
+
+    it('signs out before forgetting, so a failed sign-out stays remembered', async () => {
+      localStorage.setItem('tt_auth', JSON.stringify({ v: 1, uid: 'u1' }));
+      signOut.mockRejectedValueOnce(new Error('offline'));
+
+      await expect(signOutAndForget()).rejects.toThrow('offline');
+
+      // The visitor is still signed in, so the gate must stay quiet.
+      expect(JSON.parse(localStorage.getItem('tt_auth')).uid).toBe('u1');
     });
   });
 

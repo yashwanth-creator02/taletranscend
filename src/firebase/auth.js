@@ -20,7 +20,11 @@ import {
 } from 'firebase/auth';
 import app from './app.js';
 import { createLogger } from '@/utils';
-import { clearAuthMemory, rememberAuth } from '@services/auth-memory.storage.js';
+import {
+  clearAuthMemory,
+  isRememberedDurably,
+  rememberAuth,
+} from '@services/auth-memory.storage.js';
 
 const log = createLogger('Auth');
 
@@ -32,10 +36,12 @@ export const auth = getAuth(app);
  * otherwise creates a new one. Guarantees onReady fires exactly once.
  *
  * A session that Firebase restored from persistence predates this page load.
- * When it belongs to a real (non-anonymous) account it is remembered durably,
- * so a signed-in visitor is never asked to log in again even if the visit
- * flags were lost. A freshly auto-created anonymous session is deliberately
- * NOT remembered — the app creates one on most pages, and treating that as
+ * When it belongs to a real (non-anonymous) account it is remembered, so a
+ * signed-in visitor is never asked to log in again even if the visit flags
+ * were lost — using whatever durability the visitor already chose, so a
+ * session-only login is not upgraded to a durable one just because another
+ * page loaded. A freshly auto-created anonymous session is deliberately NOT
+ * remembered — the app creates one on most pages, and treating that as
  * "returning visitor" would disarm the first-visit login gate.
  *
  * @param {(user: import('firebase/auth').User) => void} onReady
@@ -47,7 +53,10 @@ export function initAuth(onReady) {
     if (user) {
       log.info('Existing session found', { uid: user.uid, isAnonymous: user.isAnonymous });
       if (!user.isAnonymous) {
-        rememberAuth({ uid: user.uid, anonymous: false, method: 'restore' }, { durable: true });
+        rememberAuth(
+          { uid: user.uid, anonymous: false, method: 'restore' },
+          { durable: isRememberedDurably() }
+        );
       }
       onReady(user);
     } else {
@@ -89,11 +98,14 @@ export async function setRememberPreference(durable = true) {
  * Signs out and forgets the remembered authentication, so the first-visit
  * login gate engages again on the next visit.
  *
+ * The memory is forgotten only after Firebase confirms the sign-out: a failed
+ * sign-out must not leave a still-signed-in visitor facing the gate.
+ *
  * @returns {Promise<void>}
  */
 export async function signOutAndForget() {
-  clearAuthMemory();
   await signOut(auth);
+  clearAuthMemory();
 }
 
 /**

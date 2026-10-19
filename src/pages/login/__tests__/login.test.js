@@ -56,6 +56,9 @@ describe('Login Page', () => {
     mockAuth.currentUser = null;
     localStorage.clear();
     sessionStorage.clear();
+    // jsdom shares one document URL per file: reset it so a test that sets a
+    // returnUrl cannot leak into the next one.
+    window.history.replaceState({}, '', '/login.html');
 
     // clearAllMocks() keeps any mockImplementation() set by an earlier test,
     // so the defaults are re-applied explicitly to keep tests independent.
@@ -312,6 +315,8 @@ describe('Login Page', () => {
   it('remembers a guest login for this session only when unchecked', async () => {
     await initPage();
     document.getElementById('checkbox-remember').checked = false;
+    // A durable trace may already exist: the gate acknowledgement above.
+    localStorage.setItem('tt_has_visited', 'true');
 
     document.getElementById('btn-guest-login').click();
     await vi.waitFor(() => expect(sessionStorage.getItem('tt_auth')).not.toBeNull());
@@ -329,15 +334,29 @@ describe('Login Page', () => {
     const { setRememberPreference } = await import('@fb/index.js');
     await initPage();
 
+    // Record the real call order: persistence must be set before the sign-in,
+    // because that is the moment Firebase writes the session.
+    const order = [];
+    setRememberPreference.mockImplementation(() => {
+      order.push('persistence');
+      return Promise.resolve(true);
+    });
+    signInWithGoogle.mockImplementation(() => {
+      order.push('signIn');
+      mockAuth.currentUser = { uid: 'google-1', isAnonymous: false };
+      return Promise.resolve({ user: mockAuth.currentUser });
+    });
+
     document.getElementById('checkbox-remember').checked = false;
     document.getElementById('btn-google-login').click();
 
-    await vi.waitFor(() => expect(setRememberPreference).toHaveBeenCalledWith(false));
     await vi.waitFor(() => expect(sessionStorage.getItem('tt_auth')).not.toBeNull());
+    expect(order).toEqual(['persistence', 'signIn']);
+    expect(setRememberPreference).toHaveBeenCalledWith(false);
     expect(JSON.parse(sessionStorage.getItem('tt_auth')).method).toBe('google');
   });
 
-  it('remembers a restored account durably before redirecting to profile', async () => {
+  it('remembers a restored account before continuing to the destination', async () => {
     onAuthStateChanged.mockImplementation((auth, cb) => {
       cb({ uid: 'restored-1', isAnonymous: false });
       return vi.fn();
@@ -349,6 +368,82 @@ describe('Login Page', () => {
       uid: 'restored-1',
       anonymous: false,
       method: 'restore',
+    });
+  });
+
+  it('does not upgrade a session-only login when an account is restored', async () => {
+    sessionStorage.setItem(
+      'tt_auth',
+      JSON.stringify({ v: 1, uid: 'u1', anonymous: false, method: 'google', at: 1 })
+    );
+    onAuthStateChanged.mockImplementation((auth, cb) => {
+      cb({ uid: 'u1', isAnonymous: false });
+      return vi.fn();
+    });
+
+    await initPage();
+
+    expect(JSON.parse(sessionStorage.getItem('tt_auth')).method).toBe('restore');
+    expect(localStorage.getItem('tt_auth')).toBeNull();
+  });
+
+  it('continues to the destination preserved by the gate', async () => {
+    const mod = await import('../login.js');
+    await initPage();
+    window.history.replaceState({}, '', '/login.html?returnUrl=%2Flibrary.html%3Ffilter%3Dmyth');
+
+    mod.handleAuthSuccess('guest');
+    vi.advanceTimersByTime(1000);
+
+    expect(utils.navigateTo).toHaveBeenCalledWith('/library.html?filter=myth');
+  });
+
+  it('never continues to an off-site returnUrl', async () => {
+    const mod = await import('../login.js');
+    await initPage();
+    window.history.replaceState({}, '', '/login.html?returnUrl=https%3A%2F%2Fevil.example%2Fsteal');
+
+    mod.handleAuthSuccess('guest');
+    vi.advanceTimersByTime(1000);
+
+    expect(utils.navigateTo).toHaveBeenCalledWith('profile.html');
+  });
+
+  describe('safeReturnTarget', () => {
+    async function load() {
+      return (await import('../login.js')).safeReturnTarget;
+    }
+
+    it('accepts a site-relative path', async () => {
+      const safeReturnTarget = await load();
+      expect(safeReturnTarget('/library.html?filter=myth')).toBe('/library.html?filter=myth');
+    });
+
+    it('rejects an absolute URL', async () => {
+      const safeReturnTarget = await load();
+      expect(safeReturnTarget('https://evil.example/steal')).toBe('profile.html');
+    });
+
+    it('rejects a protocol-relative URL', async () => {
+      const safeReturnTarget = await load();
+      expect(safeReturnTarget('//evil.example/steal')).toBe('profile.html');
+    });
+
+    it('rejects backslash variants browsers may normalise', async () => {
+      const safeReturnTarget = await load();
+      expect(safeReturnTarget('/\\evil.example/steal')).toBe('profile.html');
+    });
+
+    it('falls back for empty and non-string values', async () => {
+      const safeReturnTarget = await load();
+      expect(safeReturnTarget(null)).toBe('profile.html');
+      expect(safeReturnTarget(undefined)).toBe('profile.html');
+      expect(safeReturnTarget('   ')).toBe('profile.html');
+    });
+
+    it('honours a custom fallback', async () => {
+      const safeReturnTarget = await load();
+      expect(safeReturnTarget('', '/library.html')).toBe('/library.html');
     });
   });
 });

@@ -87,6 +87,8 @@ vi.mock('@fb/index.js', () => ({
   getCountFromServer: vi.fn(),
   onAuthStateChanged: vi.fn(),
   signOut: vi.fn(),
+  signOutAndForget: vi.fn(() => Promise.resolve()),
+  setRememberPreference: vi.fn(() => Promise.resolve(true)),
   initAuth: vi.fn((cb) => cb({ uid: 'mock-uid' })),
 }));
 

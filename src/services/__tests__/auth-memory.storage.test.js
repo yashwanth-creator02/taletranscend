@@ -1,5 +1,5 @@
 // src/services/__tests__/auth-memory.storage.test.js
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   AUTH_MEMORY_KEY,
   AUTH_MEMORY_VERSION,
@@ -7,11 +7,13 @@ import {
   clearAuthMemory,
   getAuthMemory,
   hasAuthMemory,
+  isRememberedDurably,
   rememberAuth,
 } from '../auth-memory.storage.js';
 
 describe('auth-memory.storage', () => {
   beforeEach(() => {
+    vi.restoreAllMocks();
     localStorage.clear();
     sessionStorage.clear();
   });
@@ -101,10 +103,37 @@ describe('auth-memory.storage', () => {
     });
   });
 
+  describe('isRememberedDurably', () => {
+    it('defaults to true when nothing is remembered', () => {
+      expect(isRememberedDurably()).toBe(true);
+    });
+
+    it('reports a durable record as durable', () => {
+      rememberAuth({ uid: 'u1', method: 'google' });
+      expect(isRememberedDurably()).toBe(true);
+    });
+
+    it('reports a session-only record as not durable', () => {
+      rememberAuth({ uid: 'u1', method: 'google' }, { durable: false });
+      expect(isRememberedDurably()).toBe(false);
+    });
+
+    it('honours the fallback when nothing is remembered', () => {
+      expect(isRememberedDurably(false)).toBe(false);
+    });
+  });
+
   describe('clearAuthMemory', () => {
     it('clears both scopes and the legacy visit flag by default', () => {
-      rememberAuth({ uid: 'u1' }, { durable: true });
-      rememberAuth({ uid: 'u1' }, { durable: false });
+      // Seeded directly: rememberAuth() would clear the other area itself.
+      localStorage.setItem(
+        AUTH_MEMORY_KEY,
+        JSON.stringify({ v: AUTH_MEMORY_VERSION, uid: 'u1', method: 'google', at: 1 })
+      );
+      sessionStorage.setItem(
+        AUTH_MEMORY_KEY,
+        JSON.stringify({ v: AUTH_MEMORY_VERSION, uid: 'u1', method: 'google', at: 1 })
+      );
       localStorage.setItem(HAS_VISITED_KEY, 'true');
 
       clearAuthMemory();
@@ -115,8 +144,14 @@ describe('auth-memory.storage', () => {
     });
 
     it('keeps the session record when only the durable scope is cleared', () => {
-      rememberAuth({ uid: 'u1' }, { durable: true });
-      rememberAuth({ uid: 'u1' }, { durable: false });
+      localStorage.setItem(
+        AUTH_MEMORY_KEY,
+        JSON.stringify({ v: AUTH_MEMORY_VERSION, uid: 'u1', method: 'google', at: 1 })
+      );
+      sessionStorage.setItem(
+        AUTH_MEMORY_KEY,
+        JSON.stringify({ v: AUTH_MEMORY_VERSION, uid: 'u1', method: 'google', at: 1 })
+      );
       localStorage.setItem(HAS_VISITED_KEY, 'true');
 
       clearAuthMemory({ session: false });
@@ -124,6 +159,43 @@ describe('auth-memory.storage', () => {
       expect(localStorage.getItem(AUTH_MEMORY_KEY)).toBeNull();
       expect(localStorage.getItem(HAS_VISITED_KEY)).toBeNull();
       expect(sessionStorage.getItem(AUTH_MEMORY_KEY)).not.toBeNull();
+    });
+
+    it('clears a session-only record when the session scope is cleared', () => {
+      rememberAuth({ uid: 'u1' }, { durable: false });
+
+      clearAuthMemory();
+
+      expect(sessionStorage.getItem(AUTH_MEMORY_KEY)).toBeNull();
+    });
+  });
+
+  describe('when storage refuses the write', () => {
+    it('returns null and leaves the existing memory untouched', () => {
+      localStorage.setItem(
+        AUTH_MEMORY_KEY,
+        JSON.stringify({ v: AUTH_MEMORY_VERSION, uid: 'existing', method: 'gate', at: 1 })
+      );
+      const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+        throw new Error('QuotaExceededError');
+      });
+
+      const written = rememberAuth({ uid: 'new' }, { durable: true });
+
+      expect(written).toBeNull();
+      // Losing the previous memory entirely would bounce a just-signed-in
+      // visitor straight back to the login gate, so it must survive.
+      expect(JSON.parse(localStorage.getItem(AUTH_MEMORY_KEY)).uid).toBe('existing');
+      expect(setItem).toHaveBeenCalled();
+    });
+
+    it('reports that nothing is remembered', () => {
+      vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+        throw new Error('QuotaExceededError');
+      });
+
+      expect(rememberAuth({ uid: 'new' })).toBeNull();
+      expect(getAuthMemory()).toBeNull();
     });
   });
 });

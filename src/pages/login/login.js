@@ -28,7 +28,11 @@ import {
   markUserVisited,
   acknowledgeGate,
 } from '@/utils';
-import { clearAuthMemory, rememberAuth } from '@services/auth-memory.storage.js';
+import {
+  clearAuthMemory,
+  isRememberedDurably,
+  rememberAuth,
+} from '@services/auth-memory.storage.js';
 import { initIcons } from '@ui/icons.js';
 import { showToast } from '@ui/components/toast.js';
 
@@ -77,6 +81,39 @@ function _isRememberChecked() {
 }
 
 /**
+ * Validates a post-login destination. Only site-relative paths are accepted,
+ * so a crafted link cannot bounce a freshly authenticated visitor to another
+ * site (open redirect).
+ *
+ * @param {string|null|undefined} raw - Candidate destination from the URL.
+ * @param {string} [fallback='profile.html'] - Used when the candidate is unusable.
+ * @returns {string}
+ */
+export function safeReturnTarget(raw, fallback = 'profile.html') {
+  if (typeof raw !== 'string') return fallback;
+
+  const trimmed = raw.trim();
+  if (!trimmed.startsWith('/')) return fallback;
+  // Reject protocol-relative ('//evil.com') and backslash variants that some
+  // browsers normalise into a host.
+  if (trimmed.startsWith('//') || trimmed.includes('\\')) return fallback;
+
+  return trimmed;
+}
+
+/**
+ * Reads the destination the visitor was originally trying to reach, as
+ * preserved by the login gate in `returnUrl` (or the legacy `redirect`).
+ *
+ * @returns {string}
+ */
+function _returnTarget() {
+  if (typeof window === 'undefined') return 'profile.html';
+  const params = new URLSearchParams(window.location.search);
+  return safeReturnTarget(params.get('returnUrl') ?? params.get('redirect'));
+}
+
+/**
  * Records how (and for how long) the visitor is remembered.
  *
  * Durable keeps the visitor remembered across browser restarts. Unchecking
@@ -84,24 +121,35 @@ function _isRememberChecked() {
  * so the login page is allowed to return in a later session.
  *
  * @param {string} method - 'google' | 'email' | 'guest'
- * @returns {boolean} The resolved durability.
+ * @returns {{durable: boolean, stored: boolean}} The resolved durability and
+ *   whether the record could actually be written.
  */
 function _rememberAuth(method) {
   const durable = _isRememberChecked();
   const current = auth?.currentUser;
 
-  rememberAuth(
+  const written = rememberAuth(
     { uid: current?.uid ?? null, anonymous: current?.isAnonymous ?? false, method },
     { durable }
   );
 
+  if (!written) {
+    // Storage is blocked or full. Keep whatever memory already exists rather
+    // than clearing it, which would send the just-signed-in visitor back to
+    // the gate on their next step.
+    log.warn('Auth memory could not be written; leaving existing memory intact');
+    return { durable, stored: false };
+  }
+
   if (durable) {
     markUserVisited();
   } else {
+    // The durable record and the legacy flag must go, otherwise the login
+    // page could never return in a later session.
     clearAuthMemory({ session: false });
   }
 
-  return durable;
+  return { durable, stored: true };
 }
 
 /**
@@ -110,11 +158,10 @@ function _rememberAuth(method) {
  * @param {string} method - Authentication method used, for the auth memory record.
  */
 export function handleAuthSuccess(method = 'unknown') {
-  const durable = _rememberAuth(method);
-  log.info('Authentication remembered', { method, durable });
+  const { durable, stored } = _rememberAuth(method);
+  log.info('Authentication remembered', { method, durable, stored });
   showToast('Welcome to the Living Archive.', 'success');
-  const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
-  const returnUrl = params?.get('returnUrl') || params?.get('redirect') || 'profile.html';
+  const returnUrl = _returnTarget();
   setTimeout(() => {
     navigateTo(returnUrl);
   }, 900);
@@ -461,15 +508,20 @@ export function initLoginPage() {
   _setupSocialLogins();
   _setupDismissLinks();
 
-  // If already signed in (non-anonymously), redirect to profile
+  // If already signed in (non-anonymously), continue to the destination
+  // instead of showing the form. The durability of the existing memory is
+  // preserved, so this cannot silently upgrade a session-only login.
   const unsubscribe = onAuthStateChanged(auth, (user) => {
     if (user && !user.isAnonymous) {
-      log.info('User already authenticated, redirecting to profile');
-      rememberAuth({ uid: user.uid, anonymous: false, method: 'restore' }, { durable: true });
+      log.info('User already authenticated, continuing to their destination');
+      rememberAuth(
+        { uid: user.uid, anonymous: false, method: 'restore' },
+        { durable: isRememberedDurably() }
+      );
       Promise.resolve().then(() => {
         if (unsubscribe) unsubscribe();
       });
-      navigateTo('profile.html');
+      navigateTo(_returnTarget());
     }
   });
 

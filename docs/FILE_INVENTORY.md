@@ -191,7 +191,7 @@ Each directory under `src/pages/` holds the JavaScript for one HTML shell in `sr
 
 ### Login (`src/pages/login`)
 
-- `src/pages/login/login.js` — Login/sign-up page controller: email and phone auth tabs, password toggle, Google and guest sign-in, Firestore profile seeding, and the auth-memory record driven by the "Keep me signed in" checkbox.
+- `src/pages/login/login.js` — Login/sign-up page controller: email and phone auth tabs, password toggle, Google and guest sign-in, Firestore profile seeding, the auth-memory record driven by the "Keep me signed in" checkbox, and validated `returnUrl` continuation.
 - `src/pages/login/__tests__/login.test.js` - Vitest tests for `src/pages/login/login.js` - signed-in redirect, Google/guest auth, email submit, tab switching, password toggle, sign-up mode, forgot password, gate acknowledgement, and durable versus session-only auth memory.
 
 ### Table of Contents (`src/pages/toc`)
@@ -245,7 +245,7 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `src/services/admin.service.js` — Admin service checking admin/moderator claims and reviewing deletionRequests: approve, reject, or force-delete chronicles.
 - `src/services/ai.service.js` — Gemini AI Oracle: suggestTitle, refineMythicText, and generateTaleContinuation via gemini-2.0-flash with sanitization and retries.
 - `src/services/ai/apiKey.storage.js` — localStorage helper for the BYOK Gemini API key (key: tt-gemini-api-key) with get/set/clear and env fallback.
-- `src/services/auth-memory.storage.js` — Explicit auth memory (key `tt_auth`) recorded on the login page and on restored sessions: durable (localStorage) or session-only (sessionStorage), cleared on sign-out; what the first-visit login gate reads.
+- `src/services/auth-memory.storage.js` — Explicit auth memory (key `tt_auth`) recorded on the login page and on restored sessions: durable (localStorage) or session-only (sessionStorage), never downgraded or upgraded by a restored session, cleared on sign-out; a failed write leaves the previous memory intact. This is what the first-visit login gate reads.
 - `src/services/author.service.js` — Scribe registration: author status from users/{uid}, schema-validated registration, mirrored to localStorage key `tt_author_{uid}`.
 - `src/services/bookmark.service.js` — Bookmark CRUD at users/{uid}/bookmarks/{taleId} with rate limiting, offline mirror, and cached tale metadata for the shelf.
 - `src/services/cache.service.js` — cacheService singleton: in-memory + sessionStorage (tt_cache:) cache with SWR, first-visit bypass, and domain invalidation helpers.
@@ -293,7 +293,7 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 ## Firebase Layer (`src/firebase`)
 
 - `src/firebase/app.js` — Initializes the Firebase app once and starts global network listeners; default-exports the app.
-- `src/firebase/auth.js` — Exports the auth instance plus initAuth anonymous bootstrap (which records restored accounts in the auth memory), setRememberPreference for the Keep-me-signed-in scope, signOutAndForget, Google/email sign-in, anonymous linking, password reset, and account deletion.
+- `src/firebase/auth.js` — Exports the auth instance plus initAuth anonymous bootstrap (which records restored accounts in the auth memory without changing an existing record's scope), setRememberPreference for the Keep-me-signed-in scope, signOutAndForget, Google/email sign-in, anonymous linking, password reset, and account deletion.
 - `src/firebase/db.js` — Creates the shared Firestore instance and re-exports Firestore SDK utilities as the single import surface.
 - `src/firebase/index.js` — Barrel re-exporting auth helpers, db helpers, refs, PATHS, APP_ROOT, and appId from the Firebase layer.
 - `src/firebase/paths.js` — PATHS factory map defining every Firestore path string under APP_ROOT v1/taletranscend/projects/v1.

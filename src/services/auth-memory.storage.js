@@ -101,9 +101,13 @@ export function hasAuthMemory() {
  * Writes the auth memory record, clearing the opposite storage area so the
  * two can never disagree about the visitor's remembered state.
  *
+ * The clear happens only after the write succeeds. A blocked or full storage
+ * area then cannot leave the visitor with no memory at all.
+ *
  * @param {{uid?: string|null, anonymous?: boolean, method?: string}} record
  * @param {{durable?: boolean}} [options]
- * @returns {Object} The record that was written (with `scope` resolved).
+ * @returns {Object|null} The record that was written (with `scope` resolved),
+ *   or null when the write failed.
  */
 export function rememberAuth(record = {}, { durable = true } = {}) {
   const payload = {
@@ -114,21 +118,42 @@ export function rememberAuth(record = {}, { durable = true } = {}) {
     at: Date.now(),
   };
 
-  const target = storageArea(durable);
+  let written = false;
 
   try {
-    storageArea(!durable)?.removeItem(AUTH_MEMORY_KEY);
-  } catch {
-    // Ignore storage restrictions
-  }
-
-  try {
-    target?.setItem(AUTH_MEMORY_KEY, JSON.stringify(payload));
+    const target = storageArea(durable);
+    if (target) {
+      target.setItem(AUTH_MEMORY_KEY, JSON.stringify(payload));
+      written = true;
+    }
   } catch (err) {
     log.warn('Could not persist auth memory:', err?.message || err);
   }
 
-  return { ...payload, scope: durable ? 'local' : 'session' };
+  if (written) {
+    try {
+      storageArea(!durable)?.removeItem(AUTH_MEMORY_KEY);
+    } catch {
+      // Ignore storage restrictions
+    }
+  }
+
+  return written ? { ...payload, scope: durable ? 'local' : 'session' } : null;
+}
+
+/**
+ * Reports whether the visitor is currently remembered durably.
+ *
+ * Restoring a session must never change how long the visitor asked to be
+ * remembered: a session-only login stays session-only when another page
+ * loads it, and vice versa.
+ *
+ * @param {boolean} [fallback=true] Value used when nothing is remembered yet.
+ * @returns {boolean}
+ */
+export function isRememberedDurably(fallback = true) {
+  const existing = getAuthMemory();
+  return existing ? existing.scope === 'local' : fallback;
 }
 
 /**
