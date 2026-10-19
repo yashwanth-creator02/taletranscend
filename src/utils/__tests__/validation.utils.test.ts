@@ -63,6 +63,7 @@ describe('Validation Utils', () => {
       audience: 'General',
       chapterCount: 1,
       wordCount: 500,
+      authorId: 'u1',
     };
 
     it('validates correct metadata', () => {
@@ -112,6 +113,7 @@ describe('Validation Utils', () => {
       title: 'The Beginning',
       content: 'Once upon a time...',
       wordCount: 4,
+      index: 0,
     };
 
     it('validates correct chapter', () => {

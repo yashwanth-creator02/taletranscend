@@ -5,7 +5,6 @@
 import {
   auth,
   getDocs,
-  getDoc,
   updateDoc,
   deleteDoc,
   query,
@@ -22,6 +21,16 @@ const log = createLogger('AdminService');
 /**
  * Checks whether the currently authenticated user possesses administrator or moderator privileges.
  *
+ * Authority comes ONLY from custom claims. This must stay in lockstep with
+ * `isAdmin()` in firestore.rules, which reads `request.auth.token.admin` /
+ * `request.auth.token.moderator` and nothing else.
+ *
+ * The `users/{uid}.role` field is deliberately NOT consulted here: it is
+ * client-writable, so trusting it would let a user grant themselves the admin
+ * UI while every Firestore write is still rejected — a confusing half-state
+ * that also masked a real permission bug. Use the `setModeratorClaim` callable
+ * to grant claims.
+ *
  * @param {import('firebase/auth').User} [user]
  * @returns {Promise<boolean>}
  */
@@ -29,16 +38,7 @@ export async function isCurrentUserAdmin(user = auth.currentUser) {
   if (!user) return false;
   try {
     const tokenResult = await user.getIdTokenResult?.();
-    if (tokenResult?.claims?.admin || tokenResult?.claims?.moderator) {
-      return true;
-    }
-    // Also check user profile document in Firestore
-    const userDoc = await getDoc(refs.user(user.uid));
-    if (userDoc?.exists?.() && userDoc.data) {
-      const role = userDoc.data()?.role;
-      return role === 'admin' || role === 'moderator';
-    }
-    return false;
+    return Boolean(tokenResult?.claims?.admin || tokenResult?.claims?.moderator);
   } catch (err) {
     log.warn('Failed to verify admin status:', err);
     return false;

@@ -1,7 +1,9 @@
 // src/services/resonance.service.js
 // Manages tale reactions (Soul Resonance) stored in Firestore.
 // Reactions live at tales/{taleId}/reactions/{userId} per the finalized schema.
-// Reaction count on the tale document is synced by the onReactionCreate/Delete Cloud Function.
+// reactionCount on the tale document is owned by THIS module: it is incremented
+// in the same gesture as the reaction write. onReactionWrite is an intentional
+// no-op — see docs/decisions/0006-reaction-count-ownership.md.
 
 import {
   auth,

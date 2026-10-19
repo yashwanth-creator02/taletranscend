@@ -141,7 +141,7 @@ export async function saveToCloud() {
   }
 
   log.info('Saving draft to cloud...', { draftId: state.draftId, userId });
-  const payload = _buildMetadataPayload();
+  const payload = _buildMetadataPayload(userId);
 
   // Validation
   const validated = validateData(DraftMetadataSchema, payload);
@@ -218,6 +218,9 @@ async function _saveChapter(userId, index, chapter) {
     title: chapter.title?.trim() || `Fragment ${index + 1}`,
     content: chapter.content || '',
     wordCount,
+    // firestore.rules requires an integer `index` matching the document's
+    // position on BOTH create and update. Without it every draft save is denied.
+    index,
   };
 
   const validated = validateData(DraftChapterSchema, payload);
@@ -228,10 +231,24 @@ async function _saveChapter(userId, index, chapter) {
     return;
   }
 
-  await setDoc(refs.draftChapter(userId, state.draftId, String(index)), {
+  const chapterRef = refs.draftChapter(userId, state.draftId, String(index));
+
+  // `createdAt` is required by the create rule only. Sending it on every save
+  // would overwrite the original creation timestamp, so it is sent only while
+  // this chapter is known to be new. That set is seeded by loadDraft() from the
+  // chapters actually on disk and extended after each successful write — which
+  // avoids one extra read per chapter per save (saveAllChapters would otherwise
+  // add a read per chapter on every publish, and a failing probe would abort
+  // the whole save).
+  const isNewChapter = !state.savedChapterIndices.has(index);
+
+  await setDoc(chapterRef, {
     ...validated.data,
+    ...(isNewChapter ? { createdAt: serverTimestamp() } : {}),
     updatedAt: serverTimestamp(),
   });
+
+  state.savedChapterIndices.add(index);
 }
 
 /* ─────────────────────────────────────────────
@@ -272,6 +289,11 @@ export async function loadDraft() {
 
   // Fetch chapters subcollection
   const chaptersSnap = await getDocs(refs.draftChapters(userId, state.draftId));
+
+  // Record which chapter documents already exist so _saveChapter() knows
+  // whether it must include `createdAt` (required by the create rule) without
+  // probing each chapter individually on every save.
+  state.savedChapterIndices = new Set(chaptersSnap.docs.map((d) => Number(d.id)));
 
   if (!chaptersSnap.empty) {
     state.chapters = chaptersSnap.docs
@@ -449,9 +471,13 @@ export function updatePublicationStatusIndicator(status) {
  * Denormalizes wordCount so shelf/profile never need sub-collection reads
  * just to display a word count.
  *
+ * `authorId` and `status` are part of the write contract, not decoration:
+ * firestore.rules validates both on draft create, and `status` on update.
+ *
+ * @param {string} userId - Owner uid; must match the draft path segment.
  * @returns {Object}
  */
-function _buildMetadataPayload() {
+function _buildMetadataPayload(userId) {
   const wordCount = state.chapters.reduce((acc, ch) => {
     return acc + countWords(ch.content);
   }, 0);
@@ -472,6 +498,8 @@ function _buildMetadataPayload() {
     authorNotes: state.authorNotes,
     chapterCount: state.chapters.length,
     wordCount,
+    authorId: userId,
+    status: state.status || 'draft',
   };
 }
 

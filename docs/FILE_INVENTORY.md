@@ -61,6 +61,7 @@ One-line duty for every file tracked by git in this repository, grouped by area 
 - `docs/decisions/0003-byok-ai-instead-of-cloud-function-proxy.md` — Decision record: AI uses per-user BYOK Gemini keys in localStorage instead of a Cloud Function proxy.
 - `docs/decisions/0004-field-scoped-rule-exception-for-engagement-counters.md` — Decision record: engagement counters stay client-writable via a permanent field-scoped rule exception.
 - `docs/decisions/0005-remembered-login-gate.md` — Decision record: the first-visit login gate reads one explicit auth-memory record; the Keep-me-signed-in checkbox governs its scope and sign-out clears it.
+- `docs/decisions/0006-reaction-count-ownership.md` — Decision record: `reactionCount` is client-owned and `onReactionWrite` is an intentional no-op, removing the double-writer hazard ADR 0004 flagged.
 - `docs/reports/2026-10-18-code-redundancy-audit.md` — Audit report listing 17 dead-code and duplication findings with severities and their same-day resolutions.
 
 ## Application Views (`src/views`)
@@ -149,13 +150,13 @@ Each directory under `src/pages/` holds the JavaScript for one HTML shell in `sr
 - `src/pages/contribution/contribution.js` — Entry point for the editor page: bootstraps auth and draft loading, binds chapter/metadata/voice/cover/AI events, checklist, presets, and status helpers.
 - `src/pages/contribution/editor.js` — Debounced auto-save of chapter content into local state plus word, character, reading-time, and goal/milestone stat updates.
 - `src/pages/contribution/index.js` — Barrel export aggregating chapters, editor, cloud, publish, state, Firebase, and icon modules for the contribution page.
-- `src/pages/contribution/publish.js` — Publishing pipeline: validates state, runs the author registration wall, writes tale/chapter docs with a version snapshot, and reports status.
-- `src/pages/contribution/state.js` — Shared mutable editor state object holding draftId, publishedTaleId, tale metadata, chapters, and the isDirty flag.
+- `src/pages/contribution/publish.js` — Publishing pipeline: validates state, runs the author registration wall, writes the tale once already `published` (auto-approval is part of the create payload), writes chapter docs against the public-chapters field contract, records a version snapshot, and reports status.
+- `src/pages/contribution/state.js` — Shared mutable editor state object holding draftId, publishedTaleId, tale metadata, chapters, the isDirty flag, and savedChapterIndices (draft chapter docs known to exist, used to decide when `createdAt` is required).
 - `src/pages/contribution/__tests__/chapters.test.js` — Vitest tests for `src/pages/contribution/chapters.js` — add, delete, reorder, sidebar rendering, chapter switching, title syncing.
 - `src/pages/contribution/__tests__/cloud.test.js` — Vitest tests for `src/pages/contribution/cloud.js` — draft ID URL init, metadata sync, draft/published saves and loads, publication status indicator.
 - `src/pages/contribution/__tests__/contribution.test.js` — Vitest tests for `src/pages/contribution/contribution.js` — setStatus and updateChecklist publish-readiness helpers.
 - `src/pages/contribution/__tests__/editor.test.js` — Vitest tests for `src/pages/contribution/editor.js` — updateStats counting and autoSaveLocal state writes and status text.
-- `src/pages/contribution/__tests__/publish.test.js` — Vitest tests for `src/pages/contribution/publish.js` — sign-in, offline, title and chapter validation, publish/update flows, author registration wall.
+- `src/pages/contribution/__tests__/publish.test.js` — Vitest tests for `src/pages/contribution/publish.js` — sign-in, offline, title and chapter validation, publish/update flows, author registration wall, and assertions on the exact tale/chapter payloads the deployed rules accept (real Zod schemas, not mocked).
 - `src/pages/contribution/__tests__/state.test.js` — Vitest tests for `src/pages/contribution/state.js` — initial field values.
 
 ### Profile (`src/pages/profile`)
@@ -243,7 +244,7 @@ Global UI layer: the icon registry, shared components, and the nav shell; each c
 
 Business logic and data access (Firestore, localStorage, external APIs); pages and components consume them, usually through the `src/services/index.js` barrel. Tests live in `__tests__/` folders next to the code.
 
-- `src/services/admin.service.js` — Admin service checking admin/moderator claims and reviewing deletionRequests: approve, reject, or force-delete chronicles.
+- `src/services/admin.service.js` — Admin service gating on admin/moderator custom CLAIMS ONLY (mirrors `isAdmin()` in `firestore.rules`) and reviewing deletionRequests: approve, reject, or force-delete chronicles.
 - `src/services/ai.service.js` — Gemini AI Oracle: suggestTitle, refineMythicText, and generateTaleContinuation via gemini-2.0-flash with sanitization and retries.
 - `src/services/ai/apiKey.storage.js` — localStorage helper for the BYOK Gemini API key (key: tt-gemini-api-key) with get/set/clear and env fallback.
 - `src/services/auth-memory.storage.js` — Explicit auth memory (key `tt_auth`) recorded on the login page and on restored sessions: durable (localStorage) or session-only (sessionStorage), never downgraded or upgraded by a restored session, cleared on sign-out; a failed write leaves the previous memory intact. This is what the first-visit login gate reads.
@@ -427,14 +428,14 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `functions/src/index.ts` — Cloud Functions entry point: initializes firebase-admin and re-exports the two triggers, the moderator callable, and the sitemap function.
 - `functions/src/sitemap.ts` — onRequest HTTP function serving a dynamic sitemap.xml built from published tales and chapter counts, with caching headers.
 - `functions/src/triggers/onCommentWrite.ts` — Firestore trigger incrementing or decrementing tales/{taleId}.commentCount when comment docs are created or deleted.
-- `functions/src/triggers/onReactionWrite.ts` — Firestore trigger incrementing or decrementing tales/{taleId}.reactionCount when reaction docs are created or deleted.
+- `functions/src/triggers/onReactionWrite.ts` — Intentional no-op trigger on the reactions subcollection. `reactionCount` is client-owned; see `docs/decisions/0006-reaction-count-ownership.md`. Do not restore the increment without removing the client's.
 - `functions/tsconfig.json` — Functions TypeScript config: ES2022/NodeNext, strict, compiling src/ into lib/ with source maps (excludes node_modules, lib).
 
 ## Firestore Security and Data
 
 - `firestore.rules` - Security rules for the v1/taletranscend/projects/v1 tree: per-collection ownership checks, field validation, and a deny-all fallback. Notification updates are allowlisted to `isRead`, `readAt`, and `isPinned` for the owner.
-- `firestore.indexes.json` — Composite index definitions for tales, comments, drafts, and bookmarks queries; deployed via `firebase deploy --only firestore:indexes`.
-- `firestore/tests/rules.emulator.test.ts` - Emulator-backed Vitest suite asserting `firestore.rules` decisions for reactions, reader progress, followers, inquiries, notification pin/read allowlisting, and fallback paths.
+- `firestore.indexes.json` — Composite index definitions for tales, comments, drafts, bookmarks, inquiries, and deletionRequests queries; deployed via `firebase deploy --only firestore:indexes`.
+- `firestore/tests/rules.emulator.test.ts` - Emulator-backed Vitest suite asserting `firestore.rules` decisions for reactions, reader progress (including the key allowlist), drafts and draft chapters, notifications (pin/read allowlist and admin authority), followers, inquiries, and fallback paths.
 
 ## Scripts and Verification
 
@@ -449,7 +450,7 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 
 ## End-to-End Tests
 
-- `e2e/specs/library.spec.js` - Playwright spec for library.html covering tale-card loading, search filtering, and pagination.
+- `e2e/specs/library.spec.js` - Playwright spec for library.html covering tale-card loading, search filtering, and pagination; seeds `tt_has_visited` before navigation so the first-visit gate does not redirect to the login screen.
 - `e2e/specs/login-gate.spec.js` — Playwright spec for the first-visit login gate: first-visit redirect, gate acknowledgement on the login page, durable and session-only bypass, corrupt records, and re-gating after the memory is cleared.
 - `e2e/specs/mobile-dock.spec.js` - Playwright spec for the mobile bottom dock at 390px: exactly Home/Library/Shelf with root-relative hrefs, retired Write/Profile entries absent, single active tab with `aria-current="page"` on library plus its computed accent plate/rule, >=44px touch targets inside the viewport with no horizontal overflow, themed non-pill chrome across all three themes, and label-growth without clipping. Blocks Firebase network for deterministic state.
 - `e2e/specs/nav-brand-menu.spec.js` - Playwright spec for the brand block: guest mark as home link, wordmark navigation, member account-menu trigger with hover hamburger glyph, brand-anchored dropdown geometry plus Escape/outside-click closing, avatar profile link, and mobile fit. Also covers the header-actions contract: no standalone Settings icon, Settings reachable from the account menu, the accent-filled quick-tools trigger across all three themes, and the 38px mobile trigger with no horizontal overflow. Blocks Firebase network and drives `updateNavUser()` from the page for deterministic state; run with `--workers=1`.

@@ -33,6 +33,12 @@ vi.mock('@fb/index.js', () => ({
   updateDoc: vi.fn(() => Promise.resolve()),
   deleteCurrentUser: vi.fn(() => Promise.resolve()),
   serverTimestamp: vi.fn(() => 'mock-timestamp'),
+  db: { name: 'mock-db' },
+  writeBatch: vi.fn(() => ({
+    set: vi.fn(),
+    delete: vi.fn(),
+    commit: vi.fn(() => Promise.resolve()),
+  })),
 }));
 
 // Mock localProgress.service.js (readStorage)
@@ -41,9 +47,11 @@ vi.mock('../reader/localProgress.service.js', () => ({
 }));
 
 // Mock @state/index.js
+// Mirror the real signatures exactly (createDraft is (id, userId, data)).
+// A looser mock hides argument-order bugs instead of catching them.
 vi.mock('@state/index.js', () => ({
   createTale: vi.fn((id, data) => ({ id, ...data })),
-  createDraft: vi.fn((id, data) => ({ id, ...data })),
+  createDraft: vi.fn((id, userId, data) => ({ id, userId, ...data })),
 }));
 
 // Mock ../tale/getTales.js
@@ -140,6 +148,10 @@ describe('profile.service', () => {
       const result = await getUserDrafts('u1');
       expect(result).toHaveLength(2);
       expect(result[0].id).toBe('d2'); // Sorted by updatedAt desc
+      // Regression guard: the owner uid must land in the factory's userId slot,
+      // not the whole Firestore payload.
+      expect(result[0].userId).toBe('u1');
+      expect(result[1].userId).toBe('u1');
     });
   });
 
@@ -253,8 +265,8 @@ describe('profile.service', () => {
       expect(following).toBe(true);
     });
 
-    it('toggles follow to true when not previously following', async () => {
-      const { getDoc, setDoc } = await import('@fb/index.js');
+    it('toggles follow to true when not previously following (one atomic batch)', async () => {
+      const { getDoc, writeBatch } = await import('@fb/index.js');
       getDoc.mockResolvedValueOnce({ exists: () => false });
 
       const isNowFollowing = await toggleFollowAuthor({
@@ -263,11 +275,16 @@ describe('profile.service', () => {
       });
 
       expect(isNowFollowing).toBe(true);
-      expect(setDoc).toHaveBeenCalledTimes(2); // followRef + followerRef
+      // Both sides of the edge must land in a single batch, so a partial
+      // failure cannot leave following/ and followers/ out of sync.
+      expect(writeBatch).toHaveBeenCalledTimes(1);
+      const batch = writeBatch.mock.results[0].value;
+      expect(batch.set).toHaveBeenCalledTimes(2);
+      expect(batch.commit).toHaveBeenCalledTimes(1);
     });
 
-    it('toggles follow to false when already following', async () => {
-      const { getDoc, deleteDoc } = await import('@fb/index.js');
+    it('toggles follow to false when already following (one atomic batch)', async () => {
+      const { getDoc, writeBatch } = await import('@fb/index.js');
       getDoc.mockResolvedValueOnce({ exists: () => true });
 
       const isNowFollowing = await toggleFollowAuthor({
@@ -276,7 +293,10 @@ describe('profile.service', () => {
       });
 
       expect(isNowFollowing).toBe(false);
-      expect(deleteDoc).toHaveBeenCalledTimes(2); // followRef + followerRef
+      expect(writeBatch).toHaveBeenCalledTimes(1);
+      const batch = writeBatch.mock.results[0].value;
+      expect(batch.delete).toHaveBeenCalledTimes(2);
+      expect(batch.commit).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -361,7 +361,10 @@ async function _handlePostReplyToReply(commentId, replyId, btn) {
 
   const targetAuthorName = btn.dataset.authorName || 'Scribe';
   const targetDepth = parseInt(btn.dataset.depth, 10) || 2;
-  const clampedDepth = Math.min(Math.max(targetDepth, 1), 5);
+  // Firestore rules cap reply nesting at depth 3 (see depth check in
+  // firestore.rules and CommentSchema). Clamp to the same ceiling the
+  // rules enforce, or the write is rejected with permission-denied.
+  const clampedDepth = Math.min(Math.max(targetDepth, 1), 3);
 
   // Rate Limiting
   const userId = auth.currentUser.uid;

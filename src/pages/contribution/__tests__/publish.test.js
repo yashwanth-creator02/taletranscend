@@ -24,34 +24,41 @@ vi.mock('@services/author.service.js', () => ({
 
 import { getAuthorStatus, registerAuthor } from '@services/author.service.js';
 
-// Mock @/utils barrel
-vi.mock('@/utils', () => ({
-  navigateTo: vi.fn(),
-  taleUrl: vi.fn((id) => `/tale.html?id=${id}`),
-  countWords: vi.fn((s) => (s ? s.split(' ').length : 0)),
-  estimateReadMins: vi.fn(() => 1),
-  safeAsync: vi.fn(async (p, options = {}) => {
-    try {
-      return await p;
-    } catch {
-      if (options.fallback !== undefined) return options.fallback;
-      return null;
-    }
-  }),
-  guardOffline: vi.fn(() => false),
-  createLogger: vi.fn(() => ({
-    debug: vi.fn(),
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-  })),
-  initPageReveal: vi.fn(),
-  readyReveal: vi.fn(),
-  escapeHtml: vi.fn((s) => s),
-  validateData: vi.fn((schema, data) => ({ success: true, data })),
-  TaleSchema: {},
-  DraftChapterSchema: {},
-}));
+// Mock @/utils barrel.
+// validateData / TaleSchema / DraftChapterSchema are deliberately NOT
+// overridden: they must stay the real implementations. Mocking them to always
+// succeed is what let publish ship a `status: 'pending'` payload (rejected by
+// both the Zod enum and the deployed rules) and chapter payloads with no
+// `index` (required by the chapters create/update rules) while this suite
+// stayed green.
+vi.mock('@/utils', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    navigateTo: vi.fn(),
+    taleUrl: vi.fn((id) => `/tale.html?id=${id}`),
+    countWords: vi.fn((s) => (s ? s.split(' ').length : 0)),
+    estimateReadMins: vi.fn(() => 1),
+    safeAsync: vi.fn(async (p, options = {}) => {
+      try {
+        return await p;
+      } catch {
+        if (options.fallback !== undefined) return options.fallback;
+        return null;
+      }
+    }),
+    guardOffline: vi.fn(() => false),
+    createLogger: vi.fn(() => ({
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    })),
+    initPageReveal: vi.fn(),
+    readyReveal: vi.fn(),
+    escapeHtml: vi.fn((s) => s),
+  };
+});
 
 import * as utils from '@/utils';
 
@@ -132,8 +139,59 @@ describe('Publish Pipeline', () => {
     expect(syncMetadataFromDom).toHaveBeenCalled();
     expect(saveAllChapters).toHaveBeenCalledWith('u1');
     expect(setDoc).toHaveBeenCalled();
-    expect(updateDoc).toHaveBeenCalled();
     expect(document.getElementById('stat-status').textContent).toContain('Published successfully');
+  });
+
+  it('writes a tale payload the deployed rules accept (published, not pending)', async () => {
+    vi.mocked(setDoc).mockResolvedValue(undefined);
+    vi.mocked(updateDoc).mockResolvedValue(undefined);
+    vi.mocked(saveAllChapters).mockResolvedValue(undefined);
+
+    await publishFullTale();
+
+    const taleWrite = vi.mocked(setDoc).mock.calls.find(([ref]) => /^tales\/[^/]+$/.test(ref));
+    expect(taleWrite).toBeDefined();
+    const payload = taleWrite[1];
+
+    // firestore.rules: status must be one of draft|submitted|published|
+    // rejected. 'pending' — what this used to send — is not in that list, and
+    // getTales.js only ever queries status == 'published' ordered by
+    // publishedAt, so a 'submitted' tale is invisible to the library.
+    expect(payload.status).toBe('published');
+    expect(payload.publishedAt).toBeDefined();
+    expect(payload.reviewedBy).toBe('auto-approve');
+
+    // No second write to the same tale document: a follow-up updateDoc is
+    // always denied by respectsCooldown() (5s since updatedAt).
+    const taleUpdates = vi
+      .mocked(updateDoc)
+      .mock.calls.filter(([ref]) => /^tales\/[^/]+$/.test(ref));
+    expect(taleUpdates).toHaveLength(0);
+  });
+
+  it('writes chapter payloads with index and createdAt, which the chapters rules require', async () => {
+    vi.mocked(setDoc).mockResolvedValue(undefined);
+    vi.mocked(updateDoc).mockResolvedValue(undefined);
+    vi.mocked(saveAllChapters).mockResolvedValue(undefined);
+
+    state.chapters = [
+      { title: 'C1', content: 'Content 1' },
+      { title: 'C2', content: 'Content 2' },
+    ];
+
+    await publishFullTale();
+
+    const chapterWrites = vi
+      .mocked(setDoc)
+      .mock.calls.filter(([ref]) => /^tales\/[^/]+\/chapters\/\d+$/.test(ref));
+
+    expect(chapterWrites).toHaveLength(2);
+    chapterWrites.forEach(([, payload], i) => {
+      expect(payload.index).toBe(i);
+      expect(payload.createdAt).toBeDefined();
+      expect(typeof payload.wordCount).toBe('number');
+      expect(typeof payload.estimatedReadMins).toBe('number');
+    });
   });
 
   it('successfully updates an already published tale', async () => {

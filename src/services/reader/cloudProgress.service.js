@@ -102,10 +102,13 @@ export async function getCloudProgress({ userId, taleId }) {
       // Build chapters map normalized through createChapterProgress
       const chapters = {};
       chaptersSnap.forEach((d) => {
-        chapters[d.id] = createChapterProgress(d.data());
+        // Signature is createChapterProgress(taleId, chapterIndex, data).
+        // Passing only d.data() left taleId undefined and chapterIndex missing.
+        chapters[d.id] = createChapterProgress(taleId, Number(d.id), d.data());
       });
 
-      return createTaleProgress(taleId, { ...snap.data(), chapters });
+      // Signature is createTaleProgress(userId, taleId, data).
+      return createTaleProgress(userId, taleId, { ...snap.data(), chapters });
     })(),
     null,
     'Failed to load reading progress.',
@@ -218,7 +221,7 @@ export async function syncMarkAllChaptersUnread({ userId, taleId, chapterCount }
     setDoc(
       refs.progress(userId, taleId),
       {
-        status: 'in-progress',
+        status: 'in_progress',
         finishedAt: null,
         updatedAt: serverTimestamp(),
       },

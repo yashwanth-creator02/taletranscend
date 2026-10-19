@@ -61,17 +61,29 @@ npm run shell         # interactive shell for calling functions directly
 **These functions are not deployed.** They are written and type-checked in CI (the
 `functions-typecheck` job in `.github/workflows/ci.yml`) but no Cloud Function of any kind
 runs in production, because deploying them requires the Blaze plan and this project stays on
-the free Spark plan. `.github/workflows/deploy.yml` deploys Hosting and Firestore rules only.
+the free Spark plan.
+
+`.github/workflows/deploy.yml` deploys `hosting,firestore:rules,firestore:indexes` on every
+push. Rules and indexes ARE live in production even though these functions are not — which is
+why a rule that validates a field the client never sends breaks the feature immediately. The
+client-side increments in `src/services/*` are therefore not a fallback for absent functions;
+they are the production implementation.
 
 Keep the code compiling — that CI job exists to catch breakage — but do not assume these run.
 Behaviour that depends on them is currently absent in production.
 
-### Known landmine: `reactionCount` has two writers
+### Resolved: `reactionCount` ownership
 
-`src/services/resonance.service.js` increments `reactionCount` client-side, and
-`onReactionWrite` increments it again from the subcollection event. Neither side guards
-against the other. This is harmless today only because the trigger is not deployed. Deploying
-it would double-count every resonance. Resolve the ownership before moving to Blaze.
+`reactionCount` is **client-owned**. `src/services/resonance.service.js` increments it in the
+same gesture that writes or deletes `reactions/{uid}`, and that is the only workable option
+while the project is on Spark.
+
+`onReactionWrite` is now **intentionally a no-op** so that deploying these functions can never
+double-count a resonance. Do not restore its increment unless the client increment is removed
+in the same change. See `docs/decisions/0006-reaction-count-ownership.md`.
+
+`onCommentWrite` still owns `commentCount` — the client does not touch it, so there is no
+double-writer there and no change was needed.
 
 ## Deploy
 

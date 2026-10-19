@@ -8,6 +8,7 @@
 
 /**
  * @typedef {Object} TaleProgress
+ * @property {string}   userId
  * @property {string}   taleId
  * @property {number}   totalReadTimeMs
  * @property {string}   status           - 'in_progress' | 'finished' | 'abandoned'
@@ -16,6 +17,7 @@
  * @property {string}   taleTitle
  * @property {string}   coverUrl
  * @property {number}   chapterCount
+ * @property {number}   lastChapterIndex - Index of the furthest chapter reached
  * @property {import('firebase/firestore').Timestamp|null} createdAt
  * @property {import('firebase/firestore').Timestamp|null} updatedAt
  * @property {Object}   chapters         - Map of chapterIndex => ChapterProgress
@@ -149,7 +151,7 @@ export function createLocalTaleProgress(taleId, data = {}) {
  * @property {string} coverUrl
  * @property {string} authorName
  * @property {import('firebase/firestore').Timestamp|null} firstReadAt
- * @property {import('firebase/firestore').Timestamp|null} lastReadAt
+ * @property {import('firebase/firestore').Timestamp|null} lastVisitedAt
  * @property {number} visitCount
  */
 
@@ -165,7 +167,9 @@ export function createReadingHistoryEntry(taleId, data = {}) {
     coverUrl: data.coverUrl ?? '',
     authorName: data.authorName ?? '',
     firstReadAt: data.firstReadAt ?? null,
-    lastReadAt: data.lastReadAt ?? null,
+    // `lastVisitedAt` (not `lastReadAt`): firestore.rules validates this exact
+    // field name on readingHistory create and update.
+    lastVisitedAt: data.lastVisitedAt ?? null,
     visitCount: data.visitCount ?? 1,
   };
 }
