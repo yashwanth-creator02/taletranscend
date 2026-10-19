@@ -16,6 +16,7 @@
 //     object, so the multi-page build silently collapsed.
 
 import { defineConfig } from 'vite';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import tailwindcss from '@tailwindcss/vite';
@@ -23,6 +24,21 @@ import { visualizer } from 'rollup-plugin-visualizer';
 import { VitePWA } from 'vite-plugin-pwa';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const DEFAULT_DEV_PORT = 5173;
+
+// Read this worktree's allocated dev port, if one has been assigned.
+// Returns null when no allocation exists so Vite applies its own default.
+function worktreePort() {
+  const portFile = path.join(__dirname, '.dev-port');
+  try {
+    const raw = fs.readFileSync(portFile, 'utf-8').trim();
+    const port = Number.parseInt(raw, 10);
+    return Number.isInteger(port) && port > 0 && port < 65536 ? port : null;
+  } catch {
+    return null;
+  }
+}
 const r = (p) => path.resolve(__dirname, p);
 
 /** The ten entry points. Adding a page means adding one line here. */
@@ -85,7 +101,12 @@ export default defineConfig({
   },
 
   server: {
-    port: 5173,
+    // Each worktree gets its own port so several dev servers can run side by
+    // side. `python execution/setup_worktree.py` writes .dev-port in the git
+    // common registry; fall back to 5173 when absent so a fresh clone still
+    // starts. An explicit `--port` flag still wins.
+    port: worktreePort(),
+    strictPort: false,
     open: '/',
     // Entry HTML lives in src/views but imports from src/pages, which is
     // outside the Vite root. Without this the dev server refuses to serve

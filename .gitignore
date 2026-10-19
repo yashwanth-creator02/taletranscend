@@ -101,3 +101,5 @@ later.firestore.rules
 agents/skills/
 .tmp/
 .vercel
+# Per-worktree dev server port, written by execution/setup_worktree.py
+.dev-port
