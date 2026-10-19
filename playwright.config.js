@@ -1,4 +1,24 @@
 import { defineConfig, devices } from '@playwright/test';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Match the port this worktree was allocated by execution/setup_worktree.py so
+// E2E never collides with another worktree's dev server. Falls back to 5173.
+const DEV_PORT = (() => {
+  try {
+    const raw = fs.readFileSync(path.join(__dirname, '.dev-port'), 'utf-8').trim();
+    const port = Number.parseInt(raw, 10);
+    if (Number.isInteger(port) && port > 0 && port < 65536) return port;
+  } catch {
+    // no allocation file
+  }
+  return 5173;
+})();
+
+const BASE_URL = `http://127.0.0.1:${DEV_PORT}`;
 
 export default defineConfig({
   testDir: './e2e',
@@ -9,7 +29,7 @@ export default defineConfig({
   reporter: 'html',
 
   use: {
-    baseURL: 'http://127.0.0.1:5173',
+    baseURL: BASE_URL,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
@@ -27,7 +47,7 @@ export default defineConfig({
 
   webServer: {
     command: 'npx vite --host 127.0.0.1',
-    url: 'http://127.0.0.1:5173/library.html',
+    url: `${BASE_URL}/library.html`,
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
   },
