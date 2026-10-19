@@ -1,0 +1,255 @@
+#!/usr/bin/env python3
+"""
+setup_worktree.py
+
+Deterministic bootstrap for a freshly created git worktree.
+
+A worktree checks out tracked files only. Everything gitignored is absent, which
+silently breaks tooling: the Firebase MCP server cannot start inside the 30s
+startup budget, brand skills disappear, and the Vercel project link is lost.
+
+This runner restores each ignored-but-required artifact, then verifies the
+result. It is idempotent and safe to re-run.
+
+Usage:
+    python execution/setup_worktree.py            # bootstrap the current directory
+    python execution/setup_worktree.py --check    # report state, change nothing
+"""
+
+import argparse
+import json
+import shutil
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+
+def find_primary_checkout() -> Path:
+    """Return the repository's main worktree.
+
+    `git worktree list` marks the primary checkout with a bare path and the
+    others with a [branch] suffix. This avoids hardcoding a machine-specific
+    absolute path into a tracked script.
+    """
+    res = subprocess.run(
+        ["git", "worktree", "list", "--porcelain"],
+        cwd=str(PROJECT_ROOT),
+        shell=True,
+        **CAPTURE,
+    )
+    for line in (res.stdout or "").splitlines():
+        if line.startswith("worktree ") and not line.rstrip().endswith("]"):
+            return Path(line[len("worktree "):].strip())
+    return PROJECT_ROOT
+
+# firebase-tools loads its whole CLI module graph on start. Measured on this
+# machine: ~68s cold, ~10s warm. OpenCode's 30s startup budget only fits the
+# warm case, so a warmup run is mandatory after a cold install.
+WARMUP_TARGET = Path("node_modules") / "firebase-tools" / "lib" / "bin" / "firebase.js"
+WARMUP_ARGS = ["experimental:mcp", "--help"]
+WARMUP_TIMEOUT_SECONDS = 180
+
+# Windows consoles default to cp1252. `opencode mcp list` emits box-drawing and
+# other UTF-8 bytes that cp1252 cannot decode, so every capture decodes as
+# UTF-8 with replacement instead of failing.
+CAPTURE = {"capture_output": True, "text": True,
+           "encoding": "utf-8", "errors": "replace"}
+
+
+def _configure_stdio() -> None:
+    """Stop UnicodeEncodeError when echoing CLI output containing box glyphs.
+
+    Windows consoles encode with cp1252. `opencode mcp list` prints U+25CF and
+    similar glyphs that cp1252 cannot represent, which would abort the run.
+    Replacement keeps the output readable and the script alive.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(errors="replace")
+        except (AttributeError, ValueError):
+            pass
+
+
+def log(message: str) -> None:
+    print(message, flush=True)
+
+
+def copy_dir(src: Path, dest: Path) -> bool:
+    """Replace dest with a copy of src. Returns True when a copy happened."""
+    if not src.is_dir():
+        log(f"    SKIP  source missing: {src}")
+        return False
+    if dest.is_dir():
+        shutil.rmtree(dest)
+    elif dest.exists():
+        dest.unlink()
+    shutil.copytree(src, dest)
+    return True
+
+
+def copy_file(src: Path, dest: Path) -> bool:
+    if not src.is_file():
+        log(f"    SKIP  source missing: {src}")
+        return False
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(src, dest)
+    return True
+
+
+def step_install(check_only: bool) -> None:
+    """Install dependencies so npx resolves firebase-tools locally."""
+    if (PROJECT_ROOT / "node_modules").is_dir():
+        log("PASSED: dependencies already installed")
+        return
+    if check_only:
+        log("PENDING: npm install (node_modules absent)")
+        return
+    log("--- Running: npm install ---")
+    res = subprocess.run(
+        ["npm", "install"],
+        cwd=str(PROJECT_ROOT),
+        shell=True,
+        **CAPTURE,
+    )
+    if res.returncode != 0:
+        log(f"FAILED: npm install exited with code {res.returncode}")
+        log(res.stdout[-2000:])
+        log(res.stderr[-2000:])
+        sys.exit(1)
+    log("PASSED: npm install")
+
+
+def step_warmup(check_only: bool) -> None:
+    """Warm the firebase-tools module graph so startup fits the 30s budget."""
+    target = PROJECT_ROOT / WARMUP_TARGET
+    if not target.is_file():
+        log("FAILED: firebase-tools not present; run npm install first")
+        sys.exit(1)
+    if check_only:
+        log("PENDING: firebase-tools warmup")
+        return
+    log("--- Running: firebase-tools warmup ---")
+    start = time.monotonic()
+    try:
+        subprocess.run(
+            ["node", str(target)] + WARMUP_ARGS,
+            cwd=str(PROJECT_ROOT),
+            shell=True,
+            **CAPTURE,
+            timeout=WARMUP_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired:
+        log("FAILED: warmup timed out")
+        sys.exit(1)
+    elapsed = time.monotonic() - start
+    log(f"PASSED: firebase-tools warmup completed in {elapsed:.1f}s")
+
+
+def step_skills(source: Path, check_only: bool) -> None:
+    """Restore .agents/skills, which is gitignored and therefore absent."""
+    src = source / ".agents" / "skills"
+    dest = PROJECT_ROOT / ".agents" / "skills"
+    if dest.is_dir():
+        log(f"PASSED: skills already present ({sum(1 for _ in dest.iterdir())} entries)")
+        return
+    if check_only:
+        log("PENDING: copy .agents/skills")
+        return
+    log("--- Running: copy .agents/skills ---")
+    if copy_dir(src, dest):
+        log(f"PASSED: copied skills from {src}")
+    else:
+        log("FAILED: no skill source found; run the brand-leo-utils sync directive")
+
+
+def step_vercel_link(source: Path, check_only: bool) -> None:
+    """Restore .vercel/project.json, which is gitignored and therefore absent."""
+    src = source / ".vercel" / "project.json"
+    dest = PROJECT_ROOT / ".vercel" / "project.json"
+    if dest.is_file():
+        log("PASSED: Vercel link already present")
+        return
+    if check_only:
+        log("PENDING: copy .vercel/project.json")
+        return
+    log("--- Running: copy .vercel/project.json ---")
+    if copy_file(src, dest):
+        log(f"PASSED: copied Vercel link from {src}")
+    else:
+        log("WARNING: no Vercel link found; run 'vercel link' manually")
+
+
+def step_report() -> None:
+    """Print resolved project identity for the copied Vercel link."""
+    link = PROJECT_ROOT / ".vercel" / "project.json"
+    if link.is_file():
+        data = json.loads(link.read_text(encoding="utf-8"))
+        log(f"      project={data.get('projectName')} id={data.get('projectId')}")
+        log(f"      team={data.get('orgId')}")
+
+
+def step_verify_mcp(check_only: bool) -> None:
+    """Report MCP connection state. Informational: needs network and auth."""
+    if check_only:
+        return
+    log("--- Running: opencode mcp list ---")
+    res = subprocess.run(
+        ["opencode", "mcp", "list"],
+        cwd=str(PROJECT_ROOT),
+        shell=True,
+        **CAPTURE,
+    )
+    output = (res.stdout or "") + (res.stderr or "")
+    for line in output.splitlines():
+        if any(token in line for token in ("connected", "failed", "authentication")):
+            log(f"      {line.strip()}")
+    if "firebase" in output and "failed" in output:
+        log("WARNING: firebase still failing. Re-run this script; if it persists")
+        log("         the module cache evicted and startup exceeded 30s again.")
+
+
+def main() -> None:
+    _configure_stdio()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--source", type=Path, default=None,
+                        help="primary checkout to copy ignored artifacts from "
+                             "(defaults to the git main worktree)")
+    parser.add_argument("--check", action="store_true",
+                        help="report state without changing anything")
+    args = parser.parse_args()
+
+    source = args.source.resolve() if args.source else find_primary_checkout()
+    check = args.check
+
+    log(f"Worktree setup for: {PROJECT_ROOT}")
+    log(f"Copying from     : {source}")
+    if check:
+        log("Mode             : check only (no changes)")
+    log("")
+
+    log("--- Dependencies ---")
+    step_install(check)
+    log("")
+
+    log("--- Ignored artifacts ---")
+    step_skills(source, check)
+    step_vercel_link(source, check)
+    step_report()
+    log("")
+
+    log("--- Firebase MCP warmup ---")
+    step_warmup(check)
+    log("")
+
+    log("--- MCP verification ---")
+    step_verify_mcp(check)
+
+    log("")
+    log("Worktree setup complete.")
+
+
+if __name__ == "__main__":
+    main()
