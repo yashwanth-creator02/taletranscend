@@ -101,6 +101,8 @@ Directives are living documents. When you discover API constraints, better appro
 
 - Create a dedicated branch for every new feature, bug fix, or major refactor. Never commit directly to `main` or `master`.
 - Never merge any branch into `main` or `master` without explicit permission from the user in the conversation. The branch is the safety net; merges require explicit user confirmation.
+- Always commit and push: when a unit of work is complete, commit it on the working branch and push the branch (`git push -u origin <branch>` on its first push). Never leave finished work sitting uncommitted or unpushed — the remote branch is the durable record.
+- Merges never fast-forward: once a merge is approved, merge with `git merge --no-ff` so the branch's history and merge commit are preserved in the graph. Never use a fast-forward merge.
 
 **6. Use Skills Wherever Possible**
 
@@ -133,6 +135,11 @@ Directives are living documents. When you discover API constraints, better appro
 - State what this turn concretely delivered: working features, fixed bugs, removed risks, time saved, future problems avoided, or knowledge gained. Ground every bullet in the turn's actual output (files, commands, verification results).
 - Keep it to 2-5 tight bullets. No generic filler, no marketing fluff, zero emojis.
 - If a turn produced no user-visible gain (pure research, an answered question), state the knowledge or decision gained instead of inventing value.
+
+**11. Discernment Nudges & Clarifying Questions — Unlimited Frequency**
+
+- The `discernment-nudge` skill is not limited to once per conversation: invoke the nudge whenever it genuinely applies, as many times as you want.
+- Clarifying questions — inline or via the question tool — may likewise be asked however many times they are needed. Never withhold a genuine question to honor an "ask only once" convention.
 
 ## Self-annealing loop
 
