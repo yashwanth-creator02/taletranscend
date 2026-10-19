@@ -25,6 +25,9 @@ const MEMBER = {
   emailVerified: false,
 };
 
+/** Reads an element's computed opacity as a number. */
+const opacityOf = (locator) => locator.evaluate((el) => getComputedStyle(el).opacity).then(Number);
+
 test.beforeEach(async ({ page }) => {
   // Keep the nav state deterministic: no live Firebase auth/notification calls.
   await page.route(/(googleapis|firebaseio)\.com/, (route) => route.abort());
@@ -138,6 +141,13 @@ test.describe('guest brand block', () => {
     await expect(page.locator('#nav-menu-btn')).toHaveCount(0);
     await expect(page.locator('#nav-brand-anchor [data-lucide="menu"]')).toHaveCount(0);
     await expect(page.locator('#user-dropdown')).toHaveCount(0);
+
+    // Hovering a guest mark must keep the logo in place: there is no glyph to
+    // swap in, so a logo that faded out would leave an empty box.
+    await mark.hover();
+    await expect
+      .poll(() => opacityOf(mark.locator('.nav-logo__img')), { timeout: 3000 })
+      .toBeGreaterThan(0.9);
   });
 
   test('wordmark navigates home', async ({ page }) => {
@@ -168,23 +178,27 @@ test.describe('member brand block', () => {
     const glyph = btn.locator('svg[data-lucide="menu"]');
     await expect(glyph).toHaveCount(1);
 
-    const opacity = (locator) =>
-      locator.evaluate((el) => getComputedStyle(el).opacity).then(Number);
-
     // At rest the logo shows; the hamburger is hidden.
-    expect(await opacity(glyph)).toBeLessThan(0.05);
-    expect(await opacity(btn.locator('.nav-logo__img'))).toBeGreaterThan(0.9);
+    expect(await opacityOf(glyph)).toBeLessThan(0.05);
+    expect(await opacityOf(btn.locator('.nav-logo__img'))).toBeGreaterThan(0.9);
 
     // Hovering swaps the logo for the hamburger.
     await btn.hover();
-    await expect.poll(() => opacity(glyph), { timeout: 3000 }).toBeGreaterThan(0.9);
-    expect(await opacity(btn.locator('.nav-logo__img'))).toBeLessThan(0.2);
+    await expect.poll(() => opacityOf(glyph), { timeout: 3000 }).toBeGreaterThan(0.9);
+    expect(await opacityOf(btn.locator('.nav-logo__img'))).toBeLessThan(0.2);
 
-    // Keyboard focus exposes it too.
+    // Keyboard focus exposes it too. Tab reaches the mark instead of calling
+    // focus(): programmatic focus after mouse input does not match
+    // :focus-visible in every engine.
     await page.mouse.move(0, 0);
-    await expect.poll(() => opacity(glyph), { timeout: 3000 }).toBeLessThan(0.05);
-    await btn.focus();
-    await expect.poll(() => opacity(glyph), { timeout: 3000 }).toBeGreaterThan(0.9);
+    await expect.poll(() => opacityOf(glyph), { timeout: 3000 }).toBeLessThan(0.05);
+    await btn.evaluate((el) => el.blur());
+    for (let i = 0; i < 25; i += 1) {
+      if (await btn.evaluate((el) => el === document.activeElement)) break;
+      await page.keyboard.press('Tab');
+    }
+    await expect(btn).toBeFocused();
+    await expect.poll(() => opacityOf(glyph), { timeout: 3000 }).toBeGreaterThan(0.9);
   });
 
   test('avatar links straight to the profile page', async ({ page }) => {

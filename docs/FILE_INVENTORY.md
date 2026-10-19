@@ -41,7 +41,7 @@ One-line duty for every file tracked by git in this repository, grouped by area 
 - `directives/author_registration_and_correspondence.md` — Agent directive governing the author registration wall, scribe registry, and reader-author inquiry correspondence.
 - `directives/code_conventions_and_architecture.md` — Agent directive governing MPA conventions, path aliases, comment trees, bfcache handling, rate limits, and aesthetics rules.
 - `directives/deploy_application.md` — Agent directive governing production builds and Firebase Hosting and Vercel deployment workflows.
-- `directives/developer_verification.md` — Agent directive governing the mandatory format, lint, token, type-check, and test pipeline before commits and pushes, plus commit/push and no-ff merge policy.
+- `directives/developer_verification.md` — Agent directive governing the mandatory format, lint, token, type-check, and test pipeline before commits and pushes, plus commit/push and no-ff merge policy and offline/e2e environment notes.
 - `directives/firestore_management.md` — Agent directive governing Firestore paths, indexes, security rules, seeding, and the Chronicle Preservation Policy.
 - `directives/mcp_servers.md` — Agent directive governing project-local MCP server setup and troubleshooting for Chrome DevTools, Firebase, and Vercel.
 - `directives/navigation_routing_and_sitemaps.md` — Agent directive governing hierarchical clean URLs, resolveHref safety, sitemaps, and fixed-overlay stacking rules.
@@ -226,7 +226,7 @@ Global UI layer: the icon registry, shared components, and the nav shell; each c
 - `src/ui/components/nav/nav.global.js` — Dynamically mounts the command palette and registers the global Ctrl/Cmd+K shortcut on pages lacking the full nav.
 - `src/ui/components/nav/nav.interactions.js` — Delegated nav click/keydown handling, scroll progress bar, command-palette focus trap (real tab stops only), brand-mark menu button and notification toggles, auth-to-DOM updates (brand slot + user area + dock), listener lifecycle.
 - `src/ui/components/nav/nav.js` — Public nav lifecycle: initNav injects header, mobile dock, and palette and starts the auth watch; destroyNav tears everything down.
-- `src/ui/components/nav/nav.state.js` — Shared mutable nav state singleton holding the current user, palette open/focus flags, listener and cleanup handles.
+- `src/ui/components/nav/nav.state.js` — Shared mutable nav state singleton holding the current user, palette open/focus flags, listener and cleanup handles, and the account dropdown's pending hide-animation timer.
 - `src/ui/components/nav/nav.templates.js` — Pure HTML string builders for header links, the quick-tools search trigger (look-up glyph), the brand mark (guest home link / member account-menu button with hamburger glyph), the account dropdown panel, the avatar profile link, guest area, mobile dock, command items, the lookup-style palette shell, and nav shell.
 - `src/ui/components/nav/nav.utils.js` — Nav helpers: getCurrentPage path resolution, getAvatarSeed, live getNavElements lookups, and escapeHtml/renderIcons re-exports.
 - `src/ui/components/nav/notifications.popover.js` — Notifications bell popover: unread badge, list rendering, toggle/close, and real-time unread count subscription lifecycle.
@@ -383,7 +383,7 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 
 - `src/assets/css/base.css` — Imports tokens and Tailwind, then defines resets, boot reveal, focus rings, layout primitives, skeletons and theme cross-fade.
 - `src/assets/css/components.css` — Shared component primitives: glass surfaces, buttons, inputs, progress, dividers, footer, toasts, modals and 404 styles.
-- `src/assets/css/nav.css` — Styles the global top nav, the quick-tools search trigger (mirrors the palette field chrome), the brand mark (guest home link / account-menu button with hover hamburger glyph), brand-anchored account dropdown, avatar profile link, mobile bottom dock, lookup-style command palette (field row, look-up glyph, match highlights), notifications drawer and scroll progress.
+- `src/assets/css/nav.css` — Styles the global top nav, the quick-tools search trigger (mirrors the palette field chrome), the brand mark (guest home link / `--menu` account-menu button with hover hamburger glyph swap), brand-anchored account dropdown, avatar profile link, mobile bottom dock, lookup-style command palette (field row, look-up glyph, match highlights), notifications drawer and scroll progress.
 - `src/assets/css/reader-themes.css` — Twelve reader colour themes scoped to [data-reader-theme], plus light-theme atmosphere and glow adjustments.
 - `src/assets/css/tokens.css` — Single source of design tokens: colour channels, semantic roles, the three app themes and reader typography defaults.
 - `src/assets/css/pages/contribution.css` — Styles the Scribe's Atelier workspace: tool sidebar, manuscript canvas, lore cards, chips and readiness seals.

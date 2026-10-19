@@ -83,7 +83,14 @@
   border-color: var(--accent);
   box-shadow: 0 0 24px rgb(var(--accent-rgb) / var(--a-08));
   transform: rotate(4deg) scale(1.04);
-  outline: none;
+}
+
+/* Keyboard focus keeps the app-wide focus ring — the accent glow alone is too
+   faint to serve as the only focus cue. */
+.nav-logo__mark:focus-visible {
+  box-shadow:
+    var(--focus-ring),
+    0 0 24px rgb(var(--accent-rgb) / var(--a-08));
 }
 
 .nav-logo__img {
@@ -111,16 +118,19 @@
     transform var(--transition-fast);
 }
 
-.nav-logo__mark:hover .nav-logo__img,
-.nav-logo__mark:focus-visible .nav-logo__img,
-.nav-logo__mark[aria-expanded='true'] .nav-logo__img {
+/* The member mark swaps the logo for the menu glyph on hover/focus (and while
+   the menu is open). Scoped to `--menu`: the guest mark is a plain home link
+   with no glyph to reveal, so its logo must stay put. */
+.nav-logo__mark--menu:hover .nav-logo__img,
+.nav-logo__mark--menu:focus-visible .nav-logo__img,
+.nav-logo__mark--menu[aria-expanded='true'] .nav-logo__img {
   opacity: 0;
   transform: scale(0.7);
 }
 
-.nav-logo__mark:hover .nav-logo__menu-icon,
-.nav-logo__mark:focus-visible .nav-logo__menu-icon,
-.nav-logo__mark[aria-expanded='true'] .nav-logo__menu-icon {
+.nav-logo__mark--menu:hover .nav-logo__menu-icon,
+.nav-logo__mark--menu:focus-visible .nav-logo__menu-icon,
+.nav-logo__mark--menu[aria-expanded='true'] .nav-logo__menu-icon {
   opacity: 1;
   transform: scale(1);
 }
@@ -375,7 +385,6 @@
 
 @media (max-width: 640px) {
   .dropdown {
-    right: 0;
     max-width: calc(100vw - 32px);
     width: 270px;
   }

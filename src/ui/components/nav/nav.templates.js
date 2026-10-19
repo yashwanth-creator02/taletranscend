@@ -132,7 +132,7 @@ export function buildBrandMark(user, current, userLinks) {
   return `
     <button
       type="button"
-      class="nav-logo__mark"
+      class="nav-logo__mark nav-logo__mark--menu"
       id="nav-menu-btn"
       aria-haspopup="menu"
       aria-expanded="false"

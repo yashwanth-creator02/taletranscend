@@ -55,6 +55,10 @@ export function openDropdown() {
   const { menuButton, dropdown } = getNavElements();
   if (!menuButton || !dropdown) return;
 
+  // A hide animation still in flight must not swallow this open.
+  window.clearTimeout(navState.dropdownHideTimer);
+  navState.dropdownHideTimer = null;
+
   dropdown.hidden = false;
   dropdown.classList.remove('is-closing');
   menuButton.setAttribute('aria-expanded', 'true');
@@ -72,7 +76,8 @@ export function closeDropdown(returnFocus = true) {
   menuButton.setAttribute('aria-expanded', 'false');
   dropdown.classList.add('is-closing');
 
-  window.setTimeout(() => {
+  navState.dropdownHideTimer = window.setTimeout(() => {
+    navState.dropdownHideTimer = null;
     dropdown.hidden = true;
     dropdown.classList.remove('is-closing');
     if (returnFocus) menuButton.focus();
@@ -457,6 +462,8 @@ export function detachGlobalListeners() {
   commandInput?.removeEventListener('input', handleCommandInput);
 
   destroyNotifications();
+  window.clearTimeout(navState.dropdownHideTimer);
+  navState.dropdownHideTimer = null;
   navState.scrollCleanup?.();
   navState.scrollCleanup = null;
   navState.listenersAttached = false;

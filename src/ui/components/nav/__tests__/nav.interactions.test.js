@@ -57,6 +57,7 @@ describe('Nav Interactions', () => {
     navState.listenersAttached = false;
     navState.commandPaletteOpen = false;
     navState.commandFocusedIndex = -1;
+    navState.dropdownHideTimer = null;
     document.body.innerHTML = `
       <header id="app-nav">
         <button id="nav-menu-btn" aria-expanded="false"></button>
@@ -97,6 +98,19 @@ describe('Nav Interactions', () => {
 
       vi.advanceTimersByTime(220);
       expect(dropdown.hidden).toBe(true);
+    });
+
+    it('re-opening during the close animation cancels the pending hide', () => {
+      openDropdown();
+      closeDropdown(false);
+      openDropdown();
+
+      vi.advanceTimersByTime(400);
+
+      const dropdown = document.getElementById('user-dropdown');
+      expect(dropdown.hidden).toBe(false);
+      expect(dropdown.classList.contains('is-closing')).toBe(false);
+      expect(document.getElementById('nav-menu-btn').getAttribute('aria-expanded')).toBe('true');
     });
   });
 

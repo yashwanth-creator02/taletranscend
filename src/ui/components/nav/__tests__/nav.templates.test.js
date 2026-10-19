@@ -51,6 +51,10 @@ describe('Nav Templates', () => {
       expect(html).toContain('aria-label="TaleTranscend home"');
       expect(html).not.toContain('nav-menu-btn');
       expect(html).not.toContain('user-dropdown');
+      // The guest mark has no glyph to swap in, so it must not opt into the
+      // hover/focus logo swap.
+      expect(html).not.toContain('nav-logo__mark--menu');
+      expect(html).not.toContain('nav-logo__menu-icon');
     });
 
     it('renders a menu button with the hamburger glyph plus the account menu for members', () => {
@@ -62,6 +66,7 @@ describe('Nav Templates', () => {
       expect(html).toContain('aria-expanded="false"');
       expect(html).toContain('aria-controls="user-dropdown"');
       expect(html).toContain('aria-label="Open account menu for Hero"');
+      expect(html).toContain('nav-logo__mark--menu');
       expect(html).toContain('data-lucide="menu"');
       expect(html).toContain('nav-logo__menu-icon');
       expect(html).toContain('id="user-dropdown"');
