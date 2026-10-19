@@ -1316,6 +1316,46 @@ body:has(#sidebar.sidebar--mobile-open) .scroll-to-top {
 
 /* ── Notifications Drawer & Badge ────────────────────────────────── */
 
+/* Floating trigger — detached from the nav bar and pinned just below it.
+   Rendered only while unread or pinned notices exist (`is-hidden`). */
+.nav-notifications-float {
+  position: fixed;
+  top: calc(var(--nav-height) + var(--space-3));
+  right: var(--space-5);
+  z-index: var(--z-nav, 200);
+  animation: notifications-float-in var(--dur-base) var(--ease-out) both;
+}
+
+.nav-notifications-float.is-hidden {
+  display: none;
+}
+
+.nav-notifications-trigger {
+  position: relative;
+}
+
+.nav-notifications-float--pinned .nav-notifications-trigger {
+  border-color: var(--border-accent);
+  color: var(--accent);
+}
+
+@keyframes notifications-float-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The toast stack owns the same top-right column — hold it clear of the
+   floating trigger whenever that trigger is visible. */
+body:has(.nav-notifications-float:not(.is-hidden)) .toast-region {
+  top: calc(var(--nav-height) + 66px);
+}
+
 .nav-notifications-badge {
   position: absolute;
   top: -3px;
@@ -1408,10 +1448,9 @@ body:has(#sidebar.sidebar--mobile-open) .scroll-to-top {
 }
 
 .nav-notifications-item {
-  display: block;
-  padding: 10px;
+  display: flex;
+  align-items: flex-start;
   border-radius: var(--radius-md);
-  text-decoration: none;
   border: 1px solid transparent;
   transition:
     background var(--transition-fast),
@@ -1426,6 +1465,71 @@ body:has(#sidebar.sidebar--mobile-open) .scroll-to-top {
 .nav-notifications-item--unread {
   background: var(--surface-1);
   border-color: var(--border-accent);
+}
+
+/* Pinned rows carry a quiet accent rail so they read as retained. */
+.nav-notifications-item--pinned {
+  box-shadow: inset 2px 0 0 0 var(--accent);
+}
+
+.nav-notifications-item__link {
+  flex: 1;
+  min-width: 0;
+  display: block;
+  padding: 10px;
+  text-decoration: none;
+}
+
+.nav-notifications-item__pin {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  margin: 6px 6px 0 0;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  opacity: 0.45;
+  transition:
+    opacity var(--transition-fast),
+    color var(--transition-fast),
+    background var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.nav-notifications-item__pin svg {
+  width: 13px;
+  height: 13px;
+}
+
+.nav-notifications-item:hover .nav-notifications-item__pin,
+.nav-notifications-item__pin:focus-visible {
+  opacity: 1;
+}
+
+.nav-notifications-item__pin:hover {
+  color: var(--accent);
+  background: var(--surface-3);
+  border-color: var(--border-subtle);
+}
+
+.nav-notifications-item__pin[aria-pressed='true'] {
+  opacity: 1;
+  color: var(--accent);
+  border-color: var(--border-accent);
+  background: var(--surface-2);
+}
+
+/* Touch devices have no hover, so the pin control stays discoverable. */
+@media (hover: none) {
+  .nav-notifications-item__pin {
+    opacity: 1;
+  }
 }
 
 .nav-notifications-item__header {

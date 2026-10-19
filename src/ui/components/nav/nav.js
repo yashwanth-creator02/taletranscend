@@ -56,33 +56,38 @@ export function initNav() {
   if (
     document.getElementById('app-nav') ||
     document.getElementById('mobile-dock-container') ||
-    document.getElementById('nav-command-palette')
+    document.getElementById('nav-command-palette') ||
+    document.getElementById('nav-notifications-container')
   )
     return;
 
   log.info('Initializing Navigation');
 
   // 1. Build HTML and destructure parts
-  const { headerHtml, dockHtml, paletteHtml } = buildNav();
+  const { headerHtml, dockHtml, alertsHtml, paletteHtml } = buildNav();
 
   // 2. Mount Header at the top of <body>
   document.body.insertAdjacentHTML('afterbegin', headerHtml);
 
-  // 3. Mount Dock at the very end of <body> (Ensures true fixed positioning)
+  // 3. Mount the floating notifications trigger right after the header, at
+  //    body level (unconstrained by the header's backdrop-filter).
+  document.getElementById('app-nav')?.insertAdjacentHTML('afterend', alertsHtml);
+
+  // 4. Mount Dock at the very end of <body> (Ensures true fixed positioning)
   document.body.insertAdjacentHTML('beforeend', dockHtml);
 
-  // 4. Mount Command Palette at the very end of <body> (Ensures true viewport-fixed overlay unconstrained by header backdrop-filter)
+  // 5. Mount Command Palette at the very end of <body> (Ensures true viewport-fixed overlay unconstrained by header backdrop-filter)
   if (paletteHtml && !document.getElementById('nav-command-palette')) {
     document.body.insertAdjacentHTML('beforeend', paletteHtml);
   }
 
-  // 5. Initialize Lucide icons
+  // 6. Initialize Lucide icons
   renderIcons();
 
-  // 6. Attach global event listeners
+  // 7. Attach global event listeners
   attachGlobalListeners();
 
-  // 7. Subscribe to Firebase auth state
+  // 8. Subscribe to Firebase auth state
   navState.unsubscribeAuth?.();
   navState.unsubscribeAuth = onAuthStateChanged(auth, updateNavUser);
 }
@@ -110,6 +115,7 @@ export function destroyNav() {
   document.getElementById('app-nav')?.remove();
   document.getElementById('mobile-dock-container')?.remove();
   document.getElementById('nav-command-palette')?.remove();
+  document.getElementById('nav-notifications-container')?.remove();
 
   // Reset runtime state
   navState.currentUser = null;

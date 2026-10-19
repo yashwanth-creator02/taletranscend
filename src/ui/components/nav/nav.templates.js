@@ -316,6 +316,65 @@ export function buildMobileDock(current, user) {
 }
 
 /* ─────────────────────────────────────────────
+   Notifications Template
+   ───────────────────────────────────────────── */
+
+/**
+ * Builds the floating notifications trigger and its drawer.
+ *
+ * Mounted as a direct child of <body> (not inside the header) because
+ * `.app-nav` uses backdrop-filter, which would otherwise trap the
+ * viewport-fixed positioning of the floating trigger.
+ *
+ * The trigger starts hidden — `updateNotificationBadge` /
+ * `updatePinnedCount` reveal it once unread or pinned notices exist.
+ *
+ * @returns {string}
+ */
+export function buildNotifications() {
+  return `
+    <div id="nav-notifications-container" class="nav-notifications-float is-hidden">
+      <button
+        type="button"
+        class="nav-settings-btn nav-notifications-trigger"
+        id="nav-notifications-btn"
+        title="Chronicle Notices"
+        aria-label="Chronicle Notices"
+        aria-haspopup="dialog"
+        aria-expanded="false"
+        aria-controls="nav-notifications-popover"
+      >
+        <i data-lucide="bell" class="w-4 h-4" aria-hidden="true"></i>
+        <span id="nav-notifications-badge" class="nav-notifications-badge hidden"></span>
+      </button>
+      <div
+        id="nav-notifications-popover"
+        class="nav-notifications-popover hidden"
+        role="dialog"
+        aria-label="Notifications"
+      >
+        <div class="nav-notifications-popover__header">
+          <div class="nav-notifications-popover__title-wrap">
+            <i data-lucide="bell" class="nav-notifications-popover__icon" aria-hidden="true"></i>
+            <h3 class="nav-notifications-popover__title">Chronicle Notices</h3>
+          </div>
+          <button
+            type="button"
+            id="nav-notifications-mark-read"
+            class="nav-notifications-popover__mark-read"
+          >
+            Mark read
+          </button>
+        </div>
+        <div id="nav-notifications-list" class="nav-notifications-list">
+          <div class="nav-notifications-empty">No notices in the archive</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ─────────────────────────────────────────────
    Command Palette Template
    ───────────────────────────────────────────── */
 
@@ -520,44 +579,7 @@ export function buildNav() {
               <i data-lucide="look-up" class="w-4 h-4" aria-hidden="true"></i>
             </button>
 
-            <!-- Notifications Bell & Drawer -->
-            <div class="relative inline-flex items-center" id="nav-notifications-container">
-              <button
-                type="button"
-                class="nav-settings-btn relative"
-                id="nav-notifications-btn"
-                title="Chronicle Notices"
-                aria-label="Chronicle Notices"
-                aria-haspopup="dialog"
-                aria-expanded="false"
-              >
-                <i data-lucide="bell" class="w-4 h-4" aria-hidden="true"></i>
-                <span id="nav-notifications-badge" class="nav-notifications-badge hidden"></span>
-              </button>
-              <div
-                id="nav-notifications-popover"
-                class="nav-notifications-popover hidden"
-                role="dialog"
-                aria-label="Notifications"
-              >
-                <div class="nav-notifications-popover__header">
-                  <div class="nav-notifications-popover__title-wrap">
-                    <i data-lucide="bell" class="nav-notifications-popover__icon" aria-hidden="true"></i>
-                    <h3 class="nav-notifications-popover__title">Chronicle Notices</h3>
-                  </div>
-                  <button
-                    type="button"
-                    id="nav-notifications-mark-read"
-                    class="nav-notifications-popover__mark-read"
-                  >
-                    Mark read
-                  </button>
-                </div>
-                <div id="nav-notifications-list" class="nav-notifications-list">
-                  <div class="nav-notifications-empty">No notices in the archive</div>
-                </div>
-              </div>
-            </div>
+            <!-- Notifications live in a floating trigger below the nav bar -->
 
             <a
               href="${settingsTarget}"
@@ -584,6 +606,7 @@ export function buildNav() {
         ${buildMobileDock(current, null)}
       </div>
     `,
+    alertsHtml: buildNotifications(),
     paletteHtml: buildCommandPalette(),
   };
 }

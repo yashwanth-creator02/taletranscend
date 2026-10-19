@@ -91,6 +91,8 @@ describe('Icons Registry', () => {
         expect(lastCall.icons.Zap).toBeDefined();
         // Brand mark menu glyph
         expect(lastCall.icons.Menu).toBeDefined();
+        // Notification pin control
+        expect(lastCall.icons.Pin).toBeDefined();
       },
       { timeout: 1000 }
     );

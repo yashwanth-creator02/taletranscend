@@ -39,6 +39,7 @@ import {
   destroyNotifications,
   updateNotificationBadge,
   loadAndRenderNotifications,
+  toggleNotificationPin,
 } from './notifications.popover.js';
 import { markAllNotificationsAsRead } from '@services/notification.service.js';
 
@@ -151,6 +152,16 @@ function handleDocumentClick(event) {
       closeCommandPalette(false);
       return;
     }
+  }
+
+  // ── Notification pin toggle ────────────────────
+  if (target.closest('.nav-notifications-item__pin')) {
+    event.preventDefault();
+    const pinBtn = target.closest('.nav-notifications-item__pin');
+    if (pinBtn instanceof HTMLElement && pinBtn.dataset.notificationId) {
+      toggleNotificationPin(pinBtn.dataset.notificationId);
+    }
+    return;
   }
 
   // ── Notifications bell button ─────────────────
@@ -295,6 +306,12 @@ function handleDocumentKeydown(event) {
         return;
       }
       closeCommandPalette(true);
+      return;
+    }
+
+    const notifPopover = document.getElementById('nav-notifications-popover');
+    if (notifPopover && !notifPopover.classList.contains('hidden')) {
+      closeNotificationsPopover(true);
       return;
     }
 
@@ -453,6 +470,14 @@ export function attachGlobalListeners() {
  * Safe to call even if listeners were never attached.
  */
 export function detachGlobalListeners() {
+  // Subscription and timer cleanup runs unconditionally: destroyNav() must not
+  // leak snapshot listeners just because the DOM listeners were never attached.
+  destroyNotifications();
+  window.clearTimeout(navState.dropdownHideTimer);
+  navState.dropdownHideTimer = null;
+  navState.scrollCleanup?.();
+  navState.scrollCleanup = null;
+
   if (!navState.listenersAttached) return;
 
   document.removeEventListener('click', handleDocumentClick);
@@ -461,11 +486,6 @@ export function detachGlobalListeners() {
   const { commandInput } = getNavElements();
   commandInput?.removeEventListener('input', handleCommandInput);
 
-  destroyNotifications();
-  window.clearTimeout(navState.dropdownHideTimer);
-  navState.dropdownHideTimer = null;
-  navState.scrollCleanup?.();
-  navState.scrollCleanup = null;
   navState.listenersAttached = false;
 }
 

@@ -119,6 +119,7 @@ async function _loadIcons() {
     Shield: L.Shield,
     ShieldAlert: L.ShieldAlert,
     Bell: L.Bell,
+    Pin: L.Pin,
     Flag: L.Flag,
     Ban: L.Ban,
     Circle: L.Circle,

@@ -9,6 +9,7 @@ import {
   buildMobileDock,
   buildCommandItem,
   buildCommandPalette,
+  buildNotifications,
   buildNav,
 } from '../nav.templates.js';
 
@@ -151,6 +152,20 @@ describe('Nav Templates', () => {
     });
   });
 
+  describe('buildNotifications', () => {
+    it('renders a hidden floating trigger with its drawer wired up', () => {
+      const html = buildNotifications();
+      expect(html).toContain('id="nav-notifications-container"');
+      expect(html).toContain('nav-notifications-float is-hidden');
+      expect(html).toContain('id="nav-notifications-btn"');
+      expect(html).toContain('aria-haspopup="dialog"');
+      expect(html).toContain('aria-controls="nav-notifications-popover"');
+      expect(html).toContain('id="nav-notifications-popover"');
+      expect(html).toContain('id="nav-notifications-list"');
+      expect(html).toContain('id="nav-notifications-mark-read"');
+    });
+  });
+
   describe('buildNav', () => {
     it('renders settings navigation icon between search bar and user profile', () => {
       const { headerHtml } = buildNav();
@@ -184,6 +199,14 @@ describe('Nav Templates', () => {
       const { headerHtml } = buildNav();
       const matches = headerHtml.match(/data-lucide="look-up"/g) ?? [];
       expect(matches).toHaveLength(2);
+    });
+
+    it('keeps the notifications trigger out of the header and exposes it as alertsHtml', () => {
+      const { headerHtml, alertsHtml } = buildNav();
+      expect(headerHtml).not.toContain('id="nav-notifications-container"');
+      expect(headerHtml).not.toContain('id="nav-notifications-btn"');
+      expect(alertsHtml).toContain('id="nav-notifications-container"');
+      expect(alertsHtml).toContain('id="nav-notifications-btn"');
     });
   });
 });

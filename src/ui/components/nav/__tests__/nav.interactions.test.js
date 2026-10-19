@@ -11,6 +11,11 @@ import { navState } from '../nav.state.js';
 import * as utils from '../nav.utils.js';
 import * as fb from '@fb/index.js';
 import { openCommandPalette } from '../nav.command-palette.js';
+import {
+  closeNotificationsPopover,
+  toggleNotificationPin,
+  toggleNotificationsPopover,
+} from '../notifications.popover.js';
 
 vi.mock('../nav.utils.js', () => ({
   getNavElements: vi.fn(),
@@ -36,6 +41,7 @@ vi.mock('../notifications.popover.js', () => ({
   destroyNotifications: vi.fn(),
   updateNotificationBadge: vi.fn(),
   loadAndRenderNotifications: vi.fn(),
+  toggleNotificationPin: vi.fn(),
 }));
 
 vi.mock('@services/notification.service.js', () => ({
@@ -149,6 +155,23 @@ describe('Nav Interactions', () => {
       expect(document.getElementById('user-dropdown').hidden).toBe(true);
     });
 
+    it('toggles the notifications drawer from its trigger', () => {
+      document.body.insertAdjacentHTML('beforeend', '<button id="nav-notifications-btn"></button>');
+
+      document.getElementById('nav-notifications-btn').click();
+      expect(toggleNotificationsPopover).toHaveBeenCalled();
+    });
+
+    it('routes pin clicks inside a notice to the pin toggle', () => {
+      document.body.insertAdjacentHTML(
+        'beforeend',
+        '<div id="nav-notifications-container"><button class="nav-notifications-item__pin" data-notification-id="n1"></button></div>'
+      );
+
+      document.querySelector('.nav-notifications-item__pin').click();
+      expect(toggleNotificationPin).toHaveBeenCalledWith('n1');
+    });
+
     it('triggers upgrade when upgrade button is clicked', async () => {
       document.body.innerHTML += '<button id="nav-upgrade-btn"></button>';
       vi.mocked(fb.upgradeAnonymousToGoogle).mockResolvedValue({ uid: 'u1' });
@@ -236,6 +259,14 @@ describe('Nav Interactions', () => {
       document.dispatchEvent(event);
 
       expect(input.value).toBe('');
+    });
+
+    it('closes the notifications drawer on Escape', () => {
+      document.body.insertAdjacentHTML('beforeend', '<div id="nav-notifications-popover"></div>');
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+
+      expect(closeNotificationsPopover).toHaveBeenCalledWith(true);
     });
 
     it('keeps Tab inside the palette by skipping tabindex="-1" elements', () => {
