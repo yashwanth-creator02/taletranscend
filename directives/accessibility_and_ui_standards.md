@@ -56,7 +56,7 @@ Define explicit standards for footer layout isolation, accessible toasting, keyb
 - **Global Command Palette**:
   - Invoked via `Ctrl+K` (Windows/Linux) or `⌘K` (macOS).
   - Triggers declare `aria-keyshortcuts="Control+K Meta+K"`, `aria-haspopup="dialog"`, and `aria-expanded`.
-  - Palette modal traps focus and supports ArrowUp/ArrowDown selection with Enter execution.
+  - Palette modal traps focus and supports ArrowUp/ArrowDown selection with Enter execution. The trap counts only real tab stops: `tabindex="-1"` elements (command items, the clear control) must never resolve as its first or last element, so Tab cycles between the field and its inline close control instead of escaping the dialog.
 - **Text Selection Shortcut (`Ctrl+A`)**:
   - In input fields, search boxes, and manuscript atelier textareas, `Ctrl+A` / `⌘A` must reliably select all text without being intercepted by global page shortcuts.
 - **Dialog & Modal Focus Trapping**:

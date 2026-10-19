@@ -212,6 +212,40 @@ describe('Nav Interactions', () => {
       expect(input.value).toBe('');
     });
 
+    it('keeps Tab inside the palette by skipping tabindex="-1" elements', () => {
+      const palette = document.createElement('div');
+      palette.id = 'nav-command-palette';
+      palette.innerHTML = `
+        <input id="trap-input" />
+        <button id="trap-close"></button>
+      `;
+      const item = document.createElement('button');
+      item.className = 'command-item';
+      item.setAttribute('tabindex', '-1');
+      palette.appendChild(item);
+      document.body.appendChild(palette);
+
+      const input = palette.querySelector('#trap-input');
+      const close = palette.querySelector('#trap-close');
+      // jsdom has no layout, so the trap's visibility filter needs stubbing.
+      for (const el of [input, close, item]) {
+        Object.defineProperty(el, 'offsetParent', { value: document.body });
+      }
+
+      vi.mocked(utils.getNavElements).mockReturnValue({ commandPalette: palette });
+      navState.commandPaletteOpen = true;
+
+      close.focus();
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+      expect(document.activeElement).toBe(input);
+
+      input.focus();
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true })
+      );
+      expect(document.activeElement).toBe(close);
+    });
+
     it('navigates dropdown menu items with ArrowDown and ArrowUp', () => {
       openDropdown();
       const dropdown = document.getElementById('user-dropdown');

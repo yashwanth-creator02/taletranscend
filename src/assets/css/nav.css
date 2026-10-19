@@ -898,6 +898,9 @@ body:has(#sidebar.sidebar--mobile-open) .scroll-to-top {
   font-size: 16px;
   font-weight: 500;
   width: 100%;
+  /* Allow the field to shrink so the inline close control is never clipped
+     on very narrow viewports (flex items default to min-width: auto). */
+  min-width: 0;
 }
 
 .command-input:focus,

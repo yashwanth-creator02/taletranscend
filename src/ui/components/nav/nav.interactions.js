@@ -245,9 +245,12 @@ function handleDocumentKeydown(event) {
   if (navState.commandPaletteOpen && event.key === 'Tab') {
     const { commandPalette } = getNavElements();
     if (commandPalette) {
+      // Only real tab stops participate: command items (arrow-key model) and
+      // the clear control are `tabindex="-1"`, so they must never resolve as
+      // the trap's first or last element.
       const focusables = Array.from(
         commandPalette.querySelectorAll(
-          'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+          'button:not([disabled]):not([tabindex="-1"]), [href]:not([tabindex="-1"]), input:not([disabled]):not([tabindex="-1"])'
         )
       ).filter((el) => el instanceof HTMLElement && el.offsetParent !== null);
 

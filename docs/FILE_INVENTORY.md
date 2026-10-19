@@ -224,7 +224,7 @@ Global UI layer: the icon registry, shared components, and the nav shell; each c
 - `src/ui/components/nav/nav.command-palette.js` — Manages command palette open/close, fuzzy list rendering with `<mark>` query highlighting, keyboard focus movement, and command execution (navigation, sign out, themes).
 - `src/ui/components/nav/nav.config.js` — Declares primary header links, user dropdown links, mobile dock items, and base command palette entries.
 - `src/ui/components/nav/nav.global.js` — Dynamically mounts the command palette and registers the global Ctrl/Cmd+K shortcut on pages lacking the full nav.
-- `src/ui/components/nav/nav.interactions.js` — Delegated nav click/keydown handling, scroll progress bar, dropdown and notification toggles, auth-to-DOM user updates, listener lifecycle.
+- `src/ui/components/nav/nav.interactions.js` — Delegated nav click/keydown handling, scroll progress bar, command-palette focus trap (real tab stops only), dropdown and notification toggles, auth-to-DOM user updates, listener lifecycle.
 - `src/ui/components/nav/nav.js` — Public nav lifecycle: initNav injects header, mobile dock, and palette and starts the auth watch; destroyNav tears everything down.
 - `src/ui/components/nav/nav.state.js` — Shared mutable nav state singleton holding the current user, palette open/focus flags, listener and cleanup handles.
 - `src/ui/components/nav/nav.templates.js` — Pure HTML string builders for header links, user dropdown/guest area, mobile dock, command items, the lookup-style palette shell, and nav shell.
@@ -232,7 +232,7 @@ Global UI layer: the icon registry, shared components, and the nav shell; each c
 - `src/ui/components/nav/notifications.popover.js` — Notifications bell popover: unread badge, list rendering, toggle/close, and real-time unread count subscription lifecycle.
 - `src/ui/components/nav/__tests__/nav.command-palette.test.js` — Vitest tests for `src/ui/components/nav/nav.command-palette.js` — palette open/close state, query filtering, match highlighting and escaping, focus movement wrapping, href/theme command execution.
 - `src/ui/components/nav/__tests__/nav.global.test.js` — Vitest tests for `src/ui/components/nav/nav.global.js` — global palette shortcut listener attachment and dynamic palette mounting/opening on standalone pages.
-- `src/ui/components/nav/__tests__/nav.interactions.test.js` — Vitest tests for `src/ui/components/nav/nav.interactions.js` — dropdown open/close, click delegation (palette, upgrade), updateNavUser rendering, keyboard shortcuts/focus navigation.
+- `src/ui/components/nav/__tests__/nav.interactions.test.js` — Vitest tests for `src/ui/components/nav/nav.interactions.js` — dropdown open/close, click delegation (palette, upgrade), updateNavUser rendering, keyboard shortcuts/focus navigation, palette Tab-trap containment.
 - `src/ui/components/nav/__tests__/nav.templates.test.js` — Vitest tests for `src/ui/components/nav/nav.templates.js` — template builders for active links, user/guest areas, mobile dock, command items, lookup palette shell ordering, nav shell ordering.
 - `src/ui/components/nav/__tests__/nav.test.js` — Vitest tests for `src/ui/components/nav/nav.js` — initNav header/dock injection, idempotency, destroyNav DOM and auth-unsubscribe cleanup.
 - `src/ui/components/nav/__tests__/nav.utils.test.js` — Vitest tests for `src/ui/components/nav/nav.utils.js` — getCurrentPage pathname fallbacks, getAvatarSeed derivation, getNavElements DOM lookups.

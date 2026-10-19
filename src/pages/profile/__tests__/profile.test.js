@@ -1,5 +1,5 @@
 // src/pages/profile/__tests__/profile.test.js
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { initAuth } from '@fb/index.js';
 import * as index from '../index.js';
 
@@ -111,10 +111,22 @@ describe('Profile Page Controller', () => {
 });
 
 describe('Profile Back Button', () => {
+  const originalReferrer = document.referrer;
+
   beforeEach(() => {
     vi.clearAllMocks();
     vi.resetModules();
     document.body.innerHTML = '';
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    Object.defineProperty(document, 'referrer', {
+      value: originalReferrer,
+      configurable: true,
+    });
+    delete window.history.length;
+    delete window.history.state;
   });
 
   it('calls history.back() when the visitor came from a same-origin page', async () => {
@@ -172,8 +184,7 @@ describe('Profile Back Button', () => {
   it('falls back to the library when there is no in-app history', async () => {
     const { handleProfileBack } = await import('../profile.js');
 
-    delete window.location;
-    window.location = { origin: 'http://localhost:3000', href: '' };
+    vi.stubGlobal('location', { origin: 'http://localhost:3000', href: '' });
 
     Object.defineProperty(document, 'referrer', { value: '', configurable: true });
     Object.defineProperty(window.history, 'length', { value: 1, configurable: true });
