@@ -69,6 +69,7 @@ async function _loadIcons() {
     PanelLeftClose: L.PanelLeftClose,
     PanelLeftOpen: L.PanelLeftOpen,
     LayoutGrid: L.LayoutGrid,
+    Menu: L.Menu,
     Columns2: L.Columns2,
     Maximize2: L.Maximize2,
     Minimize2: L.Minimize2,

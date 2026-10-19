@@ -9,14 +9,19 @@
 // Depends on:
 //   nav.state.js            — shared mutable state
 //   nav.utils.js            — getNavElements, renderIcons, getCurrentPage
-//   nav.templates.js        — buildAuthenticatedUser, buildGuestUser, buildMobileDock
+//   nav.templates.js        — buildBrandMark, buildAuthenticatedUser, buildGuestUser, buildMobileDock
 //   nav.command-palette.js  — open/close/execute helpers
 
 import { auth, signOut, upgradeAnonymousToGoogle } from '@fb/index.js';
 import { navState } from './nav.state.js';
 import { getNavElements, renderIcons, getCurrentPage } from './nav.utils.js';
 import { USER_LINKS } from './nav.config.js';
-import { buildAuthenticatedUser, buildGuestUser, buildMobileDock } from './nav.templates.js';
+import {
+  buildBrandMark,
+  buildAuthenticatedUser,
+  buildGuestUser,
+  buildMobileDock,
+} from './nav.templates.js';
 import { showToast } from '@ui/components/toast.js';
 import { createLogger } from '@/utils';
 import {
@@ -47,12 +52,12 @@ const log = createLogger('NavInteractions');
  * Opens the account dropdown and updates aria-expanded.
  */
 export function openDropdown() {
-  const { avatarButton, dropdown } = getNavElements();
-  if (!avatarButton || !dropdown) return;
+  const { menuButton, dropdown } = getNavElements();
+  if (!menuButton || !dropdown) return;
 
   dropdown.hidden = false;
   dropdown.classList.remove('is-closing');
-  avatarButton.setAttribute('aria-expanded', 'true');
+  menuButton.setAttribute('aria-expanded', 'true');
 }
 
 /**
@@ -61,16 +66,16 @@ export function openDropdown() {
  * @param {boolean} [returnFocus=true]
  */
 export function closeDropdown(returnFocus = true) {
-  const { avatarButton, dropdown } = getNavElements();
-  if (!avatarButton || !dropdown || dropdown.hidden) return;
+  const { menuButton, dropdown } = getNavElements();
+  if (!menuButton || !dropdown || dropdown.hidden) return;
 
-  avatarButton.setAttribute('aria-expanded', 'false');
+  menuButton.setAttribute('aria-expanded', 'false');
   dropdown.classList.add('is-closing');
 
   window.setTimeout(() => {
     dropdown.hidden = true;
     dropdown.classList.remove('is-closing');
-    if (returnFocus) avatarButton.focus();
+    if (returnFocus) menuButton.focus();
   }, 220);
 }
 
@@ -78,10 +83,10 @@ export function closeDropdown(returnFocus = true) {
  * Toggles the account dropdown.
  */
 function toggleDropdown() {
-  const { avatarButton } = getNavElements();
-  if (!avatarButton) return;
+  const { menuButton } = getNavElements();
+  if (!menuButton) return;
 
-  const isOpen = avatarButton.getAttribute('aria-expanded') === 'true';
+  const isOpen = menuButton.getAttribute('aria-expanded') === 'true';
   isOpen ? closeDropdown() : openDropdown();
 }
 
@@ -167,8 +172,8 @@ function handleDocumentClick(event) {
     closeNotificationsPopover();
   }
 
-  // ── Avatar button ──────────────────────────────
-  if (target.closest('#avatar-btn')) {
+  // ── Brand menu button (account dropdown trigger) ──
+  if (target.closest('#nav-menu-btn')) {
     event.preventDefault();
     toggleDropdown();
     return;
@@ -200,10 +205,10 @@ function handleDocumentClick(event) {
   }
 
   // ── Click outside dropdown ─────────────────────
-  const { avatarButton, dropdown } = getNavElements();
-  if (dropdown && avatarButton) {
-    const isOpen = avatarButton.getAttribute('aria-expanded') === 'true';
-    if (isOpen && !dropdown.contains(target) && !avatarButton.contains(target)) {
+  const { menuButton, dropdown } = getNavElements();
+  if (dropdown && menuButton) {
+    const isOpen = menuButton.getAttribute('aria-expanded') === 'true';
+    if (isOpen && !dropdown.contains(target) && !menuButton.contains(target)) {
       closeDropdown(false);
     }
   }
@@ -288,8 +293,8 @@ function handleDocumentKeydown(event) {
       return;
     }
 
-    const { avatarButton } = getNavElements();
-    if (avatarButton?.getAttribute('aria-expanded') === 'true') {
+    const { menuButton } = getNavElements();
+    if (menuButton?.getAttribute('aria-expanded') === 'true') {
       closeDropdown(true);
       return;
     }
@@ -316,8 +321,8 @@ function handleDocumentKeydown(event) {
   }
 
   // ── Arrow navigation inside user dropdown ──────
-  const { avatarButton, dropdown } = getNavElements();
-  const isDropdownOpen = avatarButton?.getAttribute('aria-expanded') === 'true';
+  const { menuButton, dropdown } = getNavElements();
+  const isDropdownOpen = menuButton?.getAttribute('aria-expanded') === 'true';
 
   if (isDropdownOpen && dropdown && !dropdown.hidden) {
     const menuItems = Array.from(
@@ -475,8 +480,15 @@ export function updateNavUser(user) {
 
   const current = getCurrentPage();
 
-  // Swap desktop user area
-  navUser.outerHTML = user ? buildAuthenticatedUser(user, current, USER_LINKS) : buildGuestUser();
+  // Swap desktop user area: avatar profile link (member) or Sign In CTA (guest)
+  navUser.outerHTML = user ? buildAuthenticatedUser(user) : buildGuestUser();
+
+  // Swap the brand slot: account menu trigger + dropdown for members,
+  // plain home link for guests
+  const brandAnchor = document.getElementById('nav-brand-anchor');
+  if (brandAnchor) {
+    brandAnchor.innerHTML = buildBrandMark(user, current, USER_LINKS);
+  }
 
   // Re-render mobile dock to reflect auth state (profile icon + label)
   const dockContainer = document.getElementById('mobile-dock-container');

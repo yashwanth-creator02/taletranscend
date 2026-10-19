@@ -87,6 +87,15 @@ Fixed-position modal overlays (such as the Quick Navigation Command Palette `.co
 - **Look-Up Glyph**: The nav quick-tools triggers (`#nav-command-button`, `#nav-command-button-mobile`) and the palette field row request `data-lucide="look-up"` — a custom composite glyph (eye with an upward arrow) registered in `src/ui/icons.js`, because Lucide ships no eye+arrow icon. The trigger mirrors the palette field's chrome (flat fill, hairline border, muted icon turning accent on hover, mono hint chip) so both search surfaces read as one control.
 - **Page Back Navigation**: Pages that are not reached through the universal nav (profile, settings, shelf, tale) provide their own Back control. The profile page ships only a single `#profile-back-btn` (`.btn-back-pill`) in the identity pillar. `handleProfileBack()` calls `history.back()` only when an in-app origin is provable (same-origin `document.referrer`, or `history.state.url` pushed by `router.js` soft navigation) and otherwise falls back to `/library.html`. Bind via `initProfileBackButton()`, which is idempotent per DOM node so soft-navigation re-inits and the auth re-init cannot double-fire.
 
+### 7. Brand Mark, Account Menu Trigger & Profile Link
+
+The header brand block splits into three roles; keep them from re-merging:
+
+- **Brand Mark = Account Menu (members only)**: `.nav-brand__anchor` (`#nav-brand-anchor`) wraps the logo mark. For a signed-in user the mark is a `<button id="nav-menu-btn">` with `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls="user-dropdown"`; it toggles the account dropdown that `buildAccountMenu()` renders beside it, anchored under the mark (`.nav-brand__anchor .dropdown { left: 0; right: auto; transform-origin: top left; }`) instead of the old top-right avatar anchor. Hover/focus (and `aria-expanded="true"`) cross-fades the logo for the `data-lucide="menu"` hamburger glyph so the menu affordance is visible before the first click.
+- **Wordmark = Home Link**: `.nav-logo__wordmark` is a standalone `<a>` to the home page (previously the whole brand block was one anchor).
+- **Avatar = Direct Profile Link**: `#nav-profile-link` (`.nav-avatar`) navigates straight to `profile.html` — no `aria-haspopup`, no chevron; the account dropdown must not be re-attached to the avatar.
+- **Guest Fallback**: guests have no account menu, so `buildBrandMark(null)` renders the mark as a plain home link (`aria-label="TaleTranscend home"`). `updateNavUser()` swaps both `#nav-brand-anchor` and `#nav-user` on every auth change, and all dropdown helpers key off the `menuButton` entry from `getNavElements()`.
+
 ## Tools / Scripts to Use
 
 - Run the navigation and routing test suite:

@@ -44,6 +44,14 @@ Or run individual npm scripts:
 - `npm run type-check`: Validates TypeScript type safety without emitting build output.
 - `npm run test:rules`: Runs the Firestore security-rules emulator suite (`firestore/tests/rules.emulator.test.ts` against the root `firestore.rules`). Requires Java and a free port 8080; stop any orphaned `java.exe` emulator process if the port is taken.
 
+## Environment Notes (Offline / Resource-Limited Runs)
+
+- **Auth-less environments**: with no network route to Firebase, every page's boot gate redirects to `/login.html` (`checkNewUserGate` in `src/utils/navigation.ts`). For browser/e2e checks set `tt_has_visited` in `localStorage` first (`page.addInitScript`), otherwise all navigation lands on the login page. A developer's own browser may still browse as a guest because a stale Firebase anonymous session is cached in IndexedDB.
+- **Deterministic e2e nav state**: `e2e/specs/nav-brand-menu.spec.js` blocks `googleapis|firebaseio`, sets the visit flag, waits for `#nav-user .signin-btn, #nav-user .nav-avatar` (the app's own auth callback settling) and only then drives `updateNavUser()` from the page. Injecting before the callback settles is racy: the late `updateNavUser(null)` overwrites the injected state.
+- **In-page dynamic imports**: Vite's `root` is `src/views`, so source modules are served as `/@fs/<abs path>?t=<mtime>` — a hardcoded `/src/...` URL 404s. Resolve the URL from `performance.getEntriesByType('resource')` so the import shares the app's module instance.
+- **Resource limits**: stop dev servers before the full unit suite and run `npx vitest run --maxWorkers=2`; vitest reports `Timeout waiting for worker to respond` / pool errors when the machine is saturated. Run Playwright with `--workers=1` (each page cold-transforms the whole module graph).
+- **Known failing e2e spec**: `e2e/specs/library.spec.js` times out on `page.goto` in an offline environment — reproduced on unmodified source, so it is environmental, not a regression.
+
 ## Outputs
 
 - Clean console verification output.

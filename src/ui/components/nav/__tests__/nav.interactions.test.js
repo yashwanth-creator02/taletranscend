@@ -59,7 +59,7 @@ describe('Nav Interactions', () => {
     navState.commandFocusedIndex = -1;
     document.body.innerHTML = `
       <header id="app-nav">
-        <button id="avatar-btn" aria-expanded="false"></button>
+        <button id="nav-menu-btn" aria-expanded="false"></button>
         <div id="user-dropdown" hidden></div>
         <div id="nav-user"></div>
         <div id="mobile-dock-container"></div>
@@ -71,7 +71,7 @@ describe('Nav Interactions', () => {
     `;
 
     vi.mocked(utils.getNavElements).mockReturnValue({
-      avatarButton: document.getElementById('avatar-btn'),
+      menuButton: document.getElementById('nav-menu-btn'),
       dropdown: document.getElementById('user-dropdown'),
       nav: document.getElementById('app-nav'),
       navUser: document.getElementById('nav-user'),
@@ -84,7 +84,7 @@ describe('Nav Interactions', () => {
     it('openDropdown shows dropdown and sets aria-expanded', () => {
       openDropdown();
       const dropdown = document.getElementById('user-dropdown');
-      const btn = document.getElementById('avatar-btn');
+      const btn = document.getElementById('nav-menu-btn');
       expect(dropdown.hidden).toBe(false);
       expect(btn.getAttribute('aria-expanded')).toBe('true');
     });
@@ -115,6 +115,18 @@ describe('Nav Interactions', () => {
       expect(openCommandPalette).toHaveBeenCalled();
     });
 
+    it('toggles the dropdown when the brand menu button is clicked', () => {
+      const btn = document.getElementById('nav-menu-btn');
+      btn.click();
+      expect(document.getElementById('user-dropdown').hidden).toBe(false);
+      expect(btn.getAttribute('aria-expanded')).toBe('true');
+
+      btn.click();
+      vi.advanceTimersByTime(220);
+      expect(document.getElementById('user-dropdown').hidden).toBe(true);
+      expect(btn.getAttribute('aria-expanded')).toBe('false');
+    });
+
     it('closes dropdown when clicking outside', () => {
       openDropdown();
       document.body.click();
@@ -139,7 +151,7 @@ describe('Nav Interactions', () => {
       const user = { uid: 'u1', displayName: 'Hero' };
       updateNavUser(user);
       expect(navState.currentUser).toBe(user);
-      expect(document.getElementById('avatar-btn')).toBeTruthy();
+      expect(document.getElementById('nav-profile-link')).toBeTruthy();
       expect(utils.renderIcons).toHaveBeenCalled();
     });
 

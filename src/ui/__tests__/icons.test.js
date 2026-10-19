@@ -89,6 +89,8 @@ describe('Icons Registry', () => {
         expect(lastCall.icons.ALargeSmall).toBeDefined();
         expect(lastCall.icons.AlignJustify).toBeDefined();
         expect(lastCall.icons.Zap).toBeDefined();
+        // Brand mark menu glyph
+        expect(lastCall.icons.Menu).toBeDefined();
       },
       { timeout: 1000 }
     );

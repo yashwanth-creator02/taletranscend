@@ -61,103 +61,169 @@ export function buildDropdownLink({ href, icon, label }, current) {
 }
 
 /**
- * Builds the full authenticated user area: avatar button + dropdown panel.
+ * Builds the desktop user area: the avatar rendered as a direct link to the
+ * user's profile page (the account menu itself now lives on the brand mark).
+ *
+ * @param {import('firebase/auth').User} user
+ * @returns {string}
+ */
+export function buildAuthenticatedUser(user) {
+  const seed = getAvatarSeed(user);
+  const avatarSrc = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
+  const displayName = escapeHtml(user.displayName || 'Your Account');
+
+  return `
+    <div class="nav-user" id="nav-user">
+      <a
+        class="nav-avatar"
+        id="nav-profile-link"
+        href="${resolveHref('profile.html')}"
+        aria-label="Open profile for ${displayName}"
+        title="Profile"
+      >
+        <img
+          src="${avatarSrc}"
+          alt=""
+          class="avatar-img"
+          width="32"
+          height="32"
+        />
+      </a>
+    </div>
+  `;
+}
+
+/**
+ * Builds the brand slot at the header's left edge: the logo mark, and — for a
+ * signed-in user — the account menu trigger plus its dropdown panel.
+ *
+ * Guest: the mark stays a plain link to the home page (no account menu exists).
+ * Member: the mark becomes a button that opens the account dropdown anchored
+ * beneath it; hovering/focusing the mark swaps the logo for a menu glyph so
+ * the affordance is visible before the first click.
+ *
+ * @param {import('firebase/auth').User | null} user
+ * @param {string} current
+ * @param {Array<{ href: string, icon: string, label: string }>} userLinks
+ * @returns {string}
+ */
+export function buildBrandMark(user, current, userLinks) {
+  const logoImg = `
+    <img
+      src="${resolveHref('/logo.png')}"
+      alt=""
+      class="nav-logo__img"
+      aria-hidden="true"
+      width="28"
+      height="28"
+    />
+  `;
+
+  if (!user) {
+    return `
+      <a href="${resolveHref('index.html')}" class="nav-logo__mark" aria-label="TaleTranscend home">
+        ${logoImg}
+      </a>
+    `;
+  }
+
+  const displayName = escapeHtml(user.displayName || 'Your Account');
+
+  return `
+    <button
+      type="button"
+      class="nav-logo__mark"
+      id="nav-menu-btn"
+      aria-haspopup="menu"
+      aria-expanded="false"
+      aria-controls="user-dropdown"
+      aria-label="Open account menu for ${displayName}"
+    >
+      ${logoImg}
+      <i data-lucide="menu" class="nav-logo__menu-icon" aria-hidden="true"></i>
+    </button>
+
+    ${buildAccountMenu(user, current, userLinks)}
+  `;
+}
+
+/**
+ * Builds the account dropdown panel: identity header, user links, optional
+ * Secure Account CTA (anonymous users), and sign out.
  *
  * @param {import('firebase/auth').User} user
  * @param {string} current
  * @param {Array<{ href: string, icon: string, label: string }>} userLinks
  * @returns {string}
  */
-export function buildAuthenticatedUser(user, current, userLinks) {
+export function buildAccountMenu(user, current, userLinks) {
   const seed = getAvatarSeed(user);
   const avatarSrc = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
   const displayName = escapeHtml(user.displayName || 'Your Account');
   const email = escapeHtml(user.email || '');
-
   const menuItems = userLinks.map((link) => buildDropdownLink(link, current)).join('');
   const isAnonymous = user.isAnonymous;
 
   return `
-    <div class="nav-user" id="nav-user">
-      <button
-        class="avatar-btn"
-        id="avatar-btn"
-        type="button"
-        aria-haspopup="menu"
-        aria-expanded="false"
-        aria-controls="user-dropdown"
-        aria-label="Open account menu for ${displayName}"
-      >
+    <div
+      class="dropdown"
+      id="user-dropdown"
+      role="menu"
+      aria-labelledby="nav-menu-btn"
+      hidden
+    >
+      <div class="dropdown__header">
         <img
           src="${avatarSrc}"
-          alt="${displayName}"
-          class="avatar-img"
-          width="32"
-          height="32"
+          alt=""
+          class="dropdown__avatar"
+          aria-hidden="true"
+          width="36"
+          height="36"
         />
-        <i data-lucide="chevron-down" class="avatar-chevron" aria-hidden="true"></i>
-      </button>
-
-      <div
-        class="dropdown"
-        id="user-dropdown"
-        role="menu"
-        aria-labelledby="avatar-btn"
-        hidden
-      >
-        <div class="dropdown__header">
-          <img
-            src="${avatarSrc}"
-            alt=""
-            class="dropdown__avatar"
-            aria-hidden="true"
-            width="36"
-            height="36"
-          />
-          <div class="dropdown__identity">
-            <p class="dropdown__name">${displayName}</p>
-            ${email ? `<p class="dropdown__email">${email}</p>` : ''}
-          </div>
+        <div class="dropdown__identity">
+          <p class="dropdown__name">${displayName}</p>
+          ${email ? `<p class="dropdown__email">${email}</p>` : ''}
         </div>
-
-        <div class="dropdown__divider" role="separator"></div>
-
-        <nav aria-label="Account navigation">
-          ${menuItems}
-          ${
-            isAnonymous
-              ? `
-            <div class="dropdown__divider" role="separator"></div>
-            <button
-              class="dropdown-link dropdown-link--primary"
-              id="nav-upgrade-btn"
-              type="button"
-              role="menuitem"
-              aria-label="Secure Account with Google"
-              tabindex="-1"
-            >
-              <i data-lucide="shield-check" class="dropdown-link__icon" aria-hidden="true"></i>
-              <span>Secure Account</span>
-            </button>
-          `
-              : ''
-          }
-        </nav>
-
-        <div class="dropdown__divider" role="separator"></div>
-
-        <button
-          class="dropdown-link dropdown-link--danger"
-          id="signout-btn"
-          type="button"
-          role="menuitem"
-          aria-label="Sign out of account"
-          tabindex="-1"
-        >
-          <i data-lucide="log-out" class="dropdown-link__icon" aria-hidden="true"></i>
-          <span>Sign Out</span>
-        </button>
       </div>
+
+      <div class="dropdown__divider" role="separator"></div>
+
+      <nav aria-label="Account navigation">
+        ${menuItems}
+        ${
+          isAnonymous
+            ? `
+          <div class="dropdown__divider" role="separator"></div>
+          <button
+            class="dropdown-link dropdown-link--primary"
+            id="nav-upgrade-btn"
+            type="button"
+            role="menuitem"
+            aria-label="Secure Account with Google"
+            tabindex="-1"
+          >
+            <i data-lucide="shield-check" class="dropdown-link__icon" aria-hidden="true"></i>
+            <span>Secure Account</span>
+          </button>
+        `
+            : ''
+        }
+      </nav>
+
+      <div class="dropdown__divider" role="separator"></div>
+
+      <button
+        class="dropdown-link dropdown-link--danger"
+        id="signout-btn"
+        type="button"
+        role="menuitem"
+        aria-label="Sign out of account"
+        tabindex="-1"
+      >
+        <i data-lucide="log-out" class="dropdown-link__icon" aria-hidden="true"></i>
+        <span>Sign Out</span>
+      </button>
     </div>
   `;
 }
@@ -416,12 +482,12 @@ export function buildNav() {
       <header id="app-nav" class="app-nav">
         <div class="nav-inner">
           <div class="nav-brand-group">
-            <a href="${resolveHref('index.html')}" class="nav-logo" aria-label="TaleTranscend home">
-              <div class="nav-logo__mark">
-                <img src="${resolveHref('/logo.png')}" alt="" class="nav-logo__img" aria-hidden="true" width="28" height="28" />
+            <div class="nav-brand">
+              <div class="nav-brand__anchor" id="nav-brand-anchor">
+                ${buildBrandMark(null)}
               </div>
-              <span class="nav-logo__wordmark">TaleTranscend</span>
-            </a>
+              <a href="${resolveHref('index.html')}" class="nav-logo__wordmark">TaleTranscend</a>
+            </div>
 
             <nav class="nav-primary desktop-shell" aria-label="Primary navigation">
               ${primaryLinks}

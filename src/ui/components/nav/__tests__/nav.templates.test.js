@@ -2,6 +2,8 @@
 import { describe, it, expect } from 'vitest';
 import {
   buildPrimaryLink,
+  buildBrandMark,
+  buildAccountMenu,
   buildAuthenticatedUser,
   buildGuestUser,
   buildMobileDock,
@@ -27,17 +29,62 @@ describe('Nav Templates', () => {
   });
 
   describe('buildAuthenticatedUser', () => {
-    it('renders user display name and avatar', () => {
+    it('renders the avatar as a direct link to the profile page', () => {
       const user = { uid: 'u123', displayName: 'Hero', email: 'h@tt.com', isAnonymous: false };
-      const html = buildAuthenticatedUser(user, 'index.html', []);
-      expect(html).toContain('Hero');
-      expect(html).toContain('h@tt.com');
-      expect(html).toContain('u123'); // seed
+      const html = buildAuthenticatedUser(user);
+      expect(html).toContain('id="nav-user"');
+      expect(html).toContain('id="nav-profile-link"');
+      expect(html).toContain('profile.html');
+      expect(html).toContain('u123'); // avatar seed
+      expect(html).toContain('aria-label="Open profile for Hero"');
+      // The account menu no longer hangs off the avatar
+      expect(html).not.toContain('id="user-dropdown"');
+      expect(html).not.toContain('aria-haspopup');
+    });
+  });
+
+  describe('buildBrandMark', () => {
+    it('renders a plain home link when no user is signed in', () => {
+      const html = buildBrandMark(null);
+      expect(html).toContain('class="nav-logo__mark"');
+      expect(html).toContain('index.html');
+      expect(html).toContain('aria-label="TaleTranscend home"');
+      expect(html).not.toContain('nav-menu-btn');
+      expect(html).not.toContain('user-dropdown');
     });
 
-    it('renders secure account button if anonymous', () => {
+    it('renders a menu button with the hamburger glyph plus the account menu for members', () => {
+      const user = { uid: 'u123', displayName: 'Hero', email: 'h@tt.com', isAnonymous: false };
+      const links = [{ href: 'shelf.html', icon: 'bookmark', label: 'My Shelf' }];
+      const html = buildBrandMark(user, 'index.html', links);
+      expect(html).toContain('id="nav-menu-btn"');
+      expect(html).toContain('aria-haspopup="menu"');
+      expect(html).toContain('aria-expanded="false"');
+      expect(html).toContain('aria-controls="user-dropdown"');
+      expect(html).toContain('aria-label="Open account menu for Hero"');
+      expect(html).toContain('data-lucide="menu"');
+      expect(html).toContain('nav-logo__menu-icon');
+      expect(html).toContain('id="user-dropdown"');
+      expect(html).toContain('My Shelf');
+    });
+  });
+
+  describe('buildAccountMenu', () => {
+    it('renders identity header, links, and sign out for members', () => {
+      const user = { uid: 'u123', displayName: 'Hero', email: 'h@tt.com', isAnonymous: false };
+      const links = [{ href: 'shelf.html', icon: 'bookmark', label: 'My Shelf' }];
+      const html = buildAccountMenu(user, 'index.html', links);
+      expect(html).toContain('aria-labelledby="nav-menu-btn"');
+      expect(html).toContain('Hero');
+      expect(html).toContain('h@tt.com');
+      expect(html).toContain('My Shelf');
+      expect(html).toContain('id="signout-btn"');
+      expect(html).not.toContain('Secure Account');
+    });
+
+    it('renders the secure account CTA for anonymous users', () => {
       const user = { uid: 'u123', isAnonymous: true };
-      const html = buildAuthenticatedUser(user, 'index.html', []);
+      const html = buildAccountMenu(user, 'index.html', []);
       expect(html).toContain('Secure Account');
     });
   });
@@ -117,6 +164,15 @@ describe('Nav Templates', () => {
       expect(headerHtml).not.toContain('id="nav-command-palette"');
       expect(paletteHtml).toContain('id="nav-command-palette"');
       expect(dockHtml).toContain('id="mobile-dock-container"');
+    });
+
+    it('renders the brand mark anchor with a standalone wordmark home link', () => {
+      const { headerHtml } = buildNav();
+      const anchorIndex = headerHtml.indexOf('id="nav-brand-anchor"');
+      const wordmarkIndex = headerHtml.indexOf('class="nav-logo__wordmark"');
+      expect(anchorIndex).toBeGreaterThan(-1);
+      expect(wordmarkIndex).toBeGreaterThan(anchorIndex);
+      expect(headerHtml).toContain('aria-label="TaleTranscend home"');
     });
 
     it('renders the custom look-up glyph on both quick-tools triggers', () => {

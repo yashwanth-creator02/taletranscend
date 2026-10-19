@@ -42,22 +42,26 @@
   gap: var(--space-7);
 }
 
-.nav-logo {
+.nav-brand {
   display: flex;
   align-items: center;
   gap: 12px;
-  text-decoration: none;
   flex-shrink: 0;
-  transition: transform var(--transition-base);
 }
 
-.nav-logo:hover {
-  transform: translateY(-1px);
+/* Positioning context for the account dropdown anchored under the brand mark */
+.nav-brand__anchor {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
+/* The mark is an anchor (guest: home link) or a button (member: opens the
+   account menu) — both states share this chrome. */
 .nav-logo__mark {
   width: 34px;
   height: 34px;
+  padding: 0;
   background: var(--surface-2);
   border: 1px solid var(--border-accent);
   border-radius: 10px;
@@ -68,13 +72,18 @@
   transition: all var(--transition-base);
   position: relative;
   overflow: hidden;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
-.nav-logo:hover .nav-logo__mark {
+.nav-logo__mark:hover,
+.nav-logo__mark:focus-visible {
   background: var(--surface-3);
   border-color: var(--accent);
   box-shadow: 0 0 24px rgb(var(--accent-rgb) / var(--a-08));
   transform: rotate(4deg) scale(1.04);
+  outline: none;
 }
 
 .nav-logo__img {
@@ -82,18 +91,38 @@
   height: 28px;
   object-fit: contain;
   filter: drop-shadow(0 0 4px rgb(var(--accent-rgb) / var(--a-08)));
-  transition: transform var(--transition-base);
+  transition:
+    transform var(--transition-base),
+    opacity var(--transition-fast);
   display: block;
 }
 
-.nav-logo:hover .nav-logo__img {
-  transform: scale(1.08);
+/* Menu glyph — swaps in for the logo on hover/focus (and while the menu is
+   open) so the mark advertises that it opens the account menu. */
+.nav-logo__menu-icon {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  color: var(--text-primary);
+  opacity: 0;
+  transform: scale(0.72);
+  transition:
+    opacity var(--transition-fast),
+    transform var(--transition-fast);
 }
 
-.nav-logo__icon {
-  width: 16px;
-  height: 16px;
-  color: var(--text-primary);
+.nav-logo__mark:hover .nav-logo__img,
+.nav-logo__mark:focus-visible .nav-logo__img,
+.nav-logo__mark[aria-expanded='true'] .nav-logo__img {
+  opacity: 0;
+  transform: scale(0.7);
+}
+
+.nav-logo__mark:hover .nav-logo__menu-icon,
+.nav-logo__mark:focus-visible .nav-logo__menu-icon,
+.nav-logo__mark[aria-expanded='true'] .nav-logo__menu-icon {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .nav-logo__wordmark {
@@ -103,6 +132,12 @@
   letter-spacing: 0.05em;
   color: var(--text-primary);
   text-transform: uppercase;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.nav-logo__wordmark:hover {
+  color: var(--accent);
 }
 
 /* ── Main Links ──────────────────────────────────────────────────── */
@@ -241,15 +276,14 @@
 /* ── User Area ───────────────────────────────────────────────────── */
 
 .nav-user {
-  position: relative;
   display: flex;
   align-items: center;
 }
 
-.avatar-btn {
-  background: none;
-  border: none;
-  padding: 0;
+/* The avatar is a direct link to the profile page — the account menu itself
+   now hangs off the brand mark in `.nav-brand__anchor`. */
+.nav-avatar {
+  display: inline-flex;
   margin-left: 4px;
   border-radius: 50%;
   cursor: pointer;
@@ -257,7 +291,7 @@
   transition: transform var(--transition-fast);
 }
 
-.avatar-btn:active {
+.nav-avatar:active {
   transform: scale(0.95);
 }
 
@@ -270,27 +304,10 @@
   transition: all var(--transition-base);
 }
 
-.avatar-btn:hover .avatar-img {
+.nav-avatar:hover .avatar-img,
+.nav-avatar:focus-visible .avatar-img {
   border-color: var(--accent);
   box-shadow: 0 0 20px rgb(var(--accent-rgb) / var(--a-08));
-}
-
-.avatar-chevron {
-  position: absolute;
-  bottom: -2px;
-  right: -2px;
-  width: 14px;
-  height: 14px;
-  background: var(--accent);
-  color: var(--text-on-accent);
-  border-radius: 50%;
-  padding: 2px;
-  border: 2px solid var(--nav-bg-scrolled);
-  transition: transform var(--transition-base);
-}
-
-.avatar-btn[aria-expanded='true'] .avatar-chevron {
-  transform: rotate(180deg);
 }
 
 /* ── Guest User ──────────────────────────────────────────────────── */
@@ -384,6 +401,13 @@
     opacity: 0;
     transform: scale(0.96) translateY(8px);
   }
+}
+
+/* The account menu hangs off the brand mark at the header's left edge */
+.nav-brand__anchor .dropdown {
+  left: 0;
+  right: auto;
+  transform-origin: top left;
 }
 
 .dropdown__header {
@@ -1649,13 +1673,10 @@ body:has(#sidebar.sidebar--mobile-open) .scroll-to-top {
   background: var(--bg-elevated);
 }
 
-[data-app-theme='light'] .avatar-btn:hover .avatar-img {
+[data-app-theme='light'] .nav-avatar:hover .avatar-img,
+[data-app-theme='light'] .nav-avatar:focus-visible .avatar-img {
   border-color: var(--accent);
   box-shadow: 0 2px 10px rgb(var(--accent-rgb) / 0.2);
-}
-
-[data-app-theme='light'] .avatar-chevron {
-  border-color: var(--bg-elevated);
 }
 
 [data-app-theme='light'] .dropdown {
