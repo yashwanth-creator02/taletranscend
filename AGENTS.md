@@ -104,7 +104,7 @@ Directives are living documents. When you discover API constraints, better appro
 
 **6. Use Skills Wherever Possible**
 
-- Proactively inspect `agents/skills/` (and all available environment skills) before writing custom code, scripts, or reinventing patterns.
+- Proactively inspect `.agents/skills/` (and all available environment skills) before writing custom code, scripts, or reinventing patterns. Note the leading dot: the directory is `.agents/skills/`, not `agents/skills/`.
 - Leverage matching skills whenever applicable rather than writing ad-hoc implementations.
 
 **7. Maintain Documentation & Proactive Inception**
@@ -114,7 +114,7 @@ Directives are living documents. When you discover API constraints, better appro
 
 **8. Destination Setup & 3-Layer Infrastructure Population**
 
-- Maintain the project's 3-layer architecture directories (`directives/`, `execution/`, `.tmp/`) and `agents/skills/`.
+- Maintain the project's 3-layer architecture directories (`directives/`, `execution/`, `.tmp/`) and `.agents/skills/`.
 - Directly consult Layer 1 directives in `directives/` for repeatable procedures.
 - Strictly adhere to the 3-layer infrastructure (Layer 1: Directives, Layer 2: Orchestration, Layer 3: Execution).
 
@@ -123,6 +123,43 @@ Directives are living documents. When you discover API constraints, better appro
 - Systematically invoke the populate skill (`.agents/skills/populate/SKILL.md`) after completing major features, refactors, UI redesigns, or architectural decisions to update corresponding Layer 1 directives in `directives/` and keep project documentation synchronized.
 - Ensure directives remain living documents, preserving discovered patterns, edge cases, and design constraints permanently for future sessions.
 - Always keep directives and documentation relevant, accurate, and up-to-date with current code implementations.
+
+**10. Value Reporting — "What I Gained"**
+
+- End every response with a closing section titled `What I Gained` (exact heading text), written from the user's perspective.
+- State what this turn concretely delivered: working features, fixed bugs, removed risks, time saved, future problems avoided, or knowledge gained. Ground every bullet in the turn's actual output (files, commands, verification results).
+- Keep it to 2-5 tight bullets. No generic filler, no marketing fluff, zero emojis.
+- If a turn produced no user-visible gain (pure research, an answered question), state the knowledge or decision gained instead of inventing value.
+
+**11. Discernment Nudges & Clarifying Questions — Unlimited Frequency**
+
+- The `discernment-nudge` skill is not limited to once per conversation: invoke the nudge whenever it genuinely applies, as many times as you want.
+- Clarifying questions — inline or via the question tool — may likewise be asked however many times they are needed. Never withhold a genuine question to honor an "ask only once" convention.
+
+**12. Worktree Bootstrap Mandate (Mandatory)**
+
+A git worktree checks out tracked files only. Everything gitignored is absent, which silently breaks agent tooling rather than erroring loudly. Immediately after creating any new worktree, run:
+
+```powershell
+python execution/setup_worktree.py
+```
+
+This is mandatory before running tests, the dev server, or any MCP tool in the new worktree. Never skip it because "the files look fine" — the failures it prevents are silent and misleading.
+
+What the runner restores, and why each is required:
+
+| Artifact               | Gitignored | Consequence if missing                                                                            |
+| ---------------------- | ---------- | ------------------------------------------------------------------------------------------------- |
+| `node_modules/`        | yes        | `npx` re-resolves remotely on every MCP start                                                     |
+| `.agents/skills/`      | yes        | Brand skills vanish; agents lose `populate`, `discernment-nudge`, `frontend-design`, and the rest |
+| `.vercel/project.json` | yes        | Vercel project link lost; `vercel` MCP drops to team scope                                        |
+| `.env`                 | yes        | Firebase config absent; app boots broken                                                          |
+
+Use `--check` to report state without changing anything, and `--source <path>` when the primary checkout is not the git main worktree.
+
+Never hand-author `.vercel/project.json` or copy `.env` into a commit. Both stay ignored. If a worktree is created outside this repository's own tooling, treat the four artifacts above as the minimum viable set and confirm each explicitly rather than assuming.
+
+The `chrome-devtools` MCP server needs nothing copied: it auto-provisions Chrome for Testing and caches the binary and profile outside the repository.
 
 ## Self-annealing loop
 
@@ -152,7 +189,7 @@ Errors are learning opportunities. When something breaks:
 
 ## Skills (brand-leo-utils)
 
-This project's skills live in `agents/skills/` — gitignored here. The
+This project's skills live in `.agents/skills/` — gitignored here. The
 brand-leo-utils repo is the source of truth; this folder is a disposable
 local copy, and it belongs to whichever agent is handling the session,
 not one specific tool.
