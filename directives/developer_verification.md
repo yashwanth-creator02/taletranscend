@@ -20,6 +20,8 @@ Execute static analysis, code formatting, design token linting, TypeScript type-
 - Branch creation requirement: Always work on a dedicated branch off `main` or `master`.
 - Never commit directly to `main` or `master`.
 - Merges to `main` require explicit user consent in conversation.
+- Always commit and push: complete each unit of work with a commit on the working branch, then push it (`git push -u origin <branch>` on the first push) — never leave finished work uncommitted or unpushed.
+- Merges never fast-forward: when a merge is approved, use `git merge --no-ff` so branch history and the merge commit are preserved.
 
 ## Tools / Scripts to Use
 

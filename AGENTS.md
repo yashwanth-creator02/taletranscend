@@ -101,6 +101,8 @@ Directives are living documents. When you discover API constraints, better appro
 
 - Create a dedicated branch for every new feature, bug fix, or major refactor. Never commit directly to `main` or `master`.
 - Never merge any branch into `main` or `master` without explicit permission from the user in the conversation. The branch is the safety net; merges require explicit user confirmation.
+- Always commit and push: when a unit of work is complete, commit it on the working branch and push the branch (`git push -u origin <branch>` on its first push). Never leave finished work sitting uncommitted or unpushed — the remote branch is the durable record.
+- Merges never fast-forward: once a merge is approved, merge with `git merge --no-ff` so the branch's history and merge commit are preserved in the graph. Never use a fast-forward merge.
 
 **6. Use Skills Wherever Possible**
 
