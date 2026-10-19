@@ -136,6 +136,11 @@ Directives are living documents. When you discover API constraints, better appro
 - Keep it to 2-5 tight bullets. No generic filler, no marketing fluff, zero emojis.
 - If a turn produced no user-visible gain (pure research, an answered question), state the knowledge or decision gained instead of inventing value.
 
+**11. Discernment Nudges & Clarifying Questions — Unlimited Frequency**
+
+- The `discernment-nudge` skill is not limited to once per conversation: invoke the nudge whenever it genuinely applies, as many times as you want.
+- Clarifying questions — inline or via the question tool — may likewise be asked however many times they are needed. Never withhold a genuine question to honor an "ask only once" convention.
+
 ## Self-annealing loop
 
 Errors are learning opportunities. When something breaks:
