@@ -11,6 +11,11 @@ startup budget, brand skills disappear, and the Vercel project link is lost.
 This runner restores each ignored-but-required artifact, then verifies the
 result. It is idempotent and safe to re-run.
 
+Secrets handling: `.env` and `.env.local` hold real Firebase credentials and are
+copied so a worktree boots. The runner refuses to copy any destination that git
+would track, never prints file contents, and reports only byte counts and key
+names. Values are never logged, echoed, or written to a commit.
+
 Usage:
     python execution/setup_worktree.py            # bootstrap the current directory
     python execution/setup_worktree.py --check    # report state, change nothing
@@ -44,6 +49,156 @@ def find_primary_checkout() -> Path:
         if line.startswith("worktree ") and not line.rstrip().endswith("]"):
             return Path(line[len("worktree "):].strip())
     return PROJECT_ROOT
+
+# ---------------------------------------------------------------------------
+# Dev server port allocation
+#
+# Each worktree gets its own dev server port so several can run side by side.
+# The registry lives in the git common directory, which every worktree of this
+# repository shares, so allocation is consistent no matter which clone runs it.
+# ---------------------------------------------------------------------------
+
+PORT_RANGE_START = 5173
+PORT_RANGE_END = 5272
+REGISTRY_NAME = "worktree-ports.json"
+
+
+def git_common_dir() -> Path:
+    res = subprocess.run(
+        ["git", "rev-parse", "--git-common-dir"],
+        cwd=str(PROJECT_ROOT),
+        shell=True,
+        **CAPTURE,
+    )
+    raw = (res.stdout or "").strip().splitlines()[0] if (res.stdout or "").strip() else ""
+    if not raw:
+        return PROJECT_ROOT / ".git"
+    candidate = Path(raw)
+    if not candidate.is_absolute():
+        candidate = (PROJECT_ROOT / candidate).resolve()
+    return candidate
+
+
+def registry_path() -> Path:
+    return git_common_dir() / REGISTRY_NAME
+
+
+def load_registry() -> dict:
+    path = registry_path()
+    if not path.is_file():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def save_registry(data: dict) -> None:
+    path = registry_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+
+
+def port_is_free(port: int) -> bool:
+    import socket
+
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        try:
+            sock.bind(("127.0.0.1", port))
+        except OSError:
+            return False
+    return True
+
+
+def prune_missing_worktrees(registry: dict) -> list:
+    """Drop entries whose worktree directory no longer exists."""
+    removed = []
+    for key in list(registry.keys()):
+        if not Path(key).is_dir():
+            removed.append(key)
+            del registry[key]
+    return removed
+
+
+def allocate_port(prune: bool = True) -> int | None:
+    """Return this worktree's dev port, assigning one if needed."""
+    registry = load_registry()
+    if prune:
+        if prune_missing_worktrees(registry):
+            save_registry(registry)
+
+    key = str(PROJECT_ROOT)
+    existing = registry.get(key, {}).get("port")
+    if isinstance(existing, int):
+        return existing
+
+    taken = {entry["port"] for entry in registry.values()
+             if isinstance(entry.get("port"), int)}
+    for port in range(PORT_RANGE_START, PORT_RANGE_END + 1):
+        if port in taken:
+            continue
+        if not port_is_free(port):
+            continue
+        registry[key] = {
+            "port": port,
+            "branch": current_branch(),
+        }
+        save_registry(registry)
+        return port
+    return None
+
+
+def current_branch() -> str:
+    res = subprocess.run(
+        ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+        cwd=str(PROJECT_ROOT),
+        shell=True,
+        **CAPTURE,
+    )
+    return (res.stdout or "").strip()
+
+
+def release_port(target: Path | None = None) -> bool:
+    """Free a worktree's port. Defaults to the current worktree."""
+    registry = load_registry()
+    key = str((target or PROJECT_ROOT).resolve())
+    if key not in registry:
+        return False
+    del registry[key]
+    save_registry(registry)
+    return True
+
+
+def write_port_file(port: int) -> None:
+    """Expose the port to tooling that does not speak JSON, such as Vite."""
+    dest = PROJECT_ROOT / ".dev-port"
+    dest.write_text(f"{port}\n", encoding="utf-8")
+
+
+def step_port(check_only: bool) -> None:
+    log("--- Running: allocate dev server port ---")
+    registry = load_registry()
+    if prune_missing_worktrees(registry):
+        save_registry(registry)
+        log("    PRUNED entries for worktrees that no longer exist")
+
+    if check_only:
+        current = registry.get(str(PROJECT_ROOT), {}).get("port")
+        log(f"    {'PENDING' if current is None else 'OK'} dev port: "
+            f"{current if current is not None else 'unassigned'}")
+        return
+
+    port = allocate_port()
+    if port is None:
+        log(f"    FAIL  no free port in {PORT_RANGE_START}-{PORT_RANGE_END}")
+        sys.exit(1)
+
+    write_port_file(port)
+    log(f"    OK    dev port {port} ({current_branch()})")
+    log(f"          start with: npm run dev -- --port {port}")
+
 
 # firebase-tools loads its whole CLI module graph on start. Measured on this
 # machine: ~68s cold, ~10s warm. OpenCode's 30s startup budget only fits the
@@ -182,6 +337,85 @@ def step_vercel_link(source: Path, check_only: bool) -> None:
         log("WARNING: no Vercel link found; run 'vercel link' manually")
 
 
+# Local environment files holding real credentials. Copied so a new worktree
+# boots, never printed, and only ever to a path git already ignores.
+ENV_FILES = [
+    (".env", ".env"),
+    (".env.local", ".env.local"),
+    ("functions/.env", "functions/.env"),
+    ("functions/.env.local", "functions/.env.local"),
+]
+
+# Keys the Vite build needs. Only names are checked; values are never read.
+REQUIRED_ENV_KEYS = [
+    "VITE_FIREBASE_API_KEY",
+    "VITE_FIREBASE_AUTH_DOMAIN",
+    "VITE_FIREBASE_PROJECT_ID",
+    "VITE_FIREBASE_STORAGE_BUCKET",
+    "VITE_FIREBASE_MESSAGING_SENDER_ID",
+    "VITE_FIREBASE_APP_ID",
+]
+
+
+def is_gitignored(rel_path: str) -> bool:
+    res = subprocess.run(
+        ["git", "check-ignore", "-q", rel_path],
+        cwd=str(PROJECT_ROOT),
+        shell=True,
+        **CAPTURE,
+    )
+    return res.returncode == 0
+
+
+def env_key_names(path: Path) -> set[str]:
+    names: set[str] = set()
+    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        line = line.strip()
+        if line and not line.startswith("#") and "=" in line:
+            names.add(line.split("=", 1)[0].strip())
+    return names
+
+
+def step_env(source: Path, check_only: bool) -> None:
+    """Copy local env files, refusing any destination git would track."""
+    log("--- Running: copy local env files ---")
+    for rel_src, rel_dest in ENV_FILES:
+        src = source / rel_src
+        dest = PROJECT_ROOT / rel_dest
+
+        if not src.is_file():
+            log(f"    SKIP  absent in source: {rel_src}")
+            continue
+
+        if not is_gitignored(rel_dest):
+            log(f"    REFUSE {rel_dest} is not gitignored; refusing to copy secrets")
+            continue
+
+        if dest.is_file() and dest.stat().st_size == src.stat().st_size:
+            log(f"    OK    {rel_dest} already present ({dest.stat().st_size} bytes)")
+            continue
+
+        if check_only:
+            log(f"    PENDING {rel_dest}")
+            continue
+
+        if copy_file(src, dest):
+            log(f"    COPIED {rel_src} -> {rel_dest} ({dest.stat().st_size} bytes)")
+        else:
+            log(f"    FAIL  could not copy {rel_src}")
+
+    env_file = PROJECT_ROOT / ".env"
+    if env_file.is_file():
+        present = env_key_names(env_file)
+        missing = [k for k in REQUIRED_ENV_KEYS if k not in present]
+        if missing:
+            log(f"    WARN  .env missing keys: {', '.join(missing)}")
+        else:
+            log(f"    OK    .env carries all {len(REQUIRED_ENV_KEYS)} required keys")
+    else:
+        log("    WARN  no .env present; copy .env.example and fill it in")
+
+
 def step_report() -> None:
     """Print resolved project identity for the copied Vercel link."""
     link = PROJECT_ROOT / ".vercel" / "project.json"
@@ -195,20 +429,32 @@ def step_verify_mcp(check_only: bool) -> None:
     """Report MCP connection state. Informational: needs network and auth."""
     if check_only:
         return
-    log("--- Running: opencode mcp list ---")
-    res = subprocess.run(
-        ["opencode", "mcp", "list"],
-        cwd=str(PROJECT_ROOT),
-        shell=True,
-        **CAPTURE,
-    )
-    output = (res.stdout or "") + (res.stderr or "")
-    for line in output.splitlines():
-        if any(token in line for token in ("connected", "failed", "authentication")):
-            log(f"      {line.strip()}")
-    if "firebase" in output and "failed" in output:
-        log("WARNING: firebase still failing. Re-run this script; if it persists")
-        log("         the module cache evicted and startup exceeded 30s again.")
+    # The first post-warmup spawn can still lose the race against the fixed 30s
+    # budget, so retry once before reporting failure.
+    for attempt in (1, 2):
+        log(f"--- Running: opencode mcp list (attempt {attempt}) ---")
+        res = subprocess.run(
+            ["opencode", "mcp", "list"],
+            cwd=str(PROJECT_ROOT),
+            shell=True,
+            **CAPTURE,
+        )
+        output = (res.stdout or "") + (res.stderr or "")
+        for line in output.splitlines():
+            if any(token in line for token in ("connected", "failed", "authentication")):
+                log(f"      {line.strip()}")
+
+        firebase_failed = any(
+            "firebase" in line and "failed" in line for line in output.splitlines()
+        )
+        if not firebase_failed:
+            return
+        if attempt == 1:
+            log("      firebase failed; warming once more and retrying")
+            step_warmup(check_only=False)
+
+    log("WARNING: firebase still failing after retry. The module cache evicted")
+    log("         and startup exceeded the fixed 30s budget again.")
 
 
 def main() -> None:
@@ -219,7 +465,32 @@ def main() -> None:
                              "(defaults to the git main worktree)")
     parser.add_argument("--check", action="store_true",
                         help="report state without changing anything")
+    parser.add_argument("--release-port", metavar="PATH", nargs="?", const="",
+                        default=None,
+                        help="release a worktree's dev port and exit. Defaults "
+                             "to the current worktree when PATH is omitted.")
+    parser.add_argument("--list-ports", action="store_true",
+                        help="print the port registry and exit")
     args = parser.parse_args()
+
+    _configure_stdio()
+
+    if args.list_ports:
+        registry = load_registry()
+        if not registry:
+            log("No worktree ports allocated.")
+            return
+        for key, entry in sorted(registry.items(), key=lambda kv: kv[1]["port"]):
+            log(f"  {entry['port']}  {entry.get('branch', '?'):<40} {key}")
+        return
+
+    if args.release_port is not None:
+        target = Path(args.release_port) if args.release_port else PROJECT_ROOT
+        if release_port(target):
+            log(f"Released dev port for {target}")
+        else:
+            log(f"No port allocation recorded for {target}")
+        return
 
     source = args.source.resolve() if args.source else find_primary_checkout()
     check = args.check
@@ -237,11 +508,16 @@ def main() -> None:
     log("--- Ignored artifacts ---")
     step_skills(source, check)
     step_vercel_link(source, check)
+    step_env(source, check)
     step_report()
     log("")
 
     log("--- Firebase MCP warmup ---")
     step_warmup(check)
+    log("")
+
+    log("--- Dev server port ---")
+    step_port(check)
     log("")
 
     log("--- MCP verification ---")
