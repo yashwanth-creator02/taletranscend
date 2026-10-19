@@ -8,10 +8,7 @@
       },
       "firebase": {
         "type": "local",
-        "command": ["npx", "-y", "firebase-tools@latest", "experimental:mcp"],
-        "timeout": {
-          "startup": 120000
-        }
+        "command": ["npx", "-y", "firebase-tools@latest", "experimental:mcp"]
       },
       "vercel": {
         "type": "remote",

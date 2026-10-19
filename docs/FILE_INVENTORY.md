@@ -442,6 +442,7 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `execution/verify_author_flows.py` — Runner of token lint, type-check and targeted Vitest suites for author service, inquire, publish, profile-sync and validation.
 - `execution/verify_interactions_and_profile.py` — Runner of token lint, type-check and Vitest suites for navigation/bfcache, tale hero interactions, profile UI, downloads and AI service.
 - `execution/verify_navigation_and_ui.py` — Runner enforcing index-only footer and brand-asset checks, then token lint, type-check and navigation/nav/toast/toc suites.
+- `execution/setup_worktree.py` — Mandatory new-worktree bootstrap: installs dependencies, copies gitignored `.agents/skills/` and `.vercel/project.json` from the primary checkout, warms the firebase-tools module graph to fit the 30s MCP startup budget, then reports MCP state; supports `--check` and `--source`.
 
 ## End-to-End Tests
 
