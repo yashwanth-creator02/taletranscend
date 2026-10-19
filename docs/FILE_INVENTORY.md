@@ -60,6 +60,7 @@ One-line duty for every file tracked by git in this repository, grouped by area 
 - `docs/decisions/0002-lean-firestore-rules-validation.md` — Decision record: rules validate permission and security-relevant fields only, not exhaustive field data, per the expression budget.
 - `docs/decisions/0003-byok-ai-instead-of-cloud-function-proxy.md` — Decision record: AI uses per-user BYOK Gemini keys in localStorage instead of a Cloud Function proxy.
 - `docs/decisions/0004-field-scoped-rule-exception-for-engagement-counters.md` — Decision record: engagement counters stay client-writable via a permanent field-scoped rule exception.
+- `docs/decisions/0005-remembered-login-gate.md` — Decision record: the first-visit login gate reads one explicit auth-memory record; the Keep-me-signed-in checkbox governs its scope and sign-out clears it.
 - `docs/reports/2026-10-18-code-redundancy-audit.md` — Audit report listing 17 dead-code and duplication findings with severities and their same-day resolutions.
 
 ## Application Views (`src/views`)
@@ -190,8 +191,8 @@ Each directory under `src/pages/` holds the JavaScript for one HTML shell in `sr
 
 ### Login (`src/pages/login`)
 
-- `src/pages/login/login.js` — Login/sign-up page controller: email and phone auth tabs, password toggle, Google and guest sign-in, Firestore profile seeding.
-- `src/pages/login/__tests__/login.test.js` — Vitest tests for `src/pages/login/login.js` — signed-in redirect, Google/guest auth, email submit, tab switching, password toggle, sign-up mode, forgot password.
+- `src/pages/login/login.js` — Login/sign-up page controller: email and phone auth tabs, password toggle, Google and guest sign-in, Firestore profile seeding, and the auth-memory record driven by the "Keep me signed in" checkbox.
+- `src/pages/login/__tests__/login.test.js` - Vitest tests for `src/pages/login/login.js` - signed-in redirect, Google/guest auth, email submit, tab switching, password toggle, sign-up mode, forgot password, gate acknowledgement, and durable versus session-only auth memory.
 
 ### Table of Contents (`src/pages/toc`)
 
@@ -244,6 +245,7 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `src/services/admin.service.js` — Admin service checking admin/moderator claims and reviewing deletionRequests: approve, reject, or force-delete chronicles.
 - `src/services/ai.service.js` — Gemini AI Oracle: suggestTitle, refineMythicText, and generateTaleContinuation via gemini-2.0-flash with sanitization and retries.
 - `src/services/ai/apiKey.storage.js` — localStorage helper for the BYOK Gemini API key (key: tt-gemini-api-key) with get/set/clear and env fallback.
+- `src/services/auth-memory.storage.js` — Explicit auth memory (key `tt_auth`) recorded on the login page and on restored sessions: durable (localStorage) or session-only (sessionStorage), cleared on sign-out; what the first-visit login gate reads.
 - `src/services/author.service.js` — Scribe registration: author status from users/{uid}, schema-validated registration, mirrored to localStorage key `tt_author_{uid}`.
 - `src/services/bookmark.service.js` — Bookmark CRUD at users/{uid}/bookmarks/{taleId} with rate limiting, offline mirror, and cached tale metadata for the shelf.
 - `src/services/cache.service.js` — cacheService singleton: in-memory + sessionStorage (tt_cache:) cache with SWR, first-visit bypass, and domain invalidation helpers.
@@ -256,6 +258,7 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `src/services/resonance.service.js` — Soul Resonance: toggles tales/{taleId}/reactions/{uid}, increments reactionCount, rate-limited, with status and count reads.
 - `src/services/__tests__/admin.service.test.js` — Vitest tests for `src/services/admin.service.js` — admin claim checks, deletion request list/approve/reject, admin deletion.
 - `src/services/__tests__/ai.service.test.js` — Vitest tests for `src/services/ai.service.js` — MSW-mocked Gemini for title suggestion, refinement, continuation, sanitization.
+- `src/services/__tests__/auth-memory.storage.test.js` — Vitest tests for `src/services/auth-memory.storage.js` — durable versus session records, scope precedence, clearing, corrupt and unknown-version records.
 - `src/services/__tests__/author.service.test.js` — Vitest tests for `src/services/author.service.js` — status reads, localStorage fallback, registration validation and setDoc payload.
 - `src/services/__tests__/bookmark.service.test.js` — Vitest tests for `src/services/bookmark.service.js` — add/remove/get/isBookmarked flows, rate limiting, document fields.
 - `src/services/__tests__/cache.service.test.js` — Vitest tests for `src/services/cache.service.js` — TTL expiry, prefix invalidation, SWR revalidation, first-visit bypass, reconcileOrReload.
@@ -290,13 +293,13 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 ## Firebase Layer (`src/firebase`)
 
 - `src/firebase/app.js` — Initializes the Firebase app once and starts global network listeners; default-exports the app.
-- `src/firebase/auth.js` — Exports the auth instance plus initAuth anonymous bootstrap, Google/email sign-in, anonymous linking, password reset, and account deletion.
+- `src/firebase/auth.js` — Exports the auth instance plus initAuth anonymous bootstrap (which records restored accounts in the auth memory), setRememberPreference for the Keep-me-signed-in scope, signOutAndForget, Google/email sign-in, anonymous linking, password reset, and account deletion.
 - `src/firebase/db.js` — Creates the shared Firestore instance and re-exports Firestore SDK utilities as the single import surface.
 - `src/firebase/index.js` — Barrel re-exporting auth helpers, db helpers, refs, PATHS, APP_ROOT, and appId from the Firebase layer.
 - `src/firebase/paths.js` — PATHS factory map defining every Firestore path string under APP_ROOT v1/taletranscend/projects/v1.
 - `src/firebase/refs.js` — refs factory map building Firestore doc/collection references from PATHS entries (tales, users, drafts, progress, etc.).
 - `src/firebase/__tests__/app.test.js` — Vitest tests for `src/firebase/app.js` — initializeApp is called with a mocked Firebase SDK.
-- `src/firebase/__tests__/auth.test.js` — Vitest tests for `src/firebase/auth.js` — initAuth existing/anonymous session flows and signInWithGoogle/upgradeAnonymousToGoogle.
+- `src/firebase/__tests__/auth.test.js` — Vitest tests for `src/firebase/auth.js` — initAuth existing/anonymous/restored-session flows, the auth memory it writes, setRememberPreference persistence scopes, signOutAndForget, and signInWithGoogle/upgradeAnonymousToGoogle.
 - `src/firebase/__tests__/db.test.js` — Vitest tests for `src/firebase/db.js` — Firestore instance creation and SDK utility re-exports.
 - `src/firebase/__tests__/index.test.js` — Vitest tests for `src/firebase/index.js` — the barrel exposes auth, db, and refs.
 - `src/firebase/__tests__/paths.test.js` — Vitest tests for `src/firebase/paths.js` — every PATHS builder returns the expected path string.
@@ -337,7 +340,7 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `src/utils/function.utils.ts` — debounce, throttle, and once higher-order wrappers for limiting or caching function calls.
 - `src/utils/index.ts` — Barrel module re-exporting every utils module plus ROUTES, getRouteByUrl, and isAppShellRoute from routes.js.
 - `src/utils/logger.ts` — createLogger builds context-prefixed console methods gated by VITE_DEV_MODE; also exports the default TT logger.
-- `src/utils/navigation.ts` — resolveHref normalization, taleUrl/readerUrl builders, new-user login gate, navigateTo fade transitions, and initPageReveal boot.
+- `src/utils/navigation.ts` — resolveHref normalization, taleUrl/readerUrl builders, the remembered-login gate (isNewUser/acknowledgeGate/checkNewUserGate), navigateTo fade transitions, and initPageReveal boot.
 - `src/utils/network.utils.ts` — initNetworkListeners toggles the body is-offline class from browser online/offline events and the initial navigator state.
 - `src/utils/offline-storage.utils.ts` — idb IndexedDB reader and shelf stores backing offline tale reads and bookmarks via save/get/remove/sync functions.
 - `src/utils/progress.utils.ts` — getOverallProgress computes tale reading percentage from 0-based chapter progress maps in flat or nested entry shapes.
@@ -355,7 +358,7 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `src/utils/__tests__/epub.utils.test.js` — Vitest tests for `src/utils/epub.utils.ts` — calculateCrc32 known vectors, escapeXml, formatChapterXhtml conversion, ZIP signatures, buildEpubBlob MIME/structure.
 - `src/utils/__tests__/format.utils.test.js` — Vitest tests for `src/utils/format.utils.ts` — formatDate input shapes, formatRelativeTime relative labels, formatNumber thousands compaction.
 - `src/utils/__tests__/function.utils.test.js` — Vitest tests for `src/utils/function.utils.ts` — debounce, throttle timer windows, and once single-execution result caching under fake timers.
-- `src/utils/__tests__/navigation.test.js` — Vitest tests for `src/utils/navigation.ts` — initPageReveal/readyReveal, resolveHref normalization, navigateTo transitions, isNewUser/markUserVisited/checkNewUserGate.
+- `src/utils/__tests__/navigation.test.js` — Vitest tests for `src/utils/navigation.ts` — initPageReveal/readyReveal, resolveHref normalization, navigateTo transitions, and the remembered-login gate (isNewUser/markUserVisited/acknowledgeGate/checkNewUserGate, including corrupt and unknown-version records).
 - `src/utils/__tests__/network.utils.test.js` — Vitest tests for `src/utils/network.utils.ts` — initNetworkListeners applying/clearing the body is-offline class on init and online/offline events.
 - `src/utils/__tests__/offline-storage.utils.test.ts` — Vitest tests for `src/utils/offline-storage.utils.ts` — tale save/get/remove, bookmark save/list, syncBookmarksOffline against a mocked idb module.
 - `src/utils/__tests__/progress.utils.test.js` — Vitest tests for `src/utils/progress.utils.ts` — getOverallProgress with flat and nested maps, missing chapters, zero chapters, clamping.
@@ -444,7 +447,8 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 
 ## End-to-End Tests
 
-- `e2e/specs/library.spec.js` — Playwright spec for library.html covering tale-card loading, search filtering, and pagination.
+- `e2e/specs/library.spec.js` - Playwright spec for library.html covering tale-card loading, search filtering, and pagination.
+- `e2e/specs/login-gate.spec.js` — Playwright spec for the first-visit login gate: first-visit redirect, gate acknowledgement on the login page, durable and session-only bypass, corrupt records, and re-gating after the memory is cleared.
 
 ## Public Assets (`public/`)
 

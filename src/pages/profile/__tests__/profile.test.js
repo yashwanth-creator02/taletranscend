@@ -7,6 +7,7 @@ vi.mock('@fb/index.js', () => ({
   initAuth: vi.fn(),
   auth: { currentUser: null },
   upgradeAnonymousToGoogle: vi.fn(),
+  signOutAndForget: vi.fn(() => Promise.resolve()),
 }));
 
 vi.mock('firebase/auth', () => ({
@@ -99,13 +100,13 @@ describe('Profile Page Controller', () => {
   });
 
   it('handles sign out', async () => {
-    const { signOut } = await import('firebase/auth');
+    const { signOutAndForget } = await import('@fb/index.js');
     await initPage();
 
     const signoutBtn = document.getElementById('btn-sign-out');
     await signoutBtn.click();
 
     expect(index.stopProfileSync).toHaveBeenCalled();
-    expect(signOut).toHaveBeenCalled();
+    expect(signOutAndForget).toHaveBeenCalled();
   });
 });

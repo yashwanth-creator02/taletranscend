@@ -10,6 +10,7 @@ import { initDevMode } from './dev.utils.ts';
 import { createLogger } from './logger.ts';
 import { initRouter, softNavigate, isSmallChange } from './router.js';
 import { cacheService } from '@services/cache.service.js';
+import { HAS_VISITED_KEY, getAuthMemory, rememberAuth } from '@services/auth-memory.storage.js';
 import { initGlobalPaletteShortcut } from '@ui/components/nav/nav.global.js';
 import { initScrollToTop } from '@ui/components/scrollToTop.js';
 
@@ -31,11 +32,18 @@ const TRANSITION_DURATION_MS = 220;
  */
 export const VIEWS_PATH = '/';
 
-export const HAS_VISITED_KEY = 'tt_has_visited';
+export { HAS_VISITED_KEY };
 
 /**
- * Checks if the current visitor is a new user (has not logged in or previously visited the app).
+ * Checks if the current visitor is a new user: someone who has never been
+ * shown the login gate and has no remembered authentication on this browser.
  * In unit testing (Vitest), returns false by default unless ignoreTestEnv is set to true.
+ *
+ * The old implementation also probed localStorage for a `firebase:authUser`
+ * key to detect an existing session. That key is the Firebase v8 format; this
+ * app runs the modern SDK, which persists sessions in IndexedDB, so the probe
+ * never matched. Session provenance is now recorded explicitly by
+ * `rememberAuth()` instead — see src/services/auth-memory.storage.js.
  */
 export function isNewUser(ignoreTestEnv = false): boolean {
   if (typeof window === 'undefined') return false;
@@ -44,16 +52,8 @@ export function isNewUser(ignoreTestEnv = false): boolean {
   }
 
   try {
+    if (getAuthMemory()) return false;
     if (localStorage.getItem(HAS_VISITED_KEY)) return false;
-
-    // Check if Firebase Auth has existing session stored in localStorage
-    const hasFirebaseUser = Object.keys(localStorage).some((k) =>
-      k.startsWith('firebase:authUser')
-    );
-    if (hasFirebaseUser) {
-      localStorage.setItem(HAS_VISITED_KEY, 'true');
-      return false;
-    }
     return true;
   } catch {
     return false;
@@ -67,6 +67,27 @@ export function markUserVisited(): void {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(HAS_VISITED_KEY, 'true');
+  } catch {
+    // Ignore storage restrictions
+  }
+}
+
+/**
+ * Records that the visitor has been shown the login gate, durably.
+ *
+ * Called when the login page loads. Without this, a first-time visitor who
+ * left the login page by any route other than clicking one of its links
+ * (back button, typed URL, closing the tab) had no memory written, so every
+ * later visit was redirected to the login page again.
+ *
+ * No-op when any memory already exists, so a session-only login is never
+ * silently upgraded to a durable one.
+ */
+export function acknowledgeGate(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    if (getAuthMemory() || localStorage.getItem(HAS_VISITED_KEY)) return;
+    rememberAuth({ method: 'gate' }, { durable: true });
   } catch {
     // Ignore storage restrictions
   }

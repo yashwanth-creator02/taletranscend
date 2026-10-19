@@ -14,12 +14,21 @@ import {
   registerWithEmail,
   sendPasswordReset,
   onAuthStateChanged,
+  setRememberPreference,
   setDoc,
   serverTimestamp,
   refs,
 } from '@fb/index.js';
 import { initAppTheme } from '@config/theme.config.js';
-import { navigateTo, initPageReveal, readyReveal, createLogger, markUserVisited } from '@/utils';
+import {
+  navigateTo,
+  initPageReveal,
+  readyReveal,
+  createLogger,
+  markUserVisited,
+  acknowledgeGate,
+} from '@/utils';
+import { clearAuthMemory, rememberAuth } from '@services/auth-memory.storage.js';
 import { initIcons } from '@ui/icons.js';
 import { showToast } from '@ui/components/toast.js';
 
@@ -58,10 +67,51 @@ export function toggleButtonLoading(buttonId, isLoading) {
 }
 
 /**
- * Handles the redirection logic after a successful login.
+ * Reads the "Keep me signed in" checkbox. Checked by default in the markup,
+ * so a missing element is treated as checked.
+ * @returns {boolean}
  */
-export function handleAuthSuccess() {
-  markUserVisited();
+function _isRememberChecked() {
+  const checkbox = document.getElementById('checkbox-remember');
+  return checkbox ? checkbox.checked : true;
+}
+
+/**
+ * Records how (and for how long) the visitor is remembered.
+ *
+ * Durable keeps the visitor remembered across browser restarts. Unchecking
+ * "Keep me signed in" leaves a session-only record and clears the durable one,
+ * so the login page is allowed to return in a later session.
+ *
+ * @param {string} method - 'google' | 'email' | 'guest'
+ * @returns {boolean} The resolved durability.
+ */
+function _rememberAuth(method) {
+  const durable = _isRememberChecked();
+  const current = auth?.currentUser;
+
+  rememberAuth(
+    { uid: current?.uid ?? null, anonymous: current?.isAnonymous ?? false, method },
+    { durable }
+  );
+
+  if (durable) {
+    markUserVisited();
+  } else {
+    clearAuthMemory({ session: false });
+  }
+
+  return durable;
+}
+
+/**
+ * Handles the redirection logic after a successful login.
+ *
+ * @param {string} method - Authentication method used, for the auth memory record.
+ */
+export function handleAuthSuccess(method = 'unknown') {
+  const durable = _rememberAuth(method);
+  log.info('Authentication remembered', { method, durable });
   showToast('Welcome to the Living Archive.', 'success');
   const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
   const returnUrl = params?.get('returnUrl') || params?.get('redirect') || 'profile.html';
@@ -209,6 +259,7 @@ function _setupFormSubmissions() {
     toggleButtonLoading('btn-email-submit', true);
 
     try {
+      await setRememberPreference(_isRememberChecked());
       if (authMode === 'signup') {
         const user = await registerWithEmail(email, password);
         // Initialize default user document in Firestore
@@ -234,12 +285,12 @@ function _setupFormSubmissions() {
         }
         showToast('Account drafted! Entering as an authenticated scribe...', 'success');
         addSuccessGlow();
-        handleAuthSuccess();
+        handleAuthSuccess('email');
       } else {
         await signInWithEmail(email, password);
         showToast('Preserved credentials recognized. Welcome back!', 'success');
         addSuccessGlow();
-        handleAuthSuccess();
+        handleAuthSuccess('email');
       }
     } catch (err) {
       log.error('Email authentication failed:', err);
@@ -315,10 +366,11 @@ function _setupSocialLogins() {
     log.info('Google login initiated');
     toggleButtonLoading('btn-google-login', true);
     try {
+      await setRememberPreference(_isRememberChecked());
       await signInWithGoogle();
       log.info('Google login successful');
       addSuccessGlow();
-      handleAuthSuccess();
+      handleAuthSuccess('google');
     } catch (err) {
       log.error('Google login failed:', err);
       if (err?.code !== 'auth/popup-closed-by-user') {
@@ -334,10 +386,11 @@ function _setupSocialLogins() {
     log.info('Guest login initiated');
     toggleButtonLoading('btn-guest-login', true);
     try {
+      await setRememberPreference(_isRememberChecked());
       await signInAnonymously(auth);
       log.info('Guest login successful');
       addSuccessGlow();
-      handleAuthSuccess();
+      handleAuthSuccess('guest');
     } catch (err) {
       log.error('Guest login failed', err);
       showToast('Guest entry failed.', 'error');
@@ -395,6 +448,11 @@ export function initLoginPage() {
   initIcons();
   readyReveal();
 
+  // The visitor has been shown the gate. Remember that durably so leaving the
+  // page by any route (back button, typed URL, closing the tab) does not send
+  // them straight back here on the next visit.
+  acknowledgeGate();
+
   _setupResponsiveSvgArt();
   _setupAuthTabs();
   _setupPasswordToggle();
@@ -407,6 +465,7 @@ export function initLoginPage() {
   const unsubscribe = onAuthStateChanged(auth, (user) => {
     if (user && !user.isAnonymous) {
       log.info('User already authenticated, redirecting to profile');
+      rememberAuth({ uid: user.uid, anonymous: false, method: 'restore' }, { durable: true });
       Promise.resolve().then(() => {
         if (unsubscribe) unsubscribe();
       });

@@ -47,7 +47,7 @@ vi.mock('@services/notification.service.js', () => ({
 vi.mock('@fb/index.js', () => ({
   auth: { currentUser: { uid: 'u1' } },
   upgradeAnonymousToGoogle: vi.fn(),
-  signOut: vi.fn(),
+  signOutAndForget: vi.fn(() => Promise.resolve()),
 }));
 
 describe('Nav Interactions', () => {

@@ -14,9 +14,13 @@ import {
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
   deleteUser,
+  setPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence,
 } from 'firebase/auth';
 import app from './app.js';
 import { createLogger } from '@/utils';
+import { clearAuthMemory, rememberAuth } from '@services/auth-memory.storage.js';
 
 const log = createLogger('Auth');
 
@@ -27,6 +31,13 @@ export const auth = getAuth(app);
  * Reuses an existing anonymous session if one exists in the browser;
  * otherwise creates a new one. Guarantees onReady fires exactly once.
  *
+ * A session that Firebase restored from persistence predates this page load.
+ * When it belongs to a real (non-anonymous) account it is remembered durably,
+ * so a signed-in visitor is never asked to log in again even if the visit
+ * flags were lost. A freshly auto-created anonymous session is deliberately
+ * NOT remembered — the app creates one on most pages, and treating that as
+ * "returning visitor" would disarm the first-visit login gate.
+ *
  * @param {(user: import('firebase/auth').User) => void} onReady
  */
 export function initAuth(onReady) {
@@ -35,6 +46,9 @@ export function initAuth(onReady) {
     unsubscribe(); // Prevent duplicate calls if auth state flips again
     if (user) {
       log.info('Existing session found', { uid: user.uid, isAnonymous: user.isAnonymous });
+      if (!user.isAnonymous) {
+        rememberAuth({ uid: user.uid, anonymous: false, method: 'restore' }, { durable: true });
+      }
       onReady(user);
     } else {
       log.info('No session found. Creating anonymous identity...');
@@ -48,6 +62,38 @@ export function initAuth(onReady) {
         });
     }
   });
+}
+
+/**
+ * Applies the "Keep me signed in" preference to Firebase's own persistence
+ * layer. Durable keeps the session across browser restarts; non-durable
+ * scopes it to the current browser session.
+ *
+ * Must be called BEFORE signing in, because that is the moment Firebase
+ * writes the session.
+ *
+ * @param {boolean} durable
+ * @returns {Promise<boolean>} True when the preference was applied.
+ */
+export async function setRememberPreference(durable = true) {
+  try {
+    await setPersistence(auth, durable ? browserLocalPersistence : browserSessionPersistence);
+    return true;
+  } catch (err) {
+    log.warn('Could not apply persistence preference:', err?.message || err);
+    return false;
+  }
+}
+
+/**
+ * Signs out and forgets the remembered authentication, so the first-visit
+ * login gate engages again on the next visit.
+ *
+ * @returns {Promise<void>}
+ */
+export async function signOutAndForget() {
+  clearAuthMemory();
+  await signOut(auth);
 }
 
 /**

@@ -8,8 +8,7 @@ import '@css/components.css';
 import '@css/pages/profile.css';
 
 import { initGlobalPaletteShortcut } from '@ui/components/nav/nav.global.js';
-import { initAuth, auth, upgradeAnonymousToGoogle } from '@fb/index.js';
-import { signOut } from 'firebase/auth';
+import { initAuth, auth, upgradeAnonymousToGoogle, signOutAndForget } from '@fb/index.js';
 import { navigateTo, initPageReveal, readyReveal, setupAuthTimeout, createLogger } from '@/utils';
 import { initIcons } from '@ui/icons.js';
 import { showToast } from '@ui/components/toast.js';
@@ -328,7 +327,7 @@ export async function initProfilePage(currentUser = auth?.currentUser) {
     log.info('Sign-out requested', { source: 'btn-sign-out' });
     try {
       stopProfileSync();
-      await signOut(auth);
+      await signOutAndForget();
       log.info('Sign-out successful');
       showToast('Signed out successfully.', 'success');
       setTimeout(() => {

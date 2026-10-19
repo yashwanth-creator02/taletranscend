@@ -18,7 +18,7 @@ vi.mock('../nav.utils.js', () => ({
 
 vi.mock('@fb/index.js', () => ({
   auth: {},
-  signOut: vi.fn(),
+  signOutAndForget: vi.fn(() => Promise.resolve()),
 }));
 
 describe('Nav Command Palette', () => {

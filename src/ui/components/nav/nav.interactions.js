@@ -12,7 +12,7 @@
 //   nav.templates.js        — buildAuthenticatedUser, buildGuestUser, buildMobileDock
 //   nav.command-palette.js  — open/close/execute helpers
 
-import { auth, signOut, upgradeAnonymousToGoogle } from '@fb/index.js';
+import { signOutAndForget, upgradeAnonymousToGoogle } from '@fb/index.js';
 import { navState } from './nav.state.js';
 import { getNavElements, renderIcons, getCurrentPage } from './nav.utils.js';
 import { USER_LINKS } from './nav.config.js';
@@ -178,7 +178,7 @@ function handleDocumentClick(event) {
   if (target.closest('#signout-btn')) {
     event.preventDefault();
     closeDropdown(false);
-    signOut(auth).catch((err) => log.error('Sign out error', err));
+    signOutAndForget().catch((err) => log.error('Sign out error', err));
     return;
   }
 

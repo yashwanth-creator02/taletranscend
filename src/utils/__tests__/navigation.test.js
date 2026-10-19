@@ -8,6 +8,7 @@ import {
   VIEWS_PATH,
   isNewUser,
   markUserVisited,
+  acknowledgeGate,
   checkNewUserGate,
   HAS_VISITED_KEY,
 } from '../navigation.ts';
@@ -167,6 +168,7 @@ describe('Navigation Utils', () => {
   describe('isNewUser', () => {
     beforeEach(() => {
       localStorage.clear();
+      sessionStorage.clear();
     });
 
     it('returns false by default in test environment', () => {
@@ -182,10 +184,41 @@ describe('Navigation Utils', () => {
       expect(isNewUser(true)).toBe(false);
     });
 
-    it('returns false and sets HAS_VISITED_KEY if firebase:authUser exists', () => {
-      localStorage.setItem('firebase:authUser:apiKey:[DEFAULT]', JSON.stringify({ uid: '123' }));
+    it('returns false when a durable auth record exists', () => {
+      localStorage.setItem(
+        'tt_auth',
+        JSON.stringify({ v: 1, uid: 'u1', anonymous: false, method: 'google', at: 1 })
+      );
       expect(isNewUser(true)).toBe(false);
-      expect(localStorage.getItem(HAS_VISITED_KEY)).toBe('true');
+    });
+
+    it('returns false when only a session-scoped auth record exists', () => {
+      sessionStorage.setItem(
+        'tt_auth',
+        JSON.stringify({ v: 1, uid: null, anonymous: true, method: 'gate', at: 1 })
+      );
+      expect(isNewUser(true)).toBe(false);
+    });
+
+    it('ignores auth records written by an unknown schema version', () => {
+      localStorage.setItem(
+        'tt_auth',
+        JSON.stringify({ v: 99, uid: 'u1', anonymous: false, method: 'google', at: 1 })
+      );
+      expect(isNewUser(true)).toBe(true);
+    });
+
+    it('ignores corrupt auth records instead of throwing', () => {
+      localStorage.setItem('tt_auth', '{not json');
+      expect(isNewUser(true)).toBe(true);
+    });
+
+    it('no longer infers a session from the legacy firebase:authUser key', () => {
+      // Regression guard: that key is the Firebase v8 format; the modern SDK
+      // persists in IndexedDB, so a localStorage probe can never match.
+      localStorage.setItem('firebase:authUser:apiKey:[DEFAULT]', JSON.stringify({ uid: '123' }));
+      expect(isNewUser(true)).toBe(true);
+      expect(localStorage.getItem(HAS_VISITED_KEY)).toBeNull();
     });
   });
 
@@ -197,9 +230,55 @@ describe('Navigation Utils', () => {
     });
   });
 
+  describe('acknowledgeGate', () => {
+    beforeEach(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+    });
+
+    it('writes a durable record when nothing is remembered', () => {
+      acknowledgeGate();
+
+      const record = JSON.parse(localStorage.getItem('tt_auth'));
+      expect(record).toMatchObject({ v: 1, method: 'gate', anonymous: false });
+      expect(sessionStorage.getItem('tt_auth')).toBeNull();
+    });
+
+    it('does not overwrite an existing auth record', () => {
+      localStorage.setItem(
+        'tt_auth',
+        JSON.stringify({ v: 1, uid: 'u1', anonymous: false, method: 'google', at: 1 })
+      );
+
+      acknowledgeGate();
+
+      expect(JSON.parse(localStorage.getItem('tt_auth')).method).toBe('google');
+    });
+
+    it('does not upgrade a session-only login to a durable one', () => {
+      sessionStorage.setItem(
+        'tt_auth',
+        JSON.stringify({ v: 1, uid: 'u1', anonymous: false, method: 'google', at: 1 })
+      );
+
+      acknowledgeGate();
+
+      expect(localStorage.getItem('tt_auth')).toBeNull();
+    });
+
+    it('does nothing when the legacy visit flag already exists', () => {
+      localStorage.setItem(HAS_VISITED_KEY, 'true');
+
+      acknowledgeGate();
+
+      expect(localStorage.getItem('tt_auth')).toBeNull();
+    });
+  });
+
   describe('checkNewUserGate', () => {
     beforeEach(() => {
       localStorage.clear();
+      sessionStorage.clear();
       delete window.location;
       window.location = {
         pathname: '/',
@@ -212,6 +291,16 @@ describe('Navigation Utils', () => {
 
     it('returns false if not a new user', () => {
       localStorage.setItem(HAS_VISITED_KEY, 'true');
+      const redirected = checkNewUserGate(true);
+      expect(redirected).toBe(false);
+      expect(window.location.replace).not.toHaveBeenCalled();
+    });
+
+    it('returns false for a remembered login', () => {
+      localStorage.setItem(
+        'tt_auth',
+        JSON.stringify({ v: 1, uid: 'u1', anonymous: false, method: 'google', at: 1 })
+      );
       const redirected = checkNewUserGate(true);
       expect(redirected).toBe(false);
       expect(window.location.replace).not.toHaveBeenCalled();

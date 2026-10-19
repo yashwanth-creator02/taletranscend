@@ -9,7 +9,7 @@
 //   nav.utils.js   — getNavElements, getCurrentPage, renderIcons
 //   nav.state.js   — read currentUser, commandPaletteOpen flag
 
-import { auth, signOut } from '@fb/index.js';
+import { signOutAndForget } from '@fb/index.js';
 import { BASE_COMMANDS } from './nav.config.js';
 import { getNavElements, getCurrentPage, renderIcons } from './nav.utils.js';
 import { navState } from './nav.state.js';
@@ -297,7 +297,7 @@ export async function executeCommand(element) {
 
   if (action === 'signout') {
     try {
-      await signOut(auth);
+      await signOutAndForget();
     } catch (error) {
       log.error('Sign out failed', error);
     }
