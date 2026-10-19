@@ -42,7 +42,7 @@ Or run individual npm scripts:
 - `npm run lint`: Runs ESLint across JavaScript and TypeScript files.
 - `npm run lint:tokens`: Fails on any raw colour literals outside design token definitions (`tokens.css`).
 - `npm run type-check`: Validates TypeScript type safety without emitting build output.
-- `npm run test:rules`: Runs the Firestore security-rules emulator suite (`firestore/tests/rules.emulator.test.ts` against the root `firestore.rules`). Requires Java and a free port 8080; stop any orphaned `java.exe` emulator process if the port is taken.
+- `npm run test:rules`: Runs the Firestore security-rules emulator suite (`firestore/tests/rules.emulator.test.ts` against the root `firestore.rules`). Requires Java and a free port 8080; stop any orphaned `java.exe` emulator process if the port is taken. A leftover `emulators:exec` run from another worktree will respawn the JVM, so stop the supervising `firebase.js emulators:exec ...` Node process first (killing the `java.exe` alone just gets it restarted).
 
 ## Environment Notes (Offline / Resource-Limited Runs)
 
