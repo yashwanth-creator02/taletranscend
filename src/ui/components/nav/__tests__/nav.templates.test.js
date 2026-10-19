@@ -92,6 +92,11 @@ describe('Nav Templates', () => {
       expect(html).toContain('id="nav-command-title"');
       expect(html).toContain('aria-labelledby="nav-command-title"');
     });
+
+    it('renders the custom look-up glyph in the field row', () => {
+      const html = buildCommandPalette();
+      expect(html).toContain('data-lucide="look-up"');
+    });
   });
 
   describe('buildNav', () => {
@@ -112,6 +117,12 @@ describe('Nav Templates', () => {
       expect(headerHtml).not.toContain('id="nav-command-palette"');
       expect(paletteHtml).toContain('id="nav-command-palette"');
       expect(dockHtml).toContain('id="mobile-dock-container"');
+    });
+
+    it('renders the custom look-up glyph on both quick-tools triggers', () => {
+      const { headerHtml } = buildNav();
+      const matches = headerHtml.match(/data-lucide="look-up"/g) ?? [];
+      expect(matches).toHaveLength(2);
     });
   });
 });

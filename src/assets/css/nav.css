@@ -162,14 +162,23 @@
 .command-trigger {
   background: var(--surface-2);
   border: 1px solid var(--border);
-  padding: 9px 18px;
-  border-radius: 14px;
+  padding: 8px 14px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   color: var(--text-muted);
   cursor: pointer;
-  transition: all var(--transition-base);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.command-trigger svg {
+  width: 16px;
+  height: 16px;
+  transition: color var(--transition-fast);
 }
 
 .command-trigger:hover {
@@ -178,12 +187,23 @@
   color: var(--text-primary);
 }
 
+.command-trigger:hover svg {
+  color: var(--accent);
+}
+
+.command-trigger:focus-visible {
+  outline: none;
+  border-color: var(--border-accent);
+  box-shadow: 0 0 0 3px rgb(var(--accent-rgb) / var(--a-06));
+}
+
 .command-trigger__hint {
-  font-size: 9px;
-  font-weight: 800;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
   background: var(--surface-4);
-  padding: 2px 6px;
-  border-radius: 5px;
+  padding: 2px 5px;
+  border-radius: 4px;
   border: 1px solid var(--border);
   color: var(--text-secondary);
 }

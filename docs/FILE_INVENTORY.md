@@ -36,12 +36,12 @@ One-line duty for every file tracked by git in this repository, grouped by area 
 
 ## Agent Guidance and Directives
 
-- `AGENTS.md` — Agent-facing repo orientation and operating principles: stack overview, developer commands, 3-layer architecture, git safety, and the documentation/clarification protocol.
+- `AGENTS.md` — Agent-facing repo orientation and operating principles: stack overview, developer commands, 3-layer architecture, git safety (commit/push delivery, no-ff merges), and the documentation/clarification protocol.
 - `directives/accessibility_and_ui_standards.md` — Agent directive governing footer isolation, accessible toasts, keyboard shortcuts, theming, and brand asset standards.
 - `directives/author_registration_and_correspondence.md` — Agent directive governing the author registration wall, scribe registry, and reader-author inquiry correspondence.
 - `directives/code_conventions_and_architecture.md` — Agent directive governing MPA conventions, path aliases, comment trees, bfcache handling, rate limits, and aesthetics rules.
 - `directives/deploy_application.md` — Agent directive governing production builds and Firebase Hosting and Vercel deployment workflows.
-- `directives/developer_verification.md` — Agent directive governing the mandatory format, lint, token, type-check, and test pipeline before commits.
+- `directives/developer_verification.md` — Agent directive governing the mandatory format, lint, token, type-check, and test pipeline before commits and pushes, plus commit/push and no-ff merge policy.
 - `directives/firestore_management.md` — Agent directive governing Firestore paths, indexes, security rules, seeding, and the Chronicle Preservation Policy.
 - `directives/mcp_servers.md` — Agent directive governing project-local MCP server setup and troubleshooting for Chrome DevTools, Firebase, and Vercel.
 - `directives/navigation_routing_and_sitemaps.md` — Agent directive governing hierarchical clean URLs, resolveHref safety, sitemaps, and fixed-overlay stacking rules.
@@ -206,8 +206,8 @@ Each directory under `src/pages/` holds the JavaScript for one HTML shell in `sr
 
 Global UI layer: the icon registry, shared components, and the nav shell; each component has a matching test file under `__tests__/`.
 
-- `src/ui/icons.js` — Central Lucide icon registry: lazily imports the icon set, retries on failure, and renders `[data-lucide]` icons via `initIcons(scope)`.
-- `src/ui/__tests__/icons.test.js` — Vitest tests for `src/ui/icons.js` — initIcons rendering, scoped calls, icon map registration, and that every view's `data-lucide` name resolves.
+- `src/ui/icons.js` — Central Lucide icon registry: lazily imports the icon set, retries on failure, renders `[data-lucide]` icons via `initIcons(scope)`, and defines the custom composite `look-up` glyph (eye with an upward arrow) used by the quick-tools trigger and palette field.
+- `src/ui/__tests__/icons.test.js` — Vitest tests for `src/ui/icons.js` — initIcons rendering, scoped calls, icon map registration (including the custom `LookUp` glyph shape), and that every view's `data-lucide` name resolves.
 - `src/ui/components/badge.js` — Shared `renderBadge` helper producing an escaped `.badge` span used by tale and shelf cards.
 - `src/ui/components/confirmModal.js` — Accessible promise-based confirmation dialog plus the tale/fragment download prompt with MD/EPUB format choice.
 - `src/ui/components/feedback.js` — Renders empty, error, and empty-search state blocks (with query suggestions and reset action) into containers.
@@ -227,13 +227,13 @@ Global UI layer: the icon registry, shared components, and the nav shell; each c
 - `src/ui/components/nav/nav.interactions.js` — Delegated nav click/keydown handling, scroll progress bar, command-palette focus trap (real tab stops only), dropdown and notification toggles, auth-to-DOM user updates, listener lifecycle.
 - `src/ui/components/nav/nav.js` — Public nav lifecycle: initNav injects header, mobile dock, and palette and starts the auth watch; destroyNav tears everything down.
 - `src/ui/components/nav/nav.state.js` — Shared mutable nav state singleton holding the current user, palette open/focus flags, listener and cleanup handles.
-- `src/ui/components/nav/nav.templates.js` — Pure HTML string builders for header links, user dropdown/guest area, mobile dock, command items, the lookup-style palette shell, and nav shell.
+- `src/ui/components/nav/nav.templates.js` — Pure HTML string builders for header links, the quick-tools search trigger (look-up glyph), user dropdown/guest area, mobile dock, command items, the lookup-style palette shell, and nav shell.
 - `src/ui/components/nav/nav.utils.js` — Nav helpers: getCurrentPage path resolution, getAvatarSeed, live getNavElements lookups, and escapeHtml/renderIcons re-exports.
 - `src/ui/components/nav/notifications.popover.js` — Notifications bell popover: unread badge, list rendering, toggle/close, and real-time unread count subscription lifecycle.
 - `src/ui/components/nav/__tests__/nav.command-palette.test.js` — Vitest tests for `src/ui/components/nav/nav.command-palette.js` — palette open/close state, query filtering, match highlighting and escaping, focus movement wrapping, href/theme command execution.
 - `src/ui/components/nav/__tests__/nav.global.test.js` — Vitest tests for `src/ui/components/nav/nav.global.js` — global palette shortcut listener attachment and dynamic palette mounting/opening on standalone pages.
 - `src/ui/components/nav/__tests__/nav.interactions.test.js` — Vitest tests for `src/ui/components/nav/nav.interactions.js` — dropdown open/close, click delegation (palette, upgrade), updateNavUser rendering, keyboard shortcuts/focus navigation, palette Tab-trap containment.
-- `src/ui/components/nav/__tests__/nav.templates.test.js` — Vitest tests for `src/ui/components/nav/nav.templates.js` — template builders for active links, user/guest areas, mobile dock, command items, lookup palette shell ordering, nav shell ordering.
+- `src/ui/components/nav/__tests__/nav.templates.test.js` — Vitest tests for `src/ui/components/nav/nav.templates.js` — template builders for active links, user/guest areas, mobile dock, command items, lookup palette shell ordering (including the look-up glyph), nav shell ordering.
 - `src/ui/components/nav/__tests__/nav.test.js` — Vitest tests for `src/ui/components/nav/nav.js` — initNav header/dock injection, idempotency, destroyNav DOM and auth-unsubscribe cleanup.
 - `src/ui/components/nav/__tests__/nav.utils.test.js` — Vitest tests for `src/ui/components/nav/nav.utils.js` — getCurrentPage pathname fallbacks, getAvatarSeed derivation, getNavElements DOM lookups.
 
@@ -383,7 +383,7 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 
 - `src/assets/css/base.css` — Imports tokens and Tailwind, then defines resets, boot reveal, focus rings, layout primitives, skeletons and theme cross-fade.
 - `src/assets/css/components.css` — Shared component primitives: glass surfaces, buttons, inputs, progress, dividers, footer, toasts, modals and 404 styles.
-- `src/assets/css/nav.css` — Styles the global top nav, user dropdown, mobile bottom dock, lookup-style command palette (field row, match highlights), notifications drawer and scroll progress.
+- `src/assets/css/nav.css` — Styles the global top nav, the quick-tools search trigger (mirrors the palette field chrome), user dropdown, mobile bottom dock, lookup-style command palette (field row, look-up glyph, match highlights), notifications drawer and scroll progress.
 - `src/assets/css/reader-themes.css` — Twelve reader colour themes scoped to [data-reader-theme], plus light-theme atmosphere and glow adjustments.
 - `src/assets/css/tokens.css` — Single source of design tokens: colour channels, semantic roles, the three app themes and reader typography defaults.
 - `src/assets/css/pages/contribution.css` — Styles the Scribe's Atelier workspace: tool sidebar, manuscript canvas, lore cards, chips and readiness seals.

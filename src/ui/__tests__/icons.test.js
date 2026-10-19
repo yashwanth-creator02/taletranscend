@@ -94,6 +94,30 @@ describe('Icons Registry', () => {
     );
   });
 
+  it('registers the custom LookUp glyph used by the quick-tools trigger and palette field', async () => {
+    const { initIcons } = await import('../icons.js');
+    await initIcons();
+
+    await vi.waitFor(
+      () => {
+        expect(mockCreateIcons).toHaveBeenCalled();
+        const lastCall = mockCreateIcons.mock.calls[mockCreateIcons.mock.calls.length - 1][0];
+        const glyph = lastCall.icons.LookUp;
+
+        // Composite glyph: eye outline + iris + arrow shaft + arrow head
+        expect(Array.isArray(glyph)).toBe(true);
+        expect(glyph.filter(([tag]) => tag === 'path')).toHaveLength(3);
+        expect(glyph.filter(([tag]) => tag === 'circle')).toHaveLength(1);
+        expect(
+          glyph.every(
+            ([tag, attrs]) => typeof tag === 'string' && attrs && typeof attrs === 'object'
+          )
+        ).toBe(true);
+      },
+      { timeout: 1000 }
+    );
+  });
+
   it('has all static data-lucide icons across all views registered in the icon map', async () => {
     const fs = await import('node:fs');
     const path = await import('node:path');

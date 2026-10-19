@@ -28,6 +28,23 @@ let _loading = false;
 // Queue of { scope, resolve } entries waiting for the module to load
 const _queue = [];
 
+// Custom glyph — Lucide ships no "eye with an upward arrow".
+// Authored on Lucide's 24x24 grid (stroke 2, round caps/joins) so it renders
+// exactly like a stock icon and call sites keep using [data-lucide="look-up"].
+// Used by the nav quick-tools trigger and the command palette field row.
+const LOOK_UP = [
+  // Eye outline
+  [
+    'path',
+    { d: 'M1.5 14c1.8-2.8 4.2-4.4 7-4.4s5.2 1.6 7 4.4c-1.8 2.8-4.2 4.4-7 4.4s-5.2-1.6-7-4.4Z' },
+  ],
+  // Iris
+  ['circle', { cx: '8.5', cy: '14', r: '2.4' }],
+  // Upward arrow: shaft and head, offset to the eye's upper right
+  ['path', { d: 'M19.5 11V2.5' }],
+  ['path', { d: 'm16.5 5.5 3-3 3 3' }],
+];
+
 /* ─────────────────────────────────────────────
    Icon Map
    Every icon used anywhere in the app.
@@ -132,6 +149,7 @@ async function _loadIcons() {
     // Discovery
     Search: L.Search,
     SearchX: L.SearchX,
+    LookUp: LOOK_UP,
     Compass: L.Compass,
     Filter: L.Filter,
     Sliders: L.Sliders,

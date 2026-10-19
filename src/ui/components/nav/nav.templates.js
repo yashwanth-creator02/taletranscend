@@ -326,7 +326,7 @@ export function buildCommandPalette() {
 
         <div class="command-search" role="search">
           <div class="command-search__icon-wrap" aria-hidden="true">
-            <i data-lucide="search" class="command-search__icon"></i>
+            <i data-lucide="look-up" class="command-search__icon"></i>
           </div>
           <input
             id="nav-command-input"
@@ -438,8 +438,8 @@ export function buildNav() {
               aria-expanded="false"
               aria-keyshortcuts="Control+K Meta+K"
             >
-              <i data-lucide="search" class="w-4 h-4" aria-hidden="true"></i>
-              <span class="text-xs font-bold uppercase tracking-widest">Search</span>
+              <i data-lucide="look-up" class="w-4 h-4" aria-hidden="true"></i>
+              <span class="text-xs font-semibold uppercase tracking-wider">Search</span>
               <kbd class="command-trigger__hint" aria-hidden="true">⌘K</kbd>
             </button>
 
@@ -451,7 +451,7 @@ export function buildNav() {
               aria-haspopup="dialog"
               aria-expanded="false"
             >
-              <i data-lucide="search" class="w-4 h-4" aria-hidden="true"></i>
+              <i data-lucide="look-up" class="w-4 h-4" aria-hidden="true"></i>
             </button>
 
             <!-- Notifications Bell & Drawer -->
