@@ -443,6 +443,7 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `execution/verify_interactions_and_profile.py` — Runner of token lint, type-check and Vitest suites for navigation/bfcache, tale hero interactions, profile UI, downloads and AI service.
 - `execution/verify_navigation_and_ui.py` — Runner enforcing index-only footer and brand-asset checks, then token lint, type-check and navigation/nav/toast/toc suites.
 - `execution/capture_responsive_audit.mjs` — Playwright runner capturing full-page screenshots and horizontal-overflow offenders for every page at 320/390/768/1280/1440 into .tmp/responsive-audit/; seeds the visited flag so the onboarding gate cannot turn captures into login-page shots.
+- `execution/setup_worktree.py` — Mandatory new-worktree bootstrap: installs dependencies, copies gitignored `.agents/skills/` and `.vercel/project.json` from the primary checkout, warms the firebase-tools module graph to fit the 30s MCP startup budget, then reports MCP state; supports `--check` and `--source`.
 
 ## End-to-End Tests
 
