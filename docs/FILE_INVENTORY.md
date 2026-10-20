@@ -23,7 +23,7 @@ One-line duty for every file tracked by git in this repository, grouped by area 
 - `skills-lock.json` — Lockfile recording source, path and hash for agent skills fetched from `firebase/agent-skills`.
 - `tsconfig.json` — TypeScript config for `src/`: ESNext with bundler resolution, `@`-prefixed path aliases, noEmit and strict; used by `npm run type-check`.
 - `vercel.json` — Vercel deployment config: `vite build` to `dist`, hierarchical URL rewrites mirroring Firebase, security and cache headers.
-- `vite.config.js` — Vite MPA config: `src/views` root with 11 HTML entries, dev-server route rewrites, aliases, chunk splitting, PWA plugin. Dev-server port comes from `.dev-port` when allocated for the worktree, otherwise Vite's default.
+- `vite.config.js` — Vite MPA config: `src/views` root with 11 HTML entries, dev-server route rewrites, aliases, chunk splitting, PWA plugin. Dev server binds 127.0.0.1 and takes its port from `.dev-port` when allocated for the worktree, otherwise Vite's default.
 - `vitest.config.js` — Vitest config for `src/` unit tests (jsdom, setup file, coverage) re-declaring the project path aliases.
 - `vitest.rules.config.js` — Minimal Vitest config selecting `firestore/tests/*.test.ts` in a node environment; consumed by `npm run test:rules`.
 
