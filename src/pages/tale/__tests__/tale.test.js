@@ -45,7 +45,7 @@ vi.mock('@/utils', () => ({
 vi.mock('@services/index.js', () => ({
   addToBookmarks: vi.fn(),
   removeFromBookmarks: vi.fn(),
-  isBookmarked: vi.fn(),
+  isBookmarked: vi.fn(() => Promise.resolve(false)),
   getResonanceStatus: vi.fn(() => Promise.resolve(true)),
 }));
 
@@ -84,6 +84,13 @@ describe('Tale Page Controller', () => {
     expect(index.renderTale).toHaveBeenCalledWith('u1', expect.anything(), 'tale123', true);
     expect(index.setupResonance).toHaveBeenCalledWith('tale123', 0, true, 'u1');
     expect(index.listenToComments).toHaveBeenCalledWith('tale123', 'author-1');
+    expect(index.setupShelfButton).toHaveBeenCalledWith(
+      'u1',
+      'tale123',
+      expect.anything(),
+      expect.objectContaining({ isBookmarked: expect.any(Function) }),
+      false
+    );
   });
 
   it('renders custom Tale 404 screen when chronicle is not found', async () => {

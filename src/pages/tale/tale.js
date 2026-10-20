@@ -89,16 +89,21 @@ export async function initTalePage(authUser = null) {
   let tale = null;
   let chapters = [];
   let isResonated = false;
+  // Preloaded with the rest of the page data so the cover's shelf shortcut can
+  // render before the first reveal instead of popping in afterwards.
+  let isShelved = false;
 
   try {
     const results = await Promise.all([
       loadTale(currentTaleId, user),
       loadChapters(currentTaleId).catch(() => []),
       getResonanceStatus(currentTaleId, userId).catch(() => false),
+      isBookmarked({ userId, taleId: currentTaleId }).catch(() => false),
     ]);
     tale = results[0];
     chapters = results[1] || [];
     isResonated = Boolean(results[2]);
+    isShelved = Boolean(results[3]);
   } catch (err) {
     log.error('Hydration failed', err);
   }
@@ -127,11 +132,17 @@ export async function initTalePage(authUser = null) {
   initHeaderScroll();
 
   // 4. Shelf and share buttons
-  await setupShelfButton(userId, currentTaleId, tale, {
-    addToBookmarks,
-    removeFromBookmarks,
-    isBookmarked,
-  });
+  await setupShelfButton(
+    userId,
+    currentTaleId,
+    tale,
+    {
+      addToBookmarks,
+      removeFromBookmarks,
+      isBookmarked,
+    },
+    isShelved
+  );
   setupShareButton(currentTaleId);
 
   // 5. Real-time listeners

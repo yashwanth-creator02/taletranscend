@@ -34,8 +34,10 @@ export const BOOKMARK_COOLDOWN_MS = 5000; // 5s
  */
 export async function addToBookmarks({ userId, taleId, tale = {} }) {
   const uid = userId || auth?.currentUser?.uid || appState?.userId;
-  if (!uid || !taleId) return;
-  if (guardOffline()) return;
+  if (!uid || !taleId) return null;
+  // Offline writes are not queued here, so report failure rather than letting
+  // callers present the change as saved.
+  if (guardOffline()) return null;
 
   if (!checkRateLimit(`bookmark:${uid}`, BOOKMARK_COOLDOWN_MS)) {
     const { showToast } = await import('@ui/components/toast.js');
@@ -101,8 +103,10 @@ export async function addToBookmarks({ userId, taleId, tale = {} }) {
  */
 export async function removeFromBookmarks({ userId, taleId }) {
   const uid = userId || auth?.currentUser?.uid || appState?.userId;
-  if (!uid || !taleId) return;
-  if (guardOffline()) return;
+  if (!uid || !taleId) return null;
+  // Offline writes are not queued here, so report failure rather than letting
+  // callers present the change as saved.
+  if (guardOffline()) return null;
 
   if (!checkRateLimit(`bookmark:${uid}`, BOOKMARK_COOLDOWN_MS)) {
     const { showToast } = await import('@ui/components/toast.js');

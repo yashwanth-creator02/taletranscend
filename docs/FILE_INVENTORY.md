@@ -46,7 +46,7 @@ One-line duty for every file tracked by git in this repository, grouped by area 
 - `directives/mcp_servers.md` — Agent directive governing project-local MCP server setup and troubleshooting for Chrome DevTools, Firebase, and Vercel.
 - `directives/navigation_routing_and_sitemaps.md` — Agent directive governing hierarchical clean URLs, resolveHref safety, sitemaps, and fixed-overlay stacking rules.
 - `directives/profile_and_oracle_ai.md` — Agent directive governing the chronicler profile, client-side Gemini key storage, Oracle AI features, and tooltips.
-- `directives/tale_interactions_and_comments.md` — Agent directive governing tale hero actions, resonance, downloads, comment trees, missives, and the tale 404 screen.
+- `directives/tale_interactions_and_comments.md` — Agent directive governing tale hero actions (including the cover's shelf shortcut), resonance, downloads, comment trees, missives, and the tale 404 screen.
 
 ## Project Documentation
 
@@ -74,7 +74,7 @@ One-line duty for every file tracked by git in this repository, grouped by area 
 - `src/views/reader.html` — Distraction-free reader shell whose `#app` carries `reader-surface` and `data-reader-theme`; loads `../pages/reader/reader.js`.
 - `src/views/settings.html` — Settings shell with back button, settings search, sidebar sections and section views; loads `../pages/settings/settings.js`.
 - `src/views/shelf.html` — Scribe's Vault shell for drafts, fragments and published chronicles; loads `../pages/shelf/shelf.js` plus tale-cards styles.
-- `src/views/tale.html` — Tale detail shell for chapters, resonance and discussion; loads `../pages/tale/tale.js`.
+- `src/views/tale.html` — Tale detail shell for chapters, resonance and discussion, plus a hero cover with a "View Shelf" shortcut revealed while the tale is on the visitor's shelf; loads `../pages/tale/tale.js`.
 - `src/views/toc.html` — HTML sitemap shell with archive stats, portal cards and chronicle index; loads `../pages/toc/toc.js`.
 
 ## Page Modules (`src/pages`)
@@ -133,13 +133,13 @@ Each directory under `src/pages/` holds the JavaScript for one HTML shell in `sr
 - `src/pages/tale/content.js` — Firestore loaders for the tale page: fetches a tale (public with private-draft fallback) and chapters sorted by chapterNum.
 - `src/pages/tale/index.js` — Barrel export for the tale page, re-exporting content, ui, interactions, comments, auth, icons, and comment utilities.
 - `src/pages/tale/inquire.js` — Chronicle Missives correspondence: author mailroom with reply/report/block, reader inquiry form with validation, local storage, and Firestore sync.
-- `src/pages/tale/interactions.js` — Tale page interactions: resonance toggle, chapter clicks with mark read/unread and download, tabs, start/resume, shelf, share, scroll, missing report.
-- `src/pages/tale/tale.js` — Entry point for the Tale Archive page: parses taleId, hydrates tale/chapters/progress after auth, then wires renderers and interactions.
+- `src/pages/tale/interactions.js` — Tale page interactions: resonance toggle, chapter clicks with mark read/unread and download, tabs, start/resume, shelf (including the cover's shelf shortcut), share, scroll, missing report.
+- `src/pages/tale/tale.js` — Entry point for the Tale Archive page: parses taleId, hydrates tale/chapters/progress and bookmark state after auth, then wires renderers and interactions.
 - `src/pages/tale/ui.js` — Presentation layer for the tale page: skeletons, tale metadata rendering, chapter list with progress, initials avatars, and the not-found view.
 - `src/pages/tale/__tests__/comments.test.js` — Vitest tests for `src/pages/tale/comments.js` — fetching/rendering, author and edited badges, posting with rate limits, edit/soft-delete, nested reply trees.
 - `src/pages/tale/__tests__/inquire.test.js` — Vitest tests for `src/pages/tale/inquire.js` — author mailroom and reader views, profile hydration, form validation, dispatch, reply/report/block helpers.
-- `src/pages/tale/__tests__/interactions.test.js` — Vitest tests for `src/pages/tale/interactions.js` — resonance, chapter clicks, batch mark read/download, tabs, start reading, shelf, report missing.
-- `src/pages/tale/__tests__/tale.test.js` — Vitest tests for `src/pages/tale/tale.js` — redirect on missing id, hydration on auth resolve, not-found screen.
+- `src/pages/tale/__tests__/interactions.test.js` — Vitest tests for `src/pages/tale/interactions.js` — resonance, chapter clicks, batch mark read/download, tabs, start reading, shelf and the shelf shortcut's conditional visibility, report missing.
+- `src/pages/tale/__tests__/tale.test.js` — Vitest tests for `src/pages/tale/tale.js` — redirect on missing id, hydration on auth resolve (including the preloaded shelf state), not-found screen.
 - `src/pages/tale/__tests__/ui.test.js` — Vitest tests for `src/pages/tale/ui.js` — skeletons, tale metadata and author/resonance rendering, chapter lists and sorting, 404 view, initials avatars.
 
 ### Contribution (`src/pages/contribution`)
@@ -247,7 +247,7 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `src/services/ai/apiKey.storage.js` — localStorage helper for the BYOK Gemini API key (key: tt-gemini-api-key) with get/set/clear and env fallback.
 - `src/services/auth-memory.storage.js` — Explicit auth memory (key `tt_auth`) recorded on the login page and on restored sessions: durable (localStorage) or session-only (sessionStorage), never downgraded or upgraded by a restored session, cleared on sign-out; a failed write leaves the previous memory intact. This is what the first-visit login gate reads.
 - `src/services/author.service.js` — Scribe registration: author status from users/{uid}, schema-validated registration, mirrored to localStorage key `tt_author_{uid}`.
-- `src/services/bookmark.service.js` — Bookmark CRUD at users/{uid}/bookmarks/{taleId} with rate limiting, offline mirror, and cached tale metadata for the shelf.
+- `src/services/bookmark.service.js` — Bookmark CRUD at users/{uid}/bookmarks/{taleId} with rate limiting, offline mirror, cached tale metadata for the shelf, and explicit `null` failures for rejected writes.
 - `src/services/cache.service.js` — cacheService singleton: in-memory + sessionStorage (tt_cache:) cache with SWR, first-visit bypass, and domain invalidation helpers.
 - `src/services/index.js` — Barrel file re-exporting every service module so pages import all service functions from a single entry point.
 - `src/services/inquiry.service.js` — Chronicle Missives: inquiries collection fetch/subscribe, create, reply, report, and block operations for reader-author correspondence.
@@ -260,7 +260,7 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `src/services/__tests__/ai.service.test.js` — Vitest tests for `src/services/ai.service.js` — MSW-mocked Gemini for title suggestion, refinement, continuation, sanitization.
 - `src/services/__tests__/auth-memory.storage.test.js` — Vitest tests for `src/services/auth-memory.storage.js` — durable versus session records, scope precedence, clearing, corrupt and unknown-version records.
 - `src/services/__tests__/author.service.test.js` — Vitest tests for `src/services/author.service.js` — status reads, localStorage fallback, registration validation and setDoc payload.
-- `src/services/__tests__/bookmark.service.test.js` — Vitest tests for `src/services/bookmark.service.js` — add/remove/get/isBookmarked flows, rate limiting, document fields.
+- `src/services/__tests__/bookmark.service.test.js` — Vitest tests for `src/services/bookmark.service.js` — add/remove/get/isBookmarked flows, rate limiting, offline failures, document fields.
 - `src/services/__tests__/cache.service.test.js` — Vitest tests for `src/services/cache.service.js` — TTL expiry, prefix invalidation, SWR revalidation, first-visit bypass, reconcileOrReload.
 - `src/services/__tests__/index.test.js` — Vitest smoke test that `src/services/index.js` re-exports key services such as getTaleMeta, getBookmarks, toggleResonance.
 - `src/services/__tests__/inquiry.service.test.js` — Vitest tests for `src/services/inquiry.service.js` — timestamp parsing, merge/dedup, fetch/subscribe, create, reply, report, block.

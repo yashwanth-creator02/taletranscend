@@ -454,14 +454,31 @@ export function setupResumeReading(userId, taleId) {
  * @param {string} taleId
  * @param {import('@state/schemas/tale.schema.js').Tale} tale
  * @param {{ addToBookmarks: Function, removeFromBookmarks: Function, isBookmarked: Function }} bookmarkService
+ * @param {boolean} [initialShelved] - Preloaded bookmark state; skips the initial read when provided.
  */
-export async function setupShelfButton(userId, taleId, tale, bookmarkService) {
+export async function setupShelfButton(userId, taleId, tale, bookmarkService, initialShelved) {
   const btns = document.querySelectorAll('[id^="shelf-btn"]');
   if (!btns.length) return;
 
   // Set initial state
-  const alreadyShelved = await bookmarkService.isBookmarked({ userId, taleId });
+  const alreadyShelved =
+    typeof initialShelved === 'boolean'
+      ? initialShelved
+      : await bookmarkService.isBookmarked({ userId, taleId });
   btns.forEach((btn) => _updateShelfUI(btn, alreadyShelved));
+  _updateShelfLinks(alreadyShelved);
+
+  // bfcache restores reuse the previous DOM. Revalidate so a bookmark removed
+  // on the shelf page cannot leave "On Your Shelf" and the shortcut behind.
+  window.addEventListener('pageshow', (event) => {
+    if (!event.persisted) return;
+    Promise.resolve(bookmarkService.isBookmarked({ userId, taleId }))
+      .then((shelved) => {
+        btns.forEach((btn) => _updateShelfUI(btn, shelved));
+        _updateShelfLinks(shelved);
+      })
+      .catch(() => {});
+  });
 
   btns.forEach((btn) => {
     btn.addEventListener('click', async () => {
@@ -491,6 +508,7 @@ export async function setupShelfButton(userId, taleId, tale, bookmarkService) {
           }
 
           btns.forEach((b) => _updateShelfUI(b, false));
+          _updateShelfLinks(false);
           showToast('Removed from your shelf.', 'info');
 
           // Start cooldown after success
@@ -522,6 +540,7 @@ export async function setupShelfButton(userId, taleId, tale, bookmarkService) {
           }
 
           btns.forEach((b) => _updateShelfUI(b, true));
+          _updateShelfLinks(true);
           showToast('Added to your shelf.', 'success');
 
           // Start cooldown after success
@@ -555,6 +574,19 @@ function _updateShelfUI(btn, shelved) {
     btn.classList.remove('border-indigo-500/40', 'bg-indigo-500/10', 'text-indigo-300');
   }
   initIcons(btn);
+}
+
+/**
+ * Shows or hides the hero's "View Shelf" shortcut attached to the cover art.
+ * It is only meaningful while the chronicle is on the visitor's shelf, so it
+ * stays out of the hero until then.
+ *
+ * @param {boolean} shelved
+ */
+function _updateShelfLinks(shelved) {
+  document.querySelectorAll('[data-shelf-link]').forEach((link) => {
+    link.classList.toggle('hidden', !shelved);
+  });
 }
 
 /* ─────────────────────────────────────────────
