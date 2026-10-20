@@ -2,7 +2,7 @@
 
 One-line duty for every file tracked by git in this repository, grouped by area and ordered like the repository tree. Use it to find where a behavior lives, what a file is for, or who consumes it — without opening files one by one.
 
-- **Source of truth:** `git ls-files` — 349 tracked files as of 2026-10-19 (this file included).
+- **Source of truth:** `git ls-files` — 350 tracked files as of 2026-10-20 (this file included).
 - **Maintenance:** when a tracked file is added, renamed, moved, or deleted, update its entry here in the same change (`AGENTS.md` principle 7; `CONTRIBUTING.md`). A stale entry is worse than no entry.
 - **Format:** one `path` — duty line per file.
 

@@ -248,11 +248,23 @@ The TaleTranscend brand mark is the mythical golden-trimmed black quill pen enci
 - **Profile Skins Are Documented Shadowing**: `profile.css` intentionally overrides the shared `.btn-ghost` / `.input-mythic` components (the file loads only on the profile page). Its hover rule carries only the declarations that actually win the cascade (colour, transform); read the in-file comments before removing or restyling those overrides.
 - **No Dead Orphan Rules**: When a component stops being used on a page, delete its page-level overrides (e.g. the `.stat-value` no-op removed from `profile.css`, the dead `.theme-btn` block removed from `components.css`) instead of leaving them for a future reader to reconcile.
 
+### 14. Mobile Viewport Invariants (320–768px, Audit 2026-10-19)
+
+- **Document-level overflow is a bug; contained overflow is a decision.** Decorative layers must be clipped inside a `fixed inset-0 overflow-hidden pointer-events-none -z-10` wrapper, never parked at negative offsets on the body. Page scrollers (`.scroll-container`, `overflow-x: hidden`) may contain intentional strips (era chips, settings sidebar, profile tabs), but no control a phone user must reach may sit outside the viewport.
+- **Phone topbar (≤560px)**: the nav drops the wordmark and renders the guest CTA icon-only (`aria-label` preserved, 38×38 target) so search, notifications, settings, and sign-in fit at 320px.
+- **Fixed bars cannot be scrolled.** The settings top bar (`.settings-top-bar`) must keep every control on-screen; below 520px the 140px side reservations collapse and the search shrinks (`min-width: 0`, 32px padding) instead of pushing Reset off-screen.
+- **Header rows that cannot shrink must wrap.** The library header wraps its search below the title from `md` until `xl` (`md:flex-wrap xl:flex-nowrap`); the shelf and contribution toolbars tighten paddings below 380px/359px rather than hiding features.
+- **Verification**: `execution/capture_responsive_audit.mjs` (all routes × widths) plus `e2e/specs/mobile-shell.spec.js` (Pixel 7 + iPhone 14). Any new browser tooling must seed `tt_has_visited` and assert it never measured `/login.html`.
+
 ## Tools / Scripts to Use
 
 - Run the UI and navigation verification suite:
   ```powershell
   python execution/verify_navigation_and_ui.py
+  ```
+- Run the responsive audit sweep against the worktree's allocated port:
+  ```powershell
+  $env:AUDIT_PORT=(Get-Content .dev-port); node execution/capture_responsive_audit.mjs
   ```
 - Run toast component tests:
   ```powershell

@@ -37,6 +37,7 @@ Or run individual npm scripts:
 - `npm test`: Runs Vitest unit and integration test suite.
 - `npm run test:coverage`: Generates test coverage report.
 - `npm run e2e`: Executes Playwright end-to-end tests.
+- `node execution/capture_responsive_audit.mjs`: Sweeps every route at 320/360/390/414/768/1280/1440 (override with `AUDIT_WIDTHS` / `AUDIT_PAGES`), records `scrollWidth` plus overflowing elements, and writes full-page screenshots to `.tmp/responsive-audit/` (gitignored). Set `AUDIT_PORT` to the worktree port in `.dev-port`. Seeds `tt_has_visited`.
 - `npm run lint`: Runs ESLint across JavaScript and TypeScript files.
 - `npm run lint:tokens`: Fails on any raw colour literals outside design token definitions (`tokens.css`).
 - `npm run type-check`: Validates TypeScript type safety without emitting build output.
@@ -52,4 +53,5 @@ Or run individual npm scripts:
 
 - Token lint failures: If `npm run lint:tokens` fails, inspect changed files for hardcoded hex, rgb, or hsl strings. Ensure all colors use CSS custom properties defined in `src/assets/css/tokens.css`.
 - E2E test failures: Playwright tests may require browser binaries. Run `npx playwright install` if browser drivers are missing.
+- Responsive captures and the mobile-shell e2e: a fresh browser context is redirected to `/login.html` unless `tt_has_visited` is seeded. Both harnesses seed it and assert the page is not the login screen; never remove those guards.
 - Pre-commit hook: Husky is configured to run lint-staged on staged files automatically.

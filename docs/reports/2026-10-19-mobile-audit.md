@@ -19,10 +19,14 @@ records what was measured, where it came from, and the root cause of each real d
 Commands:
 
 ```sh
-npx vite --host 127.0.0.1 --port 5175                          # audit server
-AUDIT_WIDTHS=320,360,390,414,768,1280,1440 node execution/capture_responsive_audit.mjs
-E2E_PORT=5175 npx playwright test --workers=2 --retries=0      # full sweep
+npx vite --host 127.0.0.1                                      # binds the port in .dev-port
+AUDIT_PORT=5177 AUDIT_WIDTHS=320,360,390,414,768,1280,1440 \
+  node execution/capture_responsive_audit.mjs
+npx playwright test --workers=2 --retries=0                    # config reads .dev-port
 ```
+
+`AUDIT_PORT` must match the worktree's `.dev-port` value (5177 in this worktree); the
+capture script still defaults to 5175 when it is unset.
 
 Method notes that matter for re-runs:
 
@@ -174,3 +178,56 @@ Fix: compact or stack the top bar under ~480px so search + actions stay on-scree
 
 Raw per-shot offender data: `.tmp/responsive-audit/metrics.json` (intermediate; reproduce
 with the commands above).
+
+## Fix log — 2026-10-20
+
+All findings were fixed on `feat/mobile-compatibility` and re-measured with the same harness.
+
+| Finding | Change                                                                                                                                 | Where                                   | Post-fix evidence                                                                           |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------- |
+| F1      | Below 560px the wordmark is hidden, the guest CTA is icon-only (`aria-label` kept), icon targets are 38px, gaps/padding tighten        | `nav.css`, `nav.templates.js`           | index/library/toc clean at 320–1280; Sign In still 123px wide at ≥768                       |
+| F2      | Atmosphere layers and orbs live in a `fixed inset-0 overflow-hidden pointer-events-none -z-10` wrapper; sticky toolbar tightens ≤380px | `shelf.html`, `shelf.css`               | 320–1440 clean (was 400–1520); toolbar row 314px at 320                                     |
+| F3      | Header wraps in the md band and returns to a single row at `xl` (`md:flex-wrap xl:flex-nowrap`)                                        | `library.html`                          | search whole at 768–1279; 1280/1440 match the pre-fix layout (title 520/search 848 at 1280) |
+| F4      | Action row gains `flex-wrap`                                                                                                           | `404.html`                              | 320 clean                                                                                   |
+| F5      | ≤359px: tighter toolbar row/pills, icon-only publish, `page-contribution` scope                                                        | `contribution.html`, `contribution.css` | 320/344 clean; 360+ keeps the label                                                         |
+| F6      | ≤520px: zero side reservations, tighter gaps, search `min-width: 0` with 32px padding (base 96/64px imposed a 162px floor)             | `settings.css`                          | Reset at 268–308 at 320 with a 129px search; ≥768 untouched                                 |
+| F8      | ≤600px: settings rows stack label above control, control clusters wrap, inputs fill the card, bio header stacks                        | `settings.css`                          | 11 squeezed rows at 320 → 0; avatar/name/social rows readable; ≥600 unchanged               |
+
+F8 was found during post-fix verification, not in the original sweep: `.settings-row` is a
+non-wrapping flex row with a `flex-shrink: 0` control cluster, so at 320 the label column
+collapsed to 0–30px (avatar and display-name rows) and wide clusters were clipped. The
+document-level matrix could not see it because `.scroll-container` clips horizontally.
+
+### Post-fix matrix — `documentElement.scrollWidth` vs viewport
+
+| Route                                      | 320 | 360 | 390 | 414 | 768 | 1280 | 1440 |
+| ------------------------------------------ | --- | --- | --- | --- | --- | ---- | ---- |
+| `/index.html`                              | ok  | ok  | ok  | ok  | ok  | ok   | ok   |
+| `/library.html`                            | ok  | ok  | ok  | ok  | ok  | ok   | ok   |
+| `/shelf.html`                              | ok  | ok  | ok  | ok  | ok  | ok   | ok   |
+| `/tale.html?id=tale-008`                   | ok  | ok  | ok  | ok  | ok  | ok   | ok   |
+| `/toc.html`                                | ok  | ok  | ok  | ok  | ok  | ok   | ok   |
+| `/reader.html?taleId=tale-008&chapterId=0` | ok  | ok  | ok  | ok  | ok  | ok   | ok   |
+| `/contribution.html`                       | ok  | ok  | ok  | ok  | ok  | ok   | ok   |
+| `/profile.html`                            | ok  | ok  | ok  | ok  | ok  | ok   | ok   |
+| `/settings.html`                           | ok  | ok  | ok  | ok  | ok  | ok   | ok   |
+| `/login.html`                              | ok  | ok  | ok  | ok  | ok  | ok   | ok   |
+| `/404.html`                                | ok  | ok  | ok  | ok  | ok  | ok   | ok   |
+
+All 77 captures (11 routes × 7 widths) report `scrollWidth == clientWidth`. Remaining
+overflowing elements are contained by design and match F7: scrollable era/tab/nav strips,
+fixed toast regions, clipped shelf/profile orbs, and the hover-only relic inspector.
+
+### Verification
+
+- Playwright: 72/72 expected, 0 failed, 0 flaky (chromium, firefox, mobile-chrome Pixel 7,
+  mobile-safari iPhone 14). The documented local teardown hang still force-kills the last
+  worker after results; the run itself is complete.
+- `npm run verify`: Prettier, ESLint, token lint, `tsc --noEmit`, and Vitest (103 files,
+  854 passed, 2 skipped) are clean.
+- Desktop guard: 1280/1440 captures were preserved before the pass
+  (`.tmp/responsive-audit-before/`) and compared after. Every added rule is scoped below the
+  affected width or wraps only under pressure; 1280/1440 geometry is unchanged. The shelf fix
+  deliberately changes desktop stacking — the orbs now sit behind the page in a clipped layer
+  instead of painting above it, at the same offsets.
+- `eslint.config.js` now ignores `.tmp/**`, matching its documented intermediate status.
