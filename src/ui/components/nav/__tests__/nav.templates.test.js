@@ -105,15 +105,39 @@ describe('Nav Templates', () => {
   });
 
   describe('buildMobileDock', () => {
-    it('renders dock items', () => {
-      const html = buildMobileDock('library.html', null);
-      expect(html).toContain('mobile-dock');
-      expect(html).toContain('Sign In'); // null user
+    it('renders exactly Home, Library, and Shelf', () => {
+      const doc = new DOMParser().parseFromString(buildMobileDock('library.html'), 'text/html');
+      const items = [...doc.querySelectorAll('.mobile-dock__item')];
+      expect(items).toHaveLength(3);
+      expect(items.map((item) => item.getAttribute('aria-label'))).toEqual([
+        'Home',
+        'Library',
+        'Shelf',
+      ]);
+      expect(items.map((item) => item.getAttribute('href'))).toEqual([
+        '/index.html',
+        '/library.html',
+        '/shelf.html',
+      ]);
     });
 
-    it('renders profile in dock if user exists', () => {
-      const html = buildMobileDock('profile.html', { uid: 'u1' });
-      expect(html).toContain('Profile');
+    it('marks the current page active and drops retired dock entries', () => {
+      const html = buildMobileDock('library.html');
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      const active = [...doc.querySelectorAll('.mobile-dock__item--active')];
+
+      expect(active).toHaveLength(1);
+      expect(active[0].getAttribute('aria-label')).toBe('Library');
+      expect(active[0].getAttribute('aria-current')).toBe('page');
+      expect(html).not.toContain('Write');
+      expect(html).not.toContain('Profile');
+      expect(html).not.toContain('Sign In');
+      expect(html).not.toContain('mobile-dock__item--primary');
+    });
+
+    it('leaves every entry inactive on an unlisted page', () => {
+      const doc = new DOMParser().parseFromString(buildMobileDock('settings.html'), 'text/html');
+      expect(doc.querySelectorAll('.mobile-dock__item--active')).toHaveLength(0);
     });
   });
 

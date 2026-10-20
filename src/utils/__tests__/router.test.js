@@ -23,8 +23,8 @@ describe('Router & Soft Navigation', () => {
         <a href="/shelf.html" class="nav-link">Shelf</a>
       </div>
       <div id="mobile-dock-container">
-        <a href="/index.html" class="dock-item dock-item--active">Home</a>
-        <a href="/library.html" class="dock-item">Library</a>
+        <a href="/index.html" class="mobile-dock__item mobile-dock__item--active">Home</a>
+        <a href="/library.html" class="mobile-dock__item">Library</a>
       </div>
       <main id="main-content" class="old-main">
         <h1>Old Page</h1>
@@ -113,8 +113,8 @@ describe('Router & Soft Navigation', () => {
       expect(libLink?.classList.contains('nav-link--active')).toBe(true);
       expect(libLink?.getAttribute('aria-current')).toBe('page');
 
-      expect(homeDock?.classList.contains('dock-item--active')).toBe(false);
-      expect(libDock?.classList.contains('dock-item--active')).toBe(true);
+      expect(homeDock?.classList.contains('mobile-dock__item--active')).toBe(false);
+      expect(libDock?.classList.contains('mobile-dock__item--active')).toBe(true);
     });
   });
 

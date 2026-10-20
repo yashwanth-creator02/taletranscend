@@ -9,19 +9,14 @@
 // Depends on:
 //   nav.state.js            — shared mutable state
 //   nav.utils.js            — getNavElements, renderIcons, getCurrentPage
-//   nav.templates.js        — buildBrandMark, buildAuthenticatedUser, buildGuestUser, buildMobileDock
+//   nav.templates.js        — buildBrandMark, buildAuthenticatedUser, buildGuestUser
 //   nav.command-palette.js  — open/close/execute helpers
 
 import { auth, signOut, upgradeAnonymousToGoogle } from '@fb/index.js';
 import { navState } from './nav.state.js';
 import { getNavElements, renderIcons, getCurrentPage } from './nav.utils.js';
 import { USER_LINKS } from './nav.config.js';
-import {
-  buildBrandMark,
-  buildAuthenticatedUser,
-  buildGuestUser,
-  buildMobileDock,
-} from './nav.templates.js';
+import { buildBrandMark, buildAuthenticatedUser, buildGuestUser } from './nav.templates.js';
 import { showToast } from '@ui/components/toast.js';
 import { createLogger } from '@/utils';
 import {
@@ -517,12 +512,8 @@ export function updateNavUser(user) {
     brandAnchor.innerHTML = buildBrandMark(user, current, USER_LINKS);
   }
 
-  // Re-render mobile dock to reflect auth state (profile icon + label)
-  const dockContainer = document.getElementById('mobile-dock-container');
-  if (dockContainer) {
-    dockContainer.innerHTML = buildMobileDock(current, user);
-    renderIcons();
-  }
+  // The mobile dock is auth-independent (Home, Library, Shelf), so it is
+  // rendered once by buildNav() and needs no rebuild here.
 
   initNotifications(user);
   renderIcons();

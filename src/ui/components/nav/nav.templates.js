@@ -264,15 +264,15 @@ export function buildUserSkeleton() {
 /**
  * Builds a single mobile dock tab item.
  *
- * @param {{ href: string, icon: string, label: string, active: boolean, primary?: boolean }} options
+ * @param {{ href: string, icon: string, label: string, active: boolean }} options
  * @returns {string}
  */
-export function buildDockItem({ href, icon, label, active, primary = false }) {
+export function buildDockItem({ href, icon, label, active }) {
   const targetHref = resolveHref(href);
   return `
     <a
       href="${targetHref}"
-      class="mobile-dock__item${primary ? ' mobile-dock__item--primary' : ''}${active ? ' mobile-dock__item--active' : ''}"
+      class="mobile-dock__item${active ? ' mobile-dock__item--active' : ''}"
       aria-label="${label}"
       ${active ? 'aria-current="page"' : ''}
     >
@@ -287,30 +287,20 @@ export function buildDockItem({ href, icon, label, active, primary = false }) {
 /**
  * Builds the full mobile bottom dock navigation.
  *
+ * The dock is intentionally auth-independent: Home, Library, and Shelf are the
+ * only destinations, so a user change never needs to rebuild its contents.
+ *
  * @param {string} current - Current page filename
- * @param {import('firebase/auth').User | null} user
  * @returns {string}
  */
-export function buildMobileDock(current, user) {
-  const profileIcon = user ? 'user' : 'log-in';
-  const profileLabel = user ? 'Profile' : 'Sign In';
-  const profileHref = user ? 'profile.html' : 'login.html';
-
+export function buildMobileDock(current) {
   const dockItems = DOCK_ITEMS.map((item) =>
     buildDockItem({ ...item, active: current === item.href })
   ).join('');
 
-  const profileItem = buildDockItem({
-    href: profileHref,
-    icon: profileIcon,
-    label: profileLabel,
-    active: current === profileHref,
-  });
-
   return `
     <nav class="mobile-dock" aria-label="Quick navigation">
       ${dockItems}
-      ${profileItem}
     </nav>
   `;
 }
@@ -591,7 +581,7 @@ export function buildNav() {
     `,
     dockHtml: `
       <div id="mobile-dock-container">
-        ${buildMobileDock(current, null)}
+        ${buildMobileDock(current)}
       </div>
     `,
     alertsHtml: buildNotifications(),

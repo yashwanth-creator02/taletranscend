@@ -103,6 +103,14 @@ The header brand block splits into three roles; keep them from re-merging:
 - **Settings Has No Header Icon**: `.nav-actions` holds only the quick-tools triggers and `#nav-user`. Settings is reached from the account menu (`USER_LINKS` in `nav.config.js`) and the command palette. Keep `settings.html` in `USER_LINKS` — removing the header icon must not strand the page. `#nav-settings-btn` no longer exists; anything that needs a neutral icon-button shell uses `.nav-icon-btn` (the floating notification trigger does). Below 480px the wordmark hides so the 38px accent trigger and the sign-in CTA fit without horizontal overflow; the logo mark remains the brand control (account menu for members, home link for guests) and the mobile dock still carries Home.
 - **Guest Fallback**: guests have no account menu, so `buildBrandMark(null)` renders the mark as a plain home link (`aria-label="TaleTranscend home"`). `updateNavUser()` swaps both `#nav-brand-anchor` and `#nav-user` on every auth change, and all dropdown helpers key off the `menuButton` entry from `getNavElements()`.
 
+### 8. Mobile Bottom Dock
+
+- **Three Destinations Only**: `DOCK_ITEMS` in `nav.config.js` is Home, Library, Shelf. Write is an account-menu/palette action and Profile is the header avatar, so neither belongs in the dock. `buildMobileDock(current)` is auth-independent and takes no user argument; `updateNavUser()` must not rebuild the dock.
+- **Active Sync**: `updateNavActiveLinks()` in `src/utils/router.js` selects `#mobile-dock-container .mobile-dock__item` and toggles `mobile-dock__item--active` plus `aria-current="page"`. Keep the class names in step with `buildDockItem()` - the retired `.dock-item` selector silently matched nothing.
+- **Chrome**: The dock is a floating rectangular bar (`--radius-lg`), theme-aware translucent `--bg-overlay-rgb` fill with backdrop blur, a hairline border, and a restrained shadow. It must not regress to a 9999px pill, gradient shimmer, glow, or pulsing dot. The active tab is an accent-tinted 28px icon plate plus a 2px accent rule at the item's bottom edge; labels are 9px uppercase.
+- **Targets & Fit**: Each item is a full-height (58px) touch target. The bar caps at `min(344px, calc(100vw - 24px))` and sits above `env(safe-area-inset-bottom)`, so it fits a 390px viewport without horizontal overflow.
+- **Shelf Page Exception**: `src/assets/css/pages/shelf.css` hides `#mobile-dock-container` on `body.page-shelf` because the vault page ships its own sticky header and Back control. The Shelf dock item still routes there; do not remove that hide rule without redesigning the shelf header.
+
 ## Tools / Scripts to Use
 
 - Run the navigation and routing test suite:
