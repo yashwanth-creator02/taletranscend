@@ -118,8 +118,8 @@ export const BASE_COMMANDS = [
 ];
 
 /**
- * Mobile dock items — the three always-available destinations. Write lives in
- * the account menu and the palette; Profile is the header avatar.
+ * Mobile dock items — the three always-available destinations. Write remains a
+ * desktop primary link and palette command; Profile is the header avatar.
  *
  * @type {Array<{ href: string, icon: string, label: string }>}
  */
