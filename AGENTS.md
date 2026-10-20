@@ -168,7 +168,10 @@ The `chrome-devtools` MCP server needs nothing copied: it auto-provisions Chrome
 python execution/setup_worktree.py --list-ports        # show every allocation
 python execution/setup_worktree.py --release-port     # free this worktree's port
 python execution/setup_worktree.py --release-port <path>   # free another worktree's port
+python execution/setup_worktree.py --verify-mcp       # spawn each MCP server and report status
 ```
+
+Bootstrap validates `opencode.json` without starting any server: it checks that the file parses, that servers are declared, and that each local command resolves on `PATH`. Add `--verify-mcp` only when you actually need live connection state — it starts every server, takes up to about two minutes cold, and leaves child processes behind.
 
 **Release the port once the branch is merged.** A merged worktree has served its purpose and its port must be freed:
 
