@@ -218,12 +218,15 @@
 #library-main {
   flex: 1;
   min-width: 0;
-  padding: 24px 16px 80px;
+  /* Bottom stays unset so .dock-clearance owns it (dock + FAB clearance). */
+  padding-top: 24px;
+  padding-inline: 16px;
 }
 
 @media (min-width: 768px) {
   #library-main {
-    padding: 32px 32px 60px;
+    padding-top: 32px;
+    padding-inline: 32px;
   }
 }
 
@@ -373,4 +376,45 @@
   background: var(--surface-4);
   border-color: var(--border-strong);
   color: var(--text-primary);
+}
+
+/* Drawer close was a 32px target; match the phone guideline (audit P5f). */
+@media (max-width: 767px) {
+  #close-sidebar-mobile {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* ── Phone Pagination ──────────────────────────────────────────────
+   The button / indicator / button row needs ~452px. Below 520px it
+   becomes two rows: the page indicator above two equal-width buttons
+   (docs/reports/2026-10-19-mobile-audit.md, P5a). */
+@media (max-width: 520px) {
+  #pagination-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+  }
+
+  #pagination-info {
+    grid-column: 1 / -1;
+    order: -1;
+    min-width: 0;
+  }
+
+  #pagination-prev,
+  #pagination-next {
+    justify-content: center;
+    padding-inline: var(--space-2);
+  }
+}
+
+/* 521–803px: the library sidebar leaves a narrow main column; trimming 8px
+   per button side keeps the single row inside it (768px was 17px over). */
+@media (min-width: 521px) and (max-width: 803px) {
+  #pagination-prev,
+  #pagination-next {
+    padding-inline: var(--space-4);
+  }
 }

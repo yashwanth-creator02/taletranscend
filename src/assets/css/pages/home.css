@@ -914,6 +914,9 @@
   position: relative;
   display: flex;
   flex-direction: column;
+  /* The nowrap title sets a 311px min-content; let the 1fr track shrink to the
+     phone content width instead (docs/reports/2026-10-19-mobile-audit.md, P5b). */
+  min-width: 0;
   padding: var(--space-4);
   background: var(--card-elevated-bg);
   border: 1px solid var(--border);

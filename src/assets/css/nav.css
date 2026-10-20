@@ -486,13 +486,13 @@
     gap: 8px;
   }
 
-  .command-trigger.mobile-shell {
-    padding: 9px 10px;
-  }
-
+  /* 44px touch targets: the 38px boxes were marginally under the guideline.
+     Four 44px actions + gaps still leave 62px of slack against the logo at 320. */
+  .command-trigger.mobile-shell,
+  .nav-settings-btn,
   .signin-btn {
-    width: 38px;
-    height: 38px;
+    width: 44px;
+    height: 44px;
     padding: 0;
     gap: 0;
     justify-content: center;
@@ -500,6 +500,12 @@
 
   .signin-btn__label {
     display: none;
+  }
+
+  /* Keep the 38px avatar visual, expand only its hit area. */
+  .avatar-btn {
+    padding: 3px;
+    margin-left: 1px;
   }
 }
 
@@ -679,7 +685,7 @@ body:has(#sidebar.sidebar--mobile-open) .scroll-to-top {
 
 .mobile-dock__label {
   font-family: var(--font-sans);
-  font-size: 8.5px;
+  font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
