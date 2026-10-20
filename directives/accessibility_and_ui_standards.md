@@ -251,10 +251,13 @@ The TaleTranscend brand mark is the mythical golden-trimmed black quill pen enci
 ### 14. Mobile Viewport Invariants (320–768px, Audit 2026-10-19)
 
 - **Document-level overflow is a bug; contained overflow is a decision.** Decorative layers must be clipped inside a `fixed inset-0 overflow-hidden pointer-events-none -z-10` wrapper, never parked at negative offsets on the body. Page scrollers (`.scroll-container`, `overflow-x: hidden`) may contain intentional strips (era chips, settings sidebar, profile tabs), but no control a phone user must reach may sit outside the viewport.
-- **Phone topbar (≤560px)**: the nav drops the wordmark and renders the guest CTA icon-only (`aria-label` preserved, 38×38 target) so search, notifications, settings, and sign-in fit at 320px.
+- **Phone topbar (≤560px)**: the nav drops the wordmark and renders the guest CTA icon-only (`aria-label` preserved, 44×44 target) so search, notifications, settings, and sign-in fit at 320px.
 - **Fixed bars cannot be scrolled.** The settings top bar (`.settings-top-bar`) must keep every control on-screen; below 520px the 140px side reservations collapse and the search shrinks (`min-width: 0`, 32px padding) instead of pushing Reset off-screen.
 - **Header rows that cannot shrink must wrap.** The library header wraps its search below the title from `md` until `xl` (`md:flex-wrap xl:flex-nowrap`); the shelf and contribution toolbars tighten paddings below 380px/359px rather than hiding features.
-- **Verification**: `execution/capture_responsive_audit.mjs` (all routes × widths) plus `e2e/specs/mobile-shell.spec.js` (Pixel 7 + iPhone 14). Any new browser tooling must seed `tt_has_visited` and assert it never measured `/login.html`.
+- **Breakpoints.** The intended convention is mobile `<768`, tablet `768–1023`, desktop `≥1024`. New rules follow it; the legacy 639/640, 767/768, 839/840 and 1023/1024 variants are recorded and were not broad-refactored in the mobile pass.
+- **Phone touch targets.** Nav search, notifications, settings and the guest CTA render as 44×44 targets below 560px; the signed-in avatar keeps its 38px visual inside a 44px hit area. Dock labels are 10px minimum. The library drawer close and the contribution tool rail also use 44px targets; the rail wraps 2×2 below 385px.
+- **Fixed-element clearance.** Below 1024px `.dock-clearance` reserves 144px at the bottom for the dock plus the 44px scroll-to-top button. Page ID rules must leave `padding-bottom` to that class (set `padding-top` / `padding-inline` only); off-canvas drawers hide the dock and FAB while open.
+- **Verification**: `execution/capture_responsive_audit.mjs` (all routes × widths) plus `e2e/specs/mobile-shell.spec.js` (Pixel 7 + iPhone 14). Any new browser tooling must seed `tt_has_visited` and assert it never measured `/login.html`. Also check max-scroll FAB clearance and open-drawer reachability at 320px.
 
 ## Tools / Scripts to Use
 

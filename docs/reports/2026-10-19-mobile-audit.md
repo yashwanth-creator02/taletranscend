@@ -133,7 +133,8 @@ to wrap (`flex-wrap`); buttons stack only when needed and the page centres corre
 
 The page toolbar (back, Write/Lore segmented control, auto-save cloud, Post button)
 needs 350px at 320. 30px of overflow, both engines; resolves at 360. The sidebar rune
-button that bleeds to x=372 is contained (sidebar clip). Fix: shave the toolbar at ≤360
+button that bled to x=372 was a second, independent clip (fixed in P5e: the rail wraps
+≤384px). Fix: shave the toolbar at ≤360
 (tighter gaps/padding; the status chip is the easiest sacrifice) until min-content ≤ 320.
 
 ### F6. Settings — fixed top bar hides controls below ~400px — MEDIUM
@@ -145,25 +146,31 @@ Fix: compact or stack the top bar under ~480px so search + actions stay on-scree
 
 ### F7. Contained overflows — inventory (no document scroll; verify per-item)
 
-| Route / element                                             | Verdict                                                                     |
-| ----------------------------------------------------------- | --------------------------------------------------------------------------- |
-| Settings sidebar nav at ≤839px                              | Scrollable strip (`overflow-x: auto`) — by design, OK                       |
-| Library era chips; toc era pills (all widths)               | Scrollable strips — by design, OK                                           |
-| Profile tab strip, top action cluster, continue-reading row | Contained; reachable except a 4px left bleed on the reading list — cosmetic |
-| Tale orbs, cover backdrop, tab strip, shine layer           | Contained by page clip/scroll rules — reference pattern                     |
-| Fixed toast regions (login/profile/shelf/index)             | `position: fixed`, no scroll contribution — OK                              |
+| Route / element                                             | Verdict                                                            |
+| ----------------------------------------------------------- | ------------------------------------------------------------------ |
+| Settings sidebar nav at ≤839px                              | Scrollable strip (`overflow-x: auto`) — by design, OK              |
+| Library era chips; toc era pills (all widths)               | Scrollable strips — by design, OK                                  |
+| Profile tab strip, top action cluster, continue-reading row | Contained and reachable; the 4px reading-list bleed is fixed in P3 |
+| Tale orbs, cover backdrop, tab strip, shine layer           | Contained by page clip/scroll rules — reference pattern            |
+| Fixed toast regions (login/profile/shelf/index)             | `position: fixed`, no scroll contribution — OK                     |
 
 ## Non-overflow observations (documentation only)
 
 - Breakpoints are mixed across files: 639/640, 767/768, 839/840, 1023/1024. Do not
   broad-refactor in this pass; record the intended convention (mobile <768, tablet
-  768–1023, desktop ≥1024) and align new rules with it.
+  768–1023, desktop ≥1024) and align new rules with it. Status: recorded in
+  `directives/accessibility_and_ui_standards.md` §14 (P4).
 - Dock label font is 8.5px — legible but below comfortable minimum (10px suggested).
-  Dock tap targets are otherwise fine (full-height items in a ~60px dock).
+  Dock tap targets are otherwise fine (full-height items in a ~60px dock). Status: fixed
+  at 10px in P2 — widest label is 49px against a 55px item at 320.
 - Small icon buttons (nav gear/bell 38px) are marginally under the 44px touch-target
-  guideline; the compaction pass is a cheap opportunity to nudge these.
+  guideline; the compaction pass is a cheap opportunity to nudge these. Status: fixed in
+  P1 — phone nav targets are 44×44 with 62px of slack at 320.
+- The library drawer close (32×32) and the contribution tool rail (30px high, with the
+  Rune tool clipped below 385px) were found in the P5 reachability audit; both are 44px
+  now (P5e/P5f).
 - `viewport-fit=cover` + `env(safe-area-inset-bottom)` are in place on the dock —
-  keep intact in any dock change.
+  keep intact in any dock change. Status: verified intact in P6.
 
 ## Fix order and verification protocol
 
@@ -185,7 +192,7 @@ All findings were fixed on `feat/mobile-compatibility` and re-measured with the 
 
 | Finding | Change                                                                                                                                 | Where                                   | Post-fix evidence                                                                           |
 | ------- | -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------- |
-| F1      | Below 560px the wordmark is hidden, the guest CTA is icon-only (`aria-label` kept), icon targets are 38px, gaps/padding tighten        | `nav.css`, `nav.templates.js`           | index/library/toc clean at 320–1280; Sign In still 123px wide at ≥768                       |
+| F1      | Below 560px the wordmark is hidden, the guest CTA is icon-only (`aria-label` kept), icon targets are 44px, gaps/padding tighten        | `nav.css`, `nav.templates.js`           | index/library/toc clean at 320–1280; Sign In still 123px wide at ≥768                       |
 | F2      | Atmosphere layers and orbs live in a `fixed inset-0 overflow-hidden pointer-events-none -z-10` wrapper; sticky toolbar tightens ≤380px | `shelf.html`, `shelf.css`               | 320–1440 clean (was 400–1520); toolbar row 314px at 320                                     |
 | F3      | Header wraps in the md band and returns to a single row at `xl` (`md:flex-wrap xl:flex-nowrap`)                                        | `library.html`                          | search whole at 768–1279; 1280/1440 match the pre-fix layout (title 520/search 848 at 1280) |
 | F4      | Action row gains `flex-wrap`                                                                                                           | `404.html`                              | 320 clean                                                                                   |
@@ -218,16 +225,67 @@ All 77 captures (11 routes × 7 widths) report `scrollWidth == clientWidth`. Rem
 overflowing elements are contained by design and match F7: scrollable era/tab/nav strips,
 fixed toast regions, clipped shelf/profile orbs, and the hover-only relic inspector.
 
-### Verification
+### Verification — F1–F8
 
-- Playwright: 72/72 expected, 0 failed, 0 flaky (chromium, firefox, mobile-chrome Pixel 7,
+- Playwright: 72/72 passed at `--workers=2`, 0 failed (chromium, firefox, mobile-chrome Pixel 7,
   mobile-safari iPhone 14). The documented local teardown hang still force-kills the last
   worker after results; the run itself is complete.
 - `npm run verify`: Prettier, ESLint, token lint, `tsc --noEmit`, and Vitest (103 files,
   854 passed, 2 skipped) are clean.
 - Desktop guard: 1280/1440 captures were preserved before the pass
-  (`.tmp/responsive-audit-before/`) and compared after. Every added rule is scoped below the
+  (`.tmp/responsive-audit-before/`) and compared after. Every F1–F8 rule is scoped below the
   affected width or wraps only under pressure; 1280/1440 geometry is unchanged. The shelf fix
   deliberately changes desktop stacking — the orbs now sit behind the page in a clipped layer
   instead of painting above it, at the same offsets.
 - `eslint.config.js` now ignores `.tmp/**`, matching its documented intermediate status.
+
+## Progress log — 2026-10-20 (post-fix polish)
+
+Remaining items from this report's non-overflow observations, fixed in impact order.
+Statuses are updated in place as each step lands.
+
+| Step | Item                                                 | Status | Evidence                                                                                                             |
+| ---- | ---------------------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------- |
+| P1   | Phone nav icon targets 38 → 44px                     | done   | actions 200px wide at 320 (62px gap to the logo); hits are 44×44 at 320/360/560                                      |
+| P2   | Dock labels 8.5 → 10px                               | done   | widest label 49px vs 55px item at 320; no label overflow at 320–560                                                  |
+| P3   | Profile continue-reading 4px bleed                   | done   | row spans 0…viewport at 320/360/414/639 and resets to the content box at 640                                         |
+| P4   | Breakpoint convention recorded                       | done   | `directives/accessibility_and_ui_standards.md` §14                                                                   |
+| P5   | Contained offenders audited for unreachable controls | done   | 11 routes × 320/360/390/414; 3 clipped layouts and 3 control issues found (P5a–P5f), all fixed                       |
+| P5a  | Library pagination clipped below 484px               | done   | phone grid ≤520px; tablet 521–803px uses 16px button padding; 768px row is 435px in a 448px column                   |
+| P5b  | Home cards were 311px inside a 288px grid            | done   | `min-width: 0` on `.home-tale-card`; card spans 16…304 at 320, title ellipsizes                                      |
+| P5c  | Profile pill row overflowed below 364px              | done   | wraps 2+1 ≤363px (144+144, sign-out 296); 364px+ single row fits exactly                                             |
+| P5d  | Scroll-top FAB covered the pagination Next button    | done   | `#library-main` was pinned to 80px by its ID shorthand; inherits `.dock-clearance` (144px), 16px gap at 320/768/1023 |
+| P5e  | Contribution Rune tool was clipped below 385px       | done   | rail wraps 2×2 ≤384px, all four tools 44px high and inside the card; single row at 385+                              |
+| P5f  | Library drawer close was 32×32                       | done   | now 44×44; all 7 drawer controls sit inside the 320×800 viewport while open                                          |
+| P6   | Safe-area insets verified intact                     | done   | dock keeps `env(safe-area-inset-bottom)`; no change                                                                  |
+
+P5 used a viewport-level reachability probe: visible interactive elements that are clipped by an
+ancestor or fully off-screen, minus scrollable strips and closed off-canvas panels. The library
+filter drawer and the contribution tool rail were also opened and measured; the drawer keeps every
+control inside 320×800 and hides the dock and FAB behind it.
+
+### Verification — post-fix polish (P1–P6)
+
+- Responsive sweep: 77/77 captures (11 routes × 320/360/390/414/768/1280/1440) report
+  `scrollWidth == clientWidth`. The first pass timed out on the 320/360/390 index shots; those
+  three were re-run clean. Remaining overflowing elements are only the by-design contained
+  scrollers and fixed regions listed in F7.
+- Reachability: the P5 probe is clean after P5a–P5f. The library filter drawer keeps all 7
+  controls inside 320×800 and hides the dock/FAB behind it; the contribution rail shows four
+  44px tools in a 2×2 grid at 320–384 and a single row at 385+. At maximum scroll the
+  scroll-top FAB clears the pagination by 16px at 320/768/1023.
+- E2E: 72/72 passed at `npx playwright test --workers=2` (chromium, firefox, Pixel 7,
+  iPhone 14). A default 10-worker local run saturated the shared Vite dev server (unstyled
+  module loads and `page.goto` timeouts in 5 tests); the same tests pass in isolation and at
+  2 workers, so this is a local harness capacity limit, not an app failure.
+- `npm run verify`: Prettier, ESLint, token lint, `tsc --noEmit`, and Vitest (103 files,
+  854 passed, 2 skipped) are clean. The TOC render test now allows 15s for its dynamic
+  page-graph import, which crossed the 5s default at 5.25s under the parallel suite; no
+  production code changed for it. A later re-run on a loaded machine hit Vitest fork-startup
+  timeouts before executing any tests; `npx vitest run --maxWorkers=2` passed all 854. The
+  default parallel pool is resource-sensitive on this workstation.
+- Desktop guard: all new rules are scoped below 1024px except `.home-tale-card { min-width: 0 }`.
+  The desktop three-column track is wider than the card's 311px min-content floor, so the rule
+  is inert there; the 1280/1440 index captures match the pre-fix layout apart from the animated
+  hero illustration. The shelf orb stacking change recorded under F2 is the one intentional
+  desktop visual change.

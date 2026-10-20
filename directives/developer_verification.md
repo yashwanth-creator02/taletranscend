@@ -54,4 +54,7 @@ Or run individual npm scripts:
 - Token lint failures: If `npm run lint:tokens` fails, inspect changed files for hardcoded hex, rgb, or hsl strings. Ensure all colors use CSS custom properties defined in `src/assets/css/tokens.css`.
 - E2E test failures: Playwright tests may require browser binaries. Run `npx playwright install` if browser drivers are missing.
 - Responsive captures and the mobile-shell e2e: a fresh browser context is redirected to `/login.html` unless `tt_has_visited` is seeded. Both harnesses seed it and assert the page is not the login screen; never remove those guards.
+- Local Playwright capacity: the shared Vite dev server can saturate above roughly 4 local workers, returning unstyled pages or `page.goto` timeouts. Run `npx playwright test --workers=2`; if the same tests pass in isolation, the app is not at fault.
+- Local Vitest capacity: the default fork pool can time out starting workers on a loaded machine before any test runs. Re-run `npx vitest run --maxWorkers=2`; a green constrained run confirms the suite.
+- Heavy page-graph tests: `src/pages/toc/__tests__/toc.test.js` sets a 15s timeout because its dynamic import of the full TOC page graph can cross the 5s default when the suite is parallel.
 - Pre-commit hook: Husky is configured to run lint-staged on staged files automatically.
