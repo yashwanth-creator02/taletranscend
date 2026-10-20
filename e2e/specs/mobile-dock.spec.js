@@ -44,7 +44,7 @@ test.describe('mobile dock', () => {
       '/shelf.html',
     ]);
 
-    const dockText = await page.locator('#mobile-dock-container').innerText();
+    const dockText = await page.locator('#mobile-dock-container').textContent();
     expect(dockText).not.toMatch(/Write|Profile|Sign In/);
   });
 
@@ -60,6 +60,28 @@ test.describe('mobile dock', () => {
       .locator('#mobile-dock-container .mobile-dock__item[aria-current="page"]')
       .evaluateAll((els) => els.map((el) => el.getAttribute('aria-label')));
     expect(currentMarks).toEqual(['Library']);
+
+    const visual = await page.evaluate(() => {
+      const active = document.querySelector('.mobile-dock__item--active');
+      const inactive = document.querySelector('.mobile-dock__item:not(.mobile-dock__item--active)');
+      const rule = getComputedStyle(active, '::after');
+      return {
+        activeColor: getComputedStyle(active).color,
+        inactiveColor: getComputedStyle(inactive).color,
+        activeLabel: getComputedStyle(active.querySelector('.mobile-dock__label')).color,
+        inactiveLabel: getComputedStyle(inactive.querySelector('.mobile-dock__label')).color,
+        plateBackground: getComputedStyle(active.querySelector('.mobile-dock__icon-wrap'))
+          .backgroundColor,
+        ruleHeight: rule.height,
+        ruleBackground: rule.backgroundColor,
+      };
+    });
+
+    expect(visual.activeColor).not.toBe(visual.inactiveColor);
+    expect(visual.activeLabel).not.toBe(visual.inactiveLabel);
+    expect(visual.plateBackground).not.toBe('rgba(0, 0, 0, 0)');
+    expect(visual.ruleHeight).toBe('2px');
+    expect(visual.ruleBackground).not.toBe('rgba(0, 0, 0, 0)');
   });
 
   test('keeps 44px touch targets inside the viewport', async ({ page }) => {
@@ -70,12 +92,13 @@ test.describe('mobile dock', () => {
       .evaluateAll((els) =>
         els.map((el) => {
           const rect = el.getBoundingClientRect();
-          return { height: rect.height, left: rect.left, right: rect.right };
+          return { width: rect.width, height: rect.height, left: rect.left, right: rect.right };
         })
       );
 
     expect(boxes).toHaveLength(3);
     for (const box of boxes) {
+      expect(box.width).toBeGreaterThanOrEqual(44);
       expect(box.height).toBeGreaterThanOrEqual(44);
       expect(box.left).toBeGreaterThanOrEqual(0);
       expect(box.right).toBeLessThanOrEqual(390);
@@ -87,22 +110,52 @@ test.describe('mobile dock', () => {
     expect(overflow).toBeLessThanOrEqual(0);
   });
 
-  test('stays a rectangular bar on every theme', async ({ page }) => {
+  test('stays a themed rectangular bar on every theme', async ({ page }) => {
     await gotoDock(page, '/index.html');
 
+    const backgrounds = [];
     for (const theme of ['transcendental', 'dark', 'light']) {
-      const { radius, height } = await page.evaluate((value) => {
+      const style = await page.evaluate((value) => {
         document.documentElement.setAttribute('data-app-theme', value);
         const dock = document.querySelector('.mobile-dock');
-        const style = getComputedStyle(dock);
+        const computed = getComputedStyle(dock);
         return {
-          radius: parseFloat(style.borderTopLeftRadius),
-          height: parseFloat(style.height),
+          background: computed.backgroundColor,
+          borderWidth: computed.borderTopWidth,
+          shadow: computed.boxShadow,
+          radius: parseFloat(computed.borderTopLeftRadius),
+          height: parseFloat(computed.height),
         };
       }, theme);
 
       // A pill would use half the bar height (or more) as its radius.
-      expect(radius).toBeLessThan(height / 2);
+      expect(style.radius).toBeLessThan(style.height / 2);
+      expect(style.background).not.toBe('rgba(0, 0, 0, 0)');
+      expect(style.borderWidth).toBe('1px');
+      expect(style.shadow).not.toBe('none');
+      backgrounds.push(style.background);
     }
+
+    expect(new Set(backgrounds).size).toBe(3);
+  });
+
+  test('grows instead of clipping when labels scale up', async ({ page }) => {
+    await gotoDock(page, '/index.html');
+
+    const result = await page.evaluate(() => {
+      const style = document.createElement('style');
+      style.textContent = '.mobile-dock__label { font-size: 18px; }';
+      document.head.appendChild(style);
+
+      const dock = document.querySelector('.mobile-dock');
+      const item = document.querySelector('.mobile-dock__item');
+      return {
+        dockHeight: dock.getBoundingClientRect().height,
+        clipped: item.scrollHeight > item.clientHeight + 1,
+      };
+    });
+
+    expect(result.dockHeight).toBeGreaterThan(58);
+    expect(result.clipped).toBe(false);
   });
 });

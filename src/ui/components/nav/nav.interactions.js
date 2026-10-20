@@ -490,7 +490,8 @@ export function detachGlobalListeners() {
 
 /**
  * Called on every Firebase auth state change.
- * Replaces the user area in the desktop header and re-renders the mobile dock.
+ * Replaces the user area in the desktop header. The mobile dock is
+ * auth-independent, so it is not rebuilt here.
  *
  * @param {import('firebase/auth').User | null} user
  */
