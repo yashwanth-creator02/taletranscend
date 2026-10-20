@@ -444,7 +444,7 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `execution/verify_author_flows.py` — Runner of token lint, type-check and targeted Vitest suites for author service, inquire, publish, profile-sync and validation.
 - `execution/verify_interactions_and_profile.py` — Runner of token lint, type-check and Vitest suites for navigation/bfcache, tale hero interactions, profile UI, downloads and AI service.
 - `execution/verify_navigation_and_ui.py` — Runner enforcing index-only footer and brand-asset checks, then token lint, type-check and navigation/nav/toast/toc suites.
-- `execution/setup_worktree.py` — Mandatory new-worktree bootstrap: installs dependencies, copies gitignored `.agents/skills/`, `.vercel/project.json`, `.env` and `.env.local` from the primary checkout (refusing any destination git would track), warms the firebase-tools module graph and retries MCP verification to fit the fixed 30s startup budget, allocates a per-worktree dev port, then reports MCP state; supports `--check`, `--source`, `--list-ports` and `--release-port`.
+- `execution/setup_worktree.py` — Mandatory new-worktree bootstrap: installs dependencies, copies gitignored `.agents/skills/`, `.vercel/project.json`, `.env` and `.env.local` from the primary checkout (refusing any destination git would track), warms the firebase-tools module graph, validates that every declared MCP server resolves without spawning it, and allocates a per-worktree dev port; supports `--check`, `--source`, `--verify-mcp`, `--list-ports` and `--release-port`.
 
 ## End-to-End Tests
 
