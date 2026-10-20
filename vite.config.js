@@ -25,8 +25,6 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const DEFAULT_DEV_PORT = 5173;
-
 // Read this worktree's allocated dev port, if one has been assigned.
 // Returns null when no allocation exists so Vite applies its own default.
 function worktreePort() {
@@ -101,6 +99,11 @@ export default defineConfig({
   },
 
   server: {
+    // Bind IPv4 explicitly. Vite's default host is `localhost`, which resolves
+    // to ::1 on Windows, so 127.0.0.1 refused connections. Playwright targets
+    // 127.0.0.1, so leaving this unset meant `reuseExistingServer` never saw a
+    // running dev server and silently started a second one on the same port.
+    host: '127.0.0.1',
     // Each worktree gets its own port so several dev servers can run side by
     // side. `python execution/setup_worktree.py` writes .dev-port in the git
     // common registry; fall back to 5173 when absent so a fresh clone still
