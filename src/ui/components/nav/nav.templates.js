@@ -170,9 +170,9 @@ export function buildAuthenticatedUser(user, current, userLinks) {
 export function buildGuestUser() {
   return `
     <div id="nav-user">
-      <a href="${resolveHref('login.html')}" class="signin-btn">
+      <a href="${resolveHref('login.html')}" class="signin-btn" aria-label="Sign in">
         <i data-lucide="log-in" class="signin-btn__icon" aria-hidden="true"></i>
-        <span>Sign In</span>
+        <span class="signin-btn__label">Sign In</span>
       </a>
     </div>
   `;

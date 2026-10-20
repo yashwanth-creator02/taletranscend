@@ -217,6 +217,35 @@ body.page-shelf #mobile-dock-container {
   }
 }
 
+/* Phone-width toolbar: the sticky header row cannot shrink (all three
+   clusters are shrink-0), so below 380px its paddings tighten just enough
+   for the row to fit a 320px viewport
+   (docs/reports/2026-10-19-mobile-audit.md, finding F2). */
+@media (max-width: 380px) {
+  .page-shelf header.sticky > div {
+    gap: 4px;
+    padding-inline: 6px;
+  }
+
+  .page-shelf header.sticky .btn-back-pill {
+    padding-inline: 8px;
+  }
+
+  .page-shelf header.sticky div:has(> .shelf-tab) {
+    gap: 0;
+    padding: 0;
+  }
+
+  .page-shelf header.sticky .shelf-tab {
+    gap: 2px;
+    padding-inline: 6px;
+  }
+
+  .page-shelf header.sticky .btn--sm {
+    --btn-pad-x: 10px;
+  }
+}
+
 .shelf-card {
   background: var(--surface-gradient);
   border: 1px solid rgb(var(--light-rgb) / var(--a-03));

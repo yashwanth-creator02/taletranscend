@@ -161,11 +161,12 @@
     </div>
 
     <a class="skip-link" href="#main-content">Skip to content</a>
-    <div class="atmosphere-base"></div>
-    <div class="particle-field"></div>
-
-    <div class="ambient-orb w-96 h-96 bg-amber-500/10 -top-20 -right-20"></div>
-    <div class="ambient-orb w-96 h-96 bg-indigo-500/10 -bottom-20 -left-20"></div>
+    <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10" aria-hidden="true">
+      <div class="atmosphere-base"></div>
+      <div class="particle-field"></div>
+      <div class="ambient-orb w-96 h-96 bg-amber-500/10 -top-20 -right-20"></div>
+      <div class="ambient-orb w-96 h-96 bg-indigo-500/10 -bottom-20 -left-20"></div>
+    </div>
 
     <!-- ── Vault Sticky Header (Replaces global nav & floating dock) ─────────────────────────── -->
     <header class="sticky top-0 z-40 border-b border-line bg-[var(--nav-bg)] backdrop-blur-2xl">

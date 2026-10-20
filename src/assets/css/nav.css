@@ -469,6 +469,40 @@
   }
 }
 
+/* Phone-width top bar: the wordmark and the guest CTA label were the two
+   non-shrinkable pieces that pushed the row to 534px and scrolled the whole
+   document sideways (docs/reports/2026-10-19-mobile-audit.md, finding F1). */
+@media (max-width: 560px) {
+  .nav-inner {
+    gap: 12px;
+    padding: 0 12px;
+  }
+
+  .nav-logo__wordmark {
+    display: none;
+  }
+
+  .nav-actions {
+    gap: 8px;
+  }
+
+  .command-trigger.mobile-shell {
+    padding: 9px 10px;
+  }
+
+  .signin-btn {
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    gap: 0;
+    justify-content: center;
+  }
+
+  .signin-btn__label {
+    display: none;
+  }
+}
+
 /* ── Mobile Bottom Dock ──────────────────────────────────────────── */
 
 #mobile-dock-container {

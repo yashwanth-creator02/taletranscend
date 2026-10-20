@@ -153,6 +153,38 @@
   min-width: 140px;
 }
 
+/* Phone-width top bar: the fixed header never scrolls, so anything pushed past
+   the viewport edge (the Reset control, at 320-500px) is unreachable. Drop the
+   140px side reservations and let the search take the remaining space
+   (docs/reports/2026-10-19-mobile-audit.md, finding F6). */
+@media (max-width: 520px) {
+  .settings-top-bar__inner {
+    gap: var(--space-2);
+    padding: 0 var(--space-3);
+  }
+
+  .settings-top-bar__left {
+    gap: var(--space-2);
+    min-width: 0;
+  }
+
+  .settings-top-bar__right {
+    min-width: 0;
+  }
+
+  .settings-top-bar__search,
+  .settings-search-wrapper {
+    min-width: 0;
+  }
+
+  .settings-search-input {
+    min-width: 0;
+    /* The base rule pads 96px left / 64px right, which makes the border-box
+       162px wide no matter how small the container gets. */
+    padding: 0 var(--space-6);
+  }
+}
+
 .settings-reset-btn {
   display: inline-flex;
   align-items: center;
@@ -416,6 +448,41 @@
   align-items: center;
   justify-content: flex-end;
   flex-shrink: 0;
+}
+
+/* Stacked phone rows: below 600px the label column and the input/control
+   cluster cannot share a line. At 320 the label collapsed to a one-character
+   column and the avatar-presets cluster was clipped; at 360-414 the social
+   inputs still squeezed the label to 30-124px. Stack the control under the
+   label and let it fill the card. */
+@media (max-width: 600px) {
+  .settings-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
+  }
+
+  .settings-row__header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+  }
+
+  .settings-row > .settings-row__left {
+    flex-wrap: wrap;
+  }
+
+  .settings-row > .settings-row__right {
+    width: 100%;
+    max-width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .settings-row > .settings-row__right .settings-input {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
 }
 
 /* ── Stacked Row Layout (Bio, Full-Width Inputs) ────────────────────────── */

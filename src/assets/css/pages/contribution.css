@@ -90,6 +90,30 @@
   }
 }
 
+/* Phone-width toolbar: the atelier header row cannot shrink (left, centre and
+   right clusters are all shrink-0), so below 360px the publish label drops to
+   its icon and the paddings tighten, keeping the primary action on-screen
+   (docs/reports/2026-10-19-mobile-audit.md, finding F5). */
+@media (max-width: 359px) {
+  .page-contribution header.sticky > div {
+    gap: 4px;
+    padding-inline: 6px;
+  }
+
+  .page-contribution header.sticky .btn-back-pill {
+    padding-inline: 8px;
+  }
+
+  .page-contribution header.sticky > div > div:first-child + div {
+    padding: 2px;
+    gap: 2px;
+  }
+
+  #publish-btn > span {
+    display: none;
+  }
+}
+
 [data-atelier-view='split'] {
   display: none !important;
 }
