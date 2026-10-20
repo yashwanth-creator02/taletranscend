@@ -3,7 +3,19 @@ import { test, expect } from '@playwright/test';
 test.describe('Library Page', () => {
   test.beforeEach(async ({ page }) => {
     page.on('pageerror', (err) => console.log('PAGE ERROR:', err.message, err.stack));
-    await page.goto('/library.html');
+    // A fresh context is treated as a first-time visitor and redirected to
+    // login.html by the onboarding gate. Seed the visited flag so the library
+    // itself renders; the gate has its own unit tests.
+    await page.addInitScript(() => {
+      try {
+        localStorage.setItem('tt_has_visited', 'true');
+      } catch {
+        // Ignore storage restrictions.
+      }
+    });
+    // External fonts and cover images can stall the `load` event for tens of
+    // seconds; each test already waits for the UI state it needs.
+    await page.goto('/library.html', { waitUntil: 'domcontentloaded' });
   });
 
   test('loads and displays tales', async ({ page }) => {
