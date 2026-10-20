@@ -17,8 +17,9 @@ would track, never prints file contents, and reports only byte counts and key
 names. Values are never logged, echoed, or written to a commit.
 
 Usage:
-    python execution/setup_worktree.py            # bootstrap the current directory
-    python execution/setup_worktree.py --check    # report state, change nothing
+    python execution/setup_worktree.py               # bootstrap the current directory
+    python execution/setup_worktree.py --check       # report state, change nothing
+    python execution/setup_worktree.py --verify-mcp  # also spawn each MCP server
 """
 
 import argparse
@@ -425,6 +426,58 @@ def step_report() -> None:
         log(f"      team={data.get('orgId')}")
 
 
+def step_mcp_config() -> None:
+    """Validate the declared MCP servers without spawning them.
+
+    Spawning is deliberately avoided here: each probe starts every declared
+    server, and the local ones are expensive (firebase-tools needs ~10s warm and
+    up to ~120s cold, chrome-devtools ~3s warm) and leave child processes behind
+    when the probe exits. Whether a server actually connects is a property of the
+    running OpenCode session, not of the worktree, so it cannot be established
+    from here. Use --verify-mcp to pay that cost deliberately.
+    """
+    path = PROJECT_ROOT / "opencode.json"
+    if not path.is_file():
+        log("FAILED: opencode.json missing; no MCP servers would be available")
+        return
+    try:
+        # utf-8-sig tolerates a BOM, which Windows editors add readily and
+        # OpenCode itself accepts; strict utf-8 would reject a working config.
+        cfg = json.loads(path.read_text(encoding="utf-8-sig"))
+    except (OSError, ValueError) as exc:
+        log(f"FAILED: opencode.json is not valid JSON: {exc}")
+        return
+
+    servers = ((cfg.get("mcp") or {}).get("servers") or {})
+    if not servers:
+        log("FAILED: no servers declared under mcp.servers")
+        return
+
+    problems = 0
+    for name, spec in sorted(servers.items()):
+        if spec.get("type") == "remote":
+            url = spec.get("url", "?")
+            log(f"    OK    {name:<16} remote {url}")
+            continue
+        argv = spec.get("command") or []
+        if not argv:
+            log(f"    FAILED {name:<15} local server has no command")
+            problems += 1
+            continue
+        exe = argv[0]
+        resolved = shutil.which(exe)
+        if resolved:
+            log(f"    OK    {name:<16} local {exe} ({resolved})")
+        else:
+            log(f"    FAILED {name:<15} local {exe} is not on PATH")
+            problems += 1
+
+    if problems:
+        log(f"FAILED: {problems} MCP server(s) cannot start as configured")
+    else:
+        log(f"PASSED: {len(servers)} MCP server(s) declared and resolvable")
+
+
 def step_verify_mcp(check_only: bool) -> None:
     """Report MCP connection state. Informational: needs network and auth."""
     if check_only:
@@ -471,6 +524,10 @@ def main() -> None:
                              "to the current worktree when PATH is omitted.")
     parser.add_argument("--list-ports", action="store_true",
                         help="print the port registry and exit")
+    parser.add_argument("--verify-mcp", action="store_true",
+                        help="additionally spawn every MCP server to check it "
+                             "connects. Slow (up to ~2 min cold) and leaves "
+                             "child processes behind; off by default.")
     args = parser.parse_args()
 
     _configure_stdio()
@@ -520,8 +577,12 @@ def main() -> None:
     step_port(check)
     log("")
 
-    log("--- MCP verification ---")
-    step_verify_mcp(check)
+    log("--- MCP config ---")
+    step_mcp_config()
+    if args.verify_mcp:
+        log("")
+        log("--- MCP live verification (spawns every server) ---")
+        step_verify_mcp(check)
 
     log("")
     log("Worktree setup complete.")

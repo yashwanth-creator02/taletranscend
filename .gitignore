@@ -41,6 +41,8 @@ dist/
 .vite/
 .eslintcache
 .prettiercache
+__pycache__/
+*.pyc
 
 
 # =========================================================
