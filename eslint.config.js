@@ -13,6 +13,7 @@ export default [
       'playwright-report/**',
       'node_modules/**',
       'functions/**',
+      '.tmp/**',
     ],
   },
   js.configs.recommended, // Base recommended ESLint rules for JS
