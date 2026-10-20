@@ -210,8 +210,14 @@ body {
 
   .insights-metric-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    /* Four 1fr tracks forced the metric cards past the narrow tablet column.
+       Auto-fit keeps 2x2 at 768px and expands to 4-up once there is room. */
+    grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
     gap: var(--space-4);
+  }
+
+  .insights-metric-grid > * {
+    min-width: 0;
   }
 
   .resize-handle {
@@ -222,6 +228,27 @@ body {
     overflow-x: hidden;
     overflow-y: auto;
     height: auto;
+  }
+}
+
+/* Long display names are flex items; without a constrained parent they keep
+   their max-content width and escape the identity card instead of ellipsizing. */
+.identity-info-block {
+  width: 100%;
+  min-width: 0;
+}
+
+#desktop-display-name,
+#mobile-display-name {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* On the narrowest phones the sanctuary nav's Home/Library labels push the
+   Library link past the viewport. Keep the icons and their aria-labels. */
+@media (max-width: 22.5rem) {
+  .sanctuary-nav-bar > div a span {
+    display: none;
   }
 }
 

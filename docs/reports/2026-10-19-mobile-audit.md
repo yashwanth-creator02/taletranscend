@@ -289,3 +289,53 @@ control inside 320×800 and hides the dock and FAB behind it.
   is inert there; the 1280/1440 index captures match the pre-fix layout apart from the animated
   hero illustration. The shelf orb stacking change recorded under F2 is the one intentional
   desktop visual change.
+
+## Second pass — 2026-10-20 (interactive and tablet layout defects)
+
+The first pass measured document-level overflow. This pass re-ran the 11 routes at
+320/360/390/414/768 (55 captures) and added interaction probes for elements hidden at rest
+(toasts, the relic inspector) and for tablet rows that clip without creating document scroll.
+Every shot still reports `scrollWidth == clientWidth`; the fixes below are about content that
+was off-screen _inside_ that stable document, so the first-pass matrix could not see them.
+
+### Fixed
+
+| Ref   | Defect                                                                                                                                           | Change                                                                                                                                       | Measured result                                                                   |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| UI-01 | Home search placeholder clipped at 320–414 (`…trad`, `…tr`)                                                                                      | `src/views/index.html`: placeholder is now `Search tales, tellers…`                                                                          | Full text at 320/360/390/414                                                      |
+| UI-02 | Relic inspector is 510px wide with `white-space: nowrap`; `reliquary.js` adds `.is-visible` on click/touch, so tapping a relic at 320 clipped it | `home.css` mobile rule: `width: min(calc(100vw - var(--space-6)), 20rem)`, `max-width`, `white-space: normal`; `.relic-inspector__row` wraps | Forced-visible probe at 320: plaque 16…304 (288px), content 286px, no page scroll |
+| UI-03 | Toast region sat at `left: -136px` at 320: the later mobile rule set `left/right` but inherited `translateX(-50%)` from the earlier rule         | `components.css` later mobile `.toast-region`: `transform: none`                                                                             | Real toast at 320: region and card 12…308 (296px)                                 |
+| UI-04 | Profile tablet (768) kept Archive/Achievements headers in a row; tab nav reached 781 and the unlocked badge 844                                  | `profile.html`: `sm:flex-row`→`lg:flex-row`, `sm:items-end`→`lg:items-end` on both headers; badge gains `w-fit`                              | 768: tab nav 360…712, badge 360…533, both inside the 328…744 column               |
+| UI-05 | Profile tablet metrics used `repeat(4, 1fr)` in a 368px grid; the fourth card reached 784                                                        | `profile.css`: `repeat(auto-fit, minmax(8.5rem, 1fr))` plus `min-width: 0` on items                                                          | 768: 2×2 cards, 176px each, grid 352…720; `#main-content` scrollWidth 768/768     |
+| UI-06 | Profile tablet display name sized to max-content and escaped the identity card (20…308 against card 48…280)                                      | `profile.css`: `.identity-info-block { width: 100%; min-width: 0 }`; both display-name nodes get `min-width: 0; max-width: 100%`             | Name 73…255 inside the 48…280 card, ellipsizes                                    |
+| UI-07 | Profile sanctuary nav at ≤360: Library link right edge 361, clipped at 320                                                                       | `profile.css` at `max-width: 22.5rem`: hide Home/Library label spans; `profile.html` keeps the icons with `aria-label`                       | 320: links 236…270 and 274…308; both icons visible                                |
+
+The first pass had classified the relic inspector as "hover-only" and the fixed toast regions as
+"no scroll contribution — OK". Both verdicts were incomplete: fixed/hidden elements can be
+off-screen without changing `scrollWidth`, and the inspector is also shown on tap. The second
+pass checks the adopted/visible state, not only the resting state.
+
+### Rechecked and dismissed (not defects)
+
+| Candidate                                                                  | Why it is not a defect                                                                                                                                        |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Library 768 dock "covering" the last row                                   | `fullPage: true` paints the fixed dock at the bottom of the tall image. `#library-main` has `dock-clearance` (144px below 1024), so the row scrolls above it. |
+| Profile header `WANDERING CHRON…`                                          | Intentional Tailwind `truncate` on a long display name; the full name is shown in the identity card.                                                          |
+| Settings nav tabs cut at 320/768                                           | `.settings-sidebar` sets `overflow-x: auto` below 840px; the strip scrolls.                                                                                   |
+| Library era chips (13 at 768), TOC era pills, tale tab strip, profile tabs | Inside `overflow-x: auto` containers; reachable by swipe.                                                                                                     |
+| Shelf/tale/profile ambient orbs, lamp halo, hero backdrop, shine layer     | Decorative bleeds; clipped without document scroll.                                                                                                           |
+| Library sidebar at 320–414, profile `tab-btn--inactive` at x≈358           | Closed off-canvas drawer/modal; not in the visible state.                                                                                                     |
+| Legacy `#toast-container` on profile/login at 320 (`left: -24`)            | Empty pre-adoption placeholder. After `toast.js` adopts it the mobile `.toast-region` rules win: 12…296 at 320.                                               |
+
+### Verification — second pass
+
+- Responsive sweep: 55/55 captures (11 routes × 320/360/390/414/768) report
+  `scrollWidth == clientWidth`. The earlier 1280/1440 desktop captures remain valid: this pass
+  changed no desktop geometry for normal-length content, and the identity-card constraint only
+  prevents long names from escaping the card at any width.
+- `npm run verify`: Prettier, ESLint, token lint, `tsc --noEmit`, and Vitest (103 files,
+  854 passed, 2 skipped) are clean.
+- `npx playwright test --workers=2 --retries=0`: 72 passed, 0 failed (chromium, firefox,
+  mobile-chrome Pixel 7, mobile-safari iPhone 14).
+- Raw data: `.tmp/responsive-audit/metrics.json` (55 shots). The ad-hoc interaction probes were
+  intermediates and were removed after capturing their measurements.

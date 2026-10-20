@@ -774,6 +774,18 @@
     bottom: -36px;
     padding: 2px var(--space-3);
     font-size: 0.625rem;
+    /* The plaque is 510px wide when nowrap, so tapping a relic on a phone
+       showed it clipped off both edges. Cap it to the viewport, give it a
+       predictable width, and let the row wrap (audit UI-02). */
+    width: min(calc(100vw - var(--space-6)), 20rem);
+    max-width: calc(100vw - var(--space-6));
+    white-space: normal;
+  }
+
+  .relic-inspector__row {
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: var(--space-1);
   }
 
   .reliquary-item__pill {

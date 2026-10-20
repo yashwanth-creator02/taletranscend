@@ -1243,6 +1243,10 @@
     left: 0.75rem;
     width: auto;
     max-width: none;
+    /* The earlier .toast-region mobile rule centres with translateX(-50%).
+       Together with this rule's left/right anchors that shift the container
+       half its width off-screen (-136px at 320). Reset it here. */
+    transform: none;
   }
 }
 
