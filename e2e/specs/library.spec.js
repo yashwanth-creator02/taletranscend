@@ -3,6 +3,11 @@ import { test, expect } from '@playwright/test';
 test.describe('Library Page', () => {
   test.beforeEach(async ({ page }) => {
     page.on('pageerror', (err) => console.log('PAGE ERROR:', err.message, err.stack));
+    // checkNewUserGate() in src/utils/navigation.ts replaces the document with
+    // /login.html when tt_has_visited is absent, and every Playwright context
+    // starts with empty localStorage. Seed the flag before any page script runs
+    // so the spec exercises the library instead of the login screen.
+    await page.addInitScript(() => localStorage.setItem('tt_has_visited', 'true'));
     await page.goto('/library.html');
   });
 

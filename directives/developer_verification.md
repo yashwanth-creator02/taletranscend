@@ -62,4 +62,6 @@ Or run individual npm scripts:
 
 - Token lint failures: If `npm run lint:tokens` fails, inspect changed files for hardcoded hex, rgb, or hsl strings. Ensure all colors use CSS custom properties defined in `src/assets/css/tokens.css`.
 - E2E test failures: Playwright tests may require browser binaries. Run `npx playwright install` if browser drivers are missing.
+- E2E redirects to the login screen: every Playwright context starts with empty `localStorage`, so `checkNewUserGate()` in `src/utils/navigation.ts` treats it as a first-time visitor and replaces the document with `/login.html`, leaving the page selectors absent. `e2e/specs/library.spec.js` seeds `tt_has_visited` through `page.addInitScript()` before `goto` to bypass the gate. Any new spec that asserts on page content needs the same seed.
+- E2E data: the library spec reads the live `taletranscend` project through anonymous auth, so it needs the real `.env` credentials and at least one published tale. `.github/workflows/ci.yml` supplies placeholder values (`test-api-key`), which is why the CI e2e job cannot pass as configured.
 - Pre-commit hook: Husky is configured to run lint-staged on staged files automatically.
