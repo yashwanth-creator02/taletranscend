@@ -12,6 +12,7 @@ import {
   buildNotifications,
   buildNav,
 } from '../nav.templates.js';
+import { USER_LINKS } from '../nav.config.js';
 
 describe('Nav Templates', () => {
   describe('buildPrimaryLink', () => {
@@ -158,6 +159,7 @@ describe('Nav Templates', () => {
       expect(html).toContain('id="nav-notifications-container"');
       expect(html).toContain('nav-notifications-float is-hidden');
       expect(html).toContain('id="nav-notifications-btn"');
+      expect(html).toContain('nav-icon-btn nav-notifications-trigger');
       expect(html).toContain('aria-haspopup="dialog"');
       expect(html).toContain('aria-controls="nav-notifications-popover"');
       expect(html).toContain('id="nav-notifications-popover"');
@@ -167,16 +169,23 @@ describe('Nav Templates', () => {
   });
 
   describe('buildNav', () => {
-    it('renders settings navigation icon between search bar and user profile', () => {
+    it('keeps the Settings icon out of the header actions', () => {
       const { headerHtml } = buildNav();
-      expect(headerHtml).toContain('id="nav-settings-btn"');
-      expect(headerHtml).toContain('settings.html');
+      expect(headerHtml).not.toContain('id="nav-settings-btn"');
+      expect(headerHtml).not.toContain('data-lucide="settings"');
+
       const searchIndex = headerHtml.indexOf('id="nav-command-button"');
-      const settingsIndex = headerHtml.indexOf('id="nav-settings-btn"');
       const userIndex = headerHtml.indexOf('id="nav-user"');
       expect(searchIndex).toBeGreaterThan(-1);
-      expect(settingsIndex).toBeGreaterThan(searchIndex);
-      expect(userIndex).toBeGreaterThan(settingsIndex);
+      expect(userIndex).toBeGreaterThan(searchIndex);
+    });
+
+    it('keeps Settings reachable from the account menu', () => {
+      const user = { uid: 'u123', displayName: 'Hero', isAnonymous: false };
+      const html = buildAccountMenu(user, 'index.html', USER_LINKS);
+      expect(USER_LINKS.some((link) => link.href === 'settings.html')).toBe(true);
+      expect(html).toContain('settings.html');
+      expect(html).toContain('>Settings<');
     });
 
     it('returns headerHtml, dockHtml, and paletteHtml with command palette unnested from header', () => {

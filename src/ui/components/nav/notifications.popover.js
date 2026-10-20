@@ -61,11 +61,17 @@ function applyNotificationsVisibility() {
   }
 
   // Nothing left to surface — close the drawer before the trigger goes away.
+  // Capture focus ownership first: hiding the panel may already blur its
+  // controls in some engines, and the fallback must still fire.
+  const hadFocusWithinRoot = root.contains(document.activeElement);
+
   closeNotificationsPopover();
 
-  const active = document.activeElement;
-  if (active instanceof HTMLElement && root.contains(active)) {
-    document.getElementById('nav-settings-btn')?.focus();
+  if (hadFocusWithinRoot) {
+    const fallback =
+      document.getElementById('nav-profile-link') ??
+      document.querySelector('#nav-user .signin-btn');
+    fallback?.focus();
   }
 
   root.classList.remove('nav-notifications-float--pinned');

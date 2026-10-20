@@ -30,12 +30,14 @@ import {
 
 const NOTIFICATIONS_MARKUP = `
   <header id="app-nav">
-    <a id="nav-settings-btn" href="settings.html">Settings</a>
+    <div id="nav-user">
+      <a id="nav-profile-link" href="profile.html">Profile</a>
+    </div>
   </header>
   <div id="nav-notifications-container" class="nav-notifications-float is-hidden">
     <button
       type="button"
-      class="nav-settings-btn nav-notifications-trigger"
+      class="nav-icon-btn nav-notifications-trigger"
       id="nav-notifications-btn"
       aria-label="Chronicle Notices"
       aria-haspopup="dialog"
@@ -110,7 +112,18 @@ describe('notifications.popover', () => {
 
       expect(popover().classList.contains('hidden')).toBe(true);
       expect(trigger().getAttribute('aria-expanded')).toBe('false');
-      expect(document.activeElement).toBe(document.getElementById('nav-settings-btn'));
+      expect(document.activeElement).toBe(document.getElementById('nav-profile-link'));
+    });
+
+    it('moves focus out of the drawer when the last unread notice is read', () => {
+      updateNotificationBadge(1);
+      toggleNotificationsPopover();
+      document.getElementById('nav-notifications-mark-read').focus();
+
+      updateNotificationBadge(0);
+
+      expect(isHidden()).toBe(true);
+      expect(document.activeElement).toBe(document.getElementById('nav-profile-link'));
     });
 
     it('names the trigger after its unread and pinned counts', () => {

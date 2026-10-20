@@ -336,7 +336,7 @@ export function buildNotifications() {
     <div id="nav-notifications-container" class="nav-notifications-float is-hidden">
       <button
         type="button"
-        class="nav-settings-btn nav-notifications-trigger"
+        class="nav-icon-btn nav-notifications-trigger"
         id="nav-notifications-btn"
         title="Chronicle Notices"
         aria-label="Chronicle Notices"
@@ -532,9 +532,6 @@ export function buildCommandPalette() {
 export function buildNav() {
   const current = getCurrentPage();
   const primaryLinks = PRIMARY_LINKS.map((link) => buildPrimaryLink(link, current)).join('');
-  const settingsTarget = resolveHref('settings.html');
-  const isSettingsActive =
-    current === 'settings.html' || current === settingsTarget || settingsTarget === `/${current}`;
 
   return {
     headerHtml: `
@@ -579,18 +576,9 @@ export function buildNav() {
               <i data-lucide="look-up" class="w-4 h-4" aria-hidden="true"></i>
             </button>
 
-            <!-- Notifications live in a floating trigger below the nav bar -->
-
-            <a
-              href="${settingsTarget}"
-              class="nav-settings-btn${isSettingsActive ? ' nav-settings-btn--active' : ''}"
-              id="nav-settings-btn"
-              title="Settings"
-              aria-label="Settings"
-              ${isSettingsActive ? 'aria-current="page"' : ''}
-            >
-              <i data-lucide="settings" class="w-4 h-4" aria-hidden="true"></i>
-            </a>
+            <!-- Notifications live in a floating trigger below the nav bar.
+                 Settings stays reachable from the account menu on the brand
+                 mark and from the command palette. -->
 
             <div id="nav-user" class="flex items-center">
               ${buildUserSkeleton()}

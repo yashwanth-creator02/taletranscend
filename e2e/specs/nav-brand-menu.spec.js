@@ -4,6 +4,10 @@
 // shows a hamburger glyph on hover), stays a plain home link for guests, the
 // wordmark navigates home, and the avatar is a direct link to the profile page.
 //
+// Header-action contract: no standalone Settings icon lives in the header (the
+// account menu and palette own that route), and the quick-tools trigger carries
+// the active theme's full accent treatment at every breakpoint.
+//
 // Firebase auth/firestore network is blocked so nav state is deterministic:
 // each test drives `updateNavUser()` from the page context instead of waiting
 // for a real sign-in. Run with --workers=1 (the dev server transforms the whole
@@ -283,5 +287,88 @@ test.describe('mobile viewport', () => {
     const box = await dropdown.boundingBox();
     expect(box.x).toBeGreaterThanOrEqual(0);
     expect(box.x + box.width).toBeLessThanOrEqual(390);
+  });
+
+  test('icon-only quick-tools trigger is a 38px accent square', async ({ page }) => {
+    await gotoNav(page, '/library.html');
+    await applyNavUser(page, null);
+
+    await expect(page.locator('#nav-settings-btn')).toHaveCount(0);
+
+    const trigger = page.locator('#nav-command-button-mobile');
+    await expect(trigger).toBeVisible();
+    const box = await trigger.boundingBox();
+    expect(Math.round(box.width)).toBe(38);
+    expect(Math.round(box.height)).toBe(38);
+
+    const background = await trigger.evaluate((el) => getComputedStyle(el).backgroundImage);
+    expect(background).toContain('linear-gradient');
+
+    // The accent square + sign-in CTA must not push the header past the viewport.
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth
+    );
+    expect(overflow).toBeLessThanOrEqual(0);
+  });
+});
+
+test.describe('header actions', () => {
+  test('no standalone Settings icon is left in the header', async ({ page }) => {
+    await gotoNav(page, '/library.html');
+    await applyNavUser(page, MEMBER);
+
+    await expect(page.locator('#nav-settings-btn')).toHaveCount(0);
+    await expect(page.locator('#app-nav .nav-actions a[href$="/settings.html"]')).toHaveCount(0);
+    await expect(page.locator('#app-nav .nav-actions [data-lucide="settings"]')).toHaveCount(0);
+
+    // The search trigger and user area remain the header's action pair.
+    await expect(page.locator('#nav-command-button')).toBeVisible();
+    await expect(page.locator('#nav-user #nav-profile-link')).toBeVisible();
+  });
+
+  test('Settings stays reachable from the account menu', async ({ page }) => {
+    await gotoNav(page, '/library.html');
+    await applyNavUser(page, MEMBER);
+
+    await page.locator('#nav-menu-btn').click();
+
+    const settings = page.locator('#user-dropdown a[href$="/settings.html"]');
+    await expect(settings).toBeVisible();
+    await expect(settings).toHaveText(/Settings/);
+  });
+
+  test('quick-tools trigger is filled with the active theme accent', async ({ page }) => {
+    await gotoNav(page, '/library.html');
+    await applyNavUser(page, null);
+
+    for (const theme of ['transcendental', 'dark', 'light']) {
+      await page.evaluate(
+        (value) => document.documentElement.setAttribute('data-app-theme', value),
+        theme
+      );
+
+      const styles = await page.evaluate(() => {
+        const probe = document.createElement('div');
+        probe.style.backgroundImage = 'var(--accent-gradient)';
+        probe.style.color = 'var(--text-on-accent)';
+        document.body.appendChild(probe);
+        const expected = getComputedStyle(probe);
+        const expectedImage = expected.backgroundImage;
+        const expectedColor = expected.color;
+        probe.remove();
+
+        const trigger = getComputedStyle(document.getElementById('nav-command-button'));
+        return {
+          image: trigger.backgroundImage,
+          color: trigger.color,
+          expectedImage,
+          expectedColor,
+        };
+      });
+
+      expect(styles.image, `accent gradient for ${theme}`).toContain(styles.expectedImage);
+      expect(styles.image, `gradient present for ${theme}`).not.toBe('none');
+      expect(styles.color, `on-accent text for ${theme}`).toBe(styles.expectedColor);
+    }
   });
 });
