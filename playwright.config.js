@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
-import fs from 'fs';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -16,7 +16,7 @@ const DEV_PORT = (() => {
     const port = Number.parseInt(raw, 10);
     if (Number.isInteger(port) && port > 0 && port < 65536) return port;
   } catch {
-    // no allocation file
+    // Fall back to 5173 if .dev-port does not exist or is unreadable.
   }
   return 5173;
 })();
@@ -25,38 +25,37 @@ const BASE_URL = `http://127.0.0.1:${DEV_PORT}`;
 
 export default defineConfig({
   testDir: './e2e',
+  timeout: 30 * 1000,
+  expect: {
+    timeout: 5000,
+  },
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
-
   use: {
+    actionTimeout: 0,
     baseURL: BASE_URL,
     trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
   },
 
   projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-      testIgnore: /mobile-shell\.spec\.js/,
     },
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
-      testIgnore: /mobile-shell\.spec\.js/,
     },
     {
-      name: 'mobile-chrome',
+      name: 'Mobile Chrome',
       use: { ...devices['Pixel 7'] },
-      testMatch: /mobile-shell\.spec\.js/,
     },
     {
-      name: 'mobile-safari',
+      name: 'Mobile Safari',
       use: { ...devices['iPhone 14'] },
-      testMatch: /mobile-shell\.spec\.js/,
     },
   ],
 

@@ -216,6 +216,28 @@ html[data-app-theme='transcendental'],
   --book-cover-shadow:
     0 10px 25px rgb(var(--dark-rgb) / 0.4), inset 0 0 0 1px rgb(var(--light-rgb) / var(--a-02));
 
+  /* ══ READING SCENE (Login Vignette) ════════════════════════════════════
+     The Reading Scene on /login is an inline SVG whose every fill is a
+     --scene-* channel reference (src/ui/reading-scene/). Only the tokens the
+     scene currently draws are declared here; each stage of the scene adds its
+     own as it is built. Dark themes read as a lamplit room at night, light as
+     an ink-and-wash plate on vellum.
+     ══════════════════════════════════════════════════════════════════════ */
+  --scene-wood-deep-rgb: 42 26 16; /* Bookcase interiors              */
+  --scene-wood-mid-rgb: 74 47 28; /* Uprights, shelves              */
+  --scene-wood-lit-rgb: 116 77 46; /* Cornice and shelf lips        */
+  --scene-wood-shadow-rgb: 24 14 9; /* Side panel, inner shade       */
+
+  --scene-page-line-rgb: 172 152 120; /* Tooled bands on spines    */
+
+  --scene-spine-navy-rgb: 46 62 92;
+  --scene-spine-teal-rgb: 40 94 94;
+  --scene-spine-rust-rgb: 152 64 41;
+  --scene-spine-mustard-rgb: 188 142 48;
+  --scene-spine-sage-rgb: 94 118 86;
+  --scene-spine-plum-rgb: 94 54 86;
+  --scene-spine-cream-rgb: 206 188 152;
+
   color-scheme: dark;
 }
 
@@ -384,6 +406,15 @@ html[data-app-theme='dark'],
   --book-cover-shadow:
     0 10px 25px rgb(var(--dark-rgb) / 0.45), inset 0 0 0 1px rgb(var(--light-rgb) / var(--a-02));
 
+  /* READING SCENE — Midnight Dark: the same wood, cooled a step and pushed
+     slightly further back so indigo furniture does not compete. */
+  --scene-wood-deep-rgb: 34 22 16;
+  --scene-wood-mid-rgb: 62 42 28;
+  --scene-wood-lit-rgb: 102 72 48;
+  --scene-wood-shadow-rgb: 20 12 8;
+  --scene-spine-navy-rgb: 52 64 104;
+  --scene-spine-plum-rgb: 100 58 98;
+
   color-scheme: dark;
 }
 
@@ -546,6 +577,25 @@ html[data-app-theme='light'],
   --book-cover-meta-val: #ffffff;
   --book-cover-progress-track: rgb(255 255 255 / 0.28);
   --book-cover-shadow: 0 6px 18px rgb(0 0 0 / 0.12), inset 0 0 0 1px rgb(26 31 44 / 0.08);
+
+  /* ══ READING SCENE — Illuminated Light ══════════════════════════════════
+     Same drawing, daylight palette: warmer and lighter walnut so the scene
+     reads as an ink-and-wash plate on vellum instead of a lamplit night room.
+     ══════════════════════════════════════════════════════════════════════ */
+  --scene-wood-deep-rgb: 108 74 46;
+  --scene-wood-mid-rgb: 146 104 64;
+  --scene-wood-lit-rgb: 190 148 98;
+  --scene-wood-shadow-rgb: 86 58 36;
+
+  --scene-page-line-rgb: 164 146 118;
+
+  --scene-spine-navy-rgb: 62 82 116;
+  --scene-spine-teal-rgb: 58 108 106;
+  --scene-spine-rust-rgb: 164 82 56;
+  --scene-spine-mustard-rgb: 196 156 66;
+  --scene-spine-sage-rgb: 112 134 100;
+  --scene-spine-plum-rgb: 112 74 102;
+  --scene-spine-cream-rgb: 216 200 168;
 
   color-scheme: light;
 }

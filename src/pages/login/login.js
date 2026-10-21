@@ -20,7 +20,8 @@ import {
 } from '@fb/index.js';
 import { initAppTheme } from '@config/theme.config.js';
 import { navigateTo, initPageReveal, readyReveal, createLogger, markUserVisited } from '@/utils';
-import { initIcons } from '@ui/icons.js';
+import { initIcons } from '@ui/components/icons.js';
+import { mountReadingScene } from '@ui/components/reading-scene.js';
 import { showToast } from '@ui/components/toast.js';
 
 const log = createLogger('Login');
@@ -188,7 +189,6 @@ function _setupAuthModeToggle() {
  * Sets up Email & Phone form submissions with Firebase Authentication.
  */
 function _setupFormSubmissions() {
-  // Email Form
   const emailForm = document.getElementById('email-login-form');
   emailForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -211,7 +211,6 @@ function _setupFormSubmissions() {
     try {
       if (authMode === 'signup') {
         const user = await registerWithEmail(email, password);
-        // Initialize default user document in Firestore
         try {
           const userRef = refs.user(user.uid);
           await setDoc(
@@ -271,7 +270,6 @@ function _setupFormSubmissions() {
     }
   });
 
-  // Forgot Password Link
   document.getElementById('btn-forgot-password')?.addEventListener('click', async () => {
     const email = document.getElementById('input-email')?.value.trim();
     if (email && email.includes('@')) {
@@ -287,7 +285,6 @@ function _setupFormSubmissions() {
     }
   });
 
-  // Phone Form
   const phoneForm = document.getElementById('phone-login-form');
   phoneForm?.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -306,11 +303,7 @@ function _setupFormSubmissions() {
   });
 }
 
-/**
- * Initializes existing working social login providers (Google and Guest).
- */
 function _setupSocialLogins() {
-  // Google Login
   document.getElementById('btn-google-login')?.addEventListener('click', async () => {
     log.info('Google login initiated');
     toggleButtonLoading('btn-google-login', true);
@@ -329,7 +322,6 @@ function _setupSocialLogins() {
     }
   });
 
-  // Guest Login (Anonymous)
   document.getElementById('btn-guest-login')?.addEventListener('click', async () => {
     log.info('Guest login initiated');
     toggleButtonLoading('btn-guest-login', true);
@@ -347,9 +339,6 @@ function _setupSocialLogins() {
   });
 }
 
-/**
- * Ensures any navigation away from login marks the user as visited.
- */
 function _setupDismissLinks() {
   document.querySelectorAll('a[href]').forEach((link) => {
     link.addEventListener('click', () => {
@@ -358,44 +347,18 @@ function _setupDismissLinks() {
   });
 }
 
-/**
- * Keeps authentication vector illustration aligned with the active theme.
- */
-function _setupResponsiveSvgArt() {
-  const imgEl = document.getElementById('login-visual-img');
-  const sourceEl = document.getElementById('login-visual-source');
-  if (!imgEl) return;
-
-  const updateIllustration = () => {
-    const isLight =
-      typeof document !== 'undefined' &&
-      document.documentElement.getAttribute('data-app-theme') === 'light';
-    const targetSrc = isLight
-      ? '/images/auth/boy-reading-light.svg'
-      : '/images/auth/boy-reading.svg';
-    if (sourceEl) {
-      sourceEl.srcset = targetSrc;
-    }
-    if (imgEl.getAttribute('src') !== targetSrc) {
-      imgEl.src = targetSrc;
-    }
-  };
-
-  updateIllustration();
-  if (typeof window !== 'undefined') {
-    window.addEventListener('appthemechange', updateIllustration);
+function _mountReadingScene() {
+  if (!mountReadingScene()) {
+    log.warn('Reading scene mount point #login-scene not found');
   }
 }
 
-/**
- * Initializes all login page components, tabs, forms, and auth listeners.
- */
 export function initLoginPage() {
   log.info('Login page initialized with split-screen vignette');
   initIcons();
   readyReveal();
 
-  _setupResponsiveSvgArt();
+  _mountReadingScene();
   _setupAuthTabs();
   _setupPasswordToggle();
   _setupAuthModeToggle();
@@ -403,7 +366,6 @@ export function initLoginPage() {
   _setupSocialLogins();
   _setupDismissLinks();
 
-  // If already signed in (non-anonymously), redirect to profile
   const unsubscribe = onAuthStateChanged(auth, (user) => {
     if (user && !user.isAnonymous) {
       log.info('User already authenticated, redirecting to profile');
