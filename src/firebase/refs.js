@@ -181,6 +181,45 @@ export const refs = {
   /** Single deletion request document */
   deletionRequest: (id) => doc(db, PATHS.deletionRequest(id)),
 
+  // ── Reports & Moderation ─────────────────────────────────────────
+
+  /** All reports collection */
+  reports: () => collection(db, PATHS.reports()),
+
+  /** Single report document */
+  report: (id) => doc(db, PATHS.report(id)),
+
+  /** All legacy moderation logs */
+  moderationLogs: () => collection(db, PATHS.moderationLogs()),
+
+  /** Single legacy moderation log document */
+  moderationLog: (id) => doc(db, PATHS.moderationLog(id)),
+
+  /** All admin audit entries */
+  adminAuditLogs: () => collection(db, PATHS.adminAuditLogs()),
+
+  /** Single admin audit entry */
+  adminAuditLog: (id) => doc(db, PATHS.adminAuditLog(id)),
+
+  // ── Author Applications ──────────────────────────────────────────
+
+  /** All author applications */
+  authorApplications: () => collection(db, PATHS.authorApplications()),
+
+  /** Single author application */
+  authorApplication: (id) => doc(db, PATHS.authorApplication(id)),
+
+  // ── Site Configuration ───────────────────────────────────────────
+
+  /** Site-wide configuration document */
+  appConfig: (docId = 'site') => doc(db, PATHS.appConfig(docId)),
+
+  /** All feature flags */
+  featureFlags: () => collection(db, PATHS.featureFlags()),
+
+  /** Single feature flag */
+  featureFlag: (id) => doc(db, PATHS.featureFlag(id)),
+
   // ── Inquiries & Chronicler's Missives ─────────────────────────────
 
   /** All inquiries collection */

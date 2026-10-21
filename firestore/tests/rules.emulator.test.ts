@@ -22,7 +22,7 @@ import {
   type RulesTestEnvironment,
 } from '@firebase/rules-unit-testing';
 import { readFileSync } from 'node:fs';
-import { setDoc, doc, updateDoc, increment, serverTimestamp } from 'firebase/firestore';
+import { setDoc, doc, getDoc, updateDoc, increment, serverTimestamp } from 'firebase/firestore';
 
 const PROJECT_ID = 'taletranscend-rules-test';
 const ROOT = 'v1/taletranscend/projects/v1';
@@ -845,5 +845,287 @@ describe('users/{userId}/readerProgress — legacy documents keep syncing', () =
         { merge: true }
       )
     );
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Admin dashboard role matrix
+//
+// Five roles are exercised explicitly: guest, ordinary user, author,
+// moderator, and administrator. Each capability has at least one allowed and
+// one denied case. These tests are the authority; client-side hiding is never
+// treated as enforcement.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('admin dashboard — five-role rules matrix', () => {
+  const adminCtx = () => testEnv.authenticatedContext('admin-1', { admin: true });
+  const moderatorCtx = () => testEnv.authenticatedContext('mod-1', { moderator: true });
+  const authorCtx = () => testEnv.authenticatedContext('author-1');
+  const userCtx = () => testEnv.authenticatedContext('user-1');
+  const guestCtx = () => testEnv.unauthenticatedContext();
+
+  async function seed(path: string, data: Record<string, unknown>) {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), `${ROOT}/${path}`), data);
+    });
+  }
+
+  describe('adminAuditLogs — append-only, administrator-readable', () => {
+    const entry = () => ({
+      actorId: 'admin-1',
+      actorRole: 'admin',
+      action: 'tale.delete',
+      targetType: 'tale',
+      targetId: 'tale-1',
+      summary: 'Removed a reported tale',
+      createdAt: new Date(),
+    });
+
+    it('an administrator CAN create an audit entry', async () => {
+      const ctx = adminCtx();
+      await assertSucceeds(setDoc(doc(ctx.firestore(), `${ROOT}/adminAuditLogs/log-1`), entry()));
+    });
+
+    it('a moderator CAN create an audit entry', async () => {
+      const ctx = moderatorCtx();
+      await assertSucceeds(
+        setDoc(doc(ctx.firestore(), `${ROOT}/adminAuditLogs/log-1`), {
+          ...entry(),
+          actorId: 'mod-1',
+          actorRole: 'moderator',
+        })
+      );
+    });
+
+    it('a moderator CANNOT write an administrator actor role', async () => {
+      const ctx = moderatorCtx();
+      await assertFails(
+        setDoc(doc(ctx.firestore(), `${ROOT}/adminAuditLogs/log-1`), {
+          ...entry(),
+          actorId: 'mod-1',
+          actorRole: 'admin',
+        })
+      );
+    });
+
+    it('an author, ordinary user, or guest CANNOT create an audit entry', async () => {
+      for (const ctx of [authorCtx(), userCtx(), guestCtx()]) {
+        await assertFails(setDoc(doc(ctx.firestore(), `${ROOT}/adminAuditLogs/log-1`), entry()));
+      }
+    });
+
+    it('an audit entry CANNOT be rewritten or deleted, even by an administrator', async () => {
+      await seed('adminAuditLogs/log-1', entry());
+      const ctx = adminCtx();
+      await assertFails(
+        updateDoc(doc(ctx.firestore(), `${ROOT}/adminAuditLogs/log-1`), { summary: 'edited' })
+      );
+    });
+
+    it('only an administrator CAN read the audit log', async () => {
+      await seed('adminAuditLogs/log-1', entry());
+      await assertSucceeds(getDoc(doc(adminCtx().firestore(), `${ROOT}/adminAuditLogs/log-1`)));
+      await assertFails(getDoc(doc(moderatorCtx().firestore(), `${ROOT}/adminAuditLogs/log-1`)));
+      await assertFails(getDoc(doc(authorCtx().firestore(), `${ROOT}/adminAuditLogs/log-1`)));
+      await assertFails(getDoc(doc(guestCtx().firestore(), `${ROOT}/adminAuditLogs/log-1`)));
+    });
+  });
+
+  describe('authorApplications — applicant creates, administrator decides', () => {
+    const application = (applicantId = 'author-1') => ({
+      applicantId,
+      penName: 'New Scribe',
+      bio: 'I write mythic short fiction.',
+      sampleUrl: 'https://example.com/sample',
+      status: 'pending',
+      createdAt: new Date(),
+    });
+
+    it('an authenticated applicant CAN create a pending application', async () => {
+      const ctx = authorCtx();
+      await assertSucceeds(
+        setDoc(doc(ctx.firestore(), `${ROOT}/authorApplications/app-1`), application())
+      );
+    });
+
+    it('a guest CANNOT create an application, and a user cannot apply as someone else', async () => {
+      await assertFails(
+        setDoc(doc(guestCtx().firestore(), `${ROOT}/authorApplications/app-1`), application())
+      );
+      await assertFails(
+        setDoc(
+          doc(authorCtx().firestore(), `${ROOT}/authorApplications/app-1`),
+          application('someone-else')
+        )
+      );
+    });
+
+    it('staff CAN read an application; an unrelated user CANNOT', async () => {
+      await seed('authorApplications/app-1', application());
+      await assertSucceeds(
+        getDoc(doc(moderatorCtx().firestore(), `${ROOT}/authorApplications/app-1`))
+      );
+      await assertSucceeds(getDoc(doc(adminCtx().firestore(), `${ROOT}/authorApplications/app-1`)));
+      await assertSucceeds(
+        getDoc(doc(authorCtx().firestore(), `${ROOT}/authorApplications/app-1`))
+      );
+      await assertFails(getDoc(doc(userCtx().firestore(), `${ROOT}/authorApplications/app-1`)));
+      await assertFails(getDoc(doc(guestCtx().firestore(), `${ROOT}/authorApplications/app-1`)));
+    });
+
+    it('a moderator CANNOT decide an application; an administrator CAN', async () => {
+      await seed('authorApplications/app-1', application());
+      const decision = {
+        status: 'approved',
+        reviewedAt: new Date(),
+        reviewedBy: 'admin-1',
+        notes: 'Welcome aboard.',
+      };
+      await assertFails(
+        updateDoc(doc(moderatorCtx().firestore(), `${ROOT}/authorApplications/app-1`), {
+          ...decision,
+          reviewedBy: 'mod-1',
+        })
+      );
+      await assertSucceeds(
+        updateDoc(doc(adminCtx().firestore(), `${ROOT}/authorApplications/app-1`), decision)
+      );
+    });
+  });
+
+  describe('users — administrator moderation branch', () => {
+    const profile = () => ({
+      name: 'Reader One',
+      avatarUrl: '',
+      website: '',
+      joinedAt: new Date(),
+      updatedAt: new Date(),
+      createdAt: new Date(),
+    });
+
+    it('an administrator CAN set isBanned; a moderator CANNOT', async () => {
+      await seed('users/target-1', profile());
+      await assertSucceeds(
+        updateDoc(doc(adminCtx().firestore(), `${ROOT}/users/target-1`), {
+          isBanned: true,
+          updatedAt: serverTimestamp(),
+        })
+      );
+      await assertFails(
+        updateDoc(doc(moderatorCtx().firestore(), `${ROOT}/users/target-1`), {
+          isBanned: true,
+          updatedAt: serverTimestamp(),
+        })
+      );
+    });
+
+    it('an ordinary user CANNOT set their own moderation flag', async () => {
+      await seed('users/user-1', profile());
+      await assertFails(
+        updateDoc(doc(userCtx().firestore(), `${ROOT}/users/user-1`), {
+          isBanned: false,
+          updatedAt: serverTimestamp(),
+        })
+      );
+    });
+
+    it('the administrator branch CANNOT rewrite identity fields', async () => {
+      await seed('users/target-1', profile());
+      await assertFails(
+        updateDoc(doc(adminCtx().firestore(), `${ROOT}/users/target-1`), {
+          name: 'Rewritten by an admin',
+          updatedAt: serverTimestamp(),
+        })
+      );
+    });
+  });
+
+  describe('site configuration — administrator only', () => {
+    it('an administrator CAN write appConfig and featureFlags; a moderator CANNOT', async () => {
+      await assertSucceeds(
+        setDoc(doc(adminCtx().firestore(), `${ROOT}/appConfig/site`), { siteName: 'TaleTranscend' })
+      );
+      await assertSucceeds(
+        setDoc(doc(adminCtx().firestore(), `${ROOT}/featureFlags/beta`), { enabled: true })
+      );
+      await assertFails(
+        setDoc(doc(moderatorCtx().firestore(), `${ROOT}/appConfig/site`), { siteName: 'Nope' })
+      );
+      await assertFails(
+        setDoc(doc(moderatorCtx().firestore(), `${ROOT}/featureFlags/beta`), { enabled: false })
+      );
+    });
+
+    it('guests CAN read public configuration but CANNOT write it', async () => {
+      await seed('appConfig/site', { siteName: 'TaleTranscend' });
+      await assertSucceeds(getDoc(doc(guestCtx().firestore(), `${ROOT}/appConfig/site`)));
+      await assertFails(
+        setDoc(doc(guestCtx().firestore(), `${ROOT}/appConfig/site`), { siteName: 'Nope' })
+      );
+    });
+  });
+
+  describe('reports — moderators triage, ordinary users cannot', () => {
+    const report = () => ({
+      reporterId: 'author-1',
+      targetId: 'tale-1',
+      targetType: 'tale',
+      reason: 'This tale violates the archive policy.',
+      status: 'pending',
+      createdAt: new Date(),
+    });
+
+    it('an authenticated reader CAN file a report; a guest CANNOT', async () => {
+      await assertSucceeds(
+        setDoc(doc(authorCtx().firestore(), `${ROOT}/reports/report-1`), report())
+      );
+      await assertFails(setDoc(doc(guestCtx().firestore(), `${ROOT}/reports/report-1`), report()));
+    });
+
+    it('a moderator CAN read and resolve a report; an ordinary user CANNOT read it', async () => {
+      await seed('reports/report-1', report());
+      await assertSucceeds(getDoc(doc(moderatorCtx().firestore(), `${ROOT}/reports/report-1`)));
+      await assertFails(getDoc(doc(userCtx().firestore(), `${ROOT}/reports/report-1`)));
+      await assertSucceeds(
+        updateDoc(doc(moderatorCtx().firestore(), `${ROOT}/reports/report-1`), {
+          status: 'resolved',
+        })
+      );
+      await assertFails(
+        updateDoc(doc(userCtx().firestore(), `${ROOT}/reports/report-1`), { status: 'resolved' })
+      );
+    });
+  });
+
+  describe('deletionRequests — author owns the petition, staff decides', () => {
+    const request = () => ({
+      userId: 'author-1',
+      taleId: 'tale-1',
+      reason: 'Please remove my tale from the archive.',
+      status: 'pending',
+      createdAt: new Date(),
+    });
+
+    it('an author CAN create and read their own petition', async () => {
+      const ctx = authorCtx();
+      await assertSucceeds(
+        setDoc(doc(ctx.firestore(), `${ROOT}/deletionRequests/req-1`), request())
+      );
+      await assertSucceeds(getDoc(doc(ctx.firestore(), `${ROOT}/deletionRequests/req-1`)));
+    });
+
+    it('a moderator CAN approve the petition; an ordinary user CANNOT update it', async () => {
+      await seed('deletionRequests/req-1', request());
+      await assertSucceeds(
+        updateDoc(doc(moderatorCtx().firestore(), `${ROOT}/deletionRequests/req-1`), {
+          status: 'approved',
+        })
+      );
+      await assertFails(
+        updateDoc(doc(userCtx().firestore(), `${ROOT}/deletionRequests/req-1`), {
+          status: 'approved',
+        })
+      );
+    });
   });
 });

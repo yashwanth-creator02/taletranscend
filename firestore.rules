@@ -30,10 +30,24 @@ service cloud.firestore {
         && request.resource.data.authorId == request.auth.uid;
     }
 
-    /** Returns true if the user has an admin or moderator custom claim. */
-    function isAdmin() {
+    /** Returns true for either staff role: administrator or moderator. */
+    function isModerator() {
       return isAuthenticated() &&
         (request.auth.token.admin == true || request.auth.token.moderator == true);
+    }
+
+    /** Returns true if the user has an admin or moderator custom claim.
+        Kept as the backward-compatible staff helper so every existing rule
+        keeps exactly the authority it had before the admin dashboard. */
+    function isAdmin() {
+      return isModerator();
+    }
+
+    /** Returns true only for the administrator role. Used for capabilities
+        that a moderator must not hold: user management, author application
+        decisions, audit-log reads, and site configuration writes. */
+    function isAdministrator() {
+      return isAuthenticated() && request.auth.token.admin == true;
     }
 
     // ── Field validators ──────────────────────────────────────────────
@@ -166,8 +180,22 @@ service cloud.firestore {
           && isValidTimestamp('updatedAt')
           && request.resource.data.size() <= 20;
 
-        // Only owner or admin can delete
-        allow delete: if isOwner(userId) || isAdmin();
+        // Administrator moderation branch. Deliberately narrow: the browser
+        // may set only the profile flags and display role, never profile
+        // identity fields and never custom claims (those are Admin SDK only).
+        // `role` is display data, not authority; see PROGRESS.md D-01/D-05.
+        allow update: if isAdministrator()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+               'isBanned', 'isVerifiedWriter', 'role', 'updatedAt'
+             ])
+          && isValidTimestamp('updatedAt')
+          && (!('isBanned' in request.resource.data) || request.resource.data.isBanned is bool)
+          && (!('isVerifiedWriter' in request.resource.data) || request.resource.data.isVerifiedWriter is bool)
+          && (!('role' in request.resource.data)
+              || request.resource.data.role in ['user', 'author', 'moderator', 'admin']);
+
+        // Only owner or staff can delete
+        allow delete: if isOwner(userId) || isModerator();
 
         // ═══════════════════════════════════════════════════════════
         //  PREFERENCES  —  users/{userId}/preferences/{prefId}
@@ -789,8 +817,8 @@ service cloud.firestore {
 
       // MODERATION LOG  —  moderationLogs/{logId}
       match /moderationLogs/{logId} {
-        allow read: if isAdmin();
-        allow create: if isAdmin()
+        allow read: if isModerator();
+        allow create: if isModerator()
           && isValidString('moderatorId', 1, 100)
           && request.resource.data.moderatorId == request.auth.uid
           && isValidString('action', 1, 100)
@@ -798,7 +826,62 @@ service cloud.firestore {
           && isValidString('targetType', 1, 50)
           && isValidString('reason', 1, 1000)
           && isValidTimestamp('createdAt');
-        allow update, delete: if isAdmin();
+        allow update, delete: if isModerator();
+      }
+
+      // ADMIN AUDIT LOG  —  adminAuditLogs/{logId}
+      // Append-only from the client. Both staff roles may create an entry for
+      // actions they perform; only administrators may read the log. Update and
+      // delete are denied so an actor cannot rewrite history.
+      match /adminAuditLogs/{logId} {
+        allow read: if isAdministrator();
+        allow create: if isModerator()
+          && isValidString('actorId', 1, 100)
+          && request.resource.data.actorId == request.auth.uid
+          && isValidString('actorRole', 1, 20)
+          && request.resource.data.actorRole in ['admin', 'moderator']
+          && ((request.auth.token.admin == true
+                && request.resource.data.actorRole == 'admin')
+              || (request.auth.token.moderator == true
+                && request.resource.data.actorRole == 'moderator'))
+          && isValidString('action', 1, 100)
+          && isValidString('targetType', 1, 50)
+          && isValidString('targetId', 0, 200)
+          && isValidString('summary', 0, 1000)
+          && isValidTimestamp('createdAt')
+          && request.resource.data.size() <= 10;
+        allow update, delete: if false;
+      }
+
+      // AUTHOR APPLICATIONS  —  authorApplications/{applicationId}
+      // An applicant creates their own pending application. Staff may read it;
+      // only an administrator may decide it. The decision fields are the only
+      // mutable keys, and the decision must be approved or rejected.
+      match /authorApplications/{applicationId} {
+        allow read: if isModerator()
+          || (isAuthenticated() && resource.data.applicantId == request.auth.uid);
+
+        allow create: if isAuthenticated()
+          && request.resource.data.applicantId == request.auth.uid
+          && isValidString('penName', 1, 100)
+          && isValidString('bio', 1, 2000)
+          && isValidUrl('sampleUrl')
+          && isValidString('status', 1, 20)
+          && request.resource.data.status == 'pending'
+          && isValidTimestamp('createdAt')
+          && request.resource.data.size() <= 12;
+
+        allow update: if isAdministrator()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+               'status', 'reviewedAt', 'reviewedBy', 'notes'
+             ])
+          && request.resource.data.status in ['approved', 'rejected']
+          && isValidTimestamp('reviewedAt')
+          && isValidString('reviewedBy', 1, 100)
+          && request.resource.data.reviewedBy == request.auth.uid
+          && (!('notes' in request.resource.data) || isValidString('notes', 0, 1000));
+
+        allow delete: if isAdministrator();
       }
 
       // ═════════════════════════════════════════════════════════════
@@ -844,15 +927,18 @@ service cloud.firestore {
       // ═════════════════════════════════════════════════════════════
 
       // APP CONFIG  —  appConfig/{docId}
+      // Publicly readable, administrator-writable. Moderators must not change
+      // site-wide configuration.
       match /appConfig/{docId} {
         allow read: if true;
-        allow write: if isAdmin();
+        allow write: if isAdministrator();
       }
 
       // FEATURE FLAGS  —  featureFlags/{flagId}
+      // Publicly readable, administrator-writable.
       match /featureFlags/{flagId} {
         allow read: if true;
-        allow write: if isAdmin();
+        allow write: if isAdministrator();
       }
     }
 

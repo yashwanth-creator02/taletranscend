@@ -187,6 +187,45 @@ export const PATHS = {
   /** Single deletion request */
   deletionRequest: (id) => `${APP_ROOT}/deletionRequests/${id}`,
 
+  // ── Reports & Moderation ─────────────────────────────────────────
+
+  /** Reader-submitted reports against a tale, comment, or user */
+  reports: () => `${APP_ROOT}/reports`,
+
+  /** Single report */
+  report: (id) => `${APP_ROOT}/reports/${id}`,
+
+  /** Immutable moderation action log (legacy collection) */
+  moderationLogs: () => `${APP_ROOT}/moderationLogs`,
+
+  /** Single moderation log entry */
+  moderationLog: (id) => `${APP_ROOT}/moderationLogs/${id}`,
+
+  /** Append-only admin dashboard audit trail */
+  adminAuditLogs: () => `${APP_ROOT}/adminAuditLogs`,
+
+  /** Single admin audit entry */
+  adminAuditLog: (id) => `${APP_ROOT}/adminAuditLogs/${id}`,
+
+  // ── Author Applications ──────────────────────────────────────────
+
+  /** Reader applications to become a chronicler */
+  authorApplications: () => `${APP_ROOT}/authorApplications`,
+
+  /** Single author application */
+  authorApplication: (id) => `${APP_ROOT}/authorApplications/${id}`,
+
+  // ── Site Configuration ───────────────────────────────────────────
+
+  /** Site-wide configuration document (single doc keyed "site") */
+  appConfig: (docId = 'site') => `${APP_ROOT}/appConfig/${docId}`,
+
+  /** Feature flag collection */
+  featureFlags: () => `${APP_ROOT}/featureFlags`,
+
+  /** Single feature flag */
+  featureFlag: (id) => `${APP_ROOT}/featureFlags/${id}`,
+
   // ── Inquiries & Chronicler's Missives ─────────────────────────────
 
   /** All inquiries collection */
