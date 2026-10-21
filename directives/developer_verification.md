@@ -50,7 +50,7 @@ Or run individual npm scripts:
 - **Deterministic e2e nav state**: `e2e/specs/nav-brand-menu.spec.js` blocks `googleapis|firebaseio`, sets the visit flag, waits for `#nav-user .signin-btn, #nav-user .nav-avatar` (the app's own auth callback settling) and only then drives `updateNavUser()` from the page. Injecting before the callback settles is racy: the late `updateNavUser(null)` overwrites the injected state.
 - **In-page dynamic imports**: Vite's `root` is `src/views`, so source modules are served as `/@fs/<abs path>?t=<mtime>` — a hardcoded `/src/...` URL 404s. Resolve the URL from `performance.getEntriesByType('resource')` so the import shares the app's module instance.
 - **Resource limits**: stop dev servers before the full unit suite and run `npx vitest run --maxWorkers=2`; vitest reports `Timeout waiting for worker to respond` / pool errors when the machine is saturated. Run Playwright with `--workers=1` (each page cold-transforms the whole module graph).
-- **Known failing e2e spec**: `e2e/specs/library.spec.js` times out on `page.goto` in an offline environment — reproduced on unmodified source, so it is environmental, not a regression.
+- **Live-data e2e spec**: `e2e/specs/library.spec.js` asserts on real tale cards, so it needs network access plus the real `.env` credentials. Offline it renders the error grid and the card assertions fail — environmental, not a source regression.
 
 ## Outputs
 
@@ -62,6 +62,5 @@ Or run individual npm scripts:
 
 - Token lint failures: If `npm run lint:tokens` fails, inspect changed files for hardcoded hex, rgb, or hsl strings. Ensure all colors use CSS custom properties defined in `src/assets/css/tokens.css`.
 - E2E test failures: Playwright tests may require browser binaries. Run `npx playwright install` if browser drivers are missing.
-- E2E redirects to the login screen: every Playwright context starts with empty `localStorage`, so `checkNewUserGate()` in `src/utils/navigation.ts` treats it as a first-time visitor and replaces the document with `/login.html`, leaving the page selectors absent. `e2e/specs/library.spec.js` seeds `tt_has_visited` through `page.addInitScript()` before `goto` to bypass the gate. Any new spec that asserts on page content needs the same seed.
 - E2E data: the library spec reads the live `taletranscend` project through anonymous auth, so it needs the real `.env` credentials and at least one published tale. `.github/workflows/ci.yml` supplies placeholder values (`test-api-key`), which is why the CI e2e job cannot pass as configured.
 - Pre-commit hook: Husky is configured to run lint-staged on staged files automatically.
