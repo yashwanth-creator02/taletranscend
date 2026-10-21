@@ -15,7 +15,6 @@
     <meta name="color-scheme" content="dark" />
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="manifest" href="/manifest.webmanifest" />
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="TaleTranscend" />
@@ -422,8 +421,8 @@
                   <div class="flex items-start gap-2">
                     <i data-lucide="sparkles" class="w-3 h-3 text-amber-400 mt-0.5 shrink-0"></i>
                     <p>
-                      <strong class="text-slate-200">Oracle AI Atelier:</strong> Priority access to
-                      Gemini generative title suggestions and prose elevation tools.
+                      <strong class="text-slate-200">Google Gemini Tools:</strong> Priority access
+                      to title suggestions, prose refinement, and continuation tools.
                     </p>
                   </div>
                   <div class="flex items-start gap-2">
@@ -621,7 +620,7 @@
               class="flex gap-4 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0"
             >
               <div class="text-xs sm:text-sm text-slate-500 italic py-6">
-                Consulting the oracle…
+                Loading reading progress…
               </div>
             </div>
           </section>
@@ -1135,8 +1134,7 @@
                       <i data-lucide="info" class="w-3 h-3"></i>
                     </button>
                     <div class="info-tooltip-box">
-                      A short story or lore about you. Used by the Oracle to conjure mythic name
-                      suggestions.
+                      A short biography used by Gemini to suggest names.
                     </div>
                   </div>
                 </div>
@@ -1182,7 +1180,7 @@
                 />
               </div>
 
-              <!-- Oracle AI / Gemini API Key -->
+              <!-- Google API Key -->
               <div class="space-y-1.5 pt-3 border-t border-white/5">
                 <div class="flex items-center justify-between ml-1">
                   <div class="flex items-center gap-2">
@@ -1191,19 +1189,18 @@
                       class="flex items-center gap-2 text-[10px] font-bold text-amber-400 uppercase tracking-[0.15em]"
                     >
                       <i data-lucide="sparkles" class="w-3 h-3 text-amber-400"></i>
-                      Gemini API Key
+                      Google API Key
                     </label>
                     <div class="info-tooltip-wrap">
                       <button
                         type="button"
                         class="p-0.5 text-slate-500 hover:text-amber-400 transition-colors cursor-help"
-                        aria-label="Gemini API Key info"
+                        aria-label="Google API Key info"
                       >
                         <i data-lucide="info" class="w-3 h-3"></i>
                       </button>
                       <div class="info-tooltip-box">
-                        Personal Google AI Studio API key used to generate AI name suggestions and
-                        mythic lore refinements without limits.
+                        Personal Google AI Studio key used for name suggestions and text refinement.
                       </div>
                     </div>
                   </div>
@@ -1221,10 +1218,10 @@
                   <input
                     type="password"
                     id="input-gemini-key"
-                    aria-label="Gemini API Key"
+                    aria-label="Google API Key"
                     autocomplete="off"
                     class="input-mythic w-full rounded-xl px-4 py-3 text-xs pr-28 font-mono placeholder:font-sans placeholder:text-sm"
-                    placeholder="Enter your Gemini API key (AIzaSy…)"
+                    placeholder="Enter your Google API Key (AIzaSy…)"
                   />
                   <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
                     <button
@@ -1238,7 +1235,7 @@
                     <button
                       type="button"
                       id="btn-save-gemini-key"
-                      aria-label="Save Gemini API key"
+                      aria-label="Save Google API Key"
                       class="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 hover:bg-amber-500/25 hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer active:scale-95 shadow-sm"
                     >
                       Save
@@ -1246,8 +1243,8 @@
                   </div>
                 </div>
                 <p class="text-[10px] text-slate-500 ml-1">
-                  Stored securely in your browser's local storage. Powers AI name suggestions and
-                  text refinement.
+                  Stored only in your browser's local storage. Powers name suggestions and text
+                  refinement.
                 </p>
               </div>
             </div>

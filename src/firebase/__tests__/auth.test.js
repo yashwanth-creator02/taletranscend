@@ -12,6 +12,16 @@ vi.mock('firebase/auth', () => ({
   GoogleAuthProvider: vi.fn(),
   signInWithPopup: vi.fn(),
   linkWithPopup: vi.fn(),
+  signInWithEmailAndPassword: vi.fn(),
+  createUserWithEmailAndPassword: vi.fn(),
+  sendPasswordResetEmail: vi.fn(),
+  deleteUser: vi.fn(),
+  EmailAuthProvider: {
+    credential: vi.fn(() => ({ providerId: 'password' })),
+  },
+  linkWithCredential: vi.fn(),
+  reauthenticateWithCredential: vi.fn(),
+  updatePassword: vi.fn(),
   setPersistence: vi.fn(() => Promise.resolve()),
   browserLocalPersistence: 'local',
   browserSessionPersistence: 'session',
@@ -21,6 +31,8 @@ import {
   initAuth,
   signInWithGoogle,
   upgradeAnonymousToGoogle,
+  upgradeAnonymousToEmail,
+  updateUserPassword,
   setRememberPreference,
   signOutAndForget,
 } from '../auth.js';
@@ -31,6 +43,10 @@ import {
   linkWithPopup,
   signOut,
   setPersistence,
+  EmailAuthProvider,
+  linkWithCredential,
+  reauthenticateWithCredential,
+  updatePassword,
 } from 'firebase/auth';
 
 vi.mock('../app.js', () => ({
@@ -242,6 +258,70 @@ describe('firebase/auth', () => {
       const user = await upgradeAnonymousToGoogle();
       expect(user).toBe(mockUser);
       expect(linkWithPopup).toHaveBeenCalledWith(mockUser, expect.anything());
+    });
+  });
+
+  describe('upgradeAnonymousToEmail', () => {
+    it('throws error if no current user', async () => {
+      mockAuth.currentUser = null;
+      await expect(upgradeAnonymousToEmail('scribe@example.com', 'password123')).rejects.toThrow(
+        'No user is currently signed in.'
+      );
+    });
+
+    it('throws when the current account is already secured', async () => {
+      mockAuth.currentUser = { uid: 'u5', isAnonymous: false, email: 'scribe@example.com' };
+      await expect(upgradeAnonymousToEmail('other@example.com', 'password123')).rejects.toThrow(
+        'This chronicle is already secured with another sign-in method.'
+      );
+    });
+
+    it('links an email credential to the anonymous user', async () => {
+      const anonymousUser = { uid: 'u6', isAnonymous: true };
+      const linkedUser = {
+        uid: 'u6',
+        isAnonymous: false,
+        email: 'scribe@example.com',
+        providerData: [{ providerId: 'password' }],
+      };
+      mockAuth.currentUser = anonymousUser;
+      linkWithCredential.mockResolvedValueOnce({ user: linkedUser });
+
+      const user = await upgradeAnonymousToEmail('scribe@example.com', 'password123');
+
+      expect(EmailAuthProvider.credential).toHaveBeenCalledWith(
+        'scribe@example.com',
+        'password123'
+      );
+      expect(linkWithCredential).toHaveBeenCalledWith(anonymousUser, {
+        providerId: 'password',
+      });
+      expect(user).toBe(linkedUser);
+    });
+  });
+
+  describe('updateUserPassword', () => {
+    it('throws when no email account is signed in', async () => {
+      mockAuth.currentUser = { uid: 'u7', email: null };
+      await expect(updateUserPassword('oldpass123', 'newpass123')).rejects.toThrow(
+        'No email account is currently signed in.'
+      );
+    });
+
+    it('reauthenticates before updating the password', async () => {
+      const user = { uid: 'u8', email: 'scribe@example.com' };
+      mockAuth.currentUser = user;
+      reauthenticateWithCredential.mockResolvedValueOnce({ user });
+      updatePassword.mockResolvedValueOnce();
+
+      const result = await updateUserPassword('oldpass123', 'newpass123');
+
+      expect(EmailAuthProvider.credential).toHaveBeenCalledWith('scribe@example.com', 'oldpass123');
+      expect(reauthenticateWithCredential).toHaveBeenCalledWith(user, {
+        providerId: 'password',
+      });
+      expect(updatePassword).toHaveBeenCalledWith(user, 'newpass123');
+      expect(result).toBe(user);
     });
   });
 });

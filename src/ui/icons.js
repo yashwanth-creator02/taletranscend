@@ -62,6 +62,7 @@ async function _loadIcons() {
     ArrowLeft: L.ArrowLeft,
     ArrowRight: L.ArrowRight,
     ArrowUp: L.ArrowUp,
+    ArrowUpRight: L.ArrowUpRight,
     ArrowDown: L.ArrowDown,
     ArrowDownUp: L.ArrowDownUp,
     ArrowUpDown: L.ArrowUpDown,
@@ -161,6 +162,7 @@ async function _loadIcons() {
     Tag: L.Tag,
     MapPin: L.MapPin,
     // Effects & Decoration
+    Sparkle: L.Sparkle,
     Sparkles: L.Sparkles,
     WandSparkles: L.WandSparkles,
     Wand2: L.Wand2,

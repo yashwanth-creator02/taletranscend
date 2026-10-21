@@ -72,7 +72,7 @@ describe('geminiModal component', () => {
       const badge = document.getElementById('gemini-modal-status-badge');
 
       expect(input?.value).toBe('AIzaSyExistingKey123');
-      expect(badge?.textContent).toBe('Configured (Securely Stored)');
+      expect(badge?.textContent).toBe('Configured');
       expect(badge?.className).toContain('text-emerald-400');
     });
   });
@@ -163,7 +163,7 @@ describe('geminiModal component', () => {
       expect(storedKey).toBe('AIzaSyNewSavedKey');
       expect(modal.classList.contains('hidden')).toBe(true);
       expect(toastModule.showToast).toHaveBeenCalledWith(
-        'Gemini API key stored securely in local storage.',
+        'Google API Key stored securely in local storage.',
         'success'
       );
       expect(eventSpy).toHaveBeenCalled();
@@ -193,7 +193,7 @@ describe('geminiModal component', () => {
       const modal = document.getElementById('modal-gemini-key');
       expect(modal.classList.contains('hidden')).toBe(true);
 
-      expect(toastModule.showToast).toHaveBeenCalledWith('Gemini API key deleted.', 'info');
+      expect(toastModule.showToast).toHaveBeenCalledWith('Google API Key deleted.', 'info');
       expect(eventSpy).toHaveBeenCalled();
     });
   });
@@ -203,7 +203,7 @@ describe('geminiModal component', () => {
       showMissingGeminiKeyToast();
 
       expect(toastModule.showToast).toHaveBeenCalledWith(
-        'Gemini API key is missing. AI features require your personal API key.',
+        'Google API Key is missing. AI features require your personal key.',
         expect.objectContaining({
           type: 'warning',
           action: expect.objectContaining({

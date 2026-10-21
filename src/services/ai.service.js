@@ -1,5 +1,5 @@
 // src/services/ai.service.js
-// Centralized AI Oracle Service.
+// Centralized AI service.
 // Interface for all generative and assistive features.
 
 import { createLogger } from '@/utils';

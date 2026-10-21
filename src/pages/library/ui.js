@@ -241,7 +241,7 @@ export function showGridEmpty(message = 'No tales found in the archives.') {
         class="group inline-flex items-center gap-2.5 px-6 py-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-bold uppercase tracking-wider hover:bg-indigo-500/20 hover:text-white transition-all shadow-lg shadow-indigo-500/10"
       >
         <i data-lucide="search" class="w-3.5 h-3.5 group-hover:scale-110 transition-transform"></i>
-        Consult the Oracle
+        Search the Archive
       </button>
     </div>
   `;

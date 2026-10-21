@@ -68,7 +68,7 @@ One-line duty for every file tracked by git in this repository, grouped by area 
 - `directives/firestore_management.md` — Agent directive governing Firestore paths, indexes, security rules, seeding, and the Chronicle Preservation Policy.
 - `directives/mcp_servers.md` — Agent directive governing project-local MCP server setup and troubleshooting for Chrome DevTools, Firebase, and Vercel.
 - `directives/navigation_routing_and_sitemaps.md` — Agent directive governing hierarchical clean URLs, resolveHref safety, sitemaps, and fixed-overlay stacking rules.
-- `directives/profile_and_oracle_ai.md` — Agent directive governing the chronicler profile, client-side Gemini key storage, Oracle AI features, and tooltips.
+- `directives/profile_and_google_api_key.md` — Agent directive governing the chronicler profile, client-side Gemini key storage, Google API key features, and tooltips.
 - `directives/tale_interactions_and_comments.md` — Agent directive governing tale hero actions (including the cover's shelf shortcut), resonance, downloads, comment trees, missives, and the tale 404 screen.
 
 ## Project Documentation
@@ -104,7 +104,7 @@ One-line duty for every file tracked by git in this repository, grouped by area 
 - `src/views/profile.html` — Chronicler profile shell with back pill, identity pillar, scribe registry card and sign-out; loads `../pages/profile/profile.js`.
   > > > > > > > feat/comprehensive-improvements
 - `src/views/reader.html` — Distraction-free reader shell whose `#app` carries `reader-surface` and `data-reader-theme`; loads `../pages/reader/reader.js`.
-- `src/views/settings.html` — Settings shell with back button, settings search, sidebar sections and section views; loads `../pages/settings/settings.js`.
+- `src/views/settings.html` — Settings shell with back button, settings search, a seven-section contents sidebar (Profile, General & Theme, Reader, Atmosphere & Motion, Archival Storage, Accounts, About TaleTranscend) and section views, including the Accounts identity, guest-elevation and password panels; loads `../pages/settings/settings.js`.
 - `src/views/shelf.html` — Scribe's Vault shell for drafts, fragments and published chronicles; loads `../pages/shelf/shelf.js` plus tale-cards styles.
 - `src/views/tale.html` — Tale detail shell for chapters, resonance and discussion, plus a hero cover with a "View Shelf" shortcut revealed while the tale is on the visitor's shelf; loads `../pages/tale/tale.js`.
 - `src/views/toc.html` — HTML sitemap shell with archive stats, portal cards and chronicle index; loads `../pages/toc/toc.js`.
@@ -232,8 +232,8 @@ Each directory under `src/pages/` holds the JavaScript for one HTML shell in `sr
 
 ### Settings (`src/pages/settings`)
 
-- `src/pages/settings/settings.js` — Settings page controller: section navigation and search, profile save to Firestore, reader/app theme and typography controls, toggles, Gemini API key modal.
-- `src/pages/settings/__tests__/settings.test.js` — Vitest tests for `src/pages/settings/settings.js` — saved settings, section switching, search filtering, preview updates, theme/font rendering, profile save, Gemini key modal, app themes.
+- `src/pages/settings/settings.js` — Settings page controller: section navigation and search, profile save to Firestore, reader/app theme and typography controls, toggles, Gemini API key modal, archival storage listing, and the Accounts panel (guest elevation by email/password or Google, read-only email display, password update and reset).
+- `src/pages/settings/__tests__/settings.test.js` — Vitest tests for `src/pages/settings/settings.js` — saved settings, section switching, search filtering, preview updates, theme/font rendering, profile save, Gemini key modal, app themes, storage archive listing, and Accounts guest/elevation/password states.
 
 ### Login (`src/pages/login`)
 
@@ -326,7 +326,7 @@ Global UI layer: the icon registry, shared components, and the nav shell; each c
 Business logic and data access (Firestore, localStorage, external APIs); pages and components consume them, usually through the `src/services/index.js` barrel. Tests live in `__tests__/` folders next to the code.
 
 - `src/services/admin.service.js` — Admin service checking admin/moderator claims and reviewing deletionRequests: approve, reject, or force-delete chronicles.
-- `src/services/ai.service.js` — Gemini AI Oracle: suggestTitle, refineMythicText, and generateTaleContinuation via gemini-2.0-flash with sanitization and retries.
+- `src/services/ai.service.js` — Gemini AI service: suggestTitle, refineMythicText, and generateTaleContinuation via gemini-2.0-flash with sanitization and retries.
 - `src/services/ai/apiKey.storage.js` — localStorage helper for the BYOK Gemini API key (key: tt-gemini-api-key) with get/set/clear and env fallback.
 - `src/services/auth-memory.storage.js` — Explicit auth memory (key `tt_auth`) recorded on the login page and on restored sessions: durable (localStorage) or session-only (sessionStorage), never downgraded or upgraded by a restored session, cleared on sign-out; a failed write leaves the previous memory intact. This is what the first-visit login gate reads.
 - `src/services/author.service.js` — Scribe registration: author status from users/{uid}, schema-validated registration, mirrored to localStorage key `tt_author_{uid}`.
@@ -388,13 +388,13 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 ## Firebase Layer (`src/firebase`)
 
 - `src/firebase/app.js` — Initializes the Firebase app once and starts global network listeners; default-exports the app.
-- `src/firebase/auth.js` — Exports the auth instance plus initAuth anonymous bootstrap (which records restored accounts in the auth memory without changing an existing record's scope), setRememberPreference for the Keep-me-signed-in scope, signOutAndForget, Google/email sign-in, anonymous linking, password reset, and account deletion.
+- `src/firebase/auth.js` — Exports the auth instance plus initAuth anonymous bootstrap (which records restored accounts in the auth memory without changing an existing record's scope), setRememberPreference for the Keep-me-signed-in scope, signOutAndForget, Google/email sign-in, anonymous linking to Google or email/password, password update and reset, and account deletion.
 - `src/firebase/db.js` — Creates the shared Firestore instance and re-exports Firestore SDK utilities as the single import surface.
 - `src/firebase/index.js` — Barrel re-exporting auth helpers, db helpers, refs, PATHS, APP_ROOT, and appId from the Firebase layer.
 - `src/firebase/paths.js` — PATHS factory map defining every Firestore path string under APP_ROOT v1/taletranscend/projects/v1.
 - `src/firebase/refs.js` — refs factory map building Firestore doc/collection references from PATHS entries (tales, users, drafts, progress, etc.).
 - `src/firebase/__tests__/app.test.js` — Vitest tests for `src/firebase/app.js` — initializeApp is called with a mocked Firebase SDK.
-- `src/firebase/__tests__/auth.test.js` — Vitest tests for `src/firebase/auth.js` — initAuth existing/anonymous/restored-session flows, the auth memory it writes, setRememberPreference persistence scopes, signOutAndForget, and signInWithGoogle/upgradeAnonymousToGoogle.
+- `src/firebase/__tests__/auth.test.js` — Vitest tests for `src/firebase/auth.js` — initAuth existing/anonymous/restored-session flows, the auth memory it writes, setRememberPreference persistence scopes, signOutAndForget, signInWithGoogle/upgradeAnonymousToGoogle, email/password anonymous linking, and password updates after re-authentication.
 - `src/firebase/__tests__/db.test.js` — Vitest tests for `src/firebase/db.js` — Firestore instance creation and SDK utility re-exports.
 - `src/firebase/__tests__/index.test.js` — Vitest tests for `src/firebase/index.js` — the barrel exposes auth, db, and refs.
 - `src/firebase/__tests__/paths.test.js` — Vitest tests for `src/firebase/paths.js` — every PATHS builder returns the expected path string.
@@ -508,7 +508,7 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `src/assets/css/pages/login.css` — Styles the login split screen: reading-vignette art column, tabbed auth card, inputs and alternate buttons.
 - `src/assets/css/pages/profile.css` — Styles the profile sanctuary: identity pillar, avatar frame, scribe registry card and responsive columns.
 - `src/assets/css/pages/reader.css` — Styles the reader layout, top bar, sidebar tools, panels and typography variables that the reader themes drive.
-- `src/assets/css/pages/settings.css` — Styles the settings page top bar, sidebar navigation, setting rows and responsive section views.
+- `src/assets/css/pages/settings.css` — Styles the settings page chrome (library-vellum top bar and contents sidebar), setting rows and cards, theme/font specimens, archival storage list, Accounts panels and responsive section views.
 - `src/assets/css/pages/shelf.css` — Styles the shelf/vault cards and layout while suppressing the global nav and mobile dock on that page.
 - `src/assets/css/pages/tale-cards.css` — Shared compact tale-card styling, imported by the taleCard component and the shelf page.
 - `src/assets/css/pages/tale.css` — Styles the tale detail page: ambient orbs, cover header, chapter list, stats and discussion surfaces.
@@ -565,6 +565,7 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `scripts/lint-tokens.mjs` — Fails the build when raw hex/rgba/hsl colour literals appear in src CSS outside tokens.css and reader-themes.css.
 - `scripts/seed-tales.mjs` — One-off seeder signing in anonymously and upserting 24 sample folklore tales with chapters into Firestore; npm run seed:tales.
 - `execution/run_verify.py` — Deterministic verification runner executing format check, token lint, ESLint, type-check and unit tests, aborting on first failure.
+- `execution/capture_settings_sections.mjs` — Playwright runner capturing every settings section at a configurable viewport and theme into `.tmp/settings-redesign/<theme>/`, seeding the visited flag and app theme so the onboarding gate cannot redirect captures to login; supports `SETTINGS_PORT`, `SETTINGS_THEME`, `SETTINGS_WIDTH`, `SETTINGS_HEIGHT`, `SETTINGS_OUT` and `SETTINGS_SEED_STORAGE`.
 - `execution/verify_author_flows.py` — Runner of token lint, type-check and targeted Vitest suites for author service, inquire, publish, profile-sync and validation.
 - `execution/verify_interactions_and_profile.py` — Runner of token lint, type-check and Vitest suites for navigation/bfcache, tale hero interactions, profile UI, downloads and AI service.
 - `execution/verify_navigation_and_ui.py` — Runner enforcing index-only footer and brand-asset checks, then token lint, type-check and navigation/nav/toast/toc suites.

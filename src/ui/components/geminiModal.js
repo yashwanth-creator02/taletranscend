@@ -1,6 +1,6 @@
 // src/ui/components/geminiModal.js
 /**
- * Global Mythic Modal for entering and managing the Google Gemini API Key.
+ * Global modal for entering and managing the Google API Key.
  *
  * Provides a centralized, accessible dialog available from any page in the MPA.
  * Integrates directly with the centralized toast notification system so missing
@@ -32,8 +32,8 @@ const MODAL_HTML = `
             <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
           </div>
           <div>
-            <h3 id="modal-gemini-title" class="gemini-modal-title settings-modal-title">Google Gemini API Key</h3>
-            <p class="gemini-modal-sub settings-modal-sub">Oracle AI & Manuscript Intelligence</p>
+            <h3 id="modal-gemini-title" class="gemini-modal-title settings-modal-title">Google API Key</h3>
+            <p class="gemini-modal-sub settings-modal-sub">Story titles, names, and lore suggestions</p>
           </div>
         </div>
         <button
@@ -50,11 +50,10 @@ const MODAL_HTML = `
         <div class="gemini-info-box settings-info-box">
           <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
           <div class="text-xs text-slate-300 space-y-1">
-            <p class="font-semibold text-slate-100">Private Archival Storage</p>
+            <p class="font-semibold text-slate-100">Stored locally</p>
             <p class="text-slate-400 text-[11px] leading-relaxed">
-              Your key is stored strictly on your device inside your browser's private local
-              storage. It is never transmitted to TaleTranscend servers, and only communicates
-              directly with Google's Gemini API endpoints.
+              Your key is stored only in this browser's local storage. It is never sent to
+              TaleTranscend servers, and it communicates directly with Google's Gemini API.
             </p>
           </div>
         </div>
@@ -62,7 +61,7 @@ const MODAL_HTML = `
         <div class="space-y-1.5">
           <div class="flex items-center justify-between">
             <label for="input-gemini-key-modal" class="text-xs font-semibold text-slate-200">
-              Gemini API Key
+              Google API Key
             </label>
             <a
               href="https://aistudio.google.com/app/apikey"
@@ -87,7 +86,7 @@ const MODAL_HTML = `
               type="button"
               id="btn-toggle-modal-key"
               class="gemini-modal-toggle-btn settings-modal-toggle-btn"
-              aria-label="Toggle API key visibility"
+              aria-label="Toggle Google API Key visibility"
             >
               Show
             </button>
@@ -109,7 +108,7 @@ const MODAL_HTML = `
           id="btn-clear-modal-key"
           data-testid="btn-delete-modal-key"
           class="btn-danger text-xs flex items-center gap-1.5"
-          aria-label="Delete stored Gemini API key"
+          aria-label="Delete stored Google API Key"
         >
           <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
           <span>Delete Key</span>
@@ -159,7 +158,7 @@ function _updateStatusBadge(modal) {
   const key = getStoredApiKey();
   if (badge) {
     if (key) {
-      badge.textContent = 'Configured (Securely Stored)';
+      badge.textContent = 'Configured';
       badge.className = 'font-semibold text-emerald-400';
     } else {
       badge.textContent = 'Not Configured';
@@ -216,12 +215,12 @@ function _initModalEvents(modal) {
       setStoredApiKey(val);
       syncKeyToPage(val);
       _updateStatusBadge(modal);
-      showToast('Gemini API key stored securely in local storage.', 'success');
+      showToast('Google API Key stored securely in local storage.', 'success');
     } else {
       clearStoredApiKey();
       syncKeyToPage('');
       _updateStatusBadge(modal);
-      showToast('Gemini API key deleted.', 'info');
+      showToast('Google API Key deleted.', 'info');
     }
     closeModal();
   });
@@ -231,13 +230,13 @@ function _initModalEvents(modal) {
     syncKeyToPage('');
     if (modalInput) modalInput.value = '';
     _updateStatusBadge(modal);
-    showToast('Gemini API key deleted.', 'info');
+    showToast('Google API Key deleted.', 'info');
     closeModal();
   });
 }
 
 /**
- * Opens the global Gemini API Key modal.
+ * Opens the global Google API Key modal.
  */
 export function openGeminiKeyModal() {
   const modal = _ensureModalInDom();
@@ -265,7 +264,7 @@ export function openGeminiKeyModal() {
 }
 
 /**
- * Closes the global Gemini API Key modal.
+ * Closes the global Google API Key modal.
  */
 export function closeGeminiKeyModal() {
   const modal = document.getElementById('modal-gemini-key');
@@ -277,7 +276,7 @@ export function closeGeminiKeyModal() {
 }
 
 /**
- * Displays a toast notification indicating that the Gemini API key is missing,
+ * Displays a toast notification indicating that the Google API Key is missing,
  * with an actionable button ("Tap to add") that opens the global key entry modal.
  *
  * @param {string} [customMessage] - Optional custom toast message
@@ -285,7 +284,7 @@ export function closeGeminiKeyModal() {
  */
 export function showMissingGeminiKeyToast(customMessage) {
   const message =
-    customMessage || 'Gemini API key is missing. AI features require your personal API key.';
+    customMessage || 'Google API Key is missing. AI features require your personal key.';
   return showToast(message, {
     type: 'warning',
     action: {

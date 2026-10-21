@@ -1,14 +1,14 @@
-# Directive: Chronicler Profile, Oracle AI, and Interactive Tooltips
+# Directive: Chronicler Profile, Google API Key, and Interactive Tooltips
 
 ## Goal
 
-Define the standard operating procedures, data contracts, and UI patterns for managing user chronicler identity, client-side Gemini API key persistence, Oracle AI generation and refinement features, and accessible, token-compliant interactive info tooltips.
+Define the standard operating procedures, data contracts, and UI patterns for managing user chronicler identity, client-side Gemini API key persistence, Google API key generation and refinement features, and accessible, token-compliant interactive info tooltips.
 
 ## When this fires
 
 - Updating chronicler profile views, edit modals, or tabs (`src/pages/profile/`, `src/views/profile.html`).
-- Managing Gemini API key inputs, visibility toggles, or save actions (`src/services/ai/apiKey.storage.js`).
-- Implementing or adjusting Oracle AI features (display name suggestions, lore refinement).
+- Managing Google API Key inputs, visibility toggles, or save actions (`src/services/ai/apiKey.storage.js`).
+- Implementing or adjusting Google API key features (display name suggestions, lore refinement).
 - Adding or positioning section-level or field-level interactive info tooltips (`.info-tooltip-wrap`, `.info-tooltip-box`).
 
 ## Inputs
@@ -36,7 +36,7 @@ Define the standard operating procedures, data contracts, and UI patterns for ma
   - **Achievements Section (`#profile-achievements-section`)**: Located directly below The Archive in the central column. Displays an unlocked milestone counter badge and renders cards for all items in `ACHIEVEMENT_REGISTRY` (`bronze`, `silver`, `gold`, `platinum` tiers) with dynamic progress bars and status shields.
 - **Settings Page Profile Editor (`settings.html#profile`)**:
   - Full-featured chronicler identity configuration embedded in the living archive settings suite.
-  - Divided card rows: Avatar preview & URL, Display Name with Oracle AI name suggester (`#btn-suggest-name`), Reader Moniker / Signature (`#setting-reader-moniker`), Lore & Bio (stacked layout `.settings-row--stacked` positioned cleanly below the sideheading with live character counter `#bio-char-count`), Pronouns, Location / Realm, Favourite Genre chips (`#genre-selector`), Yearly Reading Milestone, Social URLs, and Oracle AI & Gemini Key configuration via popup modal dialog (`#modal-gemini-key`).
+  - Divided card rows: Avatar preview & URL, Display Name with Gemini name suggester (`#btn-suggest-name`), Reader Moniker / Signature (`#setting-reader-moniker`), Lore & Bio (stacked layout `.settings-row--stacked` positioned cleanly below the sideheading with live character counter `#bio-char-count`), Pronouns, Location / Realm, Favourite Genre chips (`#genre-selector`), Yearly Reading Milestone, Social URLs, and Google API Key configuration via popup modal dialog (`#modal-gemini-key`).
   - Form commits directly to Firestore `refs.user(uid)` validated against `UserProfileSchema` via `validateData`.
 
 ### 2. Gemini API Key Storage & Popup Modal Window
@@ -47,8 +47,10 @@ Define the standard operating procedures, data contracts, and UI patterns for ma
 - **Global Modal Window & Toast Action UX**:
   - A centralized, global popup modal (`src/ui/components/geminiModal.js`) is mounted dynamically on any page across the MPA when requested.
   - On the Settings page, the clean status badge (`#gemini-key-status`: "Key Configured" vs "Not Configured") and trigger button (`#btn-open-gemini-key-modal`: "Manage Key" vs "Configure Key") open the dialog.
-  - When the Gemini API key is missing during an AI invocation anywhere across the application (e.g. Scribe's Atelier, Profile name conjuring), `showMissingGeminiKeyToast()` triggers a warning toast with an actionable `"Tap to add"` button that summons the global modal.
-  - Explanatory security callout (`.gemini-info-box` / `.settings-info-box`) informs the user of private on-device archival storage and direct-to-Google communication.
+  - When the Google API Key is missing during an AI invocation anywhere across the application (for example contribution tools or Profile name suggestions), `showMissingGeminiKeyToast()` triggers a warning toast with an actionable `"Tap to add"` button that summons the global modal.
+  - User-facing copy calls this the "Google API Key"; `Gemini` is used only when naming the underlying Google service.
+  - Triggering the button opens an accessible modal dialog (`#modal-gemini-key`) with backdrop blur.
+  - Explanatory security callout (`.settings-info-box`) explains that the key is stored locally in the browser and communicates directly with Google.
   - Direct external link to Google AI Studio to easily retrieve or generate a free API key.
   - Interactive password visibility toggle button (`#btn-toggle-modal-key`: "Show" / "Hide").
   - Dedicated **Delete Key** button (`#btn-clear-modal-key` / `data-testid="btn-delete-modal-key"`) with `trash-2` icon and danger styling alongside Save Key (`#btn-save-modal-key`) and Cancel (`#btn-cancel-modal-key`).
@@ -57,18 +59,18 @@ Define the standard operating procedures, data contracts, and UI patterns for ma
 - **Backwards Compatibility**:
   - Hidden inputs (`#input-gemini-key`, `#btn-toggle-gemini-key`, `#btn-save-gemini-key`) and `#btn-clear-modal-key` are maintained to ensure legacy scripts and test suites remain 100% interoperable.
 
-### 3. Oracle AI Integration (Names & Text Refinement)
+### 3. Google API Key Integration (Names & Text Refinement)
 
 - **Bio-Driven Name Suggestions**:
   - Header of the Display Name field provides `#btn-suggest-name`.
   - When clicked, inspects the current bio field (`#input-bio`).
   - Invokes `generateMythicNameSuggestions(bio, apiKey)` from `src/services/ai.service.js`.
   - If no custom API key is stored, gracefully falls back to system suggestions or informs the user to provide a key.
-- **Contribution Atelier Oracle AI Suite**:
-  - In `contribution.html`, authors can access the dedicated Oracle AI assistance panel (`#oracle-ai-panel`):
-    - "Suggest Title" (`#btn-oracle-title`): Analyzes the current story synopsis/content and generates thematic titles using `generateMythicNameSuggestions` or AI completion.
-    - "Elevate Passage" (`#btn-oracle-polish`): Refines selected or active draft prose with mythic diction and cadence using `refineProseWithOracle`.
-    - "Continue Chronicle" (`#btn-oracle-continue`): Extends narrative arcs based on current lore using `generateTaleContinuation`.
+- **Contribution Atelier Google Gemini Suite**:
+  - In `contribution.html`, authors can access the dedicated Google Gemini assistance panel (`#oracle-ai-panel`; internal IDs retain their historical names):
+    - "Suggest Title" (`#oracle-suggest-title-btn`): Analyzes the current story synopsis/content and generates thematic titles using `generateMythicNameSuggestions` or AI completion.
+    - "Refine Passage" (`#oracle-elevate-passage-btn`): Refines selected or active draft prose with elevated diction and cadence using `refineProseWithOracle`.
+    - "Continue Writing" (`#oracle-continue-chronicle-btn`): Extends narrative arcs based on current lore using `generateTaleContinuation`.
   - **Scribe's Primer & Word Goal**:
     - Live word counter and target goal progress shield (`#stat-word-goal-status`) tracking progress against a target of 1,500 words per chapter.
     - Collapsible Scribe's Primer panel (`#scribes-primer-panel`) detailing narrative conventions, chapter formatting, and pacing.
@@ -76,9 +78,9 @@ Define the standard operating procedures, data contracts, and UI patterns for ma
   - Uninitialized or anonymous user profiles must gracefully default to the mythic moniker `Wandering Chronicler` rather than machine placeholders like `User_Name` or empty strings.
   - Profile and chronicle title renders must pass through sanitizing title guards (`_cleanDisplayTitle`) to ensure internal Firestore document IDs (e.g. `user_123abc` or arbitrary hash IDs) are never exposed directly to the reader as document titles.
 - **Avatar Presets Palette**:
-  - In `settings.html`, below `#input-avatar-url`, an avatar preset palette offers instant mythic avatars ("Scribe", "Oracle", "Archivist", "Wanderer") to quickly equip stylized avatars without requiring external image hosting.
+  - In `settings.html`, below `#input-avatar-url`, an avatar preset palette offers instant avatars ("Scribe", "Muse", "Archivist", "Wanderer") to quickly equip stylized avatars without requiring external image hosting.
 - **Scribe Registry Guide & Application**:
-  - Profile includes a collapsible "What is a Verified Scribe?" disclosure detailing the 4 concrete benefits (Archival Crest, Reader Missives, Oracle Atelier, Eternal Preservation).
+  - Profile includes a collapsible "What is a Verified Scribe?" disclosure detailing the 4 concrete benefits (Archival Crest, Reader Missives, Google Gemini Tools, Eternal Preservation).
   - The Scribe Registry application modal features a 3-step progress shield (Eligibility, Sample Chronicle, Oath) ensuring transparent requirements before submission.
 
 ### 4. Interactive Info Tooltip Standard
@@ -134,11 +136,11 @@ Define the standard operating procedures, data contracts, and UI patterns for ma
 ## Outputs
 
 - Responsive chronicler profile with persisted identity fields across all 4 modal tabs.
-- Local Gemini API key management with explicit save and toggle controls.
+- Local Google API Key management with explicit save and toggle controls.
 - Consistent, non-clipping hover tooltips across all sections and form fields.
 
 ## Edge Cases & Error Handling
 
-- **Invalid or Missing Gemini API Key**: If the API key is missing or rejected by the Gemini API, catch errors, display an informative toast, and do not block manual input.
-- **Empty Bio Name Suggestion**: If the user clicks "Suggest Name" with an empty bio, prompt them to write a brief sentence in their bio to give the Oracle context.
+- **Invalid or Missing Google API Key**: If the API key is missing or rejected by the Gemini API, catch errors, display an informative toast, and do not block manual input.
+- **Empty Bio Name Suggestion**: If the user clicks "Suggest Name" with an empty bio, prompt them to write a brief sentence in their bio to give Gemini context.
 - **Edge Overflow**: Use `.info-tooltip-box--left` or `.info-tooltip-box--right` when tooltips are positioned near screen borders to prevent horizontal page scrolling.

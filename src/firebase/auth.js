@@ -10,6 +10,10 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   linkWithPopup,
+  EmailAuthProvider,
+  linkWithCredential,
+  reauthenticateWithCredential,
+  updatePassword,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
@@ -130,6 +134,48 @@ export async function upgradeAnonymousToGoogle() {
   const provider = new GoogleAuthProvider();
   const result = await linkWithPopup(auth.currentUser, provider);
   return result.user;
+}
+
+/**
+ * Upgrades the current anonymous user to an email/password account.
+ * Links an email credential to the existing anonymous UID so the guest
+ * archive (profile, tales, progress) remains attached.
+ *
+ * @param {string} email
+ * @param {string} password
+ * @returns {Promise<import('firebase/auth').User>}
+ */
+export async function upgradeAnonymousToEmail(email, password) {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error('No user is currently signed in.');
+  }
+  if (!user.isAnonymous) {
+    throw new Error('This chronicle is already secured with another sign-in method.');
+  }
+  const credential = EmailAuthProvider.credential(email, password);
+  const result = await linkWithCredential(user, credential);
+  return result.user;
+}
+
+/**
+ * Changes the password of the signed-in email/password account.
+ * Firebase requires a recent sign-in, so the current password is used to
+ * re-authenticate before the update.
+ *
+ * @param {string} currentPassword
+ * @param {string} newPassword
+ * @returns {Promise<import('firebase/auth').User>}
+ */
+export async function updateUserPassword(currentPassword, newPassword) {
+  const user = auth.currentUser;
+  if (!user?.email) {
+    throw new Error('No email account is currently signed in.');
+  }
+  const credential = EmailAuthProvider.credential(user.email, currentPassword);
+  await reauthenticateWithCredential(user, credential);
+  await updatePassword(user, newPassword);
+  return user;
 }
 
 /**

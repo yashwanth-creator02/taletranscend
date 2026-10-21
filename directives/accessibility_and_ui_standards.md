@@ -39,7 +39,7 @@ Define explicit standards for footer layout isolation, accessible toasting, keyb
   - A dedicated back button (`#settings-back-btn`) that navigates back to the previous address the page was opened from (`history.back()`), falling back gracefully to `/library.html`.
   - A live search filter input (`#settings-search-input`) with clear button (`#settings-search-clear`).
   - System reset trigger (`#btn-reset-settings`).
-- **Sidebar-Row Navigation**: Left sidebar provides a row for each section (`Reader Identity`, `Reading Themes`, `Codex Typography`, `Atmosphere & Motion`, `Archival Storage`, `System & Defaults`, `About Codex`) with smooth scrolling and `IntersectionObserver` scrollspy synchronization.
+- **Sidebar-Row Navigation**: Left sidebar provides a row for each section (`Profile`, `General & Theme`, `Reader`, `Atmosphere & Motion`, `Archival Storage`, `Accounts`, `About TaleTranscend`) with hash-driven section switching and an active-row indicator.
 - **Divided Card Rows**: Settings items are organized into elevated cards with horizontal row dividers, maintaining single-source design token compliance and WCAG accessibility standards.
 
 ### 3. Accessible Toasting System (`src/ui/components/toast.js`)
@@ -90,7 +90,7 @@ The TaleTranscend brand mark is the mythical golden-trimmed black quill pen enci
 - **No Global Header/Dock Navigation**: The settings page (`settings.html`) intentionally omits the global application navbar and dock to provide an uncluttered, focused Chrome-inspired settings view.
 - **Dedicated Back Button**: Navigation back to the user's prior screen uses `#settings-back-btn` running `handleNavigateBack()`, which uses `safeNavigateBack('/index.html')` to call `window.history.back()` when an in-app non-login referrer exists, or safely routes to Home (`/index.html`) when the URL was pasted or the prior page was login.
 - **Separate Section Views (Non-Continuous Scrolling)**:
-  - Each settings category (`Chronicler Profile`, `Reading Themes`, `Codex Typography`, `Atmosphere & Motion`, `Archival Storage`, `System & Defaults`, `About Codex`) is a separate section view. Only the active section is visible (`.hidden` class added to all inactive sections; `.settings-section.hidden { display: none !important; }`).
+  - Each settings category (`Profile`, `General & Theme`, `Reader`, `Atmosphere & Motion`, `Archival Storage`, `Accounts`, `About TaleTranscend`) is a separate section view. Only the active section is visible (`.hidden` class added to all inactive sections; `.settings-section.hidden { display: none !important; }`).
   - Selecting a sidebar row or navigating via URL hash (`#profile`, `#themes`, etc.) dynamically switches visibility via `switchSettingsSection`.
   - Settings search allows multi-section discovery during active typing, immediately restoring the single active section upon clearing the query.
 - **Centralized Chronicler Profile**:
@@ -152,14 +152,17 @@ The TaleTranscend brand mark is the mythical golden-trimmed black quill pen enci
 - **Scholar Scribe Tile**:
   - Scribe and authoring calls-to-action feature an elevated scholar plate with a burnished gold shield emblem (`feather` icon) and high-contrast call-to-action buttons.
 
-### 9. Settings Interface, Architecture Sections & Codex Readability
+### 9. Settings Interface, Architecture Sections & Readability
 
 - **Unified Architectural Sections**:
   - The settings interface is segmented into dedicated, modular views:
     - **Chronicler Profile** (`#section-profile`): Persona avatar, display moniker, author lore bio, pronouns, location, reading goal, and cloud archive status.
-    - **General & Theme** (`#section-general`): Global application interface theme (Transcendental / Midnight Dark / Illuminated Light), Oracle AI & Gemini API key (status indicator and popup modal), and factory default restoration.
-    - **Reader & Codex** (`#section-reader`): Default reading parchment (12 authentic manuscript themes) and codex typography settings (typeface style, font size, line spacing, measure width, live preview).
-    - **Atmosphere & Motion** (`#section-atmosphere`), **Archival Storage** (`#section-storage`), and **About Codex** (`#section-about`).
+    - **General & Theme** (`#section-general`): Global application interface theme (Transcendental / Midnight Dark / Illuminated Light), Google API Key (status indicator and popup modal), and factory default restoration.
+    - **Reader** (`#section-reader`): Default reading theme (12 authentic manuscript themes) and typography settings (typeface style, font size, line spacing, measure width, live preview).
+    - **Atmosphere & Motion** (`#section-atmosphere`): particle, audio and reduced-motion toggles.
+    - **Archival Storage** (`#section-storage`): local cache summary with clear action, plus the archived-records list of reading positions and inquiry threads stored on the device.
+    - **Accounts** (`#section-accounts`): sign-in status, read-only email address, provider label, cloud archive state, guest elevation by email/password or Google, password update and reset for password accounts, and the Google-only state.
+    - **About TaleTranscend** (`#section-about`): engine, interface and archive colophon.
   - Hash navigation seamlessly resolves legacy hashes (`#themes` and `#system` -> `#section-general`, `#typography` -> `#section-reader`).
 - **Dedicated Sideheading & Below-Field Layout (`.settings-row--stacked`)**:
   - Full-width longform inputs, notably the Chronicler Lore / Bio textarea (`#input-bio`), must be stacked vertically below the sideheading, descriptive subtitle, and info shield rather than squeezed beside it in a split two-column row.
@@ -168,13 +171,14 @@ The TaleTranscend brand mark is the mythical golden-trimmed black quill pen enci
   - Storage of sensitive credentials such as the Google Gemini API key is housed in the General section and initiated through an accessible popup modal window (`#modal-gemini-key`) instead of inline password fields.
   - The modal provides security guidance regarding client-only local storage, password visibility toggling, direct links to Google AI Studio, and clear/remove functionality.
   - The settings row presents an accessible status badge (`#gemini-key-status`: `.settings-status-badge--active` vs `.settings-status-badge--inactive`).
+  - Authentication password changes and guest elevation are transient Firebase Auth forms, not secrets persisted in the browser, so they remain inline in the Accounts section; the popup-modal rule applies to client-side stored credentials.
 - **Clean Reader Theme Specimens (Zero Light/Dark Tags)**:
   - Each of the 12 reader themes (`src/config/theme.config.js`) provides explicit palette metadata (`mode`, `bg`, `fg`, `accent`, `tint`).
   - Specimen cards (`.theme-specimen`) display miniature manuscript specimens showcasing genuine parchment color, ink foreground sample glyph `"Aa"`, and accent pip dot, with all decorative "LIGHT" or "DARK" text badges removed for a clean, distraction-free aesthetic.
-- **Typography Filters & Live Codex Preview Contrast**:
+- **Typography Filters & Live Preview Contrast**:
   - Font selector chips (`.settings-font-chip`) use semantic token-backed classes (`.settings-font-chip__title` with `var(--text-primary)`, `.settings-font-chip__sub` with `var(--text-muted)`) preventing washed-out white text on light surfaces.
   - Column measure buttons (`.setting-measure-btn.btn-primary`) render solid royal indigo backgrounds (`rgb(var(--accent-rgb))`) with crisp white text (`var(--text-on-accent)`).
-  - The Live Codex Preview sandbox applies the active manuscript theme ink and parchment background dynamically, ensuring headers and paragraph text remain sharp and legible across all modes.
+  - The Live Preview sandbox applies the active manuscript theme ink and parchment background dynamically, ensuring headers and paragraph text remain sharp and legible across all modes.
 
 ### 10. Sticky Sidebar Navigation & Profile Light Mode Standards
 
