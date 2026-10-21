@@ -3,7 +3,7 @@
  * Handles the visual layout, resizing, and modal accessibility for the profile page.
  */
 
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@ui/icons.js';
 
 export function initProfileLayout() {
   initIcons();

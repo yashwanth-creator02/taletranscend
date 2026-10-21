@@ -72,7 +72,7 @@ vi.mock('@fb/index.js', () => ({
   getDoc: vi.fn(),
   updateDoc: vi.fn(),
   increment: vi.fn((n) => ({ type: 'increment', value: n })),
-  writeBatch: vi.fn((db) => ({
+  writeBatch: vi.fn((_db) => ({
     set: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),

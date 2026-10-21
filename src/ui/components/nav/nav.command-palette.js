@@ -14,7 +14,7 @@ import { BASE_COMMANDS } from './nav.config.js';
 import { getNavElements, getCurrentPage, renderIcons } from './nav.utils.js';
 import { navState } from './nav.state.js';
 import { applyAppTheme } from '@config/theme.config.js';
-import { escapeText as escapeHtml, resolveHref, navigateTo, createLogger } from '@/utils';
+import { escapeHtml, resolveHref, navigateTo, createLogger } from '@/utils';
 
 const log = createLogger('NavCommandPalette');
 

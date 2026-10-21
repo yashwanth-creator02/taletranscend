@@ -41,6 +41,8 @@ dist/
 .vite/
 .eslintcache
 .prettiercache
+__pycache__/
+*.pyc
 
 
 # =========================================================
@@ -100,3 +102,6 @@ later.firestore.rules
 # brand-leo-utils: managed skills (source of truth lives in the brand-leo-utils repo)
 agents/skills/
 .tmp/
+.vercel
+# Per-worktree dev server port, written by execution/setup_worktree.py
+.dev-port

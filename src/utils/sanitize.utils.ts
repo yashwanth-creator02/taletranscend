@@ -50,17 +50,3 @@ export function sanitizeHtml(dirty: string): string {
     SANITIZE_DOM: true,
   });
 }
-
-/**
- * Escapes a string for safe insertion as textContent.
- * Use this when you do NOT want any HTML rendering (e.g., tale titles in cards).
- *
- * @param text - Raw string
- * @returns Escaped string where < > & " are converted to entities
- */
-export function escapeText(text: string): string {
-  if (!text) return '';
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}

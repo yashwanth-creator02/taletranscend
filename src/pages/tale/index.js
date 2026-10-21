@@ -23,8 +23,8 @@ export {
   editReply,
   deleteComment,
   deleteReply,
-  buildReplyTree,
 } from './comments.js';
+export { formatCommentDateTime, buildReplyTree } from '@/utils/comment.utils.ts';
 
 export { initAuth } from '@fb/index.js';
-export { initIcons } from '@ui/components/icons.js';
+export { initIcons } from '@ui/icons.js';

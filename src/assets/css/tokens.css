@@ -757,6 +757,21 @@ html[data-app-theme='light'],
   --scrollbar-thumb: rgb(var(--accent-rgb) / 0.25);
   --scrollbar-thumb-hover: rgb(var(--accent-rgb) / var(--a-09));
 
+  /* ── Page Layout ───────────────────────────────────────────────────────
+     Shared page-layout tokens (previously declared as page-local :root
+     blocks in contribution/library/profile/tale CSS, which made grepping
+     for token definitions unreliable). */
+
+  --editor-header-height: 64px;
+  --atelier-left-width: 290px;
+  --atelier-right-width: 380px;
+  --sidebar-width: 16rem;
+  --sidebar-width-collapsed: 4.5rem;
+  --sidebar-transition: 280ms cubic-bezier(0.4, 0, 0.2, 1);
+  --left-panel-width: 430px;
+  --right-panel-width: 340px;
+  --action-bar-height: 72px;
+
   /* ── Application Theme Specimen Cards ───────────────────────────────────
      Invariant across active theme so all theme specimen previews in settings
      render true-to-theme simultaneously. */
@@ -813,6 +828,13 @@ html[data-app-theme='light'],
   --reader-line-height: 1.75;
   --reader-measure: 68ch;
   --reader-nav-height: 56px; /* Matches .top-bar in reader.css — see there */
+}
+
+/* Responsive page-layout override (moved here from contribution.css). */
+@media (max-width: 639px) {
+  :root {
+    --editor-header-height: 58px;
+  }
 }
 
 /* ══════════════════════════════════════════════════════════════════════════

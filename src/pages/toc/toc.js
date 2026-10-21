@@ -10,7 +10,7 @@ import '@css/components.css';
 import '@css/pages/toc.css';
 
 import { initNav } from '@ui/components/nav/nav.js';
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@ui/icons.js';
 import { getTales } from '@services/index.js';
 import {
   initPageReveal,

@@ -7,7 +7,7 @@ import { getTaleMeta, getChapter, getChapters } from '@services/index.js';
 import { readerState } from './state.js';
 import {
   sanitizeHtml,
-  escapeText as escapeHtml,
+  escapeHtml,
   countWords,
   estimateReadMins,
   setText,

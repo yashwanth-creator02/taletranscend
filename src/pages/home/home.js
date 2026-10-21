@@ -16,7 +16,7 @@ import {
   taleUrl,
   createLogger,
 } from '@/utils';
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@ui/icons.js';
 import { showToast } from '@ui/components/toast.js';
 import { getTales } from '@services/index.js';
 import { cacheService } from '@services/cache.service.js';
@@ -30,6 +30,7 @@ initPageReveal();
 initNav();
 
 let _resizeBound = false;
+let _cachedTrendingTales = [];
 
 export function initHomePage() {
   init();
@@ -96,6 +97,64 @@ function _initInteractions() {
     e.preventDefault();
     _performSearch();
   });
+
+  const searchInput = document.getElementById('home-search-input');
+  const suggestionsBox = document.getElementById('home-search-suggestions');
+  if (searchInput && suggestionsBox) {
+    let debounceTimer = null;
+    searchInput.addEventListener('input', () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        const val = searchInput.value.trim().toLowerCase();
+        if (val.length < 2) {
+          suggestionsBox.classList.add('hidden');
+          suggestionsBox.innerHTML = '';
+          return;
+        }
+
+        const matches = _cachedTrendingTales
+          .filter((t) => {
+            const str = [t.title, t.description, t.era, t.authorName]
+              .filter(Boolean)
+              .join(' ')
+              .toLowerCase();
+            return str.includes(val);
+          })
+          .slice(0, 3);
+
+        if (!matches.length) {
+          suggestionsBox.classList.add('hidden');
+          suggestionsBox.innerHTML = '';
+          return;
+        }
+
+        suggestionsBox.innerHTML = matches
+          .map(
+            (m) => `
+            <a href="/reader.html?id=${encodeURIComponent(m.id)}" class="flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition-colors group">
+              <div class="min-w-0 pr-2">
+                <p class="text-xs font-cinzel font-bold text-white group-hover:text-indigo-400 transition-colors truncate">${escapeHtml(m.title || 'Untitled')}</p>
+                <p class="text-[10px] text-slate-400 truncate">${escapeHtml(m.era || 'Mythic')} · ${escapeHtml(m.authorName || 'Ancient Chronicler')}</p>
+              </div>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-400 transition-colors shrink-0"></i>
+            </a>
+          `
+          )
+          .join('');
+        suggestionsBox.classList.remove('hidden');
+        initIcons(suggestionsBox);
+      }, 150);
+    });
+
+    document.addEventListener('click', (e) => {
+      if (
+        !e.target?.closest?.('#home-search-form') &&
+        !e.target?.closest?.('#home-search-suggestions')
+      ) {
+        suggestionsBox.classList.add('hidden');
+      }
+    });
+  }
 
   // Preserve clean viewport positioning when resizing across responsive breakpoints
   if (!_resizeBound) {
@@ -173,9 +232,10 @@ async function _loadTrendingTales() {
     });
 
     currentTales = tales;
+    _cachedTrendingTales = tales;
 
     if (!tales.length) {
-      log.info('No trending tales found');
+      log.info('No trending tales found — hiding section');
       _hideTrendingSection();
       return;
     }

@@ -42,13 +42,14 @@ src/
 │   ├── ai.service.js    # Gemini integration
 │   ├── author.service.js # Author registration, status, and caching
 │   ├── bookmark.service.js
+│   ├── notification.service.js # Notification dispatch and real-time subscription
 │   ├── profile.service.js
 │   └── resonance.service.js
 ├── state/               # Schema factories and runtime state
 │   └── schemas/         # Data shape definitions (tale, user, progress, etc.)
-├── ui/components/       # Shared components (cards, nav, toast, feedback)
+├── ui/components/       # Shared components (cards, nav, toast, feedback, popovers)
 ├── utils/               # TypeScript utilities (dom, format, sanitize, etc.)
-└── views/               # HTML entry points (10 pages)
+└── views/               # HTML entry points (11 pages)
 ```
 
 ## Development
@@ -81,6 +82,10 @@ npm run format
 
 # Verify no raw colour literals exist outside the design-token files
 npm run lint:tokens
+
+# Seed the 24 sample tales + chapters into Firestore (needs a configured .env;
+# safe to re-run — the seeder is idempotent)
+npm run seed:tales
 
 # Run every check CI would run (format, lint, tokens, types, tests)
 npm run verify
@@ -134,6 +139,7 @@ TaleTranscend adopts the 3-Layer Architecture (`directives/`, `execution/`, `.tm
   - `deploy_application.md`: Production build and Firebase/Vercel deployment workflows.
   - `developer_verification.md`: Mandatory formatting, token linting, TypeScript, and testing pipeline.
   - `firestore_management.md`: Firestore indexes, database paths, and collection schemas.
+  - `mcp_servers.md`: Project-local MCP server setup for Chrome DevTools debugging and Firebase project access.
   - `navigation_routing_and_sitemaps.md`: Hierarchical clean URLs, `resolveHref` asset safety, XML sitemap, and Table of Contents (Living Codex).
   - `profile_and_oracle_ai.md`: Chronicler profile, client-side Gemini API key storage, Oracle AI, and non-clipping tooltips.
   - `tale_interactions_and_comments.md`: Consolidated hero action deck, red soul resonance, fragment progress/downloads, and comments.

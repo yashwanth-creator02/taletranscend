@@ -3,7 +3,7 @@
 
 import { readerState } from './state.js';
 import { renderTocPanel } from './templates.js';
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@ui/icons.js';
 import { createLogger, navigateTo, readerUrl } from '@/utils';
 import { showToast } from '@ui/components/toast.js';
 import {

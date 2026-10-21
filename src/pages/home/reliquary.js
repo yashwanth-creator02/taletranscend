@@ -5,7 +5,7 @@
 
 import { getReliquaryArtifacts, getArtifactAsset } from './reliquary.data.js';
 import { escapeHtml, createLogger } from '@/utils';
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@ui/icons.js';
 
 const log = createLogger('Reliquary');
 
@@ -384,7 +384,39 @@ function _setupInteractivity(container, artifacts) {
 
     const onFocus = () => selectArtifact(artifact, true);
     const onBlur = () => hideInspector();
-    const onClick = () => selectArtifact(artifact, true);
+    const onClick = () => {
+      selectArtifact(artifact, true);
+      if (hideTimer) clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => {
+        if (inspector) inspector.classList.remove('is-visible');
+      }, 3000);
+    };
+
+    let touchTimer = null;
+    let isTouchMove = false;
+
+    const onTouchStart = () => {
+      isTouchMove = false;
+      touchTimer = setTimeout(() => {
+        if (!isTouchMove) {
+          selectArtifact(artifact, true);
+          if (hideTimer) clearTimeout(hideTimer);
+          hideTimer = setTimeout(() => {
+            if (inspector) inspector.classList.remove('is-visible');
+          }, 3000);
+        }
+      }, 300);
+    };
+
+    const onTouchMove = () => {
+      isTouchMove = true;
+      if (touchTimer) clearTimeout(touchTimer);
+    };
+
+    const onTouchEnd = () => {
+      if (touchTimer) clearTimeout(touchTimer);
+    };
+
     const onKey = (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
@@ -399,12 +431,18 @@ function _setupInteractivity(container, artifacts) {
     item.addEventListener('blur', onBlur);
     item.addEventListener('click', onClick);
     item.addEventListener('keydown', onKey);
+    item.addEventListener('touchstart', onTouchStart, { passive: true });
+    item.addEventListener('touchmove', onTouchMove, { passive: true });
+    item.addEventListener('touchend', onTouchEnd, { passive: true });
 
     cleanupFns.push(() => {
       item.removeEventListener('focus', onFocus);
       item.removeEventListener('blur', onBlur);
       item.removeEventListener('click', onClick);
       item.removeEventListener('keydown', onKey);
+      item.removeEventListener('touchstart', onTouchStart);
+      item.removeEventListener('touchmove', onTouchMove);
+      item.removeEventListener('touchend', onTouchEnd);
     });
   });
 

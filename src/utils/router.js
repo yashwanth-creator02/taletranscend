@@ -12,7 +12,7 @@
 
 import { createLogger } from './logger.ts';
 import { resolveHref } from './navigation.ts';
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@ui/icons.js';
 import { initScrollToTop } from '@ui/components/scrollToTop.js';
 import { cacheService } from '@services/cache.service.js';
 import {

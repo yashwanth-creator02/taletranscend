@@ -246,14 +246,10 @@ describe('Firebase Refs', () => {
       expect(ref.path).toContain('/users/u1/following');
     });
 
-    it('followingEntry(uid, target) and follow(uid, target) return a doc ref', () => {
-      const ref = refs.followingEntry('u1', 'u2');
+    it('follow(uid, target) returns a doc ref', () => {
+      const ref = refs.follow('u1', 'u2');
       expect(ref.type).toBe('doc');
       expect(ref.path).toContain('/users/u1/following/u2');
-
-      const aliasRef = refs.follow('u1', 'u2');
-      expect(aliasRef.type).toBe('doc');
-      expect(aliasRef.path).toContain('/users/u1/following/u2');
     });
 
     it('followers(uid) returns a collection ref', () => {
@@ -262,14 +258,10 @@ describe('Firebase Refs', () => {
       expect(ref.path).toContain('/users/u1/followers');
     });
 
-    it('followerEntry(uid, f) and follower(uid, f) return a doc ref', () => {
-      const ref = refs.followerEntry('u1', 'u2');
+    it('follower(uid, f) returns a doc ref', () => {
+      const ref = refs.follower('u1', 'u2');
       expect(ref.type).toBe('doc');
       expect(ref.path).toContain('/users/u1/followers/u2');
-
-      const aliasRef = refs.follower('u1', 'u2');
-      expect(aliasRef.type).toBe('doc');
-      expect(aliasRef.path).toContain('/users/u1/followers/u2');
     });
 
     it('notifications(uid) returns a collection ref', () => {

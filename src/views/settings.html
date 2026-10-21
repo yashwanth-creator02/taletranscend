@@ -16,6 +16,7 @@
     <meta name="color-scheme" content="dark" />
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="TaleTranscend" />
@@ -132,7 +133,7 @@
         if (document.body && !document.body.classList.contains('booted')) {
           document.body.classList.add('booted');
         }
-      }, 3500);
+      }, 1500);
     </script>
 
     <noscript>
@@ -347,7 +348,7 @@
                     <span class="settings-row__sub">Enter an image URL for your profile crest</span>
                   </div>
                 </div>
-                <div class="settings-row__right">
+                <div class="settings-row__right flex flex-col gap-2">
                   <input
                     type="url"
                     id="input-avatar-url"
@@ -355,6 +356,39 @@
                     placeholder="https://images.unsplash.com/..."
                     aria-label="Avatar image URL"
                   />
+                  <div class="flex items-center gap-1.5 flex-wrap" id="avatar-presets-palette">
+                    <span class="text-[9px] uppercase tracking-wider text-muted font-bold mr-1"
+                      >Presets:</span
+                    >
+                    <button
+                      type="button"
+                      class="avatar-preset-btn px-2 py-0.5 rounded border border-line bg-surface-2 hover:bg-surface-3 text-[10px] text-muted hover:text-ink transition-colors"
+                      data-avatar-preset="https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&auto=format&fit=crop&q=80"
+                    >
+                      Scribe
+                    </button>
+                    <button
+                      type="button"
+                      class="avatar-preset-btn px-2 py-0.5 rounded border border-line bg-surface-2 hover:bg-surface-3 text-[10px] text-muted hover:text-ink transition-colors"
+                      data-avatar-preset="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400&auto=format&fit=crop&q=80"
+                    >
+                      Oracle
+                    </button>
+                    <button
+                      type="button"
+                      class="avatar-preset-btn px-2 py-0.5 rounded border border-line bg-surface-2 hover:bg-surface-3 text-[10px] text-muted hover:text-ink transition-colors"
+                      data-avatar-preset="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=400&auto=format&fit=crop&q=80"
+                    >
+                      Archivist
+                    </button>
+                    <button
+                      type="button"
+                      class="avatar-preset-btn px-2 py-0.5 rounded border border-line bg-surface-2 hover:bg-surface-3 text-[10px] text-muted hover:text-ink transition-colors"
+                      data-avatar-preset="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=400&auto=format&fit=crop&q=80"
+                    >
+                      Wanderer
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -1216,7 +1250,7 @@
           </div>
         </div>
 
-        <footer class="settings-modal-footer">
+        <div class="settings-modal-footer">
           <button type="button" id="btn-clear-modal-key" class="settings-btn-danger text-xs">
             <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
             <span>Remove Key</span>
@@ -1230,7 +1264,7 @@
               <span>Save Key</span>
             </button>
           </div>
-        </footer>
+        </div>
       </div>
     </div>
   </body>

@@ -25,13 +25,40 @@ import {
   setGridError,
   buildBookmarkCard,
 } from './ui.js';
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@ui/icons.js';
 
 const log = createLogger('ShelfContent');
 
 /* ─────────────────────────────────────────────
    Bookmarked Tales
    ───────────────────────────────────────────── */
+
+/**
+ * Maps a normalized bookmark document to the tale card shape expected by shelf grid.
+ *
+ * @param {Object} bm - Normalized bookmark
+ * @param {string} userId - User identifier
+ * @returns {Object} Tale card shape
+ */
+function _mapBookmarkToTale(bm, userId) {
+  const localChapters = getAllLocalChapters({ userId, taleId: bm.taleId });
+  const overall = getOverallProgress({
+    chapterCount: bm.chapterCount || 1,
+    chaptersProgress: localChapters,
+  });
+
+  return {
+    id: bm.taleId,
+    title: bm.taleTitle,
+    coverUrl: bm.coverUrl,
+    authorName: bm.authorName,
+    chapterCount: bm.chapterCount,
+    era: bm.era,
+    description: bm.synopsis || '',
+    progress: overall.percent,
+    bookmarkedAt: bm.bookmarkedAt,
+  };
+}
 
 /**
  * Fetches bookmarked tales directly from the bookmarks subcollection.
@@ -59,25 +86,7 @@ export async function loadBookmarkedTales(userId, force = false) {
     const onBackgroundUpdate = (freshBookmarks) => {
       log.info('Background bookmarks update received', { count: freshBookmarks.length });
       const cachedTales = shelfState.bookmarkedTales;
-      const freshTales = freshBookmarks.map((bm) => {
-        const localChapters = getAllLocalChapters({ userId, taleId: bm.taleId });
-        const overall = getOverallProgress({
-          chapterCount: bm.chapterCount || 1,
-          chaptersProgress: localChapters,
-        });
-
-        return {
-          id: bm.taleId,
-          title: bm.taleTitle,
-          coverUrl: bm.coverUrl,
-          authorName: bm.authorName,
-          chapterCount: bm.chapterCount,
-          era: bm.era,
-          description: bm.synopsis || '',
-          progress: overall.percent,
-          bookmarkedAt: bm.bookmarkedAt,
-        };
-      });
+      const freshTales = freshBookmarks.map((bm) => _mapBookmarkToTale(bm, userId));
 
       cacheService.reconcileOrReload({
         cached: cachedTales,
@@ -108,27 +117,7 @@ export async function loadBookmarkedTales(userId, force = false) {
     log.info(`Found ${bookmarks.length} bookmarks`);
 
     // Normalize through schema — ensures every field has a safe default
-    const tales = bookmarks.map((bm) => {
-      // bm is already normalized by getBookmarks service, but we use it to build the card shape
-      // Get local progress for this tale
-      const localChapters = getAllLocalChapters({ userId, taleId: bm.taleId });
-      const overall = getOverallProgress({
-        chapterCount: bm.chapterCount || 1,
-        chaptersProgress: localChapters,
-      });
-
-      return {
-        id: bm.taleId,
-        title: bm.taleTitle,
-        coverUrl: bm.coverUrl,
-        authorName: bm.authorName,
-        chapterCount: bm.chapterCount,
-        era: bm.era,
-        description: bm.synopsis || '', // Bookmarks might not cache full synopsis, fallback to empty
-        progress: overall.percent,
-        bookmarkedAt: bm.bookmarkedAt,
-      };
-    });
+    const tales = bookmarks.map((bm) => _mapBookmarkToTale(bm, userId));
 
     shelfState.bookmarkedTales = tales;
 

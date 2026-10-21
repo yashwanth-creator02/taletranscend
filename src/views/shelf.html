@@ -16,6 +16,7 @@
     <meta name="color-scheme" content="dark" />
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="TaleTranscend" />
@@ -132,7 +133,7 @@
         if (document.body && !document.body.classList.contains('booted')) {
           document.body.classList.add('booted');
         }
-      }, 3500);
+      }, 1500);
     </script>
     <noscript>
       <style>
@@ -160,11 +161,12 @@
     </div>
 
     <a class="skip-link" href="#main-content">Skip to content</a>
-    <div class="atmosphere-base"></div>
-    <div class="particle-field"></div>
-
-    <div class="ambient-orb w-96 h-96 bg-amber-500/10 -top-20 -right-20"></div>
-    <div class="ambient-orb w-96 h-96 bg-indigo-500/10 -bottom-20 -left-20"></div>
+    <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10" aria-hidden="true">
+      <div class="atmosphere-base"></div>
+      <div class="particle-field"></div>
+      <div class="ambient-orb w-96 h-96 bg-amber-500/10 -top-20 -right-20"></div>
+      <div class="ambient-orb w-96 h-96 bg-indigo-500/10 -bottom-20 -left-20"></div>
+    </div>
 
     <!-- ── Vault Sticky Header (Replaces global nav & floating dock) ─────────────────────────── -->
     <header class="sticky top-0 z-40 border-b border-line bg-[var(--nav-bg)] backdrop-blur-2xl">

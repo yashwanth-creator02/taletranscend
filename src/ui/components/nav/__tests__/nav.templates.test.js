@@ -1,8 +1,7 @@
 // src/ui/components/nav/__tests__/nav.templates.test.js
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import {
   buildPrimaryLink,
-  buildDropdownLink,
   buildAuthenticatedUser,
   buildGuestUser,
   buildMobileDock,

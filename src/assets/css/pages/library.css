@@ -3,12 +3,6 @@
    Strictly Token Compliant (tokens.css)
 */
 
-:root {
-  --sidebar-width: 16rem;
-  --sidebar-width-collapsed: 4.5rem;
-  --sidebar-transition: 280ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 /* ── Layout ──────────────────────────────────── */
 .library-layout {
   display: flex;
@@ -224,12 +218,15 @@
 #library-main {
   flex: 1;
   min-width: 0;
-  padding: 24px 16px 80px;
+  /* Bottom stays unset so .dock-clearance owns it (dock + FAB clearance). */
+  padding-top: 24px;
+  padding-inline: 16px;
 }
 
 @media (min-width: 768px) {
   #library-main {
-    padding: 32px 32px 60px;
+    padding-top: 32px;
+    padding-inline: 32px;
   }
 }
 
@@ -252,30 +249,6 @@
   outline: none;
   border-color: rgb(var(--accent-rgb) / var(--a-09));
   box-shadow: 0 0 0 2px rgb(var(--accent-rgb) / var(--a-04));
-}
-
-/* ── Modals ──────────────────────────────────── */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgb(var(--dark-rgb) / 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  z-index: 250;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-}
-
-.modal-overlay.is-open,
-.modal-overlay.flex,
-.modal-overlay:not(.hidden) {
-  display: flex;
-}
-
-.modal-overlay.hidden {
-  display: none !important;
 }
 
 /* ── Skeletons ───────────────────────────────── */
@@ -403,4 +376,45 @@
   background: var(--surface-4);
   border-color: var(--border-strong);
   color: var(--text-primary);
+}
+
+/* Drawer close was a 32px target; match the phone guideline (audit P5f). */
+@media (max-width: 767px) {
+  #close-sidebar-mobile {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* ── Phone Pagination ──────────────────────────────────────────────
+   The button / indicator / button row needs ~452px. Below 520px it
+   becomes two rows: the page indicator above two equal-width buttons
+   (docs/reports/2026-10-19-mobile-audit.md, P5a). */
+@media (max-width: 520px) {
+  #pagination-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+  }
+
+  #pagination-info {
+    grid-column: 1 / -1;
+    order: -1;
+    min-width: 0;
+  }
+
+  #pagination-prev,
+  #pagination-next {
+    justify-content: center;
+    padding-inline: var(--space-2);
+  }
+}
+
+/* 521–803px: the library sidebar leaves a narrow main column; trimming 8px
+   per button side keeps the single row inside it (768px was 17px over). */
+@media (min-width: 521px) and (max-width: 803px) {
+  #pagination-prev,
+  #pagination-next {
+    padding-inline: var(--space-4);
+  }
 }

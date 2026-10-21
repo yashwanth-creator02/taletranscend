@@ -50,7 +50,7 @@ vi.mock('../interactions.js', () => ({
   setupCardInteractions: vi.fn(),
 }));
 
-vi.mock('@ui/components/icons.js', () => ({
+vi.mock('@ui/icons.js', () => ({
   initIcons: vi.fn(),
 }));
 

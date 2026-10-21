@@ -5,7 +5,7 @@
 // Keeping templates separate from behaviour makes both independently testable.
 
 import { PRIMARY_LINKS, DOCK_ITEMS } from './nav.config.js';
-import { getCurrentPage, escapeText, getAvatarSeed } from './nav.utils.js';
+import { getCurrentPage, escapeHtml, getAvatarSeed } from './nav.utils.js';
 import { resolveHref } from '@/utils';
 
 /* ─────────────────────────────────────────────
@@ -71,8 +71,8 @@ export function buildDropdownLink({ href, icon, label }, current) {
 export function buildAuthenticatedUser(user, current, userLinks) {
   const seed = getAvatarSeed(user);
   const avatarSrc = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
-  const displayName = escapeText(user.displayName || 'Your Account');
-  const email = escapeText(user.email || '');
+  const displayName = escapeHtml(user.displayName || 'Your Account');
+  const email = escapeHtml(user.email || '');
 
   const menuItems = userLinks.map((link) => buildDropdownLink(link, current)).join('');
   const isAnonymous = user.isAnonymous;
@@ -170,9 +170,9 @@ export function buildAuthenticatedUser(user, current, userLinks) {
 export function buildGuestUser() {
   return `
     <div id="nav-user">
-      <a href="${resolveHref('login.html')}" class="signin-btn">
+      <a href="${resolveHref('login.html')}" class="signin-btn" aria-label="Sign in">
         <i data-lucide="log-in" class="signin-btn__icon" aria-hidden="true"></i>
-        <span>Sign In</span>
+        <span class="signin-btn__label">Sign In</span>
       </a>
     </div>
   `;
@@ -284,8 +284,8 @@ export function buildCommandItem(item, current, isFocused = false, index = 0) {
         <i data-lucide="${item.icon}" class="command-item__icon"></i>
       </span>
       <span class="command-item__content">
-        <span class="command-item__label">${escapeText(item.label)}</span>
-        ${item.description ? `<span class="command-item__desc">${escapeText(item.description)}</span>` : ''}
+        <span class="command-item__label">${escapeHtml(item.label)}</span>
+        ${item.description ? `<span class="command-item__desc">${escapeHtml(item.description)}</span>` : ''}
       </span>
       ${item.shortcut ? `<span class="command-item__shortcut" aria-label="Shortcut: ${item.shortcut}">${item.shortcut}</span>` : ''}
       ${isActive ? '<span class="command-item__badge">Current</span>' : ''}
@@ -425,7 +425,7 @@ export function buildNav() {
     headerHtml: `
       <header id="app-nav" class="app-nav">
         <div class="nav-inner">
-          <div class="flex items-center gap-10">
+          <div class="nav-brand-group">
             <a href="${resolveHref('index.html')}" class="nav-logo" aria-label="TaleTranscend home">
               <div class="nav-logo__mark">
                 <img src="${resolveHref('/logo.png')}" alt="" class="nav-logo__img" aria-hidden="true" width="28" height="28" />
@@ -455,7 +455,7 @@ export function buildNav() {
 
             <button
               type="button"
-              class="command-trigger mobile-shell p-3 rounded-xl bg-white/5 border border-white/10"
+              class="command-trigger mobile-shell"
               id="nav-command-button-mobile"
               aria-label="Search pages and actions"
               aria-haspopup="dialog"
@@ -463,6 +463,45 @@ export function buildNav() {
             >
               <i data-lucide="search" class="w-4 h-4" aria-hidden="true"></i>
             </button>
+
+            <!-- Notifications Bell & Drawer -->
+            <div class="relative inline-flex items-center" id="nav-notifications-container">
+              <button
+                type="button"
+                class="nav-settings-btn relative"
+                id="nav-notifications-btn"
+                title="Chronicle Notices"
+                aria-label="Chronicle Notices"
+                aria-haspopup="dialog"
+                aria-expanded="false"
+              >
+                <i data-lucide="bell" class="w-4 h-4" aria-hidden="true"></i>
+                <span id="nav-notifications-badge" class="nav-notifications-badge hidden"></span>
+              </button>
+              <div
+                id="nav-notifications-popover"
+                class="nav-notifications-popover hidden"
+                role="dialog"
+                aria-label="Notifications"
+              >
+                <div class="nav-notifications-popover__header">
+                  <div class="nav-notifications-popover__title-wrap">
+                    <i data-lucide="bell" class="nav-notifications-popover__icon" aria-hidden="true"></i>
+                    <h3 class="nav-notifications-popover__title">Chronicle Notices</h3>
+                  </div>
+                  <button
+                    type="button"
+                    id="nav-notifications-mark-read"
+                    class="nav-notifications-popover__mark-read"
+                  >
+                    Mark read
+                  </button>
+                </div>
+                <div id="nav-notifications-list" class="nav-notifications-list">
+                  <div class="nav-notifications-empty">No notices in the archive</div>
+                </div>
+              </div>
+            </div>
 
             <a
               href="${settingsTarget}"

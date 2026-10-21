@@ -13,7 +13,10 @@ Enforce architectural conventions, module aliases, state management patterns, an
 ## Inputs
 
 - Source files located under `src/`.
-- Configuration files: `vite.config.js`, `tailwind.config.js`, `tsconfig.json`.
+- Configuration files: `vite.config.js`, `tsconfig.json`, `vitest.config.js` (path aliases are
+  defined independently in all three — update all three on any alias change; `jsconfig.json`
+  was removed in the 2026-10-18 audit, F15). There is no `tailwind.config.js` — Tailwind v4 is
+  wired through the Vite plugin.
 
 ## Git Safety (If Modifying Code)
 
@@ -39,7 +42,16 @@ Enforce architectural conventions, module aliases, state management patterns, an
    - `@config/*` -> `src/config/*`
    - `@css/*` -> `src/assets/css/*`
    - `@/*` -> `src/*`
+   - Aliases are defined independently in `vite.config.js`, `tsconfig.json`, and
+     `vitest.config.js`; update all three on any alias change (then grep the repo for the old
+     alias string).
+   - Icons: import `initIcons` from `@ui/icons.js`. The `@ui/components/icons.js` re-export
+     shim was deleted (2026-10-18 audit, F7) — do not re-create it.
 4. **Comment & Reply Tree Architecture**:
+   - Shared helpers `buildReplyTree()` and `formatCommentDateTime()` live in
+     `src/utils/comment.utils.ts` and are imported by module path directly. Do not re-export
+     them from the `@/utils` barrel: many test suites `vi.mock('@/utils')` wholesale and would
+     receive `undefined` (2026-10-18 audit, F5).
    - Flat replies from Firestore are structured into an N-level hierarchy via `buildReplyTree()`.
    - Mentions: Child replies display stylized mention shields (`↳ @AuthorName`) with `corner-down-right` icon.
    - Connecting tree guidelines: `border-l border-white/10 hover:border-indigo-500/30` with capped responsive indentation (`pl-3 md:pl-4`) to prevent mobile layout squishing.

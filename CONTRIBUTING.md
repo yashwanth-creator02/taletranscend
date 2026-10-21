@@ -62,4 +62,5 @@ Or run all of the above (plus type-checking) in one command: `npm run verify`.
 ## Documentation
 
 - If adding a new core service, update `ARCHITECTURE.md`.
+- If files are added, renamed, moved, or deleted, update `docs/FILE_INVENTORY.md` to match.
 - Ensure new public functions have clear JSDoc comments.

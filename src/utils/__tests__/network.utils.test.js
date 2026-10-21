@@ -1,5 +1,5 @@
 // src/utils/__tests__/network.utils.test.js
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { initNetworkListeners } from '../network.utils.ts';
 
 describe('Network Utils', () => {

@@ -9,7 +9,7 @@ import {
 } from '../highlights.js';
 import { showToast } from '@ui/components/toast.js';
 
-vi.mock('@ui/components/icons.js', () => ({
+vi.mock('@ui/icons.js', () => ({
   initIcons: vi.fn(),
 }));
 

@@ -7,7 +7,7 @@
  */
 
 import { initIcons } from '@/ui/icons.js';
-import { escapeText } from '@/utils';
+import { escapeHtml } from '@/utils';
 
 const TOAST_DURATION = 4000;
 const TOAST_CONTAINER_ID = 'mythic-toast-hub';
@@ -135,7 +135,7 @@ export function showToast(message, typeOrOptions = 'success', extraOptions = {})
   if (options.action && options.action.label) {
     actionHtml = `
       <button class="toast-card__action-btn" type="button">
-        ${escapeText(options.action.label)}
+        ${escapeHtml(options.action.label)}
       </button>
     `;
   }
@@ -154,8 +154,8 @@ export function showToast(message, typeOrOptions = 'success', extraOptions = {})
       <i data-lucide="${iconMap[safeType]}" class="w-4 h-4"></i>
     </div>
     <div class="toast-card__content flex-1 min-w-0">
-      ${options.title ? `<div class="toast-card__title">${escapeText(options.title)}</div>` : ''}
-      <p class="toast-card__message text-[13px] font-bold tracking-wide leading-tight">${escapeText(message)}</p>
+      ${options.title ? `<div class="toast-card__title">${escapeHtml(options.title)}</div>` : ''}
+      <p class="toast-card__message text-[13px] font-bold tracking-wide leading-tight">${escapeHtml(message)}</p>
     </div>
     <div class="toast-card__actions shrink-0">
       ${actionHtml}

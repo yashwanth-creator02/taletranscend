@@ -430,30 +430,6 @@
   color: var(--accent-tint);
 }
 
-/* ══ THEME SWATCH ════════════════════════════════════════════════════════ */
-/* Used by the reader's theme picker. */
-
-.theme-btn {
-  position: relative;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  cursor: pointer;
-  transition:
-    border-color var(--transition-fast),
-    transform var(--dur-instant) var(--ease-standard);
-}
-
-.theme-btn:hover {
-  border-color: var(--border-strong);
-}
-
-.theme-btn[aria-pressed='true'],
-.theme-btn.is-active {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--accent-subtle);
-}
-
 /* ══ MISC ════════════════════════════════════════════════════════════════ */
 
 .header-orb {
@@ -1120,6 +1096,56 @@
   transform: translateY(0) !important;
 }
 
+/* ══ COMMENT SURFACE (SHARED LAYOUT) ══════════════════════════════════════
+   Geometry shared by the tale page and the reader page comment threads.
+   Colour and theme values stay page-local (reader.css uses reader theme
+   tokens, tale.css uses app tokens) — only the layout every thread needs
+   lives here so the two pages cannot drift apart again. (Audit F9.)
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.reply-target-tag {
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgb(var(--accent-rgb) / var(--a-04));
+  border: 1px solid rgb(var(--accent-rgb) / var(--a-07));
+  color: var(--accent-tint);
+  font-weight: 600;
+}
+
+.comment-replies-list {
+  margin-top: 0.75rem;
+  margin-left: 0.75rem;
+  margin-right: 0;
+  padding-left: 0.5rem;
+  padding-right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .comment-replies-list {
+    margin-left: 1.25rem;
+    padding-left: 0.75rem;
+  }
+}
+
+@media (max-width: 639px) {
+  .comment-replies-list {
+    margin-left: 0.375rem;
+    padding-left: 0.375rem;
+    margin-right: 0;
+    padding-right: 0;
+    gap: 0.375rem;
+  }
+
+  .comment-replies-list .comment-replies-list {
+    margin-left: 0.25rem;
+    padding-left: 0.25rem;
+  }
+}
+
 /* ══ MODAL OVERLAYS & DIALOGS ══════════════════════════════════════════════
    Standardized backdrop, overlay, and glassmorphic dialog card.
    Zero raw colour literals; uses only design tokens.
@@ -1217,6 +1243,10 @@
     left: 0.75rem;
     width: auto;
     max-width: none;
+    /* The earlier .toast-region mobile rule centres with translateX(-50%).
+       Together with this rule's left/right anchors that shift the container
+       half its width off-screen (-136px at 320). Reset it here. */
+    transform: none;
   }
 }
 

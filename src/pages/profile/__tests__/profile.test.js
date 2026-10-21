@@ -1,9 +1,7 @@
 // src/pages/profile/__tests__/profile.test.js
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { initAuth, auth, upgradeAnonymousToGoogle } from '@fb/index.js';
+import { initAuth } from '@fb/index.js';
 import * as index from '../index.js';
-import * as services from '@services/index.js';
-import * as utils from '@/utils';
 
 vi.mock('@fb/index.js', () => ({
   initAuth: vi.fn(),
@@ -54,7 +52,7 @@ vi.mock('@services/index.js', () => ({
   getUserDrafts: vi.fn(() => Promise.resolve([])),
 }));
 
-vi.mock('@ui/components/icons.js', () => ({
+vi.mock('@ui/icons.js', () => ({
   initIcons: vi.fn(),
 }));
 

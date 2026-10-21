@@ -3,16 +3,9 @@
 // Pure presentation layer — no data fetching here.
 
 import { shelfState } from './state.js';
-import { initIcons } from '@ui/components/icons.js';
-import { setText, formatNumber, timeAgo, escapeHtml as escapeHtml } from '@/utils';
-
-/* ─────────────────────────────────────────────
-   Helpers
-   ───────────────────────────────────────────── */
-
-function _badge(text, classes = '') {
-  return `<span class="badge ${classes}">${escapeHtml(text)}</span>`;
-}
+import { initIcons } from '@ui/icons.js';
+import { formatNumber, timeAgo, escapeHtml } from '@/utils';
+import { renderBadge } from '@ui/components/badge.js';
 
 /* ─────────────────────────────────────────────
    Grid Renderers
@@ -227,8 +220,8 @@ export function buildBookmarkCard(tale) {
         <!-- Header: Badges -->
         <div class="absolute top-0 left-0 right-14 p-2.5 sm:p-3 flex items-start justify-between gap-2 z-10">
           <div class="flex flex-wrap items-center gap-1.5">
-            ${_badge(safeEra, 'badge-era text-[8px] sm:text-[9px] px-2 py-0.5')}
-            ${isFinished ? _badge('Finished', `${statusBadgeClasses} text-[8px] sm:text-[9px] px-2 py-0.5`) : ''}
+            ${renderBadge(safeEra, 'badge-era text-[8px] sm:text-[9px] px-2 py-0.5')}
+            ${isFinished ? renderBadge('Finished', `${statusBadgeClasses} text-[8px] sm:text-[9px] px-2 py-0.5`) : ''}
           </div>
         </div>
 
@@ -315,8 +308,8 @@ export function buildDraftCard(draft) {
         <!-- Header: Badges & Actions -->
         <div class="flex items-start justify-between gap-2 mb-2.5">
           <div class="flex flex-wrap items-center gap-1.5">
-            ${_badge('Draft', 'badge-draft text-[8px] sm:text-[9px] px-2 py-0.5')}
-            ${safeEra ? _badge(safeEra, 'badge-era text-[8px] sm:text-[9px] px-2 py-0.5') : ''}
+            ${renderBadge('Draft', 'badge-draft text-[8px] sm:text-[9px] px-2 py-0.5')}
+            ${safeEra ? renderBadge(safeEra, 'badge-era text-[8px] sm:text-[9px] px-2 py-0.5') : ''}
           </div>
 
           <div class="relative shrink-0">
@@ -397,13 +390,41 @@ export function buildDraftCard(draft) {
    Hero Stats
    ───────────────────────────────────────────── */
 
+function _animateStatCount(id, target, isFormatted = false) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const num = Number(target) || 0;
+  const isTest =
+    (typeof import.meta !== 'undefined' && import.meta.env?.MODE === 'test') ||
+    (typeof process !== 'undefined' && process.env?.NODE_ENV === 'test');
+  if (num === 0 || typeof requestAnimationFrame === 'undefined' || isTest) {
+    el.textContent = isFormatted ? formatNumber(num) : String(num);
+    return;
+  }
+  const duration = 500;
+  const start = performance.now();
+  function tick(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    const val = Math.round(num * ease);
+    el.textContent = isFormatted ? formatNumber(val) : String(val);
+    if (progress < 1) {
+      requestAnimationFrame(tick);
+    } else {
+      el.textContent = isFormatted ? formatNumber(num) : String(num);
+    }
+  }
+  requestAnimationFrame(tick);
+}
+
 /**
  * @param {{ draftCount: number, bookmarkCount: number, wordsPreserved: number }} stats
  */
 export function renderHeroStats({ draftCount, bookmarkCount, wordsPreserved }) {
-  setText('hero-stat-drafts', String(draftCount));
-  setText('hero-stat-bookmarks', String(bookmarkCount));
-  setText('hero-stat-words', formatNumber(wordsPreserved));
+  _animateStatCount('hero-stat-drafts', draftCount);
+  _animateStatCount('hero-stat-bookmarks', bookmarkCount);
+  _animateStatCount('hero-stat-words', wordsPreserved, true);
 }
 
 /* ─────────────────────────────────────────────

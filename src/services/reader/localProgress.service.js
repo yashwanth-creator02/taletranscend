@@ -198,27 +198,6 @@ export function loadLocalProgress(taleId) {
 /* ================= Read Time ================= */
 
 /**
- * Adds a reading session duration to a tale's cumulative read time in localStorage.
- *
- * @param {Object} params
- * @param {string} params.userId
- * @param {string} params.taleId
- * @param {number} params.durationMs - Duration of the session in milliseconds
- */
-export function addReadTime({ userId, taleId, durationMs }) {
-  if (!userId || !taleId || durationMs <= 0) return;
-
-  const store = readStorage();
-  store[userId] ??= {};
-  store[userId][taleId] ??= { chapters: {}, totalReadTimeMs: 0 };
-
-  store[userId][taleId].totalReadTimeMs += durationMs;
-  store[userId][taleId].updatedAt = Date.now();
-
-  writeStorage(store);
-}
-
-/**
  * Returns the total read time for a tale from localStorage.
  *
  * @param {Object} params

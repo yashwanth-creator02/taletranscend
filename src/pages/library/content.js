@@ -3,7 +3,7 @@ import { cacheService } from '@services/cache.service.js';
 import { libraryState } from './state.js';
 import { safeCall, createLogger } from '@/utils';
 import { fetchTalesMetadata, renderTaleCards } from '@ui/components/taleCard.js';
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@ui/icons.js';
 import { applyAllFilters } from './filters.js';
 
 const log = createLogger('LibraryContent');

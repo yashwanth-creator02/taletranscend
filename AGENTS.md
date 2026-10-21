@@ -104,17 +104,20 @@ Directives are living documents. When you discover API constraints, better appro
 
 **6. Use Skills Wherever Possible**
 
-- Proactively inspect `agents/skills/` (and all available environment skills) before writing custom code, scripts, or reinventing patterns.
+- Proactively inspect `.agents/skills/` (and all available environment skills) before writing custom code, scripts, or reinventing patterns. Note the leading dot: the directory is `.agents/skills/`, not `agents/skills/`.
 - Leverage matching skills whenever applicable rather than writing ad-hoc implementations.
 
-**7. Maintain Documentation & Proactive Inception**
+**7. Documentation Maintenance & Clarification Protocol**
 
-- Always maintain and update project documentation (`README.md`, `docs/`) with every code change, feature, or refactor.
-- If no documentation is present in the project, proactively ask the user to initiate the creation of documentation.
+- Always update the relevant documentation (`README.md`, `docs/`, `directives/`) as part of any code change, feature, or refactor. Documentation must never be left stale.
+- If no relevant documentation exists, create it. Never skip the documentation update because no suitable file exists yet.
+- Keep `docs/FILE_INVENTORY.md` current: whenever a tracked file is added, renamed, moved, or deleted, update its entry in the same change.
+- If you have any doubt — about which documentation is relevant, what it should say, or any other decision — ask the user with the question tool before proceeding. If the user does not provide input, pause execution and wait; never resolve doubt by guessing.
+- Exception: when the user has explicitly said to complete the process without interruptions, proceed autonomously with the best and most suitable option available. In that case, clearly flag every decision you made on the user's behalf, together with the situation it accounted for, in the final response so the user can review and reverse it.
 
 **8. Destination Setup & 3-Layer Infrastructure Population**
 
-- Maintain the project's 3-layer architecture directories (`directives/`, `execution/`, `.tmp/`) and `agents/skills/`.
+- Maintain the project's 3-layer architecture directories (`directives/`, `execution/`, `.tmp/`) and `.agents/skills/`.
 - Directly consult Layer 1 directives in `directives/` for repeatable procedures.
 - Strictly adhere to the 3-layer infrastructure (Layer 1: Directives, Layer 2: Orchestration, Layer 3: Execution).
 
@@ -123,6 +126,76 @@ Directives are living documents. When you discover API constraints, better appro
 - Systematically invoke the populate skill (`.agents/skills/populate/SKILL.md`) after completing major features, refactors, UI redesigns, or architectural decisions to update corresponding Layer 1 directives in `directives/` and keep project documentation synchronized.
 - Ensure directives remain living documents, preserving discovered patterns, edge cases, and design constraints permanently for future sessions.
 - Always keep directives and documentation relevant, accurate, and up-to-date with current code implementations.
+
+**10. Value Reporting — "What I Gained"**
+
+- End every response with a closing section titled `What I Gained` (exact heading text), written from the user's perspective.
+- State what this turn concretely delivered: working features, fixed bugs, removed risks, time saved, future problems avoided, or knowledge gained. Ground every bullet in the turn's actual output (files, commands, verification results).
+- Keep it to 2-5 tight bullets. No generic filler, no marketing fluff, zero emojis.
+- If a turn produced no user-visible gain (pure research, an answered question), state the knowledge or decision gained instead of inventing value.
+
+**11. Discernment Nudges & Clarifying Questions — Unlimited Frequency**
+
+- The `discernment-nudge` skill is not limited to once per conversation: invoke the nudge whenever it genuinely applies, as many times as you want.
+- Clarifying questions — inline or via the question tool — may likewise be asked however many times they are needed. Never withhold a genuine question to honor an "ask only once" convention.
+
+**12. Worktree Bootstrap Mandate (Mandatory)**
+
+A git worktree checks out tracked files only. Everything gitignored is absent, which silently breaks agent tooling rather than erroring loudly. Immediately after creating any new worktree, run:
+
+```powershell
+python execution/setup_worktree.py
+```
+
+This is mandatory before running tests, the dev server, or any MCP tool in the new worktree. Never skip it because "the files look fine" — the failures it prevents are silent and misleading.
+
+What the runner restores, and why each is required:
+
+| Artifact               | Gitignored | Consequence if missing                                                                            |
+| ---------------------- | ---------- | ------------------------------------------------------------------------------------------------- |
+| `node_modules/`        | yes        | `npx` re-resolves remotely on every MCP start                                                     |
+| `.agents/skills/`      | yes        | Brand skills vanish; agents lose `populate`, `discernment-nudge`, `frontend-design`, and the rest |
+| `.vercel/project.json` | yes        | Vercel project link lost; `vercel` MCP drops to team scope                                        |
+| `.env`, `.env.local`   | yes        | Firebase credentials absent; app boots broken                                                     |
+| `.dev-port`            | yes        | Dev server and E2E fall back to 5173 and collide with other worktrees                             |
+
+Use `--check` to report state without changing anything, and `--source <path>` when the primary checkout is not the git main worktree.
+
+Never hand-author `.vercel/project.json` or commit any env file. The runner refuses to copy a destination git would track, so a secret cannot reach a commit even by mistake; it reports byte counts and key names only, never values.
+
+The `chrome-devtools` MCP server needs nothing copied: it auto-provisions Chrome for Testing and caches the binary and profile outside the repository.
+
+**Per-worktree dev ports.** Each worktree is assigned its own dev server port so several can run simultaneously. The registry lives at `.git/worktree-ports.json`, shared by every worktree of this repository, and `.dev-port` holds the current worktree's value. Both `vite.config.js` and `playwright.config.js` read `.dev-port`, falling back to 5173 when absent, so `npm run dev` and `npm run e2e` need no manual port flags.
+
+```powershell
+python execution/setup_worktree.py --list-ports        # show every allocation
+python execution/setup_worktree.py --release-port     # free this worktree's port
+python execution/setup_worktree.py --release-port <path>   # free another worktree's port
+python execution/setup_worktree.py --verify-mcp       # spawn each MCP server and report status
+```
+
+Bootstrap validates `opencode.json` without starting any server: it checks that the file parses, that servers are declared, and that each local command resolves on `PATH`. Add `--verify-mcp` only when you actually need live connection state — it starts every server, takes up to about two minutes cold, and leaves child processes behind.
+
+**Release the port once the branch is merged.** A merged worktree has served its purpose and its port must be freed:
+
+```powershell
+git worktree remove <path>
+python execution/setup_worktree.py --release-port <path>
+```
+
+Allocation also prunes entries whose worktree directory no longer exists, so a forgotten release self-heals on the next setup run. Never hardcode a port in a committed config file.
+
+**13. Resource Release & Response Confirmation**
+
+- Release every resource the turn acquired before finishing: dev servers, watchers, emulators, background shells, spawned child processes, browser sessions, `.tmp/` artifacts, and any port or lock you took.
+- Never leave a long-running process behind just to save a future restart. Anything that must stay alive is an explicit exception and must be named as one.
+- End every response with the confirmation block below, placed after `What I Gained` so principle 10 still governs the closing summary. If the turn acquired nothing, say so in one line.
+
+```text
+Resources received: <processes, ports, servers, files or sessions this turn started or claimed>
+Resources released: <what was stopped, closed, deleted or freed, or "none">
+Retained: <what deliberately stays alive and why, or "none">
+```
 
 ## Self-annealing loop
 
@@ -152,7 +225,7 @@ Errors are learning opportunities. When something breaks:
 
 ## Skills (brand-leo-utils)
 
-This project's skills live in `agents/skills/` — gitignored here. The
+This project's skills live in `.agents/skills/` — gitignored here. The
 brand-leo-utils repo is the source of truth; this folder is a disposable
 local copy, and it belongs to whichever agent is handling the session,
 not one specific tool.

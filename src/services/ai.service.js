@@ -3,14 +3,9 @@
 // Interface for all generative and assistive features.
 
 import { createLogger } from '@/utils';
-import {
-  getStoredApiKey,
-  setStoredApiKey,
-  clearStoredApiKey,
-  hasApiKey,
-} from './ai/apiKey.storage.js';
+import { getStoredApiKey } from './ai/apiKey.storage.js';
 
-export { getStoredApiKey, setStoredApiKey, clearStoredApiKey, hasApiKey };
+export { getStoredApiKey };
 
 const log = createLogger('AIService');
 

@@ -1,8 +1,6 @@
 // src/pages/shelf/__tests__/shelf.test.js
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { initAuth } from '@fb/index.js';
 import * as index from '../index.js';
-import { shelfState } from '../state.js';
 
 vi.mock('@fb/index.js', () => ({
   initAuth: vi.fn(),

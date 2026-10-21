@@ -40,7 +40,7 @@ vi.mock('@/utils', () => ({
     warn: vi.fn(),
   })),
   setText: vi.fn(),
-  escapeText: vi.fn((s) => s),
+  escapeHtml: vi.fn((s) => s),
   formatNumber: vi.fn((n) => String(n)),
   validateData: vi.fn((schema, data) => ({ success: true, data })),
   UserProfileSchema: {},

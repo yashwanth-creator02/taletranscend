@@ -7,7 +7,7 @@ import '@css/components.css';
 import '@css/reader-themes.css';
 import '@css/pages/settings.css';
 
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@ui/icons.js';
 import { showToast } from '@ui/components/toast.js';
 import { auth, onAuthStateChanged, refs, getDoc, setDoc, serverTimestamp } from '@fb/index.js';
 import {
@@ -916,6 +916,16 @@ export function initProfileSettings() {
   if (avatarInput) {
     avatarInput.addEventListener('input', (e) => {
       updateAvatarPreview(e.target.value);
+    });
+
+    document.querySelectorAll('.avatar-preset-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const presetUrl = btn.dataset.avatarPreset;
+        if (presetUrl) {
+          avatarInput.value = presetUrl;
+          updateAvatarPreview(presetUrl);
+        }
+      });
     });
   }
 

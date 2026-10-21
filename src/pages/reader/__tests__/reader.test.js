@@ -1,6 +1,5 @@
 // src/pages/reader/__tests__/reader.test.js
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { initAuth } from '@fb/index.js';
 import * as index from '../index.js';
 
 vi.mock('@fb/index.js', () => ({
@@ -104,6 +103,7 @@ vi.mock('@/utils', () => ({
     error: vi.fn(),
   })),
   navigateTo: vi.fn(),
+  updatePageMeta: vi.fn(),
 }));
 
 describe('Reader Page Controller', () => {

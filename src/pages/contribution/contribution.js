@@ -29,7 +29,12 @@ import {
 } from './index.js';
 import { debounce } from '@/utils';
 import { setupAuthTimeout } from '@/utils';
-import { refineMythicText, generateTaleContinuation, getStoredApiKey } from '@services/index.js';
+import {
+  refineMythicText,
+  generateTaleContinuation,
+  suggestTitle,
+  getStoredApiKey,
+} from '@services/index.js';
 import { AI_API_KEY } from '@config/app.config.js';
 import { showToast } from '@ui/components/toast.js';
 
@@ -93,9 +98,17 @@ async function init() {
     } else {
       addNewChapter();
       setStatus('New tale started.', 'neutral');
+      // Autofocus chapter title on clean mount
+      setTimeout(() => {
+        const titleEl = document.getElementById('chapter-title');
+        if (titleEl && !titleEl.value) {
+          titleEl.focus();
+        }
+      }, 100);
     }
   }
 
+  bindPrimerEvents();
   initIcons();
 }
 
@@ -252,10 +265,93 @@ function _getEffectiveApiKey() {
   );
 }
 
+function bindPrimerEvents() {
+  const toggleBtn = document.getElementById('toggle-primer-btn');
+  const primerContent = document.getElementById('primer-content');
+  const chevron = document.getElementById('primer-chevron');
+  if (!toggleBtn || !primerContent) return;
+
+  const isCollapsed = localStorage.getItem('tt_scribe_primer_collapsed') === 'true';
+  if (isCollapsed) {
+    primerContent.classList.add('hidden');
+    toggleBtn.setAttribute('aria-expanded', 'false');
+    if (chevron) chevron.style.transform = 'rotate(-90deg)';
+  }
+
+  toggleBtn.addEventListener('click', () => {
+    const hidden = primerContent.classList.toggle('hidden');
+    toggleBtn.setAttribute('aria-expanded', String(!hidden));
+    if (chevron) {
+      chevron.style.transform = hidden ? 'rotate(-90deg)' : 'rotate(0deg)';
+    }
+    localStorage.setItem('tt_scribe_primer_collapsed', String(hidden));
+  });
+}
+
 function bindAIEvents() {
   const enhanceBtn = document.getElementById('ai-enhance-btn');
   const continueBtn = document.getElementById('ai-continue-btn');
+  const oracleSuggestTitleBtn = document.getElementById('oracle-suggest-title-btn');
+  const oracleElevateBtn = document.getElementById('oracle-elevate-passage-btn');
+  const oracleContinueBtn = document.getElementById('oracle-continue-chronicle-btn');
   const contentArea = document.getElementById('chapter-content');
+
+  // Wire oracle panel triggers to main handlers
+  oracleElevateBtn?.addEventListener('click', () => {
+    if (enhanceBtn) enhanceBtn.click();
+  });
+
+  oracleContinueBtn?.addEventListener('click', () => {
+    if (continueBtn) continueBtn.click();
+  });
+
+  oracleSuggestTitleBtn?.addEventListener('click', async () => {
+    const synopsisInput = document.getElementById('tale-synopsis');
+    const titleInput = document.getElementById('tale-title');
+    const promptText = (synopsisInput?.value || contentArea?.value || '').trim();
+
+    if (!promptText || promptText.length < 10) {
+      showToast(
+        'Please enter at least 10 characters in the synopsis or chapter for the Oracle to suggest a title.',
+        'info'
+      );
+      return;
+    }
+
+    const key = _getEffectiveApiKey();
+    if (!key) {
+      showToast(
+        'Please configure your Gemini API Key in Settings to consult the Oracle.',
+        'warning'
+      );
+      return;
+    }
+
+    oracleSuggestTitleBtn.disabled = true;
+    oracleSuggestTitleBtn.classList.add('animate-pulse');
+    showToast('The Oracle contemplates an epic title...', 'info');
+
+    try {
+      const suggested = await suggestTitle(promptText, key);
+      if (suggested) {
+        if (titleInput) {
+          titleInput.value = suggested;
+          titleInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        state.title = suggested;
+        state.isDirty = true;
+        showToast('Title revealed by the Oracle.', 'success');
+      } else {
+        showToast('The Oracle remains silent.', 'warning');
+      }
+    } catch (err) {
+      log.error('Title suggestion failed:', err);
+      showToast('Title generation failed. Check your API key or connection.', 'error');
+    } finally {
+      oracleSuggestTitleBtn.disabled = false;
+      oracleSuggestTitleBtn.classList.remove('animate-pulse');
+    }
+  });
 
   if (!enhanceBtn || !continueBtn || !contentArea) return;
 
@@ -546,9 +642,9 @@ function bindPresetEvents() {
   });
 
   // Mythic Era pills click
-  document.querySelectorAll('[data-era-pill]').forEach((btn) => {
+  document.querySelectorAll('[data-era-chip]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const era = btn.dataset.eraPill;
+      const era = btn.dataset.eraChip;
       const eraInput = document.getElementById('tale-era');
       if (eraInput) {
         eraInput.value = era;
@@ -556,8 +652,8 @@ function bindPresetEvents() {
       }
       state.era = era;
       state.isDirty = true;
-      document.querySelectorAll('[data-era-pill]').forEach((p) => {
-        p.classList.toggle('era-pill--active', p.dataset.eraPill === era);
+      document.querySelectorAll('[data-era-chip]').forEach((p) => {
+        p.classList.toggle('era-chip--active', p.dataset.eraChip === era);
       });
       updateChecklist();
     });

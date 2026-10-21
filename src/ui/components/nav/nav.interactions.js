@@ -27,6 +27,15 @@ import {
   moveFocus,
   renderCommandList,
 } from './nav.command-palette.js';
+import {
+  toggleNotificationsPopover,
+  closeNotificationsPopover,
+  initNotifications,
+  destroyNotifications,
+  updateNotificationBadge,
+  loadAndRenderNotifications,
+} from './notifications.popover.js';
+import { markAllNotificationsAsRead } from '@services/notification.service.js';
 
 const log = createLogger('NavInteractions');
 
@@ -132,6 +141,30 @@ function handleDocumentClick(event) {
       closeCommandPalette(false);
       return;
     }
+  }
+
+  // ── Notifications bell button ─────────────────
+  if (target.closest('#nav-notifications-btn')) {
+    event.preventDefault();
+    toggleNotificationsPopover();
+    return;
+  }
+
+  // ── Notifications mark read button ─────────────
+  if (target.closest('#nav-notifications-mark-read')) {
+    event.preventDefault();
+    if (navState.currentUser?.uid) {
+      markAllNotificationsAsRead(navState.currentUser.uid).then(() => {
+        updateNotificationBadge(0);
+        loadAndRenderNotifications(navState.currentUser.uid);
+      });
+    }
+    return;
+  }
+
+  // ── Click outside notifications popover ────────
+  if (!target.closest('#nav-notifications-container')) {
+    closeNotificationsPopover();
   }
 
   // ── Avatar button ──────────────────────────────
@@ -415,6 +448,7 @@ export function detachGlobalListeners() {
   const { commandInput } = getNavElements();
   commandInput?.removeEventListener('input', handleCommandInput);
 
+  destroyNotifications();
   navState.scrollCleanup?.();
   navState.scrollCleanup = null;
   navState.listenersAttached = false;
@@ -448,6 +482,7 @@ export function updateNavUser(user) {
     renderIcons();
   }
 
+  initNotifications(user);
   renderIcons();
 
   // Refresh command list if palette is open (adds/removes Sign In/Out item)

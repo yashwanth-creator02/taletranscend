@@ -27,7 +27,7 @@ vi.mock('@/utils', () => ({
   }),
   guardOffline: vi.fn(() => false),
   checkRateLimit: vi.fn(() => true),
-  escapeText: vi.fn((s) => s),
+  escapeHtml: vi.fn((s) => s),
   createLogger: vi.fn(() => ({
     debug: vi.fn(),
     info: vi.fn(),

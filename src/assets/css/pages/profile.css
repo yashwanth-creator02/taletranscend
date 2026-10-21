@@ -6,11 +6,6 @@
 /* ═══════════════════════════════════════════════
  Page-specific layout tokens
  ═══════════════════════════════════════════════ */
-:root {
-  --left-panel-width: 430px;
-  --right-panel-width: 340px;
-}
-
 /* ═══════════════════════════════════════════════
  Base & Typography
  ═══════════════════════════════════════════════ */
@@ -215,8 +210,14 @@ body {
 
   .insights-metric-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    /* Four 1fr tracks forced the metric cards past the narrow tablet column.
+       Auto-fit keeps 2x2 at 768px and expands to 4-up once there is room. */
+    grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
     gap: var(--space-4);
+  }
+
+  .insights-metric-grid > * {
+    min-width: 0;
   }
 
   .resize-handle {
@@ -227,6 +228,27 @@ body {
     overflow-x: hidden;
     overflow-y: auto;
     height: auto;
+  }
+}
+
+/* Long display names are flex items; without a constrained parent they keep
+   their max-content width and escape the identity card instead of ellipsizing. */
+.identity-info-block {
+  width: 100%;
+  min-width: 0;
+}
+
+#desktop-display-name,
+#mobile-display-name {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* On the narrowest phones the sanctuary nav's Home/Library labels push the
+   Library link past the viewport. Keep the icons and their aria-labels. */
+@media (max-width: 22.5rem) {
+  .sanctuary-nav-bar > div a span {
+    display: none;
   }
 }
 
@@ -450,6 +472,22 @@ body {
     overflow-x: hidden;
     overflow-y: auto;
     height: auto;
+  }
+}
+
+/* Three nav pills need ~339px; below 364px, wrap them 2+1 so the
+   sign-out control stays fully reachable (audit P5c). */
+@media (max-width: 363px) {
+  .pillar-nav-links {
+    flex-wrap: wrap;
+  }
+
+  .pillar-nav-links a {
+    flex: 1 1 45%;
+  }
+
+  .pillar-nav-links #btn-sign-out {
+    flex: 1 1 100%;
   }
 }
 
@@ -978,6 +1016,9 @@ body {
   box-shadow: 0 4px 16px rgb(var(--light-rgb) / var(--a-03));
 }
 
+/* Profile skin for the shared ghost button. This file loads only on the
+   profile page, so these values intentionally shadow the components.css
+   base and are the authoritative look there. */
 .btn-ghost {
   background: transparent;
   border: 1px solid rgb(var(--light-rgb) / var(--a-04));
@@ -985,9 +1026,10 @@ body {
   transition: all var(--transition-normal);
 }
 
+/* The shared .btn-ghost:hover rule in components.css out-specifies this one
+   (it carries :not(:disabled)), so only colour and transform take effect
+   here; background and border are intentionally left to the shared rule. */
 .btn-ghost:hover {
-  background: rgb(var(--light-rgb) / var(--a-03));
-  border-color: rgb(var(--light-rgb) / var(--a-06));
   color: rgb(var(--light-rgb));
   transform: scale(1.02);
 }
@@ -995,6 +1037,8 @@ body {
 /* ═══════════════════════════════════════════════
  Inputs
  ═══════════════════════════════════════════════ */
+/* Profile skin for the shared input field — same page-scoped shadowing
+   rationale as .btn-ghost above. */
 .input-mythic {
   background: rgb(var(--light-rgb) / var(--a-01));
   border: 1px solid rgb(var(--light-rgb) / var(--a-04));
@@ -1221,10 +1265,6 @@ a:focus-visible,
 
 .profile-pronouns-tag {
   color: var(--accent);
-}
-
-.stat-value {
-  color: var(--text-primary);
 }
 
 .new-story-cta-title {

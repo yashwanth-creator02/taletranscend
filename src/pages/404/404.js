@@ -4,7 +4,7 @@
 import '@css/base.css';
 import '@css/components.css';
 import { initAppTheme } from '@config/theme.config.js';
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@ui/icons.js';
 import { initPageReveal, readyReveal } from '@/utils';
 
 initAppTheme();

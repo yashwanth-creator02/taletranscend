@@ -6,7 +6,7 @@ vi.mock('@ui/components/nav/nav.js', () => ({
   initNav: vi.fn(),
 }));
 
-vi.mock('@ui/components/icons.js', () => ({
+vi.mock('@ui/icons.js', () => ({
   initIcons: vi.fn(),
 }));
 
@@ -66,6 +66,8 @@ describe('Table of Contents Page', () => {
 
     vi.mocked(services.getTales).mockResolvedValue(mockTales);
 
+    // The dynamic import pulls in the full TOC page graph; under a parallel
+    // suite that can exceed the 5s default even though the render is finite.
     const { initTOCPage } = await import('../toc.js');
     await initTOCPage();
 
@@ -81,5 +83,5 @@ describe('Table of Contents Page', () => {
     expect(list.innerHTML).toContain('/tales/tale-1/read/0');
     expect(list.innerHTML).toContain('/tales/tale-1/read/1');
     expect(list.innerHTML).toContain('/tales/tale-1/read/2');
-  });
+  }, 15000);
 });

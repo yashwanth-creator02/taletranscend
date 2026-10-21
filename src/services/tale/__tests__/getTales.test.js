@@ -1,7 +1,7 @@
 // src/services/tale/__tests__/getTales.test.js
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getTales, getTalesPage, getTalesPageNumbered, getTalesByAuthor } from '../getTales.js';
-import { getDocs, getCountFromServer, refs } from '@fb/index.js';
+import { getDocs, getCountFromServer } from '@fb/index.js';
 
 describe('GetTalesService', () => {
   beforeEach(() => {

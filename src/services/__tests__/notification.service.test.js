@@ -11,6 +11,10 @@ vi.mock('@fb/index.js', () => ({
   orderBy: vi.fn((field, dir) => ({ field, dir })),
   limit: vi.fn((n) => ({ limit: n })),
   where: vi.fn((field, op, val) => ({ field, op, val })),
+  onSnapshot: vi.fn((q, cb) => {
+    cb({ size: 4 });
+    return vi.fn();
+  }),
 }));
 
 vi.mock('@/utils', async (importOriginal) => {
@@ -30,8 +34,8 @@ vi.mock('@/utils', async (importOriginal) => {
 import { getDocs, updateDoc } from '@fb/index.js';
 import {
   getUserNotifications,
-  getUnreadNotificationCount,
-  markNotificationAsRead,
+  subscribeUnreadNotifications,
+  markAllNotificationsAsRead,
 } from '../notification.service.js';
 
 describe('notification.service', () => {
@@ -68,35 +72,32 @@ describe('notification.service', () => {
     });
   });
 
-  describe('getUnreadNotificationCount', () => {
-    it('returns 0 if userId is null', async () => {
-      const count = await getUnreadNotificationCount(null);
-      expect(count).toBe(0);
+  describe('subscribeUnreadNotifications', () => {
+    it('returns noop if userId is missing', () => {
+      const unsub = subscribeUnreadNotifications(null, vi.fn());
+      expect(typeof unsub).toBe('function');
     });
 
-    it('returns size of unread documents snapshot', async () => {
-      vi.mocked(getDocs).mockResolvedValueOnce({
-        size: 3,
-      });
-
-      const count = await getUnreadNotificationCount('u1');
-      expect(count).toBe(3);
+    it('subscribes to onSnapshot and triggers callback', () => {
+      const cb = vi.fn();
+      const unsub = subscribeUnreadNotifications('u1', cb);
+      expect(cb).toHaveBeenCalledWith(4);
+      expect(typeof unsub).toBe('function');
     });
   });
 
-  describe('markNotificationAsRead', () => {
-    it('returns false if userId or notificationId is missing', async () => {
-      expect(await markNotificationAsRead(null, 'n1')).toBe(false);
-      expect(await markNotificationAsRead('u1', null)).toBe(false);
+  describe('markAllNotificationsAsRead', () => {
+    it('returns false if userId is missing', async () => {
+      expect(await markAllNotificationsAsRead(null)).toBe(false);
     });
 
-    it('calls updateDoc with isRead: true and returns true', async () => {
-      const success = await markNotificationAsRead('u1', 'n1');
-      expect(success).toBe(true);
-      expect(updateDoc).toHaveBeenCalledWith(
-        expect.objectContaining({ path: 'users/u1/notifications/n1' }),
-        { isRead: true }
-      );
+    it('marks all fetched unread notifications as read', async () => {
+      vi.mocked(getDocs).mockResolvedValueOnce({
+        docs: [{ id: 'n1' }, { id: 'n2' }],
+      });
+      const res = await markAllNotificationsAsRead('u1');
+      expect(res).toBe(true);
+      expect(updateDoc).toHaveBeenCalledTimes(2);
     });
   });
 });

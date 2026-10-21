@@ -1,6 +1,5 @@
-// src/ui/components/__tests__/feedback.test.js
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderEmptyState, renderErrorState } from '../feedback.js';
+import { renderEmptyState, renderErrorState, renderEmptySearchState } from '../feedback.js';
 
 vi.mock('@/ui/icons.js', () => ({
   initIcons: vi.fn(),
@@ -34,6 +33,33 @@ describe('Feedback Components', () => {
       renderErrorState(container, { message: 'Big Error' });
       expect(container.innerHTML).toContain('Big Error');
       expect(container.innerHTML).toContain('data-lucide="triangle-alert"');
+    });
+  });
+
+  describe('renderEmptySearchState', () => {
+    it('renders search query and suggested topic chips', () => {
+      const container = document.getElementById('container');
+      const onClear = vi.fn();
+      const onSelect = vi.fn();
+
+      renderEmptySearchState(container, {
+        query: 'Atlantis',
+        suggestions: ['Mythic', 'Ancient'],
+        onClear,
+        onSelectSuggestion: onSelect,
+      });
+
+      expect(container.innerHTML).toContain('No chronicles match "Atlantis"');
+      expect(container.innerHTML).toContain('Mythic');
+      expect(container.innerHTML).toContain('Ancient');
+
+      // Test reset button
+      container.querySelector('#empty-search-reset-btn')?.click();
+      expect(onClear).toHaveBeenCalled();
+
+      // Test suggestion chip button
+      container.querySelector('.empty-search-topic-btn')?.click();
+      expect(onSelect).toHaveBeenCalledWith('Mythic');
     });
   });
 });

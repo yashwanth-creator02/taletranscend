@@ -2,9 +2,10 @@
 // Reader theme and typography management.
 //
 // Responsibilities:
-//   - Read stored preferences from localStorage on init (cloud sync handled separately)
+//   - Read stored preferences from localStorage on init
 //   - Apply theme by setting data-reader-theme on .reader-surface (NOT on <html>)
 //   - Apply font/size/lh/measure by setting CSS custom properties on .reader-surface
+//   - Persist user changes to localStorage and (debounced) to Firestore
 //   - Sync all picker UI elements to current state after every change
 //
 // The actual theme color tokens live in reader-themes.css, scoped to
@@ -20,9 +21,15 @@ import {
   READER_STORAGE_KEYS,
   loadReaderFontStylesheets,
 } from '@config/theme.config.js';
+import { refs, setDoc, serverTimestamp } from '@fb/index.js';
 import { setInput, setText, createLogger } from '@/utils';
 
 const log = createLogger('ReaderTheme');
+
+/** Debounce window for cloud writes — slider drags fire many changes in a row. */
+const CLOUD_SAVE_DEBOUNCE_MS = 600;
+
+let _cloudSaveTimer = null;
 
 /* ─────────────────────────────────────────────
    Surface Element
@@ -99,8 +106,9 @@ export function applyCloudPrefs(prefs) {
  * Applies data-reader-theme to .reader-surface only — never touches <html>.
  *
  * @param {string} theme - Must match an id in READER_THEMES and a block in reader-themes.css
+ * @param {boolean} [persist=true] - When false (init / cloud-prefs apply), skips the cloud write
  */
-export function setTheme(theme) {
+export function setTheme(theme, persist = true) {
   readerState.theme = theme;
   localStorage.setItem(READER_STORAGE_KEYS.theme, theme);
 
@@ -120,13 +128,15 @@ export function setTheme(theme) {
   if (atmosphere) atmosphere.style.display = isDark ? 'block' : 'none';
   if (particles) particles.style.display = isDark ? 'block' : 'none';
 
+  if (persist) _scheduleCloudSave();
   _syncUI();
 }
 
 /**
  * @param {string} family - Key from FONTS object in theme.config.js
+ * @param {boolean} [persist=true] - When false (init / cloud-prefs apply), skips the cloud write
  */
-export function setFontFamily(family) {
+export function setFontFamily(family, persist = true) {
   if (!FONTS[family]) return;
   readerState.fontFamily = family;
   localStorage.setItem(READER_STORAGE_KEYS.fontFamily, family);
@@ -134,13 +144,15 @@ export function setFontFamily(family) {
   const surface = _getSurface();
   if (surface) surface.style.setProperty('--reader-font-family', FONTS[family].css);
 
+  if (persist) _scheduleCloudSave();
   _syncUI();
 }
 
 /**
  * @param {number|string} val - Font size in px, clamped to TYPOGRAPHY_BOUNDS.fontSize
+ * @param {boolean} [persist=true] - When false (init / cloud-prefs apply), skips the cloud write
  */
-export function setFontSize(val) {
+export function setFontSize(val, persist = true) {
   const { min, max } = TYPOGRAPHY_BOUNDS.fontSize;
   const px = Math.min(max, Math.max(min, Number(val)));
   readerState.fontSize = px;
@@ -149,13 +161,15 @@ export function setFontSize(val) {
   const surface = _getSurface();
   if (surface) surface.style.setProperty('--reader-font-size', `${px}px`);
 
+  if (persist) _scheduleCloudSave();
   _syncUI();
 }
 
 /**
  * @param {number|string} val - Line height multiplier, clamped to TYPOGRAPHY_BOUNDS.lineHeight
+ * @param {boolean} [persist=true] - When false (init / cloud-prefs apply), skips the cloud write
  */
-export function setLineHeight(val) {
+export function setLineHeight(val, persist = true) {
   const { min, max } = TYPOGRAPHY_BOUNDS.lineHeight;
   const lh = Math.min(max, Math.max(min, Number(val)));
   readerState.lineHeight = lh;
@@ -164,13 +178,15 @@ export function setLineHeight(val) {
   const surface = _getSurface();
   if (surface) surface.style.setProperty('--reader-line-height', String(lh));
 
+  if (persist) _scheduleCloudSave();
   _syncUI();
 }
 
 /**
  * @param {number|string} val - Characters per line, clamped to TYPOGRAPHY_BOUNDS.measure
+ * @param {boolean} [persist=true] - When false (init / cloud-prefs apply), skips the cloud write
  */
-export function setMeasure(val) {
+export function setMeasure(val, persist = true) {
   const { min, max } = TYPOGRAPHY_BOUNDS.measure;
   const ch = Math.min(max, Math.max(min, Number(val)));
   readerState.measure = ch;
@@ -179,6 +195,7 @@ export function setMeasure(val) {
   const surface = _getSurface();
   if (surface) surface.style.setProperty('--reader-measure', `${ch}ch`);
 
+  if (persist) _scheduleCloudSave();
   _syncUI();
 }
 
@@ -188,14 +205,54 @@ export function setMeasure(val) {
 
 /**
  * Applies all current readerState preference values.
- * Called on init and after applyCloudPrefs.
+ * Called on init and after applyCloudPrefs — passes persist=false so applying
+ * stored/cloud values never triggers another cloud write.
  */
 function _applyAll() {
-  setTheme(readerState.theme);
-  setFontFamily(readerState.fontFamily);
-  setFontSize(readerState.fontSize);
-  setLineHeight(readerState.lineHeight);
-  setMeasure(readerState.measure);
+  setTheme(readerState.theme, false);
+  setFontFamily(readerState.fontFamily, false);
+  setFontSize(readerState.fontSize, false);
+  setLineHeight(readerState.lineHeight, false);
+  setMeasure(readerState.measure, false);
+}
+
+/**
+ * Schedules a debounced write of the current preferences to Firestore.
+ * No-op while unauthenticated — localStorage stays the local record either way.
+ */
+function _scheduleCloudSave() {
+  if (!readerState.userId) return;
+  clearTimeout(_cloudSaveTimer);
+  _cloudSaveTimer = setTimeout(() => {
+    _cloudSaveTimer = null;
+    void _saveCloudPrefs();
+  }, CLOUD_SAVE_DEBOUNCE_MS);
+}
+
+/**
+ * Persists the current reader preferences to Firestore
+ * (users/{uid}/preferences/reader); failures are logged and otherwise ignored.
+ */
+async function _saveCloudPrefs() {
+  const userId = readerState.userId;
+  if (!userId) return;
+  try {
+    await setDoc(
+      refs.readerPrefs(userId),
+      {
+        theme: readerState.theme,
+        fontFamily: readerState.fontFamily,
+        fontSize: readerState.fontSize,
+        lineHeight: readerState.lineHeight,
+        measure: readerState.measure,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+    log.debug('Reader preferences saved to cloud');
+  } catch (err) {
+    log.warn('Could not save prefs to cloud:', err);
+  }
 }
 
 /**

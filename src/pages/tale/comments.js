@@ -29,8 +29,9 @@ import {
   validateData,
   CommentSchema,
 } from '@/utils';
-import { initIcons } from '@ui/components/icons.js';
+import { initIcons } from '@ui/icons.js';
 import { PATHS } from '@fb/paths.js';
+import { formatCommentDateTime, buildReplyTree } from '@/utils/comment.utils.ts';
 
 const log = createLogger('Comments');
 const PAGE_SIZE = 10;
@@ -638,34 +639,6 @@ async function _handleDeleteReply(commentId, replyId) {
    ───────────────────────────────────────────── */
 
 /**
- * Formats a comment timestamp to include both date and time.
- * E.g., "Oct 12, 2026 at 11:05 PM"
- *
- * @param {number|Date|object} at
- * @returns {string}
- */
-export function formatCommentDateTime(at) {
-  if (!at) return 'Recently';
-  let d;
-  if (typeof at === 'object' && at !== null && typeof at.seconds === 'number') {
-    d = new Date(at.seconds * 1000);
-  } else {
-    d = new Date(at);
-  }
-  if (isNaN(d.getTime())) return 'Recently';
-  const dateStr = d.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-  const timeStr = d.toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-  return `${dateStr} at ${timeStr}`;
-}
-
-/**
  * Extracts author initials for circular typography avatar.
  *
  * @param {string} name
@@ -821,35 +794,6 @@ function _renderComment(c) {
       ${replyFormHtml}
     </div>
   `;
-}
-
-/**
- * Transforms a flat list of replies into a hierarchical tree.
- *
- * @param {Array<object>} replies
- * @returns {Array<object>} Root-level reply nodes with a `children` array
- */
-export function buildReplyTree(replies) {
-  if (!Array.isArray(replies) || replies.length === 0) return [];
-
-  const map = new Map();
-  const roots = [];
-
-  // Initialize node with empty children
-  replies.forEach((r) => {
-    map.set(r.id, { ...r, children: [] });
-  });
-
-  replies.forEach((r) => {
-    const node = map.get(r.id);
-    if (r.replyToId && map.has(r.replyToId)) {
-      map.get(r.replyToId).children.push(node);
-    } else {
-      roots.push(node);
-    }
-  });
-
-  return roots;
 }
 
 function _renderReplyNode(node, currentDepth = 1) {

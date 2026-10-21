@@ -1,7 +1,7 @@
 // src/ui/components/nav/__tests__/nav.test.js
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { initNav, destroyNav } from '../nav.js';
-import { auth, onAuthStateChanged } from '@fb/index.js';
+import { onAuthStateChanged } from '@fb/index.js';
 import { navState } from '../nav.state.js';
 
 vi.mock('@fb/index.js', () => ({

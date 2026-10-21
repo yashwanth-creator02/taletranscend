@@ -15,9 +15,6 @@ const log = createLogger('AppConfig');
 // The Firestore root document ID under the artifacts collection.
 export const APP_ID = 'taletranscend-pro';
 
-// Application display name used in page titles and UI labels.
-export const APP_NAME = 'TaleTranscend';
-
 // ── Reading & Writing Constants ───────────────────────────────────────
 
 // Average adult reading speed in words per minute.
@@ -35,10 +32,6 @@ export const TTS_CHAR_LIMIT = 6000;
 // Debounce delay in milliseconds for syncing progress to Firestore.
 // Prevents excessive writes when the user scrolls frequently.
 export const PROGRESS_SYNC_DELAY_MS = 4000;
-
-// Minimum session duration in milliseconds before read time is recorded.
-// Prevents noise from accidental tab switches.
-export const MIN_READ_SESSION_MS = 1000;
 
 // ── Media Defaults ────────────────────────────────────────────────────
 

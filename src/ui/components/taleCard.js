@@ -5,7 +5,8 @@
 import { getTotalReadTime, getBookmarks, getTaleProgressData } from '@services/index.js';
 import { getOverallProgress, formatMs, escapeHtml as escapeHtml, createLogger } from '@/utils';
 import { DEFAULT_COVER_URL } from '@config/app.config.js';
-import { renderEmptyState, renderErrorState } from './feedback.js';
+import { renderEmptyState, renderErrorState, renderEmptySearchState } from './feedback.js';
+import { renderBadge } from './badge.js';
 
 const log = createLogger('TaleCard');
 import '@css/pages/tale-cards.css';
@@ -20,10 +21,6 @@ function _defaultCover() {
 
 function _formatReadTime(totalMs = 0) {
   return formatMs(Number(totalMs || 0));
-}
-
-function _badge(text, classes = '') {
-  return `<span class="badge ${classes}">${escapeHtml(text)}</span>`;
 }
 
 function _metaItem(icon, label) {
@@ -150,45 +147,6 @@ export function renderTaleCards(container, tales, metadata) {
   if (window.lucide) window.lucide.createIcons();
 }
 
-/**
- * Appends additional tale cards to the grid without wiping existing ones.
- * Used by the library "Load More" flow.
- *
- * @param {string} userId
- * @param {import('@state/schemas/tale.schema.js').Tale[]} tales
- */
-export async function appendTaleCards(userId, tales) {
-  const container = document.getElementById('cards-grid');
-  if (!container || !tales.length) return;
-
-  // Remove empty-state placeholder if present
-  const emptyState = container.querySelector('.empty-state');
-  if (emptyState) emptyState.remove();
-
-  const metadata = await fetchTalesMetadata(userId, tales);
-
-  const html = tales
-    .map((tale, index) => {
-      const chaptersProgress = metadata.progressSnapshots[index] || {};
-      const progressStats = getOverallProgress({
-        chapterCount: Number(tale.chapterCount) || 0,
-        chaptersProgress,
-      });
-      const displayPercent = tale.status === 'finished' ? 100 : progressStats.percent || 0;
-      return _createTaleCard(tale, displayPercent, metadata.readTimeMap, metadata.bookmarkMap);
-    })
-    .join('');
-
-  // Append instead of replace
-  const temp = document.createElement('div');
-  temp.innerHTML = html;
-  while (temp.firstChild) {
-    container.appendChild(temp.firstChild);
-  }
-
-  if (window.lucide) window.lucide.createIcons();
-}
-
 export async function renderCardsGrid(userId, tales, { showSkeleton = false } = {}) {
   const container = document.getElementById('cards-grid');
   if (!container) return;
@@ -196,6 +154,27 @@ export async function renderCardsGrid(userId, tales, { showSkeleton = false } = 
   const safeTales = Array.isArray(tales) ? tales : [];
 
   if (!safeTales.length) {
+    const searchInput = document.getElementById('search-input');
+    const query = searchInput?.value?.trim() || '';
+    if (query) {
+      renderEmptySearchState(container, {
+        query,
+        onClear: () => {
+          if (searchInput) {
+            searchInput.value = '';
+            searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        },
+        onSelectSuggestion: (topic) => {
+          if (searchInput) {
+            searchInput.value = topic;
+            searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        },
+      });
+      return;
+    }
+
     renderEmptyState(container, {
       message: 'No tales found in the archives.',
       subMessage: 'Try a different filter or come back later.',
@@ -235,7 +214,20 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
     chapterCount = 0,
   } = tale || {};
 
-  const safeTitle = escapeHtml(title);
+  const cleanTitle = (function () {
+    if (!title || typeof title !== 'string') return 'Untitled Echo';
+    const trimmed = title.trim();
+    if (
+      !trimmed ||
+      trimmed === id ||
+      trimmed === 'Untitled Tale' ||
+      /^[a-zA-Z0-9_-]{20,}$/.test(trimmed)
+    ) {
+      return 'Untitled Echo';
+    }
+    return trimmed;
+  })();
+  const safeTitle = escapeHtml(cleanTitle);
   const safeDescription = escapeHtml(description);
   const trimmedEra = typeof era === 'string' ? era.trim() : '';
   const safeEra = trimmedEra ? escapeHtml(trimmedEra) : '';
@@ -247,7 +239,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
   const menuId = `menu-${id}`;
   const cover = coverUrl || _defaultCover();
 
-  const timeBadge = readTimeLabel ? _badge(readTimeLabel, 'badge-subtle') : '';
+  const timeBadge = readTimeLabel ? renderBadge(readTimeLabel, 'badge-subtle') : '';
   const statusBadgeClasses = isFinished
     ? 'badge-finished border-emerald-500/20'
     : 'badge-era border-indigo-500/20';
@@ -265,8 +257,8 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
         <!-- Top Bar: Era Badges & Options Menu -->
         <div class="mb-2 sm:mb-3 flex items-center justify-between gap-1.5 sm:gap-2 relative z-20 min-h-6 sm:min-h-7">
           <div class="flex items-center gap-1 sm:gap-1.5 flex-wrap min-w-0">
-            ${safeEra ? _badge(safeEra, 'badge-era max-w-[85px] sm:max-w-none truncate') : ''}
-            ${isFinished ? _badge('Finished', statusBadgeClasses) : ''}
+            ${safeEra ? renderBadge(safeEra, 'badge-era max-w-[85px] sm:max-w-none truncate') : ''}
+            ${isFinished ? renderBadge('Finished', statusBadgeClasses) : ''}
           </div>
 
           <div class="relative shrink-0">
@@ -333,7 +325,10 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
           />
           <div class="card-image-scrim"></div>
 
-          <!-- Bottom of Cover: Progress Bar & Percentage -->
+          <!-- Bottom of Cover: Progress Bar & Percentage (Only shown once reading has started) -->
+          ${
+            progress > 0
+              ? `
           <div class="absolute inset-x-0 bottom-0 p-2 sm:p-2.5 z-10">
             <div class="card-progress-meta">
               <span class="card-progress-label">Progress</span>
@@ -343,6 +338,9 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
               <div class="progress-fill" style="width: ${progress}%"></div>
             </div>
           </div>
+          `
+              : ''
+          }
         </div>
 
         <!-- Middle: Fragment Tag, Title, and Description -->

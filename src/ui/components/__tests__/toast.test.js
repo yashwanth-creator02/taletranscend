@@ -8,7 +8,7 @@ vi.mock('@/ui/icons.js', () => ({
 }));
 
 vi.mock('@/utils', () => ({
-  escapeText: vi.fn((s) => s),
+  escapeHtml: vi.fn((s) => s),
 }));
 
 describe('Toast Component', () => {
@@ -167,7 +167,6 @@ describe('Toast Component', () => {
   });
 
   it('enforces maximum active toast limit to prevent flooding', () => {
-    const container = document.getElementById('mythic-toast-hub') || document.createElement('div');
     showToast('Toast 1');
     showToast('Toast 2');
     showToast('Toast 3');

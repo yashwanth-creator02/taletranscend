@@ -1,18 +1,9 @@
 // src/pages/shelf/__tests__/ui.test.js
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import {
-  renderGrid,
-  setGridLoading,
-  setGridEmpty,
-  setGridError,
-  buildBookmarkCard,
-  buildDraftCard,
-  renderHeroStats,
-  setActiveTab,
-} from '../ui.js';
+import { renderGrid, setGridLoading, renderHeroStats, setActiveTab } from '../ui.js';
 import { shelfState } from '../state.js';
 
-vi.mock('@ui/components/icons.js', () => ({
+vi.mock('@ui/icons.js', () => ({
   initIcons: vi.fn(),
 }));
 

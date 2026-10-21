@@ -9,6 +9,7 @@ import {
   setInput,
   setSelect,
   setText,
+  updatePageMeta,
 } from '../dom.utils.ts';
 
 describe('Dom Utils', () => {
@@ -78,6 +79,36 @@ describe('Dom Utils', () => {
       document.body.innerHTML = '<div id="my-div"></div>';
       setText('my-div', 'Hello world');
       expect(document.getElementById('my-div').textContent).toBe('Hello world');
+    });
+  });
+
+  describe('updatePageMeta', () => {
+    it('updates document.title and OpenGraph / Twitter tags', () => {
+      document.head.innerHTML = `
+        <title>Original Title</title>
+        <meta name="description" content="Old desc" />
+      `;
+
+      updatePageMeta({
+        title: 'Chronicle of the Cosmos',
+        description: 'A deep space mythic tale.',
+        image: 'https://example.com/cover.jpg',
+        url: 'https://taletranscend.web.app/reader.html?id=123',
+      });
+
+      expect(document.title).toBe('Chronicle of the Cosmos | TaleTranscend');
+      expect(document.querySelector('meta[name="description"]').getAttribute('content')).toBe(
+        'A deep space mythic tale.'
+      );
+      expect(document.querySelector('meta[property="og:title"]').getAttribute('content')).toBe(
+        'Chronicle of the Cosmos'
+      );
+      expect(document.querySelector('meta[property="og:image"]').getAttribute('content')).toBe(
+        'https://example.com/cover.jpg'
+      );
+      expect(document.querySelector('meta[property="og:url"]').getAttribute('content')).toBe(
+        'https://taletranscend.web.app/reader.html?id=123'
+      );
     });
   });
 });

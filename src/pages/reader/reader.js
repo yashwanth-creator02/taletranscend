@@ -72,7 +72,13 @@ import {
   limit,
 } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
-import { initPageReveal, readyReveal, setupAuthTimeout, createLogger } from '@/utils';
+import {
+  initPageReveal,
+  readyReveal,
+  setupAuthTimeout,
+  createLogger,
+  updatePageMeta,
+} from '@/utils';
 import { TTS_CHAR_LIMIT } from '@config/app.config.js';
 import { initAppTheme } from '@config/theme.config.js';
 
@@ -236,6 +242,14 @@ function openPanel(toolId) {
     btn.dataset.active = btn.dataset.tool === toolId;
   });
 
+  if (toolId === 'toc' && typeof window !== 'undefined' && window.innerWidth >= 1024) {
+    try {
+      localStorage.setItem('tt_reader_desktop_toc', 'true');
+    } catch {
+      // Ignore localStorage access failures
+    }
+  }
+
   _updateCollapseIcon();
   initIcons();
 }
@@ -293,6 +307,18 @@ function closePanel() {
   }
 
   document.getElementById('tool-panel-backdrop')?.classList.remove('visible');
+
+  if (
+    typeof window !== 'undefined' &&
+    window.innerWidth >= 1024 &&
+    readerState.openTool === 'toc'
+  ) {
+    try {
+      localStorage.setItem('tt_reader_desktop_toc', 'false');
+    } catch {
+      // Ignore localStorage access failures
+    }
+  }
 
   readerState.openTool = null;
   readerState.isCollapsed = true;
@@ -1310,6 +1336,8 @@ async function _handleBookmark() {
 
 /* ─────────────────────────────────────────────
    Reader Prefs — Firestore Sync
+   Loading lives here; saving is handled by theme.js's debounced write,
+   which fires after every user-initiated theme/typography change.
    ───────────────────────────────────────────── */
 
 /**
@@ -1328,32 +1356,6 @@ async function _loadAndApplyCloudPrefs(userId) {
     applyCloudPrefs(appState.readerPrefs);
   } catch (err) {
     log.warn('Could not load cloud prefs, using local defaults:', err);
-  }
-}
-
-/**
- * Persists current reader preferences to Firestore.
- * Called after any theme or typography change if the user is authenticated.
- *
- * @param {string} userId
- */
-export async function saveReaderPrefs(userId) {
-  if (!userId) return;
-  try {
-    await setDoc(
-      refs.readerPrefs(userId),
-      {
-        theme: readerState.theme,
-        fontFamily: readerState.fontFamily,
-        fontSize: readerState.fontSize,
-        lineHeight: readerState.lineHeight,
-        measure: readerState.measure,
-        updatedAt: serverTimestamp(),
-      },
-      { merge: true }
-    );
-  } catch (err) {
-    log.warn('Could not save prefs to cloud:', err);
   }
 }
 
@@ -1387,6 +1389,15 @@ initAuth(async (user) => {
   // Load content
   await loadReaderMeta(taleId);
 
+  if (typeof updatePageMeta === 'function') {
+    updatePageMeta({
+      title: readerState.taleTitle,
+      description: `Read ${readerState.taleTitle} by ${readerState.authorName || 'Ancient Chronicler'} on TaleTranscend.`,
+      image: readerState.coverUrl,
+      url: typeof window !== 'undefined' ? window.location.href : '',
+    });
+  }
+
   _loadHighlights();
   _loadComments();
 
@@ -1413,6 +1424,18 @@ initAuth(async (user) => {
 
   applyNavigation(navigation);
   _renderDiscussion();
+
+  // Desktop default TOC sidebar
+  const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
+  let desktopTocPref = null;
+  try {
+    desktopTocPref = localStorage.getItem('tt_reader_desktop_toc');
+  } catch {
+    // Ignore localStorage access failures
+  }
+  if (isDesktop && desktopTocPref !== 'false' && readerState.chapters.length > 0) {
+    openPanel('toc');
+  }
   const localProgress = getChapterProgress({ userId: user.uid, taleId, chapterIndex });
   const initialScrollPercent = localProgress?.scrollPercent ?? 0;
   const initialScrollTop = localProgress?.scrollTop ?? 0;

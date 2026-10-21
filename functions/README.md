@@ -9,7 +9,7 @@ rule exceptions. See `docs/MIGRATION_PLAN.md` Phase 6 for why each of these exis
 | ------------------- | ----------------- | --------------------------------------------------------------------------------- |
 | `onReactionWrite`   | Firestore trigger | Keeps `tales/{taleId}.reactionCount` in sync with the `reactions/` subcollection  |
 | `onCommentWrite`    | Firestore trigger | Keeps `tales/{taleId}.commentCount` in sync with the `comments/` subcollection    |
-| `generateAiText`    | Callable          | Proxies Gemini calls server-side, so the API key never ships to the client        |
+| `sitemap`           | HTTP (onRequest)  | Serves a dynamic `sitemap.xml` built from published tales and their chapters      |
 | `setModeratorClaim` | Callable          | Grants/revokes the `moderator` custom claim `firestore.rules`' `isAdmin()` checks |
 
 ## Setup
@@ -19,18 +19,19 @@ cd functions
 npm install
 ```
 
-### Setting the Gemini API key secret
+### AI access is BYOK, not a proxy
 
-`generateAiText` reads its Gemini API key from a Firebase Functions secret, not an
-environment variable — this is what keeps it out of the client bundle and out of source
-control. Set it once per environment:
+Earlier revisions proxied Gemini through a `generateAiText` callable so that a server-held key
+never reached the browser. **That function has been removed.** Each user now supplies their own
+Gemini key; it is stored in that browser only and passed directly to Google from
+`src/services/ai.service.js` and `src/pages/profile/ai-name.js`. The reasoning is recorded in
+`docs/decisions/0003-byok-ai-instead-of-cloud-function-proxy.md`.
 
-```bash
-firebase functions:secrets:set GEMINI_API_KEY
-```
+Practical consequences:
 
-You'll be prompted to paste the key value. It's stored in Google Secret Manager, not in this
-repo or in `.env`.
+- There is no `GEMINI_API_KEY` function secret to set.
+- No AI key is stored in this repo or in `.env`.
+- AI features are opt-in per user and degrade silently to `null` when no key is present.
 
 ### Bootstrapping the first admin
 
@@ -55,7 +56,26 @@ npm run serve        # build + start the Functions emulator (paired with the Fir
 npm run shell         # interactive shell for calling functions directly
 ```
 
+## Deployment status
+
+**These functions are not deployed.** They are written and type-checked in CI (the
+`functions-typecheck` job in `.github/workflows/ci.yml`) but no Cloud Function of any kind
+runs in production, because deploying them requires the Blaze plan and this project stays on
+the free Spark plan. `.github/workflows/deploy.yml` deploys Hosting and Firestore rules only.
+
+Keep the code compiling — that CI job exists to catch breakage — but do not assume these run.
+Behaviour that depends on them is currently absent in production.
+
+### Known landmine: `reactionCount` has two writers
+
+`src/services/resonance.service.js` increments `reactionCount` client-side, and
+`onReactionWrite` increments it again from the subcollection event. Neither side guards
+against the other. This is harmless today only because the trigger is not deployed. Deploying
+it would double-count every resonance. Resolve the ownership before moving to Blaze.
+
 ## Deploy
+
+Requires the Blaze plan. Once enabled:
 
 ```bash
 npm run deploy        # firebase deploy --only functions

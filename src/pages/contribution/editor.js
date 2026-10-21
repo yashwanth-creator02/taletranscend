@@ -58,6 +58,14 @@ export function updateStats() {
   setText('stat-chars', `${chars} Characters`);
   setText('stat-reading-time', readingLabel);
 
+  const goalEl = document.getElementById('stat-word-goal-status');
+  if (goalEl) {
+    if (words < 400) goalEl.textContent = 'Opening Passage';
+    else if (words < 800) goalEl.textContent = 'Approaching Goal';
+    else if (words <= 2000) goalEl.textContent = 'Optimal Chapter Pace';
+    else goalEl.textContent = 'Epic Volume';
+  }
+
   const milestoneEl = document.getElementById('manuscript-milestone');
   if (milestoneEl) {
     const label = milestoneEl.querySelector('span');

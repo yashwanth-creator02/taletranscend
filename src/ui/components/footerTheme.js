@@ -9,7 +9,7 @@ import {
   APP_THEME_STORAGE_KEY,
 } from '@/config/theme.config.js';
 import { createLogger } from '@/utils';
-import { initIcons } from './icons.js';
+import { initIcons } from '@ui/icons.js';
 
 const log = createLogger('FooterTheme');
 

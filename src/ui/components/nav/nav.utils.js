@@ -3,10 +3,10 @@
 // Shared utility functions used across all nav sub-modules.
 // Pure, side-effect-free helpers — safe to import anywhere.
 
-import { escapeText } from '@/utils';
+import { escapeHtml } from '@/utils';
 import { initIcons as renderIcons } from '@/ui/icons.js';
 
-export { escapeText, renderIcons };
+export { escapeHtml, renderIcons };
 
 /**
  * Returns the filename of the current page (e.g. 'library.html').

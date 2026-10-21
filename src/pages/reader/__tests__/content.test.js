@@ -3,7 +3,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { loadReaderMeta, loadReaderChapter, showReaderSkeletons } from '../content.js';
 import { readerState } from '../state.js';
 import * as services from '@services/index.js';
-import * as fb from '@fb/index.js';
 
 vi.mock('@services/index.js', () => ({
   getTaleMeta: vi.fn(),
