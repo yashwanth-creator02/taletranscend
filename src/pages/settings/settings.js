@@ -15,6 +15,7 @@ import {
   escapeHtml,
   initPageReveal,
   readyReveal,
+  safeNavigateBack,
   validateData,
   UserProfileSchema,
 } from '@/utils';
@@ -72,23 +73,11 @@ export function setSelectedGenres(genres = []) {
 }
 
 /**
- * Navigates back to the previous address the page was pushed from,
- * or gracefully falls back to the library if history/referrer is unavailable.
+ * Navigates back to the previous in-app page,
+ * or safely falls back to home if history/referrer is unavailable, external, or was login.
  */
 export function handleNavigateBack() {
-  if (typeof window === 'undefined') return;
-  if (document.referrer && window.history && window.history.length > 1) {
-    try {
-      const referrerUrl = new URL(document.referrer, window.location.origin);
-      if (referrerUrl.origin === window.location.origin) {
-        window.history.back();
-        return;
-      }
-    } catch {
-      // Malformed referrer URL fallback
-    }
-  }
-  window.location.href = '/library.html';
+  safeNavigateBack('/index.html');
 }
 
 /**

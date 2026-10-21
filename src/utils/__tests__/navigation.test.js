@@ -10,6 +10,7 @@ import {
   markUserVisited,
   acknowledgeGate,
   checkNewUserGate,
+  safeNavigateBack,
   HAS_VISITED_KEY,
 } from '../navigation.ts';
 import { initDevMode } from '../dev.utils.ts';
@@ -28,7 +29,7 @@ describe('Navigation Utils', () => {
     document.body.style.pointerEvents = '';
 
     delete window.location;
-    window.location = { href: '' };
+    window.location = { href: '', origin: 'http://localhost:3000', pathname: '/' };
 
     // Default to "motion allowed" so the fade path is the one under test.
     vi.stubGlobal(
@@ -328,6 +329,107 @@ describe('Navigation Utils', () => {
       expect(window.location.replace).toHaveBeenCalledWith(
         '/login.html?returnUrl=%2Flibrary.html%3Ffilter%3Dmyth'
       );
+    });
+  });
+
+  describe('safeNavigateBack', () => {
+    it('calls history.back() when referrer is from the same origin and not a login page', () => {
+      const historyBackSpy = vi.spyOn(window.history, 'back').mockImplementation(() => {});
+
+      Object.defineProperty(document, 'referrer', {
+        value: `${window.location.origin}/library.html`,
+        configurable: true,
+      });
+      Object.defineProperty(window.history, 'length', {
+        value: 3,
+        configurable: true,
+      });
+
+      safeNavigateBack('/index.html');
+
+      expect(historyBackSpy).toHaveBeenCalled();
+      historyBackSpy.mockRestore();
+    });
+
+    it('navigates to fallback when referrer is login page instead of calling history.back()', () => {
+      delete window.location;
+      window.location = { origin: 'http://localhost:3000', href: '', assign: vi.fn() };
+      const historyBackSpy = vi.spyOn(window.history, 'back').mockImplementation(() => {});
+
+      Object.defineProperty(document, 'referrer', {
+        value: 'http://localhost:3000/login.html',
+        configurable: true,
+      });
+      Object.defineProperty(window.history, 'length', {
+        value: 3,
+        configurable: true,
+      });
+
+      safeNavigateBack('/index.html');
+
+      expect(historyBackSpy).not.toHaveBeenCalled();
+      expect(window.location.assign).toHaveBeenCalledWith('/index.html');
+      historyBackSpy.mockRestore();
+    });
+
+    it('navigates to fallback when user pasted the URL (no referrer)', () => {
+      delete window.location;
+      window.location = { origin: 'http://localhost:3000', href: '', assign: vi.fn() };
+      const historyBackSpy = vi.spyOn(window.history, 'back').mockImplementation(() => {});
+
+      Object.defineProperty(document, 'referrer', {
+        value: '',
+        configurable: true,
+      });
+      Object.defineProperty(window.history, 'length', {
+        value: 1,
+        configurable: true,
+      });
+
+      safeNavigateBack('/index.html');
+
+      expect(historyBackSpy).not.toHaveBeenCalled();
+      expect(window.location.assign).toHaveBeenCalledWith('/index.html');
+      historyBackSpy.mockRestore();
+    });
+
+    it('navigates to fallback when referrer is from an external origin', () => {
+      delete window.location;
+      window.location = { origin: 'http://localhost:3000', href: '', assign: vi.fn() };
+      const historyBackSpy = vi.spyOn(window.history, 'back').mockImplementation(() => {});
+
+      Object.defineProperty(document, 'referrer', {
+        value: 'https://external.example.com/some/page',
+        configurable: true,
+      });
+      Object.defineProperty(window.history, 'length', {
+        value: 3,
+        configurable: true,
+      });
+
+      safeNavigateBack('/index.html');
+
+      expect(historyBackSpy).not.toHaveBeenCalled();
+      expect(window.location.assign).toHaveBeenCalledWith('/index.html');
+      historyBackSpy.mockRestore();
+    });
+
+    it('honors a custom fallback target', () => {
+      delete window.location;
+      window.location = { origin: 'http://localhost:3000', href: '', assign: vi.fn() };
+
+      Object.defineProperty(document, 'referrer', {
+        value: '',
+        configurable: true,
+      });
+      Object.defineProperty(window.history, 'length', {
+        value: 1,
+        configurable: true,
+      });
+
+      safeNavigateBack('/library.html');
+
+      expect(window.location.assign).toHaveBeenCalledWith('/library.html');
     });
   });
 });

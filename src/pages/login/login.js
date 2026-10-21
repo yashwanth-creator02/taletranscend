@@ -30,6 +30,8 @@ import {
 } from '@/utils';
 import {
   clearAuthMemory,
+  getAuthMemory,
+  HAS_VISITED_KEY,
   isRememberedDurably,
   rememberAuth,
 } from '@services/auth-memory.storage.js';
@@ -422,16 +424,32 @@ export function initLoginPage() {
   _setupDismissLinks();
 
   const unsubscribe = onAuthStateChanged(auth, (user) => {
-    if (user && !user.isAnonymous) {
-      log.info('User already authenticated, continuing to their destination');
-      rememberAuth(
-        { uid: user.uid, anonymous: false, method: 'restore' },
-        { durable: isRememberedDurably() }
-      );
-      Promise.resolve().then(() => {
-        if (unsubscribe) unsubscribe();
-      });
-      navigateTo(_returnTarget());
+    if (user) {
+      const memory = getAuthMemory();
+      const hasVisited =
+        typeof localStorage !== 'undefined' && Boolean(localStorage.getItem(HAS_VISITED_KEY));
+      const isIdentified =
+        !user.isAnonymous || memory?.anonymous || memory?.method === 'guest' || hasVisited;
+
+      if (isIdentified) {
+        log.info('User already authenticated, continuing to their destination', {
+          uid: user.uid,
+          isAnonymous: user.isAnonymous,
+        });
+        rememberAuth(
+          {
+            uid: user.uid,
+            anonymous: user.isAnonymous,
+            method: user.isAnonymous ? 'guest' : 'restore',
+          },
+          { durable: isRememberedDurably() }
+        );
+        markUserVisited();
+        Promise.resolve().then(() => {
+          if (unsubscribe) unsubscribe();
+        });
+        navigateTo(_returnTarget());
+      }
     }
   });
 

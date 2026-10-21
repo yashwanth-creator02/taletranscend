@@ -1,7 +1,7 @@
 // src/pages/contribution/contribution.js
 // Entry point for the tale editor page.
 // Bootstraps nav, auth, draft loading, and all editor interactions.
-import { initPageReveal, readyReveal, createLogger } from '@/utils';
+import { initPageReveal, readyReveal, safeNavigateBack, createLogger } from '@/utils';
 import '@css/base.css';
 import '@css/nav.css';
 import '@css/components.css';
@@ -146,11 +146,7 @@ function _applyPublishedEditUi() {
 function bindEditorEvents() {
   // Back navigation to previous visited page
   document.getElementById('btn-back')?.addEventListener('click', () => {
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      window.location.href = '/shelf.html';
-    }
+    safeNavigateBack('/index.html');
   });
 
   // Chapter controls

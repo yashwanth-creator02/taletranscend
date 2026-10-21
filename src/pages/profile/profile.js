@@ -9,7 +9,14 @@ import '@css/pages/profile.css';
 
 import { initGlobalPaletteShortcut } from '@ui/components/nav/nav.global.js';
 import { initAuth, auth, upgradeAnonymousToGoogle, signOutAndForget } from '@fb/index.js';
-import { navigateTo, initPageReveal, readyReveal, setupAuthTimeout, createLogger } from '@/utils';
+import {
+  navigateTo,
+  initPageReveal,
+  readyReveal,
+  safeNavigateBack,
+  setupAuthTimeout,
+  createLogger,
+} from '@/utils';
 import { initIcons } from '@ui/icons.js';
 import { showToast } from '@ui/components/toast.js';
 
@@ -80,26 +87,7 @@ const contribTimeout = setTimeout(() => {
  * page behaviour.
  */
 export function handleProfileBack() {
-  if (typeof window === 'undefined') return;
-
-  let sameOriginReferrer = false;
-  if (document.referrer) {
-    try {
-      sameOriginReferrer =
-        new URL(document.referrer, window.location.origin).origin === window.location.origin;
-    } catch {
-      sameOriginReferrer = false;
-    }
-  }
-
-  const softNavigated = Boolean(window.history?.state?.url);
-
-  if (window.history?.length > 1 && (sameOriginReferrer || softNavigated)) {
-    window.history.back();
-    return;
-  }
-
-  window.location.href = '/library.html';
+  safeNavigateBack('/index.html');
 }
 
 /** Element that already received the back-button listener (guards re-inits). */

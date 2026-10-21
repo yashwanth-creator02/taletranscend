@@ -387,6 +387,23 @@ describe('Login Page', () => {
     expect(localStorage.getItem('tt_auth')).toBeNull();
   });
 
+  it('redirects an identified guest to their destination or home when landing on login page', async () => {
+    localStorage.setItem('tt_has_visited', 'true');
+    localStorage.setItem(
+      'tt_auth',
+      JSON.stringify({ v: 1, uid: 'guest-1', anonymous: true, method: 'guest', at: 1 })
+    );
+
+    onAuthStateChanged.mockImplementation((auth, cb) => {
+      cb({ uid: 'guest-1', isAnonymous: true });
+      return vi.fn();
+    });
+
+    await initPage();
+
+    expect(utils.navigateTo).toHaveBeenCalledWith('index.html');
+  });
+
   it('continues to the destination preserved by the gate', async () => {
     const mod = await import('../login.js');
     await initPage();

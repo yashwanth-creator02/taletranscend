@@ -18,17 +18,21 @@ vi.mock('@ui/components/nav/nav.global.js', () => ({
   initGlobalPaletteShortcut: vi.fn(),
 }));
 
-vi.mock('@/utils', () => ({
-  navigateTo: vi.fn(),
-  initPageReveal: vi.fn(),
-  readyReveal: vi.fn(),
-  setupAuthTimeout: vi.fn(() => 123),
-  createLogger: vi.fn(() => ({
-    info: vi.fn(),
-    debug: vi.fn(),
-    error: vi.fn(),
-  })),
-}));
+vi.mock('@/utils', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    navigateTo: vi.fn(),
+    initPageReveal: vi.fn(),
+    readyReveal: vi.fn(),
+    setupAuthTimeout: vi.fn(() => 123),
+    createLogger: vi.fn(() => ({
+      info: vi.fn(),
+      debug: vi.fn(),
+      error: vi.fn(),
+    })),
+  };
+});
 
 vi.mock('../index.js', () => ({
   initProfileUI: vi.fn(),
@@ -182,10 +186,10 @@ describe('Profile Back Button', () => {
     backSpy.mockRestore();
   });
 
-  it('falls back to the library when there is no in-app history', async () => {
+  it('falls back to home when there is no in-app history', async () => {
     const { handleProfileBack } = await import('../profile.js');
 
-    vi.stubGlobal('location', { origin: 'http://localhost:3000', href: '' });
+    vi.stubGlobal('location', { origin: 'http://localhost:3000', href: '', assign: vi.fn() });
 
     Object.defineProperty(document, 'referrer', { value: '', configurable: true });
     Object.defineProperty(window.history, 'length', { value: 1, configurable: true });
@@ -193,6 +197,24 @@ describe('Profile Back Button', () => {
 
     handleProfileBack();
 
-    expect(window.location.href).toBe('/library.html');
+    expect(window.location.assign).toHaveBeenCalledWith('/index.html');
+  });
+
+  it('navigates to home when referrer is login page instead of calling history.back()', async () => {
+    const { handleProfileBack } = await import('../profile.js');
+    const backSpy = vi.spyOn(window.history, 'back').mockImplementation(() => {});
+    vi.stubGlobal('location', { origin: 'http://localhost:3000', href: '', assign: vi.fn() });
+
+    Object.defineProperty(document, 'referrer', {
+      value: `${window.location.origin}/login.html`,
+      configurable: true,
+    });
+    Object.defineProperty(window.history, 'length', { value: 3, configurable: true });
+
+    handleProfileBack();
+
+    expect(backSpy).not.toHaveBeenCalled();
+    expect(window.location.assign).toHaveBeenCalledWith('/index.html');
+    backSpy.mockRestore();
   });
 });

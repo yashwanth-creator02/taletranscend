@@ -24,7 +24,7 @@ import {
 import { cacheService } from '@services/cache.service.js';
 import { auth } from '@fb/index.js';
 import { appState } from '@state/index.js';
-import { debounce, navigateTo, taleUrl, createLogger } from '@/utils';
+import { debounce, navigateTo, safeNavigateBack, taleUrl, createLogger } from '@/utils';
 
 const log = createLogger('ShelfInteractions');
 
@@ -64,11 +64,7 @@ export function resetShelfInteractions() {
 
 function _bindBackNavigation() {
   document.getElementById('btn-back')?.addEventListener('click', () => {
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      window.location.href = '/library.html';
-    }
+    safeNavigateBack('/index.html');
   });
 }
 

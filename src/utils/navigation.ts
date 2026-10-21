@@ -277,6 +277,65 @@ export function navigateTo(target: string, delay = 0): void {
   }, TRANSITION_DURATION_MS + delay);
 }
 
+/**
+ * Safely navigates back to the originating in-app page, or falls back to home.
+ * Prevents navigating back to the login page when the visitor is identified/authenticated,
+ * and handles pasted URLs (no in-app history or cross-origin referrer) by routing to home.
+ *
+ * @param fallback - Destination when history.back() is unavailable or would lead to login (default: '/index.html').
+ */
+export function safeNavigateBack(fallback = '/index.html'): void {
+  if (typeof window === 'undefined') return;
+
+  const resolvedFallback = resolveHref(fallback);
+
+  const isLoginUrl = (urlStr: string): boolean => {
+    if (!urlStr) return false;
+    try {
+      const parsed = new URL(urlStr, window.location.origin);
+      const p = parsed.pathname.toLowerCase();
+      return (
+        p === '/login' ||
+        p === '/login.html' ||
+        p.endsWith('/login.html') ||
+        p.endsWith('/login') ||
+        p.startsWith('/login')
+      );
+    } catch {
+      return urlStr.includes('login');
+    }
+  };
+
+  const hasHistory = Boolean(window.history && window.history.length > 1);
+  const referrer = typeof document !== 'undefined' ? document.referrer : '';
+
+  if (hasHistory && referrer) {
+    try {
+      const referrerUrl = new URL(referrer, window.location.origin);
+      const isSameOrigin = referrerUrl.origin === window.location.origin;
+      if (isSameOrigin && !isLoginUrl(referrer)) {
+        window.history.back();
+        return;
+      }
+    } catch {
+      // Malformed referrer fallback
+    }
+  }
+
+  const softNavUrl = window.history?.state?.url;
+  if (hasHistory && softNavUrl && !isLoginUrl(softNavUrl)) {
+    window.history.back();
+    return;
+  }
+
+  // Safe fallback to home or specified destination instead of login
+  if (typeof window.location.assign === 'function') {
+    window.location.assign(resolvedFallback);
+  } else {
+    window.location.href = resolvedFallback;
+  }
+}
+
 // Reset body pointer-events and opacity when navigating via browser back/forward buttons (bfcache)
 if (typeof window !== 'undefined') {
   window.addEventListener('pageshow', () => {

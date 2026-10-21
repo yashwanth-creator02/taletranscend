@@ -635,9 +635,9 @@ describe('Settings Page Controller', () => {
       });
     });
 
-    it('falls back to /library.html when there is no referrer or external referrer', () => {
+    it('falls back to /index.html when there is no referrer or external referrer', () => {
       delete window.location;
-      window.location = { origin: 'http://localhost:3000', href: '' };
+      window.location = { origin: 'http://localhost:3000', href: '', assign: vi.fn() };
 
       Object.defineProperty(document, 'referrer', {
         value: '',
@@ -650,20 +650,41 @@ describe('Settings Page Controller', () => {
 
       handleNavigateBack();
 
-      expect(window.location.href).toBe('/library.html');
+      expect(window.location.assign).toHaveBeenCalledWith('/index.html');
+    });
+
+    it('navigates to /index.html when referrer is login page instead of calling history.back()', () => {
+      delete window.location;
+      window.location = { origin: 'http://localhost:3000', href: '', assign: vi.fn() };
+      const historyBackSpy = vi.spyOn(window.history, 'back').mockImplementation(() => {});
+
+      Object.defineProperty(document, 'referrer', {
+        value: `${window.location.origin}/login.html`,
+        configurable: true,
+      });
+      Object.defineProperty(window.history, 'length', {
+        value: 3,
+        configurable: true,
+      });
+
+      handleNavigateBack();
+
+      expect(historyBackSpy).not.toHaveBeenCalled();
+      expect(window.location.assign).toHaveBeenCalledWith('/index.html');
+      historyBackSpy.mockRestore();
     });
 
     it('attaches click listener to #settings-back-btn', () => {
       document.body.innerHTML = '<button id="settings-back-btn"></button>';
       delete window.location;
-      window.location = { origin: 'http://localhost:3000', href: '' };
+      window.location = { origin: 'http://localhost:3000', href: '', assign: vi.fn() };
 
       initSettingsBackButton();
 
       const backBtn = document.getElementById('settings-back-btn');
       backBtn.click();
 
-      expect(window.location.href).toBe('/library.html');
+      expect(window.location.assign).toHaveBeenCalledWith('/index.html');
     });
   });
 

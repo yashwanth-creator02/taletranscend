@@ -88,7 +88,7 @@ The TaleTranscend brand mark is the mythical golden-trimmed black quill pen enci
 ### 6. Settings Page Architecture & Dedicated Back Navigation
 
 - **No Global Header/Dock Navigation**: The settings page (`settings.html`) intentionally omits the global application navbar and dock to provide an uncluttered, focused Chrome-inspired settings view.
-- **Dedicated Back Button**: Navigation back to the user's prior screen uses `#settings-back-btn` running `handleNavigateBack()`, which verifies same-origin referrer and calls `window.history.back()` (with safe fallback to `/library.html`).
+- **Dedicated Back Button**: Navigation back to the user's prior screen uses `#settings-back-btn` running `handleNavigateBack()`, which uses `safeNavigateBack('/index.html')` to call `window.history.back()` when an in-app non-login referrer exists, or safely routes to Home (`/index.html`) when the URL was pasted or the prior page was login.
 - **Separate Section Views (Non-Continuous Scrolling)**:
   - Each settings category (`Chronicler Profile`, `Reading Themes`, `Codex Typography`, `Atmosphere & Motion`, `Archival Storage`, `System & Defaults`, `About Codex`) is a separate section view. Only the active section is visible (`.hidden` class added to all inactive sections; `.settings-section.hidden { display: none !important; }`).
   - Selecting a sidebar row or navigating via URL hash (`#profile`, `#themes`, etc.) dynamically switches visibility via `switchSettingsSection`.
