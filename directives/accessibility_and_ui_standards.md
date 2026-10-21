@@ -237,6 +237,12 @@ The TaleTranscend brand mark is the mythical golden-trimmed black quill pen enci
   - Both the vertical desktop card and the horizontal phone card render from the same template using `tale-card__inner`, `tale-card__top`, `tale-card__cover`, `tale-card__body`, and `tale-card__footer` hooks. Both skeleton renderers (`renderCardsSkeleton` and `showGridSkeleton`) mirror that structure; never fork a separate phone template.
   - The book jacket is taken out of flow inside its `cover` grid area (`position: absolute; inset: 0`) so the intrinsic 3:4 image ratio cannot stretch the row. The footer stacks below `340px` so chapter meta, the heart total, and the action button all stay reachable at 320px.
   - Total hearts are read from `tale.reactionCount` (Soul Resonance) and rendered as a heart glyph plus `formatNumber` count in the footer, in both layouts. The glyph derives its colour from `--danger` / `--danger-rgb` tokens and the count must never be clipped or hidden.
+- **Library Card Options Menu**:
+  - The three-dot trigger uses `more-vertical`, exposes `aria-haspopup="menu"` and `aria-expanded`, and controls the menu through `aria-controls`. `interactions.js` owns both attributes; never leave a stale expanded state after closing.
+  - `#cards-grid .options-menu` is a 15rem anchored popover, not a utility-class stack. It opens below the trigger and flips above it when the available viewport space is smaller than the menu height. `_positionMenu` caps the menu through the `--menu-available-height` custom property and reserves 76px for the mobile bottom navigation.
+  - On viewports below 768px, `body:has(#cards-grid .tale-card.menu-open) .library-layout` is raised above `--z-nav` so the menu is never painted behind the bottom bar.
+  - The menu header repeats the tale title; actions use sentence case, token-backed icon tiles, and dedicated `--save` / `--danger` modifiers. Do not style menu items with colour utilities such as `text-emerald-400` or `text-rose-400`.
+  - When tightening mobile rules, never target `#cards-grid .tale-card__top button`: it also matches menu items and collapses them to the trigger width. Target `.tale-card__options` explicitly.
 - **Animation Safety in Test Environments**:
   - Dynamic count-up animations, such as the Shelf hero statistics (`_animateStatCount`), use `requestAnimationFrame` with cubic ease-out in the browser.
   - In unit and integration test runners (e.g. Vitest JSDOM), RAF evaluation can be deferred while assertions execute synchronously.

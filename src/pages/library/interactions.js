@@ -54,7 +54,7 @@ export function setupCardInteractions(userId) {
 
       switch (actionEl.dataset.action) {
         case 'options':
-          _toggleMenu(actionEl.dataset.menuId);
+          _toggleMenu(actionEl.dataset.menuId, actionEl);
           return;
 
         case 'resume':
@@ -62,6 +62,7 @@ export function setupCardInteractions(userId) {
           return;
 
         case 'copy-link':
+          _closeAllMenus();
           _handleCopyLink(taleId);
           return;
 
@@ -83,14 +84,17 @@ export function setupCardInteractions(userId) {
 
         case 'mark-finished':
           if (actionEl.hasAttribute('disabled')) return;
+          _closeAllMenus();
           _confirmMarkFinished(() => _handleMarkFinished(_activeUserId, taleId));
           return;
 
         case 'couple':
+          _closeAllMenus();
           await _handleCouple(_activeUserId, taleId, actionEl);
           return;
 
         case 'decouple':
+          _closeAllMenus();
           await _handleDecouple(_activeUserId, taleId, actionEl);
           return;
 
@@ -112,8 +116,25 @@ export function setupCardInteractions(userId) {
     }
   });
 
+  // A menu anchored to a card loses its anchor when the page scrolls.
+  // Internal menu scrolling is exempt so long action lists remain usable.
+  window.addEventListener(
+    'scroll',
+    (e) => {
+      if (e.target instanceof Element && e.target.closest('.options-menu')) return;
+      _closeAllMenus();
+    },
+    { passive: true, capture: true }
+  );
+
+  window.addEventListener('resize', () => _closeAllMenus(), { passive: true });
+
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') _closeAllMenus();
+    if (e.key !== 'Escape') return;
+    const openMenu = document.querySelector('.options-menu:not(.hidden)');
+    const trigger = openMenu?.closest('.tale-card')?.querySelector('[data-action="options"]');
+    _closeAllMenus();
+    trigger?.focus();
   });
 }
 
@@ -411,7 +432,7 @@ async function _handleDecouple(userId, taleId, btn) {
    Helpers
    ───────────────────────────────────────────── */
 
-function _toggleMenu(menuId) {
+function _toggleMenu(menuId, trigger) {
   if (!menuId) return;
   const menu = document.getElementById(menuId);
   if (!menu) return;
@@ -423,13 +444,50 @@ function _toggleMenu(menuId) {
 
   if (willOpen) {
     menu.classList.remove('hidden');
+    _positionMenu(menu, trigger);
     card?.classList.add('menu-open');
+    trigger?.setAttribute('aria-expanded', 'true');
   }
+}
+
+/**
+ * Keeps the dropdown inside the viewport and clear of the mobile bottom
+ * navigation. The menu opens upward when the card sits too low on screen
+ * and its height is capped to the space actually available.
+ *
+ * @param {HTMLElement} menu
+ * @param {HTMLElement} [trigger]
+ */
+function _positionMenu(menu, trigger) {
+  const button = trigger || menu.parentElement?.querySelector('[data-action="options"]');
+  if (!button) return;
+
+  menu.style.removeProperty('--menu-available-height');
+  menu.classList.remove('options-menu--above');
+
+  const rect = button.getBoundingClientRect();
+  const edgeGap = 12;
+  const isMobile =
+    typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 767px)').matches;
+  const navClearance = isMobile ? 76 : 16;
+  const spaceBelow = window.innerHeight - rect.bottom - edgeGap - navClearance;
+  const spaceAbove = rect.top - edgeGap;
+  const naturalHeight = menu.scrollHeight;
+  const openAbove = naturalHeight > spaceBelow && spaceAbove > spaceBelow;
+
+  menu.classList.toggle('options-menu--above', openAbove);
+  const available = Math.max(96, openAbove ? spaceAbove : spaceBelow);
+  menu.style.setProperty('--menu-available-height', `${Math.floor(available)}px`);
 }
 
 function _closeAllMenus() {
   document.querySelectorAll('.options-menu:not(.hidden)').forEach((m) => {
     m.classList.add('hidden');
+    m.classList.remove('options-menu--above');
+    m.style.removeProperty('--menu-available-height');
+    m.closest('.tale-card')
+      ?.querySelector('[data-action="options"]')
+      ?.setAttribute('aria-expanded', 'false');
   });
   document.querySelectorAll('.tale-card.menu-open').forEach((c) => {
     c.classList.remove('menu-open');

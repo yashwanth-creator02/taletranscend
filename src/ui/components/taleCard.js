@@ -267,7 +267,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
     ? 'badge-finished border-emerald-500/20'
     : 'badge-era border-indigo-500/20';
   const bookmarkedAction = isBookmarked ? 'decouple' : 'couple';
-  const bookmarkedLabel = isBookmarked ? 'Remove Bookmark' : 'Save to Shelf';
+  const bookmarkedLabel = isBookmarked ? 'Remove from shelf' : 'Save to shelf';
   const bookmarkedIcon = isBookmarked ? 'bookmark-minus' : 'bookmark-plus';
 
   return `
@@ -284,55 +284,71 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
             ${isFinished ? renderBadge('Finished', statusBadgeClasses) : ''}
           </div>
 
-          <div class="relative shrink-0">
+          <div class="tale-card__menu relative shrink-0">
             <button
               type="button"
               data-action="options"
               data-menu-id="${escapeHtml(menuId)}"
-              class="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-lg bg-surface-2 border border-line text-muted transition-all hover:bg-surface-4 hover:text-ink"
-              aria-label="Chronicle Options"
+              class="tale-card__options flex items-center justify-center rounded-lg bg-surface-2 border border-line text-muted transition-all"
+              aria-label="Options for ${safeTitle}"
+              aria-haspopup="menu"
+              aria-expanded="false"
+              aria-controls="${escapeHtml(menuId)}"
             >
-              <i data-lucide="more-horizontal" class="h-3 w-3 sm:h-3.5 sm:w-3.5"></i>
+              <i data-lucide="more-vertical" class="h-4 w-4"></i>
             </button>
 
             <div
               id="${escapeHtml(menuId)}"
-              class="options-menu hidden absolute right-0 z-50 mt-1 w-52 sm:w-60 overflow-hidden rounded-2xl p-2 sm:p-2.5 shadow-2xl"
+              class="options-menu hidden"
               role="menu"
+              aria-label="Chronicle options for ${safeTitle}"
             >
-              <div class="px-3 py-2 border-b border-line mb-1.5">
-                <span class="text-[9px] font-black uppercase tracking-widest text-muted">Chronicle Options</span>
+              <div class="options-menu__header">
+                <span class="options-menu__eyebrow">Chronicle options</span>
+                <span class="options-menu__title">${safeTitle}</span>
               </div>
 
-              <button type="button" data-action="copy-link" data-id="${escapeHtml(id)}"
-                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 sm:py-3 text-left text-[10px] font-bold uppercase tracking-wider text-ink-soft transition-colors hover:bg-surface-2 hover:text-ink">
-                <i data-lucide="link" class="h-4 w-4 shrink-0"></i>
-                <span>Copy Tale Link</span>
-              </button>
+              <div class="options-menu__group">
+                <button type="button" data-action="copy-link" data-id="${escapeHtml(id)}"
+                  class="options-menu__item" role="menuitem">
+                  <span class="options-menu__icon"><i data-lucide="link" class="h-3.5 w-3.5"></i></span>
+                  <span class="options-menu__label">Copy tale link</span>
+                </button>
 
-              <button type="button" data-action="download" data-id="${escapeHtml(id)}"
-                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 sm:py-3 text-left text-[10px] font-bold uppercase tracking-wider text-ink-soft transition-colors hover:bg-surface-2 hover:text-ink">
-                <i data-lucide="download" class="h-4 w-4 shrink-0"></i>
-                <span>Download Chronicle</span>
-              </button>
+                <button type="button" data-action="download" data-id="${escapeHtml(id)}"
+                  class="options-menu__item" role="menuitem">
+                  <span class="options-menu__icon"><i data-lucide="download" class="h-3.5 w-3.5"></i></span>
+                  <span class="options-menu__label">Download chronicle</span>
+                </button>
+              </div>
 
-              <div class="h-px bg-line my-1.5"></div>
+              <div class="options-menu__divider"></div>
 
-              <button type="button"
-                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 sm:py-3 text-left text-[10px] font-bold uppercase tracking-wider transition-colors ${isFinished ? 'opacity-40 text-muted' : 'text-ink-soft hover:bg-surface-2 hover:text-ink'}"
-                data-action="${isFinished ? '' : 'mark-finished'}" data-id="${escapeHtml(id)}">
-                <i data-lucide="check-circle" class="h-4 w-4 shrink-0"></i>
-                <span>${isFinished ? 'Already Sealed' : 'Seal Chronicle'}</span>
-              </button>
+              <div class="options-menu__group">
+                <button type="button"
+                  class="options-menu__item ${isFinished ? 'is-disabled' : ''}"
+                  data-action="${isFinished ? '' : 'mark-finished'}"
+                  data-id="${escapeHtml(id)}"
+                  role="menuitem"
+                  ${isFinished ? 'disabled aria-disabled="true"' : ''}>
+                  <span class="options-menu__icon"><i data-lucide="check-circle" class="h-3.5 w-3.5"></i></span>
+                  <span class="options-menu__label">${isFinished ? 'Chronicle sealed' : 'Seal chronicle'}</span>
+                </button>
+              </div>
 
-              <div class="h-px bg-line my-1.5"></div>
+              <div class="options-menu__divider"></div>
 
-              <button type="button"
-                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 sm:py-3 text-left text-[10px] font-bold uppercase tracking-wider transition-colors ${isBookmarked ? 'text-rose-400 hover:bg-rose-500/10' : 'text-emerald-400 hover:bg-emerald-500/10'}"
-                data-action="${bookmarkedAction}" data-id="${escapeHtml(id)}">
-                <i data-lucide="${bookmarkedIcon}" class="h-4 w-4 shrink-0"></i>
-                <span>${bookmarkedLabel}</span>
-              </button>
+              <div class="options-menu__group">
+                <button type="button"
+                  class="options-menu__item ${isBookmarked ? 'options-menu__item--danger' : 'options-menu__item--save'}"
+                  data-action="${bookmarkedAction}"
+                  data-id="${escapeHtml(id)}"
+                  role="menuitem">
+                  <span class="options-menu__icon"><i data-lucide="${bookmarkedIcon}" class="h-3.5 w-3.5"></i></span>
+                  <span class="options-menu__label">${bookmarkedLabel}</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

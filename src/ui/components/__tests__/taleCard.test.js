@@ -69,6 +69,9 @@ describe('TaleCard Component', () => {
       expect(container.innerHTML).toContain('bookmark-minus'); // because it is bookmarked
       expect(container.innerHTML).toContain('data-lucide="heart"');
       expect(container.innerHTML).toContain('1.2k');
+      expect(container.innerHTML).toContain('data-lucide="more-vertical"');
+      expect(container.innerHTML).toContain('aria-haspopup="menu"');
+      expect(container.innerHTML).toContain('options-menu__item');
     });
   });
 });

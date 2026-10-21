@@ -81,6 +81,19 @@ describe('LibraryInteractions', () => {
 
     const menu = document.getElementById('menu-t1');
     expect(menu.classList.contains('hidden')).toBe(false);
+    expect(optBtn.getAttribute('aria-expanded')).toBe('true');
+  });
+
+  it('closes the options menu on outside click and resets expanded state', () => {
+    setupCardInteractions('u1');
+    const optBtn = document.querySelector('[data-action="options"]');
+    optBtn.click();
+
+    document.body.click();
+
+    const menu = document.getElementById('menu-t1');
+    expect(menu.classList.contains('hidden')).toBe(true);
+    expect(optBtn.getAttribute('aria-expanded')).toBe('false');
   });
 
   it('handles resume action', async () => {
