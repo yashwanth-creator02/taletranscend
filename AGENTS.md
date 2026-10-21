@@ -185,6 +185,18 @@ python execution/setup_worktree.py --release-port <path>
 
 Allocation also prunes entries whose worktree directory no longer exists, so a forgotten release self-heals on the next setup run. Never hardcode a port in a committed config file.
 
+**13. Resource Release & Response Confirmation**
+
+- Release every resource the turn acquired before finishing: dev servers, watchers, emulators, background shells, spawned child processes, browser sessions, `.tmp/` artifacts, and any port or lock you took.
+- Never leave a long-running process behind just to save a future restart. Anything that must stay alive is an explicit exception and must be named as one.
+- End every response with the confirmation block below, placed after `What I Gained` so principle 10 still governs the closing summary. If the turn acquired nothing, say so in one line.
+
+```text
+Resources received: <processes, ports, servers, files or sessions this turn started or claimed>
+Resources released: <what was stopped, closed, deleted or freed, or "none">
+Retained: <what deliberately stays alive and why, or "none">
+```
+
 ## Self-annealing loop
 
 Errors are learning opportunities. When something breaks:
