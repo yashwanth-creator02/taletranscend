@@ -232,6 +232,11 @@ The TaleTranscend brand mark is the mythical golden-trimmed black quill pen enci
 - **Card Progress Bar Display Rule**:
   - Library cards (`taleCard.js`) and shelf continue-reading rows must only render progress bars and percentage text when `progress > 0`.
   - Unstarted chronicles must never display misleading "PROGRESS 0%" indicators.
+- **Library Card Responsive Layout & Reaction Totals**:
+  - Below `420px`, `#cards-grid` collapses to one column and every `.tale-card` becomes a horizontal shelf row: portrait jacket on the left; era badge, options menu, title, description, and footer on the right. This includes 360px and 320px viewports.
+  - Both the vertical desktop card and the horizontal phone card render from the same template using `tale-card__inner`, `tale-card__top`, `tale-card__cover`, `tale-card__body`, and `tale-card__footer` hooks. Both skeleton renderers (`renderCardsSkeleton` and `showGridSkeleton`) mirror that structure; never fork a separate phone template.
+  - The book jacket is taken out of flow inside its `cover` grid area (`position: absolute; inset: 0`) so the intrinsic 3:4 image ratio cannot stretch the row. The footer stacks below `340px` so chapter meta, the heart total, and the action button all stay reachable at 320px.
+  - Total hearts are read from `tale.reactionCount` (Soul Resonance) and rendered as a heart glyph plus `formatNumber` count in the footer, in both layouts. The glyph derives its colour from `--danger` / `--danger-rgb` tokens and the count must never be clipped or hidden.
 - **Animation Safety in Test Environments**:
   - Dynamic count-up animations, such as the Shelf hero statistics (`_animateStatCount`), use `requestAnimationFrame` with cubic ease-out in the browser.
   - In unit and integration test runners (e.g. Vitest JSDOM), RAF evaluation can be deferred while assertions execute synchronously.

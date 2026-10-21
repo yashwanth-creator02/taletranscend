@@ -3,7 +3,13 @@
 // Renders a grid of tale cards with progress, bookmarks, and read time overlays.
 
 import { getTotalReadTime, getBookmarks, getTaleProgressData } from '@services/index.js';
-import { getOverallProgress, formatMs, escapeHtml as escapeHtml, createLogger } from '@/utils';
+import {
+  getOverallProgress,
+  formatMs,
+  formatNumber,
+  escapeHtml as escapeHtml,
+  createLogger,
+} from '@/utils';
 import { DEFAULT_COVER_URL } from '@config/app.config.js';
 import { renderEmptyState, renderErrorState, renderEmptySearchState } from './feedback.js';
 import { renderBadge } from './badge.js';
@@ -25,9 +31,24 @@ function _formatReadTime(totalMs = 0) {
 
 function _metaItem(icon, label) {
   return `
-    <div class="flex items-center gap-1 sm:gap-2 text-muted group-hover:text-accent transition-colors">
+    <div class="tale-card__meta flex items-center gap-1 sm:gap-2 text-muted group-hover:text-accent transition-colors">
       <i data-lucide="${icon}" class="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 opacity-60"></i>
       <span class="text-[8px] sm:text-[9px] font-bold uppercase tracking-[0.14em] sm:tracking-[0.18em] truncate">${escapeHtml(label)}</span>
+    </div>
+  `;
+}
+
+function _reactionItem(count) {
+  const label = formatNumber(Number(count) || 0);
+  const description = `${label} ${Number(count) === 1 ? 'heart' : 'hearts'}`;
+  return `
+    <div
+      class="tale-card__meta tale-card__likes flex items-center gap-1 sm:gap-2 text-muted group-hover:text-accent transition-colors"
+      title="${escapeHtml(description)}"
+      aria-label="${escapeHtml(description)}"
+    >
+      <i data-lucide="heart" class="tale-card__likes-icon h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0"></i>
+      <span class="text-[8px] sm:text-[9px] font-bold uppercase tracking-[0.14em] sm:tracking-[0.18em] truncate">${label}</span>
     </div>
   `;
 }
@@ -43,18 +64,18 @@ function _progressLabel(percent) {
 export function renderCardsSkeleton(container, count = 8) {
   if (!container) return;
   container.innerHTML = `
-    <div class="col-span-full grid gap-3.5 sm:gap-6 grid-cols-2 md:grid-cols-4 lg:grid-cols-4 2xl:grid-cols-4">
+    <div class="cards-grid-inner col-span-full grid gap-3.5 sm:gap-6 grid-cols-2 md:grid-cols-4 lg:grid-cols-4 2xl:grid-cols-4">
       ${Array.from({ length: count })
         .map(
           () => `
         <div class="tale-card animate-pulse">
-          <div class="p-2.5 sm:p-4 flex flex-col">
-            <div class="mb-2 sm:mb-3 flex items-center justify-between gap-1.5 sm:gap-2">
+          <div class="tale-card__inner p-2.5 sm:p-4 flex flex-col">
+            <div class="tale-card__top mb-2 sm:mb-3 flex items-center justify-between gap-1.5 sm:gap-2">
               <div class="h-4 sm:h-5 w-14 sm:w-20 rounded-sm bg-white/6"></div>
               <div class="h-6 w-6 sm:h-7 sm:w-7 rounded-lg bg-white/5"></div>
             </div>
-            <div class="card-image-wrap mb-2.5 sm:mb-3.5 bg-white/6"></div>
-            <div class="space-y-1.5 sm:space-y-2 flex-1">
+            <div class="tale-card__cover card-image-wrap mb-2.5 sm:mb-3.5 bg-white/6"></div>
+            <div class="tale-card__body space-y-1.5 sm:space-y-2 flex-1">
               <div class="h-2.5 sm:h-3 w-1/3 rounded bg-white/5"></div>
               <div class="h-4 sm:h-5 w-3/4 rounded bg-white/6"></div>
               <div class="space-y-1 sm:space-y-1.5 mt-1.5 sm:mt-2">
@@ -62,9 +83,10 @@ export function renderCardsSkeleton(container, count = 8) {
                 <div class="hidden sm:block h-3 w-5/6 rounded bg-white/5"></div>
               </div>
             </div>
-            <div class="mt-3 sm:mt-4 flex items-center justify-between pt-2 sm:pt-3 border-t border-white/5">
+            <div class="tale-card__footer mt-3 sm:mt-4 flex items-center justify-between pt-2 sm:pt-3 border-t border-white/5">
               <div class="flex gap-2">
                 <div class="h-3 w-10 sm:w-14 rounded bg-white/5"></div>
+                <div class="h-3 w-5 sm:w-7 rounded bg-white/5"></div>
               </div>
               <div class="h-5 sm:h-6 w-12 sm:w-16 rounded-lg bg-white/5"></div>
             </div>
@@ -212,6 +234,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
     description = 'No description provided.',
     era = 'Unknown Era',
     chapterCount = 0,
+    reactionCount = 0,
   } = tale || {};
 
   const cleanTitle = (function () {
@@ -253,9 +276,9 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
       data-id="${escapeHtml(id)}"
       aria-label="${safeTitle}"
     >
-      <div class="p-2.5 sm:p-4 flex flex-col flex-1">
+      <div class="tale-card__inner p-2.5 sm:p-4 flex flex-col flex-1">
         <!-- Top Bar: Era Badges & Options Menu -->
-        <div class="mb-2 sm:mb-3 flex items-center justify-between gap-1.5 sm:gap-2 relative z-20 min-h-6 sm:min-h-7">
+        <div class="tale-card__top mb-2 sm:mb-3 flex items-center justify-between gap-1.5 sm:gap-2 relative z-20 min-h-6 sm:min-h-7">
           <div class="flex items-center gap-1 sm:gap-1.5 flex-wrap min-w-0">
             ${safeEra ? renderBadge(safeEra, 'badge-era max-w-[85px] sm:max-w-none truncate') : ''}
             ${isFinished ? renderBadge('Finished', statusBadgeClasses) : ''}
@@ -315,7 +338,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
         </div>
 
         <!-- Dedicated Portrait Book Cover (3:4 ratio) -->
-        <div class="card-image-wrap mb-2.5 sm:mb-3.5">
+        <div class="tale-card__cover card-image-wrap mb-2.5 sm:mb-3.5">
           <img
             src="${escapeHtml(cover)}"
             alt="${safeTitle}"
@@ -329,7 +352,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
           ${
             progress > 0
               ? `
-          <div class="absolute inset-x-0 bottom-0 p-2 sm:p-2.5 z-10">
+          <div class="tale-card__progress absolute inset-x-0 bottom-0 p-2 sm:p-2.5 z-10">
             <div class="card-progress-meta">
               <span class="card-progress-label">Progress</span>
               <span class="card-progress-val text-accent-tint text-indigo-300">${_progressLabel(progress)}</span>
@@ -344,26 +367,27 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
         </div>
 
         <!-- Middle: Fragment Tag, Title, and Description -->
-        <div class="flex-1 flex flex-col justify-start">
-          <div class="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
+        <div class="tale-card__body flex-1 flex flex-col justify-start">
+          <div class="tale-card__kicker flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
             <span class="h-px w-3 sm:w-4 bg-indigo-500/40"></span>
             <span class="text-[8px] sm:text-[9px] font-bold text-muted uppercase tracking-widest">Scroll #${id.slice(-4)}</span>
           </div>
 
-          <h3 class="mb-1 sm:mb-1.5 line-clamp-1 text-xs sm:text-base font-bold font-cinzel text-ink group-hover:text-accent transition-colors">
+          <h3 class="tale-card__title mb-1 sm:mb-1.5 line-clamp-1 text-xs sm:text-base font-bold font-cinzel text-ink group-hover:text-accent transition-colors">
             ${safeTitle}
           </h3>
 
-          <p class="line-clamp-1 sm:line-clamp-2 text-[10px] sm:text-xs leading-relaxed text-muted group-hover:text-ink-soft transition-colors mb-2 sm:mb-3">
+          <p class="tale-card__desc line-clamp-1 sm:line-clamp-2 text-[10px] sm:text-xs leading-relaxed text-muted group-hover:text-ink-soft transition-colors mb-2 sm:mb-3">
             ${safeDescription}
           </p>
         </div>
 
         <!-- Footer: Metadata & Action -->
-        <div class="flex items-center justify-between pt-2 sm:pt-3 mt-auto border-t border-line gap-1.5">
+        <div class="tale-card__footer flex items-center justify-between pt-2 sm:pt-3 mt-auto border-t border-line gap-1.5">
           <div class="flex items-center gap-1.5 sm:gap-3 min-w-0">
-            ${_metaItem('layers', `${chapterCount} Chapters`)}
-            <span class="hidden sm:inline-flex">${timeBadge}</span>
+            ${_metaItem('layers', `${chapterCount} ${Number(chapterCount) === 1 ? 'Chapter' : 'Chapters'}`)}
+            ${_reactionItem(reactionCount)}
+            <span class="tale-card__readtime hidden sm:inline-flex">${timeBadge}</span>
           </div>
           <button
             type="button"

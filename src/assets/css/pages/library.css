@@ -293,6 +293,18 @@
   }
 }
 
+/* ── Narrow phones: single-column shelf rows ─── */
+@media (max-width: 420px) {
+  #cards-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+  }
+
+  #cards-grid .cards-grid-inner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 /* ── Reduce motion ───────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   #sidebar,

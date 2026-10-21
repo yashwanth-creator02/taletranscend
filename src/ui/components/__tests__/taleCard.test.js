@@ -56,7 +56,7 @@ describe('TaleCard Component', () => {
   describe('renderTaleCards', () => {
     it('renders cards into the container', () => {
       const container = document.getElementById('container');
-      const tales = [{ id: 't1', title: 'Tale 1', chapterCount: 5 }];
+      const tales = [{ id: 't1', title: 'Tale 1', chapterCount: 5, reactionCount: 1240 }];
       const metadata = {
         progressSnapshots: [{}],
         bookmarkMap: { t1: true },
@@ -67,6 +67,8 @@ describe('TaleCard Component', () => {
 
       expect(container.innerHTML).toContain('Tale 1');
       expect(container.innerHTML).toContain('bookmark-minus'); // because it is bookmarked
+      expect(container.innerHTML).toContain('data-lucide="heart"');
+      expect(container.innerHTML).toContain('1.2k');
     });
   });
 });
