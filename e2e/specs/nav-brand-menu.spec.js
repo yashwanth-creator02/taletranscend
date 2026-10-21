@@ -259,11 +259,11 @@ test.describe('member brand block', () => {
     await expect.poll(() => dropdown.isHidden(), { timeout: 3000 }).toBe(true);
   });
 
-  test('quick-tools trigger still renders in the reworked header', async ({ page }) => {
+  test('quick-tools trigger still renders in the reworked header', async ({ page, isMobile }) => {
     await gotoNav(page, '/library.html');
     await applyNavUser(page, MEMBER);
 
-    const trigger = page.locator('#nav-command-button');
+    const trigger = page.locator(isMobile ? '#nav-command-button-mobile' : '#nav-command-button');
     await expect(trigger).toBeVisible();
     await expect(trigger.locator('svg[data-lucide="look-up"]')).toHaveCount(1);
     await expect(page.locator('#nav-brand-anchor')).toHaveCount(1);
@@ -310,10 +310,27 @@ test.describe('mobile viewport', () => {
     );
     expect(overflow).toBeLessThanOrEqual(0);
   });
+
+  test('brand wordmark remains visible on mobile viewport', async ({ page }) => {
+    await gotoNav(page, '/library.html');
+    await applyNavUser(page, null);
+
+    const wordmark = page.locator('.nav-logo__wordmark');
+    await expect(wordmark).toBeVisible();
+    await expect(wordmark).toHaveText('TaleTranscend');
+
+    const mark = page.locator('#nav-brand-anchor');
+    await expect(mark).toBeVisible();
+
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth
+    );
+    expect(overflow).toBeLessThanOrEqual(0);
+  });
 });
 
 test.describe('header actions', () => {
-  test('no standalone Settings icon is left in the header', async ({ page }) => {
+  test('no standalone Settings icon is left in the header', async ({ page, isMobile }) => {
     await gotoNav(page, '/library.html');
     await applyNavUser(page, MEMBER);
 
@@ -322,7 +339,9 @@ test.describe('header actions', () => {
     await expect(page.locator('#app-nav .nav-actions [data-lucide="settings"]')).toHaveCount(0);
 
     // The search trigger and user area remain the header's action pair.
-    await expect(page.locator('#nav-command-button')).toBeVisible();
+    await expect(
+      page.locator(isMobile ? '#nav-command-button-mobile' : '#nav-command-button')
+    ).toBeVisible();
     await expect(page.locator('#nav-user #nav-profile-link')).toBeVisible();
   });
 

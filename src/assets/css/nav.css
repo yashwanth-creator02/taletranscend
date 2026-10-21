@@ -528,17 +528,61 @@
     padding: 0 20px;
   }
 
+  .nav-inner {
+    padding: 0 var(--space-4);
+    gap: var(--space-3);
+  }
+
+  .nav-brand-group {
+    gap: 0;
+  }
+
+  .nav-brand {
+    gap: var(--space-2-5);
+    min-width: 0;
+  }
+
   .nav-logo__wordmark {
+    display: inline-block;
     font-size: 1rem;
+    white-space: nowrap;
+    line-height: 1;
   }
 }
 
-/* Phones: the wordmark cannot coexist with the accent quick-tools trigger and
-   the sign-in CTA at 390px. Keep the logo mark (still the home/account control)
-   and let the actions own the remaining width. */
+/* Mobile phones: keep TaleTranscend visible between the left brand mark
+   and the right action controls without horizontal overflow. */
 @media (max-width: 479px) {
+  .nav-inner {
+    padding: 0 var(--space-3);
+    gap: var(--space-2);
+  }
+
+  .nav-brand {
+    gap: var(--space-2);
+    min-width: 0;
+  }
+
   .nav-logo__wordmark {
-    display: none;
+    display: inline-block;
+    font-size: clamp(0.78rem, 3.4vw, 0.95rem);
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1;
+  }
+
+  .nav-actions {
+    gap: var(--space-2);
+    flex-shrink: 0;
+  }
+
+  .signin-btn {
+    padding: var(--space-1-5) var(--space-2-5);
+    font-size: 10px;
+    gap: var(--space-1);
+    letter-spacing: 0.05em;
   }
 }
 
