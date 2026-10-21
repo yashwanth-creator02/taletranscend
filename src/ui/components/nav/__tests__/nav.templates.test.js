@@ -2,12 +2,17 @@
 import { describe, it, expect } from 'vitest';
 import {
   buildPrimaryLink,
+  buildBrandMark,
+  buildAccountMenu,
   buildAuthenticatedUser,
   buildGuestUser,
   buildMobileDock,
   buildCommandItem,
+  buildCommandPalette,
+  buildNotifications,
   buildNav,
 } from '../nav.templates.js';
+import { USER_LINKS } from '../nav.config.js';
 
 describe('Nav Templates', () => {
   describe('buildPrimaryLink', () => {
@@ -26,17 +31,67 @@ describe('Nav Templates', () => {
   });
 
   describe('buildAuthenticatedUser', () => {
-    it('renders user display name and avatar', () => {
+    it('renders the avatar as a direct link to the profile page', () => {
       const user = { uid: 'u123', displayName: 'Hero', email: 'h@tt.com', isAnonymous: false };
-      const html = buildAuthenticatedUser(user, 'index.html', []);
-      expect(html).toContain('Hero');
-      expect(html).toContain('h@tt.com');
-      expect(html).toContain('u123'); // seed
+      const html = buildAuthenticatedUser(user);
+      expect(html).toContain('id="nav-user"');
+      expect(html).toContain('id="nav-profile-link"');
+      expect(html).toContain('profile.html');
+      expect(html).toContain('u123'); // avatar seed
+      expect(html).toContain('aria-label="Open profile for Hero"');
+      // The account menu no longer hangs off the avatar
+      expect(html).not.toContain('id="user-dropdown"');
+      expect(html).not.toContain('aria-haspopup');
+    });
+  });
+
+  describe('buildBrandMark', () => {
+    it('renders a plain home link when no user is signed in', () => {
+      const html = buildBrandMark(null);
+      expect(html).toContain('class="nav-logo__mark"');
+      expect(html).toContain('index.html');
+      expect(html).toContain('aria-label="TaleTranscend home"');
+      expect(html).not.toContain('nav-menu-btn');
+      expect(html).not.toContain('user-dropdown');
+      // The guest mark has no glyph to swap in, so it must not opt into the
+      // hover/focus logo swap.
+      expect(html).not.toContain('nav-logo__mark--menu');
+      expect(html).not.toContain('nav-logo__menu-icon');
     });
 
-    it('renders secure account button if anonymous', () => {
+    it('renders a menu button with the hamburger glyph plus the account menu for members', () => {
+      const user = { uid: 'u123', displayName: 'Hero', email: 'h@tt.com', isAnonymous: false };
+      const links = [{ href: 'shelf.html', icon: 'bookmark', label: 'My Shelf' }];
+      const html = buildBrandMark(user, 'index.html', links);
+      expect(html).toContain('id="nav-menu-btn"');
+      expect(html).toContain('aria-haspopup="menu"');
+      expect(html).toContain('aria-expanded="false"');
+      expect(html).toContain('aria-controls="user-dropdown"');
+      expect(html).toContain('aria-label="Open account menu for Hero"');
+      expect(html).toContain('nav-logo__mark--menu');
+      expect(html).toContain('data-lucide="menu"');
+      expect(html).toContain('nav-logo__menu-icon');
+      expect(html).toContain('id="user-dropdown"');
+      expect(html).toContain('My Shelf');
+    });
+  });
+
+  describe('buildAccountMenu', () => {
+    it('renders identity header, links, and sign out for members', () => {
+      const user = { uid: 'u123', displayName: 'Hero', email: 'h@tt.com', isAnonymous: false };
+      const links = [{ href: 'shelf.html', icon: 'bookmark', label: 'My Shelf' }];
+      const html = buildAccountMenu(user, 'index.html', links);
+      expect(html).toContain('aria-labelledby="nav-menu-btn"');
+      expect(html).toContain('Hero');
+      expect(html).toContain('h@tt.com');
+      expect(html).toContain('My Shelf');
+      expect(html).toContain('id="signout-btn"');
+      expect(html).not.toContain('Secure Account');
+    });
+
+    it('renders the secure account CTA for anonymous users', () => {
       const user = { uid: 'u123', isAnonymous: true };
-      const html = buildAuthenticatedUser(user, 'index.html', []);
+      const html = buildAccountMenu(user, 'index.html', []);
       expect(html).toContain('Secure Account');
     });
   });
@@ -50,15 +105,39 @@ describe('Nav Templates', () => {
   });
 
   describe('buildMobileDock', () => {
-    it('renders dock items', () => {
-      const html = buildMobileDock('library.html', null);
-      expect(html).toContain('mobile-dock');
-      expect(html).toContain('Sign In'); // null user
+    it('renders exactly Home, Library, and Shelf', () => {
+      const doc = new DOMParser().parseFromString(buildMobileDock('library.html'), 'text/html');
+      const items = [...doc.querySelectorAll('.mobile-dock__item')];
+      expect(items).toHaveLength(3);
+      expect(items.map((item) => item.getAttribute('aria-label'))).toEqual([
+        'Home',
+        'Library',
+        'Shelf',
+      ]);
+      expect(items.map((item) => item.getAttribute('href'))).toEqual([
+        '/index.html',
+        '/library.html',
+        '/shelf.html',
+      ]);
     });
 
-    it('renders profile in dock if user exists', () => {
-      const html = buildMobileDock('profile.html', { uid: 'u1' });
-      expect(html).toContain('Profile');
+    it('marks the current page active and drops retired dock entries', () => {
+      const html = buildMobileDock('library.html');
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      const active = [...doc.querySelectorAll('.mobile-dock__item--active')];
+
+      expect(active).toHaveLength(1);
+      expect(active[0].getAttribute('aria-label')).toBe('Library');
+      expect(active[0].getAttribute('aria-current')).toBe('page');
+      expect(html).not.toContain('Write');
+      expect(html).not.toContain('Profile');
+      expect(html).not.toContain('Sign In');
+      expect(html).not.toContain('mobile-dock__item--primary');
+    });
+
+    it('leaves every entry inactive on an unlisted page', () => {
+      const doc = new DOMParser().parseFromString(buildMobileDock('settings.html'), 'text/html');
+      expect(doc.querySelectorAll('.mobile-dock__item--active')).toHaveLength(0);
     });
   });
 
@@ -71,17 +150,66 @@ describe('Nav Templates', () => {
     });
   });
 
+  describe('buildCommandPalette', () => {
+    it('renders a lookup layout: field row first, results below, close control inline', () => {
+      const html = buildCommandPalette();
+      const searchIndex = html.indexOf('class="command-search"');
+      const inputIndex = html.indexOf('id="nav-command-input"');
+      const closeIndex = html.indexOf('id="nav-command-close"');
+      const listIndex = html.indexOf('id="nav-command-list"');
+
+      expect(searchIndex).toBeGreaterThan(-1);
+      expect(inputIndex).toBeGreaterThan(searchIndex);
+      expect(closeIndex).toBeGreaterThan(inputIndex);
+      expect(listIndex).toBeGreaterThan(closeIndex);
+      expect(html).not.toContain('command-header');
+    });
+
+    it('names the dialog for assistive technology', () => {
+      const html = buildCommandPalette();
+      expect(html).toContain('id="nav-command-title"');
+      expect(html).toContain('aria-labelledby="nav-command-title"');
+    });
+
+    it('renders the custom look-up glyph in the field row', () => {
+      const html = buildCommandPalette();
+      expect(html).toContain('data-lucide="look-up"');
+    });
+  });
+
+  describe('buildNotifications', () => {
+    it('renders a hidden floating trigger with its drawer wired up', () => {
+      const html = buildNotifications();
+      expect(html).toContain('id="nav-notifications-container"');
+      expect(html).toContain('nav-notifications-float is-hidden');
+      expect(html).toContain('id="nav-notifications-btn"');
+      expect(html).toContain('nav-icon-btn nav-notifications-trigger');
+      expect(html).toContain('aria-haspopup="dialog"');
+      expect(html).toContain('aria-controls="nav-notifications-popover"');
+      expect(html).toContain('id="nav-notifications-popover"');
+      expect(html).toContain('id="nav-notifications-list"');
+      expect(html).toContain('id="nav-notifications-mark-read"');
+    });
+  });
+
   describe('buildNav', () => {
-    it('renders settings navigation icon between search bar and user profile', () => {
+    it('keeps the Settings icon out of the header actions', () => {
       const { headerHtml } = buildNav();
-      expect(headerHtml).toContain('id="nav-settings-btn"');
-      expect(headerHtml).toContain('settings.html');
+      expect(headerHtml).not.toContain('id="nav-settings-btn"');
+      expect(headerHtml).not.toContain('data-lucide="settings"');
+
       const searchIndex = headerHtml.indexOf('id="nav-command-button"');
-      const settingsIndex = headerHtml.indexOf('id="nav-settings-btn"');
       const userIndex = headerHtml.indexOf('id="nav-user"');
       expect(searchIndex).toBeGreaterThan(-1);
-      expect(settingsIndex).toBeGreaterThan(searchIndex);
-      expect(userIndex).toBeGreaterThan(settingsIndex);
+      expect(userIndex).toBeGreaterThan(searchIndex);
+    });
+
+    it('keeps Settings reachable from the account menu', () => {
+      const user = { uid: 'u123', displayName: 'Hero', isAnonymous: false };
+      const html = buildAccountMenu(user, 'index.html', USER_LINKS);
+      expect(USER_LINKS.some((link) => link.href === 'settings.html')).toBe(true);
+      expect(html).toContain('settings.html');
+      expect(html).toContain('>Settings<');
     });
 
     it('returns headerHtml, dockHtml, and paletteHtml with command palette unnested from header', () => {
@@ -89,6 +217,29 @@ describe('Nav Templates', () => {
       expect(headerHtml).not.toContain('id="nav-command-palette"');
       expect(paletteHtml).toContain('id="nav-command-palette"');
       expect(dockHtml).toContain('id="mobile-dock-container"');
+    });
+
+    it('renders the brand mark anchor with a standalone wordmark home link', () => {
+      const { headerHtml } = buildNav();
+      const anchorIndex = headerHtml.indexOf('id="nav-brand-anchor"');
+      const wordmarkIndex = headerHtml.indexOf('class="nav-logo__wordmark"');
+      expect(anchorIndex).toBeGreaterThan(-1);
+      expect(wordmarkIndex).toBeGreaterThan(anchorIndex);
+      expect(headerHtml).toContain('aria-label="TaleTranscend home"');
+    });
+
+    it('renders the custom look-up glyph on both quick-tools triggers', () => {
+      const { headerHtml } = buildNav();
+      const matches = headerHtml.match(/data-lucide="look-up"/g) ?? [];
+      expect(matches).toHaveLength(2);
+    });
+
+    it('keeps the notifications trigger out of the header and exposes it as alertsHtml', () => {
+      const { headerHtml, alertsHtml } = buildNav();
+      expect(headerHtml).not.toContain('id="nav-notifications-container"');
+      expect(headerHtml).not.toContain('id="nav-notifications-btn"');
+      expect(alertsHtml).toContain('id="nav-notifications-container"');
+      expect(alertsHtml).toContain('id="nav-notifications-btn"');
     });
   });
 });

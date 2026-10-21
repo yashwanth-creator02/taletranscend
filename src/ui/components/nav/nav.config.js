@@ -118,14 +118,13 @@ export const BASE_COMMANDS = [
 ];
 
 /**
- * Mobile dock items. Primary marks the elevated CTA item.
+ * Mobile dock items — the three always-available destinations. Write remains a
+ * desktop primary link and palette command; Profile is the header avatar.
  *
- * @type {Array<{ href: string, icon: string, label: string, primary?: boolean }>}
+ * @type {Array<{ href: string, icon: string, label: string }>}
  */
 export const DOCK_ITEMS = [
   { href: 'index.html', icon: 'home', label: 'Home' },
   { href: 'library.html', icon: 'book-open', label: 'Library' },
-  { href: 'contribution.html', icon: 'feather', label: 'Write', primary: true },
   { href: 'shelf.html', icon: 'bookmark', label: 'Shelf' },
-  // Profile dock item is built dynamically to reflect auth state — see nav.templates.js
 ];

@@ -9,14 +9,14 @@
 // Depends on:
 //   nav.state.js            — shared mutable state
 //   nav.utils.js            — getNavElements, renderIcons, getCurrentPage
-//   nav.templates.js        — buildAuthenticatedUser, buildGuestUser, buildMobileDock
+//   nav.templates.js        — buildBrandMark, buildAuthenticatedUser, buildGuestUser
 //   nav.command-palette.js  — open/close/execute helpers
 
 import { signOutAndForget, upgradeAnonymousToGoogle } from '@fb/index.js';
 import { navState } from './nav.state.js';
 import { getNavElements, renderIcons, getCurrentPage } from './nav.utils.js';
 import { USER_LINKS } from './nav.config.js';
-import { buildAuthenticatedUser, buildGuestUser, buildMobileDock } from './nav.templates.js';
+import { buildBrandMark, buildAuthenticatedUser, buildGuestUser } from './nav.templates.js';
 import { showToast } from '@ui/components/toast.js';
 import { createLogger } from '@/utils';
 import {
@@ -34,6 +34,7 @@ import {
   destroyNotifications,
   updateNotificationBadge,
   loadAndRenderNotifications,
+  toggleNotificationPin,
 } from './notifications.popover.js';
 import { markAllNotificationsAsRead } from '@services/notification.service.js';
 
@@ -47,12 +48,16 @@ const log = createLogger('NavInteractions');
  * Opens the account dropdown and updates aria-expanded.
  */
 export function openDropdown() {
-  const { avatarButton, dropdown } = getNavElements();
-  if (!avatarButton || !dropdown) return;
+  const { menuButton, dropdown } = getNavElements();
+  if (!menuButton || !dropdown) return;
+
+  // A hide animation still in flight must not swallow this open.
+  window.clearTimeout(navState.dropdownHideTimer);
+  navState.dropdownHideTimer = null;
 
   dropdown.hidden = false;
   dropdown.classList.remove('is-closing');
-  avatarButton.setAttribute('aria-expanded', 'true');
+  menuButton.setAttribute('aria-expanded', 'true');
 }
 
 /**
@@ -61,16 +66,17 @@ export function openDropdown() {
  * @param {boolean} [returnFocus=true]
  */
 export function closeDropdown(returnFocus = true) {
-  const { avatarButton, dropdown } = getNavElements();
-  if (!avatarButton || !dropdown || dropdown.hidden) return;
+  const { menuButton, dropdown } = getNavElements();
+  if (!menuButton || !dropdown || dropdown.hidden) return;
 
-  avatarButton.setAttribute('aria-expanded', 'false');
+  menuButton.setAttribute('aria-expanded', 'false');
   dropdown.classList.add('is-closing');
 
-  window.setTimeout(() => {
+  navState.dropdownHideTimer = window.setTimeout(() => {
+    navState.dropdownHideTimer = null;
     dropdown.hidden = true;
     dropdown.classList.remove('is-closing');
-    if (returnFocus) avatarButton.focus();
+    if (returnFocus) menuButton.focus();
   }, 220);
 }
 
@@ -78,10 +84,10 @@ export function closeDropdown(returnFocus = true) {
  * Toggles the account dropdown.
  */
 function toggleDropdown() {
-  const { avatarButton } = getNavElements();
-  if (!avatarButton) return;
+  const { menuButton } = getNavElements();
+  if (!menuButton) return;
 
-  const isOpen = avatarButton.getAttribute('aria-expanded') === 'true';
+  const isOpen = menuButton.getAttribute('aria-expanded') === 'true';
   isOpen ? closeDropdown() : openDropdown();
 }
 
@@ -143,6 +149,16 @@ function handleDocumentClick(event) {
     }
   }
 
+  // ── Notification pin toggle ────────────────────
+  if (target.closest('.nav-notifications-item__pin')) {
+    event.preventDefault();
+    const pinBtn = target.closest('.nav-notifications-item__pin');
+    if (pinBtn instanceof HTMLElement && pinBtn.dataset.notificationId) {
+      toggleNotificationPin(pinBtn.dataset.notificationId);
+    }
+    return;
+  }
+
   // ── Notifications bell button ─────────────────
   if (target.closest('#nav-notifications-btn')) {
     event.preventDefault();
@@ -167,8 +183,8 @@ function handleDocumentClick(event) {
     closeNotificationsPopover();
   }
 
-  // ── Avatar button ──────────────────────────────
-  if (target.closest('#avatar-btn')) {
+  // ── Brand menu button (account dropdown trigger) ──
+  if (target.closest('#nav-menu-btn')) {
     event.preventDefault();
     toggleDropdown();
     return;
@@ -200,10 +216,10 @@ function handleDocumentClick(event) {
   }
 
   // ── Click outside dropdown ─────────────────────
-  const { avatarButton, dropdown } = getNavElements();
-  if (dropdown && avatarButton) {
-    const isOpen = avatarButton.getAttribute('aria-expanded') === 'true';
-    if (isOpen && !dropdown.contains(target) && !avatarButton.contains(target)) {
+  const { menuButton, dropdown } = getNavElements();
+  if (dropdown && menuButton) {
+    const isOpen = menuButton.getAttribute('aria-expanded') === 'true';
+    if (isOpen && !dropdown.contains(target) && !menuButton.contains(target)) {
       closeDropdown(false);
     }
   }
@@ -245,9 +261,12 @@ function handleDocumentKeydown(event) {
   if (navState.commandPaletteOpen && event.key === 'Tab') {
     const { commandPalette } = getNavElements();
     if (commandPalette) {
+      // Only real tab stops participate: command items (arrow-key model) and
+      // the clear control are `tabindex="-1"`, so they must never resolve as
+      // the trap's first or last element.
       const focusables = Array.from(
         commandPalette.querySelectorAll(
-          'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+          'button:not([disabled]):not([tabindex="-1"]), [href]:not([tabindex="-1"]), input:not([disabled]):not([tabindex="-1"])'
         )
       ).filter((el) => el instanceof HTMLElement && el.offsetParent !== null);
 
@@ -285,8 +304,14 @@ function handleDocumentKeydown(event) {
       return;
     }
 
-    const { avatarButton } = getNavElements();
-    if (avatarButton?.getAttribute('aria-expanded') === 'true') {
+    const notifPopover = document.getElementById('nav-notifications-popover');
+    if (notifPopover && !notifPopover.classList.contains('hidden')) {
+      closeNotificationsPopover(true);
+      return;
+    }
+
+    const { menuButton } = getNavElements();
+    if (menuButton?.getAttribute('aria-expanded') === 'true') {
       closeDropdown(true);
       return;
     }
@@ -313,8 +338,8 @@ function handleDocumentKeydown(event) {
   }
 
   // ── Arrow navigation inside user dropdown ──────
-  const { avatarButton, dropdown } = getNavElements();
-  const isDropdownOpen = avatarButton?.getAttribute('aria-expanded') === 'true';
+  const { menuButton, dropdown } = getNavElements();
+  const isDropdownOpen = menuButton?.getAttribute('aria-expanded') === 'true';
 
   if (isDropdownOpen && dropdown && !dropdown.hidden) {
     const menuItems = Array.from(
@@ -440,6 +465,14 @@ export function attachGlobalListeners() {
  * Safe to call even if listeners were never attached.
  */
 export function detachGlobalListeners() {
+  // Subscription and timer cleanup runs unconditionally: destroyNav() must not
+  // leak snapshot listeners just because the DOM listeners were never attached.
+  destroyNotifications();
+  window.clearTimeout(navState.dropdownHideTimer);
+  navState.dropdownHideTimer = null;
+  navState.scrollCleanup?.();
+  navState.scrollCleanup = null;
+
   if (!navState.listenersAttached) return;
 
   document.removeEventListener('click', handleDocumentClick);
@@ -448,9 +481,6 @@ export function detachGlobalListeners() {
   const { commandInput } = getNavElements();
   commandInput?.removeEventListener('input', handleCommandInput);
 
-  destroyNotifications();
-  navState.scrollCleanup?.();
-  navState.scrollCleanup = null;
   navState.listenersAttached = false;
 }
 
@@ -460,7 +490,8 @@ export function detachGlobalListeners() {
 
 /**
  * Called on every Firebase auth state change.
- * Replaces the user area in the desktop header and re-renders the mobile dock.
+ * Replaces the user area in the desktop header. The mobile dock is
+ * auth-independent, so it is not rebuilt here.
  *
  * @param {import('firebase/auth').User | null} user
  */
@@ -472,15 +503,18 @@ export function updateNavUser(user) {
 
   const current = getCurrentPage();
 
-  // Swap desktop user area
-  navUser.outerHTML = user ? buildAuthenticatedUser(user, current, USER_LINKS) : buildGuestUser();
+  // Swap desktop user area: avatar profile link (member) or Sign In CTA (guest)
+  navUser.outerHTML = user ? buildAuthenticatedUser(user) : buildGuestUser();
 
-  // Re-render mobile dock to reflect auth state (profile icon + label)
-  const dockContainer = document.getElementById('mobile-dock-container');
-  if (dockContainer) {
-    dockContainer.innerHTML = buildMobileDock(current, user);
-    renderIcons();
+  // Swap the brand slot: account menu trigger + dropdown for members,
+  // plain home link for guests
+  const brandAnchor = document.getElementById('nav-brand-anchor');
+  if (brandAnchor) {
+    brandAnchor.innerHTML = buildBrandMark(user, current, USER_LINKS);
   }
+
+  // The mobile dock is auth-independent (Home, Library, Shelf), so it is
+  // rendered once by buildNav() and needs no rebuild here.
 
   initNotifications(user);
   renderIcons();

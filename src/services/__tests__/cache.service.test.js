@@ -23,17 +23,17 @@ describe('CacheService', () => {
   });
 
   it('expires entries after TTL', async () => {
-    cacheService.set('shortLived', 'temp', 10); // 10ms TTL
+    cacheService.set('shortLived', 'temp', 60); // 60ms TTL
     expect(cacheService.get('shortLived')?.data).toBe('temp');
 
-    await new Promise((resolve) => setTimeout(resolve, 25));
+    await new Promise((resolve) => setTimeout(resolve, 80));
 
     // Stale check without allowStale
     expect(cacheService.get('shortLived')).toBeNull();
 
     // With allowStale
-    cacheService.set('staleTest', 'val', 5);
-    await new Promise((resolve) => setTimeout(resolve, 15));
+    cacheService.set('staleTest', 'val', 40);
+    await new Promise((resolve) => setTimeout(resolve, 60));
     const staleResult = cacheService.get('staleTest', { allowStale: true });
     expect(staleResult?.data).toBe('val');
     expect(staleResult?.isStale).toBe(true);
@@ -84,11 +84,11 @@ describe('CacheService', () => {
     };
 
     // Store initially with short TTL
-    await cacheService.fetchWithCache('swrKey', fetcher, { ttl: 10, swr: true });
+    await cacheService.fetchWithCache('swrKey', fetcher, { ttl: 50, swr: true });
     expect(fetchCount).toBe(1);
 
     // Wait for TTL to expire
-    await new Promise((resolve) => setTimeout(resolve, 20));
+    await new Promise((resolve) => setTimeout(resolve, 80));
 
     // Requesting with SWR should return stale data immediately and trigger background update
     let updatedData = null;

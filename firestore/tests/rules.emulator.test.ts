@@ -298,6 +298,97 @@ describe('inquiries/{inquiryId} — author reply/report/block allowance', () => 
   });
 });
 
+describe('users/{userId}/notifications/{notificationId} — read/pin allowance', () => {
+  /** Seeds a notification for `ownerUid`, bypassing rules (admin SDK context). */
+  async function seedNotification(
+    ownerUid: string,
+    notificationId: string,
+    overrides: Record<string, unknown> = {}
+  ) {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(
+        doc(ctx.firestore(), `${ROOT}/users/${ownerUid}/notifications/${notificationId}`),
+        {
+          type: 'new_chapter',
+          title: 'A Test Notice',
+          body: '',
+          isRead: false,
+          createdAt: new Date(),
+          ...overrides,
+        }
+      );
+    });
+  }
+
+  it('the owner CAN pin a notice (the floating-trigger pin control)', async () => {
+    await seedNotification('reader-1', 'n1');
+    const ctx = testEnv.authenticatedContext('reader-1');
+    await assertSucceeds(
+      updateDoc(doc(ctx.firestore(), `${ROOT}/users/reader-1/notifications/n1`), { isPinned: true })
+    );
+  });
+
+  it('the owner CAN unpin a notice again', async () => {
+    await seedNotification('reader-1', 'n1', { isPinned: true });
+    const ctx = testEnv.authenticatedContext('reader-1');
+    await assertSucceeds(
+      updateDoc(doc(ctx.firestore(), `${ROOT}/users/reader-1/notifications/n1`), {
+        isPinned: false,
+      })
+    );
+  });
+
+  it('the owner CAN still mark a notice read alongside the pin allowlist', async () => {
+    await seedNotification('reader-1', 'n1');
+    const ctx = testEnv.authenticatedContext('reader-1');
+    await assertSucceeds(
+      updateDoc(doc(ctx.firestore(), `${ROOT}/users/reader-1/notifications/n1`), {
+        isRead: true,
+        readAt: serverTimestamp(),
+      })
+    );
+  });
+
+  it('the owner CANNOT smuggle content edits through the pin update path', async () => {
+    await seedNotification('reader-1', 'n1');
+    const ctx = testEnv.authenticatedContext('reader-1');
+    await assertFails(
+      updateDoc(doc(ctx.firestore(), `${ROOT}/users/reader-1/notifications/n1`), {
+        isPinned: true,
+        title: 'Tampered',
+      })
+    );
+  });
+
+  it('a DIFFERENT user CANNOT pin someone else’s notice', async () => {
+    await seedNotification('reader-1', 'n1');
+    const ctx = testEnv.authenticatedContext('attacker');
+    await assertFails(
+      updateDoc(doc(ctx.firestore(), `${ROOT}/users/reader-1/notifications/n1`), { isPinned: true })
+    );
+  });
+
+  it('rejects a non-boolean read state', async () => {
+    await seedNotification('reader-1', 'n1');
+    const ctx = testEnv.authenticatedContext('reader-1');
+    await assertFails(
+      updateDoc(doc(ctx.firestore(), `${ROOT}/users/reader-1/notifications/n1`), {
+        isRead: 'true',
+      })
+    );
+  });
+
+  it('rejects a non-boolean pin state', async () => {
+    await seedNotification('reader-1', 'n1');
+    const ctx = testEnv.authenticatedContext('reader-1');
+    await assertFails(
+      updateDoc(doc(ctx.firestore(), `${ROOT}/users/reader-1/notifications/n1`), {
+        isPinned: 'yes',
+      })
+    );
+  });
+});
+
 describe('Global fallback — deny-all for unmatched paths (Critical Finding #1 regression guard)', () => {
   it('denies reads/writes to a path outside the v1/taletranscend/projects/v1 prefix', async () => {
     const ctx = testEnv.authenticatedContext('someone');

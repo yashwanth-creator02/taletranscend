@@ -11,6 +11,11 @@ import { navState } from '../nav.state.js';
 import * as utils from '../nav.utils.js';
 import * as fb from '@fb/index.js';
 import { openCommandPalette } from '../nav.command-palette.js';
+import {
+  closeNotificationsPopover,
+  toggleNotificationPin,
+  toggleNotificationsPopover,
+} from '../notifications.popover.js';
 
 vi.mock('../nav.utils.js', () => ({
   getNavElements: vi.fn(),
@@ -36,6 +41,7 @@ vi.mock('../notifications.popover.js', () => ({
   destroyNotifications: vi.fn(),
   updateNotificationBadge: vi.fn(),
   loadAndRenderNotifications: vi.fn(),
+  toggleNotificationPin: vi.fn(),
 }));
 
 vi.mock('@services/notification.service.js', () => ({
@@ -57,9 +63,10 @@ describe('Nav Interactions', () => {
     navState.listenersAttached = false;
     navState.commandPaletteOpen = false;
     navState.commandFocusedIndex = -1;
+    navState.dropdownHideTimer = null;
     document.body.innerHTML = `
       <header id="app-nav">
-        <button id="avatar-btn" aria-expanded="false"></button>
+        <button id="nav-menu-btn" aria-expanded="false"></button>
         <div id="user-dropdown" hidden></div>
         <div id="nav-user"></div>
         <div id="mobile-dock-container"></div>
@@ -71,7 +78,7 @@ describe('Nav Interactions', () => {
     `;
 
     vi.mocked(utils.getNavElements).mockReturnValue({
-      avatarButton: document.getElementById('avatar-btn'),
+      menuButton: document.getElementById('nav-menu-btn'),
       dropdown: document.getElementById('user-dropdown'),
       nav: document.getElementById('app-nav'),
       navUser: document.getElementById('nav-user'),
@@ -84,7 +91,7 @@ describe('Nav Interactions', () => {
     it('openDropdown shows dropdown and sets aria-expanded', () => {
       openDropdown();
       const dropdown = document.getElementById('user-dropdown');
-      const btn = document.getElementById('avatar-btn');
+      const btn = document.getElementById('nav-menu-btn');
       expect(dropdown.hidden).toBe(false);
       expect(btn.getAttribute('aria-expanded')).toBe('true');
     });
@@ -97,6 +104,19 @@ describe('Nav Interactions', () => {
 
       vi.advanceTimersByTime(220);
       expect(dropdown.hidden).toBe(true);
+    });
+
+    it('re-opening during the close animation cancels the pending hide', () => {
+      openDropdown();
+      closeDropdown(false);
+      openDropdown();
+
+      vi.advanceTimersByTime(400);
+
+      const dropdown = document.getElementById('user-dropdown');
+      expect(dropdown.hidden).toBe(false);
+      expect(dropdown.classList.contains('is-closing')).toBe(false);
+      expect(document.getElementById('nav-menu-btn').getAttribute('aria-expanded')).toBe('true');
     });
   });
 
@@ -115,12 +135,41 @@ describe('Nav Interactions', () => {
       expect(openCommandPalette).toHaveBeenCalled();
     });
 
+    it('toggles the dropdown when the brand menu button is clicked', () => {
+      const btn = document.getElementById('nav-menu-btn');
+      btn.click();
+      expect(document.getElementById('user-dropdown').hidden).toBe(false);
+      expect(btn.getAttribute('aria-expanded')).toBe('true');
+
+      btn.click();
+      vi.advanceTimersByTime(220);
+      expect(document.getElementById('user-dropdown').hidden).toBe(true);
+      expect(btn.getAttribute('aria-expanded')).toBe('false');
+    });
+
     it('closes dropdown when clicking outside', () => {
       openDropdown();
       document.body.click();
       // closeDropdown uses setTimeout
       vi.advanceTimersByTime(220);
       expect(document.getElementById('user-dropdown').hidden).toBe(true);
+    });
+
+    it('toggles the notifications drawer from its trigger', () => {
+      document.body.insertAdjacentHTML('beforeend', '<button id="nav-notifications-btn"></button>');
+
+      document.getElementById('nav-notifications-btn').click();
+      expect(toggleNotificationsPopover).toHaveBeenCalled();
+    });
+
+    it('routes pin clicks inside a notice to the pin toggle', () => {
+      document.body.insertAdjacentHTML(
+        'beforeend',
+        '<div id="nav-notifications-container"><button class="nav-notifications-item__pin" data-notification-id="n1"></button></div>'
+      );
+
+      document.querySelector('.nav-notifications-item__pin').click();
+      expect(toggleNotificationPin).toHaveBeenCalledWith('n1');
     });
 
     it('triggers upgrade when upgrade button is clicked', async () => {
@@ -139,7 +188,7 @@ describe('Nav Interactions', () => {
       const user = { uid: 'u1', displayName: 'Hero' };
       updateNavUser(user);
       expect(navState.currentUser).toBe(user);
-      expect(document.getElementById('avatar-btn')).toBeTruthy();
+      expect(document.getElementById('nav-profile-link')).toBeTruthy();
       expect(utils.renderIcons).toHaveBeenCalled();
     });
 
@@ -210,6 +259,48 @@ describe('Nav Interactions', () => {
       document.dispatchEvent(event);
 
       expect(input.value).toBe('');
+    });
+
+    it('closes the notifications drawer on Escape', () => {
+      document.body.insertAdjacentHTML('beforeend', '<div id="nav-notifications-popover"></div>');
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+
+      expect(closeNotificationsPopover).toHaveBeenCalledWith(true);
+    });
+
+    it('keeps Tab inside the palette by skipping tabindex="-1" elements', () => {
+      const palette = document.createElement('div');
+      palette.id = 'nav-command-palette';
+      palette.innerHTML = `
+        <input id="trap-input" />
+        <button id="trap-close"></button>
+      `;
+      const item = document.createElement('button');
+      item.className = 'command-item';
+      item.setAttribute('tabindex', '-1');
+      palette.appendChild(item);
+      document.body.appendChild(palette);
+
+      const input = palette.querySelector('#trap-input');
+      const close = palette.querySelector('#trap-close');
+      // jsdom has no layout, so the trap's visibility filter needs stubbing.
+      for (const el of [input, close, item]) {
+        Object.defineProperty(el, 'offsetParent', { value: document.body });
+      }
+
+      vi.mocked(utils.getNavElements).mockReturnValue({ commandPalette: palette });
+      navState.commandPaletteOpen = true;
+
+      close.focus();
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+      expect(document.activeElement).toBe(input);
+
+      input.focus();
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true })
+      );
+      expect(document.activeElement).toBe(close);
     });
 
     it('navigates dropdown menu items with ArrowDown and ArrowUp', () => {

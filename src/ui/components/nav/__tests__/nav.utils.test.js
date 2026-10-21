@@ -29,11 +29,11 @@ describe('Nav Utils', () => {
     it('returns object with element references', () => {
       document.body.innerHTML = `
         <nav id="app-nav"></nav>
-        <button id="avatar-btn"></button>
+        <button id="nav-menu-btn"></button>
       `;
       const elements = getNavElements();
       expect(elements.nav).toBeTruthy();
-      expect(elements.avatarButton).toBeTruthy();
+      expect(elements.menuButton).toBeTruthy();
       expect(elements.dropdown).toBeNull();
     });
   });

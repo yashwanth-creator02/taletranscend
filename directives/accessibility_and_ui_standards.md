@@ -56,7 +56,7 @@ Define explicit standards for footer layout isolation, accessible toasting, keyb
 - **Global Command Palette**:
   - Invoked via `Ctrl+K` (Windows/Linux) or `⌘K` (macOS).
   - Triggers declare `aria-keyshortcuts="Control+K Meta+K"`, `aria-haspopup="dialog"`, and `aria-expanded`.
-  - Palette modal traps focus and supports ArrowUp/ArrowDown selection with Enter execution.
+  - Palette modal traps focus and supports ArrowUp/ArrowDown selection with Enter execution. The trap counts only real tab stops: `tabindex="-1"` elements (command items, the clear control) must never resolve as its first or last element, so Tab cycles between the field and its inline close control instead of escaping the dialog.
 - **Text Selection Shortcut (`Ctrl+A`)**:
   - In input fields, search boxes, and manuscript atelier textareas, `Ctrl+A` / `⌘A` must reliably select all text without being intercepted by global page shortcuts.
 - **Dialog & Modal Focus Trapping**:
@@ -80,7 +80,7 @@ The TaleTranscend brand mark is the mythical golden-trimmed black quill pen enci
 
 #### UI Brand Mark Placements
 
-- **Header Navbar**: `<div class="nav-logo__mark"><img src="${resolveHref('/logo.png')}" alt="" class="nav-logo__img" aria-hidden="true" width="28" height="28" /></div>`. Styled with subtle glass backdrop, gold border (`var(--accent-rgb)`), and hover micro-interaction.
+- **Header Navbar**: `<div class="nav-brand__anchor" id="nav-brand-anchor">` holds the brand mark, rendered by `buildBrandMark()` in `src/ui/components/nav/nav.templates.js`: guests get `<a class="nav-logo__mark" href="index.html" aria-label="TaleTranscend home"><img src="${resolveHref('/logo.png')}" alt="" class="nav-logo__img" aria-hidden="true" width="28" height="28" /></a>`; members get `<button type="button" class="nav-logo__mark nav-logo__mark--menu" id="nav-menu-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="user-dropdown" aria-label="Open account menu for {name}">` followed by the `#user-dropdown` panel. The mark keeps the glass backdrop, accent border, and hover micro-interaction; only the member mark (`--menu`) swaps the logo for the `data-lucide="menu"` hamburger glyph on hover/focus/`aria-expanded="true"`, so guest marks never blank out. `.nav-logo__wordmark` is a separate `<a href="index.html">` home link, and the avatar (`#nav-profile-link`) is a direct link to `profile.html`.
 - **Home Footer**: `<span class="home-footer__mark"><img src="/logo.png" alt="" class="home-footer__logo-img" width="22" height="22" /></span>`.
 - **Login Screen Header**: `<div class="..."><img src="/logo.png" alt="" class="w-7 h-7 object-contain drop-shadow" aria-hidden="true" /></div>`.
 - **Page Boot Curtain**: `<div class="boot-crest"><img src="/logo.png" alt="" width="26" height="26" class="object-contain" /></div>` across all 10 HTML entry points.
