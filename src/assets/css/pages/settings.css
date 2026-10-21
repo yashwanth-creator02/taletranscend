@@ -3361,6 +3361,11 @@
 }
 
 @media (max-width: 839px) {
+  .settings-profile-portrait {
+    justify-content: center;
+    width: 100%;
+  }
+
   .settings-top-bar__inner {
     padding: 0 14px;
     gap: 10px;
