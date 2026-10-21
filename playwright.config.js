@@ -12,7 +12,9 @@ const DEV_PORT = (() => {
     const raw = fs.readFileSync(path.join(__dirname, '.dev-port'), 'utf-8').trim();
     const port = Number.parseInt(raw, 10);
     if (Number.isInteger(port) && port > 0 && port < 65536) return port;
-  } catch {}
+  } catch {
+    // ignore missing .dev-port
+  }
   return 5173;
 })();
 

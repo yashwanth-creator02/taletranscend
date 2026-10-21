@@ -533,46 +533,6 @@
   }
 }
 
-<<<<<<< HEAD
-/* Phone-width top bar: the wordmark and the guest CTA label were the two
-   non-shrinkable pieces that pushed the row to 534px and scrolled the whole
-   document sideways (docs/reports/2026-10-19-mobile-audit.md, finding F1). */
-@media (max-width: 560px) {
-  .nav-inner {
-    gap: 12px;
-    padding: 0 12px;
-  }
-
-  .nav-logo__wordmark {
-    display: none;
-  }
-
-  .nav-actions {
-    gap: 8px;
-  }
-
-  /* 44px touch targets: the 38px boxes were marginally under the guideline.
-     Four 44px actions + gaps still leave 62px of slack against the logo at 320. */
-  .command-trigger.mobile-shell,
-  .nav-settings-btn,
-  .signin-btn {
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    gap: 0;
-    justify-content: center;
-  }
-
-  .signin-btn__label {
-    display: none;
-  }
-
-  /* Keep the 38px avatar visual, expand only its hit area. */
-  .avatar-btn {
-    padding: 3px;
-    margin-left: 1px;
-  }
-=======
 /* Phones: the wordmark cannot coexist with the accent quick-tools trigger and
    the sign-in CTA at 390px. Keep the logo mark (still the home/account control)
    and let the actions own the remaining width. */
@@ -580,7 +540,6 @@
   .nav-logo__wordmark {
     display: none;
   }
->>>>>>> feat/comprehensive-improvements
 }
 
 /* ── Mobile Bottom Dock ──────────────────────────────────────────── */
@@ -727,11 +686,7 @@ body:has(#sidebar.sidebar--mobile-open) .scroll-to-top {
 
 .mobile-dock__label {
   font-family: var(--font-sans);
-<<<<<<< HEAD
-  font-size: 10px;
-=======
   font-size: 9px;
->>>>>>> feat/comprehensive-improvements
   font-weight: 700;
   line-height: 1;
   letter-spacing: 0.08em;

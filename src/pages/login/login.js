@@ -14,6 +14,7 @@ import {
   registerWithEmail,
   sendPasswordReset,
   onAuthStateChanged,
+  setRememberPreference,
   setDoc,
   serverTimestamp,
   refs,
@@ -32,8 +33,7 @@ import {
   isRememberedDurably,
   rememberAuth,
 } from '@services/auth-memory.storage.js';
-import { initIcons } from '@ui/components/icons.js';
-import { mountReadingScene } from '@ui/components/reading-scene.js';
+import { initIcons } from '@ui/icons.js';
 import { showToast } from '@ui/components/toast.js';
 
 const log = createLogger('Login');
@@ -63,11 +63,55 @@ export function toggleButtonLoading(buttonId, isLoading) {
   }
 }
 
-export function handleAuthSuccess() {
-  markUserVisited();
+function _isRememberChecked() {
+  const checkbox = document.getElementById('checkbox-remember');
+  return checkbox ? checkbox.checked : true;
+}
+
+export function safeReturnTarget(raw, fallback = 'index.html') {
+  if (typeof raw !== 'string') return fallback;
+
+  const trimmed = raw.trim();
+  if (!trimmed.startsWith('/')) return fallback;
+  if (trimmed.startsWith('//') || trimmed.includes('\\')) return fallback;
+
+  return trimmed;
+}
+
+function _returnTarget() {
+  if (typeof window === 'undefined') return 'index.html';
+  const params = new URLSearchParams(window.location.search);
+  return safeReturnTarget(params.get('returnUrl') ?? params.get('redirect'));
+}
+
+function _rememberAuth(method) {
+  const durable = _isRememberChecked();
+  const current = auth?.currentUser;
+
+  const written = rememberAuth(
+    { uid: current?.uid ?? null, anonymous: current?.isAnonymous ?? false, method },
+    { durable }
+  );
+
+  if (!written) {
+    log.warn('Auth memory could not be written; leaving existing memory intact');
+    return { durable, stored: false };
+  }
+
+  if (durable) {
+    markUserVisited();
+  } else {
+    clearAuthMemory({ session: false });
+  }
+
+  return { durable, stored: true };
+}
+
+export function handleAuthSuccess(method = 'unknown') {
+  const { durable, stored } = _rememberAuth(method);
+  log.info('Authentication remembered', { method, durable, stored });
   showToast('Welcome to the Living Archive.', 'success');
-  const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
-  const returnUrl = params?.get('returnUrl') || params?.get('redirect') || 'profile.html';
+  const returnUrl = _returnTarget();
   setTimeout(() => {
     navigateTo(returnUrl);
   }, 900);
@@ -83,19 +127,6 @@ export function addSuccessGlow() {
       inset 0 1px 0 rgba(255, 255, 255, 0.15)
     `;
     card.style.borderColor = 'rgba(129, 140, 248, 0.5)';
-  }
-}
-
-function _isRememberChecked() {
-  const checkbox = document.getElementById('input-remember');
-  return checkbox ? checkbox.checked : true;
-}
-
-async function setRememberPreference(durable) {
-  if (durable) {
-    rememberAuth({ uid: auth.currentUser?.uid, anonymous: auth.currentUser?.isAnonymous ?? false, method: 'login' }, { durable: true });
-  } else {
-    rememberAuth({ uid: auth.currentUser?.uid, anonymous: auth.currentUser?.isAnonymous ?? false, method: 'login' }, { durable: false });
   }
 }
 
@@ -234,12 +265,12 @@ function _setupFormSubmissions() {
         }
         showToast('Account drafted! Entering as an authenticated scribe...', 'success');
         addSuccessGlow();
-        handleAuthSuccess();
+        handleAuthSuccess('email');
       } else {
         await signInWithEmail(email, password);
         showToast('Preserved credentials recognized. Welcome back!', 'success');
         addSuccessGlow();
-        handleAuthSuccess();
+        handleAuthSuccess('email');
       }
     } catch (err) {
       log.error('Email authentication failed:', err);
@@ -313,7 +344,7 @@ function _setupSocialLogins() {
       await signInWithGoogle();
       log.info('Google login successful');
       addSuccessGlow();
-      handleAuthSuccess();
+      handleAuthSuccess('google');
     } catch (err) {
       log.error('Google login failed:', err);
       if (err?.code !== 'auth/popup-closed-by-user') {
@@ -332,7 +363,7 @@ function _setupSocialLogins() {
       await signInAnonymously(auth);
       log.info('Guest login successful');
       addSuccessGlow();
-      handleAuthSuccess();
+      handleAuthSuccess('guest');
     } catch (err) {
       log.error('Guest login failed', err);
       showToast('Guest entry failed.', 'error');
@@ -350,9 +381,29 @@ function _setupDismissLinks() {
   });
 }
 
-function _mountReadingScene() {
-  if (!mountReadingScene()) {
-    log.warn('Reading scene mount point #login-scene not found');
+function _setupResponsiveSvgArt() {
+  const imgEl = document.getElementById('login-visual-img');
+  const sourceEl = document.getElementById('login-visual-source');
+  if (!imgEl) return;
+
+  const updateIllustration = () => {
+    const isLight =
+      typeof document !== 'undefined' &&
+      document.documentElement.getAttribute('data-app-theme') === 'light';
+    const targetSrc = isLight
+      ? '/images/auth/boy-reading-light.svg'
+      : '/images/auth/boy-reading.svg';
+    if (sourceEl) {
+      sourceEl.srcset = targetSrc;
+    }
+    if (imgEl.getAttribute('src') !== targetSrc) {
+      imgEl.src = targetSrc;
+    }
+  };
+
+  updateIllustration();
+  if (typeof window !== 'undefined') {
+    window.addEventListener('appthemechange', updateIllustration);
   }
 }
 
@@ -362,7 +413,7 @@ export function initLoginPage() {
   readyReveal();
 
   acknowledgeGate();
-  _mountReadingScene();
+  _setupResponsiveSvgArt();
   _setupAuthTabs();
   _setupPasswordToggle();
   _setupAuthModeToggle();
@@ -372,7 +423,7 @@ export function initLoginPage() {
 
   const unsubscribe = onAuthStateChanged(auth, (user) => {
     if (user && !user.isAnonymous) {
-      log.info('User already authenticated, continuing to destination');
+      log.info('User already authenticated, continuing to their destination');
       rememberAuth(
         { uid: user.uid, anonymous: false, method: 'restore' },
         { durable: isRememberedDurably() }
@@ -380,7 +431,7 @@ export function initLoginPage() {
       Promise.resolve().then(() => {
         if (unsubscribe) unsubscribe();
       });
-      navigateTo('profile.html');
+      navigateTo(_returnTarget());
     }
   });
 
