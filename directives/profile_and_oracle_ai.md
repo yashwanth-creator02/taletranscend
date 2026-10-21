@@ -44,16 +44,18 @@ Define the standard operating procedures, data contracts, and UI patterns for ma
 - **Security & Storage Principle**:
   - The Gemini API key belongs strictly to the user and is stored exclusively on the client in `localStorage` under `taletranscend_gemini_api_key`.
   - Never transmit, synchronize, or store the user's API key in Firestore user records or server logs.
-- **Dedicated Modal Window UX**:
-  - Instead of inline form inputs, the Settings page displays a clean status badge (`#gemini-key-status`: "Key Configured" vs "Not Configured") with a dedicated trigger button (`#btn-open-gemini-key-modal`: "Manage Key" vs "Configure Key").
-  - Triggering the button opens an accessible modal dialog (`#modal-gemini-key`) with backdrop blur.
-  - Explanatory security callout (`.settings-info-box`) informs the user of private on-device archival storage and direct-to-Google communication.
+- **Global Modal Window & Toast Action UX**:
+  - A centralized, global popup modal (`src/ui/components/geminiModal.js`) is mounted dynamically on any page across the MPA when requested.
+  - On the Settings page, the clean status badge (`#gemini-key-status`: "Key Configured" vs "Not Configured") and trigger button (`#btn-open-gemini-key-modal`: "Manage Key" vs "Configure Key") open the dialog.
+  - When the Gemini API key is missing during an AI invocation anywhere across the application (e.g. Scribe's Atelier, Profile name conjuring), `showMissingGeminiKeyToast()` triggers a warning toast with an actionable `"Tap to add"` button that summons the global modal.
+  - Explanatory security callout (`.gemini-info-box` / `.settings-info-box`) informs the user of private on-device archival storage and direct-to-Google communication.
   - Direct external link to Google AI Studio to easily retrieve or generate a free API key.
   - Interactive password visibility toggle button (`#btn-toggle-modal-key`: "Show" / "Hide").
-  - Clear / Remove Key button (`#btn-clear-modal-key`) alongside Save Key (`#btn-save-modal-key`) and Cancel (`#btn-cancel-modal-key`).
-  - Closing support via backdrop click, Close icon (`#modal-gemini-close`), and the `Escape` key.
+  - Dedicated **Delete Key** button (`#btn-clear-modal-key` / `data-testid="btn-delete-modal-key"`) with `trash-2` icon and danger styling alongside Save Key (`#btn-save-modal-key`) and Cancel (`#btn-cancel-modal-key`).
+  - Closes gracefully via backdrop click, Close icon (`#modal-gemini-close`), Cancel button, or the `Escape` key.
+  - Broadcasts a `'gemini-key-changed'` event on `window` to keep all page controls, badges, and inputs in sync.
 - **Backwards Compatibility**:
-  - Hidden inputs (`#input-gemini-key`, `#btn-toggle-gemini-key`, `#btn-save-gemini-key`) are maintained to ensure legacy scripts and test suites remain 100% interoperable.
+  - Hidden inputs (`#input-gemini-key`, `#btn-toggle-gemini-key`, `#btn-save-gemini-key`) and `#btn-clear-modal-key` are maintained to ensure legacy scripts and test suites remain 100% interoperable.
 
 ### 3. Oracle AI Integration (Names & Text Refinement)
 

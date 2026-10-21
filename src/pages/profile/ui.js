@@ -8,6 +8,7 @@ import { suggestNameFromBio } from './ai-name.js';
 import { debounce } from '@/utils';
 import { initIcons } from '@ui/icons.js';
 import { showToast } from '@ui/components/toast.js';
+import { showMissingGeminiKeyToast } from '@ui/components/geminiModal.js';
 import {
   getStoredApiKey,
   setStoredApiKey,
@@ -294,7 +295,7 @@ function _bindAiNameButton() {
       (typeof window !== 'undefined' ? window.__GEMINI_KEY__ : null);
 
     if (!apiKey) {
-      showToast('Please enter your Gemini API key below to summon name suggestions.', 'info');
+      showMissingGeminiKeyToast();
       if (keyInput) {
         keyInput.focus();
         keyInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
