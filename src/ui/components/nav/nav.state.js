@@ -10,6 +10,7 @@
 /**
  * @typedef {Object} NavState
  * @property {import('firebase/auth').User | null} currentUser     - The currently authenticated Firebase user, or null.
+ * @property {boolean}                             isStaff          - Whether the ID token reports an admin or moderator custom claim.
  * @property {boolean}                             commandPaletteOpen - Whether the command palette overlay is visible.
  * @property {number}                              commandFocusedIndex - Index of the keyboard-focused command item (-1 = none).
  * @property {Array<Object>}                       commandFilteredItems - Current filtered command item list (set by renderCommandList).
@@ -22,6 +23,7 @@
 /** @type {NavState} */
 export const navState = {
   currentUser: null,
+  isStaff: false,
   commandPaletteOpen: false,
   commandFocusedIndex: -1,
   commandFilteredItems: [],

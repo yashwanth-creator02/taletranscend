@@ -29,7 +29,8 @@
     { "source": "/tale/:path*", "destination": "/tale" },
     { "source": "/contribution/:path*", "destination": "/contribution" },
     { "source": "/profile/:path*", "destination": "/profile" },
-    { "source": "/login/:path*", "destination": "/login" }
+    { "source": "/login/:path*", "destination": "/login" },
+    { "source": "/admin/:path*", "destination": "/admin" }
   ],
   "headers": [
     {

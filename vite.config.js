@@ -39,8 +39,9 @@ function worktreePort() {
 }
 const r = (p) => path.resolve(__dirname, p);
 
-/** The ten entry points. Adding a page means adding one line here. */
+/** Every HTML entry point. Adding a page means adding one line here. */
 const PAGES = [
+  'admin',
   'index',
   'library',
   'shelf',
@@ -71,6 +72,9 @@ function hierarchicalRoutesPlugin() {
           req.url = '/tale.html' + query;
         } else if (url === '/toc' || url === '/sitemap') {
           req.url = '/toc.html' + query;
+        } else if (/^\/admin(?:\/.*)?$/.test(url)) {
+          // Hash routing keeps every dashboard section inside admin.html.
+          req.url = '/admin.html' + query;
         }
         next();
       });

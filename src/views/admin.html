@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <base href="/" />
+
+    <title>Archive Control Room | TaleTranscend</title>
+    <meta
+      name="description"
+      content="Role-gated administration for the TaleTranscend archive: moderation queues, author applications, audit trail, and site configuration."
+    />
+    <link rel="canonical" href="https://taletranscend.web.app/admin" />
+
+    <meta name="theme-color" content="#030305" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <meta name="robots" content="noindex, nofollow" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cinzel:wght@500;600;700;800&display=swap"
+    />
+
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('tt_app_theme') || 'transcendental';
+          var resolved = t;
+          if (t === 'system') {
+            resolved =
+              window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'transcendental'
+                : 'light';
+          }
+          document.documentElement.setAttribute('data-app-theme', resolved);
+          document.documentElement.setAttribute('data-theme-preference', t);
+        } catch (e) {}
+      })();
+    </script>
+
+    <noscript>
+      <style>
+        #admin-root {
+          display: block !important;
+        }
+      </style>
+    </noscript>
+
+    <script type="module" src="../pages/admin/admin.js"></script>
+  </head>
+
+  <body class="admin-page-body">
+    <div id="admin-root" class="admin-root">
+      <div class="admin-boot" role="status" aria-live="polite">
+        <span class="admin-boot__mark" aria-hidden="true">TT</span>
+        <p>Opening the archive control room...</p>
+      </div>
+    </div>
+
+    <noscript>
+      <p class="admin-noscript">
+        The archive control room requires JavaScript. Enable it, then reload this page.
+      </p>
+    </noscript>
+  </body>
+</html>

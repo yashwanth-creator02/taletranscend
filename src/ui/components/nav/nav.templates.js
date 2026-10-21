@@ -4,7 +4,7 @@
 // No DOM mutation happens here — all functions return strings.
 // Keeping templates separate from behaviour makes both independently testable.
 
-import { PRIMARY_LINKS, DOCK_ITEMS } from './nav.config.js';
+import { PRIMARY_LINKS, DOCK_ITEMS, STAFF_LINKS } from './nav.config.js';
 import { getCurrentPage, escapeHtml, getAvatarSeed } from './nav.utils.js';
 import { resolveHref } from '@/utils';
 
@@ -105,9 +105,10 @@ export function buildAuthenticatedUser(user) {
  * @param {import('firebase/auth').User | null} user
  * @param {string} current
  * @param {Array<{ href: string, icon: string, label: string }>} userLinks
+ * @param {boolean} [isStaff=false] Whether the resolved custom claims include staff access.
  * @returns {string}
  */
-export function buildBrandMark(user, current, userLinks) {
+export function buildBrandMark(user, current, userLinks, isStaff = false) {
   const logoImg = `
     <img
       src="${resolveHref('/logo.png')}"
@@ -143,7 +144,7 @@ export function buildBrandMark(user, current, userLinks) {
       <i data-lucide="menu" class="nav-logo__menu-icon" aria-hidden="true"></i>
     </button>
 
-    ${buildAccountMenu(user, current, userLinks)}
+    ${buildAccountMenu(user, current, userLinks, isStaff)}
   `;
 }
 
@@ -154,14 +155,16 @@ export function buildBrandMark(user, current, userLinks) {
  * @param {import('firebase/auth').User} user
  * @param {string} current
  * @param {Array<{ href: string, icon: string, label: string }>} userLinks
+ * @param {boolean} [isStaff=false] Appends the Control Room link after claim resolution.
  * @returns {string}
  */
-export function buildAccountMenu(user, current, userLinks) {
+export function buildAccountMenu(user, current, userLinks, isStaff = false) {
   const seed = getAvatarSeed(user);
   const avatarSrc = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
   const displayName = escapeHtml(user.displayName || 'Your Account');
   const email = escapeHtml(user.email || '');
-  const menuItems = userLinks.map((link) => buildDropdownLink(link, current)).join('');
+  const links = isStaff ? [...userLinks, ...STAFF_LINKS] : userLinks;
+  const menuItems = links.map((link) => buildDropdownLink(link, current)).join('');
   const isAnonymous = user.isAnonymous;
 
   return `

@@ -28,6 +28,15 @@ export const USER_LINKS = [
 ];
 
 /**
+ * Staff-only destinations. Appended to USER_LINKS only after the ID token
+ * reports an admin or moderator custom claim. Authors reach the same page
+ * through their profile; ordinary users never see the entry.
+ *
+ * @type {Array<{ href: string, icon: string, label: string }>}
+ */
+export const STAFF_LINKS = [{ href: 'admin.html', icon: 'shield', label: 'Control Room' }];
+
+/**
  * The fixed set of commands available to every user regardless of auth state.
  * Auth-sensitive commands (Sign In / Sign Out) are added dynamically in
  * `getCommandItems()` inside command-palette.js.

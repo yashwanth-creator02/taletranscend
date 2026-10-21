@@ -497,6 +497,7 @@ export function detachGlobalListeners() {
  */
 export function updateNavUser(user) {
   navState.currentUser = user;
+  navState.isStaff = false;
 
   const { nav, navUser } = getNavElements();
   if (!nav || !navUser) return;
@@ -524,4 +525,33 @@ export function updateNavUser(user) {
     const { commandInput } = getNavElements();
     renderCommandList(commandInput?.value ?? '');
   }
+
+  // Custom claims are the only UI source for staff navigation. Resolve them
+  // after the first paint so an anonymous or ordinary reader never waits on
+  // a network round-trip for a link they cannot use. A failed claim read
+  // leaves isStaff false; Firestore rules still decide every real operation.
+  if (!user || typeof user.getIdTokenResult !== 'function') return;
+  const claimUser = user;
+  user
+    .getIdTokenResult()
+    .then((result) => {
+      if (navState.currentUser !== claimUser) return;
+      const claims = result?.claims ?? {};
+      const isStaff = claims.admin === true || claims.moderator === true;
+      if (navState.isStaff === isStaff) return;
+      navState.isStaff = isStaff;
+
+      const anchor = document.getElementById('nav-brand-anchor');
+      if (anchor) {
+        anchor.innerHTML = buildBrandMark(claimUser, current, USER_LINKS, isStaff);
+        renderIcons();
+      }
+      if (navState.commandPaletteOpen) {
+        const { commandInput } = getNavElements();
+        renderCommandList(commandInput?.value ?? '');
+      }
+    })
+    .catch((err) => {
+      log.warn('Could not resolve staff claims; hiding the staff link', err);
+    });
 }

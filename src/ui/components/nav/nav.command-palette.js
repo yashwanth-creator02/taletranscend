@@ -64,6 +64,16 @@ function getCommandItems() {
   const commands = [...BASE_COMMANDS];
 
   if (navState.currentUser) {
+    if (navState.isStaff) {
+      commands.push({
+        href: 'admin.html',
+        icon: 'shield',
+        label: 'Control Room',
+        description: 'Open the archive administration dashboard',
+        category: 'Staff',
+        keywords: ['admin', 'moderation', 'staff', 'dashboard'],
+      });
+    }
     commands.push({
       action: 'signout',
       icon: 'log-out',
