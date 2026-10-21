@@ -436,7 +436,7 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 
 - `firestore.rules` - Security rules for the v1/taletranscend/projects/v1 tree: per-collection ownership checks, field validation, and a deny-all fallback. Notification updates are allowlisted to `isRead`, `readAt`, and `isPinned` for the owner.
 - `firestore.indexes.json` — Composite index definitions for tales, comments, drafts, bookmarks, inquiries, and deletionRequests queries; deployed via `firebase deploy --only firestore:indexes`.
-- `firestore/tests/rules.emulator.test.ts` - Emulator-backed Vitest suite asserting `firestore.rules` decisions for reactions, reader progress (including the key allowlist), drafts and draft chapters, notifications (pin/read allowlist and admin authority), followers, inquiries, and fallback paths.
+- `firestore/tests/rules.emulator.test.ts` - Emulator-backed Vitest suite asserting `firestore.rules` decisions for the tale `reactionCount`, reader progress (including the key allowlist), drafts and draft chapters, notifications (pin/read allowlist and admin authority), followers, inquiries, and fallback paths.
 
 ## Scripts and Verification
 

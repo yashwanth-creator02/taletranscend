@@ -34,7 +34,9 @@ const opacityOf = (locator) => locator.evaluate((el) => getComputedStyle(el).opa
 
 test.beforeEach(async ({ page }) => {
   // Keep the nav state deterministic: no live Firebase auth/notification calls.
-  await page.route(/(googleapis|firebaseio)\.com/, (route) => route.abort());
+  await page.route(/(googleapis|firebaseio)\.com|127\.0\.0\.1:(8080|9099)/, (route) =>
+    route.abort()
+  );
   await page.addInitScript(() => localStorage.setItem('tt_has_visited', 'true'));
 });
 

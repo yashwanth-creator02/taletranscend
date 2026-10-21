@@ -13,7 +13,9 @@ export { refs } from './refs.js';
 export { PATHS, APP_ROOT } from './paths.js';
 
 // The e2e CI job runs against the local emulators (see .github/workflows/ci.yml).
-if (import.meta.env.VITE_FIREBASE_USE_EMULATOR === 'true') {
+// DEV is part of the condition so a stray flag in .env can never produce a
+// production bundle that talks to 127.0.0.1.
+if (import.meta.env.DEV && import.meta.env.VITE_FIREBASE_USE_EMULATOR === 'true') {
   useEmulators();
 }
 

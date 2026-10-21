@@ -25,6 +25,7 @@ Usage:
 import argparse
 import hashlib
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -45,7 +46,7 @@ def find_primary_checkout() -> Path:
     res = subprocess.run(
         ["git", "worktree", "list", "--porcelain"],
         cwd=str(PROJECT_ROOT),
-        shell=True,
+        shell=SHELL,
         **CAPTURE,
     )
     for line in (res.stdout or "").splitlines():
@@ -70,7 +71,7 @@ def git_common_dir() -> Path:
     res = subprocess.run(
         ["git", "rev-parse", "--git-common-dir"],
         cwd=str(PROJECT_ROOT),
-        shell=True,
+        shell=SHELL,
         **CAPTURE,
     )
     raw = (res.stdout or "").strip().splitlines()[0] if (res.stdout or "").strip() else ""
@@ -157,7 +158,7 @@ def current_branch() -> str:
     res = subprocess.run(
         ["git", "rev-parse", "--abbrev-ref", "HEAD"],
         cwd=str(PROJECT_ROOT),
-        shell=True,
+        shell=SHELL,
         **CAPTURE,
     )
     return (res.stdout or "").strip()
@@ -217,6 +218,11 @@ WARMUP_TIMEOUT_SECONDS = 180
 CAPTURE = {"capture_output": True, "text": True,
            "encoding": "utf-8", "errors": "replace"}
 
+# Windows needs the shell to resolve npm.cmd/npx.cmd shims; on POSIX a list
+# argument with shell=True would pass every element after the first as $0..$n,
+# so `git worktree list` would silently run as bare `git`.
+SHELL = os.name == "nt"
+
 
 def _configure_stdio() -> None:
     """Stop UnicodeEncodeError when echoing CLI output containing box glyphs.
@@ -270,7 +276,7 @@ def step_install(check_only: bool) -> None:
     res = subprocess.run(
         ["npm", "ci"],
         cwd=str(PROJECT_ROOT),
-        shell=True,
+        shell=SHELL,
         **CAPTURE,
     )
     if res.returncode != 0:
@@ -299,7 +305,7 @@ def step_warmup(check_only: bool) -> None:
         subprocess.run(
             ["node", str(target)] + WARMUP_ARGS,
             cwd=str(PROJECT_ROOT),
-            shell=True,
+            shell=SHELL,
             **CAPTURE,
             timeout=WARMUP_TIMEOUT_SECONDS,
         )
@@ -368,7 +374,7 @@ def is_gitignored(rel_path: str) -> bool:
     res = subprocess.run(
         ["git", "check-ignore", "-q", rel_path],
         cwd=str(PROJECT_ROOT),
-        shell=True,
+        shell=SHELL,
         **CAPTURE,
     )
     return res.returncode == 0
@@ -509,7 +515,7 @@ def step_verify_mcp(check_only: bool) -> None:
         res = subprocess.run(
             ["opencode", "mcp", "list"],
             cwd=str(PROJECT_ROOT),
-            shell=True,
+            shell=SHELL,
             **CAPTURE,
         )
         output = (res.stdout or "") + (res.stderr or "")

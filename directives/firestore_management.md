@@ -104,10 +104,12 @@ v1/taletranscend/projects/v1/
    - Paths: `v1/taletranscend/projects/v1/users/${userId}/drafts/${draftId}` and
      `.../drafts/${draftId}/chapters/${index}`.
    - `firestore.rules` requires `authorId == userId` and `status` on draft CREATE, and `status`
-     on draft UPDATE. A draft payload without both is rejected — this is exactly how draft
-     creation was silently broken in production before the 2026-10-19 audit. `authorId` and
-     `status` are part of the write contract, not optional metadata; they are carried in
-     `DraftMetadataSchema` so Zod cannot strip them.
+     plus an unchanged `authorId` on draft UPDATE, so a draft can never be reassigned to another
+     author. Legacy drafts created before `authorId` became part of the write contract stay
+     updatable: authorship is only checked when the field exists. A draft payload without both
+     is rejected — this is exactly how draft creation was silently broken in production before
+     the 2026-10-19 audit. `authorId` and `status` are part of the write contract, not optional
+     metadata; they are carried in `DraftMetadataSchema` so Zod cannot strip them.
    - Draft chapter documents require an integer `index` on BOTH create and update, plus
      `createdAt` on create. `index` must equal the numeric document ID.
    - Both draft writes are covered by regression tests in `firestore/tests/rules.emulator.test.ts`
@@ -122,7 +124,9 @@ v1/taletranscend/projects/v1/
      for the same reason: `users/{uid}.role` is client-writable, so trusting it would let a user
      into the admin UI while every Firestore write is still rejected. Grant claims via the
      `setModeratorClaim` callable, never by editing `role`.
-   - An owner may update only `isRead` and `readAt` on their own notifications.
+   - An owner may update only `isRead`, `readAt`, and `isPinned` on their own notifications.
+     `isRead` and `isPinned` must be booleans and `readAt` must be a timestamp, so the read/pin
+     path cannot be used to store arbitrary values.
 
 9. **User Profile & Scribe Registry**:
    - Path: `v1/taletranscend/projects/v1/users/${userId}`

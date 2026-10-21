@@ -209,6 +209,10 @@ service cloud.firestore {
             && isValidString('title', 0, 200)
             && isValidString('status', 0, 50)
             && isValidTimestamp('updatedAt')
+            // Pin authorship without breaking legacy drafts that predate the
+            // authorId write contract: absent stays absent, present must be
+            // the owner, and it can never be reassigned to another user.
+            && (!('authorId' in request.resource.data) || request.resource.data.authorId == userId)
             && request.resource.data.size() <= 25;
 
           allow delete: if isOwner(userId) || isAdmin();
@@ -412,7 +416,8 @@ service cloud.firestore {
           allow update: if isOwner(userId)
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isRead', 'readAt', 'isPinned'])
             && request.resource.data.get('isRead', false) is bool
-            && request.resource.data.get('isPinned', false) is bool;
+            && request.resource.data.get('isPinned', false) is bool
+            && request.resource.data.get('readAt', request.time) is timestamp;
           allow delete: if isOwner(userId) || isAdmin();
         }
 
@@ -487,7 +492,7 @@ service cloud.firestore {
         // including reactionCount — meaning reacting to someone else's tale
         // was rejected by this exact rule. resonance.service.js writes
         // reactionCount directly and is its ONLY writer — onReactionWrite is
-        // an intentional no-op (see docs/decisions/0005-reaction-count-ownership.md),
+        // an intentional no-op (see docs/decisions/0006-reaction-count-ownership.md),
         // so it needs its own narrower permission, not the full-document
         // author-only path. commentCount/bookmarkCount are included here too
         // even though nothing writes them client-side yet, so this doesn't

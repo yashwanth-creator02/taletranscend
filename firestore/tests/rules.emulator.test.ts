@@ -276,6 +276,49 @@ describe('users/{userId}/drafts/{draftId} — authoring write contract (P0 regre
     );
   });
 
+  it('the owner CAN update their own draft after the cooldown', async () => {
+    await seedDraft('draft-1');
+    const ctx = testEnv.authenticatedContext(uid);
+    await assertSucceeds(
+      updateDoc(doc(ctx.firestore(), `${ROOT}/users/${uid}/drafts/draft-1`), {
+        authorId: uid,
+        title: 'A Revised Draft',
+        status: 'draft',
+        updatedAt: serverTimestamp(),
+      })
+    );
+  });
+
+  it('the owner CANNOT reassign a draft to another author', async () => {
+    await seedDraft('draft-1');
+    const ctx = testEnv.authenticatedContext(uid);
+    await assertFails(
+      updateDoc(doc(ctx.firestore(), `${ROOT}/users/${uid}/drafts/draft-1`), {
+        authorId: 'author-2',
+        updatedAt: serverTimestamp(),
+      })
+    );
+  });
+
+  it('the owner CAN still update a legacy draft that has no authorId', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), `${ROOT}/users/${uid}/drafts/legacy-1`), {
+        title: 'Legacy Draft',
+        status: 'draft',
+        createdAt: new Date(),
+        updatedAt: new Date(Date.now() - 10_000),
+      });
+    });
+    const ctx = testEnv.authenticatedContext(uid);
+    await assertSucceeds(
+      updateDoc(doc(ctx.firestore(), `${ROOT}/users/${uid}/drafts/legacy-1`), {
+        title: 'Legacy Draft Revised',
+        status: 'draft',
+        updatedAt: serverTimestamp(),
+      })
+    );
+  });
+
   it('the owner CAN create a draft chapter with index and createdAt', async () => {
     await seedDraft('draft-1');
     const ctx = testEnv.authenticatedContext(uid);
@@ -496,6 +539,17 @@ describe('users/{userId}/notifications/{notificationId} — read/pin allowance',
     await assertFails(
       updateDoc(doc(ctx.firestore(), `${ROOT}/users/reader-1/notifications/n1`), {
         isPinned: 'yes',
+      })
+    );
+  });
+
+  it('rejects a non-timestamp read timestamp', async () => {
+    await seedNotification('reader-1', 'n1');
+    const ctx = testEnv.authenticatedContext('reader-1');
+    await assertFails(
+      updateDoc(doc(ctx.firestore(), `${ROOT}/users/reader-1/notifications/n1`), {
+        isRead: true,
+        readAt: 'yesterday',
       })
     );
   });
