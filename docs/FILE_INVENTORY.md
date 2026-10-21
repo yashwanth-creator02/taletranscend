@@ -83,6 +83,7 @@ One-line duty for every file tracked by git in this repository, grouped by area 
 - `docs/decisions/0002-lean-firestore-rules-validation.md` — Decision record: rules validate permission and security-relevant fields only, not exhaustive field data, per the expression budget.
 - `docs/decisions/0003-byok-ai-instead-of-cloud-function-proxy.md` — Decision record: AI uses per-user BYOK Gemini keys in localStorage instead of a Cloud Function proxy.
 - `docs/decisions/0004-field-scoped-rule-exception-for-engagement-counters.md` — Decision record: engagement counters stay client-writable via a permanent field-scoped rule exception.
+- `docs/admin-dashboard/PROGRESS.md` — Living delivery log for the archive control room: scope, status board, decisions, open questions, risks, five-role permission matrix, Firestore rules/index changelog, and per-screen free-tier read/write estimates.
 - `docs/decisions/0005-remembered-login-gate.md` — Decision record: the first-visit login gate reads one explicit auth-memory record; the Keep-me-signed-in checkbox governs its scope and sign-out clears it.
 - `docs/reports/2026-10-18-code-redundancy-audit.md` — Audit report listing 17 dead-code and duplication findings with severities and their same-day resolutions.
   <<<<<<< HEAD
@@ -91,6 +92,7 @@ One-line duty for every file tracked by git in this repository, grouped by area 
 
 ## Application Views (`src/views`)
 
+- `src/views/admin.html` — Archive control room shell marked noindex; theme boot script, `#admin-root` mount point, and `../pages/admin/admin.js` entry.
 - `src/views/404.html` — Page-not-found shell marked noindex; loads `../pages/404/404.js` with the shared boot curtain and theme script.
 - `src/views/contribution.html` — Scribe's Atelier writing-workspace shell with manuscript, lore and split panes; loads `../pages/contribution/contribution.js`.
 - `src/views/index.html` — Landing-page shell with hero search, trending grid, newsletter CTA and theme footer; loads `../pages/home/home.js`.
@@ -249,6 +251,15 @@ Each directory under `src/pages/` holds the JavaScript for one HTML shell in `sr
 
 - `src/pages/404/404.js` — Entry point for the 404 error page; loads CSS, initializes app theme, icons, and the page reveal animation.
 
+### Admin (`src/pages/admin`)
+
+- `src/pages/admin/admin.js` — Dashboard entry: resolves claim-based access, renders the shell, hash-routes to one lazy module, and tears modules down between routes.
+- `src/pages/admin/admin.state.js` — Page-local admin state (access snapshot, active module, cleanup, mount flag) and its reset helper.
+- `src/pages/admin/admin.templates.js` — Pure HTML builders for the shell, dashboard home, boot/denied/error states, and the shared empty state; every value is escaped.
+- `src/pages/admin/admin.utils.js` — Admin formatting helpers: timestamp/date, compact counts, truncation, initials, and module descriptions.
+- `src/pages/admin/__tests__/admin.templates.test.js` — Vitest tests for shell module filtering, active route, dashboard cards, denied states, escaping, and empty states.
+- `src/pages/admin/__tests__/admin.utils.test.js` — Vitest tests for admin date/count formatting, truncation, initials, and module descriptions.
+
 ## Shared UI (`src/ui`)
 
 Global UI layer: the icon registry, shared components, and the nav shell; each component has a matching test file under `__tests__/`.
@@ -299,6 +310,7 @@ Global UI layer: the icon registry, shared components, and the nav shell; each c
 - `src/ui/components/nav/__tests__/nav.templates.test.js` - Vitest tests for `src/ui/components/nav/nav.templates.js` - template builders for active links, the brand mark (guest link vs member menu button), the account menu panel, the avatar profile link, guest area, the three-item mobile dock (Home/Library/Shelf only, single active tab, retired Write/Profile entries absent), command items, lookup palette shell ordering (including the look-up glyph), nav shell ordering, the absence of a header settings icon, and Settings remaining reachable from the account menu.
 - `src/ui/components/nav/__tests__/nav.test.js` — Vitest tests for `src/ui/components/nav/nav.js` — initNav header/dock injection, idempotency, destroyNav DOM and auth-unsubscribe cleanup.
 - `src/ui/components/nav/__tests__/nav.utils.test.js` — Vitest tests for `src/ui/components/nav/nav.utils.js` — getCurrentPage pathname fallbacks, getAvatarSeed derivation, getNavElements DOM lookups.
+- `src/ui/components/nav/__tests__/nav.staff.test.js` — Vitest tests for the claim-gated staff nav entry: hidden for readers, exactly one Control Room link for staff, and brand-mark propagation.
   <<<<<<< HEAD
   =======
 - `src/ui/components/nav/nav.command-palette.js` — Manages command palette open/close, fuzzy list rendering with `<mark>` query highlighting, keyboard focus movement, and command execution (navigation, sign out, themes).
@@ -364,6 +376,14 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `src/services/__tests__/profile.service.test.js` — Vitest tests for `src/services/profile.service.js` — continue reading, drafts, stats sync, deletion, deletion requests, follows.
 - `src/services/__tests__/progress.utils.service.test.js` — Vitest tests for `src/services/progress.utils.service.js` — chapter scrollPercent map building and error fallback to empty object.
 - `src/services/__tests__/resonance.service.test.js` — Vitest tests for `src/services/resonance.service.js` — reaction toggle on/off, rate limits, status checks, reactionCount reads.
+
+### Admin (`src/services/admin`)
+
+- `src/services/admin/access.service.js` — Claim-first role resolution (admin, moderator, author, user, guest), the eight-module registry, per-role module gating, and default-route selection.
+- `src/services/admin/audit.service.js` — Non-blocking audit-log writes with actor validation, plus a cursor-paginated audit reader for administrators.
+- `src/services/admin/pagination.service.js` — Shared admin cursor pagination with a 20-row page size, a clamped 1-50 limit, and `{ items, lastDoc, hasMore }` results.
+- `src/services/admin/index.js` — Barrel re-exporting admin access, audit, and pagination services.
+- `src/services/admin/__tests__/access.service.test.js` — Vitest tests for claim precedence, author fallback, profile-role non-elevation, fail-closed token reads, module gating, and role labels.
 
 ### Reader (`src/services/reader`)
 
@@ -506,6 +526,7 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `src/assets/css/pages/home.css` — Styles the landing page hero, search field, topic tags, trending grid, newsletter CTA and footer.
 - `src/assets/css/pages/library.css` — Styles the library archive layout: sidebar, header, filter command bar, card grid and pagination.
 - `src/assets/css/pages/login.css` — Styles the login split screen: reading-vignette art column, tabbed auth card, inputs and alternate buttons.
+- `src/assets/css/pages/admin.css` — Styles the archive control room: sidebar navigation, role shield, dashboard module cards, shared empty/loading/denied/error states, and responsive stacking; token-only colours.
 - `src/assets/css/pages/profile.css` — Styles the profile sanctuary: identity pillar, avatar frame, scribe registry card and responsive columns.
 - `src/assets/css/pages/reader.css` — Styles the reader layout, top bar, sidebar tools, panels and typography variables that the reader themes drive.
 - `src/assets/css/pages/settings.css` — Styles the settings page chrome (library-vellum top bar and contents sidebar), setting rows and cards, theme/font specimens, archival storage list, Accounts panels and responsive section views.
@@ -557,7 +578,12 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `firestore.rules` - Security rules for the v1/taletranscend/projects/v1 tree: per-collection ownership checks, field validation, and a deny-all fallback. Notification updates are allowlisted to `isRead`, `readAt`, and `isPinned` for the owner.
 - `firestore.indexes.json` — Composite index definitions for tales, comments, drafts, and bookmarks queries; deployed via `firebase deploy --only firestore:indexes`.
 - `firestore/tests/rules.emulator.test.ts` - Emulator-backed Vitest suite asserting `firestore.rules` decisions for reactions, reader progress, followers, inquiries, notification pin/read allowlisting, and fallback paths.
+
   > > > > > > > feat/comprehensive-improvements
+
+- `firestore.rules` — Adds `isModerator`/`isAdministrator` helpers, an administrator-only users admin-update branch, append-only administrator-readable `adminAuditLogs`, applicant-owned `authorApplications`, and administrator-only site-config writes; no existing permission is widened.
+- `firestore.indexes.json` — Adds cursor-pagination composites for `deletionRequests(userId, createdAt desc)`, `reports(status, createdAt desc)`, and `authorApplications(status|applicantId, createdAt desc)`.
+- `firestore/tests/rules.emulator.test.ts` — Adds five-role allowed/denied coverage for admin audit logs, author applications, the users admin-update branch, site configuration, reports, and deletion requests.
 
 ## Scripts and Verification
 
