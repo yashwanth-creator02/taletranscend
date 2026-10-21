@@ -9,6 +9,7 @@
  * @property {string}              id
  * @property {NotificationType}    type
  * @property {boolean}             isRead
+ * @property {boolean}             isPinned
  * @property {string}              title
  * @property {string}              body
  * @property {string}              actionUrl
@@ -18,6 +19,9 @@
  * @property {string|null}         fromUserName
  * @property {string|null}         fromUserAvatarUrl
  * @property {import('firebase/firestore').Timestamp|null} createdAt
+ *
+ * Legacy writers stored the target/body as `link` / `message`; the factory
+ * accepts both shapes and always exposes `actionUrl` / `body` downstream.
  */
 
 /**
@@ -30,9 +34,10 @@ export function createNotification(id, data = {}) {
     id,
     type: data.type ?? 'new_comment',
     isRead: data.isRead ?? false,
+    isPinned: data.isPinned ?? false,
     title: data.title ?? '',
-    body: data.body ?? '',
-    actionUrl: data.actionUrl ?? '',
+    body: data.body ?? data.message ?? '',
+    actionUrl: data.actionUrl ?? data.link ?? '',
     taleId: data.taleId ?? null,
     commentId: data.commentId ?? null,
     fromUserId: data.fromUserId ?? null,

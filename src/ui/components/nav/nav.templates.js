@@ -61,103 +61,169 @@ export function buildDropdownLink({ href, icon, label }, current) {
 }
 
 /**
- * Builds the full authenticated user area: avatar button + dropdown panel.
+ * Builds the desktop user area: the avatar rendered as a direct link to the
+ * user's profile page (the account menu itself now lives on the brand mark).
+ *
+ * @param {import('firebase/auth').User} user
+ * @returns {string}
+ */
+export function buildAuthenticatedUser(user) {
+  const seed = getAvatarSeed(user);
+  const avatarSrc = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
+  const displayName = escapeHtml(user.displayName || 'Your Account');
+
+  return `
+    <div class="nav-user" id="nav-user">
+      <a
+        class="nav-avatar"
+        id="nav-profile-link"
+        href="${resolveHref('profile.html')}"
+        aria-label="Open profile for ${displayName}"
+        title="Profile"
+      >
+        <img
+          src="${avatarSrc}"
+          alt=""
+          class="avatar-img"
+          width="32"
+          height="32"
+        />
+      </a>
+    </div>
+  `;
+}
+
+/**
+ * Builds the brand slot at the header's left edge: the logo mark, and — for a
+ * signed-in user — the account menu trigger plus its dropdown panel.
+ *
+ * Guest: the mark stays a plain link to the home page (no account menu exists).
+ * Member: the mark becomes a button that opens the account dropdown anchored
+ * beneath it; hovering/focusing the mark swaps the logo for a menu glyph so
+ * the affordance is visible before the first click.
+ *
+ * @param {import('firebase/auth').User | null} user
+ * @param {string} current
+ * @param {Array<{ href: string, icon: string, label: string }>} userLinks
+ * @returns {string}
+ */
+export function buildBrandMark(user, current, userLinks) {
+  const logoImg = `
+    <img
+      src="${resolveHref('/logo.png')}"
+      alt=""
+      class="nav-logo__img"
+      aria-hidden="true"
+      width="28"
+      height="28"
+    />
+  `;
+
+  if (!user) {
+    return `
+      <a href="${resolveHref('index.html')}" class="nav-logo__mark" aria-label="TaleTranscend home">
+        ${logoImg}
+      </a>
+    `;
+  }
+
+  const displayName = escapeHtml(user.displayName || 'Your Account');
+
+  return `
+    <button
+      type="button"
+      class="nav-logo__mark nav-logo__mark--menu"
+      id="nav-menu-btn"
+      aria-haspopup="menu"
+      aria-expanded="false"
+      aria-controls="user-dropdown"
+      aria-label="Open account menu for ${displayName}"
+    >
+      ${logoImg}
+      <i data-lucide="menu" class="nav-logo__menu-icon" aria-hidden="true"></i>
+    </button>
+
+    ${buildAccountMenu(user, current, userLinks)}
+  `;
+}
+
+/**
+ * Builds the account dropdown panel: identity header, user links, optional
+ * Secure Account CTA (anonymous users), and sign out.
  *
  * @param {import('firebase/auth').User} user
  * @param {string} current
  * @param {Array<{ href: string, icon: string, label: string }>} userLinks
  * @returns {string}
  */
-export function buildAuthenticatedUser(user, current, userLinks) {
+export function buildAccountMenu(user, current, userLinks) {
   const seed = getAvatarSeed(user);
   const avatarSrc = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
   const displayName = escapeHtml(user.displayName || 'Your Account');
   const email = escapeHtml(user.email || '');
-
   const menuItems = userLinks.map((link) => buildDropdownLink(link, current)).join('');
   const isAnonymous = user.isAnonymous;
 
   return `
-    <div class="nav-user" id="nav-user">
-      <button
-        class="avatar-btn"
-        id="avatar-btn"
-        type="button"
-        aria-haspopup="menu"
-        aria-expanded="false"
-        aria-controls="user-dropdown"
-        aria-label="Open account menu for ${displayName}"
-      >
+    <div
+      class="dropdown"
+      id="user-dropdown"
+      role="menu"
+      aria-labelledby="nav-menu-btn"
+      hidden
+    >
+      <div class="dropdown__header">
         <img
           src="${avatarSrc}"
-          alt="${displayName}"
-          class="avatar-img"
-          width="32"
-          height="32"
+          alt=""
+          class="dropdown__avatar"
+          aria-hidden="true"
+          width="36"
+          height="36"
         />
-        <i data-lucide="chevron-down" class="avatar-chevron" aria-hidden="true"></i>
-      </button>
-
-      <div
-        class="dropdown"
-        id="user-dropdown"
-        role="menu"
-        aria-labelledby="avatar-btn"
-        hidden
-      >
-        <div class="dropdown__header">
-          <img
-            src="${avatarSrc}"
-            alt=""
-            class="dropdown__avatar"
-            aria-hidden="true"
-            width="36"
-            height="36"
-          />
-          <div class="dropdown__identity">
-            <p class="dropdown__name">${displayName}</p>
-            ${email ? `<p class="dropdown__email">${email}</p>` : ''}
-          </div>
+        <div class="dropdown__identity">
+          <p class="dropdown__name">${displayName}</p>
+          ${email ? `<p class="dropdown__email">${email}</p>` : ''}
         </div>
-
-        <div class="dropdown__divider" role="separator"></div>
-
-        <nav aria-label="Account navigation">
-          ${menuItems}
-          ${
-            isAnonymous
-              ? `
-            <div class="dropdown__divider" role="separator"></div>
-            <button
-              class="dropdown-link dropdown-link--primary"
-              id="nav-upgrade-btn"
-              type="button"
-              role="menuitem"
-              aria-label="Secure Account with Google"
-              tabindex="-1"
-            >
-              <i data-lucide="shield-check" class="dropdown-link__icon" aria-hidden="true"></i>
-              <span>Secure Account</span>
-            </button>
-          `
-              : ''
-          }
-        </nav>
-
-        <div class="dropdown__divider" role="separator"></div>
-
-        <button
-          class="dropdown-link dropdown-link--danger"
-          id="signout-btn"
-          type="button"
-          role="menuitem"
-          aria-label="Sign out of account"
-          tabindex="-1"
-        >
-          <i data-lucide="log-out" class="dropdown-link__icon" aria-hidden="true"></i>
-          <span>Sign Out</span>
-        </button>
       </div>
+
+      <div class="dropdown__divider" role="separator"></div>
+
+      <nav aria-label="Account navigation">
+        ${menuItems}
+        ${
+          isAnonymous
+            ? `
+          <div class="dropdown__divider" role="separator"></div>
+          <button
+            class="dropdown-link dropdown-link--primary"
+            id="nav-upgrade-btn"
+            type="button"
+            role="menuitem"
+            aria-label="Secure Account with Google"
+            tabindex="-1"
+          >
+            <i data-lucide="shield-check" class="dropdown-link__icon" aria-hidden="true"></i>
+            <span>Secure Account</span>
+          </button>
+        `
+            : ''
+        }
+      </nav>
+
+      <div class="dropdown__divider" role="separator"></div>
+
+      <button
+        class="dropdown-link dropdown-link--danger"
+        id="signout-btn"
+        type="button"
+        role="menuitem"
+        aria-label="Sign out of account"
+        tabindex="-1"
+      >
+        <i data-lucide="log-out" class="dropdown-link__icon" aria-hidden="true"></i>
+        <span>Sign Out</span>
+      </button>
     </div>
   `;
 }
@@ -198,15 +264,15 @@ export function buildUserSkeleton() {
 /**
  * Builds a single mobile dock tab item.
  *
- * @param {{ href: string, icon: string, label: string, active: boolean, primary?: boolean }} options
+ * @param {{ href: string, icon: string, label: string, active: boolean }} options
  * @returns {string}
  */
-export function buildDockItem({ href, icon, label, active, primary = false }) {
+export function buildDockItem({ href, icon, label, active }) {
   const targetHref = resolveHref(href);
   return `
     <a
       href="${targetHref}"
-      class="mobile-dock__item${primary ? ' mobile-dock__item--primary' : ''}${active ? ' mobile-dock__item--active' : ''}"
+      class="mobile-dock__item${active ? ' mobile-dock__item--active' : ''}"
       aria-label="${label}"
       ${active ? 'aria-current="page"' : ''}
     >
@@ -221,31 +287,80 @@ export function buildDockItem({ href, icon, label, active, primary = false }) {
 /**
  * Builds the full mobile bottom dock navigation.
  *
+ * The dock is intentionally auth-independent: Home, Library, and Shelf are the
+ * only destinations, so a user change never needs to rebuild its contents.
+ *
  * @param {string} current - Current page filename
- * @param {import('firebase/auth').User | null} user
  * @returns {string}
  */
-export function buildMobileDock(current, user) {
-  const profileIcon = user ? 'user' : 'log-in';
-  const profileLabel = user ? 'Profile' : 'Sign In';
-  const profileHref = user ? 'profile.html' : 'login.html';
-
+export function buildMobileDock(current) {
   const dockItems = DOCK_ITEMS.map((item) =>
     buildDockItem({ ...item, active: current === item.href })
   ).join('');
 
-  const profileItem = buildDockItem({
-    href: profileHref,
-    icon: profileIcon,
-    label: profileLabel,
-    active: current === profileHref,
-  });
-
   return `
     <nav class="mobile-dock" aria-label="Quick navigation">
       ${dockItems}
-      ${profileItem}
     </nav>
+  `;
+}
+
+/* ─────────────────────────────────────────────
+   Notifications Template
+   ───────────────────────────────────────────── */
+
+/**
+ * Builds the floating notifications trigger and its drawer.
+ *
+ * Mounted as a direct child of <body> (not inside the header) because
+ * `.app-nav` uses backdrop-filter, which would otherwise trap the
+ * viewport-fixed positioning of the floating trigger.
+ *
+ * The trigger starts hidden — `updateNotificationBadge` /
+ * `updatePinnedCount` reveal it once unread or pinned notices exist.
+ *
+ * @returns {string}
+ */
+export function buildNotifications() {
+  return `
+    <div id="nav-notifications-container" class="nav-notifications-float is-hidden">
+      <button
+        type="button"
+        class="nav-icon-btn nav-notifications-trigger"
+        id="nav-notifications-btn"
+        title="Chronicle Notices"
+        aria-label="Chronicle Notices"
+        aria-haspopup="dialog"
+        aria-expanded="false"
+        aria-controls="nav-notifications-popover"
+      >
+        <i data-lucide="bell" class="w-4 h-4" aria-hidden="true"></i>
+        <span id="nav-notifications-badge" class="nav-notifications-badge hidden"></span>
+      </button>
+      <div
+        id="nav-notifications-popover"
+        class="nav-notifications-popover hidden"
+        role="dialog"
+        aria-label="Notifications"
+      >
+        <div class="nav-notifications-popover__header">
+          <div class="nav-notifications-popover__title-wrap">
+            <i data-lucide="bell" class="nav-notifications-popover__icon" aria-hidden="true"></i>
+            <h3 class="nav-notifications-popover__title">Chronicle Notices</h3>
+          </div>
+          <button
+            type="button"
+            id="nav-notifications-mark-read"
+            class="nav-notifications-popover__mark-read"
+          >
+            Mark read
+          </button>
+        </div>
+        <div id="nav-notifications-list" class="nav-notifications-list">
+          <div class="nav-notifications-empty">No notices in the archive</div>
+        </div>
+      </div>
+    </div>
   `;
 }
 
@@ -297,8 +412,11 @@ export function buildCommandItem(item, current, isFocused = false, index = 0) {
 }
 
 /**
- * Builds the command palette dialog shell (input + list container + footer).
- * The list is populated dynamically by command-palette.js.
+ * Builds the command palette shell in a lookup layout: the search field is the
+ * first row and visual anchor (with the inline close control), followed by the
+ * results list and a keyboard-hint footer. The list is populated dynamically
+ * by command-palette.js. The h2 is visually hidden and exists purely to name
+ * the dialog for assistive technology.
  *
  * @returns {string}
  */
@@ -319,33 +437,11 @@ export function buildCommandPalette() {
         aria-modal="true"
         aria-labelledby="nav-command-title"
       >
-        <div class="command-header">
-          <div class="command-header__badge-wrap">
-            <span class="command-header__badge" aria-hidden="true">
-              <i data-lucide="compass" class="command-header__badge-icon"></i>
-            </span>
-            <div class="command-header__text">
-              <div class="command-header__title-row">
-                <h2 id="nav-command-title" class="command-title">Quick Navigation</h2>
-              </div>
-              <p class="command-subtitle">Jump directly to chronicles, archives & scribe tools</p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            class="command-close"
-            id="nav-command-close"
-            aria-label="Close command palette (Escape)"
-          >
-            <span class="command-close__kbd" aria-hidden="true">Esc</span>
-            <i data-lucide="x" class="command-close__icon" aria-hidden="true"></i>
-          </button>
-        </div>
+        <h2 id="nav-command-title" class="command-title">Quick tools</h2>
 
         <div class="command-search" role="search">
           <div class="command-search__icon-wrap" aria-hidden="true">
-            <i data-lucide="search" class="command-search__icon"></i>
+            <i data-lucide="look-up" class="command-search__icon"></i>
           </div>
           <input
             id="nav-command-input"
@@ -356,8 +452,8 @@ export function buildCommandPalette() {
             aria-haspopup="listbox"
             autocomplete="off"
             spellcheck="false"
-            placeholder="Type a chronicle, page, or action…"
-            aria-label="Search pages and actions"
+            placeholder="Look up a page, theme, or action…"
+            aria-label="Look up pages, themes, and actions"
             aria-autocomplete="list"
             aria-controls="nav-command-list"
           />
@@ -365,11 +461,20 @@ export function buildCommandPalette() {
             type="button"
             class="command-search__clear"
             id="nav-command-clear"
-            aria-label="Clear search query"
+            aria-label="Clear look-up query"
             tabindex="-1"
             hidden
           >
             <i data-lucide="x" class="command-search__clear-icon" aria-hidden="true"></i>
+          </button>
+          <button
+            type="button"
+            class="command-close"
+            id="nav-command-close"
+            aria-label="Close quick tools (Escape)"
+          >
+            <span class="command-close__kbd" aria-hidden="true">Esc</span>
+            <i data-lucide="x" class="command-close__icon" aria-hidden="true"></i>
           </button>
         </div>
 
@@ -417,21 +522,18 @@ export function buildCommandPalette() {
 export function buildNav() {
   const current = getCurrentPage();
   const primaryLinks = PRIMARY_LINKS.map((link) => buildPrimaryLink(link, current)).join('');
-  const settingsTarget = resolveHref('settings.html');
-  const isSettingsActive =
-    current === 'settings.html' || current === settingsTarget || settingsTarget === `/${current}`;
 
   return {
     headerHtml: `
       <header id="app-nav" class="app-nav">
         <div class="nav-inner">
           <div class="nav-brand-group">
-            <a href="${resolveHref('index.html')}" class="nav-logo" aria-label="TaleTranscend home">
-              <div class="nav-logo__mark">
-                <img src="${resolveHref('/logo.png')}" alt="" class="nav-logo__img" aria-hidden="true" width="28" height="28" />
+            <div class="nav-brand">
+              <div class="nav-brand__anchor" id="nav-brand-anchor">
+                ${buildBrandMark(null)}
               </div>
-              <span class="nav-logo__wordmark">TaleTranscend</span>
-            </a>
+              <a href="${resolveHref('index.html')}" class="nav-logo__wordmark">TaleTranscend</a>
+            </div>
 
             <nav class="nav-primary desktop-shell" aria-label="Primary navigation">
               ${primaryLinks}
@@ -448,8 +550,8 @@ export function buildNav() {
               aria-expanded="false"
               aria-keyshortcuts="Control+K Meta+K"
             >
-              <i data-lucide="search" class="w-4 h-4" aria-hidden="true"></i>
-              <span class="text-xs font-bold uppercase tracking-widest">Search</span>
+              <i data-lucide="look-up" class="w-4 h-4" aria-hidden="true"></i>
+              <span class="text-xs font-semibold uppercase tracking-wider">Search</span>
               <kbd class="command-trigger__hint" aria-hidden="true">⌘K</kbd>
             </button>
 
@@ -461,58 +563,12 @@ export function buildNav() {
               aria-haspopup="dialog"
               aria-expanded="false"
             >
-              <i data-lucide="search" class="w-4 h-4" aria-hidden="true"></i>
+              <i data-lucide="look-up" class="w-4 h-4" aria-hidden="true"></i>
             </button>
 
-            <!-- Notifications Bell & Drawer -->
-            <div class="relative inline-flex items-center" id="nav-notifications-container">
-              <button
-                type="button"
-                class="nav-settings-btn relative"
-                id="nav-notifications-btn"
-                title="Chronicle Notices"
-                aria-label="Chronicle Notices"
-                aria-haspopup="dialog"
-                aria-expanded="false"
-              >
-                <i data-lucide="bell" class="w-4 h-4" aria-hidden="true"></i>
-                <span id="nav-notifications-badge" class="nav-notifications-badge hidden"></span>
-              </button>
-              <div
-                id="nav-notifications-popover"
-                class="nav-notifications-popover hidden"
-                role="dialog"
-                aria-label="Notifications"
-              >
-                <div class="nav-notifications-popover__header">
-                  <div class="nav-notifications-popover__title-wrap">
-                    <i data-lucide="bell" class="nav-notifications-popover__icon" aria-hidden="true"></i>
-                    <h3 class="nav-notifications-popover__title">Chronicle Notices</h3>
-                  </div>
-                  <button
-                    type="button"
-                    id="nav-notifications-mark-read"
-                    class="nav-notifications-popover__mark-read"
-                  >
-                    Mark read
-                  </button>
-                </div>
-                <div id="nav-notifications-list" class="nav-notifications-list">
-                  <div class="nav-notifications-empty">No notices in the archive</div>
-                </div>
-              </div>
-            </div>
-
-            <a
-              href="${settingsTarget}"
-              class="nav-settings-btn${isSettingsActive ? ' nav-settings-btn--active' : ''}"
-              id="nav-settings-btn"
-              title="Settings"
-              aria-label="Settings"
-              ${isSettingsActive ? 'aria-current="page"' : ''}
-            >
-              <i data-lucide="settings" class="w-4 h-4" aria-hidden="true"></i>
-            </a>
+            <!-- Notifications live in a floating trigger below the nav bar.
+                 Settings stays reachable from the account menu on the brand
+                 mark and from the command palette. -->
 
             <div id="nav-user" class="flex items-center">
               ${buildUserSkeleton()}
@@ -525,9 +581,10 @@ export function buildNav() {
     `,
     dockHtml: `
       <div id="mobile-dock-container">
-        ${buildMobileDock(current, null)}
+        ${buildMobileDock(current)}
       </div>
     `,
+    alertsHtml: buildNotifications(),
     paletteHtml: buildCommandPalette(),
   };
 }

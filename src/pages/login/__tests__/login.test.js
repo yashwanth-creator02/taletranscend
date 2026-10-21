@@ -7,10 +7,19 @@ import { showToast } from '@ui/components/toast.js';
 // We need to import the module to trigger its DOMContentLoaded listener
 // but since it uses top-level code (initPageReveal), we might need to be careful.
 
+const { mockAuth } = vi.hoisted(() => ({ mockAuth: { currentUser: null } }));
+
 vi.mock('@fb/index.js', () => ({
-  auth: { currentUser: null },
-  signInAnonymously: vi.fn(),
-  signInWithGoogle: vi.fn(),
+  auth: mockAuth,
+  setRememberPreference: vi.fn(() => Promise.resolve(true)),
+  signInAnonymously: vi.fn(() => {
+    mockAuth.currentUser = { uid: 'guest-1', isAnonymous: true };
+    return Promise.resolve({ user: mockAuth.currentUser });
+  }),
+  signInWithGoogle: vi.fn(() => {
+    mockAuth.currentUser = { uid: 'google-1', isAnonymous: false };
+    return Promise.resolve({ user: mockAuth.currentUser });
+  }),
   signInWithEmail: vi.fn().mockResolvedValue({ user: { uid: 'u1' } }),
   registerWithEmail: vi.fn().mockResolvedValue({ user: { uid: 'u1' } }),
   sendPasswordReset: vi.fn().mockResolvedValue(true),
@@ -44,6 +53,24 @@ describe('Login Page', () => {
     vi.useFakeTimers();
     vi.clearAllMocks();
     vi.resetModules();
+    mockAuth.currentUser = null;
+    localStorage.clear();
+    sessionStorage.clear();
+    // jsdom shares one document URL per file: reset it so a test that sets a
+    // returnUrl cannot leak into the next one.
+    window.history.replaceState({}, '', '/login.html');
+
+    // clearAllMocks() keeps any mockImplementation() set by an earlier test,
+    // so the defaults are re-applied explicitly to keep tests independent.
+    signInAnonymously.mockImplementation(() => {
+      mockAuth.currentUser = { uid: 'guest-1', isAnonymous: true };
+      return Promise.resolve({ user: mockAuth.currentUser });
+    });
+    signInWithGoogle.mockImplementation(() => {
+      mockAuth.currentUser = { uid: 'google-1', isAnonymous: false };
+      return Promise.resolve({ user: mockAuth.currentUser });
+    });
+    onAuthStateChanged.mockImplementation(() => vi.fn());
 
     document.body.innerHTML = `
       <div class="login-card"></div>
@@ -63,6 +90,10 @@ describe('Login Page', () => {
             </button>
           </div>
           <button id="btn-forgot-password" type="button">Forgot password?</button>
+          <label>
+            <input id="checkbox-remember" type="checkbox" checked />
+            <span>Keep me signed in</span>
+          </label>
           <button id="btn-email-submit" type="submit">
             <span id="btn-email-submit-text">Sign in</span>
             <div id="btn-email-submit-loading" class="hidden"></div>
@@ -107,7 +138,7 @@ describe('Login Page', () => {
     });
 
     await initPage();
-    expect(utils.navigateTo).toHaveBeenCalledWith('profile.html');
+    expect(utils.navigateTo).toHaveBeenCalledWith('index.html');
   });
 
   it('handles Google login success', async () => {
@@ -116,11 +147,13 @@ describe('Login Page', () => {
     const btn = document.getElementById('btn-google-login');
     await btn.click();
 
-    expect(signInWithGoogle).toHaveBeenCalled();
-    expect(showToast).toHaveBeenCalledWith(expect.stringContaining('Welcome'), 'success');
+    await vi.waitFor(() => expect(signInWithGoogle).toHaveBeenCalled());
+    await vi.waitFor(() =>
+      expect(showToast).toHaveBeenCalledWith(expect.stringContaining('Welcome'), 'success')
+    );
 
     vi.advanceTimersByTime(1000);
-    expect(utils.navigateTo).toHaveBeenCalledWith('profile.html');
+    expect(utils.navigateTo).toHaveBeenCalledWith('index.html');
   });
 
   it('handles Guest login success', async () => {
@@ -129,8 +162,10 @@ describe('Login Page', () => {
     const btn = document.getElementById('btn-guest-login');
     await btn.click();
 
-    expect(signInAnonymously).toHaveBeenCalled();
-    expect(showToast).toHaveBeenCalledWith(expect.stringContaining('Welcome'), 'success');
+    await vi.waitFor(() => expect(signInAnonymously).toHaveBeenCalled());
+    await vi.waitFor(() =>
+      expect(showToast).toHaveBeenCalledWith(expect.stringContaining('Welcome'), 'success')
+    );
   });
 
   it('handles login failure', async () => {
@@ -140,7 +175,9 @@ describe('Login Page', () => {
     const btn = document.getElementById('btn-google-login');
     await btn.click();
 
-    expect(showToast).toHaveBeenCalledWith(expect.stringContaining('failed'), 'error');
+    await vi.waitFor(() =>
+      expect(showToast).toHaveBeenCalledWith(expect.stringContaining('failed'), 'error')
+    );
     expect(btn.disabled).toBe(false);
   });
 
@@ -243,5 +280,170 @@ describe('Login Page', () => {
 
     link.click();
     expect(utils.markUserVisited).toHaveBeenCalled();
+  });
+
+  it('acknowledges the gate durably on load', async () => {
+    await initPage();
+
+    const record = JSON.parse(localStorage.getItem('tt_auth'));
+    expect(record).toMatchObject({ v: 1, method: 'gate' });
+    expect(record.scope).toBeUndefined();
+  });
+
+  it('does not overwrite existing memory when acknowledging the gate', async () => {
+    localStorage.setItem(
+      'tt_auth',
+      JSON.stringify({ v: 1, uid: null, anonymous: true, method: 'guest', at: 1 })
+    );
+
+    await initPage();
+
+    expect(JSON.parse(localStorage.getItem('tt_auth')).method).toBe('guest');
+  });
+
+  it('remembers a guest login durably when Keep me signed in is checked', async () => {
+    await initPage();
+
+    document.getElementById('btn-guest-login').click();
+    await vi.waitFor(() => expect(utils.markUserVisited).toHaveBeenCalled());
+
+    const record = JSON.parse(localStorage.getItem('tt_auth'));
+    expect(record).toMatchObject({ v: 1, uid: 'guest-1', anonymous: true, method: 'guest' });
+    expect(sessionStorage.getItem('tt_auth')).toBeNull();
+  });
+
+  it('remembers a guest login for this session only when unchecked', async () => {
+    await initPage();
+    document.getElementById('checkbox-remember').checked = false;
+    // A durable trace may already exist: the gate acknowledgement above.
+    localStorage.setItem('tt_has_visited', 'true');
+
+    document.getElementById('btn-guest-login').click();
+    await vi.waitFor(() => expect(sessionStorage.getItem('tt_auth')).not.toBeNull());
+
+    const record = JSON.parse(sessionStorage.getItem('tt_auth'));
+    expect(record).toMatchObject({ v: 1, uid: 'guest-1', anonymous: true, method: 'guest' });
+    // The durable record written when the gate was acknowledged must be gone,
+    // otherwise the login page could never return in a later session.
+    expect(localStorage.getItem('tt_auth')).toBeNull();
+    expect(localStorage.getItem('tt_has_visited')).toBeNull();
+    expect(utils.markUserVisited).not.toHaveBeenCalled();
+  });
+
+  it('applies the persistence preference before signing in', async () => {
+    const { setRememberPreference } = await import('@fb/index.js');
+    await initPage();
+
+    // Record the real call order: persistence must be set before the sign-in,
+    // because that is the moment Firebase writes the session.
+    const order = [];
+    setRememberPreference.mockImplementation(() => {
+      order.push('persistence');
+      return Promise.resolve(true);
+    });
+    signInWithGoogle.mockImplementation(() => {
+      order.push('signIn');
+      mockAuth.currentUser = { uid: 'google-1', isAnonymous: false };
+      return Promise.resolve({ user: mockAuth.currentUser });
+    });
+
+    document.getElementById('checkbox-remember').checked = false;
+    document.getElementById('btn-google-login').click();
+
+    await vi.waitFor(() => expect(sessionStorage.getItem('tt_auth')).not.toBeNull());
+    expect(order).toEqual(['persistence', 'signIn']);
+    expect(setRememberPreference).toHaveBeenCalledWith(false);
+    expect(JSON.parse(sessionStorage.getItem('tt_auth')).method).toBe('google');
+  });
+
+  it('remembers a restored account before continuing to the destination', async () => {
+    onAuthStateChanged.mockImplementation((auth, cb) => {
+      cb({ uid: 'restored-1', isAnonymous: false });
+      return vi.fn();
+    });
+
+    await initPage();
+
+    expect(JSON.parse(localStorage.getItem('tt_auth'))).toMatchObject({
+      uid: 'restored-1',
+      anonymous: false,
+      method: 'restore',
+    });
+  });
+
+  it('does not upgrade a session-only login when an account is restored', async () => {
+    sessionStorage.setItem(
+      'tt_auth',
+      JSON.stringify({ v: 1, uid: 'u1', anonymous: false, method: 'google', at: 1 })
+    );
+    onAuthStateChanged.mockImplementation((auth, cb) => {
+      cb({ uid: 'u1', isAnonymous: false });
+      return vi.fn();
+    });
+
+    await initPage();
+
+    expect(JSON.parse(sessionStorage.getItem('tt_auth')).method).toBe('restore');
+    expect(localStorage.getItem('tt_auth')).toBeNull();
+  });
+
+  it('continues to the destination preserved by the gate', async () => {
+    const mod = await import('../login.js');
+    await initPage();
+    window.history.replaceState({}, '', '/login.html?returnUrl=%2Flibrary.html%3Ffilter%3Dmyth');
+
+    mod.handleAuthSuccess('guest');
+    vi.advanceTimersByTime(1000);
+
+    expect(utils.navigateTo).toHaveBeenCalledWith('/library.html?filter=myth');
+  });
+
+  it('never continues to an off-site returnUrl', async () => {
+    const mod = await import('../login.js');
+    await initPage();
+    window.history.replaceState({}, '', '/login.html?returnUrl=https%3A%2F%2Fevil.example%2Fsteal');
+
+    mod.handleAuthSuccess('guest');
+    vi.advanceTimersByTime(1000);
+
+    expect(utils.navigateTo).toHaveBeenCalledWith('index.html');
+  });
+
+  describe('safeReturnTarget', () => {
+    async function load() {
+      return (await import('../login.js')).safeReturnTarget;
+    }
+
+    it('accepts a site-relative path', async () => {
+      const safeReturnTarget = await load();
+      expect(safeReturnTarget('/library.html?filter=myth')).toBe('/library.html?filter=myth');
+    });
+
+    it('rejects an absolute URL', async () => {
+      const safeReturnTarget = await load();
+      expect(safeReturnTarget('https://evil.example/steal')).toBe('index.html');
+    });
+
+    it('rejects a protocol-relative URL', async () => {
+      const safeReturnTarget = await load();
+      expect(safeReturnTarget('//evil.example/steal')).toBe('index.html');
+    });
+
+    it('rejects backslash variants browsers may normalise', async () => {
+      const safeReturnTarget = await load();
+      expect(safeReturnTarget('/\\evil.example/steal')).toBe('index.html');
+    });
+
+    it('falls back for empty and non-string values', async () => {
+      const safeReturnTarget = await load();
+      expect(safeReturnTarget(null)).toBe('index.html');
+      expect(safeReturnTarget(undefined)).toBe('index.html');
+      expect(safeReturnTarget('   ')).toBe('index.html');
+    });
+
+    it('honours a custom fallback', async () => {
+      const safeReturnTarget = await load();
+      expect(safeReturnTarget('', '/library.html')).toBe('/library.html');
+    });
   });
 });

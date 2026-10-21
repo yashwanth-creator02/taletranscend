@@ -789,7 +789,6 @@ html[data-app-theme='light'],
   /* ── Navigation ──────────────────────────────────────────────────────── */
 
   --nav-height: 64px;
-  --nav-dock-height: 68px; /* Mobile bottom dock  */
   --nav-blur: 32px;
   --nav-transition: var(--transition-base);
 

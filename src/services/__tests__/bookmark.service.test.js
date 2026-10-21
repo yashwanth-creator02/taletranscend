@@ -45,8 +45,9 @@ import {
 describe('bookmark.service', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
-    const { checkRateLimit } = await import('@/utils');
+    const { checkRateLimit, guardOffline } = await import('@/utils');
     vi.mocked(checkRateLimit).mockReturnValue(true);
+    vi.mocked(guardOffline).mockReturnValue(false);
   });
 
   describe('addToBookmarks', () => {
@@ -83,7 +84,19 @@ describe('bookmark.service', () => {
 
     it('returns null if userId or taleId is missing', async () => {
       const { setDoc } = await import('@fb/index.js');
-      await addToBookmarks({ userId: '', taleId: 'tale-456' });
+      const result = await addToBookmarks({ userId: '', taleId: 'tale-456' });
+      expect(result).toBeNull();
+      expect(setDoc).not.toHaveBeenCalled();
+    });
+
+    it('returns null without writing when offline', async () => {
+      const { guardOffline } = await import('@/utils');
+      const { setDoc } = await import('@fb/index.js');
+      vi.mocked(guardOffline).mockReturnValue(true);
+
+      const result = await addToBookmarks({ userId: 'u1', taleId: 't1' });
+
+      expect(result).toBeNull();
       expect(setDoc).not.toHaveBeenCalled();
     });
 
@@ -107,6 +120,18 @@ describe('bookmark.service', () => {
 
       expect(removeBookmarkOffline).toHaveBeenCalledWith('tale-456');
       expect(deleteDoc).toHaveBeenCalled();
+    });
+
+    it('returns null without deleting when offline', async () => {
+      const { guardOffline, removeBookmarkOffline } = await import('@/utils');
+      const { deleteDoc } = await import('@fb/index.js');
+      vi.mocked(guardOffline).mockReturnValue(true);
+
+      const result = await removeFromBookmarks({ userId: 'u1', taleId: 't1' });
+
+      expect(result).toBeNull();
+      expect(deleteDoc).not.toHaveBeenCalled();
+      expect(removeBookmarkOffline).not.toHaveBeenCalled();
     });
   });
 

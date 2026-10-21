@@ -99,12 +99,12 @@ export function updateNavActiveLinks(targetUrl) {
   });
 
   // Mobile dock links
-  document.querySelectorAll('#mobile-dock-container .dock-item').forEach((item) => {
+  document.querySelectorAll('#mobile-dock-container .mobile-dock__item').forEach((item) => {
     const href = item.getAttribute('href') || '';
     const isMatch =
       href.includes(activeFilename) ||
       (activeFilename === 'index.html' && (href === '/' || href === '/index.html'));
-    item.classList.toggle('dock-item--active', isMatch);
+    item.classList.toggle('mobile-dock__item--active', isMatch);
     if (isMatch) item.setAttribute('aria-current', 'page');
     else item.removeAttribute('aria-current');
   });

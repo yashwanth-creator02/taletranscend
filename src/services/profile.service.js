@@ -8,6 +8,7 @@ import { createTale, createDraft } from '@state/index.js';
 import { getTalesByAuthor } from './tale/getTales.js';
 import { safeAsync, createLogger } from '@/utils';
 import { cacheService } from './cache.service.js';
+import { clearAuthMemory } from './auth-memory.storage.js';
 
 const log = createLogger('ProfileService');
 log.debug('Module initialized');
@@ -246,6 +247,7 @@ export async function deleteUserAccount(userId) {
 
   // 2. Clear caches & local storage
   cacheService.invalidateProfile(userId);
+  clearAuthMemory();
   try {
     localStorage.removeItem('taletranscend_auth');
     localStorage.removeItem('taletranscend_settings');

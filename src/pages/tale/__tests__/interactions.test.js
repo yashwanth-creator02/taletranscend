@@ -100,6 +100,9 @@ describe('TaleInteractions', () => {
       <div id="content-echoes" class="tab-content hidden"></div>
       <button id="start-btn"></button>
       <button id="shelf-btn"><i></i><span></span></button>
+      <div id="view-shelf-wrap" class="hidden" data-shelf-link>
+        <a id="view-shelf-btn" href="shelf.html"><i></i><span>View Shelf</span></a>
+      </div>
       <button id="btn-report-missing-tale"></button>
     `;
   });
@@ -357,6 +360,103 @@ describe('TaleInteractions', () => {
       expect(mockService.addToBookmarks).toHaveBeenCalled();
       expect(btn.disabled).toBe(false);
       expect(btn.dataset.shelved).toBe('false');
+      expect(document.getElementById('view-shelf-wrap').classList.contains('hidden')).toBe(true);
+    });
+
+    it('shows the shelf shortcut when the tale is already on the shelf', async () => {
+      const mockService = {
+        isBookmarked: vi.fn(() => Promise.resolve(true)),
+        addToBookmarks: vi.fn(),
+        removeFromBookmarks: vi.fn(),
+      };
+
+      await setupShelfButton('u1', 't1', {}, mockService);
+
+      const shortcut = document.getElementById('view-shelf-wrap');
+      expect(shortcut.classList.contains('hidden')).toBe(false);
+      expect(shortcut.querySelector('a').getAttribute('href')).toBe('shelf.html');
+    });
+
+    it('keeps the shelf shortcut hidden when the tale is not on the shelf', async () => {
+      const mockService = {
+        isBookmarked: vi.fn(() => Promise.resolve(false)),
+        addToBookmarks: vi.fn(),
+        removeFromBookmarks: vi.fn(),
+      };
+
+      await setupShelfButton('u1', 't1', {}, mockService);
+
+      expect(document.getElementById('view-shelf-wrap').classList.contains('hidden')).toBe(true);
+    });
+
+    it('reveals the shelf shortcut when the tale is saved', async () => {
+      const mockService = {
+        isBookmarked: vi.fn(() => Promise.resolve(false)),
+        addToBookmarks: vi.fn(),
+        removeFromBookmarks: vi.fn(),
+      };
+
+      await setupShelfButton('u1', 't1', {}, mockService);
+      await document.getElementById('shelf-btn').click();
+
+      expect(document.getElementById('view-shelf-wrap').classList.contains('hidden')).toBe(false);
+    });
+
+    it('hides the shelf shortcut again when the tale is removed', async () => {
+      const mockService = {
+        isBookmarked: vi.fn(() => Promise.resolve(true)),
+        addToBookmarks: vi.fn(),
+        removeFromBookmarks: vi.fn(),
+      };
+
+      await setupShelfButton('u1', 't1', {}, mockService);
+      await document.getElementById('shelf-btn').click();
+
+      expect(mockService.removeFromBookmarks).toHaveBeenCalled();
+      expect(document.getElementById('view-shelf-wrap').classList.contains('hidden')).toBe(true);
+    });
+
+    it('uses the preloaded shelf state without another read', async () => {
+      const mockService = {
+        isBookmarked: vi.fn(() => Promise.resolve(false)),
+        addToBookmarks: vi.fn(),
+        removeFromBookmarks: vi.fn(),
+      };
+
+      await setupShelfButton('u1', 't1', {}, mockService, true);
+
+      expect(mockService.isBookmarked).not.toHaveBeenCalled();
+      expect(document.getElementById('shelf-btn').dataset.shelved).toBe('true');
+      expect(document.getElementById('view-shelf-wrap').classList.contains('hidden')).toBe(false);
+    });
+
+    it('revalidates the shortcut when restored from bfcache', async () => {
+      const mockService = {
+        isBookmarked: vi.fn().mockResolvedValueOnce(true).mockResolvedValueOnce(false),
+        addToBookmarks: vi.fn(),
+        removeFromBookmarks: vi.fn(),
+      };
+
+      await setupShelfButton('u1', 't1', {}, mockService);
+      expect(document.getElementById('view-shelf-wrap').classList.contains('hidden')).toBe(false);
+
+      const pageshow = new Event('pageshow');
+      Object.defineProperty(pageshow, 'persisted', { value: true });
+      window.dispatchEvent(pageshow);
+
+      await vi.waitFor(() => {
+        expect(document.getElementById('view-shelf-wrap').classList.contains('hidden')).toBe(true);
+      });
+    });
+
+    it('ships the hidden shelf shortcut in the tale view', async () => {
+      const fs = await import('node:fs');
+      const path = await import('node:path');
+      const html = fs.readFileSync(path.resolve(__dirname, '../../../views/tale.html'), 'utf8');
+
+      expect(html).toMatch(/id="view-shelf-wrap"[^>]*class="[^"]*\bhidden\b/);
+      expect(html).toMatch(/id="view-shelf-wrap"[^>]*data-shelf-link/);
+      expect(html).toMatch(/id="view-shelf-btn"[^>]*href="shelf.html"/);
     });
   });
 

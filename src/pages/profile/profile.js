@@ -8,8 +8,7 @@ import '@css/components.css';
 import '@css/pages/profile.css';
 
 import { initGlobalPaletteShortcut } from '@ui/components/nav/nav.global.js';
-import { initAuth, auth, upgradeAnonymousToGoogle } from '@fb/index.js';
-import { signOut } from 'firebase/auth';
+import { initAuth, auth, upgradeAnonymousToGoogle, signOutAndForget } from '@fb/index.js';
 import { navigateTo, initPageReveal, readyReveal, setupAuthTimeout, createLogger } from '@/utils';
 import { initIcons } from '@ui/icons.js';
 import { showToast } from '@ui/components/toast.js';
@@ -67,6 +66,58 @@ const contribTimeout = setTimeout(() => {
 }, 12000);
 
 /* ─────────────────────────────────────────────
+   Back Navigation
+   ───────────────────────────────────────────── */
+
+/**
+ * Returns the visitor to the page they navigated to the profile from.
+ *
+ * App-shell pages can be reached through the router's soft navigation, which
+ * pushes a `{ url }` history state while leaving `document.referrer` stale —
+ * so either a same-origin referrer or a soft-navigation state entry counts as
+ * "came from within the app". Any other case (direct visit, external
+ * referrer, no history) falls back to the library hub, matching the settings
+ * page behaviour.
+ */
+export function handleProfileBack() {
+  if (typeof window === 'undefined') return;
+
+  let sameOriginReferrer = false;
+  if (document.referrer) {
+    try {
+      sameOriginReferrer =
+        new URL(document.referrer, window.location.origin).origin === window.location.origin;
+    } catch {
+      sameOriginReferrer = false;
+    }
+  }
+
+  const softNavigated = Boolean(window.history?.state?.url);
+
+  if (window.history?.length > 1 && (sameOriginReferrer || softNavigated)) {
+    window.history.back();
+    return;
+  }
+
+  window.location.href = '/library.html';
+}
+
+/** Element that already received the back-button listener (guards re-inits). */
+let _profileBackBtn = null;
+
+/**
+ * Binds the profile back button exactly once per DOM node. Called from
+ * initProfilePage() so the binding survives soft-navigation re-mounts
+ * without double-firing on the hard-load auth re-init.
+ */
+export function initProfileBackButton() {
+  const backBtn = document.getElementById('profile-back-btn');
+  if (!backBtn || backBtn === _profileBackBtn) return;
+  _profileBackBtn = backBtn;
+  backBtn.addEventListener('click', () => handleProfileBack());
+}
+
+/* ─────────────────────────────────────────────
    Auth + Data
    ───────────────────────────────────────────── */
 
@@ -75,6 +126,7 @@ import { appState } from '@state/index.js';
 export async function initProfilePage(currentUser = auth?.currentUser) {
   initProfileLayout();
   initProfileUI();
+  initProfileBackButton();
   renderAchievements();
 
   // Profile form submit
@@ -328,7 +380,7 @@ export async function initProfilePage(currentUser = auth?.currentUser) {
     log.info('Sign-out requested', { source: 'btn-sign-out' });
     try {
       stopProfileSync();
-      await signOut(auth);
+      await signOutAndForget();
       log.info('Sign-out successful');
       showToast('Signed out successfully.', 'success');
       setTimeout(() => {

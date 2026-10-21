@@ -18,7 +18,7 @@ vi.mock('../nav.utils.js', () => ({
 
 vi.mock('@fb/index.js', () => ({
   auth: {},
-  signOut: vi.fn(),
+  signOutAndForget: vi.fn(() => Promise.resolve()),
 }));
 
 describe('Nav Command Palette', () => {
@@ -71,6 +71,25 @@ describe('Nav Command Palette', () => {
     it('shows empty state if no match', () => {
       renderCommandList('xyz123');
       expect(document.getElementById('nav-command-list').textContent).toContain('No results');
+    });
+
+    it('wraps matched query text in a highlight element', () => {
+      renderCommandList('libr');
+      const mark = document.querySelector('#nav-command-list .command-item__match');
+      expect(mark).not.toBeNull();
+      expect(mark.textContent.toLowerCase()).toBe('libr');
+    });
+
+    it('renders no highlight markup when the query is empty', () => {
+      renderCommandList('');
+      expect(document.querySelector('#nav-command-list .command-item__match')).toBeNull();
+    });
+
+    it('escapes raw query text instead of injecting markup in the empty state', () => {
+      renderCommandList('<img src=x onerror=alert(1)>');
+      const list = document.getElementById('nav-command-list');
+      expect(list.querySelector('img')).toBeNull();
+      expect(list.textContent).toContain('<img');
     });
   });
 

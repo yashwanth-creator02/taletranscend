@@ -513,16 +513,31 @@
           <div
             class="shrink-0 flex justify-center w-full lg:w-auto self-center order-first lg:order-last"
           >
-            <div
-              class="glass-card p-2 sm:p-2.5 rounded-3xl shine-container group w-44 sm:w-52 lg:w-56 xl:w-64 aspect-3/4 max-h-[290px] sm:max-h-[330px] xl:max-h-[380px] overflow-hidden shadow-2xl border border-white/10 relative"
-            >
-              <img
-                id="display-cover"
-                class="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-700 shadow-md"
-                src=""
-                alt="Cover"
-              />
-              <div class="shine-layer"></div>
+            <div class="flex flex-col items-stretch gap-2.5 w-44 sm:w-52 lg:w-56 xl:w-64">
+              <div
+                class="glass-card p-2 sm:p-2.5 rounded-3xl shine-container group w-full aspect-3/4 max-h-[290px] sm:max-h-[330px] xl:max-h-[380px] overflow-hidden shadow-2xl border border-white/10 relative"
+              >
+                <img
+                  id="display-cover"
+                  class="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-700 shadow-md"
+                  src=""
+                  alt="Cover"
+                />
+                <div class="shine-layer"></div>
+              </div>
+
+              <!-- Shelf shortcut, attached to the cover. Shown only while this
+                   chronicle is on the visitor's shelf. -->
+              <div id="view-shelf-wrap" class="hidden" data-shelf-link>
+                <a
+                  id="view-shelf-btn"
+                  href="shelf.html"
+                  class="btn btn-secondary w-full py-2.5 px-3 rounded-xl text-xs font-semibold"
+                >
+                  <i data-lucide="library" class="w-3.5 h-3.5"></i>
+                  <span>View Shelf</span>
+                </a>
+              </div>
             </div>
           </div>
         </div>

@@ -19,25 +19,30 @@ import {
   refs,
 } from '@fb/index.js';
 import { initAppTheme } from '@config/theme.config.js';
-import { navigateTo, initPageReveal, readyReveal, createLogger, markUserVisited } from '@/utils';
+import {
+  navigateTo,
+  initPageReveal,
+  readyReveal,
+  createLogger,
+  markUserVisited,
+  acknowledgeGate,
+} from '@/utils';
+import {
+  clearAuthMemory,
+  isRememberedDurably,
+  rememberAuth,
+} from '@services/auth-memory.storage.js';
 import { initIcons } from '@ui/components/icons.js';
 import { mountReadingScene } from '@ui/components/reading-scene.js';
 import { showToast } from '@ui/components/toast.js';
 
 const log = createLogger('Login');
 
-// Current auth mode: 'signin' | 'signup'
 let authMode = 'signin';
 
-// Initialize theme and page reveal animation
 initAppTheme();
 initPageReveal();
 
-/**
- * Toggles loading state for a button.
- * @param {string} buttonId - The ID of the button.
- * @param {boolean} isLoading - Whether to show loading state.
- */
 export function toggleButtonLoading(buttonId, isLoading) {
   const button = document.getElementById(buttonId);
   const loadingSpan = document.getElementById(`${buttonId}-loading`);
@@ -58,9 +63,6 @@ export function toggleButtonLoading(buttonId, isLoading) {
   }
 }
 
-/**
- * Handles the redirection logic after a successful login.
- */
 export function handleAuthSuccess() {
   markUserVisited();
   showToast('Welcome to the Living Archive.', 'success');
@@ -71,9 +73,6 @@ export function handleAuthSuccess() {
   }, 900);
 }
 
-/**
- * Adds a subtle glow effect to the login card on success.
- */
 export function addSuccessGlow() {
   const card = document.querySelector('.login-card');
   if (card) {
@@ -87,9 +86,19 @@ export function addSuccessGlow() {
   }
 }
 
-/**
- * Sets up tab switching between Email and Phone authentication.
- */
+function _isRememberChecked() {
+  const checkbox = document.getElementById('input-remember');
+  return checkbox ? checkbox.checked : true;
+}
+
+async function setRememberPreference(durable) {
+  if (durable) {
+    rememberAuth({ uid: auth.currentUser?.uid, anonymous: auth.currentUser?.isAnonymous ?? false, method: 'login' }, { durable: true });
+  } else {
+    rememberAuth({ uid: auth.currentUser?.uid, anonymous: auth.currentUser?.isAnonymous ?? false, method: 'login' }, { durable: false });
+  }
+}
+
 function _setupAuthTabs() {
   const tabEmail = document.getElementById('tab-btn-email');
   const tabPhone = document.getElementById('tab-btn-phone');
@@ -123,9 +132,6 @@ function _setupAuthTabs() {
   });
 }
 
-/**
- * Sets up password show/hide visibility toggle.
- */
 function _setupPasswordToggle() {
   const toggleBtn = document.getElementById('btn-toggle-password');
   const passwordInput = document.getElementById('input-password');
@@ -145,9 +151,6 @@ function _setupPasswordToggle() {
   });
 }
 
-/**
- * Toggles between Sign In and Sign Up (Create Account) modes.
- */
 function _setupAuthModeToggle() {
   const toggleBtn = document.getElementById('btn-toggle-auth-mode');
   const switchLabel = document.getElementById('auth-switch-label');
@@ -185,9 +188,6 @@ function _setupAuthModeToggle() {
   });
 }
 
-/**
- * Sets up Email & Phone form submissions with Firebase Authentication.
- */
 function _setupFormSubmissions() {
   const emailForm = document.getElementById('email-login-form');
   emailForm?.addEventListener('submit', async (e) => {
@@ -209,6 +209,7 @@ function _setupFormSubmissions() {
     toggleButtonLoading('btn-email-submit', true);
 
     try {
+      await setRememberPreference(_isRememberChecked());
       if (authMode === 'signup') {
         const user = await registerWithEmail(email, password);
         try {
@@ -308,6 +309,7 @@ function _setupSocialLogins() {
     log.info('Google login initiated');
     toggleButtonLoading('btn-google-login', true);
     try {
+      await setRememberPreference(_isRememberChecked());
       await signInWithGoogle();
       log.info('Google login successful');
       addSuccessGlow();
@@ -326,6 +328,7 @@ function _setupSocialLogins() {
     log.info('Guest login initiated');
     toggleButtonLoading('btn-guest-login', true);
     try {
+      await setRememberPreference(_isRememberChecked());
       await signInAnonymously(auth);
       log.info('Guest login successful');
       addSuccessGlow();
@@ -358,6 +361,7 @@ export function initLoginPage() {
   initIcons();
   readyReveal();
 
+  acknowledgeGate();
   _mountReadingScene();
   _setupAuthTabs();
   _setupPasswordToggle();
@@ -368,7 +372,11 @@ export function initLoginPage() {
 
   const unsubscribe = onAuthStateChanged(auth, (user) => {
     if (user && !user.isAnonymous) {
-      log.info('User already authenticated, redirecting to profile');
+      log.info('User already authenticated, continuing to destination');
+      rememberAuth(
+        { uid: user.uid, anonymous: false, method: 'restore' },
+        { durable: isRememberedDurably() }
+      );
       Promise.resolve().then(() => {
         if (unsubscribe) unsubscribe();
       });

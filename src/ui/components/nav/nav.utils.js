@@ -46,7 +46,7 @@ export function getAvatarSeed(user) {
  * @returns {{
  *   nav: HTMLElement | null,
  *   navUser: HTMLElement | null,
- *   avatarButton: HTMLButtonElement | null,
+ *   menuButton: HTMLButtonElement | null,
  *   dropdown: HTMLElement | null,
  *   commandButton: HTMLButtonElement | null,
  *   commandButtonMobile: HTMLButtonElement | null,
@@ -60,7 +60,7 @@ export function getNavElements() {
   return {
     nav: document.getElementById('app-nav'),
     navUser: document.getElementById('nav-user'),
-    avatarButton: document.getElementById('avatar-btn'),
+    menuButton: document.getElementById('nav-menu-btn'),
     dropdown: document.getElementById('user-dropdown'),
     commandButton: document.getElementById('nav-command-button'),
     commandButtonMobile: document.getElementById('nav-command-button-mobile'),

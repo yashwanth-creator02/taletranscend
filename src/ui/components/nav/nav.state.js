@@ -14,6 +14,7 @@
  * @property {number}                              commandFocusedIndex - Index of the keyboard-focused command item (-1 = none).
  * @property {Array<Object>}                       commandFilteredItems - Current filtered command item list (set by renderCommandList).
  * @property {boolean}                             listenersAttached - Whether global document listeners are active.
+ * @property {number | null}                       dropdownHideTimer - Pending setTimeout id for the account dropdown's exit animation.
  * @property {(() => void) | null}                 scrollCleanup     - Cleanup function returned by initScrollBehavior.
  * @property {(() => void) | null}                 unsubscribeAuth   - Firebase onAuthStateChanged unsubscribe function.
  */
@@ -25,6 +26,7 @@ export const navState = {
   commandFocusedIndex: -1,
   commandFilteredItems: [],
   listenersAttached: false,
+  dropdownHideTimer: null,
   scrollCleanup: null,
   unsubscribeAuth: null,
 };

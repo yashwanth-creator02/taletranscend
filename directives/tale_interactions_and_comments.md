@@ -55,6 +55,12 @@ Define the standard operating procedures, data structures, and UI behaviors for 
   - Optimistic UI update: Toggle resonance state and counter locally immediately upon click. Revert on failure with user toast.
 - **Shelf Management**:
   - Add or remove tale from user shelf/reading list with optimistic feedback.
+  - **Cover Shelf Shortcut**: the hero cover column carries a secondary "View Shelf" link (`#view-shelf-btn`, `href="shelf.html"`) directly beneath the cover art, stretched to the cover width.
+    - Visibility is controlled through `[data-shelf-link]` (`#view-shelf-wrap`) toggling the `hidden` class: shown only when the tale is confirmed on the visitor's shelf (already saved on load, or a successful add), hidden again after a successful removal.
+    - The bookmark state is preloaded with tale hydration and passed as the fifth argument to `setupShelfButton`, so the shortcut renders before the first page reveal. Keep this preload when refactoring the page bootstrap; do not reintroduce a post-reveal read.
+    - Offline add/remove resolves `null` from the bookmark service. Treat it as failure: never reveal or hide the shortcut on an unconfirmed write.
+    - On `pageshow` with `persisted: true` (bfcache restore), `setupShelfButton` revalidates `isBookmarked` and refreshes both the shelf buttons and the shortcut.
+    - The link's accessible name is its visible text ("View Shelf"). Do not add an aria-label that differs from it.
 - **Share Action**:
   - If `navigator.share` is supported by the browser, invoke native sharing with title and URL.
   - Otherwise, copy URL to clipboard and show confirmation toast.

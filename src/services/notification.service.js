@@ -20,8 +20,38 @@ import { safeAsync, createLogger } from '@/utils';
 const log = createLogger('NotificationService');
 log.debug('Notification service initialized');
 
+/** Upper bound for the count subscriptions and pinned window. */
+const NOTIFICATION_QUERY_LIMIT = 50;
+
 /**
- * Fetches notifications for a user, sorted newest first.
+ * Builds the single-field pinned query (no composite index required).
+ *
+ * @param {string} userId
+ * @param {number} maxCount
+ */
+function pinnedNotificationsQuery(userId, maxCount) {
+  return query(refs.notifications(userId), where('isPinned', '==', true), limit(maxCount));
+}
+
+/**
+ * Sorts notifications newest-first using their createdAt timestamp.
+ *
+ * @param {Array<import('@state/schemas/notification.schema.js').Notification>} items
+ * @returns {Array<import('@state/schemas/notification.schema.js').Notification>}
+ */
+function sortByNewestFirst(items) {
+  return [...items].sort((a, b) => {
+    const aMs = a.createdAt?.toMillis?.() ?? 0;
+    const bMs = b.createdAt?.toMillis?.() ?? 0;
+    return bMs - aMs;
+  });
+}
+
+/**
+ * Fetches notifications for a user, pinned notices first, then newest first.
+ *
+ * Pinned notices are queried separately so an old pinned notice stays visible
+ * even once it has scrolled past the recent window.
  *
  * @param {string} userId
  * @param {number} [maxCount=20]
@@ -32,9 +62,26 @@ export async function getUserNotifications(userId, maxCount = 20) {
 
   return safeAsync(
     (async () => {
-      const q = query(refs.notifications(userId), orderBy('createdAt', 'desc'), limit(maxCount));
-      const snap = await getDocs(q);
-      return snap.docs.map((doc) => createNotification(doc.id, doc.data()));
+      const recentQuery = query(
+        refs.notifications(userId),
+        orderBy('createdAt', 'desc'),
+        limit(maxCount)
+      );
+      const pinnedQuery = pinnedNotificationsQuery(userId, maxCount);
+      const [recentSnap, pinnedSnap] = await Promise.all([
+        getDocs(recentQuery),
+        getDocs(pinnedQuery),
+      ]);
+
+      const pinned = sortByNewestFirst(
+        pinnedSnap.docs.map((doc) => createNotification(doc.id, doc.data()))
+      );
+      const recent = sortByNewestFirst(
+        recentSnap.docs.map((doc) => createNotification(doc.id, doc.data()))
+      );
+
+      const pinnedIds = new Set(pinned.map((item) => item.id));
+      return [...pinned, ...recent.filter((item) => !pinnedIds.has(item.id))];
     })(),
     {
       fallback: [],
@@ -54,7 +101,11 @@ export function subscribeUnreadNotifications(userId, onUpdate) {
   if (!userId || typeof onUpdate !== 'function') return () => {};
 
   try {
-    const q = query(refs.notifications(userId), where('isRead', '==', false), limit(50));
+    const q = query(
+      refs.notifications(userId),
+      where('isRead', '==', false),
+      limit(NOTIFICATION_QUERY_LIMIT)
+    );
     return onSnapshot(
       q,
       (snap) => {
@@ -71,6 +122,58 @@ export function subscribeUnreadNotifications(userId, onUpdate) {
 }
 
 /**
+ * Subscribes to real-time changes in the pinned notifications count.
+ *
+ * @param {string} userId
+ * @param {(count: number) => void} onUpdate
+ * @returns {() => void} Unsubscribe function
+ */
+export function subscribePinnedNotificationCount(userId, onUpdate) {
+  if (!userId || typeof onUpdate !== 'function') return () => {};
+
+  try {
+    const q = pinnedNotificationsQuery(userId, NOTIFICATION_QUERY_LIMIT);
+    return onSnapshot(
+      q,
+      (snap) => {
+        onUpdate(snap ? snap.size : 0);
+      },
+      (error) => {
+        log.error('Error in pinned notifications snapshot listener:', error);
+      }
+    );
+  } catch (err) {
+    log.error('Failed to attach pinned notifications listener:', err);
+    return () => {};
+  }
+}
+
+/**
+ * Pins or unpins a single notification for the user.
+ *
+ * @param {string} userId
+ * @param {string} notificationId
+ * @param {boolean} isPinned
+ * @returns {Promise<boolean>}
+ */
+export async function setNotificationPinned(userId, notificationId, isPinned) {
+  if (!userId || !notificationId) return false;
+
+  return safeAsync(
+    (async () => {
+      await updateDoc(refs.notification(userId, notificationId), {
+        isPinned: Boolean(isPinned),
+      });
+      return true;
+    })(),
+    {
+      fallback: false,
+      logContext: 'services.notification.setNotificationPinned',
+    }
+  );
+}
+
+/**
  * Marks all unread notifications as read.
  *
  * @param {string} userId
@@ -81,7 +184,11 @@ export async function markAllNotificationsAsRead(userId) {
 
   return safeAsync(
     (async () => {
-      const q = query(refs.notifications(userId), where('isRead', '==', false), limit(50));
+      const q = query(
+        refs.notifications(userId),
+        where('isRead', '==', false),
+        limit(NOTIFICATION_QUERY_LIMIT)
+      );
       const snap = await getDocs(q);
       const updates = snap.docs.map((docSnap) =>
         updateDoc(refs.notification(userId, docSnap.id), { isRead: true })
