@@ -190,8 +190,13 @@ export async function markAllNotificationsAsRead(userId) {
         limit(NOTIFICATION_QUERY_LIMIT)
       );
       const snap = await getDocs(q);
+      // firestore.rules allows an owner to change only isRead + readAt; write
+      // both so the rule's allowlist and the stored data stay aligned.
       const updates = snap.docs.map((docSnap) =>
-        updateDoc(refs.notification(userId, docSnap.id), { isRead: true })
+        updateDoc(refs.notification(userId, docSnap.id), {
+          isRead: true,
+          readAt: serverTimestamp(),
+        })
       );
       await Promise.all(updates);
       return true;
@@ -215,8 +220,14 @@ export async function createNotificationForUser(userId, notificationData) {
 
   return safeAsync(
     (async () => {
+      // Normalize the legacy `message` / `link` spellings to the canonical
+      // `body` / `actionUrl` field names at write time, so newly stored
+      // documents never need the read-side fallback in createNotification.
+      const { message, link, ...rest } = notificationData;
       const docRef = await addDoc(refs.notifications(userId), {
-        ...notificationData,
+        ...rest,
+        body: notificationData.body ?? message ?? '',
+        actionUrl: notificationData.actionUrl ?? link ?? '',
         isRead: false,
         createdAt: serverTimestamp(),
       });

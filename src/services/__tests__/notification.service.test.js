@@ -7,6 +7,8 @@ vi.mock('@fb/index.js', () => ({
   },
   getDocs: vi.fn(),
   updateDoc: vi.fn(() => Promise.resolve()),
+  addDoc: vi.fn(() => Promise.resolve({ id: 'n1' })),
+  serverTimestamp: vi.fn(() => 'mock-timestamp'),
   query: vi.fn((...args) => ({ args })),
   orderBy: vi.fn((field, dir) => ({ field, dir })),
   limit: vi.fn((n) => ({ limit: n })),
@@ -176,6 +178,12 @@ describe('notification.service', () => {
       const res = await markAllNotificationsAsRead('u1');
       expect(res).toBe(true);
       expect(updateDoc).toHaveBeenCalledTimes(2);
+      // firestore.rules allows an owner to change only isRead + readAt, so the
+      // update must carry both or the rule's allowlist rejects the write.
+      expect(updateDoc).toHaveBeenCalledWith(expect.anything(), {
+        isRead: true,
+        readAt: 'mock-timestamp',
+      });
     });
   });
 });

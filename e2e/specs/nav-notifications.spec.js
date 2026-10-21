@@ -20,7 +20,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 test.describe.configure({ timeout: 60000 });
 
 test.beforeEach(async ({ page }) => {
-  await page.route(/(googleapis|firebaseio)\.com/, (route) => route.abort());
+  await page.route(/(googleapis|firebaseio)\.com|127\.0\.0\.1:(8080|9099)/, (route) =>
+    route.abort()
+  );
   await page.addInitScript(() => localStorage.setItem('tt_has_visited', 'true'));
 });
 

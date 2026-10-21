@@ -168,8 +168,18 @@ function bindEditorEvents() {
   // Cloud save buttons
   const saveHandler = async () => {
     syncMetadataFromDom();
-    await saveToCloud();
-    updateChecklist();
+    try {
+      await saveToCloud();
+      updateChecklist();
+    } catch (err) {
+      // saveToCloud() rejects on permission-denied — most commonly the 5s
+      // per-document cooldown in firestore.rules when Save is pressed twice in
+      // quick succession — and on network failure. Without this catch that
+      // rejection vanished: no toast, state.isDirty stayed true, and the
+      // beforeunload prompt kept firing while the author believed it had saved.
+      log.error('Cloud save failed', err);
+      showToast('Could not save to the archives. Please try again in a moment.', 'error');
+    }
   };
 
   document.getElementById('save-draft-btn')?.addEventListener('click', saveHandler);

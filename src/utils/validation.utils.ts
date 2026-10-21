@@ -16,7 +16,7 @@ export const CommentSchema = z.object({
   parentId: z.string().nullable().optional(),
   replyToId: z.string().nullable().optional(),
   replyToAuthorName: z.string().nullable().optional(),
-  depth: z.number().min(0).max(5, 'Echo nesting is too deep'),
+  depth: z.number().min(0).max(3, 'Echo nesting is too deep'),
 });
 
 /* ─────────────────────────────────────────────
@@ -42,6 +42,10 @@ export const DraftMetadataSchema = z.object({
     .default('ongoing'),
   chapterCount: z.number().min(0),
   wordCount: z.number().min(0),
+  // Required by firestore.rules on draft create (must equal the owner's uid).
+  authorId: z.string().min(1, 'Author ID is required'),
+  // Required by firestore.rules on draft create AND update.
+  status: z.enum(['draft', 'submitted', 'published', 'rejected']).optional().default('draft'),
 });
 
 export const DraftChapterSchema = z.object({
@@ -49,6 +53,8 @@ export const DraftChapterSchema = z.object({
   title: z.string().min(1, 'Chapter title is required').max(200),
   content: z.string().max(100000, 'Chapter is too long (max 100k chars)'),
   wordCount: z.number().min(0),
+  // Required by firestore.rules on draft chapter create AND update.
+  index: z.number().int().min(0).max(1000),
 });
 
 export const TaleSchema = z.object({
@@ -76,7 +82,9 @@ export const TaleSchema = z.object({
   commentCount: z.number().optional().default(0),
   reactionCount: z.number().optional().default(0),
   bookmarkCount: z.number().optional().default(0),
-  status: z.enum(['draft', 'pending', 'published', 'rejected']).optional().default('draft'),
+  // 'submitted' (not 'pending') — this enum must match the deployed
+  // firestore.rules check, which only accepts draft|submitted|published|rejected.
+  status: z.enum(['draft', 'submitted', 'published', 'rejected']).optional().default('draft'),
   publicationStatus: z
     .enum(['ongoing', 'completed', 'hiatus', 'cancelled'])
     .optional()

@@ -33,6 +33,16 @@ export const state = {
   worldSetting: '',
   authorNotes: '',
 
+  // Moderation state of the draft document. Must be written on every save:
+  // firestore.rules requires `status` on both draft create and update.
+  status: 'draft',
+
+  // Indices of draft chapter documents confirmed to exist on disk. Seeded by
+  // loadDraft() and extended by _saveChapter() after each successful write.
+  // _saveChapter() consults this to decide whether `createdAt` is required
+  // (create rule) or must be preserved (update rule).
+  savedChapterIndices: new Set(),
+
   // ── Chapters ──────────────────────────────────────────────────────
   // Array of { title: string, content: string }
   chapters: [],

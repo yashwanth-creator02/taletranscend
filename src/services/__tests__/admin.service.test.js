@@ -83,7 +83,7 @@ describe('admin.service', () => {
       expect(result).toBe(true);
     });
 
-    it('returns true when Firestore user doc has role admin', async () => {
+    it('returns FALSE when only the Firestore user doc has role admin (claims are the only authority)', async () => {
       const { getDoc } = await import('@fb/index.js');
       const mockUser = {
         uid: 'user-uid',
@@ -95,10 +95,14 @@ describe('admin.service', () => {
       });
 
       const result = await isCurrentUserAdmin(mockUser);
-      expect(result).toBe(true);
+      expect(result).toBe(false);
+      // The profile document must not even be consulted: firestore.rules'
+      // isAdmin() reads custom claims only, so a role-based grant would let a
+      // user into the admin UI while every write is still denied.
+      expect(getDoc).not.toHaveBeenCalled();
     });
 
-    it('returns false when neither claim nor Firestore role is admin', async () => {
+    it('returns false when the claim is absent', async () => {
       const { getDoc } = await import('@fb/index.js');
       const mockUser = {
         uid: 'user-uid',

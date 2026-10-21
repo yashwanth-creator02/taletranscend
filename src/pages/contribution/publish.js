@@ -5,10 +5,15 @@
 //   1. Validate — title, at least one chapter with content
 //   2. Sync metadata from DOM into state
 //   3. Save all chapters to draft subcollection
-//   4. Write tale document to tales collection with status='pending'
-//   5. Auto-approve — updates status to 'published' (moderation hook ready)
-//   6. Write each chapter to tales/{id}/chapters subcollection via refs
-//   7. Update draft document with publishedTaleId reference
+//   4. Write the tale document to the tales collection, already 'published'
+//      (auto-approval is folded into the create payload — a follow-up update
+//      can never pass respectsCooldown(); see the Step 3 comment)
+//   5. Write each chapter to tales/{id}/chapters subcollection via refs
+//   6. Record the immutable publish version snapshot
+//   7. Best-effort: point the draft document at the published tale
+//
+// Every write below must satisfy the field contract in firestore.rules for the
+// path it targets. That contract is asserted by firestore/tests/rules.emulator.test.ts.
 //
 // Single tales collection replaces the old community_tales / pending_tales split.
 // The status field on the tale document handles the moderation pipeline.
@@ -313,6 +318,10 @@ async function _doPublish(userId, authorStatus = null) {
             title: chapter.title?.trim() || `Fragment ${index + 1}`,
             content: chapter.content || '',
             wordCount: chapterWordCount,
+            // Public chapter rules require an INTEGER index on both create and
+            // update (firestore.rules isValidInt('index', 0, 1000)). Omitting it
+            // made every published-chapter write a silent permission-denied.
+            index,
           };
 
           const chapterValidated = validateData(DraftChapterSchema, chapterPayload);
@@ -349,7 +358,19 @@ async function _doPublish(userId, authorStatus = null) {
   const id = state.draftId !== 'new' ? state.draftId : _generateId();
   const taleRef = refs.tale(id);
 
-  /* ── Step 3: Write tale with status=pending ─────────────── */
+  /* ── Step 3: Write the tale, already published ──────────────
+   * The tale is created as 'published' rather than created as 'submitted' and
+   * then flipped by a follow-up updateDoc. The two-step version could not work:
+   *   - `allow update` on tales requires respectsCooldown() (5s since
+   *     `updatedAt`), which can never hold for a document created microseconds
+   *     earlier, so the flip was always denied.
+   *   - getTales.js only ever queries `status == 'published'` ordered by
+   *     `publishedAt`, so a tale left at 'submitted' with publishedAt: null is
+   *     invisible to the library and the reader.
+   * safeAsync() swallowed the denial, so the author saw "published" for a tale
+   * nobody could find. Auto-approval is therefore part of the create payload;
+   * a real moderation pipeline would change `status` here instead.
+   */
   const description = state.synopsis?.trim() || _extractDescription(state.chapters);
   const wordCount = state.chapters.reduce((acc, ch) => acc + countWords(ch.content), 0);
   const estimatedReadMins = estimateReadMins(wordCount);
@@ -384,7 +405,10 @@ async function _doPublish(userId, authorStatus = null) {
     commentCount: 0,
     reactionCount: 0,
     bookmarkCount: 0,
-    status: 'pending',
+    // 'published', not 'submitted'/'pending': firestore.rules accepts
+    // draft|submitted|published|rejected, and only 'published' is discoverable
+    // via getTales.js. See the Step 3 comment above.
+    status: 'published',
     isFeatured: false,
     isEditorsPick: false,
     searchKeywords: _buildSearchKeywords(state.title, state.tags),
@@ -399,11 +423,12 @@ async function _doPublish(userId, authorStatus = null) {
     setDoc(taleRef, {
       ...taleValidated.data,
       submittedAt: serverTimestamp(),
-      reviewedAt: null,
-      reviewedBy: null,
+      // Auto-approved in the create payload — see the Step 3 comment.
+      reviewedAt: serverTimestamp(),
+      reviewedBy: 'auto-approve',
       rejectionReason: null,
       moderationNotes: null,
-      publishedAt: null,
+      publishedAt: serverTimestamp(),
       lastChapterAddedAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
       createdAt: serverTimestamp(),
@@ -411,18 +436,7 @@ async function _doPublish(userId, authorStatus = null) {
     { logContext: 'pages.contribution.publish.writeTaleDoc' }
   );
 
-  /* ── Step 4: Auto-approve (moderation hook) ─────────────── */
-  await safeAsync(
-    updateDoc(taleRef, {
-      status: 'published',
-      publishedAt: serverTimestamp(),
-      reviewedAt: serverTimestamp(),
-      reviewedBy: 'auto-approve',
-    }),
-    { logContext: 'pages.contribution.publish.autoApprove' }
-  );
-
-  /* ── Step 5: Write chapters subcollection ───────────────── */
+  /* ── Step 4: Write chapters subcollection ───────────────── */
   await safeAsync(
     Promise.all(
       state.chapters.map(async (chapter, index) => {
@@ -434,6 +448,9 @@ async function _doPublish(userId, authorStatus = null) {
           title: chapter.title?.trim() || `Fragment ${index + 1}`,
           content: chapter.content || '',
           wordCount: chapterWordCount,
+          // Public chapter rules require an INTEGER index on both create and
+          // update (firestore.rules isValidInt('index', 0, 1000)).
+          index,
         };
 
         const chapterValidated = validateData(DraftChapterSchema, chapterPayload);
@@ -444,6 +461,9 @@ async function _doPublish(userId, authorStatus = null) {
         await setDoc(refs.chapter(id, index), {
           ...chapterValidated.data,
           estimatedReadMins: chapterReadMins,
+          // Public chapter rules require BOTH on create:
+          //   isValidTimestamp('createdAt') and isValidInt('estimatedReadMins').
+          createdAt: serverTimestamp(),
           publishedAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
         });
@@ -452,7 +472,7 @@ async function _doPublish(userId, authorStatus = null) {
     { logContext: 'pages.contribution.publish.writeChapters' }
   );
 
-  /* ── Step 6: Record immutable publish version snapshot ──────── */
+  /* ── Step 5: Record immutable publish version snapshot ──────── */
   const versionId = `v_${Date.now()}`;
   await safeAsync(
     setDoc(refs.taleVersion(id, versionId), {

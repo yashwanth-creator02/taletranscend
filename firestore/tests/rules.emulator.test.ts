@@ -14,7 +14,7 @@
 // runtime (the emulator itself is a JVM process — install a JRE if
 // `npm run test:rules` fails with a Java-related error).
 
-import { describe, it, beforeAll, afterAll, beforeEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import {
   initializeTestEnvironment,
   assertSucceeds,
@@ -222,6 +222,161 @@ describe('users/{userId}/progress/{taleId} — subcollection model (Phase 2 sche
   });
 });
 
+describe('users/{userId}/drafts/{draftId} — authoring write contract (P0 regression)', () => {
+  const uid = 'author-1';
+
+  /** Seeds a draft bypassing rules (admin SDK context). */
+  async function seedDraft(draftId: string) {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), `${ROOT}/users/${uid}/drafts/${draftId}`), {
+        authorId: uid,
+        title: 'A Draft',
+        status: 'draft',
+        createdAt: new Date(),
+        updatedAt: new Date(Date.now() - 10_000),
+      });
+    });
+  }
+
+  it('the owner CAN create a draft with the shape cloud.js sends', async () => {
+    const ctx = testEnv.authenticatedContext(uid);
+    await assertSucceeds(
+      setDoc(doc(ctx.firestore(), `${ROOT}/users/${uid}/drafts/draft-1`), {
+        authorId: uid,
+        title: 'Legend of the Roots',
+        synopsis: '',
+        status: 'draft',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      })
+    );
+  });
+
+  it('a draft WITHOUT authorId is denied (the bug this suite now guards)', async () => {
+    const ctx = testEnv.authenticatedContext(uid);
+    await assertFails(
+      setDoc(doc(ctx.firestore(), `${ROOT}/users/${uid}/drafts/draft-1`), {
+        title: 'Legend of the Roots',
+        status: 'draft',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      })
+    );
+  });
+
+  it('a draft WITHOUT status is denied', async () => {
+    const ctx = testEnv.authenticatedContext(uid);
+    await assertFails(
+      setDoc(doc(ctx.firestore(), `${ROOT}/users/${uid}/drafts/draft-1`), {
+        authorId: uid,
+        title: 'Legend of the Roots',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      })
+    );
+  });
+
+  it('the owner CAN update their own draft after the cooldown', async () => {
+    await seedDraft('draft-1');
+    const ctx = testEnv.authenticatedContext(uid);
+    await assertSucceeds(
+      updateDoc(doc(ctx.firestore(), `${ROOT}/users/${uid}/drafts/draft-1`), {
+        authorId: uid,
+        title: 'A Revised Draft',
+        status: 'draft',
+        updatedAt: serverTimestamp(),
+      })
+    );
+  });
+
+  it('the owner CANNOT reassign a draft to another author', async () => {
+    await seedDraft('draft-1');
+    const ctx = testEnv.authenticatedContext(uid);
+    await assertFails(
+      updateDoc(doc(ctx.firestore(), `${ROOT}/users/${uid}/drafts/draft-1`), {
+        authorId: 'author-2',
+        updatedAt: serverTimestamp(),
+      })
+    );
+  });
+
+  it('the owner CAN still update a legacy draft that has no authorId', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), `${ROOT}/users/${uid}/drafts/legacy-1`), {
+        title: 'Legacy Draft',
+        status: 'draft',
+        createdAt: new Date(),
+        updatedAt: new Date(Date.now() - 10_000),
+      });
+    });
+    const ctx = testEnv.authenticatedContext(uid);
+    await assertSucceeds(
+      updateDoc(doc(ctx.firestore(), `${ROOT}/users/${uid}/drafts/legacy-1`), {
+        title: 'Legacy Draft Revised',
+        status: 'draft',
+        updatedAt: serverTimestamp(),
+      })
+    );
+  });
+
+  it('the owner CAN create a draft chapter with index and createdAt', async () => {
+    await seedDraft('draft-1');
+    const ctx = testEnv.authenticatedContext(uid);
+    await assertSucceeds(
+      setDoc(doc(ctx.firestore(), `${ROOT}/users/${uid}/drafts/draft-1/chapters/0`), {
+        chapterNum: 1,
+        title: 'The Beginning',
+        content: 'Once upon a time...',
+        wordCount: 4,
+        index: 0,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      })
+    );
+  });
+
+  it('a draft chapter WITHOUT index is denied', async () => {
+    await seedDraft('draft-1');
+    const ctx = testEnv.authenticatedContext(uid);
+    await assertFails(
+      setDoc(doc(ctx.firestore(), `${ROOT}/users/${uid}/drafts/draft-1/chapters/0`), {
+        chapterNum: 1,
+        title: 'The Beginning',
+        content: 'Once upon a time...',
+        wordCount: 4,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      })
+    );
+  });
+
+  it('the owner CAN update a draft chapter (respecting the 5s cooldown)', async () => {
+    await seedDraft('draft-1');
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), `${ROOT}/users/${uid}/drafts/draft-1/chapters/0`), {
+        chapterNum: 1,
+        title: 'The Beginning',
+        content: 'Once upon a time...',
+        wordCount: 4,
+        index: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(Date.now() - 10_000),
+      });
+    });
+    const ctx = testEnv.authenticatedContext(uid);
+    await assertSucceeds(
+      setDoc(doc(ctx.firestore(), `${ROOT}/users/${uid}/drafts/draft-1/chapters/0`), {
+        chapterNum: 1,
+        title: 'The Beginning, Revised',
+        content: 'Once upon a time, again...',
+        wordCount: 5,
+        index: 0,
+        updatedAt: serverTimestamp(),
+      })
+    );
+  });
+});
+
 describe('users/{userId}/followers/{followerUid} — cross-user write (proactive fix)', () => {
   it('user A CAN create a "followers" entry under user B (A is the follower)', async () => {
     const ctxA = testEnv.authenticatedContext('user-a');
@@ -387,6 +542,17 @@ describe('users/{userId}/notifications/{notificationId} — read/pin allowance',
       })
     );
   });
+
+  it('rejects a non-timestamp read timestamp', async () => {
+    await seedNotification('reader-1', 'n1');
+    const ctx = testEnv.authenticatedContext('reader-1');
+    await assertFails(
+      updateDoc(doc(ctx.firestore(), `${ROOT}/users/reader-1/notifications/n1`), {
+        isRead: true,
+        readAt: 'yesterday',
+      })
+    );
+  });
 });
 
 describe('Global fallback — deny-all for unmatched paths (Critical Finding #1 regression guard)', () => {
@@ -404,6 +570,280 @@ describe('Global fallback — deny-all for unmatched paths (Critical Finding #1 
       setDoc(doc(ctx.firestore(), 'v2/taletranscend/projects/v1/public/data/tales/tale-1'), {
         title: 'wrong version segment',
       })
+    );
+  });
+});
+
+describe('users/{userId}/readerProgress — key allowlist (unbounded-field hardening)', () => {
+  it('the owner CAN write the documented tale-level fields', async () => {
+    const uid = 'reader-1';
+    const ctx = testEnv.authenticatedContext(uid);
+    await assertSucceeds(
+      setDoc(
+        doc(ctx.firestore(), `${ROOT}/users/${uid}/readerProgress/tale-1`),
+        {
+          status: 'finished',
+          finishedAt: serverTimestamp(),
+          lastReadAt: serverTimestamp(),
+          taleTitle: 'A Tale',
+          coverUrl: '',
+          chapterCount: 3,
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      )
+    );
+  });
+
+  it('the owner CANNOT smuggle an unlisted field into tale-level progress', async () => {
+    const uid = 'reader-1';
+    const ctx = testEnv.authenticatedContext(uid);
+    await assertFails(
+      setDoc(
+        doc(ctx.firestore(), `${ROOT}/users/${uid}/readerProgress/tale-1`),
+        { lastReadAt: serverTimestamp(), secretBlob: 'x'.repeat(100) },
+        { merge: true }
+      )
+    );
+  });
+
+  it('the owner CANNOT smuggle an unlisted field into chapter progress', async () => {
+    const uid = 'reader-1';
+    const ctx = testEnv.authenticatedContext(uid);
+    await assertFails(
+      setDoc(
+        doc(ctx.firestore(), `${ROOT}/users/${uid}/readerProgress/tale-1/chapters/0`),
+        { scrollPercent: 10, updatedAt: serverTimestamp(), extra: 'nope' },
+        { merge: true }
+      )
+    );
+  });
+});
+
+describe('users/{userId}/notifications — claims are the only admin authority', () => {
+  it('a non-admin CANNOT create a notification for another user', async () => {
+    const ctx = testEnv.authenticatedContext('reader-1');
+    await assertFails(
+      setDoc(doc(ctx.firestore(), `${ROOT}/users/author-1/notifications/n1`), {
+        type: 'system',
+        title: 'Hello',
+        body: 'Body',
+        isRead: false,
+        createdAt: serverTimestamp(),
+      })
+    );
+  });
+
+  it('a user whose profile doc says role: admin still CANNOT create one', async () => {
+    // The client gate (admin.service.js) is claims-only, so the rules must be
+    // too. A role field in the profile document grants nothing.
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), `${ROOT}/users/reader-1`), {
+        name: 'Reader',
+        role: 'admin',
+        joinedAt: new Date(),
+        updatedAt: new Date(),
+      });
+    });
+    const ctx = testEnv.authenticatedContext('reader-1');
+    await assertFails(
+      setDoc(doc(ctx.firestore(), `${ROOT}/users/author-1/notifications/n1`), {
+        type: 'system',
+        title: 'Hello',
+        body: 'Body',
+        isRead: false,
+        createdAt: serverTimestamp(),
+      })
+    );
+  });
+
+  it('an admin CAN create a notification for another user', async () => {
+    const adminCtx = testEnv.authenticatedContext('admin-1', { admin: true });
+    await assertSucceeds(
+      setDoc(doc(adminCtx.firestore(), `${ROOT}/users/author-1/notifications/n1`), {
+        type: 'system',
+        title: 'Hello',
+        body: 'Body',
+        actionUrl: '/library',
+        isRead: false,
+        createdAt: serverTimestamp(),
+      })
+    );
+  });
+
+  it('the owner CAN mark a notification read with isRead + readAt', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), `${ROOT}/users/reader-1/notifications/n1`), {
+        type: 'system',
+        title: 'Hello',
+        body: 'Body',
+        isRead: false,
+        createdAt: new Date(),
+      });
+    });
+    const ctx = testEnv.authenticatedContext('reader-1');
+    await assertSucceeds(
+      updateDoc(doc(ctx.firestore(), `${ROOT}/users/reader-1/notifications/n1`), {
+        isRead: true,
+        readAt: serverTimestamp(),
+      })
+    );
+  });
+});
+
+describe('public/data/tales — publish payload contract (P0 regression)', () => {
+  const authorUid = 'author-1';
+
+  /**
+   * The exact tale payload publish.js Step 3 sends. Kept literal rather than
+   * imported so a change to the client contract has to be mirrored here
+   * deliberately — and a mismatch then fails loudly instead of silently.
+   */
+  const publishTalePayload = () => ({
+    title: 'A Published Tale',
+    authorId: authorUid,
+    authorName: 'Scribe',
+    authorEmail: 'scribe@example.com',
+    description: 'Desc',
+    synopsis: '',
+    coverUrl: '',
+    era: '',
+    tags: [],
+    tone: 'Mythic',
+    language: 'English',
+    visibility: 'public',
+    audience: 'General',
+    publicationStatus: 'ongoing',
+    contentWarnings: [],
+    worldSetting: '',
+    authorNotes: '',
+    chapterCount: 1,
+    wordCount: 100,
+    estimatedReadMins: 1,
+    readCount: 0,
+    commentCount: 0,
+    reactionCount: 0,
+    bookmarkCount: 0,
+    status: 'published',
+    isFeatured: false,
+    isEditorsPick: false,
+    searchKeywords: [],
+    submittedAt: serverTimestamp(),
+    reviewedAt: serverTimestamp(),
+    reviewedBy: 'auto-approve',
+    rejectionReason: null,
+    moderationNotes: null,
+    publishedAt: serverTimestamp(),
+    lastChapterAddedAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    createdAt: serverTimestamp(),
+  });
+
+  it('the author CAN create a tale already published, exactly as publish.js sends it', async () => {
+    const ctx = testEnv.authenticatedContext(authorUid);
+    await assertSucceeds(
+      setDoc(doc(ctx.firestore(), `${ROOT}/public/data/tales/new-tale`), publishTalePayload())
+    );
+  });
+
+  it("status 'pending' — what publish.js used to send — is DENIED", async () => {
+    const ctx = testEnv.authenticatedContext(authorUid);
+    await assertFails(
+      setDoc(doc(ctx.firestore(), `${ROOT}/public/data/tales/new-tale`), {
+        ...publishTalePayload(),
+        status: 'pending',
+      })
+    );
+  });
+
+  it("visibility 'unlisted' — an option the editor offers — is accepted", async () => {
+    const ctx = testEnv.authenticatedContext(authorUid);
+    await assertSucceeds(
+      setDoc(doc(ctx.firestore(), `${ROOT}/public/data/tales/new-tale`), {
+        ...publishTalePayload(),
+        visibility: 'unlisted',
+      })
+    );
+  });
+
+  it('the payload stays within the 40-field cap the create rule enforces', async () => {
+    expect(Object.keys(publishTalePayload()).length).toBeLessThanOrEqual(40);
+  });
+
+  it('the author CAN create a chapter with index + createdAt, as publish.js sends it', async () => {
+    await seedTale(authorUid, 'new-tale');
+    const ctx = testEnv.authenticatedContext(authorUid);
+    await assertSucceeds(
+      setDoc(doc(ctx.firestore(), `${ROOT}/public/data/tales/new-tale/chapters/0`), {
+        chapterNum: 1,
+        title: 'The Beginning',
+        content: 'Once upon a time...',
+        wordCount: 4,
+        index: 0,
+        estimatedReadMins: 1,
+        createdAt: serverTimestamp(),
+        publishedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      })
+    );
+  });
+
+  it('a chapter WITHOUT index is denied — the exact defect the publish payload had', async () => {
+    await seedTale(authorUid, 'new-tale');
+    const ctx = testEnv.authenticatedContext(authorUid);
+    await assertFails(
+      setDoc(doc(ctx.firestore(), `${ROOT}/public/data/tales/new-tale/chapters/0`), {
+        chapterNum: 1,
+        title: 'The Beginning',
+        content: 'Once upon a time...',
+        wordCount: 4,
+        estimatedReadMins: 1,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      })
+    );
+  });
+});
+
+describe('users/{userId}/readerProgress — legacy documents keep syncing', () => {
+  it('the owner CAN still update a progress doc carrying a legacy extra field', async () => {
+    const uid = 'reader-1';
+    // Documents written by an earlier app version could carry an inline
+    // `scrollPercent` / `lastChapterIndex` / `chapters` map — the pre-Phase-2
+    // rule required them. A WHOLE-document key allowlist is evaluated against
+    // the merged result, so it would reject every future update to such a
+    // document, permanently and silently (every progress writer swallows
+    // errors). Update therefore uses diff().affectedKeys().hasOnly(...).
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), `${ROOT}/users/${uid}/readerProgress/legacy-tale`), {
+        lastReadAt: new Date(),
+        totalReadTimeMs: 1000,
+        scrollPercent: 42,
+        lastChapterIndex: 3,
+        chapters: { 0: { scrollPercent: 42 } },
+        updatedAt: new Date(),
+      });
+    });
+
+    const ctx = testEnv.authenticatedContext(uid);
+    await assertSucceeds(
+      setDoc(
+        doc(ctx.firestore(), `${ROOT}/users/${uid}/readerProgress/legacy-tale`),
+        { lastReadAt: serverTimestamp(), updatedAt: serverTimestamp() },
+        { merge: true }
+      )
+    );
+  });
+
+  it('the owner CANNOT introduce a NEW unlisted field', async () => {
+    const uid = 'reader-1';
+    const ctx = testEnv.authenticatedContext(uid);
+    await assertFails(
+      setDoc(
+        doc(ctx.firestore(), `${ROOT}/users/${uid}/readerProgress/tale-1`),
+        { lastReadAt: serverTimestamp(), junk: 'x' },
+        { merge: true }
+      )
     );
   });
 });

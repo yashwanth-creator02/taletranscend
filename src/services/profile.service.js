@@ -2,7 +2,7 @@
 // Profile-specific data fetching: reading history, published tales, drafts.
 // All returned objects are normalized through schema factories.
 
-import { getDocs, getDoc, setDoc, deleteDoc, serverTimestamp, refs } from '@fb/index.js';
+import { getDocs, getDoc, serverTimestamp, writeBatch, db, refs } from '@fb/index.js';
 import { readStorage } from './reader/localProgress.service.js';
 import { createTale, createDraft } from '@state/index.js';
 import { getTalesByAuthor } from './tale/getTales.js';
@@ -140,13 +140,17 @@ export async function getUserDrafts(userId) {
       }
 
       log.info(`Found ${snapshot.docs.length} drafts`, { userId });
-      return snapshot.docs
-        .map((d) => createDraft(d.id, d.data()))
-        .sort((a, b) => {
-          const aTime = a.updatedAt?.seconds ?? 0;
-          const bTime = b.updatedAt?.seconds ?? 0;
-          return bTime - aTime;
-        });
+      return (
+        snapshot.docs
+          // Signature is createDraft(id, userId, data). Passing d.data() second
+          // put the document payload in the userId slot and defaulted every field.
+          .map((d) => createDraft(d.id, userId, d.data()))
+          .sort((a, b) => {
+            const aTime = a.updatedAt?.seconds ?? 0;
+            const bTime = b.updatedAt?.seconds ?? 0;
+            return bTime - aTime;
+          })
+      );
     },
     { ttl: 2 * 60 * 1000 }
   );
@@ -314,28 +318,29 @@ export async function toggleFollowAuthor({ userId, targetAuthorId }) {
   });
 
   if (snap.exists()) {
-    await safeAsync(deleteDoc(followRef), {
+    // One logical edge, two documents. Batch them so a partial failure cannot
+    // leave a `following` entry with no matching `followers` entry (or vice
+    // versa) — the two collections are the only record of the edge.
+    const batch = writeBatch(db);
+    batch.delete(followRef);
+    batch.delete(followerRef);
+    await safeAsync(batch.commit(), {
       logContext: 'services.profile.toggleFollowAuthor.unfollow',
-    });
-    await safeAsync(deleteDoc(followerRef), {
-      logContext: 'services.profile.toggleFollowAuthor.unfollower',
     });
     return false;
   } else {
-    await safeAsync(
-      setDoc(followRef, {
-        targetUid: targetAuthorId,
-        followedAt: serverTimestamp(),
-      }),
-      { logContext: 'services.profile.toggleFollowAuthor.follow' }
-    );
-    await safeAsync(
-      setDoc(followerRef, {
-        followerUid: userId,
-        followedAt: serverTimestamp(),
-      }),
-      { logContext: 'services.profile.toggleFollowAuthor.follower' }
-    );
+    const batch = writeBatch(db);
+    batch.set(followRef, {
+      targetUid: targetAuthorId,
+      followedAt: serverTimestamp(),
+    });
+    batch.set(followerRef, {
+      followerUid: userId,
+      followedAt: serverTimestamp(),
+    });
+    await safeAsync(batch.commit(), {
+      logContext: 'services.profile.toggleFollowAuthor.follow',
+    });
     return true;
   }
 }

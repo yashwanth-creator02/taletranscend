@@ -43,3 +43,8 @@ confirmed working, the rule is what's keeping these counters functional at all.
   direct write and the function's trigger would increment the same field). Before deploying
   those functions, this rule exception needs to be revisited — don't assume deploying the
   function alone is sufficient.
+
+  **Resolved for `reactionCount` by [ADR 0006](0006-reaction-count-ownership.md)**: the client
+  is the sole owner of `reactionCount` and `onReactionWrite` is now an intentional no-op, so
+  this particular hazard no longer exists. The caveat above still applies unchanged to
+  `commentCount` if `onCommentWrite`'s ownership is ever moved client-side.

@@ -109,7 +109,7 @@ export default defineConfig({
     // common registry; fall back to 5173 when absent so a fresh clone still
     // starts. An explicit `--port` flag still wins.
     port: worktreePort(),
-    strictPort: false,
+    strictPort: true,
     open: '/',
     // Entry HTML lives in src/views but imports from src/pages, which is
     // outside the Vite root. Without this the dev server refuses to serve

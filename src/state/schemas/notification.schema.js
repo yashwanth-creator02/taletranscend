@@ -3,7 +3,7 @@
 // users/{uid}/notifications/{notificationId}
 
 /**
- * @typedef {'new_comment'|'new_chapter'|'new_follower'|'tale_featured'|'reply'} NotificationType
+ * @typedef {'new_comment'|'new_chapter'|'new_follower'|'tale_featured'|'reply'|'system'} NotificationType
  *
  * @typedef {Object} Notification
  * @property {string}              id
@@ -26,7 +26,7 @@
 
 /**
  * @param {string} id
- * @param {Partial<Notification>} data
+ * @param {Partial<Notification> & { message?: string, link?: string }} data
  * @returns {Notification}
  */
 export function createNotification(id, data = {}) {

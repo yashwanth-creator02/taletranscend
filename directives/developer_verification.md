@@ -13,7 +13,7 @@ Execute static analysis, code formatting, design token linting, TypeScript type-
 ## Inputs
 
 - Node.js runtime environment (v20+; see `engines` in `package.json`).
-- Project dependencies installed via `npm install`.
+- Project dependencies installed via `npm ci` (use `npm install` only when intentionally changing dependencies).
 
 ## Git Safety (If Modifying Code)
 
@@ -52,7 +52,7 @@ Or run individual npm scripts:
 - **In-page dynamic imports**: Vite's `root` is `src/views`, so source modules are served as `/@fs/<abs path>?t=<mtime>` — a hardcoded `/src/...` URL 404s. Resolve the URL from `performance.getEntriesByType('resource')` so the import shares the app's module instance.
 - **PWA manifest ownership**: never hand-author `<link rel="manifest" href="/manifest.webmanifest" />` in `src/views/*.html`. VitePWA injects the manifest link at build time; a manual link 404s in dev because the manifest only exists in `dist/`. If a dev-console manifest 404 appears, remove the manual link rather than adding a file to `public/`.
 - **Resource limits**: stop dev servers before the full unit suite and run `npx vitest run --maxWorkers=2`; vitest reports `Timeout waiting for worker to respond` / pool errors when the machine is saturated. Run Playwright with `--workers=1` (each page cold-transforms the whole module graph).
-- **Known failing e2e spec**: `e2e/specs/library.spec.js` times out on `page.goto` in an offline environment — reproduced on unmodified source, so it is environmental, not a regression.
+- **Live-data e2e spec**: `e2e/specs/library.spec.js` asserts on real tale cards. A normal local run reads the live `.env` project; CI sets `VITE_FIREBASE_USE_EMULATOR=true` and seeds 25 deterministic tales (`e2e/seed-emulator.mjs`) so it needs no real credentials. With neither, the error grid renders and the card assertions fail.
 
 ## Outputs
 
@@ -64,6 +64,7 @@ Or run individual npm scripts:
 
 - Token lint failures: If `npm run lint:tokens` fails, inspect changed files for hardcoded hex, rgb, or hsl strings. Ensure all colors use CSS custom properties defined in `src/assets/css/tokens.css`.
 - E2E test failures: Playwright tests may require browser binaries. Run `npx playwright install` if browser drivers are missing.
+- E2E data: a normal local run reads the live `taletranscend` project through anonymous auth, so it needs the real `.env` credentials and at least one published tale. CI instead starts the Auth and Firestore emulators, seeds them with `e2e/seed-emulator.mjs`, and points the app at them with `VITE_FIREBASE_USE_EMULATOR=true`. Use `--workers=1` when running the emulator path locally; higher parallelism times out on a busy machine.
 - Responsive captures and the mobile-shell e2e: a fresh browser context is redirected to `/login.html` unless `tt_has_visited` is seeded. Both harnesses seed it and assert the page is not the login screen; never remove those guards.
 - Local Playwright capacity: the shared Vite dev server can saturate above roughly 4 local workers, returning unstyled pages or `page.goto` timeouts. Run `npx playwright test --workers=2`; if the same tests pass in isolation, the app is not at fault.
 - Local Vitest capacity: the default fork pool can time out starting workers on a loaded machine before any test runs. Re-run `npx vitest run --maxWorkers=2`; a green constrained run confirms the suite.

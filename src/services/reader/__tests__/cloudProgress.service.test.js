@@ -8,9 +8,24 @@ import { getDoc, setDoc, getDocs, refs, serverTimestamp } from '@fb/index.js';
 import { createChapterProgress, createTaleProgress } from '@state/index.js';
 
 // Mock @state/index.js
+// These mocks MUST mirror the real factory signatures, otherwise the test
+// encodes whatever argument order the service happens to use and can never
+// catch an arity/order bug:
+//   createChapterProgress(taleId, chapterIndex, data)
+//   createTaleProgress(userId, taleId, data)
 vi.mock('@state/index.js', () => ({
-  createChapterProgress: vi.fn((data) => ({ ...data, normalized: true })),
-  createTaleProgress: vi.fn((id, data) => ({ id, ...data, normalized: true })),
+  createChapterProgress: vi.fn((taleId, chapterIndex, data) => ({
+    taleId,
+    chapterIndex,
+    ...data,
+    normalized: true,
+  })),
+  createTaleProgress: vi.fn((userId, taleId, data) => ({
+    userId,
+    taleId,
+    ...data,
+    normalized: true,
+  })),
 }));
 
 // Mock @/utils
@@ -145,19 +160,22 @@ describe('CloudProgressService', () => {
       expect(refs.progress).toHaveBeenCalledWith('u1', 't1');
       expect(getDocs).toHaveBeenCalled();
       expect(createChapterProgress).toHaveBeenCalledTimes(2);
-      expect(createTaleProgress).toHaveBeenCalledWith('t1', {
+      expect(createChapterProgress).toHaveBeenNthCalledWith(1, 't1', 0, { scrollPercent: 10 });
+      expect(createChapterProgress).toHaveBeenNthCalledWith(2, 't1', 1, { scrollPercent: 20 });
+      expect(createTaleProgress).toHaveBeenCalledWith('u1', 't1', {
         ...mockTaleData,
         chapters: {
-          0: { scrollPercent: 10, normalized: true },
-          1: { scrollPercent: 20, normalized: true },
+          0: { taleId: 't1', chapterIndex: 0, scrollPercent: 10, normalized: true },
+          1: { taleId: 't1', chapterIndex: 1, scrollPercent: 20, normalized: true },
         },
       });
       expect(result).toEqual({
-        id: 't1',
+        userId: 'u1',
+        taleId: 't1',
         lastReadAt: 'ts',
         chapters: {
-          0: { scrollPercent: 10, normalized: true },
-          1: { scrollPercent: 20, normalized: true },
+          0: { taleId: 't1', chapterIndex: 0, scrollPercent: 10, normalized: true },
+          1: { taleId: 't1', chapterIndex: 1, scrollPercent: 20, normalized: true },
         },
         normalized: true,
       });

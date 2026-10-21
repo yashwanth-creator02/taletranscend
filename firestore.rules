@@ -209,6 +209,10 @@ service cloud.firestore {
             && isValidString('title', 0, 200)
             && isValidString('status', 0, 50)
             && isValidTimestamp('updatedAt')
+            // Pin authorship without breaking legacy drafts that predate the
+            // authorId write contract: absent stays absent, present must be
+            // the owner, and it can never be reassigned to another user.
+            && (!('authorId' in request.resource.data) || request.resource.data.authorId == userId)
             && request.resource.data.size() <= 25;
 
           allow delete: if isOwner(userId) || isAdmin();
@@ -240,30 +244,74 @@ service cloud.firestore {
         //  exactly — NOT renamed, per the decision to keep original paths)
         //
         //  Rewritten (Phase 2) to match the subcollection-based model
-        //  cloudProgress.service.js actually uses. This tale-level document
-        //  only ever holds `lastReadAt` and an optional `totalReadTimeMs` —
-        //  it does NOT hold `scrollPercent`, `lastChapterIndex`, or an inline
-        //  `chapters` map, which the old rule incorrectly required. Precise
-        //  per-chapter scroll position lives in the nested chapters/{index}
-        //  subcollection below instead, written independently.
+        //  cloudProgress.service.js actually uses. Precise per-chapter scroll
+        //  position lives in the nested chapters/{index} subcollection below,
+        //  written independently.
+        //
+        //  The tale-level document carries at most the 8 keys listed in the
+        //  allowlist below: `lastReadAt` (always), the optional
+        //  `totalReadTimeMs`, and the completion fields markFinish.service.js
+        //  and syncMarkAllChaptersRead write. `keys().hasOnly` + a `size()`
+        //  cap keep it from growing without bound, which the previous
+        //  validator-only rule allowed (it checked the two fields it knew
+        //  about and silently accepted everything else).
         // ═══════════════════════════════════════════════════════════
 
         match /readerProgress/{taleId} {
           allow read: if isOwner(userId) || isAdmin();
 
-          allow create, update: if isOwner(userId)
+          // Create: the document is brand new, so a whole-document allowlist is
+          // meaningful and safe.
+          allow create: if isOwner(userId)
             && isValidTimestamp('lastReadAt')
-            && isValidOptionalNumber('totalReadTimeMs', 0, 1000000000000);
+            && isValidOptionalNumber('totalReadTimeMs', 0, 1000000000000)
+            && request.resource.data.keys().hasOnly([
+                 'lastReadAt', 'totalReadTimeMs', 'status', 'finishedAt',
+                 'taleTitle', 'coverUrl', 'chapterCount', 'updatedAt'
+               ])
+            && request.resource.data.size() <= 10;
+
+          // Update: only the keys THIS write touches are constrained. A
+          // whole-document allowlist is evaluated against the MERGED result, so
+          // a legacy field left by an earlier app version (this rule used to
+          // require an inline `scrollPercent` / `lastChapterIndex` / `chapters`
+          // map) would permanently block every future update to that document.
+          // Every writer path here is silent, so the reader would simply stop
+          // syncing progress with no error surfaced anywhere. Growth stays
+          // bounded anyway: only these eight keys can ever be added.
+          allow update: if isOwner(userId)
+            && isValidTimestamp('lastReadAt')
+            && isValidOptionalNumber('totalReadTimeMs', 0, 1000000000000)
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                 'lastReadAt', 'totalReadTimeMs', 'status', 'finishedAt',
+                 'taleTitle', 'coverUrl', 'chapterCount', 'updatedAt'
+               ]);
 
           allow delete: if isOwner(userId) || isAdmin();
 
           // users/{userId}/readerProgress/{taleId}/chapters/{index}
+          // Every writer (cloudProgress.service.js, markFinish.service.js)
+          // sends exactly these three keys.
           match /chapters/{chapterIndex} {
             allow read: if isOwner(userId) || isAdmin();
-            allow create, update: if isOwner(userId)
+            allow create: if isOwner(userId)
               && isValidNumber('scrollPercent', 0, 100)
               && isValidTimestamp('updatedAt')
-              && isValidOptionalInt('lastCharacterOffset', 0, 100000000);
+              && isValidOptionalInt('lastCharacterOffset', 0, 100000000)
+              && request.resource.data.keys().hasOnly([
+                   'scrollPercent', 'lastCharacterOffset', 'updatedAt'
+                 ])
+              && request.resource.data.size() <= 5;
+            // Same create/update split as the tale-level document above, for
+            // the same reason: constrain the keys this write touches, not the
+            // whole merged document.
+            allow update: if isOwner(userId)
+              && isValidNumber('scrollPercent', 0, 100)
+              && isValidTimestamp('updatedAt')
+              && isValidOptionalInt('lastCharacterOffset', 0, 100000000)
+              && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                   'scrollPercent', 'lastCharacterOffset', 'updatedAt'
+                 ]);
             allow delete: if isOwner(userId) || isAdmin();
           }
         }
@@ -350,11 +398,15 @@ service cloud.firestore {
         // ═══════════════════════════════════════════════════════════
         //  NOTIFICATIONS  —  users/{userId}/notifications/{notificationId}
         //
-        //  Creation is intentionally admin/trusted-server-only for now —
-        //  once functions/ exists (Phase 6) these should be written by a
-        //  Cloud Function, not directly by clients. Until then, nothing in
-        //  the app actually creates these, so this is a conservative
-        //  placeholder, not a verified-against-live-usage rule.
+        //  Creation is admin-only by design. Notifications are addressed to a
+        //  DIFFERENT user than the one writing them (an admin notifies the
+        //  affected author), so an owner-scoped create rule would either deny
+        //  the real flow or open a spam vector.
+        //
+        //  `isAdmin()` reads custom claims ONLY. The client's
+        //  isCurrentUserAdmin() in src/services/admin.service.js is claims-only
+        //  too, so the UI gate and this rule agree — a user whose profile
+        //  document merely says role: 'admin' gets neither.
         // ═══════════════════════════════════════════════════════════
 
         match /notifications/{notificationId} {
@@ -364,7 +416,8 @@ service cloud.firestore {
           allow update: if isOwner(userId)
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isRead', 'readAt', 'isPinned'])
             && request.resource.data.get('isRead', false) is bool
-            && request.resource.data.get('isPinned', false) is bool;
+            && request.resource.data.get('isPinned', false) is bool
+            && request.resource.data.get('readAt', request.time) is timestamp;
           allow delete: if isOwner(userId) || isAdmin();
         }
 
@@ -416,7 +469,13 @@ service cloud.firestore {
           && 'status' in request.resource.data
           && request.resource.data.status in ['draft', 'submitted', 'published', 'rejected']
           && 'visibility' in request.resource.data
-          && request.resource.data.visibility in ['public', 'private']
+          // 'unlisted' is a value the editor's own visibility control offers
+          // (contribution.html data-visibility). Only 'public' is treated as
+          // public by the read rule above — everything else resolves to
+          // author/admin-only. Rejecting 'unlisted' outright turned a publish
+          // into a silent permission-denied, so it is accepted here and its
+          // non-public semantics stay in the read rule.
+          && request.resource.data.visibility in ['public', 'private', 'unlisted']
           && isValidNumber('readCount', 0, 1000000000)
           && isValidNumber('commentCount', 0, 1000000000)
           && isValidNumber('reactionCount', 0, 1000000000)
@@ -432,11 +491,12 @@ service cloud.firestore {
         // original rule required isAuthor()||isAdmin() for ANY update,
         // including reactionCount — meaning reacting to someone else's tale
         // was rejected by this exact rule. resonance.service.js writes
-        // reactionCount directly (not via a Cloud Function — none exists in
-        // this repo), so it needs its own narrower permission, not the
-        // full-document author-only path. commentCount/bookmarkCount are
-        // included here too even though nothing writes them client-side yet,
-        // so this doesn't need revisiting if that gets wired up later.
+        // reactionCount directly and is its ONLY writer — onReactionWrite is
+        // an intentional no-op (see docs/decisions/0006-reaction-count-ownership.md),
+        // so it needs its own narrower permission, not the full-document
+        // author-only path. commentCount/bookmarkCount are included here too
+        // even though nothing writes them client-side yet, so this doesn't
+        // need revisiting if that gets wired up later.
         allow update: if (
             (isAuthor() || isAdmin())
             && respectsCooldown()
@@ -444,7 +504,7 @@ service cloud.firestore {
             && 'status' in request.resource.data
             && request.resource.data.status in ['draft', 'submitted', 'published', 'rejected']
             && 'visibility' in request.resource.data
-            && request.resource.data.visibility in ['public', 'private']
+            && request.resource.data.visibility in ['public', 'private', 'unlisted']
             && isValidNumber('readCount', 0, 1000000000)
             && isValidNumber('commentCount', 0, 1000000000)
             && isValidNumber('reactionCount', 0, 1000000000)

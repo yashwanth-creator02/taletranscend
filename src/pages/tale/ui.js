@@ -173,7 +173,7 @@ export async function renderTale(userId, tale, taleId, isResonated = false) {
   // Status indicator (Ongoing, Completed, Hiatus, Stopped/Cancelled)
   const rawStatus = (
     tale.publicationStatus ||
-    (tale.status !== 'published' && tale.status !== 'pending' && tale.status !== 'draft'
+    (tale.status !== 'published' && tale.status !== 'submitted' && tale.status !== 'draft'
       ? tale.status
       : null) ||
     'ongoing'
