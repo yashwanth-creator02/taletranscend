@@ -3983,6 +3983,22 @@
   line-height: 1.5;
 }
 
+.settings-account-alert__link {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.settings-account-alert__link:hover {
+  color: var(--text-primary);
+}
+
+.settings-account-alert__link:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
 .settings-account-note {
   max-width: 70ch;
   margin: 0;

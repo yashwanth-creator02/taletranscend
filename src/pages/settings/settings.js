@@ -1517,6 +1517,8 @@ export function setupAuthDisplay() {
   });
 }
 
+const ACCOUNT_SIGN_IN_URL = '/login.html?returnUrl=%2Fsettings.html%23section-accounts';
+
 /**
  * Maps Firebase Auth failures to copy a chronicler can act on.
  * Returns an empty string for dismissals that should not raise an alert.
@@ -1527,7 +1529,7 @@ function accountErrorText(err) {
   switch (err?.code) {
     case 'auth/email-already-in-use':
     case 'auth/credential-already-in-use':
-      return 'That email is already connected to another chronicle. Sign in to that account instead.';
+      return 'That email is already connected to another chronicle. {signin} to that account instead.';
     case 'auth/invalid-email':
       return 'Enter a valid email address.';
     case 'auth/weak-password':
@@ -1560,8 +1562,28 @@ function accountErrorText(err) {
  */
 function setAccountAlert(el, message) {
   if (!el) return;
-  el.textContent = message;
+  el.textContent = '';
   el.hidden = !message;
+  if (!message) return;
+
+  const marker = '{signin}';
+  const markerIndex = message.indexOf(marker);
+  if (markerIndex === -1) {
+    el.textContent = message;
+    return;
+  }
+
+  const before = message.slice(0, markerIndex);
+  const after = message.slice(markerIndex + marker.length);
+  const link = document.createElement('a');
+  link.href = ACCOUNT_SIGN_IN_URL;
+  link.className = 'settings-account-alert__link';
+  link.textContent = 'Sign in';
+  link.setAttribute('aria-label', 'Sign in to the existing account');
+
+  if (before) el.append(document.createTextNode(before));
+  el.append(link);
+  if (after) el.append(document.createTextNode(after));
 }
 
 /**

@@ -1111,7 +1111,15 @@ describe('Settings Page Controller', () => {
           'That email is already connected to another chronicle. Sign in to that account instead.'
         )
       );
-      expect(document.getElementById('settings-account-alert').hidden).toBe(false);
+      const alert = document.getElementById('settings-account-alert');
+      const link = alert.querySelector('a.settings-account-alert__link');
+      expect(alert.hidden).toBe(false);
+      expect(link).not.toBeNull();
+      expect(link.textContent).toBe('Sign in');
+      expect(link.getAttribute('href')).toBe(
+        '/login.html?returnUrl=%2Fsettings.html%23section-accounts'
+      );
+      expect(link.getAttribute('aria-label')).toBe('Sign in to the existing account');
     });
 
     it('updates the password after confirmation', async () => {
