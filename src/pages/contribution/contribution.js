@@ -37,6 +37,7 @@ import {
 } from '@services/index.js';
 import { AI_API_KEY } from '@config/app.config.js';
 import { showToast } from '@ui/components/toast.js';
+import { openGeminiKeyModal, showMissingGeminiKeyToast } from '@ui/components/geminiModal.js';
 
 initPageReveal();
 
@@ -320,10 +321,7 @@ function bindAIEvents() {
 
     const key = _getEffectiveApiKey();
     if (!key) {
-      showToast(
-        'Please configure your Gemini API Key in Settings to consult the Oracle.',
-        'warning'
-      );
+      showMissingGeminiKeyToast();
       return;
     }
 
@@ -346,7 +344,13 @@ function bindAIEvents() {
       }
     } catch (err) {
       log.error('Title suggestion failed:', err);
-      showToast('Title generation failed. Check your API key or connection.', 'error');
+      showToast('Title generation failed. Check your API key or connection.', {
+        type: 'error',
+        action: {
+          label: 'Tap to check',
+          onClick: () => openGeminiKeyModal(),
+        },
+      });
     } finally {
       oracleSuggestTitleBtn.disabled = false;
       oracleSuggestTitleBtn.classList.remove('animate-pulse');
@@ -363,6 +367,11 @@ function bindAIEvents() {
     }
 
     const key = _getEffectiveApiKey();
+    if (!key) {
+      showMissingGeminiKeyToast();
+      return;
+    }
+
     enhanceBtn.disabled = true;
     enhanceBtn.classList.add('animate-pulse');
     showToast('Consulting the Oracle...', 'info');
@@ -378,10 +387,13 @@ function bindAIEvents() {
       }
     } catch (err) {
       log.error('Enhancement failed:', err);
-      showToast(
-        'Refinement failed. Please check your connection or API key in profile settings.',
-        'error'
-      );
+      showToast('Refinement failed. Check your API key or connection.', {
+        type: 'error',
+        action: {
+          label: 'Tap to check',
+          onClick: () => openGeminiKeyModal(),
+        },
+      });
     } finally {
       enhanceBtn.disabled = false;
       enhanceBtn.classList.remove('animate-pulse');
@@ -396,6 +408,11 @@ function bindAIEvents() {
     }
 
     const key = _getEffectiveApiKey();
+    if (!key) {
+      showMissingGeminiKeyToast();
+      return;
+    }
+
     continueBtn.disabled = true;
     continueBtn.classList.add('animate-pulse');
     showToast('The Oracle channels the narrative thread...', 'info');
@@ -416,7 +433,13 @@ function bindAIEvents() {
       }
     } catch (err) {
       log.error('AI Continuation failed:', err);
-      showToast('Continuation failed. Please check your connection or API key.', 'error');
+      showToast('Continuation failed. Check your API key or connection.', {
+        type: 'error',
+        action: {
+          label: 'Tap to check',
+          onClick: () => openGeminiKeyModal(),
+        },
+      });
     } finally {
       continueBtn.disabled = false;
       continueBtn.classList.remove('animate-pulse');

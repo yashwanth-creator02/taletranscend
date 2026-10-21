@@ -268,12 +268,14 @@ Global UI layer: the icon registry, shared components, and the nav shell; each c
 - `src/ui/components/confirmModal.js` — Accessible promise-based confirmation dialog plus the tale/fragment download prompt with MD/EPUB format choice.
 - `src/ui/components/feedback.js` — Renders empty, error, and empty-search state blocks (with query suggestions and reset action) into containers.
 - `src/ui/components/footerTheme.js` — Footer segmented theme control (transcendental/dark/light) with roving keyboard focus, applying and syncing the app theme.
+- `src/ui/components/geminiModal.js` — Global modal dialog for entering, securely storing, and deleting the user's Gemini API key; provides `showMissingGeminiKeyToast()` with actionable "Tap to add" button.
 - `src/ui/components/scrollToTop.js` — Mounts and manages the scroll-to-top button that appears after 120px of scroll and smooth-scrolls page containers.
 - `src/ui/components/taleCard.js` — Renders library tale-card grids, skeletons, parallel progress/bookmark/read-time prefetch, and empty/search/error states.
 - `src/ui/components/toast.js` — Mythic toast system: container, queue limit, type variants, countdown bar, pause-on-hover, swipe dismiss, and action buttons.
 - `src/ui/components/__tests__/confirmModal.test.js` — Vitest tests for `src/ui/components/confirmModal.js` — confirm/cancel/close/backdrop/Escape/focus-trap behavior and confirmTaleDownload format selection.
 - `src/ui/components/__tests__/feedback.test.js` — Vitest tests for `src/ui/components/feedback.js` — renderEmptyState, renderErrorState, renderEmptySearchState markup plus clear/suggestion callbacks.
 - `src/ui/components/__tests__/footerTheme.test.js` — Vitest tests for `src/ui/components/footerTheme.js` — markup, active-state sync, click/keyboard theme switching, appthemechange handling.
+- `src/ui/components/__tests__/geminiModal.test.js` — Vitest tests for `src/ui/components/geminiModal.js` — modal creation, password toggle, status badge, key save, key deletion, close triggers, and toast action.
 - `src/ui/components/__tests__/scrollToTop.test.js` — Vitest tests for `src/ui/components/scrollToTop.js` — button creation, icon normalization, click scrolling, scroll-position visibility toggling.
 - `src/ui/components/__tests__/taleCard.test.js` — Vitest tests for `src/ui/components/taleCard.js` — renderCardsSkeleton counts, fetchTalesMetadata maps, renderTaleCards output.
 - `src/ui/components/__tests__/toast.test.js` — Vitest tests for `src/ui/components/toast.js` — container creation, legacy adoption, types, auto-dismiss, hover pause, action buttons, queue limit, swipe dismiss.

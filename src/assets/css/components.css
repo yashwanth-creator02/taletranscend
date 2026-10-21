@@ -1391,3 +1391,192 @@
 .toast-card--info .toast-card__progress-bar {
   background: var(--toast-info-fg) !important;
 }
+
+/* ══ GLOBAL GEMINI API KEY MODAL ══════════════════════════════════════════
+   Shared across all MPA pages for configuring & deleting the Gemini API Key.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.gemini-modal-overlay,
+.settings-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+}
+
+.gemini-modal-overlay.hidden,
+.settings-modal-overlay.hidden {
+  display: none !important;
+}
+
+.gemini-modal-backdrop,
+.settings-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgb(var(--dark-rgb) / var(--a-10));
+  backdrop-filter: blur(var(--blur-md));
+  -webkit-backdrop-filter: blur(var(--blur-md));
+}
+
+.gemini-modal-card,
+.settings-modal-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 500px;
+  border-radius: var(--radius-xl);
+  background: var(--bg-overlay);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: geminiModalEnter var(--dur-normal) var(--ease-out);
+}
+
+@keyframes geminiModalEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.gemini-modal-header,
+.settings-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.gemini-modal-title,
+.settings-modal-title {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: var(--leading-tight);
+}
+
+.gemini-modal-sub,
+.settings-modal-sub {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.3;
+}
+
+.gemini-modal-close,
+.settings-modal-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--dur-fast) ease;
+}
+
+.gemini-modal-close:hover,
+.settings-modal-close:hover {
+  background: var(--surface-3);
+  color: var(--text-primary);
+}
+
+.gemini-modal-close:focus-visible,
+.settings-modal-close:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.gemini-modal-body,
+.settings-modal-body {
+  padding: var(--space-5);
+}
+
+.gemini-info-box,
+.settings-info-box {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3-5);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+}
+
+.gemini-modal-toggle-btn,
+.settings-modal-toggle-btn {
+  position: absolute;
+  right: var(--space-3);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  transition:
+    color var(--dur-fast) ease,
+    background var(--dur-fast) ease;
+}
+
+.gemini-modal-toggle-btn:hover,
+.settings-modal-toggle-btn:hover {
+  color: var(--text-primary);
+  background: var(--surface-3);
+}
+
+.gemini-modal-footer,
+.settings-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3-5) var(--space-5);
+  background: var(--surface-1);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.gemini-modal-input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  padding-right: var(--space-12);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-family: var(--font-mono, monospace);
+  font-size: var(--text-xs);
+  outline: none;
+  transition: all var(--dur-fast) ease;
+}
+
+.gemini-modal-input:focus {
+  border-color: var(--border-accent);
+  background: var(--surface-3);
+  box-shadow: var(--focus-ring);
+}
+
+[data-app-theme='light'] .gemini-modal-card,
+[data-app-theme='light'] .settings-modal-card {
+  background: var(--bg-overlay);
+  border-color: var(--border);
+  box-shadow: var(--shadow-xl);
+}
+
+[data-app-theme='light'] .gemini-info-box,
+[data-app-theme='light'] .settings-info-box {
+  background: var(--surface-2);
+  border-color: var(--border-subtle);
+}
