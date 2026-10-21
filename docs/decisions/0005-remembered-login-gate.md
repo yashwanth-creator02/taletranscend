@@ -35,7 +35,7 @@ legacy `tt_has_visited` flag on read for browsers that already hold it.
   itself to `browserSessionPersistence` before signing in.
 - **A restored session never changes the recorded scope.** Everything that re-remembers an account
   (a page's `initAuth`, or the login page seeing a live session) keeps whatever scope is already
-  recorded — otherwise signing in unchecked and being handed over to `profile.html` would silently
+  recorded — otherwise signing in unchecked and being handed over to `index.html` would silently
   upgrade a session-only choice to durable, and "Keep me signed in" would be a lie.
 - **Written on:** the login page loading (a durable "gate answered" record, unless something is
   already remembered), every deliberate sign-in (Google, email, guest, with the method recorded),

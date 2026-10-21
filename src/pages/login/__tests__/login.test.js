@@ -138,7 +138,7 @@ describe('Login Page', () => {
     });
 
     await initPage();
-    expect(utils.navigateTo).toHaveBeenCalledWith('profile.html');
+    expect(utils.navigateTo).toHaveBeenCalledWith('index.html');
   });
 
   it('handles Google login success', async () => {
@@ -153,7 +153,7 @@ describe('Login Page', () => {
     );
 
     vi.advanceTimersByTime(1000);
-    expect(utils.navigateTo).toHaveBeenCalledWith('profile.html');
+    expect(utils.navigateTo).toHaveBeenCalledWith('index.html');
   });
 
   it('handles Guest login success', async () => {
@@ -406,7 +406,7 @@ describe('Login Page', () => {
     mod.handleAuthSuccess('guest');
     vi.advanceTimersByTime(1000);
 
-    expect(utils.navigateTo).toHaveBeenCalledWith('profile.html');
+    expect(utils.navigateTo).toHaveBeenCalledWith('index.html');
   });
 
   describe('safeReturnTarget', () => {
@@ -421,24 +421,24 @@ describe('Login Page', () => {
 
     it('rejects an absolute URL', async () => {
       const safeReturnTarget = await load();
-      expect(safeReturnTarget('https://evil.example/steal')).toBe('profile.html');
+      expect(safeReturnTarget('https://evil.example/steal')).toBe('index.html');
     });
 
     it('rejects a protocol-relative URL', async () => {
       const safeReturnTarget = await load();
-      expect(safeReturnTarget('//evil.example/steal')).toBe('profile.html');
+      expect(safeReturnTarget('//evil.example/steal')).toBe('index.html');
     });
 
     it('rejects backslash variants browsers may normalise', async () => {
       const safeReturnTarget = await load();
-      expect(safeReturnTarget('/\\evil.example/steal')).toBe('profile.html');
+      expect(safeReturnTarget('/\\evil.example/steal')).toBe('index.html');
     });
 
     it('falls back for empty and non-string values', async () => {
       const safeReturnTarget = await load();
-      expect(safeReturnTarget(null)).toBe('profile.html');
-      expect(safeReturnTarget(undefined)).toBe('profile.html');
-      expect(safeReturnTarget('   ')).toBe('profile.html');
+      expect(safeReturnTarget(null)).toBe('index.html');
+      expect(safeReturnTarget(undefined)).toBe('index.html');
+      expect(safeReturnTarget('   ')).toBe('index.html');
     });
 
     it('honours a custom fallback', async () => {

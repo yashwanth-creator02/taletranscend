@@ -86,10 +86,10 @@ function _isRememberChecked() {
  * site (open redirect).
  *
  * @param {string|null|undefined} raw - Candidate destination from the URL.
- * @param {string} [fallback='profile.html'] - Used when the candidate is unusable.
+ * @param {string} [fallback='index.html'] - Used when the candidate is unusable.
  * @returns {string}
  */
-export function safeReturnTarget(raw, fallback = 'profile.html') {
+export function safeReturnTarget(raw, fallback = 'index.html') {
   if (typeof raw !== 'string') return fallback;
 
   const trimmed = raw.trim();
@@ -108,7 +108,7 @@ export function safeReturnTarget(raw, fallback = 'profile.html') {
  * @returns {string}
  */
 function _returnTarget() {
-  if (typeof window === 'undefined') return 'profile.html';
+  if (typeof window === 'undefined') return 'index.html';
   const params = new URLSearchParams(window.location.search);
   return safeReturnTarget(params.get('returnUrl') ?? params.get('redirect'));
 }
