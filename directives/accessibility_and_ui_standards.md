@@ -159,7 +159,10 @@ The TaleTranscend brand mark is the mythical golden-trimmed black quill pen enci
     - **Chronicler Profile** (`#section-profile`): Persona avatar, display moniker, author lore bio, pronouns, location, reading goal, and cloud archive status.
     - **General & Theme** (`#section-general`): Global application interface theme (Transcendental / Midnight Dark / Illuminated Light), Oracle AI & Gemini API key (status indicator and popup modal), and factory default restoration.
     - **Reader & Codex** (`#section-reader`): Default reading parchment (12 authentic manuscript themes) and codex typography settings (typeface style, font size, line spacing, measure width, live preview).
-    - **Atmosphere & Motion** (`#section-atmosphere`), **Archival Storage** (`#section-storage`), and **About Codex** (`#section-about`).
+    - **Atmosphere & Motion** (`#section-atmosphere`): particle, audio and reduced-motion toggles.
+    - **Archival Storage** (`#section-storage`): local cache summary with clear action, plus the archived-records list of reading positions and inquiry threads stored on the device.
+    - **Accounts** (`#section-accounts`): sign-in status, read-only email address, provider label, cloud archive state, guest elevation by email/password or Google, password update and reset for password accounts, and the Google-only state.
+    - **About Codex** (`#section-about`): engine, interface and archive colophon with a Living Codex link.
   - Hash navigation seamlessly resolves legacy hashes (`#themes` and `#system` -> `#section-general`, `#typography` -> `#section-reader`).
 - **Dedicated Sideheading & Below-Field Layout (`.settings-row--stacked`)**:
   - Full-width longform inputs, notably the Chronicler Lore / Bio textarea (`#input-bio`), must be stacked vertically below the sideheading, descriptive subtitle, and info shield rather than squeezed beside it in a split two-column row.
@@ -168,6 +171,7 @@ The TaleTranscend brand mark is the mythical golden-trimmed black quill pen enci
   - Storage of sensitive credentials such as the Google Gemini API key is housed in the General section and initiated through an accessible popup modal window (`#modal-gemini-key`) instead of inline password fields.
   - The modal provides security guidance regarding client-only local storage, password visibility toggling, direct links to Google AI Studio, and clear/remove functionality.
   - The settings row presents an accessible status badge (`#gemini-key-status`: `.settings-status-badge--active` vs `.settings-status-badge--inactive`).
+  - Authentication password changes and guest elevation are transient Firebase Auth forms, not secrets persisted in the browser, so they remain inline in the Accounts section; the popup-modal rule applies to client-side stored credentials.
 - **Clean Reader Theme Specimens (Zero Light/Dark Tags)**:
   - Each of the 12 reader themes (`src/config/theme.config.js`) provides explicit palette metadata (`mode`, `bg`, `fg`, `accent`, `tint`).
   - Specimen cards (`.theme-specimen`) display miniature manuscript specimens showcasing genuine parchment color, ink foreground sample glyph `"Aa"`, and accent pip dot, with all decorative "LIGHT" or "DARK" text badges removed for a clean, distraction-free aesthetic.

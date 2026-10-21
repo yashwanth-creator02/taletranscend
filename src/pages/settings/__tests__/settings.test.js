@@ -8,8 +8,11 @@ import {
   renderThemes,
   renderFonts,
   getArchivalStats,
+  renderStorageArchive,
   initSettingsInteractions,
   setupAuthDisplay,
+  setupAccountSettings,
+  renderAccountState,
   handleNavigateBack,
   initSettingsBackButton,
   normalizeSectionId,
@@ -37,7 +40,17 @@ import {
   applyAppTheme,
   initAppTheme,
 } from '@config/theme.config.js';
-import { auth, onAuthStateChanged, setDoc, getDoc } from '@fb/index.js';
+import {
+  auth,
+  onAuthStateChanged,
+  setDoc,
+  getDoc,
+  signInAnonymously,
+  upgradeAnonymousToEmail,
+  upgradeAnonymousToGoogle,
+  updateUserPassword,
+  sendPasswordReset,
+} from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
 import { getStoredApiKey } from '@/services/ai/apiKey.storage.js';
 
@@ -48,6 +61,11 @@ vi.mock('@fb/index.js', () => ({
   getDoc: vi.fn(() => Promise.resolve({ exists: () => false, data: () => ({}) })),
   setDoc: vi.fn(() => Promise.resolve()),
   serverTimestamp: vi.fn(() => 'MOCK_TIMESTAMP'),
+  signInAnonymously: vi.fn(),
+  upgradeAnonymousToEmail: vi.fn(),
+  upgradeAnonymousToGoogle: vi.fn(),
+  updateUserPassword: vi.fn(),
+  sendPasswordReset: vi.fn(),
 }));
 
 vi.mock('@ui/icons.js', () => ({
@@ -607,6 +625,35 @@ describe('Settings Page Controller', () => {
 
       const stats = getArchivalStats();
       expect(stats.progressCount).toBe(3);
+      expect(stats.entries).toHaveLength(3);
+      expect(stats.entries.find((entry) => entry.key === 'tt_progress_tale_1')).toMatchObject({
+        kind: 'Reading progress',
+        label: 'Tale 1',
+        detail: '50% read',
+      });
+      expect(stats.totalBytes).toBeGreaterThan(0);
+    });
+
+    it('renders each stored record and an empty state', () => {
+      document.body.innerHTML = `
+        <span id="settings-storage-meta"></span>
+        <div id="settings-storage-list"></div>
+      `;
+      localStorage.setItem('tt_progress_tale_1', JSON.stringify({ pct: 50 }));
+      localStorage.setItem('tt_inquiries_tale_2', JSON.stringify([{ message: 'One' }]));
+
+      renderStorageArchive();
+
+      const list = document.getElementById('settings-storage-list');
+      expect(list.textContent).toContain('Reading progress');
+      expect(list.textContent).toContain('Tale 1, 50% read');
+      expect(list.textContent).toContain('Inquiry thread');
+      expect(list.textContent).toContain('1 missive archived');
+      expect(document.getElementById('settings-storage-meta').textContent).toContain('2 records');
+
+      localStorage.clear();
+      renderStorageArchive();
+      expect(list.textContent).toContain('No reading records yet');
     });
   });
 
@@ -888,6 +935,268 @@ describe('Settings Page Controller', () => {
 
       expect(document.getElementById('settings-auth-status').textContent).toBe('Scribe Ronin');
       expect(document.getElementById('settings-auth-uid').textContent).toBe('ID: user-456');
+    });
+  });
+
+  describe('Accounts', () => {
+    const ACCOUNT_MARKUP = `
+      <span id="settings-account-status"></span>
+      <span id="settings-account-status-sub"></span>
+      <input id="settings-account-email" />
+      <span id="settings-account-provider"></span>
+      <span id="settings-account-sync"></span>
+      <span id="settings-account-sync-sub"></span>
+      <div id="settings-elevate-card">
+        <form id="settings-elevate-form">
+          <input id="settings-elevate-email" />
+          <input id="settings-elevate-password" />
+          <button id="btn-elevate-email" type="submit">Secure</button>
+        </form>
+        <button id="btn-elevate-google" type="button">Google</button>
+        <p id="settings-account-alert" hidden></p>
+      </div>
+      <div id="settings-password-card" hidden>
+        <form id="settings-password-form">
+          <input id="settings-current-password" />
+          <input id="settings-new-password" />
+          <input id="settings-confirm-password" />
+          <button id="btn-update-password" type="submit">Update</button>
+          <button id="btn-send-password-reset" type="button">Reset</button>
+        </form>
+        <p id="settings-password-alert" hidden></p>
+      </div>
+      <div id="settings-google-card" hidden></div>
+    `;
+
+    const submit = (id) => {
+      document
+        .getElementById(id)
+        .dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    };
+
+    beforeEach(() => {
+      document.body.innerHTML = ACCOUNT_MARKUP;
+      auth.currentUser = null;
+      onAuthStateChanged.mockImplementation(() => vi.fn());
+      signInAnonymously.mockReset();
+    });
+
+    afterEach(() => {
+      auth.currentUser = null;
+    });
+
+    it('renders the guest identity and the elevation card', () => {
+      renderAccountState({ uid: 'anon-1', isAnonymous: true });
+
+      const status = document.getElementById('settings-account-status');
+      expect(status.textContent).toBe('Guest');
+      expect(status.className).toContain('settings-status-badge--inactive');
+      expect(document.getElementById('settings-account-email').value).toBe('');
+      expect(document.getElementById('settings-account-provider').textContent).toBe(
+        'Anonymous session'
+      );
+      expect(document.getElementById('settings-account-sync').textContent).toBe('Guest session');
+      expect(document.getElementById('settings-elevate-card').hidden).toBe(false);
+      expect(document.getElementById('settings-password-card').hidden).toBe(true);
+      expect(document.getElementById('settings-google-card').hidden).toBe(true);
+    });
+
+    it('renders an email/password account with its address', () => {
+      renderAccountState({
+        uid: 'user-1',
+        isAnonymous: false,
+        email: 'scribe@example.com',
+        providerData: [{ providerId: 'password' }],
+      });
+
+      const status = document.getElementById('settings-account-status');
+      expect(status.textContent).toBe('Signed in');
+      expect(status.className).toContain('settings-status-badge--active');
+      expect(document.getElementById('settings-account-email').value).toBe('scribe@example.com');
+      expect(document.getElementById('settings-account-provider').textContent).toBe(
+        'Email & password'
+      );
+      expect(document.getElementById('settings-account-sync').textContent).toBe('Cloud archive');
+      expect(document.getElementById('settings-elevate-card').hidden).toBe(true);
+      expect(document.getElementById('settings-password-card').hidden).toBe(false);
+      expect(document.getElementById('settings-google-card').hidden).toBe(true);
+    });
+
+    it('renders a Google-only account without password controls', () => {
+      renderAccountState({
+        uid: 'user-2',
+        isAnonymous: false,
+        email: 'scribe@example.com',
+        providerData: [{ providerId: 'google.com' }],
+      });
+
+      expect(document.getElementById('settings-account-provider').textContent).toBe('Google');
+      expect(document.getElementById('settings-password-card').hidden).toBe(true);
+      expect(document.getElementById('settings-google-card').hidden).toBe(false);
+    });
+
+    it('labels an account linked to both email and Google', () => {
+      renderAccountState({
+        uid: 'user-3',
+        isAnonymous: false,
+        email: 'scribe@example.com',
+        providerData: [{ providerId: 'password' }, { providerId: 'google.com' }],
+      });
+
+      expect(document.getElementById('settings-account-provider').textContent).toBe(
+        'Email & Google'
+      );
+      expect(document.getElementById('settings-password-card').hidden).toBe(false);
+      expect(document.getElementById('settings-google-card').hidden).toBe(true);
+    });
+
+    it('does not create a guest identity before auth state settles', () => {
+      setupAccountSettings();
+      expect(signInAnonymously).not.toHaveBeenCalled();
+    });
+
+    it('creates a guest identity on demand and links it to an email', async () => {
+      const guest = { uid: 'anon-new', isAnonymous: true };
+      const linked = {
+        uid: 'anon-new',
+        isAnonymous: false,
+        email: 'new@example.com',
+        providerData: [{ providerId: 'password' }],
+      };
+      signInAnonymously.mockResolvedValue({ user: guest });
+      upgradeAnonymousToEmail.mockResolvedValue(linked);
+
+      setupAccountSettings();
+      document.getElementById('settings-elevate-email').value = 'new@example.com';
+      document.getElementById('settings-elevate-password').value = 'password123';
+      submit('settings-elevate-form');
+
+      await vi.waitFor(() =>
+        expect(upgradeAnonymousToEmail).toHaveBeenCalledWith('new@example.com', 'password123')
+      );
+      expect(signInAnonymously).toHaveBeenCalledWith(auth);
+      expect(document.getElementById('settings-account-status').textContent).toBe('Signed in');
+      expect(document.getElementById('settings-account-email').value).toBe('new@example.com');
+      expect(document.getElementById('settings-elevate-card').hidden).toBe(true);
+      expect(document.getElementById('settings-password-card').hidden).toBe(false);
+      expect(showToast).toHaveBeenCalledWith(
+        'Chronicle secured. Cloud saving is now active.',
+        'success'
+      );
+    });
+
+    it('rejects a short elevation password before linking', () => {
+      document.getElementById('settings-elevate-email').value = 'new@example.com';
+      document.getElementById('settings-elevate-password').value = 'short';
+      setupAccountSettings();
+      submit('settings-elevate-form');
+
+      expect(document.getElementById('settings-account-alert').textContent).toBe(
+        'Use a password with at least 8 characters.'
+      );
+      expect(upgradeAnonymousToEmail).not.toHaveBeenCalled();
+    });
+
+    it('shows the already-connected message for a taken email', async () => {
+      auth.currentUser = { uid: 'anon-2', isAnonymous: true };
+      upgradeAnonymousToEmail.mockRejectedValue({ code: 'auth/email-already-in-use' });
+
+      setupAccountSettings();
+      document.getElementById('settings-elevate-email').value = 'taken@example.com';
+      document.getElementById('settings-elevate-password').value = 'password123';
+      submit('settings-elevate-form');
+
+      await vi.waitFor(() =>
+        expect(document.getElementById('settings-account-alert').textContent).toBe(
+          'That email is already connected to another chronicle. Sign in to that account instead.'
+        )
+      );
+      expect(document.getElementById('settings-account-alert').hidden).toBe(false);
+    });
+
+    it('updates the password after confirmation', async () => {
+      auth.currentUser = {
+        uid: 'user-4',
+        isAnonymous: false,
+        email: 'scribe@example.com',
+        providerData: [{ providerId: 'password' }],
+      };
+      renderAccountState(auth.currentUser);
+      updateUserPassword.mockResolvedValue(auth.currentUser);
+
+      setupAccountSettings();
+      document.getElementById('settings-current-password').value = 'oldpass123';
+      document.getElementById('settings-new-password').value = 'newpass123';
+      document.getElementById('settings-confirm-password').value = 'newpass123';
+      submit('settings-password-form');
+
+      await vi.waitFor(() =>
+        expect(updateUserPassword).toHaveBeenCalledWith('oldpass123', 'newpass123')
+      );
+      expect(showToast).toHaveBeenCalledWith(
+        'Password updated. Other sessions will need to sign in again.',
+        'success'
+      );
+    });
+
+    it('refuses mismatched new passwords', () => {
+      auth.currentUser = {
+        uid: 'user-5',
+        isAnonymous: false,
+        email: 'scribe@example.com',
+        providerData: [{ providerId: 'password' }],
+      };
+      renderAccountState(auth.currentUser);
+
+      setupAccountSettings();
+      document.getElementById('settings-current-password').value = 'oldpass123';
+      document.getElementById('settings-new-password').value = 'newpass123';
+      document.getElementById('settings-confirm-password').value = 'different123';
+      submit('settings-password-form');
+
+      expect(document.getElementById('settings-password-alert').textContent).toBe(
+        'The new passwords do not match.'
+      );
+      expect(updateUserPassword).not.toHaveBeenCalled();
+    });
+
+    it('sends a recovery link to the signed-in email', async () => {
+      auth.currentUser = {
+        uid: 'user-6',
+        isAnonymous: false,
+        email: 'scribe@example.com',
+        providerData: [{ providerId: 'password' }],
+      };
+      sendPasswordReset.mockResolvedValue(undefined);
+
+      setupAccountSettings();
+      document.getElementById('btn-send-password-reset').click();
+
+      await vi.waitFor(() => expect(sendPasswordReset).toHaveBeenCalledWith('scribe@example.com'));
+      expect(showToast).toHaveBeenCalledWith(
+        'Recovery link sent to scribe@example.com.',
+        'success'
+      );
+    });
+
+    it('upgrades a guest to Google', async () => {
+      auth.currentUser = { uid: 'anon-3', isAnonymous: true };
+      upgradeAnonymousToGoogle.mockResolvedValue({
+        uid: 'anon-3',
+        isAnonymous: false,
+        email: 'scribe@example.com',
+        providerData: [{ providerId: 'google.com' }],
+      });
+
+      setupAccountSettings();
+      document.getElementById('btn-elevate-google').click();
+
+      await vi.waitFor(() => expect(upgradeAnonymousToGoogle).toHaveBeenCalled());
+      expect(showToast).toHaveBeenCalledWith(
+        'Chronicle secured with Google. Cloud saving is active.',
+        'success'
+      );
+      expect(document.getElementById('settings-google-card').hidden).toBe(false);
     });
   });
 

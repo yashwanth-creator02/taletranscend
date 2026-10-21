@@ -9,7 +9,19 @@ import '@css/pages/settings.css';
 
 import { initIcons } from '@ui/icons.js';
 import { showToast } from '@ui/components/toast.js';
-import { auth, onAuthStateChanged, refs, getDoc, setDoc, serverTimestamp } from '@fb/index.js';
+import {
+  auth,
+  onAuthStateChanged,
+  refs,
+  getDoc,
+  setDoc,
+  serverTimestamp,
+  signInAnonymously,
+  upgradeAnonymousToEmail,
+  upgradeAnonymousToGoogle,
+  updateUserPassword,
+  sendPasswordReset,
+} from '@fb/index.js';
 import {
   createLogger,
   escapeHtml,
@@ -556,6 +568,12 @@ export function renderFonts(activeFont) {
           </span>
           <span class="settings-font-chip__sub text-[10px] block">${escapeHtml(font.sub || '')}</span>
         </div>
+        <span
+          class="settings-font-chip__specimen"
+          aria-hidden="true"
+          style="font-family: ${font.css};"
+          >Aa</span
+        >
         <i data-lucide="check" class="w-4 h-4 text-indigo-400 font-check ${isActive ? '' : 'hidden'}"></i>
       </button>
     `;
@@ -566,25 +584,188 @@ export function renderFonts(activeFont) {
 }
 
 /**
- * Calculates local cache statistics.
- * @returns {{ progressCount: number, moniker: string }}
+ * Counts the bytes a stored value occupies.
+ * @param {string} value
+ * @returns {number}
+ */
+function archiveByteSize(value) {
+  try {
+    return new Blob([value]).size;
+  } catch {
+    return value.length;
+  }
+}
+
+/**
+ * Formats a byte count for the archive summary.
+ * @param {number} bytes
+ * @returns {string}
+ */
+function formatArchiveSize(bytes) {
+  if (!bytes) return '0 B';
+  if (bytes < 1024) return `${bytes} B`;
+  return `${(bytes / 1024).toFixed(1)} KB`;
+}
+
+/**
+ * Turns a stored tale id into a readable label.
+ * @param {string} taleId
+ * @returns {string}
+ */
+function formatArchiveTale(taleId) {
+  const cleaned = String(taleId)
+    .replace(/^tale[_-]?/i, '')
+    .replace(/[_-]+/g, ' ')
+    .trim();
+  if (!cleaned) return 'Untitled tale';
+  const title = cleaned.replace(/\b\w/g, (char) => char.toUpperCase());
+  return /^\d+$/.test(title) ? `Tale ${title}` : title;
+}
+
+/**
+ * Describes a stored reading-progress value.
+ * @param {string} raw
+ * @returns {string}
+ */
+function describeProgressEntry(raw) {
+  try {
+    const parsed = JSON.parse(raw);
+    const pct = Number(parsed?.pct ?? parsed?.percent ?? parsed?.progress);
+    if (Number.isFinite(pct)) return `${Math.round(pct)}% read`;
+    if (parsed?.scrollTop != null || parsed?.scroll != null) return 'Scroll position saved';
+    if (parsed?.chapter) return `Chapter ${parsed.chapter}`;
+  } catch {
+    // Stored value is not JSON; fall through to the generic label.
+  }
+  return 'Reading position saved';
+}
+
+/**
+ * Describes a stored inquiry thread.
+ * @param {string} raw
+ * @returns {string}
+ */
+function describeInquiryEntry(raw) {
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      const count = parsed.length;
+      return `${count} ${count === 1 ? 'missive' : 'missives'} archived`;
+    }
+  } catch {
+    // Stored value is not JSON; fall through to the generic label.
+  }
+  return 'Inquiry thread archived';
+}
+
+/**
+ * Calculates local cache statistics and itemizes the stored records.
+ * @returns {{
+ *   progressCount: number,
+ *   moniker: string,
+ *   entries: Array<{key: string, kind: string, icon: string, id: string, label: string, detail: string, bytes: number}>,
+ *   totalBytes: number
+ * }}
  */
 export function getArchivalStats() {
-  let progressCount = 0;
+  const entries = [];
+  let moniker = 'None recorded';
   try {
+    moniker = localStorage.getItem('tt_reader_moniker') || 'None recorded';
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && (key.startsWith('tt_progress_') || key.startsWith('tt_inquiries_'))) {
-        progressCount++;
+      if (!key) continue;
+
+      if (key.startsWith('tt_progress_')) {
+        const raw = localStorage.getItem(key) || '';
+        const taleId = key.slice('tt_progress_'.length);
+        entries.push({
+          key,
+          kind: 'Reading progress',
+          icon: 'book-open',
+          id: taleId,
+          label: formatArchiveTale(taleId),
+          detail: describeProgressEntry(raw),
+          bytes: archiveByteSize(raw),
+        });
+      } else if (key.startsWith('tt_inquiries_')) {
+        const raw = localStorage.getItem(key) || '';
+        const taleId = key.slice('tt_inquiries_'.length);
+        entries.push({
+          key,
+          kind: 'Inquiry thread',
+          icon: 'message-square',
+          id: taleId,
+          label: formatArchiveTale(taleId),
+          detail: describeInquiryEntry(raw),
+          bytes: archiveByteSize(raw),
+        });
       }
     }
   } catch {
-    // fallback
+    // Storage may be unavailable; return whatever was collected.
   }
+
+  entries.sort(
+    (a, b) =>
+      a.kind.localeCompare(b.kind) || a.label.localeCompare(b.label) || a.key.localeCompare(b.key)
+  );
+
   return {
-    progressCount,
-    moniker: localStorage.getItem('tt_reader_moniker') || 'None recorded',
+    progressCount: entries.length,
+    moniker,
+    entries,
+    totalBytes: entries.reduce((sum, entry) => sum + entry.bytes, 0),
   };
+}
+
+/**
+ * Renders the itemized list of records held in the local archive.
+ * @param {ReturnType<typeof getArchivalStats>} [stats]
+ */
+export function renderStorageArchive(stats = getArchivalStats()) {
+  const list = document.getElementById('settings-storage-list');
+  const meta = document.getElementById('settings-storage-meta');
+  if (!list) return;
+
+  const count = stats.entries.length;
+  if (meta) {
+    meta.textContent = `${count} ${count === 1 ? 'record' : 'records'}, ${formatArchiveSize(stats.totalBytes)}`;
+  }
+
+  if (!count) {
+    list.innerHTML = `
+      <div class="settings-storage-empty">
+        <i data-lucide="archive" class="settings-storage-empty__icon" aria-hidden="true"></i>
+        <p class="settings-storage-empty__text">
+          No reading records yet. Progress and inquiry threads saved on this device will appear
+          here.
+        </p>
+      </div>
+    `;
+    initIcons(list);
+    return;
+  }
+
+  list.innerHTML = stats.entries
+    .map(
+      (entry) => `
+        <div class="settings-storage-item" title="${escapeHtml(entry.key)}">
+          <span class="settings-storage-item__icon" aria-hidden="true">
+            <i data-lucide="${entry.icon}"></i>
+          </span>
+          <div class="settings-storage-item__text">
+            <span class="settings-storage-item__title">${escapeHtml(entry.kind)}</span>
+            <span class="settings-storage-item__sub">
+              ${escapeHtml(entry.label)}, ${escapeHtml(entry.detail)}
+            </span>
+          </div>
+          <span class="settings-storage-item__size">${formatArchiveSize(entry.bytes)}</span>
+        </div>
+      `
+    )
+    .join('');
+  initIcons(list);
 }
 
 /**
@@ -1191,12 +1372,14 @@ export function initSettingsInteractions() {
     });
   }
 
-  // Cache Statistics & Clear
+  // Cache Statistics & Archive Contents
   const stats = getArchivalStats();
   const cacheStatsCount = document.getElementById('settings-cache-count');
   if (cacheStatsCount) {
-    cacheStatsCount.textContent = `${stats.progressCount} Cached Items`;
+    const total = stats.entries.length;
+    cacheStatsCount.textContent = `${total} Cached ${total === 1 ? 'Item' : 'Items'}`;
   }
+  renderStorageArchive(stats);
 
   const clearCacheBtn = document.getElementById('btn-clear-reading-cache');
   if (clearCacheBtn) {
@@ -1214,6 +1397,7 @@ export function initSettingsInteractions() {
         count++;
       });
       if (cacheStatsCount) cacheStatsCount.textContent = '0 Cached Items';
+      renderStorageArchive();
       showToast(`Cleared ${count} cached reading progress entries.`, 'success');
     });
   }
@@ -1333,6 +1517,320 @@ export function setupAuthDisplay() {
   });
 }
 
+/**
+ * Maps Firebase Auth failures to copy a chronicler can act on.
+ * Returns an empty string for dismissals that should not raise an alert.
+ * @param {any} err
+ * @returns {string}
+ */
+function accountErrorText(err) {
+  switch (err?.code) {
+    case 'auth/email-already-in-use':
+    case 'auth/credential-already-in-use':
+      return 'That email is already connected to another chronicle. Sign in to that account instead.';
+    case 'auth/invalid-email':
+      return 'Enter a valid email address.';
+    case 'auth/weak-password':
+      return 'Use a password with at least 8 characters.';
+    case 'auth/wrong-password':
+    case 'auth/invalid-credential':
+      return 'The current password is incorrect.';
+    case 'auth/too-many-requests':
+      return 'Too many attempts. Try again shortly.';
+    case 'auth/popup-blocked':
+      return 'Allow popups for this site, then try Google again.';
+    case 'auth/popup-closed-by-user':
+    case 'auth/cancelled-popup-request':
+      return '';
+    case 'auth/operation-not-allowed':
+      return 'This sign-in method is not enabled for the archive yet.';
+    case 'auth/requires-recent-login':
+      return 'Sign in again before changing this credential.';
+    case 'auth/network-request-failed':
+      return 'The archive could not be reached. Check your connection.';
+    default:
+      return err?.message || 'The account change could not be completed.';
+  }
+}
+
+/**
+ * Shows or clears an inline account error.
+ * @param {HTMLElement | null} el
+ * @param {string} message
+ */
+function setAccountAlert(el, message) {
+  if (!el) return;
+  el.textContent = message;
+  el.hidden = !message;
+}
+
+/**
+ * Toggles a submit control while an auth request is in flight.
+ * @param {HTMLButtonElement | null} button
+ * @param {boolean} busy
+ */
+function setAccountBusy(button, busy) {
+  if (!button) return;
+  button.disabled = busy;
+  button.setAttribute('aria-busy', busy ? 'true' : 'false');
+  button.classList.toggle('is-busy', busy);
+}
+
+/**
+ * Returns a human label for the providers linked to the account.
+ * @param {import('firebase/auth').User | null} user
+ * @returns {string}
+ */
+function accountProviderLabel(user) {
+  if (!user || user.isAnonymous) return 'Anonymous session';
+  const providers = Array.isArray(user.providerData)
+    ? user.providerData.map((provider) => provider.providerId)
+    : [];
+  const hasPassword = providers.includes('password');
+  const hasGoogle = providers.includes('google.com');
+  if (hasPassword && hasGoogle) return 'Email & Google';
+  if (hasPassword) return 'Email & password';
+  if (hasGoogle) return 'Google';
+  return 'Authenticated session';
+}
+
+/**
+ * Reflects the current auth identity into the Accounts section.
+ * Guest, email/password, and Google accounts each get a distinct state.
+ * @param {import('firebase/auth').User | null} user
+ */
+export function renderAccountState(user) {
+  const signedIn = Boolean(user) && !user.isAnonymous;
+  const email = user?.email || '';
+  const providers = Array.isArray(user?.providerData)
+    ? user.providerData.map((provider) => provider.providerId)
+    : [];
+  const hasPassword = providers.includes('password');
+  const hasGoogle = providers.includes('google.com');
+
+  const status = document.getElementById('settings-account-status');
+  const statusSub = document.getElementById('settings-account-status-sub');
+  const emailInput = /** @type {HTMLInputElement | null} */ (
+    document.getElementById('settings-account-email')
+  );
+  const provider = document.getElementById('settings-account-provider');
+  const sync = document.getElementById('settings-account-sync');
+  const syncSub = document.getElementById('settings-account-sync-sub');
+  const elevateCard = document.getElementById('settings-elevate-card');
+  const passwordCard = document.getElementById('settings-password-card');
+  const googleCard = document.getElementById('settings-google-card');
+
+  if (status) {
+    status.textContent = signedIn ? 'Signed in' : 'Guest';
+    status.className = `settings-status-badge settings-status-badge--${
+      signedIn ? 'active' : 'inactive'
+    }`;
+  }
+  if (statusSub) {
+    statusSub.textContent = signedIn
+      ? 'Your chronicle is secured to this account.'
+      : 'Writing as a guest on this device.';
+  }
+  if (emailInput) {
+    emailInput.value = email;
+    emailInput.title = email;
+  }
+  if (provider) provider.textContent = accountProviderLabel(user);
+  if (sync) {
+    sync.textContent = signedIn ? 'Cloud archive' : 'Guest session';
+    sync.className = `settings-status-badge settings-status-badge--${
+      signedIn ? 'active' : 'inactive'
+    }`;
+  }
+  if (syncSub) {
+    syncSub.textContent = signedIn
+      ? 'Your archive follows this account across devices.'
+      : 'Elevate to keep this archive across devices.';
+  }
+
+  if (elevateCard) elevateCard.hidden = signedIn;
+  if (passwordCard) passwordCard.hidden = !(signedIn && hasPassword);
+  if (googleCard) googleCard.hidden = !(signedIn && hasGoogle && !hasPassword);
+}
+
+/**
+ * Guarantees a Firebase user exists before an elevation attempt.
+ * Settings can be opened directly on a cold browser with no restored session;
+ * the rest of the archive is anonymous-first, so create the guest identity here
+ * rather than failing the link.
+ * @returns {Promise<import('firebase/auth').User>}
+ */
+async function ensureAccountUser() {
+  if (auth.currentUser) return auth.currentUser;
+  const credential = await signInAnonymously(auth);
+  return credential.user;
+}
+
+/**
+ * Wires the Accounts section: guest elevation via email or Google, the
+ * read-only email display, password updates, and recovery mail.
+ */
+export function setupAccountSettings() {
+  const elevateForm = /** @type {HTMLFormElement | null} */ (
+    document.getElementById('settings-elevate-form')
+  );
+  const elevateEmail = /** @type {HTMLInputElement | null} */ (
+    document.getElementById('settings-elevate-email')
+  );
+  const elevatePassword = /** @type {HTMLInputElement | null} */ (
+    document.getElementById('settings-elevate-password')
+  );
+  const elevateButton = /** @type {HTMLButtonElement | null} */ (
+    document.getElementById('btn-elevate-email')
+  );
+  const googleButton = /** @type {HTMLButtonElement | null} */ (
+    document.getElementById('btn-elevate-google')
+  );
+  const accountAlert = document.getElementById('settings-account-alert');
+
+  const passwordForm = /** @type {HTMLFormElement | null} */ (
+    document.getElementById('settings-password-form')
+  );
+  const currentPassword = /** @type {HTMLInputElement | null} */ (
+    document.getElementById('settings-current-password')
+  );
+  const newPassword = /** @type {HTMLInputElement | null} */ (
+    document.getElementById('settings-new-password')
+  );
+  const confirmPassword = /** @type {HTMLInputElement | null} */ (
+    document.getElementById('settings-confirm-password')
+  );
+  const updateButton = /** @type {HTMLButtonElement | null} */ (
+    document.getElementById('btn-update-password')
+  );
+  const resetButton = /** @type {HTMLButtonElement | null} */ (
+    document.getElementById('btn-send-password-reset')
+  );
+  const passwordAlert = document.getElementById('settings-password-alert');
+
+  if (!elevateForm && !passwordForm) return;
+
+  onAuthStateChanged(auth, (user) => {
+    renderAccountState(user);
+  });
+
+  // Do not create an anonymous identity before Firebase has restored a
+  // persisted session: that would replace a returning signed-in visitor with
+  // a fresh guest. The elevation handlers call ensureAccountUser() only after
+  // the visitor acts, when the auth state has settled.
+
+  elevateForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    setAccountAlert(accountAlert, '');
+    const email = elevateEmail?.value.trim() || '';
+    const password = elevatePassword?.value || '';
+
+    if (!email || !email.includes('@')) {
+      setAccountAlert(accountAlert, 'Enter a valid email address.');
+      elevateEmail?.focus();
+      return;
+    }
+    if (password.length < 8) {
+      setAccountAlert(accountAlert, 'Use a password with at least 8 characters.');
+      elevatePassword?.focus();
+      return;
+    }
+
+    setAccountBusy(elevateButton, true);
+    try {
+      await ensureAccountUser();
+      const user = await upgradeAnonymousToEmail(email, password);
+      renderAccountState(user);
+      elevateForm.reset();
+      showToast('Chronicle secured. Cloud saving is now active.', 'success');
+    } catch (err) {
+      const message = accountErrorText(err);
+      if (message) setAccountAlert(accountAlert, message);
+    } finally {
+      setAccountBusy(elevateButton, false);
+    }
+  });
+
+  googleButton?.addEventListener('click', async () => {
+    setAccountAlert(accountAlert, '');
+    setAccountBusy(googleButton, true);
+    try {
+      await ensureAccountUser();
+      const user = await upgradeAnonymousToGoogle();
+      renderAccountState(user);
+      showToast('Chronicle secured with Google. Cloud saving is active.', 'success');
+    } catch (err) {
+      const message = accountErrorText(err);
+      if (message) setAccountAlert(accountAlert, message);
+    } finally {
+      setAccountBusy(googleButton, false);
+    }
+  });
+
+  passwordForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    setAccountAlert(passwordAlert, '');
+    const current = currentPassword?.value || '';
+    const next = newPassword?.value || '';
+    const confirmation = confirmPassword?.value || '';
+
+    if (!current) {
+      setAccountAlert(passwordAlert, 'Enter your current password.');
+      currentPassword?.focus();
+      return;
+    }
+    if (next.length < 8) {
+      setAccountAlert(passwordAlert, 'Use a new password with at least 8 characters.');
+      newPassword?.focus();
+      return;
+    }
+    if (next !== confirmation) {
+      setAccountAlert(passwordAlert, 'The new passwords do not match.');
+      confirmPassword?.focus();
+      return;
+    }
+
+    setAccountBusy(updateButton, true);
+    try {
+      await updateUserPassword(current, next);
+      passwordForm.reset();
+      showToast('Password updated. Other sessions will need to sign in again.', 'success');
+    } catch (err) {
+      const message = accountErrorText(err);
+      if (message) setAccountAlert(passwordAlert, message);
+    } finally {
+      setAccountBusy(updateButton, false);
+    }
+  });
+
+  resetButton?.addEventListener('click', async () => {
+    setAccountAlert(passwordAlert, '');
+    const email = auth.currentUser?.email;
+    if (!email) {
+      setAccountAlert(passwordAlert, 'No email address is connected to this chronicle.');
+      return;
+    }
+
+    setAccountBusy(resetButton, true);
+    try {
+      await sendPasswordReset(email);
+      showToast(`Recovery link sent to ${email}.`, 'success');
+    } catch (err) {
+      const message = accountErrorText(err);
+      if (message) setAccountAlert(passwordAlert, message);
+    } finally {
+      setAccountBusy(resetButton, false);
+    }
+  });
+
+  [elevateEmail, elevatePassword].forEach((input) => {
+    input?.addEventListener('input', () => setAccountAlert(accountAlert, ''));
+  });
+  [currentPassword, newPassword, confirmPassword].forEach((input) => {
+    input?.addEventListener('input', () => setAccountAlert(passwordAlert, ''));
+  });
+}
+
 // Initialize page reveal animation barrier
 initPageReveal();
 
@@ -1345,6 +1843,7 @@ export function initSettingsPage() {
   loadReaderFontStylesheets();
   initSettingsInteractions();
   setupAuthDisplay();
+  setupAccountSettings();
   initIcons();
   readyReveal();
   log.info('Settings page initialized successfully');

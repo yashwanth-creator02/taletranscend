@@ -228,6 +228,9 @@
     <div class="settings-container">
       <!-- Left Sidebar: Each section has its own row -->
       <aside class="settings-sidebar" id="settings-sidebar" aria-label="Settings navigation">
+        <div class="settings-sidebar__head">
+          <span class="settings-sidebar__title">Contents</span>
+        </div>
         <nav class="settings-sidebar__nav" role="tablist">
           <button
             type="button"
@@ -237,7 +240,7 @@
             aria-selected="true"
             aria-controls="section-profile"
           >
-            <i data-lucide="user" class="settings-nav-icon"></i>
+            <span class="settings-nav-mark" aria-hidden="true"><i data-lucide="sparkle"></i></span>
             <span class="settings-nav-label">Chronicler Profile</span>
           </button>
 
@@ -249,7 +252,7 @@
             aria-selected="false"
             aria-controls="section-general"
           >
-            <i data-lucide="sliders-horizontal" class="settings-nav-icon"></i>
+            <span class="settings-nav-mark" aria-hidden="true"><i data-lucide="sparkle"></i></span>
             <span class="settings-nav-label">General & Theme</span>
           </button>
 
@@ -261,7 +264,7 @@
             aria-selected="false"
             aria-controls="section-reader"
           >
-            <i data-lucide="book-open" class="settings-nav-icon"></i>
+            <span class="settings-nav-mark" aria-hidden="true"><i data-lucide="sparkle"></i></span>
             <span class="settings-nav-label">Reader & Codex</span>
           </button>
 
@@ -273,7 +276,7 @@
             aria-selected="false"
             aria-controls="section-atmosphere"
           >
-            <i data-lucide="sparkles" class="settings-nav-icon"></i>
+            <span class="settings-nav-mark" aria-hidden="true"><i data-lucide="sparkle"></i></span>
             <span class="settings-nav-label">Atmosphere & Motion</span>
           </button>
 
@@ -285,8 +288,20 @@
             aria-selected="false"
             aria-controls="section-storage"
           >
-            <i data-lucide="database" class="settings-nav-icon"></i>
+            <span class="settings-nav-mark" aria-hidden="true"><i data-lucide="sparkle"></i></span>
             <span class="settings-nav-label">Archival Storage</span>
+          </button>
+
+          <button
+            type="button"
+            class="settings-nav-item"
+            data-target="section-accounts"
+            role="tab"
+            aria-selected="false"
+            aria-controls="section-accounts"
+          >
+            <span class="settings-nav-mark" aria-hidden="true"><i data-lucide="sparkle"></i></span>
+            <span class="settings-nav-label">Accounts</span>
           </button>
 
           <button
@@ -297,10 +312,14 @@
             aria-selected="false"
             aria-controls="section-about"
           >
-            <i data-lucide="info" class="settings-nav-icon"></i>
+            <span class="settings-nav-mark" aria-hidden="true"><i data-lucide="sparkle"></i></span>
             <span class="settings-nav-label">About Codex</span>
           </button>
         </nav>
+        <div class="settings-sidebar__foot">
+          <a href="/toc.html" class="settings-sidebar__link">Living Codex</a>
+          <span aria-hidden="true">v1.0</span>
+        </div>
       </aside>
 
       <!-- Right Main Content Area: Separate Section Views -->
@@ -318,385 +337,396 @@
           data-section-name="Chronicler Profile"
         >
           <div class="settings-section-header">
-            <h2 class="settings-section-title">Chronicler Profile</h2>
-            <p class="settings-section-desc">
-              Customise your author identity, public moniker, lore, avatar, and correspondence.
-            </p>
+            <span class="settings-section-mark" aria-hidden="true"
+              ><i data-lucide="sparkle"></i
+            ></span>
+            <div class="settings-section-heading">
+              <h2 class="settings-section-title">Chronicler Profile</h2>
+              <p class="settings-section-desc">
+                Customise your author identity, public moniker, lore, avatar, and correspondence.
+              </p>
+            </div>
           </div>
 
-          <form id="settings-profile-form" class="space-y-6">
-            <!-- Card 1: Avatar & Identity -->
-            <div class="settings-card">
-              <!-- Avatar row -->
-              <div class="settings-row" data-setting-item>
-                <div class="settings-row__left">
-                  <div class="settings-avatar-preview">
-                    <img
-                      id="modal-avatar-preview"
-                      src=""
-                      alt="Avatar preview"
-                      class="settings-avatar-img hidden"
+          <div class="settings-profile-layout">
+            <form id="settings-profile-form" class="space-y-6">
+              <!-- Card 1: Avatar & Identity -->
+              <div class="settings-card">
+                <!-- Avatar row -->
+                <div class="settings-row" data-setting-item>
+                  <div class="settings-avatar-fields">
+                    <div class="settings-row__text">
+                      <span class="settings-row__label">Chronicler Avatar</span>
+                      <span class="settings-row__sub"
+                        >Enter an image URL for your profile crest</span
+                      >
+                    </div>
+                    <input
+                      type="url"
+                      id="input-avatar-url"
+                      class="settings-input"
+                      placeholder="https://images.unsplash.com/..."
+                      aria-label="Avatar image URL"
                     />
-                    <i
-                      id="modal-avatar-fallback"
-                      data-lucide="user"
-                      class="w-6 h-6 text-slate-600"
-                    ></i>
-                  </div>
-                  <div class="settings-row__text">
-                    <span class="settings-row__label">Chronicler Avatar</span>
-                    <span class="settings-row__sub">Enter an image URL for your profile crest</span>
-                  </div>
-                </div>
-                <div class="settings-row__right flex flex-col gap-2">
-                  <input
-                    type="url"
-                    id="input-avatar-url"
-                    class="settings-input"
-                    placeholder="https://images.unsplash.com/..."
-                    aria-label="Avatar image URL"
-                  />
-                  <div class="flex items-center gap-1.5 flex-wrap" id="avatar-presets-palette">
-                    <span class="text-[9px] uppercase tracking-wider text-muted font-bold mr-1"
-                      >Presets:</span
-                    >
-                    <button
-                      type="button"
-                      class="avatar-preset-btn px-2 py-0.5 rounded border border-line bg-surface-2 hover:bg-surface-3 text-[10px] text-muted hover:text-ink transition-colors"
-                      data-avatar-preset="https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&auto=format&fit=crop&q=80"
-                    >
-                      Scribe
-                    </button>
-                    <button
-                      type="button"
-                      class="avatar-preset-btn px-2 py-0.5 rounded border border-line bg-surface-2 hover:bg-surface-3 text-[10px] text-muted hover:text-ink transition-colors"
-                      data-avatar-preset="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400&auto=format&fit=crop&q=80"
-                    >
-                      Oracle
-                    </button>
-                    <button
-                      type="button"
-                      class="avatar-preset-btn px-2 py-0.5 rounded border border-line bg-surface-2 hover:bg-surface-3 text-[10px] text-muted hover:text-ink transition-colors"
-                      data-avatar-preset="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=400&auto=format&fit=crop&q=80"
-                    >
-                      Archivist
-                    </button>
-                    <button
-                      type="button"
-                      class="avatar-preset-btn px-2 py-0.5 rounded border border-line bg-surface-2 hover:bg-surface-3 text-[10px] text-muted hover:text-ink transition-colors"
-                      data-avatar-preset="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=400&auto=format&fit=crop&q=80"
-                    >
-                      Wanderer
-                    </button>
+                    <div class="settings-avatar-presets" id="avatar-presets-palette">
+                      <span class="settings-avatar-presets__label">Presets</span>
+                      <button
+                        type="button"
+                        class="avatar-preset-btn"
+                        data-avatar-preset="https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&auto=format&fit=crop&q=80"
+                      >
+                        Scribe
+                      </button>
+                      <button
+                        type="button"
+                        class="avatar-preset-btn"
+                        data-avatar-preset="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400&auto=format&fit=crop&q=80"
+                      >
+                        Oracle
+                      </button>
+                      <button
+                        type="button"
+                        class="avatar-preset-btn"
+                        data-avatar-preset="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=400&auto=format&fit=crop&q=80"
+                      >
+                        Archivist
+                      </button>
+                      <button
+                        type="button"
+                        class="avatar-preset-btn"
+                        data-avatar-preset="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=400&auto=format&fit=crop&q=80"
+                      >
+                        Wanderer
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <!-- Display Name -->
-              <div class="settings-row" data-setting-item>
-                <div class="settings-row__left">
-                  <div class="settings-row__icon-wrap">
-                    <i data-lucide="user-pen" class="w-4 h-4 text-indigo-400"></i>
-                  </div>
-                  <div class="settings-row__text">
-                    <span class="settings-row__label">Display Name</span>
-                    <span class="settings-row__sub"
-                      >Your public name displayed across the living archive</span
-                    >
-                  </div>
-                </div>
-                <div class="settings-row__right flex items-center gap-2">
-                  <input
-                    type="text"
-                    id="input-name"
-                    class="settings-input"
-                    placeholder="Enter chronicler name"
-                    maxlength="100"
-                    aria-label="Display Name"
-                  />
-                  <button
-                    type="button"
-                    id="btn-suggest-name"
-                    class="settings-btn-secondary whitespace-nowrap text-[11px]"
-                    title="Conjure a name suggestion using Oracle AI based on your bio"
-                  >
-                    <i data-lucide="sparkles" class="w-3 h-3 text-amber-400"></i>
-                    <span>Suggest</span>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Moniker & Signature -->
-              <div class="settings-row" data-setting-item>
-                <div class="settings-row__left">
-                  <div class="settings-row__icon-wrap">
-                    <i data-lucide="feather" class="w-4 h-4 text-indigo-400"></i>
-                  </div>
-                  <div class="settings-row__text">
-                    <span class="settings-row__label">Preferred Scribe Signature</span>
-                    <span class="settings-row__sub"
-                      >Pre-populates your moniker when inquiring with chroniclers</span
-                    >
-                  </div>
-                </div>
-                <div class="settings-row__right">
-                  <input
-                    type="text"
-                    id="setting-reader-moniker"
-                    class="settings-input"
-                    placeholder="e.g. Archivist Ronin"
-                    maxlength="50"
-                    aria-label="Preferred Scribe Signature"
-                  />
-                </div>
-              </div>
-
-              <!-- Short Bio (Stacked Layout: Below sideheading, full width) -->
-              <div class="settings-row settings-row--stacked" data-setting-item>
-                <div class="settings-row__header">
+                <!-- Display Name -->
+                <div class="settings-row" data-setting-item>
                   <div class="settings-row__left">
                     <div class="settings-row__icon-wrap">
-                      <i data-lucide="scroll" class="w-4 h-4 text-indigo-400"></i>
+                      <i data-lucide="user-pen" class="w-4 h-4 text-indigo-400"></i>
                     </div>
                     <div class="settings-row__text">
-                      <div class="flex items-center gap-2">
-                        <label for="input-bio" class="settings-row__label"
-                          >Chronicler Lore / Bio</label
-                        >
-                        <span class="settings-info-pill">Lore & AI Context</span>
-                      </div>
+                      <span class="settings-row__label">Display Name</span>
                       <span class="settings-row__sub"
-                        >Brief chronicle about your persona. Used by Oracle AI to conjure story
-                        titles, tags, and monikers.</span
+                        >Your public name displayed across the living archive</span
+                      >
+                    </div>
+                  </div>
+                  <div class="settings-row__right flex items-center gap-2">
+                    <input
+                      type="text"
+                      id="input-name"
+                      class="settings-input"
+                      placeholder="Enter chronicler name"
+                      maxlength="100"
+                      aria-label="Display Name"
+                    />
+                    <button
+                      type="button"
+                      id="btn-suggest-name"
+                      class="settings-btn-secondary whitespace-nowrap text-[11px]"
+                      title="Conjure a name suggestion using Oracle AI based on your bio"
+                    >
+                      <i data-lucide="sparkles" class="w-3 h-3 text-indigo-400"></i>
+                      <span>Suggest</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Moniker & Signature -->
+                <div class="settings-row" data-setting-item>
+                  <div class="settings-row__left">
+                    <div class="settings-row__icon-wrap">
+                      <i data-lucide="feather" class="w-4 h-4 text-indigo-400"></i>
+                    </div>
+                    <div class="settings-row__text">
+                      <span class="settings-row__label">Preferred Scribe Signature</span>
+                      <span class="settings-row__sub"
+                        >Pre-populates your moniker when inquiring with chroniclers</span
                       >
                     </div>
                   </div>
                   <div class="settings-row__right">
-                    <span id="bio-char-count" class="settings-badge font-mono text-[10px]"
-                      >0 / 1000</span
-                    >
+                    <input
+                      type="text"
+                      id="setting-reader-moniker"
+                      class="settings-input"
+                      placeholder="e.g. Archivist Ronin"
+                      maxlength="50"
+                      aria-label="Preferred Scribe Signature"
+                    />
                   </div>
                 </div>
-                <div class="settings-row__body mt-2 w-full">
-                  <textarea
-                    id="input-bio"
-                    rows="4"
-                    class="settings-input settings-textarea w-full resize-y text-xs leading-relaxed"
-                    placeholder="Whispering stories to the stars, chronicling fragments of the forgotten age…"
-                    maxlength="1000"
-                    aria-label="Chronicler Lore / Bio"
-                  ></textarea>
-                  <p class="settings-field-tip mt-1.5">
-                    <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400 shrink-0"></i>
-                    <span
-                      >Rich lore helps the Oracle AI summon unique names and stylistic suggestions
-                      tailored to your voice.</span
-                    >
+
+                <!-- Short Bio (Stacked Layout: Below sideheading, full width) -->
+                <div class="settings-row settings-row--stacked" data-setting-item>
+                  <div class="settings-row__header">
+                    <div class="settings-row__left">
+                      <div class="settings-row__icon-wrap">
+                        <i data-lucide="scroll" class="w-4 h-4 text-indigo-400"></i>
+                      </div>
+                      <div class="settings-row__text">
+                        <div class="flex items-center gap-2">
+                          <label for="input-bio" class="settings-row__label"
+                            >Chronicler Lore / Bio</label
+                          >
+                          <span class="settings-info-pill">Lore & AI Context</span>
+                        </div>
+                        <span class="settings-row__sub"
+                          >Brief chronicle about your persona. Used by Oracle AI to conjure story
+                          titles, tags, and monikers.</span
+                        >
+                      </div>
+                    </div>
+                    <div class="settings-row__right">
+                      <span id="bio-char-count" class="settings-badge font-mono text-[10px]"
+                        >0 / 1000</span
+                      >
+                    </div>
+                  </div>
+                  <div class="settings-row__body mt-2 w-full">
+                    <textarea
+                      id="input-bio"
+                      rows="4"
+                      class="settings-input settings-textarea w-full resize-y text-xs leading-relaxed"
+                      placeholder="Whispering stories to the stars, chronicling fragments of the forgotten age…"
+                      maxlength="1000"
+                      aria-label="Chronicler Lore / Bio"
+                    ></textarea>
+                    <p class="settings-field-tip mt-1.5">
+                      <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-400 shrink-0"></i>
+                      <span
+                        >Rich lore helps the Oracle AI summon unique names and stylistic suggestions
+                        tailored to your voice.</span
+                      >
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Pronouns -->
+                <div class="settings-row" data-setting-item>
+                  <div class="settings-row__left">
+                    <div class="settings-row__icon-wrap">
+                      <i data-lucide="user-check" class="w-4 h-4 text-indigo-400"></i>
+                    </div>
+                    <div class="settings-row__text">
+                      <span class="settings-row__label">Pronouns</span>
+                      <span class="settings-row__sub"
+                        >How fellow scribes and readers address your spirit</span
+                      >
+                    </div>
+                  </div>
+                  <div class="settings-row__right">
+                    <input
+                      type="text"
+                      id="input-pronouns"
+                      class="settings-input"
+                      placeholder="they/them, she/her, he/him…"
+                      maxlength="50"
+                      aria-label="Pronouns"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card 2: Lore & Preferences -->
+              <div class="settings-card">
+                <!-- Location -->
+                <div class="settings-row" data-setting-item>
+                  <div class="settings-row__left">
+                    <div class="settings-row__icon-wrap">
+                      <i data-lucide="map-pin" class="w-4 h-4 text-indigo-400"></i>
+                    </div>
+                    <div class="settings-row__text">
+                      <span class="settings-row__label">Location / Realm</span>
+                      <span class="settings-row__sub">Your city, country, or mythic realm</span>
+                    </div>
+                  </div>
+                  <div class="settings-row__right">
+                    <input
+                      type="text"
+                      id="input-location"
+                      class="settings-input"
+                      placeholder="City, Country or 'The Void'"
+                      maxlength="100"
+                      aria-label="Location"
+                    />
+                  </div>
+                </div>
+
+                <!-- Favourite Genres -->
+                <div class="settings-row flex-col items-start gap-3" data-setting-item>
+                  <div class="settings-row__left w-full">
+                    <div class="settings-row__icon-wrap">
+                      <i data-lucide="tags" class="w-4 h-4 text-indigo-400"></i>
+                    </div>
+                    <div class="settings-row__text">
+                      <span class="settings-row__label">Favourite Genres</span>
+                      <span class="settings-row__sub"
+                        >Genres you enjoy reading or writing, used to tailor chronicles in your
+                        feed</span
+                      >
+                    </div>
+                  </div>
+                  <div class="w-full pt-1">
+                    <div id="genre-selector" class="flex flex-wrap gap-2">
+                      <!-- Populated dynamically by settings.js -->
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Yearly Reading Goal -->
+                <div class="settings-row" data-setting-item>
+                  <div class="settings-row__left">
+                    <div class="settings-row__icon-wrap">
+                      <i data-lucide="target" class="w-4 h-4 text-indigo-400"></i>
+                    </div>
+                    <div class="settings-row__text">
+                      <span class="settings-row__label">Yearly Reading Milestone</span>
+                      <span class="settings-row__sub"
+                        >How many tales and chronicles you aim to read this year</span
+                      >
+                    </div>
+                  </div>
+                  <div class="settings-row__right">
+                    <input
+                      type="number"
+                      id="input-reading-goal"
+                      min="1"
+                      max="365"
+                      class="settings-input w-28 text-center"
+                      placeholder="12"
+                      aria-label="Yearly Reading Goal"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card 3: Social & External Presence -->
+              <div class="settings-card">
+                <!-- Website -->
+                <div class="settings-row" data-setting-item>
+                  <div class="settings-row__left">
+                    <div class="settings-row__icon-wrap">
+                      <i data-lucide="globe" class="w-4 h-4 text-indigo-400"></i>
+                    </div>
+                    <div class="settings-row__text">
+                      <span class="settings-row__label">Website / Sanctuary</span>
+                      <span class="settings-row__sub"
+                        >Link to your personal website or portfolio</span
+                      >
+                    </div>
+                  </div>
+                  <div class="settings-row__right">
+                    <input
+                      type="url"
+                      id="input-website"
+                      class="settings-input"
+                      placeholder="https://yoursite.com"
+                      aria-label="Website URL"
+                    />
+                  </div>
+                </div>
+
+                <!-- Twitter / X -->
+                <div class="settings-row" data-setting-item>
+                  <div class="settings-row__left">
+                    <div class="settings-row__icon-wrap">
+                      <i data-lucide="badge-x" class="w-4 h-4 text-indigo-400"></i>
+                    </div>
+                    <div class="settings-row__text">
+                      <span class="settings-row__label">Twitter / X</span>
+                      <span class="settings-row__sub">Your X handle for social connection</span>
+                    </div>
+                  </div>
+                  <div class="settings-row__right">
+                    <input
+                      type="text"
+                      id="input-twitter"
+                      class="settings-input"
+                      placeholder="handle"
+                      aria-label="Twitter handle"
+                    />
+                  </div>
+                </div>
+
+                <!-- Instagram -->
+                <div class="settings-row" data-setting-item>
+                  <div class="settings-row__left">
+                    <div class="settings-row__icon-wrap">
+                      <i data-lucide="instagram" class="w-4 h-4 text-indigo-400"></i>
+                    </div>
+                    <div class="settings-row__text">
+                      <span class="settings-row__label">Instagram</span>
+                      <span class="settings-row__sub">Your Instagram profile handle</span>
+                    </div>
+                  </div>
+                  <div class="settings-row__right">
+                    <input
+                      type="text"
+                      id="input-instagram"
+                      class="settings-input"
+                      placeholder="handle"
+                      aria-label="Instagram handle"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card 5: Account Identity & Save Actions -->
+              <div class="settings-card">
+                <div class="settings-row" data-setting-item>
+                  <div class="settings-row__left">
+                    <div class="settings-row__icon-wrap">
+                      <i data-lucide="shield" class="w-4 h-4 text-indigo-400"></i>
+                    </div>
+                    <div class="settings-row__text">
+                      <span class="settings-row__label">Account Identity & UID</span>
+                      <span id="settings-auth-uid" class="settings-row__sub font-mono"
+                        >Resolving...</span
+                      >
+                    </div>
+                  </div>
+                  <div class="settings-row__right">
+                    <span id="settings-auth-status" class="settings-badge">Resolving...</span>
+                  </div>
+                </div>
+
+                <!-- Submit Button Row -->
+                <div class="settings-card__footer">
+                  <p class="settings-card__foot-note">
+                    Changes persist to your chronicler profile and cloud archive.
                   </p>
+                  <button type="button" id="btn-save-profile" class="settings-btn-primary">
+                    <i data-lucide="check" class="w-4 h-4"></i>
+                    <span>Save Profile Changes</span>
+                  </button>
                 </div>
               </div>
+            </form>
 
-              <!-- Pronouns -->
-              <div class="settings-row" data-setting-item>
-                <div class="settings-row__left">
-                  <div class="settings-row__icon-wrap">
-                    <i data-lucide="user-check" class="w-4 h-4 text-indigo-400"></i>
-                  </div>
-                  <div class="settings-row__text">
-                    <span class="settings-row__label">Pronouns</span>
-                    <span class="settings-row__sub"
-                      >How fellow scribes and readers address your spirit</span
-                    >
-                  </div>
-                </div>
-                <div class="settings-row__right">
-                  <input
-                    type="text"
-                    id="input-pronouns"
-                    class="settings-input"
-                    placeholder="they/them, she/her, he/him…"
-                    maxlength="50"
-                    aria-label="Pronouns"
+            <aside class="settings-profile-portrait" aria-label="Profile crest preview">
+              <div class="settings-avatar-stage">
+                <div class="settings-avatar-preview">
+                  <img
+                    id="modal-avatar-preview"
+                    src=""
+                    alt="Avatar preview"
+                    class="settings-avatar-img hidden"
                   />
+                  <i
+                    id="modal-avatar-fallback"
+                    data-lucide="user"
+                    class="w-6 h-6 text-slate-600"
+                  ></i>
                 </div>
+                <span class="settings-avatar-caption">Profile crest</span>
               </div>
-            </div>
-
-            <!-- Card 2: Lore & Preferences -->
-            <div class="settings-card">
-              <!-- Location -->
-              <div class="settings-row" data-setting-item>
-                <div class="settings-row__left">
-                  <div class="settings-row__icon-wrap">
-                    <i data-lucide="map-pin" class="w-4 h-4 text-indigo-400"></i>
-                  </div>
-                  <div class="settings-row__text">
-                    <span class="settings-row__label">Location / Realm</span>
-                    <span class="settings-row__sub">Your city, country, or mythic realm</span>
-                  </div>
-                </div>
-                <div class="settings-row__right">
-                  <input
-                    type="text"
-                    id="input-location"
-                    class="settings-input"
-                    placeholder="City, Country or 'The Void'"
-                    maxlength="100"
-                    aria-label="Location"
-                  />
-                </div>
-              </div>
-
-              <!-- Favourite Genres -->
-              <div class="settings-row flex-col items-start gap-3" data-setting-item>
-                <div class="settings-row__left w-full">
-                  <div class="settings-row__icon-wrap">
-                    <i data-lucide="tags" class="w-4 h-4 text-indigo-400"></i>
-                  </div>
-                  <div class="settings-row__text">
-                    <span class="settings-row__label">Favourite Genres</span>
-                    <span class="settings-row__sub"
-                      >Genres you enjoy reading or writing, used to tailor chronicles in your
-                      feed</span
-                    >
-                  </div>
-                </div>
-                <div class="w-full pt-1">
-                  <div id="genre-selector" class="flex flex-wrap gap-2">
-                    <!-- Populated dynamically by settings.js -->
-                  </div>
-                </div>
-              </div>
-
-              <!-- Yearly Reading Goal -->
-              <div class="settings-row" data-setting-item>
-                <div class="settings-row__left">
-                  <div class="settings-row__icon-wrap">
-                    <i data-lucide="target" class="w-4 h-4 text-indigo-400"></i>
-                  </div>
-                  <div class="settings-row__text">
-                    <span class="settings-row__label">Yearly Reading Milestone</span>
-                    <span class="settings-row__sub"
-                      >How many tales and chronicles you aim to read this year</span
-                    >
-                  </div>
-                </div>
-                <div class="settings-row__right">
-                  <input
-                    type="number"
-                    id="input-reading-goal"
-                    min="1"
-                    max="365"
-                    class="settings-input w-28 text-center"
-                    placeholder="12"
-                    aria-label="Yearly Reading Goal"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <!-- Card 3: Social & External Presence -->
-            <div class="settings-card">
-              <!-- Website -->
-              <div class="settings-row" data-setting-item>
-                <div class="settings-row__left">
-                  <div class="settings-row__icon-wrap">
-                    <i data-lucide="globe" class="w-4 h-4 text-indigo-400"></i>
-                  </div>
-                  <div class="settings-row__text">
-                    <span class="settings-row__label">Website / Sanctuary</span>
-                    <span class="settings-row__sub"
-                      >Link to your personal website or portfolio</span
-                    >
-                  </div>
-                </div>
-                <div class="settings-row__right">
-                  <input
-                    type="url"
-                    id="input-website"
-                    class="settings-input"
-                    placeholder="https://yoursite.com"
-                    aria-label="Website URL"
-                  />
-                </div>
-              </div>
-
-              <!-- Twitter / X -->
-              <div class="settings-row" data-setting-item>
-                <div class="settings-row__left">
-                  <div class="settings-row__icon-wrap">
-                    <i data-lucide="badge-x" class="w-4 h-4 text-indigo-400"></i>
-                  </div>
-                  <div class="settings-row__text">
-                    <span class="settings-row__label">Twitter / X</span>
-                    <span class="settings-row__sub">Your X handle for social connection</span>
-                  </div>
-                </div>
-                <div class="settings-row__right">
-                  <input
-                    type="text"
-                    id="input-twitter"
-                    class="settings-input"
-                    placeholder="handle"
-                    aria-label="Twitter handle"
-                  />
-                </div>
-              </div>
-
-              <!-- Instagram -->
-              <div class="settings-row" data-setting-item>
-                <div class="settings-row__left">
-                  <div class="settings-row__icon-wrap">
-                    <i data-lucide="instagram" class="w-4 h-4 text-indigo-400"></i>
-                  </div>
-                  <div class="settings-row__text">
-                    <span class="settings-row__label">Instagram</span>
-                    <span class="settings-row__sub">Your Instagram profile handle</span>
-                  </div>
-                </div>
-                <div class="settings-row__right">
-                  <input
-                    type="text"
-                    id="input-instagram"
-                    class="settings-input"
-                    placeholder="handle"
-                    aria-label="Instagram handle"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <!-- Card 5: Account Identity & Save Actions -->
-            <div class="settings-card">
-              <div class="settings-row" data-setting-item>
-                <div class="settings-row__left">
-                  <div class="settings-row__icon-wrap">
-                    <i data-lucide="shield" class="w-4 h-4 text-indigo-400"></i>
-                  </div>
-                  <div class="settings-row__text">
-                    <span class="settings-row__label">Account Identity & UID</span>
-                    <span id="settings-auth-uid" class="settings-row__sub font-mono"
-                      >Resolving...</span
-                    >
-                  </div>
-                </div>
-                <div class="settings-row__right">
-                  <span id="settings-auth-status" class="settings-badge">Resolving...</span>
-                </div>
-              </div>
-
-              <!-- Submit Button Row -->
-              <div class="p-4 sm:p-5 flex items-center justify-between bg-white/[0.02]">
-                <p class="text-[11px] text-slate-400">
-                  Changes persist to your chronicler profile and cloud archive.
-                </p>
-                <button type="button" id="btn-save-profile" class="settings-btn-primary">
-                  <i data-lucide="check" class="w-4 h-4"></i>
-                  <span>Save Profile Changes</span>
-                </button>
-              </div>
-            </div>
-          </form>
+            </aside>
+          </div>
         </section>
 
         <!-- 2. General & Theme Section -->
@@ -706,11 +736,16 @@
           data-section-name="General and Theme"
         >
           <div class="settings-section-header">
-            <h2 class="settings-section-title">General & Theme</h2>
-            <p class="settings-section-desc">
-              Configure overall application interface illumination, Oracle AI intelligence, and
-              system defaults.
-            </p>
+            <span class="settings-section-mark" aria-hidden="true"
+              ><i data-lucide="sparkle"></i
+            ></span>
+            <div class="settings-section-heading">
+              <h2 class="settings-section-title">General & Theme</h2>
+              <p class="settings-section-desc">
+                Configure overall application interface illumination, Oracle AI intelligence, and
+                system defaults.
+              </p>
+            </div>
           </div>
 
           <!-- Card 1: Application Interface Theme -->
@@ -752,7 +787,7 @@
             >
               <div class="settings-row__left">
                 <div class="settings-row__icon-wrap">
-                  <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+                  <i data-lucide="sparkles" class="w-4 h-4 text-indigo-400"></i>
                 </div>
                 <div class="settings-row__text">
                   <div class="flex items-center gap-2">
@@ -824,11 +859,16 @@
           data-section-name="Reader and Codex"
         >
           <div class="settings-section-header">
-            <h2 class="settings-section-title">Reader & Codex</h2>
-            <p class="settings-section-desc">
-              Configure manuscript reading parchment illumination, typography, spacing, and live
-              preview.
-            </p>
+            <span class="settings-section-mark" aria-hidden="true"
+              ><i data-lucide="sparkle"></i
+            ></span>
+            <div class="settings-section-heading">
+              <h2 class="settings-section-title">Reader & Codex</h2>
+              <p class="settings-section-desc">
+                Configure manuscript reading parchment illumination, typography, spacing, and live
+                preview.
+              </p>
+            </div>
           </div>
 
           <!-- Card 1: Default Reading Parchment -->
@@ -1004,10 +1044,15 @@
           data-section-name="Atmosphere and Motion"
         >
           <div class="settings-section-header">
-            <h2 class="settings-section-title">Atmosphere & Motion</h2>
-            <p class="settings-section-desc">
-              Manage particles, auditory cues, and accessibility motion settings.
-            </p>
+            <span class="settings-section-mark" aria-hidden="true"
+              ><i data-lucide="sparkle"></i
+            ></span>
+            <div class="settings-section-heading">
+              <h2 class="settings-section-title">Atmosphere & Motion</h2>
+              <p class="settings-section-desc">
+                Manage particles, auditory cues, and accessibility motion settings.
+              </p>
+            </div>
           </div>
 
           <div class="settings-card">
@@ -1097,10 +1142,15 @@
           data-section-name="Archival Storage"
         >
           <div class="settings-section-header">
-            <h2 class="settings-section-title">Archival Storage</h2>
-            <p class="settings-section-desc">
-              Manage local storage cache and offline reading positions.
-            </p>
+            <span class="settings-section-mark" aria-hidden="true"
+              ><i data-lucide="sparkle"></i
+            ></span>
+            <div class="settings-section-heading">
+              <h2 class="settings-section-title">Archival Storage</h2>
+              <p class="settings-section-desc">
+                Manage local storage cache and offline reading positions.
+              </p>
+            </div>
           </div>
 
           <div class="settings-card">
@@ -1132,36 +1182,345 @@
               </div>
             </div>
           </div>
+
+          <div class="settings-card settings-storage-archive" data-setting-item>
+            <div class="settings-storage-archive__head">
+              <div class="settings-storage-archive__heading">
+                <span class="settings-storage-archive__title">Archived records</span>
+                <span class="settings-storage-archive__sub">
+                  Reading positions and inquiry threads saved on this device.
+                </span>
+              </div>
+              <span class="settings-storage-archive__meta" id="settings-storage-meta"
+                >0 records</span
+              >
+            </div>
+            <div class="settings-storage-list" id="settings-storage-list"></div>
+          </div>
         </section>
 
-        <!-- 7. About Codex Section -->
-        <section id="section-about" class="settings-section hidden" data-section-name="About Codex">
+        <!-- 6. Accounts Section -->
+        <section id="section-accounts" class="settings-section hidden" data-section-name="Accounts">
           <div class="settings-section-header">
-            <h2 class="settings-section-title">About Codex</h2>
-            <p class="settings-section-desc">
-              Architecture information, engine versions, and archive links.
-            </p>
+            <span class="settings-section-mark" aria-hidden="true"
+              ><i data-lucide="sparkle"></i
+            ></span>
+            <div class="settings-section-heading">
+              <h2 class="settings-section-title">Accounts</h2>
+              <p class="settings-section-desc">
+                Manage your sign-in, cloud archive, and account security.
+              </p>
+            </div>
           </div>
 
-          <div class="settings-card">
-            <div class="settings-row" data-setting-item>
+          <div class="settings-card settings-account-identity" data-setting-item>
+            <div class="settings-row">
               <div class="settings-row__left">
                 <div class="settings-row__icon-wrap">
-                  <i data-lucide="info" class="w-4 h-4 text-indigo-400"></i>
+                  <i data-lucide="user" class="w-4 h-4 text-indigo-400"></i>
                 </div>
                 <div class="settings-row__text">
-                  <span class="settings-row__label">TaleTranscend Codex Engine</span>
-                  <span class="settings-row__sub"
-                    >Version 1.0.0 — Vanilla ES2022 Multi-Page Application</span
-                  >
+                  <span class="settings-row__label">Sign-in status</span>
+                  <span class="settings-row__sub" id="settings-account-status-sub">
+                    Writing as a guest on this device
+                  </span>
                 </div>
               </div>
               <div class="settings-row__right">
-                <a href="/toc.html" class="settings-row-link">
-                  <span>Living Codex</span>
-                  <i data-lucide="external-link" class="w-3.5 h-3.5 ml-1"></i>
-                </a>
+                <span
+                  id="settings-account-status"
+                  class="settings-status-badge settings-status-badge--inactive"
+                  >Guest</span
+                >
               </div>
+            </div>
+
+            <div class="settings-row">
+              <div class="settings-row__left">
+                <div class="settings-row__icon-wrap">
+                  <i data-lucide="mail" class="w-4 h-4 text-indigo-400"></i>
+                </div>
+                <div class="settings-row__text">
+                  <span class="settings-row__label">Email address</span>
+                  <span class="settings-row__sub">
+                    Used for cloud saving and password recovery
+                  </span>
+                </div>
+              </div>
+              <div class="settings-row__right">
+                <input
+                  id="settings-account-email"
+                  class="settings-input settings-account-email-input"
+                  type="email"
+                  readonly
+                  value=""
+                  placeholder="No email connected"
+                  aria-label="Signed in email address"
+                />
+              </div>
+            </div>
+
+            <div class="settings-row">
+              <div class="settings-row__left">
+                <div class="settings-row__icon-wrap">
+                  <i data-lucide="key" class="w-4 h-4 text-indigo-400"></i>
+                </div>
+                <div class="settings-row__text">
+                  <span class="settings-row__label">Sign-in method</span>
+                  <span class="settings-row__sub">How this chronicle is authenticated</span>
+                </div>
+              </div>
+              <div class="settings-row__right">
+                <span class="settings-account-provider" id="settings-account-provider">
+                  Anonymous session
+                </span>
+              </div>
+            </div>
+
+            <div class="settings-row">
+              <div class="settings-row__left">
+                <div class="settings-row__icon-wrap">
+                  <i data-lucide="cloud" class="w-4 h-4 text-indigo-400"></i>
+                </div>
+                <div class="settings-row__text">
+                  <span class="settings-row__label">Cloud archive</span>
+                  <span class="settings-row__sub" id="settings-account-sync-sub">
+                    Elevate to keep this archive across devices
+                  </span>
+                </div>
+              </div>
+              <div class="settings-row__right">
+                <span
+                  id="settings-account-sync"
+                  class="settings-status-badge settings-status-badge--inactive"
+                  >Guest session</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="settings-card settings-account-panel"
+            id="settings-elevate-card"
+            data-setting-item
+          >
+            <div class="settings-account-panel__head">
+              <div class="settings-account-panel__heading">
+                <h3 class="settings-account-panel__title">Secure this chronicle</h3>
+                <p class="settings-account-panel__sub">
+                  You are writing as a guest. Connect an email or Google account to keep your tales,
+                  reading progress, and inquiries across devices.
+                </p>
+              </div>
+              <span class="settings-account-panel__seal" aria-hidden="true">
+                <i data-lucide="shield-check" class="w-4 h-4"></i>
+              </span>
+            </div>
+
+            <form id="settings-elevate-form" class="settings-account-form" novalidate>
+              <div class="settings-account-grid">
+                <label class="settings-account-field">
+                  <span class="settings-account-label">Email address</span>
+                  <input
+                    id="settings-elevate-email"
+                    class="settings-input"
+                    type="email"
+                    autocomplete="email"
+                    placeholder="you@example.com"
+                    required
+                  />
+                </label>
+                <label class="settings-account-field">
+                  <span class="settings-account-label">Password</span>
+                  <input
+                    id="settings-elevate-password"
+                    class="settings-input"
+                    type="password"
+                    autocomplete="new-password"
+                    placeholder="At least 8 characters"
+                    minlength="8"
+                    required
+                  />
+                </label>
+              </div>
+
+              <div class="settings-account-form__foot">
+                <p class="settings-account-hint">
+                  Your guest archive stays attached to this chronicle.
+                </p>
+                <button type="submit" id="btn-elevate-email" class="settings-btn-primary">
+                  <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+                  <span>Secure account & sync</span>
+                </button>
+              </div>
+            </form>
+
+            <div class="settings-account-divider"><span>or</span></div>
+
+            <button type="button" id="btn-elevate-google" class="settings-account-google">
+              <i data-lucide="globe" class="w-4 h-4"></i>
+              <span>Continue with Google</span>
+            </button>
+
+            <p class="settings-account-alert" id="settings-account-alert" role="alert" hidden></p>
+          </div>
+
+          <div
+            class="settings-card settings-account-panel"
+            id="settings-password-card"
+            data-setting-item
+            hidden
+          >
+            <div class="settings-account-panel__head">
+              <div class="settings-account-panel__heading">
+                <h3 class="settings-account-panel__title">Password</h3>
+                <p class="settings-account-panel__sub">
+                  Update the password used to sign in to this chronicle.
+                </p>
+              </div>
+              <span class="settings-account-panel__seal" aria-hidden="true">
+                <i data-lucide="key" class="w-4 h-4"></i>
+              </span>
+            </div>
+
+            <form id="settings-password-form" class="settings-account-form" novalidate>
+              <label class="settings-account-field settings-account-field--current">
+                <span class="settings-account-label">Current password</span>
+                <input
+                  id="settings-current-password"
+                  class="settings-input"
+                  type="password"
+                  autocomplete="current-password"
+                  placeholder="Enter your current password"
+                  required
+                />
+              </label>
+
+              <div class="settings-account-grid">
+                <label class="settings-account-field">
+                  <span class="settings-account-label">New password</span>
+                  <input
+                    id="settings-new-password"
+                    class="settings-input"
+                    type="password"
+                    autocomplete="new-password"
+                    placeholder="At least 8 characters"
+                    minlength="8"
+                    required
+                  />
+                </label>
+                <label class="settings-account-field">
+                  <span class="settings-account-label">Confirm new password</span>
+                  <input
+                    id="settings-confirm-password"
+                    class="settings-input"
+                    type="password"
+                    autocomplete="new-password"
+                    placeholder="Repeat the new password"
+                    minlength="8"
+                    required
+                  />
+                </label>
+              </div>
+
+              <div class="settings-account-form__foot">
+                <p class="settings-account-hint">
+                  Changing your password signs out other sessions.
+                </p>
+                <div class="settings-account-form__actions">
+                  <button type="button" id="btn-send-password-reset" class="settings-btn-secondary">
+                    Send reset email
+                  </button>
+                  <button type="submit" id="btn-update-password" class="settings-btn-primary">
+                    Update password
+                  </button>
+                </div>
+              </div>
+
+              <p
+                class="settings-account-alert"
+                id="settings-password-alert"
+                role="alert"
+                hidden
+              ></p>
+            </form>
+          </div>
+
+          <div
+            class="settings-card settings-account-panel"
+            id="settings-google-card"
+            data-setting-item
+            hidden
+          >
+            <div class="settings-account-panel__head">
+              <div class="settings-account-panel__heading">
+                <h3 class="settings-account-panel__title">Google sign-in</h3>
+                <p class="settings-account-panel__sub">
+                  This chronicle signs in through Google. Cloud saving is active.
+                </p>
+              </div>
+              <span class="settings-account-panel__seal" aria-hidden="true">
+                <i data-lucide="globe" class="w-4 h-4"></i>
+              </span>
+            </div>
+            <p class="settings-account-note">
+              Your password is managed by Google. Change it from your
+              <a
+                href="https://myaccount.google.com/security"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="settings-row-link"
+              >
+                Google Account
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+              </a>
+              instead.
+            </p>
+          </div>
+        </section>
+
+        <section id="section-about" class="settings-section hidden" data-section-name="About Codex">
+          <div class="settings-section-header">
+            <span class="settings-section-mark" aria-hidden="true"
+              ><i data-lucide="sparkle"></i
+            ></span>
+            <div class="settings-section-heading">
+              <h2 class="settings-section-title">About Codex</h2>
+              <p class="settings-section-desc">
+                Architecture information, engine versions, and archive links.
+              </p>
+            </div>
+          </div>
+
+          <div class="settings-card settings-colophon">
+            <div class="settings-colophon__head" data-setting-item>
+              <div class="settings-colophon__mark" aria-hidden="true">TT</div>
+              <div class="settings-colophon__intro">
+                <h3 class="settings-colophon__title">The TaleTranscend Codex</h3>
+                <p class="settings-colophon__sub">
+                  A living archive for tales, chronicles, and the voices that carry them.
+                </p>
+              </div>
+            </div>
+            <dl class="settings-colophon__list">
+              <div class="settings-colophon__entry" data-setting-item>
+                <dt>Engine</dt>
+                <dd>Version 1.0.0, Vanilla ES2022</dd>
+              </div>
+              <div class="settings-colophon__entry" data-setting-item>
+                <dt>Interface</dt>
+                <dd>Vite, multi-page, design tokens</dd>
+              </div>
+              <div class="settings-colophon__entry" data-setting-item>
+                <dt>Archive</dt>
+                <dd>Firebase, Firestore, anonymous auth</dd>
+              </div>
+            </dl>
+            <div class="settings-colophon__foot">
+              <a href="/toc.html" class="settings-row-link">
+                <span>Open the Living Codex</span>
+                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 ml-1"></i>
+              </a>
             </div>
           </div>
         </section>
@@ -1181,7 +1540,7 @@
         <header class="settings-modal-header">
           <div class="flex items-center gap-2.5">
             <div class="settings-row__icon-wrap">
-              <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+              <i data-lucide="sparkles" class="w-4 h-4 text-indigo-400"></i>
             </div>
             <div>
               <h3 id="modal-gemini-title" class="settings-modal-title">Google Gemini API Key</h3>
@@ -1245,7 +1604,7 @@
               </button>
             </div>
             <p id="modal-gemini-hint" class="text-[11px] text-slate-400">
-              Keys typically begin with <code class="font-mono text-amber-300/80">AIzaSy</code>.
+              Keys typically begin with <code class="font-mono text-indigo-300/80">AIzaSy</code>.
             </p>
           </div>
         </div>
