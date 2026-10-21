@@ -283,7 +283,7 @@ function _bindAiNameButton() {
   btn.addEventListener('click', async () => {
     const bio = bioInput.value.trim();
     if (!bio || bio.length < 5) {
-      showToast('Write a short bio first (at least 5 characters) to summon a name.', 'info');
+      showToast('Write a short bio first (at least 5 characters) to suggest a name.', 'info');
       bioInput.focus();
       return;
     }
@@ -294,7 +294,7 @@ function _bindAiNameButton() {
       (typeof window !== 'undefined' ? window.__GEMINI_KEY__ : null);
 
     if (!apiKey) {
-      showToast('Please enter your Gemini API key below to summon name suggestions.', 'info');
+      showToast('Enter your Google API Key below to get name suggestions.', 'info');
       if (keyInput) {
         keyInput.focus();
         keyInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -306,7 +306,7 @@ function _bindAiNameButton() {
 
     const originalText = btn.textContent;
     btn.disabled = true;
-    btn.textContent = 'Conjuring…';
+    btn.textContent = 'Suggesting…';
 
     try {
       const suggested = await suggestNameFromBio(bio, apiKey);
@@ -318,10 +318,10 @@ function _bindAiNameButton() {
         }
         showToast(`Suggested: "${suggested}"`, 'success');
       } else {
-        showToast('Could not summon a name. Verify your Gemini API key and try again.', 'error');
+        showToast('Could not suggest a name. Check your Google API Key and try again.', 'error');
       }
     } catch {
-      showToast('Failed to summon name. Please check your connection and API key.', 'error');
+      showToast('Name suggestion failed. Check your connection and Google API Key.', 'error');
     } finally {
       btn.disabled = false;
       btn.textContent = originalText;
@@ -345,10 +345,10 @@ function _bindApiKeyInput() {
     const val = keyInput.value.trim();
     if (val) {
       setStoredApiKey(val);
-      showToast('Gemini API key saved.', 'success');
+      showToast('Google API Key saved.', 'success');
     } else {
       clearStoredApiKey();
-      showToast('Gemini API key cleared.', 'info');
+      showToast('Google API Key cleared.', 'info');
     }
   };
 

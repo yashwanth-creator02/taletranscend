@@ -296,7 +296,7 @@ function bindAIEvents() {
   const oracleContinueBtn = document.getElementById('oracle-continue-chronicle-btn');
   const contentArea = document.getElementById('chapter-content');
 
-  // Wire oracle panel triggers to main handlers
+  // Wire Gemini panel triggers to main handlers
   oracleElevateBtn?.addEventListener('click', () => {
     if (enhanceBtn) enhanceBtn.click();
   });
@@ -312,7 +312,7 @@ function bindAIEvents() {
 
     if (!promptText || promptText.length < 10) {
       showToast(
-        'Please enter at least 10 characters in the synopsis or chapter for the Oracle to suggest a title.',
+        'Please enter at least 10 characters in the synopsis or chapter to suggest a title.',
         'info'
       );
       return;
@@ -320,16 +320,13 @@ function bindAIEvents() {
 
     const key = _getEffectiveApiKey();
     if (!key) {
-      showToast(
-        'Please configure your Gemini API Key in Settings to consult the Oracle.',
-        'warning'
-      );
+      showToast('Configure your Google API Key in Settings to use these tools.', 'warning');
       return;
     }
 
     oracleSuggestTitleBtn.disabled = true;
     oracleSuggestTitleBtn.classList.add('animate-pulse');
-    showToast('The Oracle contemplates an epic title...', 'info');
+    showToast('Generating a title...', 'info');
 
     try {
       const suggested = await suggestTitle(promptText, key);
@@ -340,9 +337,9 @@ function bindAIEvents() {
         }
         state.title = suggested;
         state.isDirty = true;
-        showToast('Title revealed by the Oracle.', 'success');
+        showToast('Title suggested.', 'success');
       } else {
-        showToast('The Oracle remains silent.', 'warning');
+        showToast('No title suggestion was returned.', 'warning');
       }
     } catch (err) {
       log.error('Title suggestion failed:', err);
@@ -365,23 +362,20 @@ function bindAIEvents() {
     const key = _getEffectiveApiKey();
     enhanceBtn.disabled = true;
     enhanceBtn.classList.add('animate-pulse');
-    showToast('Consulting the Oracle...', 'info');
+    showToast('Refining text with Gemini...', 'info');
 
     try {
       const refined = await refineMythicText(text, key);
       if (refined) {
         contentArea.value = refined;
         contentArea.dispatchEvent(new Event('input', { bubbles: true }));
-        showToast('The weave has been refined.', 'success');
+        showToast('Passage refined.', 'success');
       } else {
-        showToast('The oracle remains silent.', 'warning');
+        showToast('No refined passage was returned.', 'warning');
       }
     } catch (err) {
       log.error('Enhancement failed:', err);
-      showToast(
-        'Refinement failed. Please check your connection or API key in profile settings.',
-        'error'
-      );
+      showToast('Refinement failed. Check your connection or Google API Key in Settings.', 'error');
     } finally {
       enhanceBtn.disabled = false;
       enhanceBtn.classList.remove('animate-pulse');
@@ -398,7 +392,7 @@ function bindAIEvents() {
     const key = _getEffectiveApiKey();
     continueBtn.disabled = true;
     continueBtn.classList.add('animate-pulse');
-    showToast('The Oracle channels the narrative thread...', 'info');
+    showToast('Generating the next passage...', 'info');
 
     try {
       const continuation = await generateTaleContinuation(text, key);
@@ -412,11 +406,11 @@ function bindAIEvents() {
         contentArea.dispatchEvent(new Event('input', { bubbles: true }));
         showToast('The narrative continues.', 'success');
       } else {
-        showToast('The muse provides no further words at this time.', 'warning');
+        showToast('No continuation was returned.', 'warning');
       }
     } catch (err) {
       log.error('AI Continuation failed:', err);
-      showToast('Continuation failed. Please check your connection or API key.', 'error');
+      showToast('Continuation failed. Check your connection or Google API Key.', 'error');
     } finally {
       continueBtn.disabled = false;
       continueBtn.classList.remove('animate-pulse');

@@ -101,7 +101,7 @@ vi.mock('@config/theme.config.js', async (importOriginal) => {
 });
 
 vi.mock('@pages/profile/ai-name.js', () => ({
-  suggestNameFromBio: vi.fn(() => Promise.resolve('Mythic Oracle')),
+  suggestNameFromBio: vi.fn(() => Promise.resolve('Mythic Bard')),
 }));
 
 vi.mock('@/services/ai/apiKey.storage.js', () => ({
@@ -445,7 +445,7 @@ describe('Settings Page Controller', () => {
       expect(modal.classList.contains('hidden')).toBe(true);
       expect(document.getElementById('input-gemini-key').value).toBe('AIzaSyNewSavedKey');
       expect(showToast).toHaveBeenCalledWith(
-        'Gemini API key stored securely in local storage.',
+        'Google API Key stored securely in local storage.',
         'success'
       );
     });
@@ -463,7 +463,7 @@ describe('Settings Page Controller', () => {
 
       expect(modal.classList.contains('hidden')).toBe(true);
       expect(document.getElementById('input-gemini-key').value).toBe('');
-      expect(showToast).toHaveBeenCalledWith('Gemini API key removed.', 'info');
+      expect(showToast).toHaveBeenCalledWith('Google API Key removed.', 'info');
     });
   });
 

@@ -1024,11 +1024,11 @@ export function initGeminiKeyModal() {
       if (val) {
         setStoredApiKey(val);
         if (hiddenInput) hiddenInput.value = val;
-        showToast('Gemini API key stored securely in local storage.', 'success');
+        showToast('Google API Key stored securely in local storage.', 'success');
       } else {
         clearStoredApiKey();
         if (hiddenInput) hiddenInput.value = '';
-        showToast('Gemini API key removed.', 'info');
+        showToast('Google API Key removed.', 'info');
       }
       updateGeminiKeyBadge();
       closeModal();
@@ -1041,7 +1041,7 @@ export function initGeminiKeyModal() {
       if (hiddenInput) hiddenInput.value = '';
       if (modalInput) modalInput.value = '';
       updateGeminiKeyBadge();
-      showToast('Gemini API key removed.', 'info');
+      showToast('Google API Key removed.', 'info');
       closeModal();
     });
   }
@@ -1124,16 +1124,13 @@ export function initProfileSettings() {
       const currentBioInput = document.getElementById('input-bio');
       const bio = currentBioInput?.value?.trim();
       if (!bio) {
-        showToast(
-          'Please record lore or a short bio first so the Oracle can suggest a moniker.',
-          'info'
-        );
+        showToast('Please add a short bio first so Gemini can suggest a name.', 'info');
         return;
       }
 
       const originalHtml = suggestBtn.innerHTML;
       suggestBtn.disabled = true;
-      suggestBtn.innerHTML = '<span class="inline-block animate-spin mr-1">✦</span> Conjuring...';
+      suggestBtn.innerHTML = '<span class="inline-block animate-spin mr-1">✦</span> Suggesting...';
 
       try {
         const suggestion = await suggestNameFromBio(bio);
@@ -1141,17 +1138,17 @@ export function initProfileSettings() {
           const nameInput = document.getElementById('input-name');
           if (nameInput) {
             nameInput.value = suggestion;
-            showToast(`Oracle conjured name: ${suggestion}`, 'success');
+            showToast(`Name suggested: ${suggestion}`, 'success');
           }
         } else {
           showToast(
-            'Could not summon name suggestion. Ensure your Gemini API key is configured.',
+            'Could not suggest a name. Make sure your Google API Key is configured.',
             'error'
           );
         }
       } catch (err) {
         log.error('Failed to suggest name', err);
-        showToast('Oracle suggestion failed.', 'error');
+        showToast('Name suggestion failed.', 'error');
       } finally {
         suggestBtn.disabled = false;
         suggestBtn.innerHTML = originalHtml;
@@ -1179,10 +1176,10 @@ export function initProfileSettings() {
       const val = keyInput.value.trim();
       if (val) {
         setStoredApiKey(val);
-        showToast('Gemini API key saved securely in local storage.', 'success');
+        showToast('Google API Key saved securely in local storage.', 'success');
       } else {
         clearStoredApiKey();
-        showToast('Gemini API key cleared.', 'info');
+        showToast('Google API Key cleared.', 'info');
       }
       updateGeminiKeyBadge();
     });
@@ -1326,7 +1323,7 @@ export function initSettingsInteractions() {
       saveSetting(READER_STORAGE_KEYS.fontFamily, fontId);
       settings.fontFamily = fontId;
       updatePreview(settings);
-      showToast(`Codex typography set to ${fontId}`, 'info');
+      showToast(`Reading font set to ${fontId}`, 'info');
     });
   }
 

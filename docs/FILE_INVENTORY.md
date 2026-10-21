@@ -68,7 +68,7 @@ One-line duty for every file tracked by git in this repository, grouped by area 
 - `directives/firestore_management.md` — Agent directive governing Firestore paths, indexes, security rules, seeding, and the Chronicle Preservation Policy.
 - `directives/mcp_servers.md` — Agent directive governing project-local MCP server setup and troubleshooting for Chrome DevTools, Firebase, and Vercel.
 - `directives/navigation_routing_and_sitemaps.md` — Agent directive governing hierarchical clean URLs, resolveHref safety, sitemaps, and fixed-overlay stacking rules.
-- `directives/profile_and_oracle_ai.md` — Agent directive governing the chronicler profile, client-side Gemini key storage, Oracle AI features, and tooltips.
+- `directives/profile_and_google_api_key.md` — Agent directive governing the chronicler profile, client-side Gemini key storage, Google API key features, and tooltips.
 - `directives/tale_interactions_and_comments.md` — Agent directive governing tale hero actions (including the cover's shelf shortcut), resonance, downloads, comment trees, missives, and the tale 404 screen.
 
 ## Project Documentation
@@ -104,7 +104,7 @@ One-line duty for every file tracked by git in this repository, grouped by area 
 - `src/views/profile.html` — Chronicler profile shell with back pill, identity pillar, scribe registry card and sign-out; loads `../pages/profile/profile.js`.
   > > > > > > > feat/comprehensive-improvements
 - `src/views/reader.html` — Distraction-free reader shell whose `#app` carries `reader-surface` and `data-reader-theme`; loads `../pages/reader/reader.js`.
-- `src/views/settings.html` — Settings shell with back button, settings search, a seven-section contents sidebar (Profile, General & Theme, Reader & Codex, Atmosphere & Motion, Archival Storage, Accounts, About Codex) and section views, including the Accounts identity, guest-elevation and password panels; loads `../pages/settings/settings.js`.
+- `src/views/settings.html` — Settings shell with back button, settings search, a seven-section contents sidebar (Profile, General & Theme, Reader, Atmosphere & Motion, Archival Storage, Accounts, About TaleTranscend) and section views, including the Accounts identity, guest-elevation and password panels; loads `../pages/settings/settings.js`.
 - `src/views/shelf.html` — Scribe's Vault shell for drafts, fragments and published chronicles; loads `../pages/shelf/shelf.js` plus tale-cards styles.
 - `src/views/tale.html` — Tale detail shell for chapters, resonance and discussion, plus a hero cover with a "View Shelf" shortcut revealed while the tale is on the visitor's shelf; loads `../pages/tale/tale.js`.
 - `src/views/toc.html` — HTML sitemap shell with archive stats, portal cards and chronicle index; loads `../pages/toc/toc.js`.
@@ -324,7 +324,7 @@ Global UI layer: the icon registry, shared components, and the nav shell; each c
 Business logic and data access (Firestore, localStorage, external APIs); pages and components consume them, usually through the `src/services/index.js` barrel. Tests live in `__tests__/` folders next to the code.
 
 - `src/services/admin.service.js` — Admin service checking admin/moderator claims and reviewing deletionRequests: approve, reject, or force-delete chronicles.
-- `src/services/ai.service.js` — Gemini AI Oracle: suggestTitle, refineMythicText, and generateTaleContinuation via gemini-2.0-flash with sanitization and retries.
+- `src/services/ai.service.js` — Gemini AI service: suggestTitle, refineMythicText, and generateTaleContinuation via gemini-2.0-flash with sanitization and retries.
 - `src/services/ai/apiKey.storage.js` — localStorage helper for the BYOK Gemini API key (key: tt-gemini-api-key) with get/set/clear and env fallback.
 - `src/services/auth-memory.storage.js` — Explicit auth memory (key `tt_auth`) recorded on the login page and on restored sessions: durable (localStorage) or session-only (sessionStorage), never downgraded or upgraded by a restored session, cleared on sign-out; a failed write leaves the previous memory intact. This is what the first-visit login gate reads.
 - `src/services/author.service.js` — Scribe registration: author status from users/{uid}, schema-validated registration, mirrored to localStorage key `tt_author_{uid}`.

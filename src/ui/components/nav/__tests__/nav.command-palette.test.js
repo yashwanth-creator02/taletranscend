@@ -73,11 +73,11 @@ describe('Nav Command Palette', () => {
       const list = document.getElementById('nav-command-list');
       const expected = [
         ['General & Theme', 'settings.html#general'],
-        ['Reader & Codex', 'settings.html#reader'],
+        ['Reader', 'settings.html#reader'],
         ['Atmosphere & Motion', 'settings.html#atmosphere'],
         ['Archival Storage', 'settings.html#storage'],
         ['Accounts', 'settings.html#accounts'],
-        ['About Codex', 'settings.html#about'],
+        ['About TaleTranscend', 'settings.html#about'],
       ];
 
       for (const [label, href] of expected) {
@@ -89,8 +89,8 @@ describe('Nav Command Palette', () => {
       }
     });
 
-    it('finds the table of contents through its living-codex alias', () => {
-      renderCommandList('living codex');
+    it('finds the table of contents through its contents alias', () => {
+      renderCommandList('contents');
       const list = document.getElementById('nav-command-list');
       const item = list.querySelector('.command-item[data-href="toc.html"]');
 

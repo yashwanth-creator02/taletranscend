@@ -3118,13 +3118,6 @@
   color: var(--text-muted);
 }
 
-.settings-colophon__foot {
-  display: flex;
-  justify-content: flex-end;
-  padding: 14px 22px;
-  background: var(--surface-1);
-}
-
 .settings-row-link {
   display: inline-flex;
   align-items: center;

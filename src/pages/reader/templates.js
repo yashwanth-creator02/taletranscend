@@ -620,6 +620,6 @@ export function renderInfoPanel(state) {
       <div class="stat-row"><span class="stat-label">Progress</span><span class="reader-stat-value">${Math.round(state.progress || 0)} %</span></div>
       <div class="stat-row"><span class="stat-label">Era</span><span class="reader-stat-value">${state.era || 'Unknown'}</span></div>
       <div class="stat-row"><span class="stat-label">Language</span><span class="reader-stat-value">${state.language || 'English'}</span></div>
-      <div class="mt-6 rounded-xl border p-3 text-xs leading-relaxed" style="background:var(--reader-card-bg);border-color:var(--reader-border);color:var(--reader-muted)">Reader v1.0 &mdash; built for slow reading.</div>
+      <div class="mt-6 rounded-xl border p-3 text-xs leading-relaxed" style="background:var(--reader-card-bg);border-color:var(--reader-border);color:var(--reader-muted)">Built for slow reading.</div>
     </div>`;
 }
