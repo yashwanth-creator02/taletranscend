@@ -1996,6 +1996,7 @@
   font-size: 11px;
   letter-spacing: 0.04em;
   color: var(--text-muted);
+  white-space: nowrap;
 }
 
 .settings-reset-btn:hover {
@@ -2006,6 +2007,22 @@
 
 .settings-reset-btn i {
   color: var(--text-muted);
+}
+
+/* Below the wide desktop breakpoint the search must yield space to the back
+   control, title, and reset action instead of forcing them to truncate. */
+@media (max-width: 1024px) {
+  .settings-top-bar__left,
+  .settings-top-bar__right {
+    flex: 0 0 auto;
+    min-width: auto;
+  }
+
+  .settings-top-bar__search {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: none;
+  }
 }
 
 /* ── Container & contents leaf ───────────────────────────────────────────── */
@@ -3352,6 +3369,8 @@
   .settings-profile-portrait {
     position: static;
     order: -1;
+    justify-content: center;
+    width: 100%;
   }
 
   .settings-avatar-preview {
@@ -3361,9 +3380,15 @@
 }
 
 @media (max-width: 839px) {
-  .settings-profile-portrait {
+  .settings-reset-btn {
+    width: 34px;
+    padding: 0;
     justify-content: center;
-    width: 100%;
+    flex: 0 0 auto;
+  }
+
+  .settings-reset-btn span {
+    display: none;
   }
 
   .settings-top-bar__inner {
