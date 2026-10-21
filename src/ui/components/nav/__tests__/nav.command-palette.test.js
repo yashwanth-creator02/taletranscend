@@ -68,6 +68,36 @@ describe('Nav Command Palette', () => {
       expect(list.textContent).not.toContain('Home');
     });
 
+    it('surfaces every settings destination with its canonical section hash', () => {
+      renderCommandList('settings');
+      const list = document.getElementById('nav-command-list');
+      const expected = [
+        ['General & Theme', 'settings.html#general'],
+        ['Reader & Codex', 'settings.html#reader'],
+        ['Atmosphere & Motion', 'settings.html#atmosphere'],
+        ['Archival Storage', 'settings.html#storage'],
+        ['Accounts', 'settings.html#accounts'],
+        ['About Codex', 'settings.html#about'],
+      ];
+
+      for (const [label, href] of expected) {
+        const item = [...list.querySelectorAll('.command-item')].find(
+          (element) => element.querySelector('.command-item__label')?.textContent === label
+        );
+        expect(item).not.toBeUndefined();
+        expect(item?.dataset.href).toBe(href);
+      }
+    });
+
+    it('finds the table of contents through its living-codex alias', () => {
+      renderCommandList('living codex');
+      const list = document.getElementById('nav-command-list');
+      const item = list.querySelector('.command-item[data-href="toc.html"]');
+
+      expect(item).not.toBeNull();
+      expect(item?.textContent).toContain('Table of Contents');
+    });
+
     it('shows empty state if no match', () => {
       renderCommandList('xyz123');
       expect(document.getElementById('nav-command-list').textContent).toContain('No results');

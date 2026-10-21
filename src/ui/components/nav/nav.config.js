@@ -32,7 +32,7 @@ export const USER_LINKS = [
  * Auth-sensitive commands (Sign In / Sign Out) are added dynamically in
  * `getCommandItems()` inside command-palette.js.
  *
- * @type {Array<{ href?: string, action?: string, icon: string, label: string, keywords: string[], shortcut?: string }>}
+ * @type {Array<{ href?: string, action?: string, icon: string, label: string, description: string, category: string, keywords: string[], shortcut?: string }>}
  */
 export const BASE_COMMANDS = [
   {
@@ -50,6 +50,14 @@ export const BASE_COMMANDS = [
     description: 'Explore mythic lore, sacred scrolls & folklore',
     category: 'Lore Archives',
     keywords: ['library', 'browse', 'books', 'tales', 'folklore', 'myths'],
+  },
+  {
+    href: 'toc.html',
+    icon: 'list',
+    label: 'Table of Contents',
+    description: 'The living codex of every preserved chronicle',
+    category: 'Lore Archives',
+    keywords: ['table of contents', 'toc', 'living codex', 'index', 'archive', 'chronicles'],
   },
   {
     href: 'shelf.html',
@@ -82,6 +90,95 @@ export const BASE_COMMANDS = [
     description: 'Configure appearance, typography & archival preferences',
     category: 'System & Preferences',
     keywords: ['settings', 'preferences', 'theme', 'font', 'appearance', 'options'],
+  },
+  {
+    href: 'settings.html#general',
+    icon: 'sliders-horizontal',
+    label: 'General & Theme',
+    description: 'Interface theme, Oracle AI & system defaults',
+    category: 'System & Preferences',
+    keywords: [
+      'settings',
+      'general',
+      'theme',
+      'appearance',
+      'oracle',
+      'gemini',
+      'api key',
+      'reset',
+      'defaults',
+    ],
+  },
+  {
+    href: 'settings.html#reader',
+    icon: 'book-open',
+    label: 'Reader & Codex',
+    description: 'Reading themes, typography & live excerpt preview',
+    category: 'System & Preferences',
+    keywords: [
+      'settings',
+      'reader',
+      'reading',
+      'font',
+      'typography',
+      'line height',
+      'measure',
+      'preview',
+    ],
+  },
+  {
+    href: 'settings.html#atmosphere',
+    icon: 'sparkles',
+    label: 'Atmosphere & Motion',
+    description: 'Particles, ambient sound & reduced motion',
+    category: 'System & Preferences',
+    keywords: [
+      'settings',
+      'atmosphere',
+      'particles',
+      'sound',
+      'audio',
+      'motion',
+      'animation',
+      'reduced motion',
+    ],
+  },
+  {
+    href: 'settings.html#storage',
+    icon: 'database',
+    label: 'Archival Storage',
+    description: 'Cached reading state & inquiry records',
+    category: 'System & Preferences',
+    keywords: ['settings', 'storage', 'cache', 'cached', 'offline', 'archive', 'records', 'local'],
+  },
+  {
+    href: 'settings.html#accounts',
+    icon: 'shield-check',
+    label: 'Accounts',
+    description: 'Email, password, guest elevation & cloud saving',
+    category: 'System & Preferences',
+    keywords: [
+      'settings',
+      'account',
+      'accounts',
+      'email',
+      'password',
+      'guest',
+      'upgrade',
+      'sign in',
+      'login',
+      'cloud',
+      'sync',
+      'security',
+    ],
+  },
+  {
+    href: 'settings.html#about',
+    icon: 'info',
+    label: 'About Codex',
+    description: 'Version, architecture & the Living Codex',
+    category: 'System & Preferences',
+    keywords: ['settings', 'about', 'version', 'architecture', 'engine', 'credits', 'codex'],
   },
   {
     action: 'theme:transcendental',
