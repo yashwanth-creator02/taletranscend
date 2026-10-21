@@ -13,7 +13,7 @@ Execute static analysis, code formatting, design token linting, TypeScript type-
 ## Inputs
 
 - Node.js runtime environment (v20+; see `engines` in `package.json`).
-- Project dependencies installed via `npm install`.
+- Project dependencies installed via `npm ci` (use `npm install` only when intentionally changing dependencies).
 
 ## Git Safety (If Modifying Code)
 

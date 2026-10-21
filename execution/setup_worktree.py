@@ -23,6 +23,7 @@ Usage:
 """
 
 import argparse
+import hashlib
 import json
 import shutil
 import subprocess
@@ -36,9 +37,10 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 def find_primary_checkout() -> Path:
     """Return the repository's main worktree.
 
-    `git worktree list` marks the primary checkout with a bare path and the
-    others with a [branch] suffix. This avoids hardcoding a machine-specific
-    absolute path into a tracked script.
+    `git worktree list --porcelain` prints one `worktree <path>` line per
+    worktree, main checkout first, and puts the branch on a separate `branch`
+    line, so the first path line is the primary checkout. This avoids
+    hardcoding a machine-specific absolute path into a tracked script.
     """
     res = subprocess.run(
         ["git", "worktree", "list", "--porcelain"],
@@ -47,7 +49,7 @@ def find_primary_checkout() -> Path:
         **CAPTURE,
     )
     for line in (res.stdout or "").splitlines():
-        if line.startswith("worktree ") and not line.rstrip().endswith("]"):
+        if line.startswith("worktree "):
             return Path(line[len("worktree "):].strip())
     return PROJECT_ROOT
 
@@ -181,15 +183,16 @@ def write_port_file(port: int) -> None:
 def step_port(check_only: bool) -> None:
     log("--- Running: allocate dev server port ---")
     registry = load_registry()
-    if prune_missing_worktrees(registry):
-        save_registry(registry)
-        log("    PRUNED entries for worktrees that no longer exist")
 
     if check_only:
         current = registry.get(str(PROJECT_ROOT), {}).get("port")
         log(f"    {'PENDING' if current is None else 'OK'} dev port: "
             f"{current if current is not None else 'unassigned'}")
         return
+
+    if prune_missing_worktrees(registry):
+        save_registry(registry)
+        log("    PRUNED entries for worktrees that no longer exist")
 
     port = allocate_port()
     if port is None:
@@ -261,28 +264,31 @@ def step_install(check_only: bool) -> None:
         log("PASSED: dependencies already installed")
         return
     if check_only:
-        log("PENDING: npm install (node_modules absent)")
+        log("PENDING: npm ci (node_modules absent)")
         return
-    log("--- Running: npm install ---")
+    log("--- Running: npm ci ---")
     res = subprocess.run(
-        ["npm", "install"],
+        ["npm", "ci"],
         cwd=str(PROJECT_ROOT),
         shell=True,
         **CAPTURE,
     )
     if res.returncode != 0:
-        log(f"FAILED: npm install exited with code {res.returncode}")
+        log(f"FAILED: npm ci exited with code {res.returncode}")
         log(res.stdout[-2000:])
         log(res.stderr[-2000:])
         sys.exit(1)
-    log("PASSED: npm install")
+    log("PASSED: npm ci")
 
 
 def step_warmup(check_only: bool) -> None:
     """Warm the firebase-tools module graph so startup fits the 30s budget."""
     target = PROJECT_ROOT / WARMUP_TARGET
     if not target.is_file():
-        log("FAILED: firebase-tools not present; run npm install first")
+        if check_only:
+            log("PENDING: firebase-tools warmup (node_modules absent)")
+            return
+        log("FAILED: firebase-tools not present; run npm ci first")
         sys.exit(1)
     if check_only:
         log("PENDING: firebase-tools warmup")
@@ -368,6 +374,20 @@ def is_gitignored(rel_path: str) -> bool:
     return res.returncode == 0
 
 
+def file_digest(path: Path) -> str:
+    """Hash file contents without reading them into memory as text.
+
+    Comparing sizes alone treats a same-length edit as already copied, so a
+    rotated credential in the primary checkout would never reach the new
+    worktree. Only the digest is exposed; contents are never printed.
+    """
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(65536), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 def env_key_names(path: Path) -> set[str]:
     names: set[str] = set()
     for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
@@ -392,7 +412,7 @@ def step_env(source: Path, check_only: bool) -> None:
             log(f"    REFUSE {rel_dest} is not gitignored; refusing to copy secrets")
             continue
 
-        if dest.is_file() and dest.stat().st_size == src.stat().st_size:
+        if dest.is_file() and file_digest(dest) == file_digest(src):
             log(f"    OK    {rel_dest} already present ({dest.stat().st_size} bytes)")
             continue
 

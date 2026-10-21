@@ -23,7 +23,7 @@ One-line duty for every file tracked by git in this repository, grouped by area 
 - `skills-lock.json` — Lockfile recording source, path and hash for agent skills fetched from `firebase/agent-skills`.
 - `tsconfig.json` — TypeScript config for `src/`: ESNext with bundler resolution, `@`-prefixed path aliases, noEmit and strict; used by `npm run type-check`.
 - `vercel.json` — Vercel deployment config: `vite build` to `dist`, hierarchical URL rewrites mirroring Firebase, security and cache headers.
-- `vite.config.js` — Vite MPA config: `src/views` root with 11 HTML entries, dev-server route rewrites, aliases, chunk splitting, PWA plugin. Dev server binds 127.0.0.1 and takes its port from `.dev-port` when allocated for the worktree, otherwise Vite's default.
+- `vite.config.js` - Vite MPA config: `src/views` root with 11 HTML entries, dev-server route rewrites, aliases, chunk splitting, PWA plugin. Dev server binds 127.0.0.1 and takes its port from `.dev-port` when allocated for the worktree, otherwise Vite's default; `strictPort: true` makes a taken port fail fast instead of drifting to the next free one.
 - `vitest.config.js` — Vitest config for `src/` unit tests (jsdom, setup file, coverage) re-declaring the project path aliases.
 - `vitest.rules.config.js` — Minimal Vitest config selecting `firestore/tests/*.test.ts` in a node environment; consumed by `npm run test:rules`.
 
@@ -446,7 +446,7 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `execution/verify_author_flows.py` — Runner of token lint, type-check and targeted Vitest suites for author service, inquire, publish, profile-sync and validation.
 - `execution/verify_interactions_and_profile.py` — Runner of token lint, type-check and Vitest suites for navigation/bfcache, tale hero interactions, profile UI, downloads and AI service.
 - `execution/verify_navigation_and_ui.py` — Runner enforcing index-only footer and brand-asset checks, then token lint, type-check and navigation/nav/toast/toc suites.
-- `execution/setup_worktree.py` — Mandatory new-worktree bootstrap: installs dependencies, copies gitignored `.agents/skills/`, `.vercel/project.json`, `.env` and `.env.local` from the primary checkout (refusing any destination git would track), warms the firebase-tools module graph, validates that every declared MCP server resolves without spawning it, and allocates a per-worktree dev port; supports `--check`, `--source`, `--verify-mcp`, `--list-ports` and `--release-port`.
+- `execution/setup_worktree.py` - Mandatory new-worktree bootstrap: installs dependencies with `npm ci`, copies gitignored `.agents/skills/`, `.vercel/project.json`, `.env` and `.env.local` from the primary checkout (refusing any destination git would track), warms the firebase-tools module graph, validates that every declared MCP server resolves without spawning it, and allocates a per-worktree dev port; `--check` reports state without writing, and `--source`, `--verify-mcp`, `--list-ports` and `--release-port` cover the remaining modes.
 
 ## End-to-End Tests
 
