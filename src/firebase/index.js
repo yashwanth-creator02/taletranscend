@@ -3,6 +3,7 @@
 // Every page and service imports auth helpers, db helpers, refs, and paths from here.
 
 import { createLogger } from '@/utils';
+import { useEmulators } from './emulators.js';
 const log = createLogger('Firebase');
 
 export * from './auth.js';
@@ -10,5 +11,10 @@ export * from './db.js';
 export { APP_ID as appId } from '@config/app.config.js';
 export { refs } from './refs.js';
 export { PATHS, APP_ROOT } from './paths.js';
+
+// The e2e CI job runs against the local emulators (see .github/workflows/ci.yml).
+if (import.meta.env.VITE_FIREBASE_USE_EMULATOR === 'true') {
+  useEmulators();
+}
 
 log.debug('Firebase layer initialized');
