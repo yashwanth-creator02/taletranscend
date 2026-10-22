@@ -43,29 +43,27 @@ Confirmed defaults:
 | T2.3    | Vite routing, Firebase hosting rewrite, nav entry   | Main Agent | Done                   |
 | T2.4    | Foundation tests, docs, commit, present Gate 2 diff | Main Agent | Done (Gate 2)          |
 | T2.5    | Expand five-role rules matrix to 77 tests           | Main Agent | Done                   |
-| T3.1    | Overview module                                     | Subagent   | Blocked on Gate 2      |
-| T3.2    | Users and roles module                              | Subagent   | Blocked on Gate 2      |
-| T3.3    | Tale deletion moderation module                     | Subagent   | Blocked on Gate 2      |
-| T3.4    | Comment and report queue module                     | Subagent   | Blocked on Gate 2      |
-| T3.5    | Author applications module                          | Subagent   | Blocked on Gate 2      |
-| T3.6    | Audit log module                                    | Subagent   | Blocked on Gate 2      |
-| T3.7    | Site settings module                                | Subagent   | Blocked on Gate 2      |
-| T3.8    | Author own-content section                          | Subagent   | Blocked on Gate 2      |
-| T4.1    | Four independent read-only reviews                  | Subagents  | Blocked on Gate 2      |
-| T5.1    | Lint, typecheck, rules emulator, unit, E2E          | Main Agent | Blocked on Gate 2      |
-| T6.1    | Handoff summary and merge instructions              | Main Agent | Blocked on Gate 2      |
+| T3.1    | Overview module                                     | Subagent   | In Progress            |
+| T3.2    | Users and roles module                              | Subagent   | In Progress            |
+| T3.3    | Tale deletion moderation module                     | Subagent   | In Progress            |
+| T3.4    | Comment and report queue module                     | Subagent   | In Progress            |
+| T3.5    | Author applications module                          | Subagent   | In Progress            |
+| T3.6    | Audit log module                                    | Subagent   | In Progress            |
+| T3.7    | Site settings module                                | Subagent   | In Progress            |
+| T3.8    | Author own-content section                          | Subagent   | In Progress            |
+| T4.1    | Four independent read-only reviews                  | Subagents  | Blocked on T3          |
+| T5.1    | Lint, typecheck, rules emulator, unit, E2E          | Main Agent | Blocked on T4          |
+| T6.1    | Handoff summary and merge instructions              | Main Agent | Blocked on T5          |
 
 ## 3. Current Activity
 
-- **Doing right now:** Gate 2 review. Phase 2 foundation is implemented and
-  validated; the full rules and index diff is presented to the user.
-- **Stop condition:** Gate 2. No Phase 3 module work begins until the user
-  approves the rules and index changes.
+- **Doing right now:** Phase 3 module implementation. Eight modules in parallel,
+  disjoint file ownership per subagent.
+- **Stop condition:** All modules complete and tested; then Phase 4 reviews.
 - **Next 3 steps:**
-  1. User reviews the rules/index diff and approves or requests changes.
-  2. On approval, start Phase 3 module work in parallel with disjoint file
-     ownership.
-  3. Keep this document updated before and after every module task.
+  1. Each module implements its UI + service + tests with disjoint file ownership.
+  2. Main agent merges module outputs into `src/pages/admin/` without conflicts.
+  3. Phase 4: four independent read-only reviews.
 
 ## 4. Plan
 
@@ -119,6 +117,7 @@ assignment procedure, and merge instructions. No merge, push, or deploy.
 - [2026-10-22 00:00] Expanded five-role rules matrix to 77 tests (T2.5). All new
   admin gates covered with allowed and denied cases for every role.
 - [2026-10-22 00:00] Phase 2 complete. Gate 2 ready for approval.
+- [2026-10-22 12:00] Gate 2 APPROVED. Phase 3 module work started with parallel subagent ownership.
 
 ## 6. Decisions
 
