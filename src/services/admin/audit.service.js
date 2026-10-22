@@ -37,8 +37,19 @@ export async function writeAdminAuditLog({
   targetId = '',
   summary = '',
 }) {
-  if (!actorId || (actorRole !== 'admin' && actorRole !== 'moderator')) {
+  const role = typeof actorRole === 'string' ? actorRole.trim() : '';
+  if (!actorId || (role !== 'admin' && role !== 'moderator')) {
     log.warn('Refusing audit entry with an invalid actor', { actorId, actorRole });
+    return { success: false };
+  }
+
+  const safeAction = String(action ?? '').trim();
+  const safeTargetType = String(targetType ?? '').trim();
+  if (!safeAction || !safeTargetType) {
+    log.warn('Refusing audit entry without an action or target type', {
+      action,
+      targetType,
+    });
     return { success: false };
   }
 
@@ -46,11 +57,11 @@ export async function writeAdminAuditLog({
     (async () => {
       const created = await addDoc(refs.adminAuditLogs(), {
         actorId,
-        actorRole,
-        action,
-        targetType,
-        targetId,
-        summary: String(summary).slice(0, 1000),
+        actorRole: role,
+        action: safeAction,
+        targetType: safeTargetType,
+        targetId: String(targetId ?? ''),
+        summary: String(summary ?? '').slice(0, 1000),
         createdAt: serverTimestamp(),
       });
       return { success: true, id: created.id };

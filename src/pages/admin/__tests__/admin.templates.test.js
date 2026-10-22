@@ -40,9 +40,22 @@ describe('admin templates', () => {
     });
     expect(html).toContain('data-admin-module="overview"');
     expect(html).toContain('data-admin-module="author"');
+    expect(html).toContain('data-admin-module="home"');
     expect(html).not.toContain('data-admin-module="settings"');
+    expect(html).toContain('href="#/"');
+    expect(html).toContain('Back to archive');
     expect(html).toContain('aria-current="page"');
     expect(html).toContain('Administrator');
+  });
+
+  it('marks the dashboard link current on the landing route', () => {
+    const html = buildAdminShell({
+      access: adminAccess,
+      modules,
+      activeModule: null,
+    });
+    expect(html).toMatch(/data-admin-module="home"\s+aria-current="page"/);
+    expect(html).not.toMatch(/data-admin-module="overview"\s+aria-current="page"/);
   });
 
   it('renders a dashboard card for every allowed module', () => {

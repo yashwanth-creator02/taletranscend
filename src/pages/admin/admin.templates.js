@@ -51,6 +51,15 @@ export function buildAdminShell({ access, modules, activeModule }) {
           </div>
         </div>
         <nav class="admin-nav" aria-label="Administration modules">
+          <a
+            class="admin-nav__link${activeModule === null ? ' admin-nav__link--active' : ''}"
+            href="#/"
+            data-admin-module="home"
+            ${activeModule === null ? 'aria-current="page"' : ''}
+          >
+            <i data-lucide="home" class="admin-nav__icon" aria-hidden="true"></i>
+            <span>Dashboard</span>
+          </a>
           ${navItems}
         </nav>
         <p class="admin-sidebar__note">
@@ -61,10 +70,10 @@ export function buildAdminShell({ access, modules, activeModule }) {
 
       <div class="admin-main">
         <header class="admin-topbar">
-          <div style="display: flex; align-items: center; gap: 1rem;">
-            <a href="index.html" class="btn btn-ghost" style="padding: 0.5rem 0.75rem; display: inline-flex; align-items: center; gap: 0.5rem;" aria-label="Return to archive">
+          <div class="admin-topbar__group">
+            <a href="index.html" class="btn btn-ghost admin-topbar__back" aria-label="Return to archive">
               <i data-lucide="arrow-left" aria-hidden="true"></i>
-              <span>Back</span>
+              <span>Back to archive</span>
             </a>
             <div>
               <p class="admin-kicker">TaleTranscend</p>
@@ -115,8 +124,8 @@ export function buildDashboardHome(access, modules) {
         <p class="admin-kicker">${escapeHtml(roleLabel(access.role))} access</p>
         <h2 id="admin-home-title" class="admin-home__title">What the archive needs today</h2>
         <p class="admin-home__lede">
-          Choose a section. Every list is cursor-paginated and every action is
-          written to the audit trail.
+          Choose a section. Lists are cursor-paginated, and every staff action
+          is written to the audit trail.
         </p>
       </div>
       <div class="admin-card-grid">${cards}</div>

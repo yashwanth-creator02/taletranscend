@@ -10,4 +10,5 @@ export {
   roleLabel,
 } from './access.service.js';
 export { ADMIN_PAGE_SIZE, fetchAdminPage } from './pagination.service.js';
+export { getSignedInUser, getStaffIdentity, requireSignedInUser } from './session.service.js';
 export { writeAdminAuditLog, listAdminAuditLogPage } from './audit.service.js';

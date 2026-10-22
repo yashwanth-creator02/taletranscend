@@ -26,8 +26,48 @@ import {
 
 const log = createLogger('AdminPage');
 
-// Vite turns this into a lazy map of every file under ./modules/**/*.js.
-const moduleLoaders = import.meta.glob('./modules/**/*.js');
+// A stalled auth restore must not leave the control room on its loading screen
+// forever. The fallback resolves as a guest, which lands on the access gate.
+const AUTH_BOOT_TIMEOUT_MS = 15000;
+
+// Vite turns this into a lazy map of every module entry file. Test files live
+// one directory deeper (modules/<id>/__tests__/) and are deliberately excluded.
+const moduleLoaders = import.meta.glob('./modules/*/*.js');
+
+/** @type {null | (() => void)} */
+let hashHandler = null;
+/** @type {null | MutationObserver} */
+let iconObserver = null;
+/** @type {number} */
+let iconFrame = 0;
+let routeVersion = 0;
+
+/**
+ * Modules render asynchronously after mount, so icon placeholders added later
+ * would otherwise stay empty. Watch the content region for new placeholders
+ * only: Lucide replaces placeholders with SVG, so observing every mutation
+ * would re-enter this callback forever and starve the page.
+ * @param {HTMLElement} root
+ */
+function observeIcons(root) {
+  iconObserver?.disconnect();
+  iconObserver = new MutationObserver((records) => {
+    const hasPlaceholder = records.some((record) =>
+      [...record.addedNodes].some(
+        (node) =>
+          node instanceof Element &&
+          (node.matches('[data-lucide]:not(svg)') || node.querySelector('[data-lucide]:not(svg)'))
+      )
+    );
+    if (!hasPlaceholder || iconFrame) return;
+
+    iconFrame = window.requestAnimationFrame(() => {
+      iconFrame = 0;
+      if (adminState.mounted) initIcons(root);
+    });
+  });
+  iconObserver.observe(root, { childList: true, subtree: true });
+}
 
 /** @returns {string | null} */
 function moduleFromHash() {
@@ -47,10 +87,9 @@ function paint(html) {
  * Mount one module into the content panel.
  * @param {string} moduleId
  * @param {HTMLElement} container
+ * @param {number} version
  */
-async function mountModule(moduleId, container) {
-  adminState.cleanup?.();
-  adminState.cleanup = null;
+async function mountModule(moduleId, container, version) {
   adminState.activeModule = moduleId;
   container.innerHTML = buildModuleLoading(moduleId);
   initIcons();
@@ -78,12 +117,18 @@ async function mountModule(moduleId, container) {
         window.location.hash = `#/${id}`;
       },
     });
+    if (version !== routeVersion) {
+      if (typeof cleanup === 'function') cleanup();
+      return;
+    }
     adminState.cleanup = typeof cleanup === 'function' ? cleanup : null;
     initIcons();
   } catch (err) {
     log.error(`Failed to mount admin module: ${moduleId}`, err);
-    container.innerHTML = buildModuleError(moduleId);
-    initIcons();
+    if (version === routeVersion) {
+      container.innerHTML = buildModuleError(moduleId);
+      initIcons();
+    }
   }
 }
 
@@ -93,11 +138,11 @@ async function mountModule(moduleId, container) {
  */
 async function renderRoute(focusContent = false) {
   if (!adminState.access?.canEnter) return;
+  const version = ++routeVersion;
   const modules = getAllowedModules(adminState.access);
   const requested = moduleFromHash();
   const active = requested && canAccessModule(adminState.access, requested) ? requested : null;
-  const previousActive = adminState.activeModule;
-  if (active !== previousActive) adminState.cleanup?.();
+  adminState.cleanup?.();
   adminState.cleanup = null;
   adminState.activeModule = active;
 
@@ -111,15 +156,19 @@ async function renderRoute(focusContent = false) {
 
   const content = document.getElementById('admin-content');
   if (!content) return;
+  observeIcons(content);
 
   if (active) {
-    await mountModule(active, content);
+    await mountModule(active, content, version);
   } else {
     content.innerHTML = buildDashboardHome(adminState.access, modules);
     initIcons();
   }
 
-  if (focusContent) content.focus({ preventScroll: true });
+  if (focusContent) {
+    content.focus({ preventScroll: true });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 }
 
 /**
@@ -136,12 +185,33 @@ export async function initAdminPage() {
 
   // Restore the Firebase session first, so the user session is set.
   await new Promise((resolve) => {
-    initAuth(() => resolve());
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve();
+    };
+    const timer = setTimeout(() => {
+      log.warn('Auth restore timed out; resolving access as a guest');
+      finish();
+    }, AUTH_BOOT_TIMEOUT_MS);
+
+    try {
+      initAuth(finish);
+    } catch (err) {
+      log.error('Auth restore failed to start', err);
+      finish();
+    }
   });
+
+  // The page may have been torn down while auth was restoring.
+  if (!adminState.mounted) return;
 
   // Note: No global nav requested — control room uses its own back button.
 
   adminState.access = await resolveDashboardAccess();
+  if (!adminState.mounted) return;
   if (!adminState.access.canEnter) {
     paint(buildAccessDenied(adminState.access));
     return;
@@ -149,13 +219,29 @@ export async function initAdminPage() {
 
   await renderRoute();
 
-  window.addEventListener('hashchange', () => {
-    renderRoute(true);
-  });
+  if (!hashHandler) {
+    hashHandler = () => {
+      renderRoute(true).catch((err) => {
+        log.error('Failed to render admin route', err);
+      });
+    };
+    window.addEventListener('hashchange', hashHandler);
+  }
 }
 
 /** Tear down listeners and module state. Used by tests. */
 export function destroyAdminPage() {
+  routeVersion += 1;
+  iconObserver?.disconnect();
+  iconObserver = null;
+  if (iconFrame) {
+    window.cancelAnimationFrame(iconFrame);
+    iconFrame = 0;
+  }
+  if (hashHandler) {
+    window.removeEventListener('hashchange', hashHandler);
+    hashHandler = null;
+  }
   resetAdminState();
 }
 

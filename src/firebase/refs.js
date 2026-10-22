@@ -79,6 +79,9 @@ export const refs = {
 
   // ── User Profile ──────────────────────────────────────────────────
 
+  /** All user profiles */
+  users: () => collection(db, PATHS.users()),
+
   /** User profile document */
   user: (uid) => doc(db, PATHS.user(uid)),
 

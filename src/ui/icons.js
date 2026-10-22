@@ -136,6 +136,7 @@ async function _loadIcons() {
     User: L.User,
     UserPen: L.UserPen,
     UserCheck: L.UserCheck,
+    Users: L.Users || L.Users2,
     Users2: L.Users2,
     // Charts & Stats
     BarChart2: L.BarChart2,
@@ -191,6 +192,8 @@ async function _loadIcons() {
     MoreHorizontal: L.MoreHorizontal,
     MoreVertical: L.MoreVertical,
     Home: L.Home,
+    LayoutDashboard: L.LayoutDashboard,
+    ShieldOff: L.ShieldOff,
     // Writing & Editor
     Pen: L.Pen,
     PenTool: L.PenTool,

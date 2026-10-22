@@ -170,7 +170,16 @@ service cloud.firestore {
           && isValidTimestamp('updatedAt')
           && 'createdAt' in request.resource.data
           && request.resource.data.createdAt == request.time // Enforce server-set createdAt on create
-          && request.resource.data.size() <= 20;
+          && request.resource.data.size() <= 20
+          // Moderation flags are staff-only. A profile may start unbanned and
+          // unverified, but the owner cannot grant themselves either flag.
+          && (!('isBanned' in request.resource.data) || request.resource.data.isBanned == false)
+          && (!('isVerifiedWriter' in request.resource.data)
+              || request.resource.data.isVerifiedWriter == false)
+          // `role` is display metadata, never claim authority. Staff roles can
+          // only be granted through an administrator's moderation branch.
+          && (!('role' in request.resource.data)
+              || request.resource.data.role in ['reader', 'user', 'author']);
 
         allow update: if isOwner(userId)
           && respectsCooldown()
@@ -178,7 +187,12 @@ service cloud.firestore {
           && isValidUrl('avatarUrl')
           && isValidUrl('website')
           && isValidTimestamp('updatedAt')
-          && request.resource.data.size() <= 20;
+          && request.resource.data.size() <= 20
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+               'isBanned', 'isVerifiedWriter'
+             ])
+          && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role'])
+              || request.resource.data.role in ['reader', 'user', 'author']);
 
         // Administrator moderation branch. Deliberately narrow: the browser
         // may set only the profile flags and display role, never profile
@@ -811,7 +825,17 @@ service cloud.firestore {
           && isValidTimestamp('createdAt');
 
         allow read: if isAdmin();
-        allow update: if isAdmin();
+        allow update: if isAdmin()
+          && resource.data.status == 'pending'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+               'status', 'reviewedAt', 'reviewedBy', 'resolutionNotes'
+             ])
+          && request.resource.data.status in ['resolved', 'dismissed']
+          && isValidTimestamp('reviewedAt')
+          && isValidString('reviewedBy', 1, 100)
+          && request.resource.data.reviewedBy == request.auth.uid
+          && (!('resolutionNotes' in request.resource.data)
+              || isValidString('resolutionNotes', 0, 1000));
         allow delete: if isAdmin();
       }
 
@@ -872,6 +896,7 @@ service cloud.firestore {
           && request.resource.data.size() <= 12;
 
         allow update: if isAdministrator()
+          && resource.data.status == 'pending'
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
                'status', 'reviewedAt', 'reviewedBy', 'notes'
              ])
@@ -896,8 +921,29 @@ service cloud.firestore {
           && request.resource.data.userId == request.auth.uid
           && isValidString('taleId', 1, 100)
           && isValidString('reason', 5, 2000)
-          && isValidTimestamp('createdAt');
-        allow update, delete: if isAdmin();
+          && isValidString('status', 1, 20)
+          && request.resource.data.status == 'pending'
+          && isValidTimestamp('createdAt')
+          && request.resource.data.keys().hasOnly([
+               'userId', 'taleId', 'reason', 'status', 'createdAt'
+             ])
+          // A petition must target a real tale owned by the petitioner. Without
+          // this check any signed-in reader could ask staff to delete another
+          // author's chronicle.
+          && exists(/databases/$(database)/documents/v1/taletranscend/projects/v1/public/data/tales/$(request.resource.data.taleId))
+          && get(/databases/$(database)/documents/v1/taletranscend/projects/v1/public/data/tales/$(request.resource.data.taleId)).data.authorId == request.auth.uid;
+        allow update: if isAdmin()
+          && resource.data.status == 'pending'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+               'status', 'reviewedBy', 'reviewedAt', 'adminNotes'
+             ])
+          && request.resource.data.status in ['approved', 'rejected']
+          && isValidTimestamp('reviewedAt')
+          && isValidString('reviewedBy', 1, 100)
+          && request.resource.data.reviewedBy == request.auth.uid
+          && (!('adminNotes' in request.resource.data)
+              || isValidString('adminNotes', 0, 1000));
+        allow delete: if isAdmin();
       }
 
       // ═════════════════════════════════════════════════════════════

@@ -1,15 +1,16 @@
 # Admin Dashboard Progress & Status (TaleTranscend)
 
 > Persistent work log for the admin dashboard build. Updated before and after
-> every task. Branch: `feature/admin-dashboard`. Never merged, pushed to main,
-> or deployed from this worktree.
+> every task. Branch: `feature/admin-dashboard`. Never merged to main. Firestore
+> rules and indexes were deployed to project `taletranscend` on 2026-10-23 after
+> the emulator suite passed.
 
 ## 1. Goal and Confirmed Scope
 
 **Goal:** a secure, role-gated admin dashboard for TaleTranscend, delivered on
 branch `feature/admin-dashboard`, with Firestore rules as the authority (never
 the UI alone), paginated free-tier-safe queries, emulator-based rules tests for
-all five roles, and no production Firebase access.
+all five roles, and no credential committed to the repository.
 
 **Gate 1 status: APPROVED with defaults** (user: "go with defaults and continue").
 
@@ -42,7 +43,7 @@ Confirmed defaults:
 | T2.2    | Admin access service and admin shell                | Main Agent | Done                   |
 | T2.3    | Vite routing, Firebase hosting rewrite, nav entry   | Main Agent | Done                   |
 | T2.4    | Foundation tests, docs, commit, present Gate 2 diff | Main Agent | Done (Gate 2)          |
-| T2.5    | Expand five-role rules matrix to 77 tests           | Main Agent | Done                   |
+| T2.5    | Expand five-role rules matrix to 81 tests           | Main Agent | Done                   |
 | T3.1    | Overview module                                     | Main Agent | Done                   |
 | T3.2    | Users and roles module                              | Main Agent | Done                   |
 | T3.3    | Tale deletion moderation module                     | Main Agent | Done                   |
@@ -51,19 +52,25 @@ Confirmed defaults:
 | T3.6    | Audit log module                                    | Main Agent | Done                   |
 | T3.7    | Site settings module                                | Main Agent | Done                   |
 | T3.8    | Author own-content section                          | Main Agent | Done                   |
-| T4.1    | Four independent read-only reviews                  | Subagents  | Done                   |
-| T5.1    | Lint, typecheck, rules emulator, unit, E2E          | Main Agent | Done                   |
-| T6.1    | Handoff summary and merge instructions              | Main Agent | In Progress            |
+| T4.1    | Independent module reviews and remediation          | Subagents  | Done                   |
+| T5.1    | Lint, typecheck, tokens, rules, unit, build         | Main Agent | Done                   |
+| T5.2    | Live admin verification at 390 px and 1440 px       | Main Agent | Done                   |
+| T5.3    | Guest and ordinary-user E2E denial paths            | Main Agent | Done                   |
+| T6.1    | Handoff summary and merge instructions              | Main Agent | Done                   |
 
 ## 3. Current Activity
 
-- **Doing right now:** Phase 3 module implementation. Eight modules in parallel,
-  disjoint file ownership per subagent.
-- **Stop condition:** All modules complete and tested; then Phase 4 reviews.
-- **Next 3 steps:**
-  1. Each module implements its UI + service + tests with disjoint file ownership.
-  2. Main agent merges module outputs into `src/pages/admin/` without conflicts.
-  3. Phase 4: four independent read-only reviews.
+- **State:** Implementation, security hardening, remediation, and verification
+  are complete on `feature/admin-dashboard`. The branch is ready for review and
+  merge by the user; it has not been merged.
+- **Last action:** Reviewer-driven hardening closed deletion-request ownership,
+  self-granted moderation flags, and concurrent decision races. The emulator
+  suite now passes 81 tests and the hardened rules are deployed.
+- **Next steps:**
+  1. Review the branch diff and the evidence in section 9.
+  2. Merge only with explicit user approval, using a non-fast-forward merge.
+  3. Assign or remove staff claims through the local Admin SDK procedure in
+     `docs/admin-dashboard/OPERATIONS.md`.
 
 ## 4. Plan
 
@@ -119,47 +126,69 @@ assignment procedure, and merge instructions. No merge, push, or deploy.
 - [2026-10-22 00:00] Phase 2 complete. Gate 2 ready for approval.
 - [2026-10-22 12:00] Gate 2 APPROVED. Phase 3 module work completed. All 8 modules built directly.
 - [2026-10-22 19:08] Fixed missing CSS classes (admin-badge, admin-btn, admin-content-stack, etc.) for my-content module; moved misplaced test file to correct path. All checks re-passed.
+- [2026-10-23 00:00] Hardened the audit, settings, and author modules. Audit reads guard malformed actor roles, surface service errors, and search/load more through delegated events. Settings writes now resolve the real staff identity, merge-create config and flag documents, and merge stored flags with four disabled defaults. The author section moved to `modules/author/author.js`, dropped the rules-denied reports panel, validates the 5-2000 character reason, and uses a server timestamp for petitions. Targeted tests, ESLint, and Prettier pass.
+- [2026-10-23 00:00] Rewrote the users module against the real `users` collection with name/newest sorting, UID lookup, cursor pagination, profile details, live tale counts, and rule-safe moderation writes that record the acting staff member.
+- [2026-10-23 00:00] Rewrote the deletion, report, application, audit, settings, and overview flows: real data only, real staff identity on every mutation and audit entry, server timestamps, atomic approval deletion, and author-workspace grants on application approval.
+- [2026-10-23 00:00] Fixed the admin module loader path, removed the icon hydration mutation loop, registered missing icons, and added a static icon coverage test across every admin template and module.
+- [2026-10-23 00:00] Deployed the branch Firestore rules and indexes to project `taletranscend`; emulator suite passed 77 tests before deployment. All composite indexes reached READY.
+- [2026-10-23 00:00] Created the missing `users/{uid}` profile for the test administrator and verified the admin claim. Live verification passed all nine routes at 390 px and 1440 px with zero page errors, console errors, or horizontal page overflow.
+- [2026-10-23 00:00] Reviewer-driven hardening: deletion petitions must target a tale the petitioner owns; deletion, report, and application decisions only apply to pending documents; staff decisions record the caller as reviewer; owner profile writes cannot set `isBanned`, `isVerifiedWriter`, or a staff `role`. Deletion approval now refuses a missing or mismatched tale and describes removal of the public record without claiming subcollection erasure. Added Author Studio link for registered authors and title-to-ID resolution for removal petitions.
+- [2026-10-23 00:00] Re-verified hardened branch: 81/81 rules tests, 1,179 unit tests passed (2 skipped), 16/16 admin denial E2E, lint, token lint, type-check, format check, and build all pass. Hardened rules deployed to project `taletranscend`.
 
-## 7. Review Findings (Phase 4)
+## 7. Review Findings and Resolution
 
-### Security Review (manual)
+### Security
 
-- SAFE: All admin-gated collections use `isAdministrator()` or `isModerator()` correctly
-- SAFE: `adminAuditLogs` is append-only (`update/delete: if false`); actorRole must match claim
-- SAFE: `authorApplications` update restricted to admin, only decision fields mutable
-- SAFE: `users` admin branch restricts affected keys to moderation flags + updatedAt
-- SAFE: `appConfig`/`featureFlags` write restricted to `isAdministrator()`
-- SAFE: `deletionRequests` update/delete restricted to `isAdmin()` (back compat alias)
-- SAFE: Existing rules unchanged — `isAdmin()` still means admin OR moderator
-- ISSUE (low): `reports` read/update/delete uses `isAdmin()` which includes moderators via alias. This is intentional per D-02 design; if you want admin-only reports, change to `isAdministrator()`.
+- All staff collections are gated by `isAdministrator()` or `isModerator()`.
+- `adminAuditLogs` remains append-only; the actor role must match the caller's
+  custom claim.
+- `authorApplications` decisions are administrator-only and limited to the four
+  decision fields; only pending applications can be decided.
+- The administrator branch on `users` allows only `isBanned`,
+  `isVerifiedWriter`, `role`, and `updatedAt`. Owner create/update branches reject
+  self-granted moderation flags and staff roles.
+- A deletion petition can only be created for a tale owned by the petitioner.
+  Staff decisions require a pending petition and record the caller as reviewer.
+- `appConfig` and `featureFlags` writes are administrator-only.
+- Every staff mutation now records the real acting user. Earlier code wrote the
+  affected user or applicant as the actor and hardcoded a role; that is fixed.
+- Rules were not weakened. The deployed rules passed the 81-test emulator suite.
 
-### Code Quality Review (manual)
+### Code Quality
 
-- CLEAN: All modules follow consistent mount/cleanup pattern
-- CLEAN: Consistent use of confirmModal for destructive actions, toast for feedback
-- CLEAN: All string interpolation uses escapeAdminHtml()
-- CLEAN: Pagination uses fetchAdminPage with ADMIN_PAGE_SIZE clamped 1-50
-- ISSUE (low): Users module loads profiles from tales collection (indirect); consider a direct users collection query in future
-- INFO: 8 service files, 8 module files, 7 test files — all pass lint and type-check
+- All modules follow the same `mount({container, access, navigate})` and cleanup
+  contract.
+- All modules use event delegation; no `window.handle*` globals or inline
+  handlers remain.
+- All interpolated values pass through escaping helpers.
+- List queries are cursor-paginated and bounded.
+- Destructive actions use confirmation dialogs; deletion approval is described
+  as removal of the public tale record and as irreversible from the dashboard.
+- Static icon coverage now scans admin templates, the access service, and every
+  admin module so a missing icon fails a unit test.
 
-### Test Coverage Review (manual)
+### Tests and Verification
 
-- 77 rules emulator tests covering all 5 roles for every new gate
-- 25 unit tests across 7 service test files + 2 page test files = 117 files total
-- Baseline: 1,035 tests pre-Phase 2; current: 1,051 passed, 2 skipped (+16 net gain)
-- ISSUE (medium): No E2E tests for admin flows — Phase 5 E2E covers navigation but not admin-specific interactions
-- INFO: my-content module test has comprehensive DOM interaction coverage
+- 81 Firestore rules tests cover all five roles, including deletion ownership,
+  concurrent decisions, and self-granted moderation flags.
+- Full unit suite: 127 files, 1,179 passed, 2 skipped, 0 failed.
+- Admin-specific unit coverage: access, session, audit, users, overview,
+  deletion, reports, applications, settings, author, templates, utilities, and
+  module interaction tests.
+- Admin E2E: 16 passed across guest denial, direct-route denial, mobile layout,
+  and noindex metadata.
+- Live verification: nine routes at 390 px and 1440 px, zero page errors, zero
+  console errors, zero page-level horizontal overflow.
 
-### UX Review (manual)
+### UX
 
-- CLEAN: ARIA labels present on all sections (aria-labelledby)
-- CLEAN: Loading states, empty states, error states all implemented
-- CLEAN: Token-only colors — no raw hex/rgb literals
-- CLEAN: Zero emojis, zero pill badges (per hard rules)
-- ISSUE (low): my-content module uses `admin-badge` and `admin-btn` classes that were missing from initial CSS — now added
-- ISSUE (low): Mobile responsiveness for admin tables not explicitly tested at narrow viewports
-- INFO: All interactive elements use proper button elements with type="button"
-- [2026-10-22 19:08] Fixed missing CSS classes (admin-badge, admin-btn, admin-content-stack, etc.) for my-content module; moved misplaced test file to correct path. All checks re-passed.
+- Loading, empty, error, and success states are implemented per module.
+- Tables scroll horizontally inside their wrapper on narrow screens rather than
+  overflowing the page.
+- Token-only colors; no raw color literals.
+- No emojis and no decorative badge or status-dot patterns.
+- Actions are keyboard-reachable native buttons, with visible focus states from
+  the shared component styles.
 
 ## 6. Decisions
 
@@ -207,15 +236,21 @@ assignment procedure, and merge instructions. No merge, push, or deploy.
 - **Risk:** Count aggregation requires collection-level read permission. Tales
   and comments use document-dependent read rules. The overview module must probe
   this in the emulator and fall back to an explicit unavailable state.
-- **Risk:** Composite indexes are declared but not deployed. The user will deploy
-  them later; until then, queries fail with a Firestore index link. No deploy is
-  run from this worktree.
+- **Risk:** The four composite indexes are deployed and READY. Any future query
+  that adds a filter or sort combination needs a matching index deployment, or
+  the module will show its error state.
 - **Risk:** A ban flag in `users/{uid}` does not lock the account. The rules do
   not read the profile on every request because that would add a read to every
   write. Ban enforcement remains a server-side/claim task.
-- **Risk:** E2E custom-claim setup needs Auth emulator admin access. Rules tests
-  cover all five roles authoritatively; E2E covers the guest and ordinary-user
-  denial paths and any staff path that can be set up without production access.
+- **Risk:** Approving a deletion removes the tale document; chapter and comment
+  subcollections are not cascaded by Firestore and require a trusted server-side
+  cleanup job. The UI and notification therefore say the public record was
+  removed, not that every subcollection was erased.
+- **Risk:** E2E covers guest and ordinary-user denial only. Staff flows are
+  covered by service and module tests plus live authenticated verification;
+  seeding a staff user into the Auth emulator is future work.
+- **Limitation:** Admin tables scroll horizontally inside their wrapper on narrow
+  screens. This keeps every column reachable without causing page overflow.
 - **Assumption:** Spark plan limits apply: 50k reads/day and 20k writes/day.
   Every module must stay within the per-screen budgets in section 10.
 - **Assumption:** The existing test count is the floor. Tests may be added or
@@ -223,40 +258,47 @@ assignment procedure, and merge instructions. No merge, push, or deploy.
 
 ## 9. Verification Results
 
-- Phase 0: repository structure, rules, paths, refs, Vite pages, Firebase
-  rewrites, emulator ports, and test configuration inspected.
-- Phase 2 (`npm run lint`): `ESLint: No issues found`.
-- Phase 2 (`npm run type-check`): `tsc --noEmit` completed with no errors.
-- Phase 2 (`npm run lint:tokens`): `token lint: no raw colour literals outside
-the design system`.
-- Phase 2 (focused unit, `npx vitest run src/pages/admin src/services/admin
-src/ui/components/nav/__tests__/nav.staff.test.js`): 21 passed, 0 failed.
-- Phase 2 (full unit, `npm test`): 110 test files passed; 1,033 tests passed,
-  2 skipped (1,035 collected), 0 failed.
-- Phase 2 (rules emulator, `npm run test:rules`): 1 test file passed; 77 tests
-  passed, 0 failed after the five-role expansion covering author, user, moderator,
-  administrator, and guest roles across all new admin gates.
-- Phase 2 (`npm run build`): production build completed successfully; the admin
-  entry (`admin-CJCX9wWe.js`) and PWA precache were generated.
-- Phase 2 E2E: deferred to Phase 5. Guest and ordinary-user denial paths are
-  already covered authoritatively by the rules emulator suite.
+All commands were run in the admin worktree on 2026-10-23.
+
+| Check                 | Command                                                            | Result                                                                                  |
+| --------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| Full unit suite       | `npm test -- --maxWorkers=2`                                       | 127 files; 1,179 passed, 2 skipped, 0 failed                                            |
+| Admin unit subset     | `npx vitest run src/services/admin src/pages/admin --maxWorkers=2` | 156 passed, 0 failed                                                                    |
+| Firestore rules       | `npm run test:rules`                                               | 81 passed, 0 failed                                                                     |
+| Admin denial E2E      | `npx playwright test e2e/specs/admin-access.spec.js --workers=1`   | 16 passed, 0 failed                                                                     |
+| Formatting            | `npm run format:check`                                             | All files match Prettier style                                                          |
+| ESLint                | `npm run lint`                                                     | No issues found                                                                         |
+| Design tokens         | `npm run lint:tokens`                                              | No raw color literals outside the design system                                         |
+| Type check            | `npm run type-check`                                               | No errors                                                                               |
+| Production build      | `npm run build`                                                    | Completed; admin chunks and PWA precache generated                                      |
+| Live authenticated UI | `.tmp/verify-admin.mjs`                                            | 9 routes at 390 px and 1440 px; 0 failures, 0 page errors, 0 console errors, 0 overflow |
+| Live users flow       | `.tmp/verify-admin.mjs`                                            | Search `Leo` returned 1 row; detail panel opened with real profile                      |
+
+Rules and indexes were deployed with:
+
+```powershell
+npx firebase deploy --only firestore:rules --project taletranscend --non-interactive
+npx firebase deploy --only firestore:indexes --project taletranscend --non-interactive
+```
+
+All four new composite indexes were confirmed READY before the final live run.
 
 ## 10. Free-Tier Estimates per Screen
 
 Estimates are per first page load, with page size 20 unless noted. Count
 aggregations are billed as one read per 1,000 index entries.
 
-| Screen              | Reads (first load)                                        | Writes per action                                                      |
-| ------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------- |
-| Admin shell / guard | 0 for staff (cached claims); 1 profile read for an author | 0                                                                      |
-| Overview            | 5 count aggregations + 10 recent audit entries = about 15 | 0                                                                      |
-| Users and roles     | 25 user documents                                         | 1 profile update + 1 audit = 2                                         |
-| Tale deletion queue | 20 requests                                               | delete tale + update request + audit + optional notification = up to 4 |
-| Report queue        | 20 reports                                                | update report + moderation log + audit = 3                             |
-| Author applications | 20 applications                                           | update application + audit = 2                                         |
-| Audit log           | 25 entries                                                | 0                                                                      |
-| Site settings       | 1 config document                                         | 1 config write + 1 audit = 2                                           |
-| Author own content  | 20 own tales + 10 own deletion requests = 30              | deletion request + audit = 2                                           |
+| Screen              | Reads (first load)                                        | Writes per action                                                                 |
+| ------------------- | --------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Admin shell / guard | 0 for staff (cached claims); 1 profile read for an author | 0                                                                                 |
+| Overview            | 5 count aggregations + 5 recent audit entries = about 10  | 0                                                                                 |
+| Users and roles     | 20 user documents                                         | 1 profile update + 1 audit = 2                                                    |
+| Tale deletion queue | 20 requests                                               | atomic request update + tale delete, then audit + optional notification = up to 4 |
+| Report queue        | 20 reports                                                | update report + audit = 2                                                         |
+| Author applications | 20 applications                                           | atomic application + author-role update, then audit = 3                           |
+| Audit log           | 20 entries                                                | 0                                                                                 |
+| Site settings       | 1 config document + up to 50 flag documents               | 1 config or flag write + 1 audit = 2                                              |
+| Author own content  | 20 own tales + 10 own deletion requests = 30              | 1 deletion request = 1                                                            |
 
 No screen uses an unbounded `onSnapshot`. No screen reads a collection in a
 loop. No screen fetches a full collection for statistics.
@@ -290,11 +332,18 @@ loop. No screen fetches a full collection for statistics.
 - Added `authorApplications/{applicationId}`: create by the applicant; read by
   the applicant or staff; decide by administrator.
 - Added an administrator update branch on `users/{userId}` limited to
-  `isBanned`, `isVerifiedWriter`, `role`, and `updatedAt`.
+  `isBanned`, `isVerifiedWriter`, `role`, and `updatedAt`. Owner create/update
+  branches reject self-granted moderation flags and staff roles.
 - Tightened `appConfig/{docId}` and `featureFlags/{flagId}` writes from
   moderator/admin to administrator only.
-- Existing report, moderation-log, deletion-request, tale, comment, and user
-  delete rules keep their current authority. No existing permission was widened.
+- Deletion petitions now require an existing tale owned by the petitioner,
+  `pending` status, and a bounded field set. Decisions only apply to pending
+  petitions, use a bounded decision field set, and record the caller as reviewer.
+- Report and author-application decisions now require a pending source document,
+  a bounded decision field set, and the caller as reviewer. This closes the
+  concurrent-decision race without weakening staff authority.
+- Existing moderation-log, tale, comment, and user delete rules keep their
+  current authority. No existing permission was widened.
 
 ### Indexes (Phase 2)
 
@@ -307,3 +356,7 @@ loop. No screen fetches a full collection for statistics.
 - `adminAuditLogs`: `createdAt` descending is a single-field automatic index; no
   composite entry needed.
 - Existing `tales (status, publishedAt)` remains sufficient for its query.
+
+All declared rules and indexes were deployed to project `taletranscend` on
+2026-10-23. The four affected composite indexes were verified READY through the
+Firebase Admin API before the final live verification run.

@@ -990,6 +990,14 @@ describe('admin dashboard — five-role rules matrix', () => {
       await assertSucceeds(
         updateDoc(doc(adminCtx().firestore(), `${ROOT}/authorApplications/app-1`), decision)
       );
+      // The application is no longer pending, so a second reviewer cannot
+      // overwrite the first decision.
+      await assertFails(
+        updateDoc(doc(adminCtx().firestore(), `${ROOT}/authorApplications/app-1`), {
+          ...decision,
+          status: 'rejected',
+        })
+      );
     });
   });
 
@@ -998,9 +1006,45 @@ describe('admin dashboard — five-role rules matrix', () => {
       name: 'Reader One',
       avatarUrl: '',
       website: '',
-      joinedAt: new Date(),
-      updatedAt: new Date(),
-      createdAt: new Date(),
+      joinedAt: new Date(Date.now() - 60_000),
+      // Older than the write cooldown so owner-write tests fail for the rule
+      // under test, not the cooldown guard.
+      updatedAt: new Date(Date.now() - 60_000),
+      createdAt: new Date(Date.now() - 60_000),
+    });
+
+    it('an ordinary user CAN create their own profile with non-staff defaults', async () => {
+      await assertSucceeds(
+        setDoc(doc(userCtx().firestore(), `${ROOT}/users/user-1`), {
+          ...profile(),
+          role: 'reader',
+          isBanned: false,
+          isVerifiedWriter: false,
+          joinedAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          createdAt: serverTimestamp(),
+        })
+      );
+    });
+
+    it('an ordinary user CANNOT self-grant moderation flags or a staff role on create', async () => {
+      const ctx = userCtx();
+      for (const payload of [
+        { isBanned: true },
+        { isVerifiedWriter: true },
+        { role: 'admin' },
+        { role: 'moderator' },
+      ]) {
+        await assertFails(
+          setDoc(doc(ctx.firestore(), `${ROOT}/users/user-1`), {
+            ...profile(),
+            joinedAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+            createdAt: serverTimestamp(),
+            ...payload,
+          })
+        );
+      }
     });
 
     it('an administrator CAN set isBanned; a moderator CANNOT', async () => {
@@ -1040,6 +1084,28 @@ describe('admin dashboard — five-role rules matrix', () => {
       await assertFails(
         updateDoc(doc(userCtx().firestore(), `${ROOT}/users/user-1`), {
           isBanned: false,
+          updatedAt: serverTimestamp(),
+        })
+      );
+      await assertFails(
+        updateDoc(doc(userCtx().firestore(), `${ROOT}/users/user-1`), {
+          isVerifiedWriter: true,
+          updatedAt: serverTimestamp(),
+        })
+      );
+    });
+
+    it('an ordinary user CANNOT promote their own display role to staff', async () => {
+      await seed('users/user-1', profile());
+      await assertFails(
+        updateDoc(doc(userCtx().firestore(), `${ROOT}/users/user-1`), {
+          role: 'admin',
+          updatedAt: serverTimestamp(),
+        })
+      );
+      await assertFails(
+        updateDoc(doc(userCtx().firestore(), `${ROOT}/users/user-1`), {
+          role: 'moderator',
           updatedAt: serverTimestamp(),
         })
       );
@@ -1114,7 +1180,11 @@ describe('admin dashboard — five-role rules matrix', () => {
       const ctx = adminCtx();
       await assertSucceeds(getDoc(doc(ctx.firestore(), `${ROOT}/reports/report-1`)));
       await assertSucceeds(
-        updateDoc(doc(ctx.firestore(), `${ROOT}/reports/report-1`), { status: 'resolved' })
+        updateDoc(doc(ctx.firestore(), `${ROOT}/reports/report-1`), {
+          status: 'resolved',
+          reviewedBy: 'admin-1',
+          reviewedAt: new Date(),
+        })
       );
     });
 
@@ -1133,6 +1203,16 @@ describe('admin dashboard — five-role rules matrix', () => {
       await assertSucceeds(
         updateDoc(doc(moderatorCtx().firestore(), `${ROOT}/reports/report-1`), {
           status: 'resolved',
+          reviewedBy: 'mod-1',
+          reviewedAt: new Date(),
+        })
+      );
+      // A decided report cannot be overwritten by a stale second decision.
+      await assertFails(
+        updateDoc(doc(moderatorCtx().firestore(), `${ROOT}/reports/report-1`), {
+          status: 'dismissed',
+          reviewedBy: 'mod-1',
+          reviewedAt: new Date(),
         })
       );
       await assertFails(
@@ -1188,7 +1268,8 @@ describe('admin dashboard — five-role rules matrix', () => {
       createdAt: new Date(),
     });
 
-    it('an author CAN create and read their own petition', async () => {
+    it('an author CAN create and read a petition for their own tale', async () => {
+      await seedTale('author-1', 'tale-1');
       const ctx = authorCtx();
       await assertSucceeds(
         setDoc(doc(ctx.firestore(), `${ROOT}/deletionRequests/req-1`), request())
@@ -1196,17 +1277,39 @@ describe('admin dashboard — five-role rules matrix', () => {
       await assertSucceeds(getDoc(doc(ctx.firestore(), `${ROOT}/deletionRequests/req-1`)));
     });
 
-    it('an administrator or moderator CAN approve the petition', async () => {
+    it('a user CANNOT petition to delete another author\u2019s tale', async () => {
+      await seedTale('author-1', 'tale-1');
+      await assertFails(
+        setDoc(doc(userCtx().firestore(), `${ROOT}/deletionRequests/req-1`), {
+          ...request(),
+          userId: 'user-1',
+        })
+      );
+    });
+
+    it('an administrator or moderator CAN decide a pending petition', async () => {
       await seed('deletionRequests/req-1', request());
       await assertSucceeds(
         updateDoc(doc(moderatorCtx().firestore(), `${ROOT}/deletionRequests/req-1`), {
           status: 'approved',
+          reviewedBy: 'mod-1',
+          reviewedAt: new Date(),
+        })
+      );
+      // Once decided, the petition cannot be overwritten by a stale decision.
+      await assertFails(
+        updateDoc(doc(moderatorCtx().firestore(), `${ROOT}/deletionRequests/req-1`), {
+          status: 'rejected',
+          reviewedBy: 'mod-1',
+          reviewedAt: new Date(),
         })
       );
       await seed('deletionRequests/req-2', request());
       await assertSucceeds(
         updateDoc(doc(adminCtx().firestore(), `${ROOT}/deletionRequests/req-2`), {
           status: 'approved',
+          reviewedBy: 'admin-1',
+          reviewedAt: new Date(),
         })
       );
     });

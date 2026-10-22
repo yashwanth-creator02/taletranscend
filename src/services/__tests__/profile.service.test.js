@@ -17,6 +17,7 @@ vi.mock('@fb/index.js', () => ({
   },
   refs: {
     tale: vi.fn((tid) => ({ path: `tales/${tid}` })),
+    tales: vi.fn(() => ({ path: 'tales' })),
     drafts: vi.fn((uid) => ({ path: `users/${uid}/drafts` })),
     draftChapters: vi.fn((uid, did) => ({ path: `users/${uid}/drafts/${did}/chapters` })),
     user: vi.fn((uid) => ({ path: `users/${uid}` })),
@@ -27,6 +28,8 @@ vi.mock('@fb/index.js', () => ({
   },
   getDoc: vi.fn(),
   getDocs: vi.fn(),
+  query: vi.fn((...args) => args),
+  where: vi.fn((...args) => args),
   setDoc: vi.fn(() => Promise.resolve()),
   deleteDoc: vi.fn(() => Promise.resolve()),
   addDoc: vi.fn(() => Promise.resolve({ id: 'req-new' })),
@@ -228,7 +231,12 @@ describe('profile.service', () => {
     });
 
     it('submits deletion request document to archive administration', async () => {
-      const { addDoc, refs } = await import('@fb/index.js');
+      const { addDoc, getDoc, refs } = await import('@fb/index.js');
+      getDoc.mockResolvedValueOnce({
+        exists: () => true,
+        id: 'tale-99',
+        data: () => ({ authorId: 'u1', title: 'A Tale' }),
+      });
 
       const result = await submitTaleDeletionRequest({
         userId: 'u1',
@@ -248,6 +256,63 @@ describe('profile.service', () => {
         })
       );
       expect(refs.deletionRequests).toHaveBeenCalled();
+    });
+
+    it('resolves an exact title to the caller-owned tale ID', async () => {
+      const { addDoc, getDoc, getDocs } = await import('@fb/index.js');
+      getDoc.mockResolvedValueOnce({ exists: () => false });
+      getDocs.mockResolvedValueOnce({
+        docs: [
+          {
+            id: 'tale-7',
+            data: () => ({ authorId: 'u1', title: 'The Long Night' }),
+          },
+        ],
+      });
+
+      await submitTaleDeletionRequest({
+        userId: 'u1',
+        taleId: '  the long night ',
+        reason: 'Author desires removal from canonical weave',
+      });
+
+      expect(addDoc).toHaveBeenCalledWith(
+        expect.objectContaining({ path: 'deletionRequests' }),
+        expect.objectContaining({ taleId: 'tale-7', status: 'pending' })
+      );
+    });
+
+    it('refuses a tale owned by another author', async () => {
+      const { getDoc } = await import('@fb/index.js');
+      getDoc.mockResolvedValueOnce({
+        exists: () => true,
+        id: 'tale-99',
+        data: () => ({ authorId: 'someone-else', title: 'A Tale' }),
+      });
+
+      await expect(
+        submitTaleDeletionRequest({
+          userId: 'u1',
+          taleId: 'tale-99',
+          reason: 'Author desires removal from canonical weave',
+        })
+      ).rejects.toThrow('does not belong to your account');
+    });
+
+    it('refuses a title that does not match any owned tale', async () => {
+      const { getDoc, getDocs } = await import('@fb/index.js');
+      getDoc.mockResolvedValueOnce({ exists: () => false });
+      getDocs.mockResolvedValueOnce({
+        docs: [{ id: 'tale-7', data: () => ({ authorId: 'u1', title: 'Other Tale' }) }],
+      });
+
+      await expect(
+        submitTaleDeletionRequest({
+          userId: 'u1',
+          taleId: 'Missing Tale',
+          reason: 'Author desires removal from canonical weave',
+        })
+      ).rejects.toThrow('No chronicle with that title or ID belongs to your account');
     });
   });
 

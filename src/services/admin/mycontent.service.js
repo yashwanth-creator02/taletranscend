@@ -1,8 +1,15 @@
 // src/services/admin/mycontent.service.js
-import { addDoc, getDocs, query, where, orderBy, limit, auth } from '@fb/index.js';
+// Author-owned content reads and deletion petitions. The rules authorise these
+// operations by ownership, not by a staff claim: an author may read only their
+// own tales and deletion requests, and may create a petition for their own tale.
+
+import { addDoc, serverTimestamp, auth } from '@fb/index.js';
 import { refs } from '@fb/refs.js';
-import { fetchAdminPage } from './pagination.service.js';
-import { writeAdminAuditLog } from './audit.service.js';
+import { ADMIN_PAGE_SIZE, fetchAdminPage } from './pagination.service.js';
+
+/** Deletion reasons must match the bounds enforced by firestore.rules. */
+export const DELETION_REASON_MIN = 5;
+export const DELETION_REASON_MAX = 2000;
 
 /**
  * Fetch a paginated page of the logged-in author's tales.
@@ -24,6 +31,7 @@ export async function getAuthorTalesPage(cursor = null) {
     conditions: [['authorId', '==', user.uid]],
     orderField: 'publishedAt',
     direction: 'desc',
+    pageSize: ADMIN_PAGE_SIZE,
     cursor,
   });
 }
@@ -48,76 +56,40 @@ export async function getAuthorDeletionRequestsPage(cursor = null) {
     conditions: [['userId', '==', user.uid]],
     orderField: 'createdAt',
     direction: 'desc',
+    pageSize: ADMIN_PAGE_SIZE,
     cursor,
   });
 }
 
 /**
- * Fetch pending reports on the logged-in author's content.
- *
- * @returns {Promise<Array<Record<string, unknown> & { id: string }>>}
- */
-export async function getAuthorReports() {
-  const user = auth.currentUser;
-  if (!user) return [];
-
-  // Fetch author's tales to get their IDs
-  const talesQuery = query(refs.tales(), where('authorId', '==', user.uid), limit(50));
-  const talesSnap = await getDocs(talesQuery);
-  const taleIds = talesSnap.docs.map((d) => d.id);
-
-  if (taleIds.length === 0) return [];
-
-  // Firestore 'in' query supports up to 30 items
-  const chunks = [];
-  for (let i = 0; i < taleIds.length; i += 30) {
-    chunks.push(taleIds.slice(i, i + 30));
-  }
-
-  const reportsMap = new Map();
-  for (const chunk of chunks) {
-    const reportsQuery = query(
-      refs.reports(),
-      where('status', '==', 'pending'),
-      where('targetId', 'in', chunk),
-      orderBy('createdAt', 'desc'),
-      limit(20)
-    );
-    const snap = await getDocs(reportsQuery);
-    snap.docs.forEach((d) => {
-      reportsMap.set(d.id, { id: d.id, ...d.data() });
-    });
-  }
-
-  return Array.from(reportsMap.values());
-}
-
-/**
- * Initiate a deletion request for a tale.
+ * Initiate a deletion request for one of the author's tales. The reason is
+ * validated before the write because the rules require 5-2000 characters and a
+ * rejected write would be indistinguishable from a network failure in the UI.
  *
  * @param {string} taleId
- * @param {string} [reason]
+ * @param {string} reason
  * @returns {Promise<string>} Created request ID
  */
 export async function requestTaleDeletion(taleId, reason = '') {
+  const id = String(taleId ?? '').trim();
+  if (!id) throw new Error('A tale ID is required.');
+
   const user = auth.currentUser;
-  if (!user) throw new Error('Not authenticated');
+  if (!user) throw new Error('Sign in before requesting a tale deletion.');
+
+  const trimmedReason = String(reason ?? '').trim();
+  if (trimmedReason.length < DELETION_REASON_MIN || trimmedReason.length > DELETION_REASON_MAX) {
+    throw new Error(
+      `A deletion reason must be between ${DELETION_REASON_MIN} and ${DELETION_REASON_MAX} characters.`
+    );
+  }
 
   const docRef = await addDoc(refs.deletionRequests(), {
     userId: user.uid,
-    taleId,
-    reason,
+    taleId: id,
+    reason: trimmedReason,
     status: 'pending',
-    createdAt: new Date().toISOString(),
-  });
-
-  await writeAdminAuditLog({
-    actorId: user.uid,
-    actorRole: 'author',
-    action: 'deletion.requested',
-    targetType: 'deletionRequest',
-    targetId: docRef.id,
-    summary: `Author requested deletion for tale ${taleId}`,
+    createdAt: serverTimestamp(),
   });
 
   return docRef.id;

@@ -463,6 +463,12 @@ function _renderAuthorRegistry(data) {
   const authorCard = document.getElementById('author-registry-card');
   if (!authorCard) return;
 
+  const studioLink = document.getElementById('profile-author-studio-link');
+  if (studioLink) {
+    studioLink.classList.toggle('hidden', !data.isAuthor);
+    studioLink.classList.toggle('flex', Boolean(data.isAuthor));
+  }
+
   const isRegistered = Boolean(data.isAuthor && data.authorEmail);
   const unreg = document.getElementById('author-registry-unregistered');
   const reg = document.getElementById('author-registry-registered');

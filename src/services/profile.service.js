@@ -2,7 +2,7 @@
 // Profile-specific data fetching: reading history, published tales, drafts.
 // All returned objects are normalized through schema factories.
 
-import { getDocs, getDoc, serverTimestamp, writeBatch, db, refs } from '@fb/index.js';
+import { getDocs, getDoc, serverTimestamp, writeBatch, db, refs, query, where } from '@fb/index.js';
 import { readStorage } from './reader/localProgress.service.js';
 import { createTale, createDraft } from '@state/index.js';
 import { getTalesByAuthor } from './tale/getTales.js';
@@ -284,11 +284,52 @@ export async function submitTaleDeletionRequest({ userId, taleId, reason }) {
   }
 
   const { addDoc, serverTimestamp, refs } = await import('@fb/index.js');
-  log.info('Submitting chronicle deletion request to admin...', { userId, taleId });
+  const selector = String(taleId).trim();
+  const normalizedSelector = selector.toLocaleLowerCase();
+
+  // The profile form accepts an ID or a title. Resolve either form to a tale
+  // the caller actually owns before writing the petition.
+  let resolvedTaleId = '';
+  let direct;
+  try {
+    direct = await getDoc(refs.tale(selector));
+  } catch {
+    // A title is not always a valid document path (for example, it contains a
+    // slash). Fall through to the author-scoped title lookup.
+    direct = { exists: () => false };
+  }
+  if (direct.exists()) {
+    const directAuthorId = direct.data()?.authorId;
+    if (directAuthorId !== userId) {
+      throw new Error('That chronicle does not belong to your account.');
+    }
+    resolvedTaleId = direct.id;
+  } else {
+    const authored = await getDocs(query(refs.tales(), where('authorId', '==', userId)));
+    const match = authored.docs.find(
+      (entry) =>
+        String(entry.data()?.title ?? '')
+          .trim()
+          .toLocaleLowerCase() === normalizedSelector
+    );
+    if (!match) {
+      throw new Error('No chronicle with that title or ID belongs to your account.');
+    }
+    resolvedTaleId = match.id;
+  }
+
+  if (!resolvedTaleId) {
+    throw new Error('The chronicle could not be resolved.');
+  }
+
+  log.info('Submitting chronicle deletion request to admin...', {
+    userId,
+    taleId: resolvedTaleId,
+  });
 
   const docRef = await addDoc(refs.deletionRequests(), {
     userId,
-    taleId,
+    taleId: resolvedTaleId,
     reason: reason.trim(),
     status: 'pending',
     createdAt: serverTimestamp(),

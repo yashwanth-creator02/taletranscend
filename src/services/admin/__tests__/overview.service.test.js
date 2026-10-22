@@ -4,18 +4,18 @@ import { fetchOverviewStats } from '../overview.service.js';
 import { listAdminAuditLogPage } from '../audit.service.js';
 
 vi.mock('@fb/index.js', () => ({
-  query: vi.fn(),
-  where: vi.fn(),
-  orderBy: vi.fn(),
-  limit: vi.fn(),
-  getDocs: vi.fn(),
+  query: vi.fn((ref, ...constraints) => ({ ref, constraints })),
+  where: vi.fn((field, op, value) => ({ field, op, value })),
+  getCountFromServer: vi.fn(),
 }));
 
 vi.mock('@fb/refs.js', () => ({
   refs: {
-    tales: vi.fn(),
-    reports: vi.fn(),
-    authorApplications: vi.fn(),
+    tales: vi.fn(() => 'tales'),
+    users: vi.fn(() => 'users'),
+    reports: vi.fn(() => 'reports'),
+    authorApplications: vi.fn(() => 'applications'),
+    deletionRequests: vi.fn(() => 'deletions'),
   },
 }));
 
@@ -28,44 +28,88 @@ describe('overview service', () => {
     vi.clearAllMocks();
   });
 
-  it('returns overview stats with all required fields', async () => {
-    const mockTalesSnap = {
-      size: 42,
-      docs: [{ data: () => ({ authorId: 'user-1' }) }, { data: () => ({ authorId: 'user-2' }) }],
-    };
-    const mockReportsSnap = { size: 5 };
-    const mockAppsSnap = { size: 2 };
-    const mockAuditPage = { items: [] };
-
-    vi.mocked(await import('@fb/index.js')).getDocs.mockResolvedValueOnce(mockTalesSnap);
-    vi.mocked(await import('@fb/index.js')).getDocs.mockResolvedValueOnce(mockReportsSnap);
-    vi.mocked(await import('@fb/index.js')).getDocs.mockResolvedValueOnce(mockAppsSnap);
-    vi.mocked(listAdminAuditLogPage).mockResolvedValue(mockAuditPage);
+  it('returns live Firestore counts and recent audit entries', async () => {
+    const { getCountFromServer } = await import('@fb/index.js');
+    getCountFromServer
+      .mockResolvedValueOnce({ data: () => ({ count: 42 }) })
+      .mockResolvedValueOnce({ data: () => ({ count: 120 }) })
+      .mockResolvedValueOnce({ data: () => ({ count: 5 }) })
+      .mockResolvedValueOnce({ data: () => ({ count: 2 }) })
+      .mockResolvedValueOnce({ data: () => ({ count: 3 }) });
+    vi.mocked(listAdminAuditLogPage).mockResolvedValue({
+      items: [
+        {
+          id: 'log-1',
+          actorId: 'admin-uid',
+          actorRole: 'admin',
+          action: 'user.ban',
+          targetType: 'user',
+          targetId: 'target-uid',
+          summary: 'Banned a user',
+          createdAt: null,
+        },
+      ],
+      lastDoc: null,
+      hasMore: false,
+      error: null,
+    });
 
     const stats = await fetchOverviewStats();
 
-    expect(stats).toHaveProperty('totalTales');
-    expect(stats).toHaveProperty('totalUsers');
-    expect(stats).toHaveProperty('pendingReports');
-    expect(stats).toHaveProperty('pendingApplications');
-    expect(stats).toHaveProperty('recentAuditEntries');
-    expect(typeof stats.totalTales).toBe('number');
-    expect(typeof stats.pendingReports).toBe('number');
-    expect(Array.isArray(stats.recentAuditEntries)).toBe(true);
+    expect(stats).toEqual({
+      totalTales: 42,
+      totalUsers: 120,
+      pendingReports: 5,
+      pendingApplications: 2,
+      pendingDeletions: 3,
+      recentAuditEntries: [
+        {
+          id: 'log-1',
+          actorId: 'admin-uid',
+          actorRole: 'admin',
+          action: 'user.ban',
+          targetType: 'user',
+          targetId: 'target-uid',
+          summary: 'Banned a user',
+          createdAt: null,
+        },
+      ],
+      auditUnavailable: false,
+    });
+    expect(listAdminAuditLogPage).toHaveBeenCalledWith({ pageSize: 5 });
   });
 
-  it('handles empty audit entries gracefully', async () => {
-    const mockTalesSnap = { size: 0, docs: [] };
-    const mockReportsSnap = { size: 0 };
-    const mockAppsSnap = { size: 0 };
-    const mockAuditPage = { items: [] };
+  it('returns null for a counter that cannot be read instead of estimating', async () => {
+    const { getCountFromServer } = await import('@fb/index.js');
+    getCountFromServer
+      .mockResolvedValueOnce({ data: () => ({ count: 1 }) })
+      .mockRejectedValueOnce(new Error('permission denied'))
+      .mockResolvedValueOnce({ data: () => ({ count: 0 }) })
+      .mockResolvedValueOnce({ data: () => ({ count: 0 }) })
+      .mockResolvedValueOnce({ data: () => ({ count: 0 }) });
 
-    vi.mocked(await import('@fb/index.js')).getDocs.mockResolvedValueOnce(mockTalesSnap);
-    vi.mocked(await import('@fb/index.js')).getDocs.mockResolvedValueOnce(mockReportsSnap);
-    vi.mocked(await import('@fb/index.js')).getDocs.mockResolvedValueOnce(mockAppsSnap);
-    vi.mocked(listAdminAuditLogPage).mockResolvedValue(mockAuditPage);
+    const stats = await fetchOverviewStats({ includeAudit: false });
+
+    expect(stats.totalTales).toBe(1);
+    expect(stats.totalUsers).toBeNull();
+    expect(stats.recentAuditEntries).toEqual([]);
+    expect(stats.auditUnavailable).toBe(false);
+    expect(listAdminAuditLogPage).not.toHaveBeenCalled();
+  });
+
+  it('flags audit read failures without failing the counters', async () => {
+    const { getCountFromServer } = await import('@fb/index.js');
+    getCountFromServer.mockResolvedValue({ data: () => ({ count: 0 }) });
+    vi.mocked(listAdminAuditLogPage).mockResolvedValue({
+      items: [],
+      lastDoc: null,
+      hasMore: false,
+      error: new Error('audit denied'),
+    });
 
     const stats = await fetchOverviewStats();
-    expect(stats.recentAuditEntries).toEqual([]);
+
+    expect(stats.totalTales).toBe(0);
+    expect(stats.auditUnavailable).toBe(true);
   });
 });

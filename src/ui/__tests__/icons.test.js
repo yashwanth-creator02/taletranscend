@@ -148,5 +148,37 @@ describe('Icons Registry', () => {
     }
 
     expect(missingInViews).toEqual([]);
+
+    const adminFiles = [
+      path.resolve(__dirname, '../../pages/admin/admin.templates.js'),
+      path.resolve(__dirname, '../../services/admin/access.service.js'),
+      ...fs
+        .readdirSync(path.resolve(__dirname, '../../pages/admin/modules'), { withFileTypes: true })
+        .filter((entry) => entry.isDirectory())
+        .flatMap((entry) => {
+          const moduleDir = path.resolve(__dirname, '../../pages/admin/modules', entry.name);
+          return fs
+            .readdirSync(moduleDir)
+            .filter((file) => file.endsWith('.js'))
+            .map((file) => path.join(moduleDir, file));
+        }),
+    ];
+
+    const missingInAdmin = [];
+    for (const file of adminFiles) {
+      const content = fs.readFileSync(file, 'utf8');
+      const matches = content.matchAll(
+        /data-lucide=["']([^"'${}]+)["']|icon:\s*['"]([a-z0-9-]+)['"]/g
+      );
+      for (const match of matches) {
+        const iconName = (match[1] ?? match[2]).trim();
+        const normalized = iconName.replace(/-/g, '').toLowerCase();
+        if (!registered.has(normalized)) {
+          missingInAdmin.push(`${path.basename(file)}: ${iconName}`);
+        }
+      }
+    }
+
+    expect(missingInAdmin).toEqual([]);
   });
 });

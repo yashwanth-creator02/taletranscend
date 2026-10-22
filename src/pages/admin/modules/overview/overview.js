@@ -5,124 +5,194 @@ import {
   formatAdminCount,
   escapeAdminHtml,
   adminInitials,
+  truncateAdminText,
 } from '../../admin.utils.js';
-import { buildAdminEmptyState } from '../../admin.templates.js';
+import { buildAdminEmptyState, buildModuleLoading } from '../../admin.templates.js';
 
 /**
  * @param {{ container: HTMLElement, access: import('../../admin.state.js').AdminAccess }} opts
  * @returns {() => void}
  */
-export function mount({ container }) {
+export function mount({ container, access }) {
   let loading = true;
   let stats = null;
-  let error = false;
+  let error = null;
+  let disposed = false;
 
   async function load() {
+    loading = true;
+    error = null;
+    render();
     try {
-      stats = await fetchOverviewStats();
-      error = false;
+      stats = await fetchOverviewStats({ includeAudit: Boolean(access?.isAdmin) });
     } catch (err) {
-      error = true;
+      error = err;
       console.error('[overview] failed to load stats', err);
     } finally {
-      loading = false;
-      render();
+      if (!disposed) {
+        loading = false;
+        render();
+      }
     }
   }
 
-  function render() {
-    if (loading) {
-      container.innerHTML =
-        '<div class="admin-module-loading" role="status"><span class="admin-module-loading__line"></span><p>Loading overview...</p></div>';
-      return;
-    }
+  function renderAudit() {
+    const heading = `<h3 class="admin-audit-strip__title">Recent Staff Activity</h3>`;
 
-    if (error || !stats) {
-      container.innerHTML = buildAdminEmptyState({
-        title: 'Failed to load overview',
-        body: 'Could not fetch dashboard statistics. Try refreshing the page.',
-        icon: 'alert-circle',
-      });
-      return;
-    }
-
-    const { totalTales, totalUsers, pendingReports, pendingApplications, recentAuditEntries } =
-      stats;
-
-    const statsHtml = `
-      <div class="admin-stats-grid">
-        <div class="admin-stat">
-          <span class="admin-stat__value">${escapeAdminHtml(formatAdminCount(totalTales))}</span>
-          <span class="admin-stat__label">Published Tales</span>
-        </div>
-        <div class="admin-stat">
-          <span class="admin-stat__value">${escapeAdminHtml(formatAdminCount(totalUsers))}</span>
-          <span class="admin-stat__label">Registered Users</span>
-        </div>
-        <div class="admin-stat">
-          <span class="admin-stat__value">${escapeAdminHtml(formatAdminCount(pendingReports))}</span>
-          <span class="admin-stat__label">Pending Reports</span>
-        </div>
-        <div class="admin-stat">
-          <span class="admin-stat__value">${escapeAdminHtml(formatAdminCount(pendingApplications))}</span>
-          <span class="admin-stat__label">Pending Applications</span>
-        </div>
-      </div>
-    `;
-
-    const auditHtml =
-      recentAuditEntries.length > 0
-        ? `
+    if (!access?.isAdmin) {
+      return `
         <div class="admin-audit-strip">
-          <h3 class="admin-audit-strip__title">Recent Staff Activity</h3>
+          ${heading}
+          <p class="admin-readonly-note">
+            Recent staff activity is visible to administrators only. The audit log
+            remains append-only for every staff action.
+          </p>
+        </div>
+      `;
+    }
+
+    if (stats?.auditUnavailable) {
+      return `
+        <div class="admin-audit-strip">
+          ${heading}
+          ${buildAdminEmptyState({
+            title: 'Audit activity unavailable',
+            body: 'The dashboard counters loaded, but the audit log could not be read. Refresh to try again.',
+            icon: 'alert-circle',
+          })}
+        </div>
+      `;
+    }
+
+    const entries = stats?.recentAuditEntries ?? [];
+    if (entries.length === 0) {
+      return `
+        <div class="admin-audit-strip">
+          ${heading}
+          ${buildAdminEmptyState({
+            title: 'No recent activity',
+            body: 'The audit log is empty. Staff actions will appear here as they happen.',
+            icon: 'scroll-text',
+          })}
+        </div>
+      `;
+    }
+
+    return `
+      <div class="admin-audit-strip">
+        ${heading}
+        <div class="admin-table-wrapper">
           <table class="admin-table">
             <thead>
               <tr>
                 <th class="admin-table__cell--left">Actor</th>
                 <th>Action</th>
                 <th>Target</th>
-                <th>Time</th>
+                <th class="admin-table__cell--right">Time</th>
               </tr>
             </thead>
             <tbody>
-              ${recentAuditEntries
-                .map(
-                  (entry) => `
-                <tr>
-                  <td class="admin-table__cell--left">
-                    <span class="admin-table__mark">${escapeAdminHtml(adminInitials(entry.actorRole))}</span>
-                    ${escapeAdminHtml(entry.actorRole)}
-                  </td>
-                  <td>${escapeAdminHtml(entry.action)}</td>
-                  <td>${escapeAdminHtml(`${entry.targetType}/${entry.targetId}`)}</td>
-                  <td class="admin-table__cell--right">${escapeAdminHtml(formatAdminDate(entry.createdAt))}</td>
-                </tr>
-              `
-                )
+              ${entries
+                .map((entry) => {
+                  const role = entry.actorRole || 'staff';
+                  const actor = entry.actorId || 'Unknown actor';
+                  const target = [entry.targetType, entry.targetId].filter(Boolean).join(' / ');
+                  return `
+                    <tr>
+                      <td class="admin-table__cell--left">
+                        <span class="admin-table__mark">${escapeAdminHtml(
+                          adminInitials(actor)
+                        )}</span>
+                        <span class="admin-table__name">${escapeAdminHtml(
+                          truncateAdminText(actor, 28)
+                        )}</span>
+                        <span class="admin-table__sub">${escapeAdminHtml(role)}</span>
+                      </td>
+                      <td>${escapeAdminHtml(entry.action || 'Unknown action')}</td>
+                      <td>${escapeAdminHtml(truncateAdminText(target || 'Archive', 40))}</td>
+                      <td class="admin-table__cell--right">${escapeAdminHtml(
+                        formatAdminDate(entry.createdAt)
+                      )}</td>
+                    </tr>
+                  `;
+                })
                 .join('')}
             </tbody>
           </table>
         </div>
-      `
-        : buildAdminEmptyState({
-            title: 'No recent activity',
-            body: 'The audit log is empty. Staff actions will appear here as they happen.',
-            icon: 'scroll-text',
-          });
+      </div>
+    `;
+  }
+
+  function render() {
+    if (loading) {
+      container.innerHTML = buildModuleLoading('overview');
+      return;
+    }
+
+    if (error || !stats) {
+      container.innerHTML = `
+        <section aria-labelledby="overview-error-title">
+          <div class="admin-error" role="alert">
+            <h2 id="overview-error-title" class="admin-section-title">Overview unavailable</h2>
+            <p>Live archive counters could not be read. No numbers are estimated.</p>
+            <div class="admin-error__actions">
+              <button type="button" class="admin-btn" data-action="retry">Try again</button>
+            </div>
+          </div>
+        </section>
+      `;
+      return;
+    }
+
+    const cards = [
+      { label: 'Published Tales', value: stats.totalTales },
+      { label: 'Registered Users', value: stats.totalUsers },
+      { label: 'Pending Reports', value: stats.pendingReports },
+      { label: 'Pending Applications', value: stats.pendingApplications },
+      { label: 'Pending Deletions', value: stats.pendingDeletions },
+    ];
+
+    const statsHtml = `
+      <div class="admin-stats-grid">
+        ${cards
+          .map(
+            (card) => `
+              <div class="admin-stat">
+                <span class="admin-stat__value">${escapeAdminHtml(
+                  formatAdminCount(card.value)
+                )}</span>
+                <span class="admin-stat__label">${escapeAdminHtml(card.label)}</span>
+              </div>
+            `
+          )
+          .join('')}
+      </div>
+    `;
 
     container.innerHTML = `
       <section aria-labelledby="overview-title">
         <h2 id="overview-title" class="admin-section-title">Archive Overview</h2>
+        <p class="admin-note">
+          Counts are read live from Firestore. An em dash means that counter could
+          not be read; it is never replaced with an estimate.
+        </p>
         ${statsHtml}
-        ${auditHtml}
+        ${renderAudit()}
       </section>
     `;
   }
 
+  function handleClick(event) {
+    if (event.target.closest('[data-action="retry"]')) load();
+  }
+
+  container.addEventListener('click', handleClick);
   load();
 
   return () => {
-    /* no cleanup needed */
+    disposed = true;
+    container.removeEventListener('click', handleClick);
   };
 }
 

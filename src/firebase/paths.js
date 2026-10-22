@@ -83,6 +83,9 @@ export const PATHS = {
 
   // ── User Profile ──────────────────────────────────────────────────
 
+  /** All user profiles */
+  users: () => `${APP_ROOT}/users`,
+
   /** User profile document */
   user: (uid) => `${APP_ROOT}/users/${uid}`,
 
