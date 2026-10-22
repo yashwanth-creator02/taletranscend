@@ -41,7 +41,8 @@ Confirmed defaults:
 | T2.1    | Role helpers, rules, indexes, rules emulator tests  | Main Agent | Done                   |
 | T2.2    | Admin access service and admin shell                | Main Agent | Done                   |
 | T2.3    | Vite routing, Firebase hosting rewrite, nav entry   | Main Agent | Done                   |
-| T2.4    | Foundation tests, docs, commit, present Gate 2 diff | Main Agent | In Progress (Gate 2)   |
+| T2.4    | Foundation tests, docs, commit, present Gate 2 diff | Main Agent | Done (Gate 2)          |
+| T2.5    | Expand five-role rules matrix to 77 tests           | Main Agent | Done                   |
 | T3.1    | Overview module                                     | Subagent   | Blocked on Gate 2      |
 | T3.2    | Users and roles module                              | Subagent   | Blocked on Gate 2      |
 | T3.3    | Tale deletion moderation module                     | Subagent   | Blocked on Gate 2      |
@@ -114,7 +115,10 @@ assignment procedure, and merge instructions. No merge, push, or deploy.
 - [2026-10-21 00:00] Added five-role rules emulator coverage and unit tests for
   access resolution, templates, formatting, and the staff nav entry.
 - [2026-10-21 00:00] Phase 2 validation passed: lint, type-check, token lint,
-  full unit suite, rules emulator suite, and production build. Gate 2 prepared.
+  full unit suite, rules emulator suite, and production build.
+- [2026-10-22 00:00] Expanded five-role rules matrix to 77 tests (T2.5). All new
+  admin gates covered with allowed and denied cases for every role.
+- [2026-10-22 00:00] Phase 2 complete. Gate 2 ready for approval.
 
 ## 6. Decisions
 
