@@ -6,7 +6,6 @@ import '@css/base.css';
 import '@css/components.css';
 import '@css/pages/admin.css';
 
-import { initNav } from '@ui/components/nav/nav.js';
 import { initIcons } from '@ui/icons.js';
 import { createLogger } from '@/utils';
 import { initAuth } from '@fb/index.js';
@@ -27,10 +26,8 @@ import {
 
 const log = createLogger('AdminPage');
 
-// Vite turns this into a lazy map of every file under ./modules/. Adding a
-// module in Phase 3 needs no change to this file, and Phase 2 builds with an
-// empty map instead of a broken static import.
-const moduleLoaders = import.meta.glob('./modules/*.js');
+// Vite turns this into a lazy map of every file under ./modules/**/*.js.
+const moduleLoaders = import.meta.glob('./modules/**/*.js');
 
 /** @returns {string | null} */
 function moduleFromHash() {
@@ -58,7 +55,10 @@ async function mountModule(moduleId, container) {
   container.innerHTML = buildModuleLoading(moduleId);
   initIcons();
 
-  const loader = moduleLoaders[`./modules/${moduleId}.js`];
+  // Try subdirectory pattern first (e.g. ./modules/users/users.js), then flat pattern.
+  const loader =
+    moduleLoaders[`./modules/${moduleId}/${moduleId}.js`] ||
+    moduleLoaders[`./modules/${moduleId}.js`];
   if (!loader) {
     container.innerHTML = buildModuleError(moduleId);
     initIcons();
@@ -134,17 +134,12 @@ export async function initAdminPage() {
 
   paint(buildAccessLoading());
 
-  // Restore the Firebase session first (like every other page), so the user
-  // is set before initNav mounts the header. initNav's onAuthStateChanged
-  // subscriber fires immediately with the restored user, which is what
-  // resolves the brand-mark skeleton into the real account menu.
+  // Restore the Firebase session first, so the user session is set.
   await new Promise((resolve) => {
     initAuth(() => resolve());
   });
 
-  // Boot the nav after auth has restored, so it renders the authenticated
-  // user area instead of the skeleton placeholder.
-  initNav();
+  // Note: No global nav requested — control room uses its own back button.
 
   adminState.access = await resolveDashboardAccess();
   if (!adminState.access.canEnter) {

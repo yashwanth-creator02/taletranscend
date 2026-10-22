@@ -61,9 +61,15 @@ export function buildAdminShell({ access, modules, activeModule }) {
 
       <div class="admin-main">
         <header class="admin-topbar">
-          <div>
-            <p class="admin-kicker">TaleTranscend</p>
-            <h1 class="admin-topbar__title">Archive control room</h1>
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <a href="index.html" class="btn btn-ghost" style="padding: 0.5rem 0.75rem; display: inline-flex; align-items: center; gap: 0.5rem;" aria-label="Return to archive">
+              <i data-lucide="arrow-left" aria-hidden="true"></i>
+              <span>Back</span>
+            </a>
+            <div>
+              <p class="admin-kicker">TaleTranscend</p>
+              <h1 class="admin-topbar__title">Archive control room</h1>
+            </div>
           </div>
           <span class="admin-role-shield" data-role="${escapeHtml(access.role)}">
             <i data-lucide="shield-check" class="admin-role-shield__icon" aria-hidden="true"></i>
