@@ -188,8 +188,9 @@ the design system`.
 src/ui/components/nav/__tests__/nav.staff.test.js`): 21 passed, 0 failed.
 - Phase 2 (full unit, `npm test`): 110 test files passed; 1,033 tests passed,
   2 skipped (1,035 collected), 0 failed.
-- Phase 2 (rules emulator, `npm run test:rules`): 1 test file passed; 68 tests
-  passed, 0 failed after the final audit actor-role tightening.
+- Phase 2 (rules emulator, `npm run test:rules`): 1 test file passed; 77 tests
+  passed, 0 failed after the five-role expansion covering author, user, moderator,
+  administrator, and guest roles across all new admin gates.
 - Phase 2 (`npm run build`): production build completed successfully; the admin
   entry (`admin-CJCX9wWe.js`) and PWA precache were generated.
 - Phase 2 E2E: deferred to Phase 5. Guest and ordinary-user denial paths are

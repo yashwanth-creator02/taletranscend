@@ -1019,6 +1019,22 @@ describe('admin dashboard — five-role rules matrix', () => {
       );
     });
 
+    it('an author or guest CANNOT use the administrator moderation branch', async () => {
+      await seed('users/target-1', profile());
+      await assertFails(
+        updateDoc(doc(authorCtx().firestore(), `${ROOT}/users/target-1`), {
+          isBanned: true,
+          updatedAt: serverTimestamp(),
+        })
+      );
+      await assertFails(
+        updateDoc(doc(guestCtx().firestore(), `${ROOT}/users/target-1`), {
+          isBanned: true,
+          updatedAt: serverTimestamp(),
+        })
+      );
+    });
+
     it('an ordinary user CANNOT set their own moderation flag', async () => {
       await seed('users/user-1', profile());
       await assertFails(
@@ -1063,6 +1079,17 @@ describe('admin dashboard — five-role rules matrix', () => {
         setDoc(doc(guestCtx().firestore(), `${ROOT}/appConfig/site`), { siteName: 'Nope' })
       );
     });
+
+    it('authors and ordinary users CANNOT write site configuration', async () => {
+      for (const ctx of [authorCtx(), userCtx()]) {
+        await assertFails(
+          setDoc(doc(ctx.firestore(), `${ROOT}/appConfig/site`), { siteName: 'Nope' })
+        );
+        await assertFails(
+          setDoc(doc(ctx.firestore(), `${ROOT}/featureFlags/beta`), { enabled: false })
+        );
+      }
+    });
   });
 
   describe('reports — moderators triage, ordinary users cannot', () => {
@@ -1082,6 +1109,23 @@ describe('admin dashboard — five-role rules matrix', () => {
       await assertFails(setDoc(doc(guestCtx().firestore(), `${ROOT}/reports/report-1`), report()));
     });
 
+    it('an administrator CAN read and resolve a report', async () => {
+      await seed('reports/report-1', report());
+      const ctx = adminCtx();
+      await assertSucceeds(getDoc(doc(ctx.firestore(), `${ROOT}/reports/report-1`)));
+      await assertSucceeds(
+        updateDoc(doc(ctx.firestore(), `${ROOT}/reports/report-1`), { status: 'resolved' })
+      );
+    });
+
+    it('an author CANNOT read back the report they filed, and a guest CANNOT read it', async () => {
+      await assertSucceeds(
+        setDoc(doc(authorCtx().firestore(), `${ROOT}/reports/report-1`), report())
+      );
+      await assertFails(getDoc(doc(authorCtx().firestore(), `${ROOT}/reports/report-1`)));
+      await assertFails(getDoc(doc(guestCtx().firestore(), `${ROOT}/reports/report-1`)));
+    });
+
     it('a moderator CAN read and resolve a report; an ordinary user CANNOT read it', async () => {
       await seed('reports/report-1', report());
       await assertSucceeds(getDoc(doc(moderatorCtx().firestore(), `${ROOT}/reports/report-1`)));
@@ -1094,6 +1138,44 @@ describe('admin dashboard — five-role rules matrix', () => {
       await assertFails(
         updateDoc(doc(userCtx().firestore(), `${ROOT}/reports/report-1`), { status: 'resolved' })
       );
+    });
+  });
+
+  describe('moderationLogs — staff-only action record', () => {
+    const entry = (moderatorId = 'mod-1') => ({
+      moderatorId,
+      action: 'report.resolve',
+      targetId: 'report-1',
+      targetType: 'report',
+      reason: 'Validated the report and removed the content.',
+      createdAt: new Date(),
+    });
+
+    it('an administrator and a moderator CAN create an entry', async () => {
+      await assertSucceeds(
+        setDoc(doc(adminCtx().firestore(), `${ROOT}/moderationLogs/log-1`), entry('admin-1'))
+      );
+      await assertSucceeds(
+        setDoc(doc(moderatorCtx().firestore(), `${ROOT}/moderationLogs/log-2`), entry())
+      );
+    });
+
+    it('an author, ordinary user, or guest CANNOT create an entry', async () => {
+      for (const ctx of [authorCtx(), userCtx(), guestCtx()]) {
+        await assertFails(setDoc(doc(ctx.firestore(), `${ROOT}/moderationLogs/log-1`), entry()));
+      }
+    });
+
+    it('only staff CAN read, update, or delete an entry', async () => {
+      await seed('moderationLogs/log-1', entry());
+      await assertSucceeds(getDoc(doc(adminCtx().firestore(), `${ROOT}/moderationLogs/log-1`)));
+      await assertSucceeds(getDoc(doc(moderatorCtx().firestore(), `${ROOT}/moderationLogs/log-1`)));
+      for (const ctx of [authorCtx(), userCtx(), guestCtx()]) {
+        await assertFails(getDoc(doc(ctx.firestore(), `${ROOT}/moderationLogs/log-1`)));
+        await assertFails(
+          updateDoc(doc(ctx.firestore(), `${ROOT}/moderationLogs/log-1`), { reason: 'edited' })
+        );
+      }
     });
   });
 
@@ -1114,13 +1196,32 @@ describe('admin dashboard — five-role rules matrix', () => {
       await assertSucceeds(getDoc(doc(ctx.firestore(), `${ROOT}/deletionRequests/req-1`)));
     });
 
-    it('a moderator CAN approve the petition; an ordinary user CANNOT update it', async () => {
+    it('an administrator or moderator CAN approve the petition', async () => {
       await seed('deletionRequests/req-1', request());
       await assertSucceeds(
         updateDoc(doc(moderatorCtx().firestore(), `${ROOT}/deletionRequests/req-1`), {
           status: 'approved',
         })
       );
+      await seed('deletionRequests/req-2', request());
+      await assertSucceeds(
+        updateDoc(doc(adminCtx().firestore(), `${ROOT}/deletionRequests/req-2`), {
+          status: 'approved',
+        })
+      );
+    });
+
+    it('a guest CANNOT create or read a petition', async () => {
+      await assertFails(
+        setDoc(doc(guestCtx().firestore(), `${ROOT}/deletionRequests/req-1`), request())
+      );
+      await seed('deletionRequests/req-1', request());
+      await assertFails(getDoc(doc(guestCtx().firestore(), `${ROOT}/deletionRequests/req-1`)));
+    });
+
+    it('an ordinary user CANNOT read or update another author\u2019s petition', async () => {
+      await seed('deletionRequests/req-1', request());
+      await assertFails(getDoc(doc(userCtx().firestore(), `${ROOT}/deletionRequests/req-1`)));
       await assertFails(
         updateDoc(doc(userCtx().firestore(), `${ROOT}/deletionRequests/req-1`), {
           status: 'approved',
