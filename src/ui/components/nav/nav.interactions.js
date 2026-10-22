@@ -533,7 +533,7 @@ export function updateNavUser(user) {
   if (!user || typeof user.getIdTokenResult !== 'function') return;
   const claimUser = user;
   user
-    .getIdTokenResult()
+    .getIdTokenResult(true)
     .then((result) => {
       if (navState.currentUser !== claimUser) return;
       const claims = result?.claims ?? {};

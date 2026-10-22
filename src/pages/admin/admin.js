@@ -132,12 +132,19 @@ export async function initAdminPage() {
   if (!root || adminState.mounted) return;
   adminState.mounted = true;
 
-  initNav();
   paint(buildAccessLoading());
 
+  // Restore the Firebase session first (like every other page), so the user
+  // is set before initNav mounts the header. initNav's onAuthStateChanged
+  // subscriber fires immediately with the restored user, which is what
+  // resolves the brand-mark skeleton into the real account menu.
   await new Promise((resolve) => {
     initAuth(() => resolve());
   });
+
+  // Boot the nav after auth has restored, so it renders the authenticated
+  // user area instead of the skeleton placeholder.
+  initNav();
 
   adminState.access = await resolveDashboardAccess();
   if (!adminState.access.canEnter) {

@@ -120,6 +120,13 @@ export const ROUTES = [
     navActive: '404.html',
     match: (path) => path === '/404.html' || path === '/404',
   },
+  {
+    id: 'admin',
+    file: 'admin.html',
+    shell: 'standalone',
+    navActive: 'admin.html',
+    match: (path) => path === '/admin.html' || path === '/admin',
+  },
 ];
 
 /**
