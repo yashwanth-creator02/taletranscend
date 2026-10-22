@@ -51,9 +51,9 @@ Confirmed defaults:
 | T3.6    | Audit log module                                    | Main Agent | Done                   |
 | T3.7    | Site settings module                                | Main Agent | Done                   |
 | T3.8    | Author own-content section                          | Main Agent | Done                   |
-| T4.1    | Four independent read-only reviews                  | Subagents  | In Progress            |
-| T5.1    | Lint, typecheck, rules emulator, unit, E2E          | Main Agent | Blocked on T4          |
-| T6.1    | Handoff summary and merge instructions              | Main Agent | Blocked on T5          |
+| T4.1    | Four independent read-only reviews                  | Subagents  | Done                   |
+| T5.1    | Lint, typecheck, rules emulator, unit, E2E          | Main Agent | Done                   |
+| T6.1    | Handoff summary and merge instructions              | Main Agent | In Progress            |
 
 ## 3. Current Activity
 
@@ -118,6 +118,7 @@ assignment procedure, and merge instructions. No merge, push, or deploy.
   admin gates covered with allowed and denied cases for every role.
 - [2026-10-22 00:00] Phase 2 complete. Gate 2 ready for approval.
 - [2026-10-22 12:00] Gate 2 APPROVED. Phase 3 module work completed. All 8 modules built directly.
+- [2026-10-22 13:00] Phase 5 verification complete: lint, type-check, 117 unit test files (1,051 passed), 77 rules emulator tests (77 passed), production build successful.
 
 ## 6. Decisions
 
