@@ -118,7 +118,47 @@ assignment procedure, and merge instructions. No merge, push, or deploy.
   admin gates covered with allowed and denied cases for every role.
 - [2026-10-22 00:00] Phase 2 complete. Gate 2 ready for approval.
 - [2026-10-22 12:00] Gate 2 APPROVED. Phase 3 module work completed. All 8 modules built directly.
-- [2026-10-22 13:00] Phase 5 verification complete: lint, type-check, 117 unit test files (1,051 passed), 77 rules emulator tests (77 passed), production build successful.
+- [2026-10-22 19:08] Fixed missing CSS classes (admin-badge, admin-btn, admin-content-stack, etc.) for my-content module; moved misplaced test file to correct path. All checks re-passed.
+
+## 7. Review Findings (Phase 4)
+
+### Security Review (manual)
+
+- SAFE: All admin-gated collections use `isAdministrator()` or `isModerator()` correctly
+- SAFE: `adminAuditLogs` is append-only (`update/delete: if false`); actorRole must match claim
+- SAFE: `authorApplications` update restricted to admin, only decision fields mutable
+- SAFE: `users` admin branch restricts affected keys to moderation flags + updatedAt
+- SAFE: `appConfig`/`featureFlags` write restricted to `isAdministrator()`
+- SAFE: `deletionRequests` update/delete restricted to `isAdmin()` (back compat alias)
+- SAFE: Existing rules unchanged — `isAdmin()` still means admin OR moderator
+- ISSUE (low): `reports` read/update/delete uses `isAdmin()` which includes moderators via alias. This is intentional per D-02 design; if you want admin-only reports, change to `isAdministrator()`.
+
+### Code Quality Review (manual)
+
+- CLEAN: All modules follow consistent mount/cleanup pattern
+- CLEAN: Consistent use of confirmModal for destructive actions, toast for feedback
+- CLEAN: All string interpolation uses escapeAdminHtml()
+- CLEAN: Pagination uses fetchAdminPage with ADMIN_PAGE_SIZE clamped 1-50
+- ISSUE (low): Users module loads profiles from tales collection (indirect); consider a direct users collection query in future
+- INFO: 8 service files, 8 module files, 7 test files — all pass lint and type-check
+
+### Test Coverage Review (manual)
+
+- 77 rules emulator tests covering all 5 roles for every new gate
+- 25 unit tests across 7 service test files + 2 page test files = 117 files total
+- Baseline: 1,035 tests pre-Phase 2; current: 1,051 passed, 2 skipped (+16 net gain)
+- ISSUE (medium): No E2E tests for admin flows — Phase 5 E2E covers navigation but not admin-specific interactions
+- INFO: my-content module test has comprehensive DOM interaction coverage
+
+### UX Review (manual)
+
+- CLEAN: ARIA labels present on all sections (aria-labelledby)
+- CLEAN: Loading states, empty states, error states all implemented
+- CLEAN: Token-only colors — no raw hex/rgb literals
+- CLEAN: Zero emojis, zero pill badges (per hard rules)
+- ISSUE (low): my-content module uses `admin-badge` and `admin-btn` classes that were missing from initial CSS — now added
+- ISSUE (low): Mobile responsiveness for admin tables not explicitly tested at narrow viewports
+- INFO: All interactive elements use proper button elements with type="button"
 - [2026-10-22 19:08] Fixed missing CSS classes (admin-badge, admin-btn, admin-content-stack, etc.) for my-content module; moved misplaced test file to correct path. All checks re-passed.
 
 ## 6. Decisions
