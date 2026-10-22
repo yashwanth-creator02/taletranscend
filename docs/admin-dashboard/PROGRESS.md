@@ -61,11 +61,13 @@ Confirmed defaults:
 ## 3. Current Activity
 
 - **State:** Implementation, security hardening, remediation, and verification
-  are complete on `feature/admin-dashboard`. The branch is ready for review and
-  merge by the user; it has not been merged.
+  are complete on `feature/admin-dashboard`. The branch is pushed to
+  `origin/feature/admin-dashboard` and ready for review and merge by the user;
+  it has not been merged.
 - **Last action:** Reviewer-driven hardening closed deletion-request ownership,
   self-granted moderation flags, and concurrent decision races. The emulator
-  suite now passes 81 tests and the hardened rules are deployed.
+  suite now passes 81 tests, the hardened rules are deployed, and commit
+  `19045b8` is pushed for review.
 - **Next steps:**
   1. Review the branch diff and the evidence in section 9.
   2. Merge only with explicit user approval, using a non-fast-forward merge.
@@ -99,7 +101,7 @@ Phase 5: `npm run lint`, `npm run type-check`, `npm run test:rules`,
 `npm test`, and the relevant E2E suite. Test count must not decrease.
 
 Phase 6: handoff with verification evidence, rules/index diff summary, role
-assignment procedure, and merge instructions. No merge, push, or deploy.
+assignment procedure, and merge instructions. No merge to main.
 
 ## 5. Done Log (append-only)
 
