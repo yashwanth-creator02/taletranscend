@@ -68,7 +68,10 @@ export async function resolveDashboardAccess(user = auth.currentUser) {
   if (!user) return makeAccess('guest');
 
   try {
-    const tokenResult = await user.getIdTokenResult?.();
+    // Force-fetch the latest ID token so custom claims set while this
+    // session was idle are reflected without waiting for a 60-minute
+    // token rotation. forceRefresh: true is safe — it simply re-fetches.
+    const tokenResult = await user.getIdTokenResult?.(true);
     const claims = tokenResult?.claims ?? {};
     if (claims.admin === true) return makeAccess('admin');
     if (claims.moderator === true) return makeAccess('moderator');

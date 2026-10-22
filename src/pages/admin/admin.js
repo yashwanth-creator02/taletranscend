@@ -9,6 +9,7 @@ import '@css/pages/admin.css';
 import { initNav } from '@ui/components/nav/nav.js';
 import { initIcons } from '@ui/icons.js';
 import { createLogger } from '@/utils';
+import { initAuth } from '@fb/index.js';
 import {
   canAccessModule,
   getAllowedModules,
@@ -121,7 +122,11 @@ async function renderRoute(focusContent = false) {
   if (focusContent) content.focus({ preventScroll: true });
 }
 
-/** Boot the page. Safe to call twice; the second call is a no-op. */
+/**
+ * Boot the page. Safe to call twice; the second call is a no-op.
+ * Restores the Firebase session first (every other page does this), so the
+ * admin claim is present in the user's token before access is resolved.
+ */
 export async function initAdminPage() {
   const root = document.getElementById('admin-root');
   if (!root || adminState.mounted) return;
@@ -129,6 +134,10 @@ export async function initAdminPage() {
 
   initNav();
   paint(buildAccessLoading());
+
+  await new Promise((resolve) => {
+    initAuth(() => resolve());
+  });
 
   adminState.access = await resolveDashboardAccess();
   if (!adminState.access.canEnter) {
