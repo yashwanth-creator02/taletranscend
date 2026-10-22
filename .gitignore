@@ -69,6 +69,9 @@ architecture.svg
 migrate.js
 seed-tale.js
 
+# Local Auth-claim admin utility (drives the Admin SDK with local credentials)
+set-claims.mjs
+
 # Local demo / scratch
 demo/
 ex.tale.html
