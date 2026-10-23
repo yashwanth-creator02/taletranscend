@@ -67,7 +67,11 @@ Confirmed defaults:
 - **Last action:** Reviewer-driven hardening closed deletion-request ownership,
   self-granted moderation flags, and concurrent decision races. The emulator
   suite now passes 81 tests, the hardened rules are deployed, and commit
-  `19045b8` is pushed for review.
+  `19045b8` is pushed for review. A post-delivery navigation defect was then
+  fixed: `admin.html` no longer sets a document-wide `<base href="/">`, so
+  sidebar hash links stay on `/admin.html` or `/admin` instead of escaping to
+  the public home page. Sidebar navigation now passes for all nine sections on
+  both admin entry paths without a page reload.
 - **Next steps:**
   1. Review the branch diff and the evidence in section 9.
   2. Merge only with explicit user approval, using a non-fast-forward merge.
@@ -136,6 +140,7 @@ assignment procedure, and merge instructions. No merge to main.
 - [2026-10-23 00:00] Created the missing `users/{uid}` profile for the test administrator and verified the admin claim. Live verification passed all nine routes at 390 px and 1440 px with zero page errors, console errors, or horizontal page overflow.
 - [2026-10-23 00:00] Reviewer-driven hardening: deletion petitions must target a tale the petitioner owns; deletion, report, and application decisions only apply to pending documents; staff decisions record the caller as reviewer; owner profile writes cannot set `isBanned`, `isVerifiedWriter`, or a staff `role`. Deletion approval now refuses a missing or mismatched tale and describes removal of the public record without claiming subcollection erasure. Added Author Studio link for registered authors and title-to-ID resolution for removal petitions.
 - [2026-10-23 00:00] Re-verified hardened branch: 81/81 rules tests, 1,179 unit tests passed (2 skipped), 16/16 admin denial E2E, lint, token lint, type-check, format check, and build all pass. Hardened rules deployed to project `taletranscend`.
+- [2026-10-23 00:00] Fixed dashboard section navigation. `src/views/admin.html` carried `<base href="/">`, which resolved every `#/<module>` link against the site root and sent clicks to the public home page (`/#/users`) instead of the dashboard (`/admin.html#/users`). Removed the base tag and added an E2E regression that checks hash links resolve inside the admin document. All nine sections now navigate on both `/admin.html` and `/admin` with no reload or module error.
 
 ## 7. Review Findings and Resolution
 
@@ -267,7 +272,8 @@ All commands were run in the admin worktree on 2026-10-23.
 | Full unit suite       | `npm test -- --maxWorkers=2`                                       | 127 files; 1,179 passed, 2 skipped, 0 failed                                            |
 | Admin unit subset     | `npx vitest run src/services/admin src/pages/admin --maxWorkers=2` | 156 passed, 0 failed                                                                    |
 | Firestore rules       | `npm run test:rules`                                               | 81 passed, 0 failed                                                                     |
-| Admin denial E2E      | `npx playwright test e2e/specs/admin-access.spec.js --workers=1`   | 16 passed, 0 failed                                                                     |
+| Admin denial E2E      | `npx playwright test e2e/specs/admin-access.spec.js --workers=1`   | 20 passed, 0 failed                                                                     |
+| Sidebar navigation    | `.tmp/verify-nav.mjs`                                              | Nine sections on `/admin.html` and `/admin`; hash route, no reload, no module errors    |
 | Formatting            | `npm run format:check`                                             | All files match Prettier style                                                          |
 | ESLint                | `npm run lint`                                                     | No issues found                                                                         |
 | Design tokens         | `npm run lint:tokens`                                              | No raw color literals outside the design system                                         |

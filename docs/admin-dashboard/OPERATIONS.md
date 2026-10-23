@@ -55,6 +55,9 @@ never commit the service-account JSON.
 ## Routes
 
 The page uses hash routing; the first route is loaded after access resolves.
+Do not add a document-wide `<base>` element to `admin.html`: it rewrites
+`#/<module>` links against the site root and navigates clicks out of the
+dashboard.
 
 | Hash             | Module         |
 | ---------------- | -------------- |

@@ -56,6 +56,23 @@ test.describe('Admin access gate', () => {
     await expect(page.locator('a[href="index.html"]').first()).toBeVisible();
   });
 
+  test('keeps dashboard hash links inside the admin document', async ({ page }) => {
+    await rememberGuest(page);
+    await page.goto('/admin.html');
+
+    // A document-wide <base href="/"> turns "#/users" into "/#/users", which
+    // leaves the dashboard and silently lands on the public home page.
+    const resolved = await page.evaluate(() => {
+      const anchor = document.createElement('a');
+      anchor.href = '#/users';
+      document.body.appendChild(anchor);
+      return anchor.href;
+    });
+    const url = new URL(resolved);
+    expect(url.pathname).toBe('/admin.html');
+    expect(url.hash).toBe('#/users');
+  });
+
   test('keeps the control room out of search indexes', async ({ page }) => {
     await rememberGuest(page);
     await page.goto('/admin.html');
