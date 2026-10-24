@@ -216,6 +216,31 @@ export function buildModuleError(moduleId) {
 }
 
 /**
+ * Denial state for a hash route that is unknown or unavailable to the role.
+ * The same copy covers both cases so the shell does not reveal which modules
+ * exist to an account that cannot open them.
+ *
+ * @param {{moduleId: string | null, role: string}} options
+ * @returns {string}
+ */
+export function buildRouteDenied({ moduleId, role }) {
+  const route = moduleId ? `#/${moduleId}` : 'the requested route';
+  return `
+    <section class="admin-module-error" role="alert">
+      <p class="admin-kicker">Route unavailable</p>
+      <h2 class="admin-module-error__title">This section is not available to your role</h2>
+      <p class="admin-module-error__body">
+        The dashboard section <code>${escapeHtml(route)}</code> could not be opened with your
+        current access. It may not exist, or it may require a different archive role.
+        No data was loaded.
+      </p>
+      <p class="admin-note">Signed in as ${escapeHtml(roleLabel(role))}.</p>
+      <a class="btn btn-ghost" href="#/">Return to dashboard home</a>
+    </section>
+  `;
+}
+
+/**
  * Empty-state block shared by module tables.
  * @param {{title: string, body: string, icon?: string}} options
  * @returns {string}

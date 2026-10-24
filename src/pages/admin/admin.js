@@ -9,12 +9,9 @@ import '@css/pages/admin.css';
 import { initIcons } from '@ui/icons.js';
 import { createLogger } from '@/utils';
 import { initAuth } from '@fb/index.js';
-import {
-  canAccessModule,
-  getAllowedModules,
-  resolveDashboardAccess,
-} from '@services/admin/access.service.js';
+import { getAllowedModules, resolveDashboardAccess } from '@services/admin/access.service.js';
 import { adminState, resetAdminState } from './admin.state.js';
+import { resolveAdminRoute } from './admin.routes.js';
 import {
   buildAccessDenied,
   buildAccessLoading,
@@ -22,6 +19,7 @@ import {
   buildDashboardHome,
   buildModuleError,
   buildModuleLoading,
+  buildRouteDenied,
 } from './admin.templates.js';
 
 const log = createLogger('AdminPage');
@@ -67,12 +65,6 @@ function observeIcons(root) {
     });
   });
   iconObserver.observe(root, { childList: true, subtree: true });
-}
-
-/** @returns {string | null} */
-function moduleFromHash() {
-  const match = window.location.hash.match(/^#\/?([a-z][a-z0-9-]*)/i);
-  return match?.[1] ?? null;
 }
 
 /** @param {string} html */
@@ -140,17 +132,16 @@ async function renderRoute(focusContent = false) {
   if (!adminState.access?.canEnter) return;
   const version = ++routeVersion;
   const modules = getAllowedModules(adminState.access);
-  const requested = moduleFromHash();
-  const active = requested && canAccessModule(adminState.access, requested) ? requested : null;
+  const route = resolveAdminRoute(adminState.access, window.location.hash);
   adminState.cleanup?.();
   adminState.cleanup = null;
-  adminState.activeModule = active;
+  adminState.activeModule = route.active;
 
   paint(
     buildAdminShell({
       access: adminState.access,
       modules,
-      activeModule: active,
+      activeModule: route.denied ? '__denied__' : route.active,
     })
   );
 
@@ -158,8 +149,14 @@ async function renderRoute(focusContent = false) {
   if (!content) return;
   observeIcons(content);
 
-  if (active) {
-    await mountModule(active, content, version);
+  if (route.denied) {
+    content.innerHTML = buildRouteDenied({
+      moduleId: route.requested,
+      role: adminState.access.role,
+    });
+    initIcons();
+  } else if (route.active) {
+    await mountModule(route.active, content, version);
   } else {
     content.innerHTML = buildDashboardHome(adminState.access, modules);
     initIcons();
@@ -217,8 +214,8 @@ export async function initAdminPage() {
     return;
   }
 
-  await renderRoute();
-
+  // Attach before the first render so a navigation during a slow module
+  // chunk load is not lost. routeVersion discards the superseded render.
   if (!hashHandler) {
     hashHandler = () => {
       renderRoute(true).catch((err) => {
@@ -227,6 +224,8 @@ export async function initAdminPage() {
     };
     window.addEventListener('hashchange', hashHandler);
   }
+
+  await renderRoute();
 }
 
 /** Tear down listeners and module state. Used by tests. */

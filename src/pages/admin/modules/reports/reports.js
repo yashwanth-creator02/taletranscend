@@ -6,8 +6,16 @@ import {
 } from '@services/admin/reports.service.js';
 import { showConfirmModal } from '@/ui/components/confirmModal.js';
 import { showToast } from '@/ui/components/toast.js';
-import { formatAdminDate, truncateAdminText, escapeAdminHtml } from '../../admin.utils.js';
+import {
+  formatAdminDate,
+  truncateAdminText,
+  escapeAdminHtml,
+  captureAdminSearchFocus,
+  restoreAdminSearchFocus,
+} from '../../admin.utils.js';
 import { buildAdminEmptyState, buildModuleLoading } from '../../admin.templates.js';
+
+const SEARCH_DEBOUNCE_MS = 300;
 
 const STATUS_OPTIONS = [
   { value: 'pending', label: 'Pending' },
@@ -89,6 +97,9 @@ export function mount({ container }) {
   let hasMore = false;
   let status = 'pending';
   let direction = 'desc';
+  let searchTerm = '';
+  let searchTimer = null;
+  let pendingSearchFocus = null;
   let loading = false;
   let loadingMore = false;
   let deciding = false;
@@ -102,6 +113,17 @@ export function mount({ container }) {
   function renderToolbar() {
     return `
       <div class="admin-toolbar">
+        <label class="admin-field admin-field--grow">
+          <span class="admin-field__label">Search</span>
+          <input
+            class="admin-input"
+            type="search"
+            data-role="search"
+            value="${escapeAdminHtml(searchTerm)}"
+            placeholder="Search by target ID prefix"
+            autocomplete="off"
+          />
+        </label>
         <label class="admin-field">
           <span class="admin-field__label">Status</span>
           <select class="admin-select" data-filter="status">
@@ -110,7 +132,11 @@ export function mount({ container }) {
         </label>
         <label class="admin-field">
           <span class="admin-field__label">Sort</span>
-          <select class="admin-select" data-filter="direction">
+          <select
+            class="admin-select"
+            data-filter="direction"
+            ${searchTerm ? 'disabled title="Prefix search sorts alphabetically"' : ''}
+          >
             ${renderOptions(DIRECTION_OPTIONS, direction)}
           </select>
         </label>
@@ -305,12 +331,18 @@ export function mount({ container }) {
   }
 
   function render() {
+    pendingSearchFocus = captureAdminSearchFocus(container, pendingSearchFocus);
     if (loading) {
       container.innerHTML = buildModuleLoading('reports');
       return;
     }
 
-    const empty = EMPTY_STATES[status] ?? EMPTY_STATES.pending;
+    const empty = searchTerm
+      ? {
+          title: 'No reports match that search',
+          body: 'Try a different target ID prefix, or clear the search to see the queue.',
+        }
+      : (EMPTY_STATES[status] ?? EMPTY_STATES.pending);
     const body = error
       ? `
         <div class="admin-error" role="alert">
@@ -336,6 +368,8 @@ export function mount({ container }) {
         ${body}
       </section>
     `;
+    restoreAdminSearchFocus(container, pendingSearchFocus);
+    pendingSearchFocus = null;
   }
 
   async function loadFirstPage() {
@@ -350,7 +384,7 @@ export function mount({ container }) {
     render();
 
     try {
-      const result = await listReportsPage({ status, direction });
+      const result = await listReportsPage({ status, search: searchTerm, direction });
       if (disposed || token !== loadVersion) return;
       items = result.items ?? [];
       lastDoc = result.lastDoc ?? null;
@@ -377,7 +411,12 @@ export function mount({ container }) {
     render();
 
     try {
-      const result = await listReportsPage({ status, direction, cursor: lastDoc });
+      const result = await listReportsPage({
+        status,
+        search: searchTerm,
+        direction,
+        cursor: lastDoc,
+      });
       if (disposed || token !== loadVersion) return;
       items = [...items, ...(result.items ?? [])];
       lastDoc = result.lastDoc ?? null;
@@ -385,7 +424,7 @@ export function mount({ container }) {
     } catch (err) {
       if (disposed || token !== loadVersion) return;
       console.error('[reports] failed to load more reports', err);
-      showToast({ type: 'error', message: 'Could not load more reports.' });
+      showToast('Could not load more reports.', 'error');
     } finally {
       if (!disposed && token === loadVersion) {
         loadingMore = false;
@@ -407,7 +446,7 @@ export function mount({ container }) {
       if (!result) {
         selectedId = null;
         detailLoading = false;
-        showToast({ type: 'error', message: 'That report no longer exists.' });
+        showToast('That report no longer exists.', 'error');
         render();
         return;
       }
@@ -416,7 +455,7 @@ export function mount({ container }) {
       if (disposed || selectedId !== reportId) return;
       selectedId = null;
       console.error('[reports] failed to load report detail', err);
-      showToast({ type: 'error', message: 'Could not load the report detail.' });
+      showToast('Could not load the report detail.', 'error');
     } finally {
       if (!disposed && selectedId === reportId) {
         detailLoading = false;
@@ -450,19 +489,16 @@ export function mount({ container }) {
 
     try {
       await resolveReport(reportId, resolution, { notes });
-      showToast({
-        type: 'success',
-        message: resolved ? 'Report resolved.' : 'Report dismissed.',
-      });
+      showToast(resolved ? 'Report resolved.' : 'Report dismissed.', 'success');
       selectedId = null;
       detail = null;
       await loadFirstPage();
     } catch (err) {
       console.error('[reports] decision failed', err);
-      showToast({
-        type: 'error',
-        message: err instanceof Error && err.message ? err.message : 'The decision was not saved.',
-      });
+      showToast(
+        err instanceof Error && err.message ? err.message : 'The decision was not saved.',
+        'error'
+      );
       if (!disposed) render();
     } finally {
       deciding = false;
@@ -498,6 +534,19 @@ export function mount({ container }) {
     }
   }
 
+  function handleInput(event) {
+    const field =
+      event.target instanceof Element ? event.target.closest('[data-role="search"]') : null;
+    if (!(field instanceof HTMLInputElement)) return;
+
+    searchTerm = field.value.trim();
+    if (searchTimer) window.clearTimeout(searchTimer);
+    searchTimer = window.setTimeout(() => {
+      searchTimer = null;
+      if (!disposed) loadFirstPage();
+    }, SEARCH_DEBOUNCE_MS);
+  }
+
   function handleChange(event) {
     const field = event.target instanceof Element ? event.target.closest('[data-filter]') : null;
     if (!field) return;
@@ -516,13 +565,19 @@ export function mount({ container }) {
 
   container.addEventListener('click', handleClick);
   container.addEventListener('change', handleChange);
+  container.addEventListener('input', handleInput);
   loadFirstPage();
 
   return () => {
     disposed = true;
     loadVersion += 1;
+    if (searchTimer) {
+      window.clearTimeout(searchTimer);
+      searchTimer = null;
+    }
     container.removeEventListener('click', handleClick);
     container.removeEventListener('change', handleChange);
+    container.removeEventListener('input', handleInput);
   };
 }
 

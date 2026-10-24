@@ -104,9 +104,37 @@ describe('reports module', () => {
     await vi.waitFor(() => {
       expect(listReportsPage).toHaveBeenLastCalledWith({
         status: 'dismissed',
+        search: '',
         direction: 'desc',
       });
     });
+
+    unmount();
+  });
+
+  it('searches by target id prefix after a debounce', async () => {
+    const container = createContainer();
+    const unmount = mount({ container, access: ACCESS });
+
+    await vi.waitFor(() => {
+      expect(listReportsPage).toHaveBeenCalledTimes(1);
+    });
+
+    const search = container.querySelector('[data-role="search"]');
+    search.value = 'tale-';
+    search.dispatchEvent(new Event('input', { bubbles: true }));
+
+    await vi.waitFor(
+      () => {
+        expect(listReportsPage).toHaveBeenLastCalledWith({
+          status: 'pending',
+          search: 'tale-',
+          direction: 'desc',
+        });
+      },
+      { timeout: 1500 }
+    );
+    expect(container.textContent).toContain('No reports match that search');
 
     unmount();
   });
@@ -163,9 +191,7 @@ describe('reports module', () => {
       });
     });
 
-    expect(showToast).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'success', message: 'Report resolved.' })
-    );
+    expect(showToast).toHaveBeenCalledWith('Report resolved.', 'success');
 
     unmount();
   });
@@ -246,6 +272,7 @@ describe('reports module', () => {
     });
     expect(listReportsPage).toHaveBeenLastCalledWith({
       status: 'pending',
+      search: '',
       direction: 'desc',
       cursor,
     });

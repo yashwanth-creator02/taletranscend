@@ -54,12 +54,12 @@
   gap: var(--space-6);
   width: min(1440px, calc(100% - var(--space-8)));
   margin: 0 auto;
-  padding: calc(var(--nav-height) + var(--space-6)) 0 var(--space-9);
+  padding: var(--space-6) 0 var(--space-9);
 }
 
 .admin-sidebar {
   position: sticky;
-  top: calc(var(--nav-height) + var(--space-4));
+  top: var(--space-4);
   align-self: start;
   display: flex;
   flex-direction: column;
@@ -330,7 +330,7 @@
   gap: var(--space-3);
   width: min(620px, calc(100% - var(--space-8)));
   margin: 0 auto;
-  padding: calc(var(--nav-height) + var(--space-9)) 0 var(--space-9);
+  padding: var(--space-9) 0;
 }
 
 .admin-denied__icon-wrap {
@@ -599,11 +599,6 @@
   text-align: center;
 }
 
-.admin-pagination {
-  margin-top: var(--space-4);
-  text-align: center;
-}
-
 .admin-note {
   margin: 0 0 var(--space-4);
   color: var(--text-muted);
@@ -751,13 +746,74 @@
   margin-bottom: var(--space-6);
 }
 
+.admin-section-title {
+  position: relative;
+  margin: 0 0 var(--space-2);
+  padding: 0 0 var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 1.15rem + 0.45vw, 1.55rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+}
+
+.admin-section-title::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 54px;
+  height: 2px;
+  background: var(--accent);
+}
+
 .admin-section__header {
+  position: relative;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  gap: var(--space-4);
   margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
+.admin-section__header::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 54px;
+  height: 2px;
+  background: var(--accent);
+}
+
+.admin-section__header .admin-section-title {
+  margin-bottom: var(--space-1);
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.admin-section__header .admin-section-title::after {
+  display: none;
+}
+
+.admin-section__header .admin-note {
+  margin-bottom: 0;
+}
+
+.admin-error .admin-section-title {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.admin-error .admin-section-title::after {
+  display: none;
+}
+
+.admin-pagination,
 .admin-pagination-bar {
   padding: var(--space-3);
   text-align: center;

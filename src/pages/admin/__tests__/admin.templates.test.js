@@ -6,6 +6,7 @@ import {
   buildAdminShell,
   buildDashboardHome,
   buildModuleError,
+  buildRouteDenied,
 } from '../admin.templates.js';
 
 const adminAccess = {
@@ -79,6 +80,20 @@ describe('admin templates', () => {
 
   it('escapes a module id before it reaches the error title', () => {
     const html = buildModuleError('<script>alert(1)</script>');
+    expect(html).not.toContain('<script>');
+    expect(html).toContain('&lt;script&gt;');
+  });
+
+  it('renders a generic denial for an unavailable hash route', () => {
+    const html = buildRouteDenied({ moduleId: 'users', role: 'moderator' });
+    expect(html).toContain('This section is not available to your role');
+    expect(html).toContain('#/users');
+    expect(html).toContain('Moderator');
+    expect(html).toContain('href="#/"');
+  });
+
+  it('escapes a requested route before rendering the denial', () => {
+    const html = buildRouteDenied({ moduleId: '<script>alert(1)</script>', role: 'author' });
     expect(html).not.toContain('<script>');
     expect(html).toContain('&lt;script&gt;');
   });

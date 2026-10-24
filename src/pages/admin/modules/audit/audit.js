@@ -214,7 +214,7 @@ export function mount({ container }) {
 
     const pagination = hasMore
       ? `
-        <div class="admin-pagination">
+        <div class="admin-pagination-bar">
           <button type="button" class="admin-btn" data-action="load-more" ${
             loadingMore ? 'disabled' : ''
           }>

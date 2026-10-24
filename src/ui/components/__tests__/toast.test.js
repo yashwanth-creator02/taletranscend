@@ -100,6 +100,21 @@ describe('Toast Component', () => {
     expect(container.children.length).toBe(0);
   });
 
+  it('accepts a legacy options object as the first argument', () => {
+    showToast({ type: 'error', message: 'Legacy shape' });
+    const container = document.getElementById('mythic-toast-hub');
+    expect(container.textContent).toContain('Legacy shape');
+    expect(container.textContent).not.toContain('[object Object]');
+    expect(document.querySelector('.text-rose-400')).toBeTruthy();
+  });
+
+  it('renders an Error as an error toast with its message', () => {
+    showToast(new Error('Network unavailable'));
+    const container = document.getElementById('mythic-toast-hub');
+    expect(container.textContent).toContain('Network unavailable');
+    expect(document.querySelector('.text-rose-400')).toBeTruthy();
+  });
+
   it('provides shorthand helpers (success, error, warning, info)', () => {
     showToast.success('Shorthand Success');
     expect(document.querySelector('.text-emerald-400')).toBeTruthy();

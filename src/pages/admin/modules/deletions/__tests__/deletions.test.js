@@ -99,6 +99,7 @@ describe('deletion module', () => {
     await vi.waitFor(() => {
       expect(listDeletionRequestsPage).toHaveBeenCalledWith({
         status: 'pending',
+        search: '',
         direction: 'desc',
       });
     });
@@ -110,6 +111,7 @@ describe('deletion module', () => {
     await vi.waitFor(() => {
       expect(listDeletionRequestsPage).toHaveBeenLastCalledWith({
         status: 'approved',
+        search: '',
         direction: 'desc',
       });
     });
@@ -121,9 +123,37 @@ describe('deletion module', () => {
     await vi.waitFor(() => {
       expect(listDeletionRequestsPage).toHaveBeenLastCalledWith({
         status: 'approved',
+        search: '',
         direction: 'asc',
       });
     });
+
+    unmount();
+  });
+
+  it('searches by tale id prefix after a debounce', async () => {
+    const container = createContainer();
+    const unmount = mount({ container, access: ACCESS });
+
+    await vi.waitFor(() => {
+      expect(listDeletionRequestsPage).toHaveBeenCalledTimes(1);
+    });
+
+    const search = container.querySelector('[data-role="search"]');
+    search.value = 'tale-';
+    search.dispatchEvent(new Event('input', { bubbles: true }));
+
+    await vi.waitFor(
+      () => {
+        expect(listDeletionRequestsPage).toHaveBeenLastCalledWith({
+          status: 'pending',
+          search: 'tale-',
+          direction: 'desc',
+        });
+      },
+      { timeout: 1500 }
+    );
+    expect(container.textContent).toContain('No deletion requests match that search');
 
     unmount();
   });
@@ -152,6 +182,7 @@ describe('deletion module', () => {
     });
     expect(listDeletionRequestsPage).toHaveBeenLastCalledWith({
       status: 'pending',
+      search: '',
       direction: 'desc',
       cursor,
     });
@@ -220,10 +251,8 @@ describe('deletion module', () => {
     );
     expect(showConfirmModal.mock.calls[0][0].message).toContain('The Long Night');
     expect(showToast).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: 'success',
-        message: expect.stringContaining('permanently deleted'),
-      })
+      expect.stringContaining('permanently deleted'),
+      'success'
     );
 
     unmount();

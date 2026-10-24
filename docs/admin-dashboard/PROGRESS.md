@@ -150,6 +150,7 @@ assignment procedure, and merge instructions. No merge to main.
 - [2026-10-23 12:00] Backfilled legacy comment flags. The live project had 51 of 88 comments without `isHidden` and `isPinned`; equality queries would have hidden them from both the public surfaces and the admin list. A non-destructive Admin SDK batch set only the two missing booleans to `false`; all other fields and timestamps were untouched. After the backfill: 88 total, 0 missing, 8 pinned.
 - [2026-10-23 12:00] Verification for the global views: 1,222 unit tests passed across 131 files (2 skipped), 84/84 rules-emulator tests passed, type-check, ESLint, token lint, format check, and production build passed. The collection-group rule was moved to the database root after the emulator proved a nested wildcard does not authorise a collection-group query. The tale comment test Firestore mock gained `where` after the new hidden filter was added.
 - [2026-10-24 00:00] Removed inert dashboard features after auditing every control against a real consumer. Deleted the Site Settings module, service, tests, CSS, and registry entry: its four feature flags (`betaAccess`, `darkMode`, `newReaderFlow`, `enhancedSearch`) were invented defaults, and no reader bundle reads `featureFlags` or `appConfig`. Removed the Users role selector and Ban/Unban controls: profile `role` cannot grant a custom claim, and no reader surface checks `isBanned`. Users now exposes only `isVerifiedWriter`, which `getAuthorStatus()` reads to unlock Author Studio. Relabelled Overview "Registered Users" to "Reader Profiles" and renamed the counter to `totalProfiles` so the number is not mistaken for Firebase Auth accounts. Kept `refs.appConfig`, `refs.featureFlags`, their paths, and their rules for any external consumer.
+- [2026-10-25 00:00] Completed the admin panel review. Fixed fifteen `showToast({ type, message })` call sites that rendered `[object Object]`, and hardened `showToast` to accept that legacy shape and `Error` values. Unknown, malformed, and role-denied hashes now render a generic denial state instead of silently showing dashboard home. Added server-side prefix search to Deletions (`taleId`), Reports (`targetId`), and Applications (`penName`) with status-aware composite indexes; search focus survives the loading render. Added settings-inspired section headers, removed the phantom global-nav offset, and unified the Audit pagination chrome. Corrected the permission matrix: Tales & Chapters remains administrator-only, matching the registry and module guard. Tightened `firestore.rules` so tale full updates and tale/chapter deletion require `isAdministrator()`; moderators keep read access for report triage.
 
 ## 7. Review Findings and Resolution
 
@@ -166,6 +167,9 @@ assignment procedure, and merge instructions. No merge to main.
 - A deletion petition can only be created for a tale owned by the petitioner.
   Staff decisions require a pending petition and record the caller as reviewer.
 - `appConfig` and `featureFlags` writes are administrator-only.
+- Tale full updates and tale/chapter deletion require `isAdministrator()`. The
+  admin-only Tales & Chapters module and the documented matrix now match the
+  rules; moderators retain read access to a tale while triaging a report.
 - Every staff mutation now records the real acting user. Earlier code wrote the
   affected user or applicant as the actor and hardcoded a role; that is fixed.
 - Rules were not weakened. The deployed rules passed the 81-test emulator suite.
@@ -364,24 +368,24 @@ loop. No screen fetches a full collection for statistics.
 
 ## 11. Confirmed Permission Matrix
 
-| Capability                        | Guest  | User   | Author              | Moderator | Admin   |
-| --------------------------------- | ------ | ------ | ------------------- | --------- | ------- |
-| Open `admin.html`                 | Denied | Denied | Author section only | Allowed   | Allowed |
-| Global overview stats             | Denied | Denied | Denied              | Allowed   | Allowed |
-| Own content summary               | Denied | Denied | Allowed             | Denied    | Allowed |
-| List users                        | Denied | Denied | Denied              | Denied    | Allowed |
-| Read every tale, including drafts | Denied | Denied | Denied              | Allowed   | Allowed |
-| Edit tale title/status/visibility | Denied | Denied | Own tales only      | Allowed   | Allowed |
-| Delete a tale                     | Denied | Denied | Denied              | Allowed   | Allowed |
-| Change writer verification        | Denied | Denied | Denied              | Denied    | Allowed |
-| Moderate tale deletions           | Denied | Denied | Denied              | Allowed   | Allowed |
-| Read every comment                | Denied | Denied | Denied              | Allowed   | Allowed |
-| Hide/pin/delete comments          | Denied | Denied | Denied              | Allowed   | Allowed |
-| Moderate reports                  | Denied | Denied | Denied              | Allowed   | Allowed |
-| Read author applications          | Denied | Denied | Own only            | Allowed   | Allowed |
-| Decide author applications        | Denied | Denied | Denied              | Denied    | Allowed |
-| Read audit log                    | Denied | Denied | Denied              | Denied    | Allowed |
-| Write audit entry                 | Denied | Denied | Denied              | Allowed   | Allowed |
+| Capability                            | Guest  | User   | Author              | Moderator | Admin   |
+| ------------------------------------- | ------ | ------ | ------------------- | --------- | ------- |
+| Open `admin.html`                     | Denied | Denied | Author section only | Allowed   | Allowed |
+| Global overview stats                 | Denied | Denied | Denied              | Allowed   | Allowed |
+| Own content summary                   | Denied | Denied | Allowed             | Denied    | Allowed |
+| List users                            | Denied | Denied | Denied              | Denied    | Allowed |
+| Browse every tale in Tales & Chapters | Denied | Denied | Denied              | Denied    | Allowed |
+| Edit tale title/status/visibility     | Denied | Denied | Own tales only      | Denied    | Allowed |
+| Delete a tale                         | Denied | Denied | Denied              | Denied    | Allowed |
+| Change writer verification            | Denied | Denied | Denied              | Denied    | Allowed |
+| Moderate tale deletions               | Denied | Denied | Denied              | Allowed   | Allowed |
+| Read every comment                    | Denied | Denied | Denied              | Allowed   | Allowed |
+| Hide/pin/delete comments              | Denied | Denied | Denied              | Allowed   | Allowed |
+| Moderate reports                      | Denied | Denied | Denied              | Allowed   | Allowed |
+| Read author applications              | Denied | Denied | Own only            | Allowed   | Allowed |
+| Decide author applications            | Denied | Denied | Denied              | Denied    | Allowed |
+| Read audit log                        | Denied | Denied | Denied              | Denied    | Allowed |
+| Write audit entry                     | Denied | Denied | Denied              | Allowed   | Allowed |
 
 ## 12. Changelog of Rules and Index Changes
 
@@ -439,6 +443,15 @@ loop. No screen fetches a full collection for statistics.
 - `adminAuditLogs`: `createdAt` descending is a single-field automatic index; no
   composite entry needed.
 - Existing `tales (status, publishedAt)` remains sufficient for its query.
+
+### Indexes (Admin search)
+
+- `deletionRequests`: `status` ascending, `taleId` ascending (status-filtered
+  tale-id prefix search).
+- `reports`: `status` ascending, `targetId` ascending (status-filtered
+  target-id prefix search).
+- `authorApplications`: `status` ascending, `penName` ascending
+  (status-filtered, case-sensitive pen-name prefix search).
 
 All declared rules and indexes were deployed to project `taletranscend` on
 2026-10-23. The four Phase 2 indexes are READY. The five global-view indexes

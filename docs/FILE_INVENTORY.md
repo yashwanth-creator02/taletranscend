@@ -254,11 +254,13 @@ Each directory under `src/pages/` holds the JavaScript for one HTML shell in `sr
 
 ### Admin (`src/pages/admin`)
 
-- `src/pages/admin/admin.js` — Dashboard entry: resolves claim-based access, renders the shell, hash-routes to one lazy module, and tears modules down between routes.
-- `src/pages/admin/admin.state.js` — Page-local admin state (access snapshot, active module, cleanup, mount flag) and its reset helper.
-- `src/pages/admin/admin.templates.js` — Pure HTML builders for the shell, dashboard home, boot/denied/error states, and the shared empty state; every value is escaped.
-- `src/pages/admin/admin.utils.js` — Admin formatting helpers: timestamp/date, compact counts, truncation, initials, and module descriptions.
-- `src/pages/admin/__tests__/admin.templates.test.js` — Vitest tests for shell module filtering, active route, dashboard cards, denied states, escaping, and empty states.
+- `src/pages/admin/admin.js` - Dashboard entry: resolves claim-based access, renders the shell, hash-routes to one lazy module, renders a denial state for unknown or forbidden hashes, and tears modules down between routes.
+- `src/pages/admin/admin.routes.js` - Pure hash-route helpers: slug extraction and role-aware route resolution returning requested, active, and denied state.
+- `src/pages/admin/admin.state.js` - Page-local admin state (access snapshot, active module, cleanup, mount flag) and its reset helper.
+- `src/pages/admin/admin.templates.js` - Pure HTML builders for the shell, dashboard home, boot/denied/route-denied/error states, and the shared empty state; every value is escaped.
+- `src/pages/admin/admin.utils.js` - Admin formatting helpers: timestamp/date, compact counts, truncation, initials, and module descriptions.
+- `src/pages/admin/__tests__/admin.routes.test.js` - Vitest tests for hash parsing, home routes, valid module routes, and unknown or role-denied routes.
+- `src/pages/admin/__tests__/admin.templates.test.js` - Vitest tests for shell module filtering, active route, dashboard cards, access and route denial states, escaping, and empty states.
 - `src/pages/admin/__tests__/admin.utils.test.js` — Vitest tests for admin date/count formatting, truncation, initials, and module descriptions.
 - `src/pages/admin/modules/overview/overview.js` — Live overview: five count aggregations, explicit unavailable counters, administrator-only recent audit, moderator read-only note, loading/error/retry states, delegated listeners, and cleanup.
 - `src/pages/admin/modules/overview/__tests__/overview.test.js` — Vitest tests for live counters, administrator audit rendering, moderator audit suppression, explicit unavailable state, and retry.
@@ -268,12 +270,12 @@ Each directory under `src/pages/` holds the JavaScript for one HTML shell in `sr
 - `src/pages/admin/modules/content/__tests__/content.test.js` — Vitest tests for the global tale list, filters, search debounce, detail, permitted edits, deletion confirmation, denial, and cleanup.
 - `src/pages/admin/modules/comments/comments.js` — Global Comments moderation: collection-group list with visible/hidden/pinned filters, detail with tale context, hide/unhide, pin/unpin, confirmed deletion, delegated listeners, and cleanup.
 - `src/pages/admin/modules/comments/__tests__/comments.test.js` — Vitest tests for the global comment list, filters, detail, moderation actions, deletion confirmation, staff denial, and cleanup.
-- `src/pages/admin/modules/deletions/deletions.js` — Deletion queue: status/sort filters, request detail with tale and requester context, atomic approval that permanently deletes the tale, rejection notes, page-scoped duplicate guards, delegated listeners, and cleanup.
-- `src/pages/admin/modules/deletions/__tests__/deletions.test.js` — Vitest tests for filtering, detail loading, confirmation, approval/rejection, errors, pagination, and cleanup.
-- `src/pages/admin/modules/reports/reports.js` — Report queue: status/sort filters, target detail summary, resolve/dismiss with notes, loading/error/empty states, delegated listeners, and cleanup.
-- `src/pages/admin/modules/reports/__tests__/reports.test.js` — Vitest tests for filtering, detail, decisions, service errors, pagination, and cleanup.
-- `src/pages/admin/modules/applications/applications.js` — Author applications: status/sort filters, applicant detail, administrator-only decisions with notes, approval that grants the author profile role, moderator read-only state, delegated listeners, and cleanup.
-- `src/pages/admin/modules/applications/__tests__/applications.test.js` — Vitest tests for filtering, detail, decision validation, role-grant messaging, moderator read-only behavior, errors, pagination, and cleanup.
+- `src/pages/admin/modules/deletions/deletions.js` - Deletion queue: status/sort filters, debounced tale-id prefix search, request detail with tale and requester context, atomic approval that permanently deletes the tale, rejection notes, page-scoped duplicate guards, delegated listeners, and cleanup.
+- `src/pages/admin/modules/deletions/__tests__/deletions.test.js` - Vitest tests for filtering, search, detail loading, confirmation, approval/rejection, errors, pagination, and cleanup.
+- `src/pages/admin/modules/reports/reports.js` - Report queue: status/sort filters, debounced target-id prefix search, target detail summary, resolve/dismiss with notes, loading/error/empty states, delegated listeners, and cleanup.
+- `src/pages/admin/modules/reports/__tests__/reports.test.js` - Vitest tests for filtering, search, detail, decisions, service errors, pagination, and cleanup.
+- `src/pages/admin/modules/applications/applications.js` - Author applications: status/sort filters, debounced pen-name prefix search, applicant detail, administrator-only decisions with notes, approval that grants the author profile role, moderator read-only state, delegated listeners, and cleanup.
+- `src/pages/admin/modules/applications/__tests__/applications.test.js` - Vitest tests for filtering, search, detail, decision validation, role-grant messaging, moderator read-only behavior, errors, pagination, and cleanup.
 - `src/pages/admin/modules/audit/audit.js` — Administrator audit-log reader: loading/error/empty states, action-or-actor search over loaded entries, delegated Load More, malformed-role guards, and listener cleanup.
 - `src/pages/admin/modules/audit/__tests__/audit.test.js` — Vitest tests for audit rendering, malformed actor roles, service error states and retry, search, cursor Load More, and unmount cleanup.
 - `src/pages/admin/modules/author/author.js` — Author Studio: author-owned tale list with tale links, per-tale deletion-request state, validated reason form, cursor Load More for tales and requests, loading/error/empty states, and delegated listeners.
@@ -308,7 +310,7 @@ Global UI layer: the icon registry, shared components, and the nav shell; each c
 - `src/ui/components/__tests__/geminiModal.test.js` — Vitest tests for `src/ui/components/geminiModal.js` — modal creation, password toggle, status badge, key save, key deletion, close triggers, and toast action.
 - `src/ui/components/__tests__/scrollToTop.test.js` — Vitest tests for `src/ui/components/scrollToTop.js` — button creation, icon normalization, click scrolling, scroll-position visibility toggling.
 - `src/ui/components/__tests__/taleCard.test.js` — Vitest tests for `src/ui/components/taleCard.js` — renderCardsSkeleton counts, fetchTalesMetadata maps, renderTaleCards output.
-- `src/ui/components/__tests__/toast.test.js` — Vitest tests for `src/ui/components/toast.js` — container creation, legacy adoption, types, auto-dismiss, hover pause, action buttons, queue limit, swipe dismiss.
+- `src/ui/components/__tests__/toast.test.js` - Vitest tests for `src/ui/components/toast.js` - container creation, legacy adoption, types, legacy object-first messages, auto-dismiss, hover pause, action buttons, queue limit, swipe dismiss.
   <<<<<<< HEAD
   <<<<<<< HEAD
 - `src/ui/components/nav/nav.command-palette.js` — Manages command palette open/close, fuzzy list rendering, keyboard focus movement, and command execution (navigation, sign out, themes).
@@ -401,10 +403,10 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 ### Admin (`src/services/admin`)
 
 - `src/services/admin/access.service.js` — Claim-first role resolution (admin, moderator, author, user, guest), the nine-module registry, per-role module gating, and default-route selection.
-- `src/services/admin/applications.service.js` — Cursor-paginated author applications, status-filtered detail, and administrator-only decisions that record the reviewer and grant the author profile role in one batch.
-- `src/services/admin/deletion.service.js` — Cursor-paginated deletion requests, status/sort filters, detail join with tale and requester, and an atomic decision batch that deletes the tale on approval, logs the action, and notifies best-effort.
+- `src/services/admin/applications.service.js` - Cursor-paginated author applications with status and pen-name prefix search, status-filtered detail, and administrator-only decisions that record the reviewer and grant the author profile role in one batch.
+- `src/services/admin/deletion.service.js` - Cursor-paginated deletion requests with status and tale-id prefix search, detail join with tale and requester, and an atomic decision batch that deletes the tale on approval, logs the action, and notifies best-effort.
 - `src/services/admin/overview.service.js` — Live overview counts via `getCountFromServer` for tales, reader profiles and three pending queues, with per-counter unavailable states and an optional administrator-only audit snapshot.
-- `src/services/admin/reports.service.js` — Cursor-paginated report queue, status filters, target detail summaries, and staff resolve/dismiss decisions with reviewer identity and audit logging.
+- `src/services/admin/reports.service.js` - Cursor-paginated report queue with status and target-id prefix search, target detail summaries, and staff resolve/dismiss decisions with reviewer identity and audit logging.
 - `src/services/admin/session.service.js` — Force-refreshed staff identity resolution (`admin` over `moderator`), signed-in user accessors, and fail-closed claim verification used by every staff write.
 - `src/services/admin/users.service.js` — Real user collection pages by name or join date, exact UID lookup, profile detail with a live tale count, and administrator-only writer-verification updates restricted to the rules' allowed fields.
 - `src/services/admin/content.service.js` — Global tale pages including drafts, status/title/exact-ID search, tale detail with up to 50 chapters and a live comment count, rule-safe title/status/visibility updates with audit, and confirmed deletion.
@@ -566,7 +568,7 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `src/assets/css/pages/home.css` — Styles the landing page hero, search field, topic tags, trending grid, newsletter CTA and footer.
 - `src/assets/css/pages/library.css` — Styles the library archive layout: sidebar, header, filter command bar, card grid and pagination.
 - `src/assets/css/pages/login.css` — Styles the login split screen: reading-vignette art column, tabbed auth card, inputs and alternate buttons.
-- `src/assets/css/pages/admin.css` — Styles the archive control room: sidebar navigation, role shield, dashboard module cards, shared toolbar/field/detail/error/read-only classes, and responsive stacking; token-only colours.
+- `src/assets/css/pages/admin.css` - Styles the archive control room: sidebar navigation, role shield, dashboard module cards, settings-inspired section headings, shared toolbar/field/detail/error/read-only classes, unified pagination, and responsive stacking; token-only colours.
 - `src/assets/css/pages/profile.css` — Styles the profile sanctuary: identity pillar, avatar frame, scribe registry card and responsive columns.
 - `src/assets/css/pages/reader.css` — Styles the reader layout, top bar, sidebar tools, panels and typography variables that the reader themes drive.
 - `src/assets/css/pages/settings.css` — Styles the settings page chrome (library-vellum top bar and contents sidebar), setting rows and cards, theme/font specimens, archival storage list, Accounts panels and responsive section views.
@@ -622,7 +624,7 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
   > > > > > > > feat/comprehensive-improvements
 
 - `firestore.rules` — Adds `isModerator`/`isAdministrator` helpers, an administrator-only users admin-update branch, append-only administrator-readable `adminAuditLogs`, applicant-owned `authorApplications`, and administrator-only site-config writes; no existing permission is widened.
-- `firestore.indexes.json` — Adds cursor-pagination composites for `deletionRequests(userId, createdAt desc)`, `reports(status, createdAt desc)`, and `authorApplications(status|applicantId, createdAt desc)`.
+- `firestore.indexes.json` - Adds cursor-pagination composites for `deletionRequests(userId, createdAt desc)`, `reports(status, createdAt desc)`, and `authorApplications(status|applicantId, createdAt desc)`, plus admin prefix-search composites for `deletionRequests(status, taleId)`, `reports(status, targetId)`, and `authorApplications(status, penName)`.
 - `firestore/tests/rules.emulator.test.ts` — Adds five-role allowed/denied coverage for admin audit logs, author applications, the users admin-update branch, site configuration, reports, and deletion requests.
 - `firestore.rules` — Global data views: database-root staff-only collection-group read for comments; nested comment rules still authorize hide/pin/delete; tale staff reads and deletion are unchanged.
 - `firestore.indexes.json` — Global data views: adds tale `status + updatedAt`, tale `status + title`, per-tale visible/pinned comment ordering, and collection-group comment visibility/pin ordering indexes.

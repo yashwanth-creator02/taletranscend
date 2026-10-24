@@ -7,8 +7,16 @@ import {
 } from '@services/admin/applications.service.js';
 import { showConfirmModal } from '@/ui/components/confirmModal.js';
 import { showToast } from '@/ui/components/toast.js';
-import { formatAdminDate, truncateAdminText, escapeAdminHtml } from '../../admin.utils.js';
+import {
+  formatAdminDate,
+  truncateAdminText,
+  escapeAdminHtml,
+  captureAdminSearchFocus,
+  restoreAdminSearchFocus,
+} from '../../admin.utils.js';
 import { buildAdminEmptyState, buildModuleLoading } from '../../admin.templates.js';
+
+const SEARCH_DEBOUNCE_MS = 300;
 
 const STATUS_OPTIONS = [
   { value: 'pending', label: 'Pending' },
@@ -110,6 +118,9 @@ export function mount({ container, access }) {
   let hasMore = false;
   let status = 'pending';
   let direction = 'desc';
+  let searchTerm = '';
+  let searchTimer = null;
+  let pendingSearchFocus = null;
   let loading = false;
   let loadingMore = false;
   let deciding = false;
@@ -123,6 +134,17 @@ export function mount({ container, access }) {
   function renderToolbar() {
     return `
       <div class="admin-toolbar">
+        <label class="admin-field admin-field--grow">
+          <span class="admin-field__label">Search</span>
+          <input
+            class="admin-input"
+            type="search"
+            data-role="search"
+            value="${escapeAdminHtml(searchTerm)}"
+            placeholder="Search by pen name prefix"
+            autocomplete="off"
+          />
+        </label>
         <label class="admin-field">
           <span class="admin-field__label">Status</span>
           <select class="admin-select" data-filter="status">
@@ -131,7 +153,11 @@ export function mount({ container, access }) {
         </label>
         <label class="admin-field">
           <span class="admin-field__label">Sort</span>
-          <select class="admin-select" data-filter="direction">
+          <select
+            class="admin-select"
+            data-filter="direction"
+            ${searchTerm ? 'disabled title="Prefix search sorts alphabetically"' : ''}
+          >
             ${renderOptions(DIRECTION_OPTIONS, direction)}
           </select>
         </label>
@@ -355,12 +381,18 @@ export function mount({ container, access }) {
   }
 
   function render() {
+    pendingSearchFocus = captureAdminSearchFocus(container, pendingSearchFocus);
     if (loading) {
       container.innerHTML = buildModuleLoading('author applications');
       return;
     }
 
-    const empty = EMPTY_STATES[status] ?? EMPTY_STATES.pending;
+    const empty = searchTerm
+      ? {
+          title: 'No applications match that search',
+          body: 'Try a different pen name prefix, or clear the search to see the queue.',
+        }
+      : (EMPTY_STATES[status] ?? EMPTY_STATES.pending);
     const body = error
       ? `
         <div class="admin-error" role="alert">
@@ -396,6 +428,8 @@ export function mount({ container, access }) {
         ${body}
       </section>
     `;
+    restoreAdminSearchFocus(container, pendingSearchFocus);
+    pendingSearchFocus = null;
   }
 
   async function loadFirstPage() {
@@ -410,7 +444,7 @@ export function mount({ container, access }) {
     render();
 
     try {
-      const result = await listApplicationsPage({ status, direction });
+      const result = await listApplicationsPage({ status, search: searchTerm, direction });
       if (disposed || token !== loadVersion) return;
       items = result.items ?? [];
       lastDoc = result.lastDoc ?? null;
@@ -437,7 +471,12 @@ export function mount({ container, access }) {
     render();
 
     try {
-      const result = await listApplicationsPage({ status, direction, cursor: lastDoc });
+      const result = await listApplicationsPage({
+        status,
+        search: searchTerm,
+        direction,
+        cursor: lastDoc,
+      });
       if (disposed || token !== loadVersion) return;
       items = [...items, ...(result.items ?? [])];
       lastDoc = result.lastDoc ?? null;
@@ -445,7 +484,7 @@ export function mount({ container, access }) {
     } catch (err) {
       if (disposed || token !== loadVersion) return;
       console.error('[applications] failed to load more applications', err);
-      showToast({ type: 'error', message: 'Could not load more applications.' });
+      showToast('Could not load more applications.', 'error');
     } finally {
       if (!disposed && token === loadVersion) {
         loadingMore = false;
@@ -467,7 +506,7 @@ export function mount({ container, access }) {
       if (!result) {
         selectedId = null;
         detailLoading = false;
-        showToast({ type: 'error', message: 'That application no longer exists.' });
+        showToast('That application no longer exists.', 'error');
         render();
         return;
       }
@@ -476,7 +515,7 @@ export function mount({ container, access }) {
       if (disposed || selectedId !== applicationId) return;
       selectedId = null;
       console.error('[applications] failed to load application detail', err);
-      showToast({ type: 'error', message: 'Could not load the application detail.' });
+      showToast('Could not load the application detail.', 'error');
     } finally {
       if (!disposed && selectedId === applicationId) {
         detailLoading = false;
@@ -493,10 +532,7 @@ export function mount({ container, access }) {
     const notesField = container.querySelector('[data-role="application-notes"]');
     const notes = notesField instanceof HTMLTextAreaElement ? notesField.value : '';
     if (notes.trim().length > APPLICATION_NOTES_MAX) {
-      showToast({
-        type: 'error',
-        message: `Reviewer notes must be ${APPLICATION_NOTES_MAX} characters or fewer.`,
-      });
+      showToast(`Reviewer notes must be ${APPLICATION_NOTES_MAX} characters or fewer.`, 'error');
       notesField?.focus();
       return;
     }
@@ -527,19 +563,16 @@ export function mount({ container, access }) {
       const approvalMessage = result.authorRoleGranted
         ? 'Author application approved. Author workspace access granted.'
         : 'Author application approved. The applicant profile was missing or already held a staff role, so its role was left unchanged.';
-      showToast({
-        type: 'success',
-        message: approved ? approvalMessage : 'Author application rejected.',
-      });
+      showToast(approved ? approvalMessage : 'Author application rejected.', 'success');
       selectedId = null;
       detail = null;
       await loadFirstPage();
     } catch (err) {
       console.error('[applications] decision failed', err);
-      showToast({
-        type: 'error',
-        message: err instanceof Error && err.message ? err.message : 'The decision was not saved.',
-      });
+      showToast(
+        err instanceof Error && err.message ? err.message : 'The decision was not saved.',
+        'error'
+      );
       if (!disposed) render();
     } finally {
       deciding = false;
@@ -575,6 +608,19 @@ export function mount({ container, access }) {
     }
   }
 
+  function handleInput(event) {
+    const field =
+      event.target instanceof Element ? event.target.closest('[data-role="search"]') : null;
+    if (!(field instanceof HTMLInputElement)) return;
+
+    searchTerm = field.value.trim();
+    if (searchTimer) window.clearTimeout(searchTimer);
+    searchTimer = window.setTimeout(() => {
+      searchTimer = null;
+      if (!disposed) loadFirstPage();
+    }, SEARCH_DEBOUNCE_MS);
+  }
+
   function handleChange(event) {
     const field = event.target instanceof Element ? event.target.closest('[data-filter]') : null;
     if (!field) return;
@@ -593,13 +639,19 @@ export function mount({ container, access }) {
 
   container.addEventListener('click', handleClick);
   container.addEventListener('change', handleChange);
+  container.addEventListener('input', handleInput);
   loadFirstPage();
 
   return () => {
     disposed = true;
     loadVersion += 1;
+    if (searchTimer) {
+      window.clearTimeout(searchTimer);
+      searchTimer = null;
+    }
     container.removeEventListener('click', handleClick);
     container.removeEventListener('change', handleChange);
+    container.removeEventListener('input', handleInput);
   };
 }
 

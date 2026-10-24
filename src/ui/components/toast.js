@@ -73,7 +73,7 @@ function _enforceLimit(container) {
 /**
  * Displays a mythic toast notification.
  *
- * @param {string} message - The message to display
+ * @param {string | {message?: string, type?: string, [key: string]: unknown}} message - The message to display, or a legacy options object
  * @param {'success' | 'error' | 'info' | 'warning' | object} [typeOrOptions='success'] - Tone of the notification or options object
  * @param {object} [extraOptions={}] - Additional options when type is passed as string
  * @returns {HTMLElement} The created toast element
@@ -81,6 +81,20 @@ function _enforceLimit(container) {
 export function showToast(message, typeOrOptions = 'success', extraOptions = {}) {
   let type = 'success';
   let options = {};
+
+  // Accept an Error directly, and the older `showToast({ type, message })`
+  // shape so a missed call site renders a real message instead of
+  // "[object Object]".
+  if (message instanceof Error) {
+    message = message.message || 'Something went wrong.';
+    typeOrOptions = 'error';
+  } else if (message && typeof message === 'object') {
+    const legacy = message;
+    message =
+      typeof legacy.message === 'string' ? legacy.message : String(legacy.message ?? '').trim();
+    typeOrOptions = typeof legacy.type === 'string' ? legacy.type : 'success';
+    extraOptions = legacy;
+  }
 
   if (typeof typeOrOptions === 'string') {
     type = typeOrOptions;

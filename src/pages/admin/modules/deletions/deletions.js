@@ -6,8 +6,16 @@ import {
 } from '@services/admin/deletion.service.js';
 import { showConfirmModal } from '@/ui/components/confirmModal.js';
 import { showToast } from '@/ui/components/toast.js';
-import { formatAdminDate, truncateAdminText, escapeAdminHtml } from '../../admin.utils.js';
+import {
+  formatAdminDate,
+  truncateAdminText,
+  escapeAdminHtml,
+  captureAdminSearchFocus,
+  restoreAdminSearchFocus,
+} from '../../admin.utils.js';
 import { buildAdminEmptyState, buildModuleLoading } from '../../admin.templates.js';
+
+const SEARCH_DEBOUNCE_MS = 300;
 
 const STATUS_OPTIONS = [
   { value: 'pending', label: 'Pending' },
@@ -89,6 +97,9 @@ export function mount({ container }) {
   let hasMore = false;
   let status = 'pending';
   let direction = 'desc';
+  let searchTerm = '';
+  let searchTimer = null;
+  let pendingSearchFocus = null;
   let loading = false;
   let loadingMore = false;
   let deciding = false;
@@ -102,6 +113,17 @@ export function mount({ container }) {
   function renderToolbar() {
     return `
       <div class="admin-toolbar">
+        <label class="admin-field admin-field--grow">
+          <span class="admin-field__label">Search</span>
+          <input
+            class="admin-input"
+            type="search"
+            data-role="search"
+            value="${escapeAdminHtml(searchTerm)}"
+            placeholder="Search by tale ID prefix"
+            autocomplete="off"
+          />
+        </label>
         <label class="admin-field">
           <span class="admin-field__label">Status</span>
           <select class="admin-select" data-filter="status">
@@ -110,7 +132,11 @@ export function mount({ container }) {
         </label>
         <label class="admin-field">
           <span class="admin-field__label">Sort</span>
-          <select class="admin-select" data-filter="direction">
+          <select
+            class="admin-select"
+            data-filter="direction"
+            ${searchTerm ? 'disabled title="Prefix search sorts alphabetically"' : ''}
+          >
             ${renderOptions(DIRECTION_OPTIONS, direction)}
           </select>
         </label>
@@ -292,12 +318,18 @@ export function mount({ container }) {
   }
 
   function render() {
+    pendingSearchFocus = captureAdminSearchFocus(container, pendingSearchFocus);
     if (loading) {
       container.innerHTML = buildModuleLoading('deletion requests');
       return;
     }
 
-    const empty = EMPTY_STATES[status] ?? EMPTY_STATES.pending;
+    const empty = searchTerm
+      ? {
+          title: 'No deletion requests match that search',
+          body: 'Try a different tale ID prefix, or clear the search to see the queue.',
+        }
+      : (EMPTY_STATES[status] ?? EMPTY_STATES.pending);
     const body = error
       ? `
         <div class="admin-error" role="alert">
@@ -323,6 +355,8 @@ export function mount({ container }) {
         ${body}
       </section>
     `;
+    restoreAdminSearchFocus(container, pendingSearchFocus);
+    pendingSearchFocus = null;
   }
 
   async function loadFirstPage() {
@@ -337,7 +371,7 @@ export function mount({ container }) {
     render();
 
     try {
-      const result = await listDeletionRequestsPage({ status, direction });
+      const result = await listDeletionRequestsPage({ status, search: searchTerm, direction });
       if (disposed || token !== loadVersion) return;
       items = result.items ?? [];
       lastDoc = result.lastDoc ?? null;
@@ -364,7 +398,12 @@ export function mount({ container }) {
     render();
 
     try {
-      const result = await listDeletionRequestsPage({ status, direction, cursor: lastDoc });
+      const result = await listDeletionRequestsPage({
+        status,
+        search: searchTerm,
+        direction,
+        cursor: lastDoc,
+      });
       if (disposed || token !== loadVersion) return;
       items = [...items, ...(result.items ?? [])];
       lastDoc = result.lastDoc ?? null;
@@ -372,7 +411,7 @@ export function mount({ container }) {
     } catch (err) {
       if (disposed || token !== loadVersion) return;
       console.error('[deletion] failed to load more requests', err);
-      showToast({ type: 'error', message: 'Could not load more deletion requests.' });
+      showToast('Could not load more deletion requests.', 'error');
     } finally {
       if (!disposed && token === loadVersion) {
         loadingMore = false;
@@ -394,7 +433,7 @@ export function mount({ container }) {
       if (!result) {
         selectedId = null;
         detailLoading = false;
-        showToast({ type: 'error', message: 'That deletion request no longer exists.' });
+        showToast('That deletion request no longer exists.', 'error');
         render();
         return;
       }
@@ -403,7 +442,7 @@ export function mount({ container }) {
       if (disposed || selectedId !== requestId) return;
       selectedId = null;
       console.error('[deletion] failed to load request detail', err);
-      showToast({ type: 'error', message: 'Could not load the request detail.' });
+      showToast('Could not load the request detail.', 'error');
     } finally {
       if (!disposed && selectedId === requestId) {
         detailLoading = false;
@@ -442,21 +481,21 @@ export function mount({ container }) {
 
     try {
       await decideDeletionRequest(requestId, decision, { notes });
-      showToast({
-        type: 'success',
-        message: approved
+      showToast(
+        approved
           ? 'Deletion request approved. The public tale record was permanently deleted.'
           : 'Deletion request rejected. The tale was kept.',
-      });
+        'success'
+      );
       selectedId = null;
       detail = null;
       await loadFirstPage();
     } catch (err) {
       console.error('[deletion] decision failed', err);
-      showToast({
-        type: 'error',
-        message: err instanceof Error && err.message ? err.message : 'The decision was not saved.',
-      });
+      showToast(
+        err instanceof Error && err.message ? err.message : 'The decision was not saved.',
+        'error'
+      );
       if (!disposed) render();
     } finally {
       deciding = false;
@@ -492,6 +531,19 @@ export function mount({ container }) {
     }
   }
 
+  function handleInput(event) {
+    const field =
+      event.target instanceof Element ? event.target.closest('[data-role="search"]') : null;
+    if (!(field instanceof HTMLInputElement)) return;
+
+    searchTerm = field.value.trim();
+    if (searchTimer) window.clearTimeout(searchTimer);
+    searchTimer = window.setTimeout(() => {
+      searchTimer = null;
+      if (!disposed) loadFirstPage();
+    }, SEARCH_DEBOUNCE_MS);
+  }
+
   function handleChange(event) {
     const field = event.target instanceof Element ? event.target.closest('[data-filter]') : null;
     if (!field) return;
@@ -510,13 +562,19 @@ export function mount({ container }) {
 
   container.addEventListener('click', handleClick);
   container.addEventListener('change', handleChange);
+  container.addEventListener('input', handleInput);
   loadFirstPage();
 
   return () => {
     disposed = true;
     loadVersion += 1;
+    if (searchTimer) {
+      window.clearTimeout(searchTimer);
+      searchTimer = null;
+    }
     container.removeEventListener('click', handleClick);
     container.removeEventListener('change', handleChange);
+    container.removeEventListener('input', handleInput);
   };
 }
 

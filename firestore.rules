@@ -557,7 +557,7 @@ service cloud.firestore {
         // even though nothing writes them client-side yet, so this doesn't
         // need revisiting if that gets wired up later.
         allow update: if (
-            ((isRegistered() && isAuthor()) || isAdmin())
+            ((isRegistered() && isAuthor()) || isAdministrator())
             && respectsCooldown()
             && isValidString('title', 1, 200)
             && 'status' in request.resource.data
@@ -579,8 +579,9 @@ service cloud.firestore {
             && isValidOptionalNumber('bookmarkCount', 0, 1000000000)
           );
 
-        // Delete: admin only (authors must submit an archive deletion request)
-        allow delete: if isAdmin();
+        // Delete: administrator only (authors must submit an archive deletion request).
+        // Moderators triage reports and petitions but do not hold tale deletion authority.
+        allow delete: if isAdministrator();
 
         // ═══════════════════════════════════════════════════════════
         //  CHAPTERS  —  public/data/tales/{taleId}/chapters/{chapterIndex}
@@ -615,8 +616,8 @@ service cloud.firestore {
             && isValidInt('estimatedReadMins', 0, 10000)
             && isValidTimestamp('updatedAt');
 
-          // Delete: admin only
-          allow delete: if isAdmin();
+          // Delete: administrator only; chapter text stays author-owned.
+          allow delete: if isAdministrator();
         }
 
         // ═══════════════════════════════════════════════════════════

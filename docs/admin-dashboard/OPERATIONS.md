@@ -13,9 +13,13 @@ Firestore field and never from a URL parameter.
 | Claim                | Dashboard role | Modules                                                                                             |
 | -------------------- | -------------- | --------------------------------------------------------------------------------------------------- |
 | `admin: true`        | Administrator  | Overview, Users, Tales & Chapters, Deletions, Reports, Comments, Applications, Audit, Author Studio |
-| `moderator: true`    | Moderator      | Overview, Deletions, Reports, Comments, Applications, Author Studio                                 |
+| `moderator: true`    | Moderator      | Overview, Deletions, Reports, Comments, Applications                                                |
 | neither              | Reader         | Access denied                                                                                       |
 | approved author only | Author         | Author Studio only                                                                                  |
+
+Tales & Chapters is administrator-only. Moderators may read a specific tale
+while triaging a report, but they cannot open the global content browser or
+edit and delete tales.
 
 `admin` takes precedence when both claims are present. Every staff service
 re-reads the force-refreshed token through `getStaffIdentity()` before writing,
@@ -72,8 +76,10 @@ dashboard.
 | `#/audit`        | Audit log        |
 | `#/author`       | Author Studio    |
 
-Unauthorised hashes render the module-level denial/error state rather than
-bypassing the sidebar. The page is marked `noindex, nofollow`.
+Unknown or unauthorised hashes render a generic denial state with a link back
+to the dashboard home. They never fall back silently to the home screen, so a
+mistyped or forbidden route is visible to the operator. The page is marked
+`noindex, nofollow`.
 
 ## Data and actions
 
@@ -82,10 +88,10 @@ bypassing the sidebar. The page is marked `noindex, nofollow`.
 | Overview         | `getCountFromServer` for published tales, reader profiles, pending reports, applications and deletions; five recent audit entries                            | None                                                                                                                                                                                               |
 | Users            | `users` collection (newest or name order), exact UID lookup, per-user tale count on demand                                                                   | `isVerifiedWriter`, `updatedAt`; audit entry                                                                                                                                                       |
 | Tales & Chapters | Every tale, including drafts, filtered by status and searched by title or exact ID; cursor-paginated. Detail adds up to 50 chapters and a live comment count | `title`, `status`, `visibility`, the four required counters when missing, `publishedAt` on first publication, `updatedAt`; delete tale; audit entry. Chapter text stays author-owned and read-only |
-| Deletions        | `deletionRequests` filtered by status, joined to the tale and requester profile                                                                              | Decision status, reviewer, timestamp, notes; approval deletes the tale in the same batch and notifies the author; audit entry                                                                      |
-| Reports          | `reports` filtered by status                                                                                                                                 | `status`, reviewer, timestamp; audit entry                                                                                                                                                         |
+| Deletions        | `deletionRequests` filtered by status and searched by tale-id prefix, joined to the tale and requester profile                                               | Decision status, reviewer, timestamp, notes; approval deletes the tale in the same batch and notifies the author; audit entry                                                                      |
+| Reports          | `reports` filtered by status and searched by target-id prefix                                                                                                | `status`, reviewer, timestamp; audit entry                                                                                                                                                         |
 | Comments         | Collection-group read across every tale's `comments`, filtered by visible/hidden/pinned and paginated; detail adds the parent tale summary                   | `isHidden`, `isPinned`, `reportCount`, `updatedAt`; delete comment; audit entry. Public comment surfaces honour both flags                                                                         |
-| Applications     | `authorApplications` filtered by status                                                                                                                      | `status`, `reviewedBy`, `reviewedAt`, `notes`; approval also grants the applicant the profile `author` role; audit entry (administrators only)                                                     |
+| Applications     | `authorApplications` filtered by status and searched by case-sensitive pen-name prefix                                                                       | `status`, `reviewedBy`, `reviewedAt`, `notes`; approval also grants the applicant the profile `author` role; audit entry (administrators only)                                                     |
 | Audit            | `adminAuditLogs`, newest first, paginated                                                                                                                    | Append-only; never edited or deleted from the client                                                                                                                                               |
 | Author Studio    | The signed-in author's tales and deletion requests                                                                                                           | New deletion request (reason 5–2000 characters); no staff audit writes                                                                                                                             |
 
@@ -183,8 +189,11 @@ primary workflow.
   search; an unbounded text scan would defeat the Spark-plan page limits.
 - Admin tables scroll horizontally inside their container on narrow screens. The
   page itself does not overflow; every column remains reachable.
-- Audit search and author request-state checks operate on the pages already
-  loaded; they are not unbounded collection scans.
+- Deletion, report, and application search use server-side prefix range
+  queries over `taleId`, `targetId`, and `penName`. They require the matching
+  `status + field` composite indexes in `firestore.indexes.json`; they are not
+  unbounded collection scans. Audit search and author request-state checks
+  operate on the pages already loaded.
 - The dashboard intentionally has no bulk actions and no client-side user
   deletion.
 - The Site Settings module was removed. It edited `appConfig/site` and four

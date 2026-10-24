@@ -3,8 +3,10 @@ import { describe, expect, it } from 'vitest';
 import {
   adminInitials,
   adminModuleDescription,
+  captureAdminSearchFocus,
   formatAdminCount,
   formatAdminDate,
+  restoreAdminSearchFocus,
   toAdminDate,
   truncateAdminText,
 } from '../admin.utils.js';
@@ -47,6 +49,30 @@ describe('admin utils', () => {
     expect(adminInitials('Moderator')).toBe('M');
     expect(adminInitials('Archive Control')).toBe('AC');
     expect(adminInitials('')).toBe('TT');
+  });
+
+  it('captures and restores admin search focus across a render', () => {
+    document.body.innerHTML = `
+      <div id="admin-search-test">
+        <input data-role="search" value="tale" />
+      </div>
+    `;
+    const container = document.getElementById('admin-search-test');
+    const input = container.querySelector('input');
+    input.focus();
+    input.setSelectionRange(2, 4);
+
+    const snapshot = captureAdminSearchFocus(container);
+    expect(snapshot).toEqual({ start: 2, end: 4 });
+
+    container.innerHTML = '<input data-role="search" value="tale" />';
+    restoreAdminSearchFocus(container, snapshot);
+
+    const restored = container.querySelector('input');
+    expect(document.activeElement).toBe(restored);
+    expect(restored.selectionStart).toBe(2);
+    expect(restored.selectionEnd).toBe(4);
+    document.body.innerHTML = '';
   });
 
   it('describes every dashboard module with a non-empty string', () => {

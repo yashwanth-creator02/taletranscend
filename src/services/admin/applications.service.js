@@ -18,8 +18,18 @@ export const APPLICATION_DECISIONS = Object.freeze(['approved', 'rejected']);
 export const APPLICATION_NOTES_MAX = 1000;
 
 /**
- * @param {{ status?: string, direction?: 'asc' | 'desc', cursor?: unknown }} [options]
- * @returns {{ status: string, direction: 'asc' | 'desc', cursor: unknown }}
+ * @param {unknown} value
+ * @param {number} [max=200]
+ * @returns {string}
+ */
+function cleanSearch(value, max = 200) {
+  const text = String(value ?? '').trim();
+  return text.length <= max ? text : text.slice(0, max);
+}
+
+/**
+ * @param {{ status?: string, search?: string, direction?: 'asc' | 'desc', cursor?: unknown }} [options]
+ * @returns {{ status: string, search: string, direction: 'asc' | 'desc', cursor: unknown }}
  */
 function normalizeListOptions(options = {}) {
   const source = options && typeof options === 'object' ? options : {};
@@ -27,6 +37,7 @@ function normalizeListOptions(options = {}) {
     typeof source.status === 'string' ? source.status.trim().toLowerCase() : 'pending';
   return {
     status: APPLICATION_STATUS_FILTERS.includes(requestedStatus) ? requestedStatus : 'pending',
+    search: cleanSearch(source.search),
     direction: source.direction === 'asc' ? 'asc' : 'desc',
     cursor: source.cursor ?? null,
   };
@@ -35,15 +46,26 @@ function normalizeListOptions(options = {}) {
 /**
  * Read one cursor-paginated page of author applications.
  *
- * @param {{ status?: 'pending' | 'approved' | 'rejected' | 'all', direction?: 'asc' | 'desc', cursor?: unknown }} [options]
+ * A search is a case-sensitive pen-name prefix range ordered by penName.
+ * Combining it with the status filter needs the `status + penName` composite
+ * index declared in firestore.indexes.json.
+ *
+ * @param {{ status?: 'pending' | 'approved' | 'rejected' | 'all', search?: string, direction?: 'asc' | 'desc', cursor?: unknown }} [options]
  * @returns {Promise<{ items: Array<Record<string, unknown> & { id: string }>, lastDoc: unknown, hasMore: boolean }>}
  */
 export async function listApplicationsPage(options = {}) {
-  const { status, direction, cursor } = normalizeListOptions(options);
+  const { status, search, direction, cursor } = normalizeListOptions(options);
+  const searching = search.length > 0;
+  const conditions = [];
+  if (status !== 'all') conditions.push(['status', '==', status]);
+  if (searching) {
+    conditions.push(['penName', '>=', search]);
+    conditions.push(['penName', '<=', `${search}\uf8ff`]);
+  }
   return fetchAdminPage(refs.authorApplications(), {
-    conditions: status === 'all' ? [] : [['status', '==', status]],
-    orderField: 'createdAt',
-    direction,
+    conditions,
+    orderField: searching ? 'penName' : 'createdAt',
+    direction: searching ? 'asc' : direction,
     cursor,
   });
 }

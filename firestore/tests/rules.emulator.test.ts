@@ -1450,7 +1450,7 @@ describe('admin dashboard — five-role rules matrix', () => {
         visibility: 'private',
         publishedAt: null,
       });
-      await assertSucceeds(
+      await assertFails(
         updateDoc(
           doc(moderatorCtx().firestore(), `${ROOT}/public/data/tales/draft-2`),
           updatePayload('Moderated by staff')
@@ -1467,6 +1467,9 @@ describe('admin dashboard — five-role rules matrix', () => {
           doc(userCtx().firestore(), `${ROOT}/public/data/tales/draft-3`),
           updatePayload('Not allowed')
         )
+      );
+      await assertFails(
+        deleteDoc(doc(moderatorCtx().firestore(), `${ROOT}/public/data/tales/draft-3`))
       );
       await assertSucceeds(
         deleteDoc(doc(adminCtx().firestore(), `${ROOT}/public/data/tales/draft-3`))

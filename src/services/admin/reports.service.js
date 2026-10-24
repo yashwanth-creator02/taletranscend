@@ -19,8 +19,18 @@ export const REPORT_RESOLUTIONS = Object.freeze(['resolved', 'dismissed']);
 export const REPORT_NOTES_MAX = 1000;
 
 /**
- * @param {{ status?: string, direction?: 'asc' | 'desc', cursor?: unknown }} [options]
- * @returns {{ status: string, direction: 'asc' | 'desc', cursor: unknown }}
+ * @param {unknown} value
+ * @param {number} [max=200]
+ * @returns {string}
+ */
+function cleanSearch(value, max = 200) {
+  const text = String(value ?? '').trim();
+  return text.length <= max ? text : text.slice(0, max);
+}
+
+/**
+ * @param {{ status?: string, search?: string, direction?: 'asc' | 'desc', cursor?: unknown }} [options]
+ * @returns {{ status: string, search: string, direction: 'asc' | 'desc', cursor: unknown }}
  */
 function normalizeListOptions(options = {}) {
   const source = options && typeof options === 'object' ? options : {};
@@ -28,6 +38,7 @@ function normalizeListOptions(options = {}) {
     typeof source.status === 'string' ? source.status.trim().toLowerCase() : 'pending';
   return {
     status: REPORT_STATUS_FILTERS.includes(requestedStatus) ? requestedStatus : 'pending',
+    search: cleanSearch(source.search),
     direction: source.direction === 'asc' ? 'asc' : 'desc',
     cursor: source.cursor ?? null,
   };
@@ -49,15 +60,26 @@ function summarizeText(value, max = 160) {
 /**
  * Read one cursor-paginated page of reports.
  *
- * @param {{ status?: 'pending' | 'resolved' | 'dismissed' | 'all', direction?: 'asc' | 'desc', cursor?: unknown }} [options]
+ * A search is a target-id prefix range ordered by targetId. Combining it with
+ * the status filter needs the `status + targetId` composite index declared in
+ * firestore.indexes.json.
+ *
+ * @param {{ status?: 'pending' | 'resolved' | 'dismissed' | 'all', search?: string, direction?: 'asc' | 'desc', cursor?: unknown }} [options]
  * @returns {Promise<{ items: Array<Record<string, unknown> & { id: string }>, lastDoc: unknown, hasMore: boolean }>}
  */
 export async function listReportsPage(options = {}) {
-  const { status, direction, cursor } = normalizeListOptions(options);
+  const { status, search, direction, cursor } = normalizeListOptions(options);
+  const searching = search.length > 0;
+  const conditions = [];
+  if (status !== 'all') conditions.push(['status', '==', status]);
+  if (searching) {
+    conditions.push(['targetId', '>=', search]);
+    conditions.push(['targetId', '<=', `${search}\uf8ff`]);
+  }
   return fetchAdminPage(refs.reports(), {
-    conditions: status === 'all' ? [] : [['status', '==', status]],
-    orderField: 'createdAt',
-    direction,
+    conditions,
+    orderField: searching ? 'targetId' : 'createdAt',
+    direction: searching ? 'asc' : direction,
     cursor,
   });
 }

@@ -108,6 +108,21 @@ describe('applications service', () => {
     });
   });
 
+  it('searches pen names by prefix with ascending name order', async () => {
+    await listApplicationsPage({ status: 'approved', search: '  Mara  ' });
+
+    expect(fetchAdminPage).toHaveBeenCalledWith('authorApplications', {
+      conditions: [
+        ['status', '==', 'approved'],
+        ['penName', '>=', 'Mara'],
+        ['penName', '<=', 'Mara\uf8ff'],
+      ],
+      orderField: 'penName',
+      direction: 'asc',
+      cursor: null,
+    });
+  });
+
   it('drops the where clause for the all-status filter', async () => {
     await listApplicationsPage({ status: 'all' });
 

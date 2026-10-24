@@ -128,10 +128,8 @@ describe('applications module', () => {
       })
     );
     expect(showToast).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: 'success',
-        message: 'Author application approved. Author workspace access granted.',
-      })
+      'Author application approved. Author workspace access granted.',
+      'success'
     );
 
     unmount();
@@ -195,14 +193,39 @@ describe('applications module', () => {
 
     await vi.waitFor(() => {
       expect(showToast).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: 'error',
-          message: expect.stringContaining('1000 characters or fewer'),
-        })
+        expect.stringContaining('1000 characters or fewer'),
+        'error'
       );
     });
     expect(showConfirmModal).not.toHaveBeenCalled();
     expect(decideApplication).not.toHaveBeenCalled();
+
+    unmount();
+  });
+
+  it('searches by pen name prefix after a debounce', async () => {
+    const container = createContainer();
+    const unmount = mount({ container, access: ADMIN_ACCESS });
+
+    await vi.waitFor(() => {
+      expect(listApplicationsPage).toHaveBeenCalledTimes(1);
+    });
+
+    const search = container.querySelector('[data-role="search"]');
+    search.value = 'Mara';
+    search.dispatchEvent(new Event('input', { bubbles: true }));
+
+    await vi.waitFor(
+      () => {
+        expect(listApplicationsPage).toHaveBeenLastCalledWith({
+          status: 'pending',
+          search: 'Mara',
+          direction: 'desc',
+        });
+      },
+      { timeout: 1500 }
+    );
+    expect(container.textContent).toContain('No applications match that search');
 
     unmount();
   });
@@ -222,6 +245,7 @@ describe('applications module', () => {
     await vi.waitFor(() => {
       expect(listApplicationsPage).toHaveBeenLastCalledWith({
         status: 'approved',
+        search: '',
         direction: 'desc',
       });
     });
@@ -281,6 +305,7 @@ describe('applications module', () => {
     });
     expect(listApplicationsPage).toHaveBeenLastCalledWith({
       status: 'pending',
+      search: '',
       direction: 'desc',
       cursor,
     });

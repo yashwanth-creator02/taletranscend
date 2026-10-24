@@ -93,6 +93,21 @@ describe('reports service', () => {
     });
   });
 
+  it('searches target ids by prefix with ascending id order', async () => {
+    await listReportsPage({ status: 'resolved', search: '  tale-1  ' });
+
+    expect(fetchAdminPage).toHaveBeenCalledWith('reports', {
+      conditions: [
+        ['status', '==', 'resolved'],
+        ['targetId', '>=', 'tale-1'],
+        ['targetId', '<=', 'tale-1\uf8ff'],
+      ],
+      orderField: 'targetId',
+      direction: 'asc',
+      cursor: null,
+    });
+  });
+
   it('drops the where clause for the all-status filter', async () => {
     await listReportsPage({ status: 'all' });
 

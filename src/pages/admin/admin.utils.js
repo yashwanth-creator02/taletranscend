@@ -77,6 +77,49 @@ export function escapeAdminHtml(value) {
 }
 
 /**
+ * Remember the caret of an active admin search input before a render replaces
+ * the toolbar. The previous snapshot is kept while a loading state temporarily
+ * removes the input, so focus can be restored once results return.
+ *
+ * @param {HTMLElement | null} container
+ * @param {{start: number, end: number} | null} [previous]
+ * @returns {{start: number, end: number} | null}
+ */
+export function captureAdminSearchFocus(container, previous = null) {
+  if (!container || typeof document === 'undefined') return previous;
+  const active = document.activeElement;
+  if (!active?.matches?.('[data-role="search"]') || !container.contains(active)) {
+    return previous;
+  }
+  return {
+    start: typeof active.selectionStart === 'number' ? active.selectionStart : 0,
+    end: typeof active.selectionEnd === 'number' ? active.selectionEnd : 0,
+  };
+}
+
+/**
+ * Restore search focus only when nothing else claimed it. This prevents a
+ * background render from stealing focus after the user clicks a different
+ * control.
+ *
+ * @param {HTMLElement | null} container
+ * @param {{start: number, end: number} | null} snapshot
+ */
+export function restoreAdminSearchFocus(container, snapshot) {
+  if (!snapshot || !container || typeof document === 'undefined') return;
+  const active = document.activeElement;
+  if (active && active !== document.body && container.contains(active)) return;
+  const input = container.querySelector('[data-role="search"]');
+  if (!input || input.tagName !== 'INPUT') return;
+  input.focus({ preventScroll: true });
+  try {
+    input.setSelectionRange(snapshot.start, snapshot.end);
+  } catch {
+    // Search inputs support selection ranges in every supported browser.
+  }
+}
+
+/**
  * Two-letter mark for a user or tale row.
  * @param {unknown} value
  * @returns {string}

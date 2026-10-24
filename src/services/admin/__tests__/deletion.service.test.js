@@ -118,6 +118,21 @@ describe('deletion service', () => {
     });
   });
 
+  it('searches tale ids by prefix with ascending id order', async () => {
+    await listDeletionRequestsPage({ status: 'approved', search: '  tale-1  ' });
+
+    expect(fetchAdminPage).toHaveBeenCalledWith('deletionRequests', {
+      conditions: [
+        ['status', '==', 'approved'],
+        ['taleId', '>=', 'tale-1'],
+        ['taleId', '<=', 'tale-1\uf8ff'],
+      ],
+      orderField: 'taleId',
+      direction: 'asc',
+      cursor: null,
+    });
+  });
+
   it('drops the where clause for the all-status filter', async () => {
     await listDeletionRequestsPage({ status: 'all' });
 
