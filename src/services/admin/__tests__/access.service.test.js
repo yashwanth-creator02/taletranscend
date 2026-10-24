@@ -39,7 +39,8 @@ describe('admin access service', () => {
     const access = await resolveDashboardAccess(userWithClaims({ admin: true }));
     expect(access).toMatchObject({ role: 'admin', isAdmin: true, isStaff: true, canEnter: true });
     expect(getAllowedModules(access).map((m) => m.id)).toEqual(DASHBOARD_MODULES.map((m) => m.id));
-    expect(canAccessModule(access, 'settings')).toBe(true);
+    expect(canAccessModule(access, 'content')).toBe(true);
+    expect(canAccessModule(access, 'comments')).toBe(true);
     expect(defaultModuleFor(access)).toBe('overview');
   });
 
@@ -52,8 +53,9 @@ describe('admin access service', () => {
       canEnter: true,
     });
     expect(canAccessModule(access, 'reports')).toBe(true);
+    expect(canAccessModule(access, 'comments')).toBe(true);
+    expect(canAccessModule(access, 'content')).toBe(false);
     expect(canAccessModule(access, 'users')).toBe(false);
-    expect(canAccessModule(access, 'settings')).toBe(false);
     expect(canAccessModule(access, 'audit')).toBe(false);
   });
 

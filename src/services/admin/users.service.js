@@ -1,10 +1,11 @@
 // src/services/admin/users.service.js
-// Administrator reads and flag writes for real reader profiles.
+// Administrator reads and writer-verification writes for real reader profiles.
 //
 // The users collection is the source of truth for profiles. Nothing here
 // derives a user from tale authorship: a reader without a published tale is
-// still a reader. Flag writes are deliberately narrow because firestore.rules
-// rejects any key outside isBanned, isVerifiedWriter, role, and updatedAt.
+// still a reader. The only profile write exposed here is writer verification,
+// which unlocks the Author Studio. Staff claims, account bans, and profile role
+// labels are not editable from the browser dashboard.
 
 import { getCountFromServer, getDoc, query, serverTimestamp, updateDoc, where } from '@fb/index.js';
 import { refs } from '@fb/refs.js';
@@ -15,16 +16,8 @@ import { getStaffIdentity } from './session.service.js';
 
 const log = createLogger('AdminUsers');
 
-/** Roles accepted by the Firestore administrator update branch. */
-export const USER_ROLES = Object.freeze(['user', 'author', 'moderator', 'admin']);
-
 /** Firebase Auth UIDs and Firestore auto-ids are at least 20 characters. */
 const UID_PATTERN = /^[A-Za-z0-9_-]{20,}$/;
-
-/** @param {unknown} value @param {string} key */
-function hasOwn(value, key) {
-  return Object.prototype.hasOwnProperty.call(value, key);
-}
 
 /**
  * Shape a Firestore profile document for the admin UI. The document id is the
@@ -143,46 +136,21 @@ export async function getUserDetail(uid) {
 }
 
 /**
- * Update the administrator-managed flags on a profile.
+ * Set the writer-verification flag on a profile.
  *
- * The patch contains only the fields the caller supplied plus a Firestore
- * server timestamp. The audit actor comes from the signed-in staff claim, never
- * from the target uid.
+ * This is the only profile mutation the dashboard exposes because it has a real
+ * effect: `getAuthorStatus()` treats a verified writer as an author, which
+ * unlocks the Author Studio. The audit actor comes from the signed-in staff
+ * claim, never from the target uid.
  *
  * @param {string} uid
- * @param {{ isBanned?: boolean, isVerifiedWriter?: boolean, role?: string }} flags
- * @returns {Promise<Record<string, unknown>>}
+ * @param {boolean} isVerifiedWriter
+ * @returns {Promise<{ isVerifiedWriter: boolean }>}
  */
-export async function updateUserFlags(uid, flags = {}) {
+export async function updateWriterVerification(uid, isVerifiedWriter) {
   if (!uid) throw new Error('A user id is required.');
-
-  const nextFlags = flags && typeof flags === 'object' ? flags : {};
-  /** @type {Record<string, unknown>} */
-  const updates = {};
-
-  if (hasOwn(nextFlags, 'isBanned')) {
-    if (typeof nextFlags.isBanned !== 'boolean') {
-      throw new Error('isBanned must be a boolean.');
-    }
-    updates.isBanned = nextFlags.isBanned;
-  }
-
-  if (hasOwn(nextFlags, 'isVerifiedWriter')) {
-    if (typeof nextFlags.isVerifiedWriter !== 'boolean') {
-      throw new Error('isVerifiedWriter must be a boolean.');
-    }
-    updates.isVerifiedWriter = nextFlags.isVerifiedWriter;
-  }
-
-  if (hasOwn(nextFlags, 'role')) {
-    if (typeof nextFlags.role !== 'string' || !USER_ROLES.includes(nextFlags.role)) {
-      throw new Error(`role must be one of: ${USER_ROLES.join(', ')}.`);
-    }
-    updates.role = nextFlags.role;
-  }
-
-  if (Object.keys(updates).length === 0) {
-    throw new Error('Provide at least one user flag to update.');
+  if (typeof isVerifiedWriter !== 'boolean') {
+    throw new Error('isVerifiedWriter must be a boolean.');
   }
 
   // Resolve the real caller before mutating, so a missing staff claim never
@@ -190,7 +158,7 @@ export async function updateUserFlags(uid, flags = {}) {
   const identity = await getStaffIdentity();
 
   await updateDoc(refs.user(uid), {
-    ...updates,
+    isVerifiedWriter,
     updatedAt: serverTimestamp(),
   });
 
@@ -198,17 +166,19 @@ export async function updateUserFlags(uid, flags = {}) {
     const audit = await writeAdminAuditLog({
       actorId: identity.uid,
       actorRole: identity.role,
-      action: 'user.flags.update',
+      action: 'user.verification.update',
       targetType: 'user',
       targetId: uid,
-      summary: `Updated ${Object.keys(updates).join(', ')} for user ${uid}.`.slice(0, 1000),
+      summary: `${
+        isVerifiedWriter ? 'Granted' : 'Removed'
+      } writer verification for user ${uid}.`.slice(0, 1000),
     });
     if (!audit?.success) {
-      log.warn('The user update was saved but its audit entry failed', { uid });
+      log.warn('The writer verification was saved but its audit entry failed', { uid });
     }
   } catch (err) {
-    log.warn('The user update was saved but its audit entry failed', err);
+    log.warn('The writer verification was saved but its audit entry failed', err);
   }
 
-  return { ...updates };
+  return { isVerifiedWriter };
 }

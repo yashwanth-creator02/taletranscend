@@ -42,10 +42,10 @@ describe('overview service', () => {
           id: 'log-1',
           actorId: 'admin-uid',
           actorRole: 'admin',
-          action: 'user.ban',
+          action: 'user.verification.update',
           targetType: 'user',
           targetId: 'target-uid',
-          summary: 'Banned a user',
+          summary: 'Updated writer verification',
           createdAt: null,
         },
       ],
@@ -58,7 +58,7 @@ describe('overview service', () => {
 
     expect(stats).toEqual({
       totalTales: 42,
-      totalUsers: 120,
+      totalProfiles: 120,
       pendingReports: 5,
       pendingApplications: 2,
       pendingDeletions: 3,
@@ -67,10 +67,10 @@ describe('overview service', () => {
           id: 'log-1',
           actorId: 'admin-uid',
           actorRole: 'admin',
-          action: 'user.ban',
+          action: 'user.verification.update',
           targetType: 'user',
           targetId: 'target-uid',
-          summary: 'Banned a user',
+          summary: 'Updated writer verification',
           createdAt: null,
         },
       ],
@@ -91,7 +91,7 @@ describe('overview service', () => {
     const stats = await fetchOverviewStats({ includeAudit: false });
 
     expect(stats.totalTales).toBe(1);
-    expect(stats.totalUsers).toBeNull();
+    expect(stats.totalProfiles).toBeNull();
     expect(stats.recentAuditEntries).toEqual([]);
     expect(stats.auditUnavailable).toBe(false);
     expect(listAdminAuditLogPage).not.toHaveBeenCalled();

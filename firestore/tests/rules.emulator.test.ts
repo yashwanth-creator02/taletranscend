@@ -22,7 +22,20 @@ import {
   type RulesTestEnvironment,
 } from '@firebase/rules-unit-testing';
 import { readFileSync } from 'node:fs';
-import { setDoc, doc, getDoc, updateDoc, increment, serverTimestamp } from 'firebase/firestore';
+import {
+  setDoc,
+  doc,
+  getDoc,
+  updateDoc,
+  increment,
+  serverTimestamp,
+  collectionGroup,
+  query,
+  getDocs,
+  deleteDoc,
+  where,
+} from 'firebase/firestore';
+import type { Firestore } from 'firebase/firestore';
 
 const PROJECT_ID = 'taletranscend-rules-test';
 const ROOT = 'v1/taletranscend/projects/v1';
@@ -1329,6 +1342,134 @@ describe('admin dashboard — five-role rules matrix', () => {
         updateDoc(doc(userCtx().firestore(), `${ROOT}/deletionRequests/req-1`), {
           status: 'approved',
         })
+      );
+    });
+  });
+
+  describe('global content and comment moderation', () => {
+    const comment = (overrides: Record<string, unknown> = {}) => ({
+      authorId: 'reader-2',
+      authorName: 'Reader Two',
+      authorType: 'reader',
+      text: 'A reflection on the tale.',
+      taleId: 'tale-1',
+      type: 'general',
+      depth: 0,
+      parentId: '',
+      isHidden: false,
+      isPinned: false,
+      reportCount: 0,
+      likeCount: 0,
+      replyCount: 0,
+      isDeleted: false,
+      isEdited: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      ...overrides,
+    });
+
+    const commentPath = `${ROOT}/public/data/tales/tale-1/comments/comment-1`;
+
+    const collectionGroupQuery = (firestore: Firestore) =>
+      query(collectionGroup(firestore, 'comments'), where('isHidden', '==', false));
+
+    it('staff can query every comment via the collection group; everyone else is denied', async () => {
+      await seedTale('author-1', 'tale-1');
+      await seed('public/data/tales/tale-1/comments/comment-1', comment());
+
+      const adminSnap = await assertSucceeds(getDocs(collectionGroupQuery(adminCtx().firestore())));
+      expect(adminSnap.size).toBe(1);
+
+      await assertSucceeds(getDocs(collectionGroupQuery(moderatorCtx().firestore())));
+
+      for (const ctx of [authorCtx(), userCtx(), guestCtx()]) {
+        await assertFails(getDocs(collectionGroupQuery(ctx.firestore())));
+      }
+    });
+
+    it('staff can hide and pin a comment while ordinary users and guests cannot', async () => {
+      await seedTale('author-1', 'tale-1');
+      await seed('public/data/tales/tale-1/comments/comment-1', comment());
+
+      await assertSucceeds(
+        updateDoc(doc(moderatorCtx().firestore(), commentPath), {
+          isHidden: true,
+          isPinned: false,
+          reportCount: 0,
+          updatedAt: serverTimestamp(),
+        })
+      );
+
+      await assertFails(
+        updateDoc(doc(userCtx().firestore(), commentPath), {
+          isHidden: false,
+          isPinned: true,
+          reportCount: 0,
+          updatedAt: serverTimestamp(),
+        })
+      );
+
+      await assertSucceeds(deleteDoc(doc(adminCtx().firestore(), commentPath)));
+      const deleted = await assertSucceeds(getDoc(doc(adminCtx().firestore(), commentPath)));
+      expect(deleted.exists()).toBe(false);
+    });
+
+    it('staff can read a private draft and update the fields the dashboard exposes', async () => {
+      await seedTale('author-1', 'draft-1', {
+        status: 'draft',
+        visibility: 'private',
+        publishedAt: null,
+      });
+
+      await assertSucceeds(
+        getDoc(doc(adminCtx().firestore(), `${ROOT}/public/data/tales/draft-1`))
+      );
+      await assertFails(getDoc(doc(userCtx().firestore(), `${ROOT}/public/data/tales/draft-1`)));
+
+      const updatePayload = (title: string) => ({
+        title,
+        status: 'published',
+        visibility: 'public',
+        readCount: 0,
+        commentCount: 0,
+        reactionCount: 0,
+        bookmarkCount: 0,
+        publishedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+
+      await assertSucceeds(
+        updateDoc(
+          doc(adminCtx().firestore(), `${ROOT}/public/data/tales/draft-1`),
+          updatePayload('Published by staff')
+        )
+      );
+
+      await seedTale('author-1', 'draft-2', {
+        status: 'draft',
+        visibility: 'private',
+        publishedAt: null,
+      });
+      await assertSucceeds(
+        updateDoc(
+          doc(moderatorCtx().firestore(), `${ROOT}/public/data/tales/draft-2`),
+          updatePayload('Moderated by staff')
+        )
+      );
+
+      await seedTale('author-1', 'draft-3', {
+        status: 'draft',
+        visibility: 'private',
+        publishedAt: null,
+      });
+      await assertFails(
+        updateDoc(
+          doc(userCtx().firestore(), `${ROOT}/public/data/tales/draft-3`),
+          updatePayload('Not allowed')
+        )
+      );
+      await assertSucceeds(
+        deleteDoc(doc(adminCtx().firestore(), `${ROOT}/public/data/tales/draft-3`))
       );
     });
   });

@@ -10,7 +10,7 @@ vi.mock('@services/admin/overview.service.js', () => ({
 function stats(overrides = {}) {
   return {
     totalTales: 33,
-    totalUsers: 3,
+    totalProfiles: 3,
     pendingReports: 2,
     pendingApplications: 1,
     pendingDeletions: 4,
@@ -47,7 +47,8 @@ describe('overview module', () => {
     });
 
     expect(fetchOverviewStats).toHaveBeenCalledWith({ includeAudit: true });
-    expect(container.textContent).toContain('Registered Users');
+    expect(container.textContent).toContain('Reader Profiles');
+    expect(container.textContent).toContain('not Firebase Auth accounts');
     expect(container.textContent).toContain('Pending Deletions');
     expect(container.textContent).toContain('Recent Staff Activity');
     expect(container.innerHTML).not.toContain('onclick=');

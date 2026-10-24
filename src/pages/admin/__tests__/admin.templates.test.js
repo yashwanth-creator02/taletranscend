@@ -41,7 +41,7 @@ describe('admin templates', () => {
     expect(html).toContain('data-admin-module="overview"');
     expect(html).toContain('data-admin-module="author"');
     expect(html).toContain('data-admin-module="home"');
-    expect(html).not.toContain('data-admin-module="settings"');
+    expect(html).not.toContain('data-admin-module="users"');
     expect(html).toContain('href="#/"');
     expect(html).toContain('Back to archive');
     expect(html).toContain('aria-current="page"');

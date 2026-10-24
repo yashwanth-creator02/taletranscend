@@ -1,6 +1,6 @@
 // src/services/admin/__tests__/users.service.test.js
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { USER_ROLES, getUserDetail, listUsersPage, updateUserFlags } from '../users.service.js';
+import { getUserDetail, listUsersPage, updateWriterVerification } from '../users.service.js';
 import { refs } from '@fb/refs.js';
 
 const mocks = vi.hoisted(() => ({
@@ -203,7 +203,7 @@ describe('admin users service', () => {
     expect(mocks.getCountFromServer).not.toHaveBeenCalled();
   });
 
-  it('writes only supplied flags plus a server timestamp and audits the real caller', async () => {
+  it('writes writer verification plus a server timestamp and audits the real caller', async () => {
     mocks.getStaffIdentity.mockResolvedValue({
       uid: 'staff-1',
       role: 'admin',
@@ -212,84 +212,50 @@ describe('admin users service', () => {
     });
     mocks.updateDoc.mockResolvedValue(undefined);
 
-    const result = await updateUserFlags('user-1', { isBanned: true, role: 'moderator' });
+    const result = await updateWriterVerification('user-1', true);
 
     expect(mocks.serverTimestamp).toHaveBeenCalledTimes(1);
     expect(mocks.updateDoc).toHaveBeenCalledWith('user:user-1', {
-      isBanned: true,
-      role: 'moderator',
+      isVerifiedWriter: true,
       updatedAt: 'server-timestamp',
     });
 
     const patch = mocks.updateDoc.mock.calls[0][1];
-    expect(Object.keys(patch).sort()).toEqual(['isBanned', 'role', 'updatedAt']);
+    expect(Object.keys(patch).sort()).toEqual(['isVerifiedWriter', 'updatedAt']);
 
     expect(mocks.writeAdminAuditLog).toHaveBeenCalledWith({
       actorId: 'staff-1',
       actorRole: 'admin',
-      action: 'user.flags.update',
+      action: 'user.verification.update',
       targetType: 'user',
       targetId: 'user-1',
-      summary: expect.stringContaining('isBanned'),
+      summary: expect.stringContaining('Granted writer verification'),
     });
 
     const auditEntry = mocks.writeAdminAuditLog.mock.calls[0][0];
     expect(auditEntry.actorId).not.toBe('user-1');
     expect(auditEntry.summary.length).toBeLessThanOrEqual(1000);
-    expect(result).toEqual({ isBanned: true, role: 'moderator' });
+    expect(result).toEqual({ isVerifiedWriter: true });
   });
 
-  it('ignores keys the Firestore rules would reject', async () => {
-    mocks.getStaffIdentity.mockResolvedValue({
-      uid: 'staff-1',
-      role: 'admin',
-      email: '',
-      displayName: '',
-    });
-    mocks.updateDoc.mockResolvedValue(undefined);
-
-    await updateUserFlags('user-1', {
-      isVerifiedWriter: false,
-      name: 'Injected Name',
-      actorId: 'forged-actor',
-    });
-
-    expect(mocks.updateDoc).toHaveBeenCalledWith('user:user-1', {
-      isVerifiedWriter: false,
-      updatedAt: 'server-timestamp',
-    });
-  });
-
-  it('validates the role against the Firestore enum before any write', async () => {
-    expect(USER_ROLES).toEqual(['user', 'author', 'moderator', 'admin']);
-
-    await expect(updateUserFlags('user-1', { role: 'superadmin' })).rejects.toThrow(
-      /role must be one of/i
+  it('rejects a non-boolean verification value before any write', async () => {
+    await expect(updateWriterVerification('user-1', 'yes')).rejects.toThrow(
+      /isVerifiedWriter must be a boolean/i
     );
     expect(mocks.getStaffIdentity).not.toHaveBeenCalled();
     expect(mocks.updateDoc).not.toHaveBeenCalled();
     expect(mocks.writeAdminAuditLog).not.toHaveBeenCalled();
   });
 
-  it('rejects non-boolean flag values', async () => {
-    await expect(updateUserFlags('user-1', { isBanned: 'yes' })).rejects.toThrow(
-      /isBanned must be a boolean/i
-    );
-    await expect(updateUserFlags('user-1', { isVerifiedWriter: 1 })).rejects.toThrow(
-      /isVerifiedWriter must be a boolean/i
-    );
-    expect(mocks.updateDoc).not.toHaveBeenCalled();
-  });
-
-  it('rejects an empty update', async () => {
-    await expect(updateUserFlags('user-1', {})).rejects.toThrow(/at least one user flag/i);
+  it('rejects a missing user id before any write', async () => {
+    await expect(updateWriterVerification('', true)).rejects.toThrow(/user id is required/i);
     expect(mocks.updateDoc).not.toHaveBeenCalled();
   });
 
   it('does not write when the staff identity cannot be resolved', async () => {
     mocks.getStaffIdentity.mockRejectedValue(new Error('No staff claim'));
 
-    await expect(updateUserFlags('user-1', { isBanned: true })).rejects.toThrow(/staff claim/i);
+    await expect(updateWriterVerification('user-1', true)).rejects.toThrow(/staff claim/i);
     expect(mocks.updateDoc).not.toHaveBeenCalled();
     expect(mocks.writeAdminAuditLog).not.toHaveBeenCalled();
   });
@@ -304,8 +270,8 @@ describe('admin users service', () => {
     mocks.updateDoc.mockResolvedValue(undefined);
     mocks.writeAdminAuditLog.mockResolvedValue({ success: false });
 
-    await expect(updateUserFlags('user-1', { isBanned: true })).resolves.toEqual({
-      isBanned: true,
+    await expect(updateWriterVerification('user-1', false)).resolves.toEqual({
+      isVerifiedWriter: false,
     });
     expect(mocks.updateDoc).toHaveBeenCalledTimes(1);
   });
@@ -320,7 +286,7 @@ describe('admin users service', () => {
     mocks.updateDoc.mockResolvedValue(undefined);
     mocks.writeAdminAuditLog.mockRejectedValue(new Error('audit offline'));
 
-    await expect(updateUserFlags('user-1', { isVerifiedWriter: true })).resolves.toEqual({
+    await expect(updateWriterVerification('user-1', true)).resolves.toEqual({
       isVerifiedWriter: true,
     });
     expect(mocks.updateDoc).toHaveBeenCalledTimes(1);

@@ -68,6 +68,7 @@ import {
   updateDoc,
   deleteDoc,
   query,
+  where,
   orderBy,
   limit,
 } from '@fb/index.js';
@@ -500,7 +501,13 @@ function _bindHighlightEvents() {
 async function _loadComments() {
   if (!readerState.taleId) return;
   try {
-    const q = query(refs.comments(readerState.taleId), orderBy('createdAt', 'desc'), limit(50));
+    const q = query(
+      refs.comments(readerState.taleId),
+      where('isHidden', '==', false),
+      orderBy('isPinned', 'desc'),
+      orderBy('createdAt', 'desc'),
+      limit(50)
+    );
     const snap = await getDocs(q);
     readerState.comments = await Promise.all(
       snap.docs.map(async (d) => {

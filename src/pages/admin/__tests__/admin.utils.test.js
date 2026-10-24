@@ -53,11 +53,12 @@ describe('admin utils', () => {
     for (const id of [
       'overview',
       'users',
+      'content',
       'deletions',
       'reports',
+      'comments',
       'applications',
       'audit',
-      'settings',
       'author',
       'unknown',
     ]) {

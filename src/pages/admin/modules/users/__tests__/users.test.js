@@ -1,28 +1,26 @@
 // src/pages/admin/modules/users/__tests__/users.test.js
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { mount } from '../users.js';
-import { listUsersPage, getUserDetail, updateUserFlags } from '@services/admin/users.service.js';
+import {
+  listUsersPage,
+  getUserDetail,
+  updateWriterVerification,
+} from '@services/admin/users.service.js';
 
 const serviceMocks = vi.hoisted(() => ({
   listUsersPage: vi.fn(),
   getUserDetail: vi.fn(),
-  updateUserFlags: vi.fn(),
+  updateWriterVerification: vi.fn(),
 }));
 
 const uiMocks = vi.hoisted(() => ({
-  showConfirmModal: vi.fn(),
   showToast: vi.fn(),
 }));
 
 vi.mock('@services/admin/users.service.js', () => ({
   listUsersPage: serviceMocks.listUsersPage,
   getUserDetail: serviceMocks.getUserDetail,
-  updateUserFlags: serviceMocks.updateUserFlags,
-  USER_ROLES: ['user', 'author', 'moderator', 'admin'],
-}));
-
-vi.mock('@/ui/components/confirmModal.js', () => ({
-  showConfirmModal: uiMocks.showConfirmModal,
+  updateWriterVerification: serviceMocks.updateWriterVerification,
 }));
 
 vi.mock('@/ui/components/toast.js', () => ({
@@ -80,8 +78,7 @@ describe('admin users module', () => {
     vi.clearAllMocks();
     serviceMocks.listUsersPage.mockResolvedValue(makePage([]));
     serviceMocks.getUserDetail.mockResolvedValue(null);
-    serviceMocks.updateUserFlags.mockResolvedValue({});
-    uiMocks.showConfirmModal.mockResolvedValue(true);
+    serviceMocks.updateWriterVerification.mockResolvedValue({ isVerifiedWriter: false });
   });
 
   it('blocks non-administrators without reading user data', () => {
@@ -114,7 +111,7 @@ describe('admin users module', () => {
     expect(container.querySelector('[data-region="count"]').textContent).toContain('1+');
     expect(container.querySelector('[data-action="load-more"]')).not.toBeNull();
     expect(window.loadMore).toBeUndefined();
-    expect(window.handleBan).toBeUndefined();
+    expect(window.updateWriterVerification).toBeUndefined();
     expect(container.innerHTML).not.toContain('onclick');
     expect(container.innerHTML).not.toContain('onchange');
 
@@ -307,10 +304,9 @@ describe('admin users module', () => {
     unmount();
   });
 
-  it('confirms a ban and sends only the isBanned flag', async () => {
+  it('offers writer verification but no role or ban controls', async () => {
     serviceMocks.listUsersPage.mockResolvedValue(makePage([makeUser()]));
     serviceMocks.getUserDetail.mockResolvedValue({ ...makeUser(), taleCount: 0 });
-    serviceMocks.updateUserFlags.mockResolvedValue({ isBanned: true });
 
     const { container, unmount } = setup();
 
@@ -319,47 +315,11 @@ describe('admin users module', () => {
     });
     await openDetailFor(container);
 
-    container.querySelector('[data-action="toggle-ban"]').click();
-
-    await vi.waitFor(() => {
-      expect(uiMocks.showConfirmModal).toHaveBeenCalledTimes(1);
-    });
-    expect(uiMocks.showConfirmModal).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: 'Ban this reader?',
-        confirmVariant: 'danger',
-      })
-    );
-
-    await vi.waitFor(() => {
-      expect(updateUserFlags).toHaveBeenCalledWith('user-1', { isBanned: true });
-    });
-    await vi.waitFor(() => {
-      expect(uiMocks.showToast).toHaveBeenCalledWith('Reader banned.', 'success');
-    });
-    expect(container.textContent).toContain('Unban user');
-
-    unmount();
-  });
-
-  it('does not update when the ban confirmation is cancelled', async () => {
-    serviceMocks.listUsersPage.mockResolvedValue(makePage([makeUser()]));
-    serviceMocks.getUserDetail.mockResolvedValue({ ...makeUser(), taleCount: 0 });
-    uiMocks.showConfirmModal.mockResolvedValue(false);
-
-    const { container, unmount } = setup();
-
-    await vi.waitFor(() => {
-      expect(container.querySelector('[data-action="view-user"]')).not.toBeNull();
-    });
-    await openDetailFor(container);
-
-    container.querySelector('[data-action="toggle-ban"]').click();
-
-    await vi.waitFor(() => {
-      expect(uiMocks.showConfirmModal).toHaveBeenCalledTimes(1);
-    });
-    expect(updateUserFlags).not.toHaveBeenCalled();
+    expect(container.querySelector('[data-action="toggle-verified"]')).not.toBeNull();
+    expect(container.querySelector('[data-action="toggle-ban"]')).toBeNull();
+    expect(container.querySelector('[data-action="apply-role"]')).toBeNull();
+    expect(container.querySelector('[data-role="role-select"]')).toBeNull();
+    expect(container.textContent).toContain('does not change them');
 
     unmount();
   });
@@ -367,7 +327,7 @@ describe('admin users module', () => {
   it('toggles writer verification without a confirmation dialog', async () => {
     serviceMocks.listUsersPage.mockResolvedValue(makePage([makeUser()]));
     serviceMocks.getUserDetail.mockResolvedValue({ ...makeUser(), taleCount: 0 });
-    serviceMocks.updateUserFlags.mockResolvedValue({
+    serviceMocks.updateWriterVerification.mockResolvedValue({
       isVerifiedWriter: true,
     });
 
@@ -381,43 +341,14 @@ describe('admin users module', () => {
     container.querySelector('[data-action="toggle-verified"]').click();
 
     await vi.waitFor(() => {
-      expect(updateUserFlags).toHaveBeenCalledWith('user-1', { isVerifiedWriter: true });
+      expect(updateWriterVerification).toHaveBeenCalledWith('user-1', true);
     });
-    expect(uiMocks.showConfirmModal).not.toHaveBeenCalled();
     expect(uiMocks.showToast).toHaveBeenCalledWith('Writer verified.', 'success');
 
     unmount();
   });
 
-  it('confirms a role change and sends only the validated role', async () => {
-    serviceMocks.listUsersPage.mockResolvedValue(makePage([makeUser()]));
-    serviceMocks.getUserDetail.mockResolvedValue({ ...makeUser(), taleCount: 0 });
-    serviceMocks.updateUserFlags.mockResolvedValue({ role: 'moderator' });
-
-    const { container, unmount } = setup();
-
-    await vi.waitFor(() => {
-      expect(container.querySelector('[data-action="view-user"]')).not.toBeNull();
-    });
-    await openDetailFor(container);
-
-    const roleSelect = container.querySelector('[data-role="role-select"]');
-    roleSelect.value = 'moderator';
-    container.querySelector('[data-action="apply-role"]').click();
-
-    await vi.waitFor(() => {
-      expect(uiMocks.showConfirmModal).toHaveBeenCalledWith(
-        expect.objectContaining({ title: 'Change this profile role?' })
-      );
-    });
-    await vi.waitFor(() => {
-      expect(updateUserFlags).toHaveBeenCalledWith('user-1', { role: 'moderator' });
-    });
-
-    unmount();
-  });
-
-  it('escapes names and bios before rendering them or interpolating a modal message', async () => {
+  it('escapes names and bios before rendering them', async () => {
     const hostile = '<img src=x onerror="window.__usersPwned=1">';
     serviceMocks.listUsersPage.mockResolvedValue(makePage([makeUser({ name: hostile })]));
     serviceMocks.getUserDetail.mockResolvedValue({
@@ -437,15 +368,7 @@ describe('admin users module', () => {
     await openDetailFor(container);
 
     expect(container.querySelector('img')).toBeNull();
-
-    container.querySelector('[data-action="toggle-ban"]').click();
-
-    await vi.waitFor(() => {
-      expect(uiMocks.showConfirmModal).toHaveBeenCalledTimes(1);
-    });
-    const message = uiMocks.showConfirmModal.mock.calls[0][0].message;
-    expect(message).toContain('&lt;img');
-    expect(message).not.toContain('<img');
+    expect(window.__usersPwned).toBeUndefined();
 
     unmount();
   });

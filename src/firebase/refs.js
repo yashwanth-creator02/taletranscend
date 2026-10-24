@@ -8,7 +8,7 @@
 //   const snap = await getDoc(refs.tale(taleId));
 
 import { db } from './db.js';
-import { doc, collection } from 'firebase/firestore';
+import { doc, collection, collectionGroup } from 'firebase/firestore';
 import { PATHS } from './paths.js';
 import { createLogger } from '@/utils';
 
@@ -31,6 +31,12 @@ export const refs = {
 
   /** Comments subcollection for a tale */
   comments: (taleId) => collection(db, PATHS.publicTaleComments(taleId)),
+
+  /**
+   * Staff collection-group view across every tale's comments.
+   * Reads are gated by the wildcard comment rule in firestore.rules.
+   */
+  allComments: () => collectionGroup(db, 'comments'),
 
   /** Single comment document */
   comment: (taleId, commentId) => doc(db, PATHS.publicTaleComment(taleId, commentId)),

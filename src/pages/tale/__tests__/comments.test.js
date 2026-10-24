@@ -17,6 +17,7 @@ vi.mock('@fb/index.js', () => ({
   getDoc: vi.fn(() => Promise.resolve({ exists: () => false })),
   getDocs: vi.fn(),
   query: vi.fn(),
+  where: vi.fn(),
   orderBy: vi.fn(),
   limit: vi.fn(),
   startAfter: vi.fn(),

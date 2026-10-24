@@ -147,7 +147,7 @@ export function mount({ container, access }) {
 
     const cards = [
       { label: 'Published Tales', value: stats.totalTales },
-      { label: 'Registered Users', value: stats.totalUsers },
+      { label: 'Reader Profiles', value: stats.totalProfiles },
       { label: 'Pending Reports', value: stats.pendingReports },
       { label: 'Pending Applications', value: stats.pendingApplications },
       { label: 'Pending Deletions', value: stats.pendingDeletions },
@@ -175,7 +175,9 @@ export function mount({ container, access }) {
         <h2 id="overview-title" class="admin-section-title">Archive Overview</h2>
         <p class="admin-note">
           Counts are read live from Firestore. An em dash means that counter could
-          not be read; it is never replaced with an estimate.
+          not be read; it is never replaced with an estimate. Reader Profiles counts
+          <span class="font-mono">users/{uid}</span> profile documents, not Firebase Auth accounts:
+          anonymous sessions without a profile are not included.
         </p>
         ${statsHtml}
         ${renderAudit()}

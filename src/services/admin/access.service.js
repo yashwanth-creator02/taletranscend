@@ -22,9 +22,11 @@ const log = createLogger('AdminAccess');
  */
 export const DASHBOARD_MODULES = Object.freeze([
   { id: 'overview', label: 'Overview', icon: 'layout-dashboard', roles: ['admin', 'moderator'] },
-  { id: 'users', label: 'Users & Roles', icon: 'users', roles: ['admin'] },
+  { id: 'users', label: 'Users', icon: 'users', roles: ['admin'] },
+  { id: 'content', label: 'Tales & Chapters', icon: 'book-open', roles: ['admin'] },
   { id: 'deletions', label: 'Tale Deletions', icon: 'book-x', roles: ['admin', 'moderator'] },
   { id: 'reports', label: 'Reports', icon: 'flag', roles: ['admin', 'moderator'] },
+  { id: 'comments', label: 'Comments', icon: 'message-square', roles: ['admin', 'moderator'] },
   {
     id: 'applications',
     label: 'Author Applications',
@@ -32,7 +34,6 @@ export const DASHBOARD_MODULES = Object.freeze([
     roles: ['admin', 'moderator'],
   },
   { id: 'audit', label: 'Audit Log', icon: 'scroll-text', roles: ['admin'] },
-  { id: 'settings', label: 'Site Settings', icon: 'settings', roles: ['admin'] },
   { id: 'author', label: 'Author Studio', icon: 'feather', roles: ['author', 'admin'] },
 ]);
 

@@ -986,6 +986,17 @@ service cloud.firestore {
         allow read: if true;
         allow write: if isAdministrator();
       }
+
+    }
+
+    // COMMENT COLLECTION GROUP  -  staff-only global moderation view.
+    // A collection-group query is not scoped by a parent document path, so its
+    // rule must sit at the database root with a leading wildcard. The nested
+    // comment rule above still authorises updates and deletes for a known tale;
+    // this rule only grants staff the read that powers the global Comments
+    // module. The database is dedicated to this application.
+    match /{path=**}/comments/{commentId} {
+      allow read: if isAdmin();
     }
 
     // ═══════════════════════════════════════════════════════════════

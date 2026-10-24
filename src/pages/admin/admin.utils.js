@@ -102,12 +102,13 @@ export function adminModuleDescription(moduleId) {
   return (
     {
       overview: 'Live archive counts and the most recent staff activity.',
-      users: 'Find readers, review profile flags, and document role changes.',
+      users: 'Find reader profiles and grant or remove writer verification.',
+      content: 'Inspect every tale, including drafts, and edit its publication record.',
+      comments: 'Read and moderate comments across every tale in the archive.',
       deletions: 'Approve or decline chronicle removal petitions.',
-      reports: 'Triage reader reports and act on harmful content.',
+      reports: 'Triage reader reports and record a resolution.',
       applications: 'Review readers applying to become chroniclers.',
       audit: 'Read the append-only record of staff actions.',
-      settings: 'Edit public site configuration and feature flags.',
       author: 'Your own tales and removal petitions.',
     }[moduleId] ?? 'Archive administration.'
   );

@@ -10,6 +10,7 @@ import {
   doc,
   serverTimestamp,
   query,
+  where,
   orderBy,
   limit,
   startAfter,
@@ -190,11 +191,21 @@ async function _fetchComments(isInitial = false) {
   }
 
   try {
-    // Bug fix: was ordering by 'timestamp' — schema field is 'createdAt'
+    // Hidden comments are excluded at the query level. Pinned comments sort
+    // above ordinary comments, then newest first. Both constraints share the
+    // composite index in firestore.indexes.json.
     const q = isInitial
-      ? query(refs.comments(_currentTaleId), orderBy('createdAt', 'desc'), limit(PAGE_SIZE))
+      ? query(
+          refs.comments(_currentTaleId),
+          where('isHidden', '==', false),
+          orderBy('isPinned', 'desc'),
+          orderBy('createdAt', 'desc'),
+          limit(PAGE_SIZE)
+        )
       : query(
           refs.comments(_currentTaleId),
+          where('isHidden', '==', false),
+          orderBy('isPinned', 'desc'),
           orderBy('createdAt', 'desc'),
           startAfter(_lastVisible),
           limit(PAGE_SIZE)

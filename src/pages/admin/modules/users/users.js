@@ -1,15 +1,13 @@
 // src/pages/admin/modules/users/users.js
 // Administrator user directory: real profiles, cursor pagination, a detail
-// panel, and narrowly scoped flag/role writes. Every action is delegated from
-// the module container, so no inline handlers or window globals are needed.
+// panel, and writer verification. Every action is delegated from the module
+// container, so no inline handlers or window globals are needed.
 
 import {
   listUsersPage,
   getUserDetail,
-  updateUserFlags,
-  USER_ROLES,
+  updateWriterVerification,
 } from '@services/admin/users.service.js';
-import { showConfirmModal } from '@/ui/components/confirmModal.js';
 import { showToast } from '@/ui/components/toast.js';
 import {
   formatAdminDate,
@@ -34,9 +32,9 @@ export function mount({ container, access } = {}) {
   if (!access?.isAdmin) {
     container.innerHTML = `
       <section aria-labelledby="admin-users-denied-title">
-        <h2 id="admin-users-denied-title" class="admin-section-title">Users &amp; Roles</h2>
+        <h2 id="admin-users-denied-title" class="admin-section-title">Users</h2>
         <p class="admin-readonly-note">
-          Administrator access is required to review user profiles and flags. No data was read.
+          Administrator access is required to review reader profiles. No data was read.
         </p>
       </section>
     `;
@@ -62,10 +60,14 @@ export function mount({ container, access } = {}) {
 
   container.innerHTML = `
     <section aria-labelledby="admin-users-title">
-      <h2 id="admin-users-title" class="admin-section-title">Users &amp; Roles</h2>
+      <h2 id="admin-users-title" class="admin-section-title">Users</h2>
       <p class="admin-note">
-        Profiles are read from the users collection. Role labels are display data only; actual
-        authority follows Firebase Auth custom claims.
+        Profiles come from the Firestore users collection, not Firebase Auth. An Auth account
+        without a profile document does not appear here, and the browser SDK cannot list Auth
+        accounts at all: that requires server-side Admin SDK access. The only profile action
+        offered here is writer verification. Role labels are display data; staff authority follows
+        Firebase Auth custom claims, and account bans require an enforcement surface that this
+        dashboard does not have. The table is cursor-paginated, so use Load More to continue.
       </p>
 
       <div class="admin-toolbar">
@@ -131,36 +133,14 @@ export function mount({ container, access } = {}) {
 
   /** @param {Record<string, unknown>} user */
   function buildFlagBadges(user) {
-    const banned = user?.isBanned === true;
     const verified = user?.isVerifiedWriter === true;
     return `
       <span class="admin-meta-row">
-        <span class="admin-badge ${banned ? 'admin-badge--rejected' : 'admin-badge--dismissed'}">
-          ${banned ? 'Banned' : 'Active'}
-        </span>
         <span class="admin-badge ${verified ? 'admin-badge--approved' : 'admin-badge--dismissed'}">
-          ${verified ? 'Verified' : 'Unverified'}
+          ${verified ? 'Verified writer' : 'Unverified'}
         </span>
       </span>
     `;
-  }
-
-  /** @param {string} currentRole */
-  function buildRoleOptions(currentRole) {
-    const options = USER_ROLES.map(
-      (role) =>
-        `<option value="${escapeAdminHtml(role)}"${
-          role === currentRole ? ' selected' : ''
-        }>${escapeAdminHtml(role)}</option>`
-    );
-    if (!USER_ROLES.includes(currentRole)) {
-      options.unshift(
-        `<option value="" selected disabled>${escapeAdminHtml(
-          currentRole
-        )} (current, not assignable)</option>`
-      );
-    }
-    return options.join('');
   }
 
   /** @param {Record<string, unknown>} user */
@@ -323,7 +303,6 @@ export function mount({ container, access } = {}) {
     const uid = String(detail.uid ?? detail.id ?? selectedUid);
     const name = displayName(detail);
     const role = displayRole(detail);
-    const isBanned = detail.isBanned === true;
     const isVerified = detail.isVerifiedWriter === true;
     const disabled = actionBusy ? 'disabled' : '';
     const taleCountLabel =
@@ -366,15 +345,6 @@ export function mount({ container, access } = {}) {
         <div class="admin-actions">
           <button
             type="button"
-            class="admin-btn admin-btn--sm${isBanned ? '' : ' admin-btn--danger'}"
-            data-action="toggle-ban"
-            data-uid="${escapeAdminHtml(uid)}"
-            ${disabled}
-          >
-            ${isBanned ? 'Unban user' : 'Ban user'}
-          </button>
-          <button
-            type="button"
             class="admin-btn admin-btn--sm"
             data-action="toggle-verified"
             data-uid="${escapeAdminHtml(uid)}"
@@ -382,31 +352,13 @@ export function mount({ container, access } = {}) {
           >
             ${isVerified ? 'Remove verification' : 'Verify writer'}
           </button>
-          <label class="admin-field">
-            <span class="admin-field__label">Set role</span>
-            <select
-              class="admin-select"
-              data-role="role-select"
-              data-uid="${escapeAdminHtml(uid)}"
-              ${disabled}
-            >
-              ${buildRoleOptions(role)}
-            </select>
-          </label>
-          <button
-            type="button"
-            class="admin-btn admin-btn--sm"
-            data-action="apply-role"
-            data-uid="${escapeAdminHtml(uid)}"
-            ${disabled}
-          >
-            Apply role
-          </button>
         </div>
 
         <p class="admin-readonly-note">
-          Flags and role labels are stored on the profile. Authority still follows Firebase Auth
-          custom claims, which the browser cannot grant.
+          Writer verification unlocks the Author Studio. Role labels are shown as stored profile
+          data, but this dashboard does not change them: staff authority requires Firebase Auth
+          custom claims. The banned flag is neither shown nor editable because no reader surface
+          enforces a profile ban.
         </p>
       </section>
     `;
@@ -508,15 +460,15 @@ export function mount({ container, access } = {}) {
     renderResults();
   }
 
-  /** @param {string} uid @param {Record<string, unknown>} flags @param {string} successMessage */
-  async function applyFlags(uid, flags, successMessage) {
+  /** @param {string} uid @param {boolean} isVerifiedWriter @param {string} successMessage */
+  async function applyVerification(uid, isVerifiedWriter, successMessage) {
     if (destroyed || actionBusy) return;
 
     actionBusy = true;
     renderDetail();
 
     try {
-      const updated = await updateUserFlags(uid, flags);
+      const updated = await updateWriterVerification(uid, isVerifiedWriter);
       if (destroyed) return;
 
       items = items.map((item) =>
@@ -528,8 +480,8 @@ export function mount({ container, access } = {}) {
       showToast(successMessage, 'success');
     } catch (err) {
       if (destroyed) return;
-      console.error('[users] flag update failed', err);
-      showToast('Could not update this user. No change was saved.', 'error');
+      console.error('[users] writer verification update failed', err);
+      showToast('Could not update writer verification. No change was saved.', 'error');
     } finally {
       if (!destroyed) {
         actionBusy = false;
@@ -540,79 +492,17 @@ export function mount({ container, access } = {}) {
   }
 
   /** @param {string} uid */
-  async function handleToggleBan(uid) {
-    if (!detail || actionBusy) return;
-    const detailUid = String(detail.uid ?? detail.id ?? '');
-    if (detailUid !== uid) return;
-
-    const nextBanned = !(detail.isBanned === true);
-    const name = displayName(detail);
-
-    const confirmed = await showConfirmModal({
-      title: nextBanned ? 'Ban this reader?' : 'Lift this ban?',
-      message: nextBanned
-        ? `Set the banned flag for <strong>${escapeAdminHtml(name)}</strong>?`
-        : `Clear the banned flag for <strong>${escapeAdminHtml(name)}</strong>?`,
-      subtext: 'The change is written to the admin audit trail.',
-      confirmText: nextBanned ? 'Ban reader' : 'Lift ban',
-      cancelText: 'Cancel',
-      confirmVariant: nextBanned ? 'danger' : 'primary',
-      icon: nextBanned ? 'shield-off' : 'shield-check',
-    });
-    if (!confirmed || destroyed) return;
-
-    await applyFlags(uid, { isBanned: nextBanned }, nextBanned ? 'Reader banned.' : 'Ban lifted.');
-  }
-
-  /** @param {string} uid */
   async function handleToggleVerified(uid) {
     if (!detail || actionBusy) return;
     const detailUid = String(detail.uid ?? detail.id ?? '');
     if (detailUid !== uid) return;
 
     const nextVerified = !(detail.isVerifiedWriter === true);
-    await applyFlags(
+    await applyVerification(
       uid,
-      { isVerifiedWriter: nextVerified },
+      nextVerified,
       nextVerified ? 'Writer verified.' : 'Verification removed.'
     );
-  }
-
-  /** @param {string} uid */
-  async function handleApplyRole(uid) {
-    if (!detail || actionBusy) return;
-    const detailUid = String(detail.uid ?? detail.id ?? '');
-    if (detailUid !== uid) return;
-
-    const select = detailEl?.querySelector('[data-role="role-select"]');
-    const nextRole = String(select?.value ?? '');
-    const currentRole = displayRole(detail);
-
-    if (!USER_ROLES.includes(nextRole)) {
-      showToast('Choose a valid profile role first.', 'error');
-      return;
-    }
-    if (nextRole === currentRole) {
-      showToast('That role is already set on this profile.', 'info');
-      return;
-    }
-
-    const confirmed = await showConfirmModal({
-      title: 'Change this profile role?',
-      message: `Set <strong>${escapeAdminHtml(
-        displayName(detail)
-      )}</strong> from <strong>${escapeAdminHtml(
-        currentRole
-      )}</strong> to <strong>${escapeAdminHtml(nextRole)}</strong>?`,
-      subtext: 'Role labels are display data. Custom claims still decide what this account can do.',
-      confirmText: 'Change role',
-      cancelText: 'Cancel',
-      confirmVariant: 'primary',
-      icon: 'shield-check',
-    });
-    if (!confirmed || destroyed) return;
-
-    await applyFlags(uid, { role: nextRole }, `Role updated to ${nextRole}.`);
   }
 
   /** @param {MouseEvent} event */
@@ -641,14 +531,8 @@ export function mount({ container, access } = {}) {
       case 'retry-detail':
         if (uid) openDetail(uid);
         break;
-      case 'toggle-ban':
-        if (uid) handleToggleBan(uid);
-        break;
       case 'toggle-verified':
         if (uid) handleToggleVerified(uid);
-        break;
-      case 'apply-role':
-        if (uid) handleApplyRole(uid);
         break;
       default:
         break;

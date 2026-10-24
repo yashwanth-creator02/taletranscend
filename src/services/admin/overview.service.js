@@ -29,7 +29,7 @@ async function countQuery(queryRef, label) {
  * @param {{ includeAudit?: boolean }} [options]
  * @returns {Promise<{
  *   totalTales: number | null,
- *   totalUsers: number | null,
+ *   totalProfiles: number | null,
  *   pendingReports: number | null,
  *   pendingApplications: number | null,
  *   pendingDeletions: number | null,
@@ -38,10 +38,10 @@ async function countQuery(queryRef, label) {
  * }>}
  */
 export async function fetchOverviewStats({ includeAudit = true } = {}) {
-  const [totalTales, totalUsers, pendingReports, pendingApplications, pendingDeletions] =
+  const [totalTales, totalProfiles, pendingReports, pendingApplications, pendingDeletions] =
     await Promise.all([
       countQuery(query(refs.tales(), where('status', '==', 'published')), 'published tale'),
-      countQuery(refs.users(), 'user'),
+      countQuery(refs.users(), 'reader profile'),
       countQuery(query(refs.reports(), where('status', '==', 'pending')), 'pending report'),
       countQuery(
         query(refs.authorApplications(), where('status', '==', 'pending')),
@@ -77,7 +77,7 @@ export async function fetchOverviewStats({ includeAudit = true } = {}) {
 
   return {
     totalTales,
-    totalUsers,
+    totalProfiles,
     pendingReports,
     pendingApplications,
     pendingDeletions,
