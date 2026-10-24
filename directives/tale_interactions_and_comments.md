@@ -125,6 +125,9 @@ Define the standard operating procedures, data structures, and UI behaviors for 
   - Firestore payload: `text: ''`, `isDeleted: true`, `deletedAt: serverTimestamp()`.
   - UI representation: Displays "This has been deleted by the user." in muted, italic typography.
   - Action triggers (reply, edit, delete) are hidden on soft-deleted items, while preserving the child reply tree.
+- **Guest Read-Only Gate**:
+  - Anonymous Firebase sessions are guests. Posting, replying, liking, editing, and deleting comments/replies must call `requireRegisteredUser()` from `src/services/auth.guard.js` before any write.
+  - The gate shows a warning toast with a **Sign in or sign up** action whose `returnUrl` is the current page; Firestore rules enforce the same boundary with `isRegistered()`.
 - **Rate Limiting & Cooldown**:
   - Posting reflections and echo-backs is protected by cooldown (`checkRateLimit`, `applyButtonCooldown`) preventing spam transmissions.
 
@@ -143,7 +146,7 @@ Define the standard operating procedures, data structures, and UI behaviors for 
     - **Report** (`reportMissive`): Flags inappropriate or abusive missives to archivists.
     - **Block** (`blockSender`): Blocks hostile senders from submitting further missives for this chronicle.
 - **Reader Missives View (`#reader-missives-view`)**:
-  - Activated when the viewing user is a reader or guest.
+  - Activated when the viewing user is a registered reader. Guests can read the author card but the missive submit handler calls `requireRegisteredUser('send a missive')` and stops before dispatch.
   - Inscribe Missive: Reader form with category selection (Lore & World, Character Doubts, Plot & Theories, Connect & Praise), reader moniker, optional contact handle, and message textarea.
   - Dispatched Inquiries & Scribe Responses (`#reader-sent-inquiries-container`):
     - Lists all inquiries dispatched by the user for this tale.

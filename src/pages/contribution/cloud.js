@@ -10,6 +10,7 @@
 
 import { auth, getDoc, getDocs, addDoc, setDoc, serverTimestamp, refs } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
+import { requireRegisteredUser } from '@services/auth.guard.js';
 import { cacheService } from '@services/cache.service.js';
 import {
   countWords,
@@ -63,8 +64,8 @@ function _syncDraftIdToUrl() {
  * Firestore document and updates state.draftId + the URL param.
  */
 export async function saveToCloud() {
-  if (!auth.currentUser) {
-    log.warn('Save requested without authenticated user');
+  if (!requireRegisteredUser('save a draft')) {
+    log.warn('Save requested by a guest account');
     return;
   }
 

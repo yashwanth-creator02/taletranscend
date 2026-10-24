@@ -16,6 +16,23 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    /** Returns true for a real account, not an anonymous Firebase guest session.
+        Guests are read-only. A custom token without a `firebase` claim is minted
+        by a trusted server and is therefore treated as registered; real
+        anonymous sessions always carry sign_in_provider == 'anonymous'. */
+    function isRegistered() {
+      return isAuthenticated()
+        && (
+          !('firebase' in request.auth.token)
+          || request.auth.token.firebase.sign_in_provider != 'anonymous'
+        );
+    }
+
+    /** Returns true if the registered account's UID matches the given userId. */
+    function isRegisteredOwner(userId) {
+      return isRegistered() && request.auth.uid == userId;
+    }
+
     /** Returns true if the authenticated user is the author of the resource. */
     function isAuthor() {
       return isAuthenticated() && resource.data.authorId == request.auth.uid;
@@ -162,7 +179,7 @@ service cloud.firestore {
         // (guards against a non-https/javascript: URI ending up somewhere
         // rendered later). A `size() <= 20` blanket check replaces the
         // dropped per-field bound checks.
-        allow create: if isOwner(userId)
+        allow create: if isRegisteredOwner(userId)
           && isValidString('name', 1, 100)
           && isValidUrl('avatarUrl')
           && isValidUrl('website')
@@ -181,7 +198,7 @@ service cloud.firestore {
           && (!('role' in request.resource.data)
               || request.resource.data.role in ['reader', 'user', 'author']);
 
-        allow update: if isOwner(userId)
+        allow update: if isRegisteredOwner(userId)
           && respectsCooldown()
           && isValidString('name', 1, 100)
           && isValidUrl('avatarUrl')
@@ -208,8 +225,8 @@ service cloud.firestore {
           && (!('role' in request.resource.data)
               || request.resource.data.role in ['user', 'author', 'moderator', 'admin']);
 
-        // Only owner or staff can delete
-        allow delete: if isOwner(userId) || isModerator();
+        // Only a registered owner or staff can delete
+        allow delete: if isRegisteredOwner(userId) || isModerator();
 
         // ═══════════════════════════════════════════════════════════
         //  PREFERENCES  —  users/{userId}/preferences/{prefId}
@@ -237,7 +254,7 @@ service cloud.firestore {
           // to gate publish flow), and updatedAt (cooldown). A
           // `size() <= 25` blanket check replaces the dropped per-field
           // bound checks.
-          allow create: if isOwner(userId)
+          allow create: if isRegisteredOwner(userId)
             && isValidString('title', 0, 200)
             && isValidString('status', 0, 50)
             && isValidTimestamp('createdAt')
@@ -246,7 +263,7 @@ service cloud.firestore {
             && request.resource.data.authorId == userId
             && request.resource.data.size() <= 25;
 
-          allow update: if isOwner(userId)
+          allow update: if isRegisteredOwner(userId)
             && respectsCooldown()
             && isValidString('title', 0, 200)
             && isValidString('status', 0, 50)
@@ -257,26 +274,26 @@ service cloud.firestore {
             && (!('authorId' in request.resource.data) || request.resource.data.authorId == userId)
             && request.resource.data.size() <= 25;
 
-          allow delete: if isOwner(userId) || isAdmin();
+          allow delete: if isRegisteredOwner(userId) || isAdmin();
 
           // DRAFT CHAPTERS  —  users/{userId}/drafts/{draftId}/chapters/{index}
           match /chapters/{chapterIndex} {
             allow read: if isOwner(userId) || isAdmin();
-            allow create: if isOwner(userId)
+            allow create: if isRegisteredOwner(userId)
               && isValidString('title', 0, 200)
               && isValidString('content', 0, 500000)
               && isValidInt('index', 0, 1000)
               && isValidInt('wordCount', 0, 100000)
               && isValidTimestamp('createdAt')
               && isValidTimestamp('updatedAt');
-            allow update: if isOwner(userId)
+            allow update: if isRegisteredOwner(userId)
               && respectsCooldown()
               && isValidString('title', 0, 200)
               && isValidString('content', 0, 500000)
               && isValidInt('index', 0, 1000)
               && isValidInt('wordCount', 0, 100000)
               && isValidTimestamp('updatedAt');
-            allow delete: if isOwner(userId) || isAdmin();
+            allow delete: if isRegisteredOwner(userId) || isAdmin();
           }
         }
 
@@ -423,8 +440,8 @@ service cloud.firestore {
         // Written by userId themselves (I am following someone) — owner-write is correct here.
         match /following/{targetUid} {
           allow read: if isOwner(userId) || isAdmin();
-          allow create: if isOwner(userId) && isValidTimestamp('followedAt');
-          allow delete: if isOwner(userId) || isAdmin();
+          allow create: if isRegisteredOwner(userId) && isValidTimestamp('followedAt');
+          allow delete: if isRegisteredOwner(userId) || isAdmin();
         }
 
         // FOLLOWERS  —  users/{userId}/followers/{followerUid}
@@ -433,8 +450,8 @@ service cloud.firestore {
         // write will be rejected exactly like the reactionCount bug was.
         match /followers/{followerUid} {
           allow read: if isOwner(userId) || isAdmin() || isOwner(followerUid);
-          allow create: if isOwner(followerUid) && isValidTimestamp('followedAt');
-          allow delete: if isOwner(userId) || isAdmin() || isOwner(followerUid);
+          allow create: if isRegisteredOwner(followerUid) && isValidTimestamp('followedAt');
+          allow delete: if isOwner(userId) || isAdmin() || isRegisteredOwner(followerUid);
         }
 
         // ═══════════════════════════════════════════════════════════
@@ -505,7 +522,7 @@ service cloud.firestore {
         // replaces the old per-field bound checks as a cheap blanket guard
         // against a malicious author padding the document with junk fields —
         // still a real guard, just one expression instead of twenty.
-        allow create: if isAuthenticated()
+        allow create: if isRegistered()
           && isAuthorOfIncoming()
           && isValidString('title', 1, 200)
           && 'status' in request.resource.data
@@ -540,7 +557,7 @@ service cloud.firestore {
         // even though nothing writes them client-side yet, so this doesn't
         // need revisiting if that gets wired up later.
         allow update: if (
-            (isAuthor() || isAdmin())
+            ((isRegistered() && isAuthor()) || isAdmin())
             && respectsCooldown()
             && isValidString('title', 1, 200)
             && 'status' in request.resource.data
@@ -554,7 +571,7 @@ service cloud.firestore {
             && isValidTimestamp('updatedAt')
             && request.resource.data.size() <= 40
           ) || (
-            isAuthenticated()
+            isRegistered()
             && request.resource.data.diff(resource.data).affectedKeys()
                  .hasOnly(['reactionCount', 'commentCount', 'bookmarkCount'])
             && isValidOptionalNumber('reactionCount', 0, 1000000000)
@@ -578,7 +595,7 @@ service cloud.firestore {
               && get(/databases/$(database)/documents/v1/taletranscend/projects/v1/public/data/tales/$(taleId)).data.authorId == request.auth.uid
             );
 
-          allow create: if isAuthenticated()
+          allow create: if isRegistered()
             && get(/databases/$(database)/documents/v1/taletranscend/projects/v1/public/data/tales/$(taleId)).data.authorId == request.auth.uid
             && isValidString('title', 0, 200)
             && isValidString('content', 0, 500000)  // ~500KB max per chapter
@@ -588,7 +605,7 @@ service cloud.firestore {
             && isValidTimestamp('createdAt')
             && isValidTimestamp('updatedAt');
 
-          allow update: if isAuthenticated()
+          allow update: if isRegistered()
             && get(/databases/$(database)/documents/v1/taletranscend/projects/v1/public/data/tales/$(taleId)).data.authorId == request.auth.uid
             && respectsCooldown()
             && isValidString('title', 0, 200)
@@ -622,7 +639,7 @@ service cloud.firestore {
           // time (always 0/false/empty), so a blanket `size() <= 20` check
           // is enough to guard against a malicious payload, without
           // re-validating each one individually.
-          allow create: if isAuthenticated()
+          allow create: if isRegistered()
             && isValidString('text', 1, 5000)
             && request.resource.data.text.trim().size() > 0
             && isValidString('taleId', 1, 100)
@@ -644,7 +661,7 @@ service cloud.firestore {
           // fixed proactively since commentLikes isn't wired up client-side
           // yet, but will hit the same wall the moment it is).
           allow update: if (
-              isAuthenticated()
+              isRegistered()
               && resource.data.authorId == request.auth.uid
               && (
                 // Author editing text
@@ -671,14 +688,14 @@ service cloud.firestore {
               && isValidBool('isPinned')
               && isValidInt('reportCount', 0, 1000)
             ) || (
-              isAuthenticated()
+              isRegistered()
               && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount'])
               && isValidInt('likeCount', 0, 1000000)
             );
 
           // Delete: author or admin
           allow delete: if (
-            isAuthenticated() && resource.data.authorId == request.auth.uid
+            isRegistered() && resource.data.authorId == request.auth.uid
           ) || isAdmin();
 
           // COMMENT REPLIES — .../comments/{commentId}/replies/{replyId}
@@ -687,7 +704,7 @@ service cloud.firestore {
               || get(/databases/$(database)/documents/v1/taletranscend/projects/v1/public/data/tales/$(taleId)).data.status == 'published'
               || isAdmin();
 
-            allow create: if isAuthenticated()
+            allow create: if isRegistered()
               && isValidString('text', 1, 5000)
               && request.resource.data.text.trim().size() > 0
               && isValidString('taleId', 1, 100)
@@ -701,7 +718,7 @@ service cloud.firestore {
               && isValidTimestamp('updatedAt');
 
             allow update: if (
-                isAuthenticated()
+                isRegistered()
                 && resource.data.authorId == request.auth.uid
                 && (
                   // Author editing reply text
@@ -725,15 +742,15 @@ service cloud.firestore {
               ) || isAdmin();
 
             allow delete: if (
-              isAuthenticated() && resource.data.authorId == request.auth.uid
+              isRegistered() && resource.data.authorId == request.auth.uid
             ) || isAdmin();
           }
 
           // COMMENT LIKES  —  .../comments/{commentId}/likes/{uid}
           match /likes/{uid} {
             allow read: if true;
-            allow create: if isOwner(uid);
-            allow delete: if isOwner(uid) || isAdmin();
+            allow create: if isRegisteredOwner(uid);
+            allow delete: if isRegisteredOwner(uid) || isAdmin();
           }
         }
 
@@ -743,18 +760,18 @@ service cloud.firestore {
 
         match /reactions/{reactionId} {
           allow read: if true;
-          allow create: if isAuthenticated()
+          allow create: if isRegistered()
             && isValidString('userId', 1, 100)
             && request.resource.data.userId == request.auth.uid
             && isValidString('type', 1, 50)
             && request.resource.data.type in ['like', 'love', 'insightful', 'mythic'];
 
-          allow update: if isAuthenticated()
+          allow update: if isRegistered()
             && resource.data.userId == request.auth.uid
             && isValidString('type', 1, 50)
             && request.resource.data.type in ['like', 'love', 'insightful', 'mythic'];
 
-          allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+          allow delete: if isRegistered() && resource.data.userId == request.auth.uid;
         }
 
         // ═══════════════════════════════════════════════════════════
@@ -769,7 +786,7 @@ service cloud.firestore {
               isAuthenticated()
               && get(/databases/$(database)/documents/v1/taletranscend/projects/v1/public/data/tales/$(taleId)).data.authorId == request.auth.uid
             );
-          allow create: if isAuthenticated()
+          allow create: if isRegistered()
             && get(/databases/$(database)/documents/v1/taletranscend/projects/v1/public/data/tales/$(taleId)).data.authorId == request.auth.uid
             && isValidTimestamp('createdAt');
           allow update, delete: if isAdmin();
@@ -813,7 +830,7 @@ service cloud.firestore {
 
       // REPORTS  —  reports/{reportId}
       match /reports/{reportId} {
-        allow create: if isAuthenticated()
+        allow create: if isRegistered()
           && isValidString('reporterId', 1, 100)
           && request.resource.data.reporterId == request.auth.uid
           && isValidString('targetId', 1, 100)
@@ -885,7 +902,7 @@ service cloud.firestore {
         allow read: if isModerator()
           || (isAuthenticated() && resource.data.applicantId == request.auth.uid);
 
-        allow create: if isAuthenticated()
+        allow create: if isRegistered()
           && request.resource.data.applicantId == request.auth.uid
           && isValidString('penName', 1, 100)
           && isValidString('bio', 1, 2000)
@@ -917,7 +934,7 @@ service cloud.firestore {
       match /deletionRequests/{requestId} {
         allow read: if isAdmin()
           || (isAuthenticated() && resource.data.userId == request.auth.uid);
-        allow create: if isAuthenticated()
+        allow create: if isRegistered()
           && request.resource.data.userId == request.auth.uid
           && isValidString('taleId', 1, 100)
           && isValidString('reason', 5, 2000)
@@ -957,14 +974,14 @@ service cloud.firestore {
             resource.data.senderId == request.auth.uid
             || resource.data.authorId == request.auth.uid
           ));
-        allow create: if isAuthenticated()
+        allow create: if isRegistered()
           && request.resource.data.senderId == request.auth.uid
           && isValidString('authorId', 1, 100)
           && isValidString('taleId', 1, 100)
           && isValidString('message', 1, 5000)
           && isValidTimestamp('createdAt');
         allow update: if isAdmin()
-          || (isAuthenticated() && resource.data.authorId == request.auth.uid);
+          || (isRegistered() && resource.data.authorId == request.auth.uid);
         allow delete: if isAdmin();
       }
 

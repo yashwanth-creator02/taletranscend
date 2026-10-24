@@ -19,6 +19,7 @@ import {
 } from '@/utils';
 import { initIcons } from '@ui/icons.js';
 import { showToast } from '@ui/components/toast.js';
+import { requireRegisteredUser } from '@services/auth.guard.js';
 
 const log = createLogger('Profile');
 
@@ -168,6 +169,7 @@ export async function initProfilePage(currentUser = auth?.currentUser) {
   // New story CTA
   document.getElementById('btn-new-story')?.addEventListener('click', () => {
     log.info('New story CTA clicked');
+    if (!requireRegisteredUser('start a new story')) return;
     navigateTo('contribution.html');
   });
 
@@ -277,6 +279,7 @@ export async function initProfilePage(currentUser = auth?.currentUser) {
 
   formTaleDeletion?.addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (!requireRegisteredUser('request a tale deletion')) return;
     const taleId = document.getElementById('input-deletion-tale-id')?.value.trim();
     const reason = document.getElementById('input-deletion-reason')?.value.trim();
 

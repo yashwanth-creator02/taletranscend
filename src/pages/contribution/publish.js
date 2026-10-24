@@ -20,6 +20,7 @@
 
 import { auth, setDoc, updateDoc, serverTimestamp, refs } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
+import { requireRegisteredUser } from '@services/auth.guard.js';
 import { cacheService } from '@services/cache.service.js';
 import { getAuthorStatus, registerAuthor } from '@services/author.service.js';
 import {
@@ -171,9 +172,12 @@ export function promptAuthorRegistrationWall(userId, currentStatus = null) {
  */
 export async function publishFullTale() {
   log.info('Publish pipeline initiated');
-  if (!auth.currentUser) {
-    log.warn('Publish requested without authenticated user');
-    _setPublishStatus('You must be signed in to publish.', 'error');
+  if (!requireRegisteredUser('publish a tale')) {
+    log.warn('Publish requested by a guest account');
+    _setPublishStatus(
+      'Only registered readers can publish. Sign in or create an account.',
+      'error'
+    );
     return;
   }
 

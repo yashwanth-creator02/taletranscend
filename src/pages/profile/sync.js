@@ -9,6 +9,7 @@ import { createLogger, validateData, UserProfileSchema } from '@/utils';
 import { createUserProfile } from '@state/index.js';
 import { registerAuthor } from '@services/author.service.js';
 import { updateProfileUI, showNotification } from './ui.js';
+import { requireRegisteredUser } from '@services/auth.guard.js';
 import { profileState } from './state.js';
 import { setStoredApiKey, clearStoredApiKey } from '@/services/ai/apiKey.storage.js';
 
@@ -105,10 +106,7 @@ export function stopProfileSync() {
  * Creates a createdAt timestamp on first save.
  */
 export async function saveProfile() {
-  if (!auth.currentUser) {
-    showNotification('You must be signed in to save.', 'error');
-    return;
-  }
+  if (!requireRegisteredUser('save a profile')) return;
 
   const uid = auth.currentUser.uid;
   log.info('Saving profile...', { uid });
@@ -179,10 +177,7 @@ export async function saveProfile() {
  * @returns {Promise<boolean>}
  */
 export async function saveAuthorRegistry(authorData) {
-  if (!auth.currentUser) {
-    showNotification('You must be signed in to register as a scribe.', 'error');
-    return false;
-  }
+  if (!requireRegisteredUser('register as a scribe')) return false;
 
   const uid = auth.currentUser.uid;
   try {

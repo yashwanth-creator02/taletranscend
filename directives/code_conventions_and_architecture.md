@@ -58,6 +58,7 @@ Enforce architectural conventions, module aliases, state management patterns, an
    - Soft-delete policy: Erased comments display `"This has been deleted by the user."` (italic slate); edit, silence, and reply triggers are removed, but all child replies remain intact.
    - Edit transparency: Edits display an `Edited` badge (`edit-3` icon) next to the timestamp.
 5. **Author Role Ownership, Registration Gating & Inquire Constraints**:
+   - **Guest Read-Only**: Anonymous sessions may read only. Every content, engagement, or contribution write calls `requireRegisteredUser()` from `src/services/auth.guard.js`, which shows the registration toast with a `returnUrl` login action. Firestore rules enforce the same boundary with `isRegistered()`.
    - **Publish Gating**: Unregistered authors are gated by `#author-registration-wall-modal` in the contribution atelier before manuscript publishing.
    - **Proactive Scribe Registry**: Users can proactively register/update scribe credentials on the profile page (`#author-registry-card`, `#profile-author-modal`).
    - **Author Ownership**: Author edit actions ("Edit Chronicle") must only appear if the current authenticated user matches the tale author UID (`isAuthor`).

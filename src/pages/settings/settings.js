@@ -9,6 +9,7 @@ import '@css/pages/settings.css';
 
 import { initIcons } from '@ui/icons.js';
 import { showToast } from '@ui/components/toast.js';
+import { requireRegisteredUser } from '@services/auth.guard.js';
 import {
   auth,
   onAuthStateChanged,
@@ -812,10 +813,7 @@ export function updateAvatarPreview(url) {
  * @returns {Promise<boolean>}
  */
 export async function handleSaveProfile() {
-  if (!auth.currentUser) {
-    showToast('Please sign in or initialize anonymous auth before saving profile.', 'error');
-    return false;
-  }
+  if (!requireRegisteredUser('save a profile')) return false;
 
   const uid = auth.currentUser.uid;
   const saveBtn = document.getElementById('btn-save-profile');

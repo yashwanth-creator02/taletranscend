@@ -20,6 +20,7 @@ import {
   db,
 } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
+import { requireRegisteredUser } from '@services/auth.guard.js';
 import { createComment } from '@state/index.js';
 import {
   escapeHtml,
@@ -92,7 +93,8 @@ export async function listenToComments(taleId, taleAuthorId = null) {
 export async function postComment(taleId) {
   const input = document.getElementById('comment-text');
   const text = input?.value.trim();
-  if (!text || !auth.currentUser) return;
+  if (!text) return;
+  if (!requireRegisteredUser('post a comment')) return;
 
   // Rate Limiting
   const userId = auth.currentUser.uid;
@@ -293,7 +295,8 @@ async function _fetchReplies(commentId) {
 async function _handlePostReply(commentId, btn) {
   const input = document.getElementById(`reply-text-${commentId}`);
   const text = input?.value.trim();
-  if (!text || !auth.currentUser) return;
+  if (!text) return;
+  if (!requireRegisteredUser('reply to a comment')) return;
 
   // Rate Limiting
   const userId = auth.currentUser.uid;
@@ -368,7 +371,8 @@ async function _handlePostReply(commentId, btn) {
 async function _handlePostReplyToReply(commentId, replyId, btn) {
   const input = document.getElementById(`reply-to-reply-text-${replyId}`);
   const text = input?.value.trim();
-  if (!text || !auth.currentUser) return;
+  if (!text) return;
+  if (!requireRegisteredUser('reply to a comment')) return;
 
   const targetAuthorName = btn.dataset.authorName || 'Scribe';
   const targetDepth = parseInt(btn.dataset.depth, 10) || 2;
@@ -495,10 +499,7 @@ async function _handleSaveEditComment(commentId, btn) {
     return;
   }
 
-  if (!auth.currentUser) {
-    showToast('Please sign in to edit your echo.', 'warning');
-    return;
-  }
+  if (!requireRegisteredUser('edit a comment')) return;
 
   btn.disabled = true;
   const originalText = btn.textContent;
@@ -539,10 +540,7 @@ async function _handleSaveEditReply(commentId, replyId, btn) {
     return;
   }
 
-  if (!auth.currentUser) {
-    showToast('Please sign in to edit your reply.', 'warning');
-    return;
-  }
+  if (!requireRegisteredUser('edit a reply')) return;
 
   btn.disabled = true;
   const originalText = btn.textContent;
@@ -611,6 +609,7 @@ export async function deleteReply(taleId, commentId, replyId) {
 }
 
 async function _handleDeleteReply(commentId, replyId) {
+  if (!requireRegisteredUser('delete a reply')) return;
   if (
     typeof window !== 'undefined' &&
     window.confirm &&
@@ -1055,6 +1054,7 @@ function _bindDelegatedEvents(list) {
     }
 
     if (target.classList.contains('delete-comment-trigger') && commentId) {
+      if (!requireRegisteredUser('delete a comment')) return;
       if (
         typeof window !== 'undefined' &&
         window.confirm &&

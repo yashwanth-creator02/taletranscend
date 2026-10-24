@@ -1474,3 +1474,203 @@ describe('admin dashboard — five-role rules matrix', () => {
     });
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Guest read-only boundary
+//
+// Anonymous Firebase sessions are the app's guests. They may read public
+// content, but every content/engagement/contribution write requires a real
+// account. The client shows a registration toast; these rules are the actual
+// enforcement boundary.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('guest read-only boundary', () => {
+  const anonymousCtx = () =>
+    testEnv.authenticatedContext('guest-1', {
+      firebase: { sign_in_provider: 'anonymous' },
+    });
+  const registeredCtx = () => testEnv.authenticatedContext('reader-1');
+
+  async function seed(path: string, data: Record<string, unknown>) {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), `${ROOT}/${path}`), data);
+    });
+  }
+
+  const comment = (authorId: string) => ({
+    authorId,
+    authorName: authorId === 'guest-1' ? 'Guest' : 'Reader One',
+    text: 'A reflection on the tale.',
+    taleId: 'tale-1',
+    type: 'general',
+    depth: 0,
+    parentId: '',
+    isHidden: false,
+    isPinned: false,
+    reportCount: 0,
+    likeCount: 0,
+    replyCount: 0,
+    isDeleted: false,
+    isEdited: false,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
+
+  it('a guest CAN read a published tale and its comments', async () => {
+    await seedTale('author-1', 'tale-1');
+    await seed('public/data/tales/tale-1/comments/comment-1', comment('author-1'));
+
+    const ctx = anonymousCtx();
+    await assertSucceeds(getDoc(doc(ctx.firestore(), `${ROOT}/public/data/tales/tale-1`)));
+    await assertSucceeds(
+      getDoc(doc(ctx.firestore(), `${ROOT}/public/data/tales/tale-1/comments/comment-1`))
+    );
+  });
+
+  it('a guest CANNOT post comments, replies, likes, or reactions', async () => {
+    await seedTale('author-1', 'tale-1');
+    const ctx = anonymousCtx();
+
+    await assertFails(
+      setDoc(
+        doc(ctx.firestore(), `${ROOT}/public/data/tales/tale-1/comments/comment-1`),
+        comment('guest-1')
+      )
+    );
+
+    await assertFails(
+      setDoc(
+        doc(ctx.firestore(), `${ROOT}/public/data/tales/tale-1/comments/comment-1/replies/reply-1`),
+        {
+          text: 'A guest reply.',
+          taleId: 'tale-1',
+          authorId: 'guest-1',
+          authorName: 'Guest',
+          parentId: 'comment-1',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
+      )
+    );
+
+    await assertFails(
+      setDoc(
+        doc(ctx.firestore(), `${ROOT}/public/data/tales/tale-1/comments/comment-1/likes/guest-1`),
+        { userId: 'guest-1', createdAt: new Date() }
+      )
+    );
+
+    await assertFails(
+      setDoc(doc(ctx.firestore(), `${ROOT}/public/data/tales/tale-1/reactions/reaction-1`), {
+        userId: 'guest-1',
+        type: 'like',
+      })
+    );
+  });
+
+  it('a guest CANNOT publish tales, save drafts, or write draft chapters', async () => {
+    const ctx = anonymousCtx();
+
+    await assertFails(
+      setDoc(doc(ctx.firestore(), `${ROOT}/public/data/tales/guest-tale`), {
+        title: 'A Guest Tale',
+        authorId: 'guest-1',
+        status: 'published',
+        visibility: 'public',
+        readCount: 0,
+        commentCount: 0,
+        reactionCount: 0,
+        bookmarkCount: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+    );
+
+    await assertFails(
+      setDoc(doc(ctx.firestore(), `${ROOT}/users/guest-1/drafts/draft-1`), {
+        title: 'Draft',
+        status: 'draft',
+        authorId: 'guest-1',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+    );
+
+    await assertFails(
+      setDoc(doc(ctx.firestore(), `${ROOT}/users/guest-1/drafts/draft-1/chapters/0`), {
+        title: 'Chapter',
+        content: 'Text',
+        index: 0,
+        wordCount: 1,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+    );
+  });
+
+  it('a guest CANNOT apply as an author, request deletion, send a missive, or file a report', async () => {
+    await seedTale('guest-1', 'tale-1');
+    const ctx = anonymousCtx();
+
+    await assertFails(
+      setDoc(doc(ctx.firestore(), `${ROOT}/authorApplications/app-1`), {
+        applicantId: 'guest-1',
+        penName: 'Guest Scribe',
+        bio: 'I would like to write.',
+        sampleUrl: 'https://example.com/sample',
+        status: 'pending',
+        createdAt: new Date(),
+      })
+    );
+
+    await assertFails(
+      setDoc(doc(ctx.firestore(), `${ROOT}/deletionRequests/req-1`), {
+        userId: 'guest-1',
+        taleId: 'tale-1',
+        reason: 'Please remove this tale.',
+        status: 'pending',
+        createdAt: new Date(),
+      })
+    );
+
+    await assertFails(
+      setDoc(doc(ctx.firestore(), `${ROOT}/inquiries/inq-1`), {
+        senderId: 'guest-1',
+        authorId: 'author-1',
+        taleId: 'tale-1',
+        message: 'A guest missive.',
+        createdAt: new Date(),
+      })
+    );
+
+    await assertFails(
+      setDoc(doc(ctx.firestore(), `${ROOT}/reports/report-1`), {
+        reporterId: 'guest-1',
+        targetId: 'tale-1',
+        targetType: 'tale',
+        reason: 'A guest report.',
+        status: 'pending',
+        createdAt: new Date(),
+      })
+    );
+  });
+
+  it('a registered reader CAN still post a comment and react', async () => {
+    await seedTale('author-1', 'tale-1');
+    const ctx = registeredCtx();
+
+    await assertSucceeds(
+      setDoc(
+        doc(ctx.firestore(), `${ROOT}/public/data/tales/tale-1/comments/comment-1`),
+        comment('reader-1')
+      )
+    );
+
+    await assertSucceeds(
+      setDoc(doc(ctx.firestore(), `${ROOT}/public/data/tales/tale-1/reactions/reaction-1`), {
+        userId: 'reader-1',
+        type: 'like',
+      })
+    );
+  });
+});

@@ -13,6 +13,7 @@ import {
 } from './content.js';
 import { setActiveTab, buildSortPanel, refreshSortPanel } from './ui.js';
 import { showToast } from '@ui/components/toast.js';
+import { requireRegisteredUser } from '@services/auth.guard.js';
 import { initIcons } from '@ui/icons.js';
 import { confirmTaleDownload } from '@ui/components/confirmModal.js';
 import {
@@ -372,6 +373,7 @@ async function _handleCardAction(action, id, e) {
 
     case 'delete-draft': {
       if (!uid || !id) break;
+      if (!requireRegisteredUser('delete a draft')) break;
       if (!confirm('Are you sure you want to discard this draft? This cannot be undone.')) break;
 
       try {

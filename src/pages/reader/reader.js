@@ -73,6 +73,7 @@ import {
   limit,
 } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
+import { requireRegisteredUser } from '@services/auth.guard.js';
 import {
   initPageReveal,
   readyReveal,
@@ -629,10 +630,7 @@ function _bindCommentEvents() {
   document.getElementById('post-comment')?.addEventListener('click', async () => {
     const body = readerState.newComment.trim();
     if (!body) return;
-    if (!readerState.userId) {
-      showToast('Please sign in to join the discussion.', 'info');
-      return;
-    }
+    if (!requireRegisteredUser('join the discussion')) return;
 
     const postBtn = document.getElementById('post-comment');
     if (postBtn) postBtn.disabled = true;
@@ -687,10 +685,7 @@ function _bindCommentEvents() {
       const comment = readerState.comments.find((c) => c.id === commentId);
       if (!comment) return;
 
-      if (!readerState.userId) {
-        showToast('Please sign in to like comments.', 'info');
-        return;
-      }
+      if (!requireRegisteredUser('like a comment')) return;
 
       btn.disabled = true;
       const willLike = !comment.liked;
@@ -755,10 +750,7 @@ function _bindCommentEvents() {
       const replyText = textarea?.value?.trim();
       if (!replyText) return;
 
-      if (!readerState.userId) {
-        showToast('Please sign in to reply.', 'info');
-        return;
-      }
+      if (!requireRegisteredUser('reply to a comment')) return;
 
       btn.disabled = true;
       try {
@@ -847,10 +839,7 @@ function _bindCommentEvents() {
       const replyText = textarea?.value?.trim();
       if (!replyText) return;
 
-      if (!readerState.userId) {
-        showToast('Please sign in to reply.', 'info');
-        return;
-      }
+      if (!requireRegisteredUser('reply to a comment')) return;
 
       btn.disabled = true;
       try {
@@ -942,6 +931,7 @@ function _bindCommentEvents() {
         showToast('Comment cannot be empty.', 'warning');
         return;
       }
+      if (!requireRegisteredUser('edit a comment')) return;
 
       btn.disabled = true;
       try {
@@ -971,6 +961,7 @@ function _bindCommentEvents() {
   document.querySelectorAll('.delete-trigger').forEach((btn) => {
     btn.addEventListener('click', async () => {
       const commentId = btn.dataset.commentId;
+      if (!requireRegisteredUser('delete a comment')) return;
       if (
         typeof window !== 'undefined' &&
         window.confirm &&
@@ -1012,10 +1003,7 @@ function _bindCommentEvents() {
       const reply = comment?.replies?.find((r) => r.id === replyId);
       if (!reply) return;
 
-      if (!readerState.userId) {
-        showToast('Please sign in to like replies.', 'info');
-        return;
-      }
+      if (!requireRegisteredUser('like a reply')) return;
 
       btn.disabled = true;
       const willLike = !reply.liked;
@@ -1081,6 +1069,7 @@ function _bindCommentEvents() {
         showToast('Reply cannot be empty.', 'warning');
         return;
       }
+      if (!requireRegisteredUser('edit a reply')) return;
 
       btn.disabled = true;
       try {
@@ -1111,6 +1100,7 @@ function _bindCommentEvents() {
     btn.addEventListener('click', async () => {
       const replyId = btn.dataset.replyId;
       const commentId = btn.dataset.commentId;
+      if (!requireRegisteredUser('delete a reply')) return;
       if (
         typeof window !== 'undefined' &&
         window.confirm &&

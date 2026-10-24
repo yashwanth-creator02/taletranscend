@@ -66,6 +66,27 @@ describe('TaleComments', () => {
     `;
   });
 
+  describe('guest gate', () => {
+    it('blocks an anonymous guest before any comment write and offers registration', async () => {
+      const previousUser = fb.auth.currentUser;
+      fb.auth.currentUser = { uid: 'guest-1', displayName: 'Guest', isAnonymous: true };
+      document.getElementById('comment-text').value = 'A guest echo';
+
+      await postComment('t1');
+
+      expect(showToast).toHaveBeenCalledWith(
+        expect.stringContaining('Only registered readers can post a comment'),
+        expect.objectContaining({
+          type: 'warning',
+          action: expect.objectContaining({ label: 'Sign in or sign up' }),
+        })
+      );
+      expect(fb.addDoc).not.toHaveBeenCalled();
+
+      fb.auth.currentUser = previousUser;
+    });
+  });
+
   describe('listenToComments', () => {
     it('fetches and renders comments', async () => {
       vi.mocked(fb.getDocs).mockResolvedValue({

@@ -28,6 +28,9 @@ Define the standard operating procedures, data contracts, and UI behaviors for a
 
 ### 1. Author Registration Wall (Contribution Atelier)
 
+- **Guest Gate Before Everything Else**:
+  - `publishFullTale()` and `saveToCloud()` call `requireRegisteredUser('publish a tale')` / `requireRegisteredUser('save a draft')` before validation. A guest gets the registration toast with a `returnUrl` login action and no Firestore write occurs.
+  - The author registration wall is a second gate for registered readers who have not registered as scribes.
 - **Gating Point**:
   - Before writing or updating a tale in `publishFullTale()`, after local title and chapter content validation, query the user's author status via `getAuthorStatus(userId)`.
   - If `!authorStatus.isAuthor || !authorStatus.authorEmail`, suspend publication and display `#author-registration-wall-modal`.

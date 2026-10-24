@@ -189,7 +189,8 @@ must add an entry here in the same change.
 ## Edge Cases & Error Handling
 
 - Chronicle Preservation Policy: Rules strictly enforce author ownership and admin-only chronicle dissolution. Never relax permissions to allow non-owners or unauthenticated users to overwrite or delete tales.
-- Anonymous Auth: Every user receives a persistent anonymous UID from Firebase Auth. All ownership queries must reference `request.auth.uid`.
+- Anonymous Auth: Every visitor receives a persistent anonymous UID. Those sessions are guests and are read-only for content and contributions. Use `isRegistered()` / `isRegisteredOwner()` for every content, engagement, or contribution write; keep private reading aids (progress, bookmarks, lists, history, preferences) on `isOwner()`. See `docs/decisions/0007-guest-read-only.md`.
+- All ownership queries must reference `request.auth.uid`.
 - Nested Reply Rules Match: Always ensure `parentId` matches the top-level comment ID in payload when posting nested replies, otherwise Firestore rules reject with permission-denied.
 - Test vs Production Rules: Never deploy test-mode open rules to production. Run the test emulator suite prior to rules deployment.
 - Single rules source: keep `firestore.rules` / `firestore.indexes.json` at the repository root. Do not create copies under `firestore/` — a drifted duplicate was deleted in the 2026-10-18 audit (F1/F2), and the emulator suite reads the root file.

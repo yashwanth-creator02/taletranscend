@@ -108,7 +108,9 @@ describe('Publish Pipeline', () => {
   it('fails if user is not signed in', async () => {
     auth.currentUser = null;
     await publishFullTale();
-    expect(document.getElementById('stat-status').textContent).toContain('must be signed in');
+    expect(document.getElementById('stat-status').textContent).toContain(
+      'Only registered readers can publish'
+    );
   });
 
   it('fails if offline', async () => {

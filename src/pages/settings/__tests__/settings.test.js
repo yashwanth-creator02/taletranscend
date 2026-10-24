@@ -557,8 +557,11 @@ describe('Settings Page Controller', () => {
       const result = await handleSaveProfile();
       expect(result).toBe(false);
       expect(showToast).toHaveBeenCalledWith(
-        'Please sign in or initialize anonymous auth before saving profile.',
-        'error'
+        expect.stringContaining('Only registered readers can save a profile'),
+        expect.objectContaining({
+          type: 'warning',
+          action: expect.objectContaining({ label: 'Sign in or sign up' }),
+        })
       );
     });
 

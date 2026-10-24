@@ -6,6 +6,7 @@
 import { createLogger, escapeHtml } from '@/utils';
 import { auth, refs, addDoc, updateDoc, serverTimestamp } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
+import { requireRegisteredUser } from '@services/auth.guard.js';
 import { initIcons } from '@ui/icons.js';
 import { getAuthorStatus } from '@services/author.service.js';
 import {
@@ -867,6 +868,7 @@ export function setupInquire(taleId, tale, userId = null) {
   if (form) {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (!requireRegisteredUser('send a missive')) return;
 
       const moniker = senderNameInput?.value.trim() || '';
       const contact = senderContactInput?.value.trim() || '';

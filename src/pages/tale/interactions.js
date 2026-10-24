@@ -20,6 +20,7 @@ import {
 } from '@services/index.js';
 import { auth } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
+import { requireRegisteredUser } from '@services/auth.guard.js';
 import { initIcons } from '@ui/icons.js';
 import { renderChapters } from './ui.js';
 import {
@@ -77,6 +78,7 @@ export async function setupResonance(
   btns.forEach((btn) => {
     btn.addEventListener('click', async () => {
       log.info('Resonance toggle clicked');
+      if (!requireRegisteredUser('resonate with a tale')) return;
       btns.forEach((b) => (b.disabled = true));
       try {
         const result = await toggleResonance(taleId);

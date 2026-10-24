@@ -7,7 +7,7 @@
 TaleTranscend is a browser-based platform where:
 - **Readers** discover and read curated tales with a rich, customizable reader.
 - **Writers** draft multi-chapter stories, publish to a public library, and receive AI-assisted suggestions.
-- **Everyone** engages through bookmarks, comments, and reactions — no traditional account required (Anonymous Auth).
+- **Guests** read every public tale without an account; **registered readers** comment, react, bookmark across devices, and publish. Anonymous sessions are read-only for content and contributions.
 
 ## Tech Stack
 
@@ -122,7 +122,7 @@ Rules are defined in `firestore.rules`.
 - **Multi-Page Application (MPA):** Each page is a separate HTML file bundled by Vite. No client-side SPA router.
 - **State Management:** Global mutable singleton (`appState`) + page-local state objects. No reactive framework (direct DOM manipulation).
 - **Navigation & Bfcache Guarantee:** Page transition system (`src/utils/navigation.ts`) binds a global `pageshow` listener to guarantee pointer events and opacity are unconditionally restored when navigating backward via browser address bar controls.
-- **Firebase Anonymous Auth:** Every visitor gets a persistent, anonymous UID.
+- **Firebase Anonymous Auth:** Every visitor gets a persistent anonymous UID for reading progress and bookmarks. Guests are read-only; content and contribution writes require a registered account (`isRegistered()` in `firestore.rules`, `src/services/auth.guard.js` in the UI).
 - **Design Tokens:** Strict single-source palette in `src/assets/css/tokens.css` enforced by `npm run lint:tokens`. Zero raw colour literals.
 - **Single-Page Footer Isolation:** Only the home page (`src/views/index.html`) contains a site footer; inner views rely on the global navigation header (`app-nav`) and mobile dock.
 - **Brand Emblem Suite:** The mythical golden quill pen is the official brand emblem across header, home footer, auth, boot curtains, and social graph cards (`public/logo.png`, `logo-wide.png`, `icon.svg`, `apple-touch-icon.png`, `favicon.ico`).

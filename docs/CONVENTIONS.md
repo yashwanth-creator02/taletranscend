@@ -94,7 +94,7 @@ writable by users who aren't the tale's author. Don't solve this by loosening th
 document's update permission — scope it to exactly those fields:
 
 ```
-isAuthenticated()
+isRegistered()
   && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactionCount', ...])
   && isValidNumber('reactionCount', 0, 1000000000)
 ```
@@ -104,6 +104,17 @@ owner of these counters, but they're currently dormant (Spark plan — see
 `functions/README.md`), so the field-scoped rule exception is the actual, permanent mechanism
 in production today, not a stopgap. Don't treat it as temporary scaffolding to be removed later
 without confirming the functions are actually deployed and working first.
+
+## Guests are read-only: use `isRegistered()`, not `isAuthenticated()`, for writes
+
+Anonymous Firebase sessions are guests, and `isAuthenticated()` accepts them. Any new
+content, engagement, or contribution write must use `isRegistered()` (or
+`isRegisteredOwner()` when the writer owns the path). Reading aids — reader progress,
+bookmarks, lists, history, preferences, and notification read state — may stay on
+`isOwner()`. Mirror the backend boundary in the UI with
+`requireRegisteredUser()` from `src/services/auth.guard.js`, which shows the
+registration toast with a `returnUrl` login link. See
+`docs/decisions/0007-guest-read-only.md`.
 
 ## BYOK for anything needing a paid third-party API key
 

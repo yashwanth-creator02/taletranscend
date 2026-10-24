@@ -85,6 +85,7 @@ One-line duty for every file tracked by git in this repository, grouped by area 
 - `docs/decisions/0004-field-scoped-rule-exception-for-engagement-counters.md` — Decision record: engagement counters stay client-writable via a permanent field-scoped rule exception.
 - `docs/admin-dashboard/PROGRESS.md` — Living delivery log for the archive control room: scope, status board, decisions, open questions, risks, five-role permission matrix, Firestore rules/index changelog, and per-screen free-tier read/write estimates.
 - `docs/decisions/0005-remembered-login-gate.md` — Decision record: the first-visit login gate reads one explicit auth-memory record; the Keep-me-signed-in checkbox governs its scope and sign-out clears it.
+- `docs/decisions/0007-guest-read-only.md` — Decision record: anonymous Firebase sessions are guests and may only read; content, engagement, and contribution writes require `isRegistered()`, while private reading aids stay available.
 - `docs/reports/2026-10-18-code-redundancy-audit.md` — Audit report listing 17 dead-code and duplication findings with severities and their same-day resolutions.
   <<<<<<< HEAD
 - # `docs/reports/2026-10-19-mobile-audit.md` — Full mobile sweep (11 routes × 7 widths), overflow matrix, root-caused defects with fix directions, and the verification protocol for the mobile pass.
@@ -359,6 +360,7 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `src/services/ai.service.js` — Gemini AI service: suggestTitle, refineMythicText, and generateTaleContinuation via gemini-2.0-flash with sanitization and retries.
 - `src/services/ai/apiKey.storage.js` — localStorage helper for the BYOK Gemini API key (key: tt-gemini-api-key) with get/set/clear and env fallback.
 - `src/services/auth-memory.storage.js` — Explicit auth memory (key `tt_auth`) recorded on the login page and on restored sessions: durable (localStorage) or session-only (sessionStorage), never downgraded or upgraded by a restored session, cleared on sign-out; a failed write leaves the previous memory intact. This is what the first-visit login gate reads.
+- `src/services/auth.guard.js` — Guest read-only gate: `isRegisteredUser()` treats anonymous Firebase sessions as guests, `buildLoginUrl()` preserves the current path/query/hash as `returnUrl`, and `requireRegisteredUser()` shows the registration toast with a sign-in/sign-up action before a gated write.
 - `src/services/author.service.js` — Scribe registration: author status from users/{uid}, schema-validated registration, mirrored to localStorage key `tt_author_{uid}`.
 - `src/services/bookmark.service.js` — Bookmark CRUD at users/{uid}/bookmarks/{taleId} with rate limiting, offline mirror, cached tale metadata for the shelf, and explicit `null` failures for rejected writes.
 - `src/services/cache.service.js` — cacheService singleton: in-memory + sessionStorage (tt_cache:) cache with SWR, first-visit bypass, and domain invalidation helpers.
@@ -378,6 +380,7 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `src/services/__tests__/admin.service.test.js` — Vitest tests for `src/services/admin.service.js` — admin claim checks, deletion request list/approve/reject, admin deletion.
 - `src/services/__tests__/ai.service.test.js` — Vitest tests for `src/services/ai.service.js` — MSW-mocked Gemini for title suggestion, refinement, continuation, sanitization.
 - `src/services/__tests__/auth-memory.storage.test.js` — Vitest tests for `src/services/auth-memory.storage.js` — durable versus session records, scope precedence, clearing, corrupt and unknown-version records.
+- `src/services/__tests__/auth.guard.test.js` — Vitest tests for `src/services/auth.guard.js` — registered versus anonymous users, legacy test doubles without `isAnonymous`, login return-target encoding, and the registration toast action.
 - `src/services/__tests__/author.service.test.js` — Vitest tests for `src/services/author.service.js` — status reads, localStorage fallback, registration validation and setDoc payload.
 - `src/services/__tests__/bookmark.service.test.js` — Vitest tests for `src/services/bookmark.service.js` — add/remove/get/isBookmarked flows, rate limiting, offline failures, document fields.
 - `src/services/__tests__/cache.service.test.js` — Vitest tests for `src/services/cache.service.js` — TTL expiry, prefix invalidation, SWR revalidation, first-visit bypass, reconcileOrReload.
@@ -624,6 +627,7 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `firestore.rules` — Global data views: database-root staff-only collection-group read for comments; nested comment rules still authorize hide/pin/delete; tale staff reads and deletion are unchanged.
 - `firestore.indexes.json` — Global data views: adds tale `status + updatedAt`, tale `status + title`, per-tale visible/pinned comment ordering, and collection-group comment visibility/pin ordering indexes.
 - `firestore/tests/rules.emulator.test.ts` — Global data views: collection-group comment read allowance for admin/moderator and denial for everyone else, plus staff tale updates/deletion and comment moderation/deletion.
+- `firestore/tests/rules.emulator.test.ts` — Guest read-only boundary: anonymous sessions can read published tales/comments but cannot write comments, replies, likes, reactions, tales, drafts, applications, deletion requests, inquiries, or reports; a registered reader can still comment and react.
 
 ## Scripts and Verification
 
