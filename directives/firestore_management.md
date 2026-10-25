@@ -77,8 +77,9 @@ v1/taletranscend/projects/v1/
    - Comments and replies: set `text: ''`, `isDeleted: true`, `deletedAt`, `deletedBy`,
      `deletionType` (`author|administrator|automated`), `deletionReason`, and
      `moderationCategory`; archive the original text in staff-only
-     `moderationArchive/{registryId}`. This preserves the thread tree and prevents orphaned
-     child replies.
+     `moderationArchive/{registryId}`. Comment archives also store
+     `previousIsHidden` so restore cannot reveal a previously hidden comment. This preserves
+     the thread tree and prevents orphaned child replies.
    - Tales: keep the document, chapters, comments, and relationships; set `isDeleted`,
      `deletedAt`, `deletedBy`, `deletionType`, `deletionReason`, `moderationCategory`,
      `previousStatus`, `previousVisibility`, `status: 'deleted'`, and
@@ -87,10 +88,16 @@ v1/taletranscend/projects/v1/
      `tale_<taleId>`, `comment_<taleId>_<commentId>`, and
      `reply_<taleId>_<commentId>_<replyId>` so staff can filter, restore, or purge without
      scanning every entity collection.
+   - Deletion-petition approval requires `isAdministrator()` because it writes
+     administrator-only tale deletion fields and registry entries. Moderators may reject a
+     pending petition but cannot approve it; the UI hides approval and the service rejects it
+     before any write.
    - Public reads reject deleted tales and hide deleted comments/replies. Authors cannot edit
      deleted records, reply under deleted parents, or like deleted comments.
    - Permanent deletion is a separate staff action: administrator-only for tales, staff for
-     comments/replies, always confirmed and audited. It still does not cascade subcollections.
+     comments/replies, always confirmed and audited. Delete the entity and mark the registry
+     entry `purged` in one batch so a failed second write cannot leave the registry lying. It
+     still does not cascade subcollections.
 
 4. **Reporting, Private Notes & Inbox**:
    - `reports/{reportId}` is staff-visible and stores contextual target type/ID, category,
@@ -104,9 +111,9 @@ v1/taletranscend/projects/v1/
    - Responses append to both report and history and create a `report_response` notification in
      `users/{uid}/notifications` with action URL `settings.html#section-support`. Direct staff
      messages use `type: 'admin_message'`.
-   - Closed reports cannot be overwritten. Report creation requires a registered account and a
-     reason of 1-500 characters; the client uses the subject as `reason` and keeps the longer
-     description separately.
+   - Resolved and closed reports cannot be overwritten or receive a response. Report creation
+     requires a registered account and a reason of 1-500 characters; the client uses the
+     subject as `reason` and keeps the longer description separately.
 
 5. **Edit Metadata Tracking**:
    - Inline edits set `text: newText`, `isEdited: true`, `editedAt: serverTimestamp()`, and `updatedAt: serverTimestamp()`.

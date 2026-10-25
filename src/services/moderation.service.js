@@ -9,14 +9,12 @@
 
 import {
   db,
-  deleteDoc,
   getDoc,
   getDocs,
   limit,
   query,
   refs,
   serverTimestamp,
-  setDoc,
   where,
   writeBatch,
 } from '@fb/index.js';
@@ -287,9 +285,11 @@ export async function permanentlyDeleteTale(taleId) {
     throw new Error('Soft-delete the tale before permanently removing it.');
   }
 
-  await deleteDoc(refs.tale(id));
-  await setDoc(
-    refs.softDeletion(registryIdFor('tale', { taleId: id })),
+  const registryRef = refs.softDeletion(registryIdFor('tale', { taleId: id }));
+  const batch = writeBatch(db);
+  batch.delete(refs.tale(id));
+  batch.set(
+    registryRef,
     {
       status: 'purged',
       purgedAt: serverTimestamp(),
@@ -298,6 +298,7 @@ export async function permanentlyDeleteTale(taleId) {
     },
     { merge: true }
   );
+  await batch.commit();
   await audit(identity, 'tale.purge', 'tale', id, `Permanently removed tale ${id}.`);
   return { taleId: id };
 }
@@ -334,6 +335,7 @@ export async function softDeleteComment(
       text: cleanText(data.text, 5000),
       authorId: data.authorId ?? '',
       authorName: cleanText(data.authorName, 100),
+      previousIsHidden: data.isHidden === true,
       archivedAt: serverTimestamp(),
       archivedBy: identity.uid,
     }
@@ -399,17 +401,23 @@ export async function restoreComment(taleId, commentId) {
   );
   if (!archiveSnap.exists()) throw new Error('The archived comment text is unavailable.');
 
+  const archive = archiveSnap.data() ?? {};
+  const previousIsHidden =
+    typeof archive.previousIsHidden === 'boolean'
+      ? archive.previousIsHidden
+      : data.isHidden === true;
+
   const registryId = registryIdFor('comment', { taleId: parentId, commentId: id });
   const batch = writeBatch(db);
   batch.update(refs.comment(parentId, id), {
     isDeleted: false,
-    text: cleanText(archiveSnap.data()?.text, 5000),
+    text: cleanText(archive.text, 5000),
     deletedAt: null,
     deletedBy: null,
     deletionType: null,
     deletionReason: null,
     moderationCategory: null,
-    isHidden: data.isHidden === true,
+    isHidden: previousIsHidden,
     isPinned: data.isPinned === true,
     reportCount: Number(data.reportCount) || 0,
     restoredAt: serverTimestamp(),
@@ -456,9 +464,13 @@ export async function permanentlyDeleteComment(taleId, commentId) {
   if (data.isDeleted !== true)
     throw new Error('Soft-delete the comment before permanently removing it.');
 
-  await deleteDoc(refs.comment(parentId, id));
-  await setDoc(
-    refs.softDeletion(registryIdFor('comment', { taleId: parentId, commentId: id })),
+  const registryRef = refs.softDeletion(
+    registryIdFor('comment', { taleId: parentId, commentId: id })
+  );
+  const batch = writeBatch(db);
+  batch.delete(refs.comment(parentId, id));
+  batch.set(
+    registryRef,
     {
       status: 'purged',
       purgedAt: serverTimestamp(),
@@ -467,6 +479,7 @@ export async function permanentlyDeleteComment(taleId, commentId) {
     },
     { merge: true }
   );
+  await batch.commit();
   await audit(
     identity,
     'comment.purge',
@@ -641,11 +654,13 @@ export async function permanentlyDeleteReply(taleId, commentId, replyId) {
   if (data.isDeleted !== true)
     throw new Error('Soft-delete the reply before permanently removing it.');
 
-  await deleteDoc(refs.commentReply(parentId, parentCommentId, id));
-  await setDoc(
-    refs.softDeletion(
-      registryIdFor('reply', { taleId: parentId, commentId: parentCommentId, replyId: id })
-    ),
+  const registryRef = refs.softDeletion(
+    registryIdFor('reply', { taleId: parentId, commentId: parentCommentId, replyId: id })
+  );
+  const batch = writeBatch(db);
+  batch.delete(refs.commentReply(parentId, parentCommentId, id));
+  batch.set(
+    registryRef,
     {
       status: 'purged',
       purgedAt: serverTimestamp(),
@@ -654,6 +669,7 @@ export async function permanentlyDeleteReply(taleId, commentId, replyId) {
     },
     { merge: true }
   );
+  await batch.commit();
   await audit(
     identity,
     'reply.purge',

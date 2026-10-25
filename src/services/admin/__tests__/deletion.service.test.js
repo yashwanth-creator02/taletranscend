@@ -228,6 +228,24 @@ describe('deletion service', () => {
     );
   });
 
+  it('refuses to approve a petition when the caller is not an administrator', async () => {
+    vi.mocked(getStaffIdentity).mockResolvedValue({
+      uid: 'mod-1',
+      role: 'moderator',
+      email: '',
+      displayName: '',
+    });
+
+    await expect(decideDeletionRequest('req-1', 'approved')).rejects.toThrow(
+      'Administrator access is required to approve deletion requests.'
+    );
+
+    expect(mockGetDoc).not.toHaveBeenCalled();
+    expect(mockWriteBatch).not.toHaveBeenCalled();
+    expect(writeAdminAuditLog).not.toHaveBeenCalled();
+    expect(createNotificationForUser).not.toHaveBeenCalled();
+  });
+
   it('refuses to approve a petition when the tale no longer exists', async () => {
     mockGetDoc
       .mockResolvedValueOnce(docSnapshot('req-1', REQUEST))

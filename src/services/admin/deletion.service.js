@@ -152,6 +152,9 @@ export async function decideDeletionRequest(requestId, decision, { notes = '' } 
 
   // Resolve the real actor first: no read or write happens for a non-staff caller.
   const identity = await getStaffIdentity();
+  if (decision === 'approved' && identity.role !== 'admin') {
+    throw new Error('Administrator access is required to approve deletion requests.');
+  }
   const request = await getDeletionRequestDetail(requestId);
   if (!request) throw new Error('Deletion request not found.');
   if (request.status !== 'pending') {

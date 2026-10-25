@@ -127,8 +127,9 @@ Define the standard operating procedures, data structures, and UI behaviors for 
   - Author deletion payload: `text: ''`, `isDeleted: true`, `deletedAt`, `deletedBy`,
     `deletionType: 'author'`, `deletionReason`, and `moderationCategory: null`.
   - Administrator removal also archives the original text in staff-only
-    `moderationArchive` and writes a `softDeletions` registry record. The public document keeps
-    its ID and child replies.
+    `moderationArchive` and writes a `softDeletions` registry record. Comment archives store
+    `previousIsHidden` so restore does not reveal a comment that was hidden before removal. The
+    public document keeps its ID and child replies.
   - UI representation: author-deleted items show "This has been deleted by the user.";
     administrator-removed items show a moderation notice with the category. Both use muted,
     italic typography and preserve the child reply tree.
@@ -137,8 +138,9 @@ Define the standard operating procedures, data structures, and UI behaviors for 
   - The comments pane carries `#community-guidelines-btn` at its top-right. It opens an accessible
     `role="dialog"` with focus trapping, Escape/backdrop close, and focus restoration.
   - Non-owner comments and replies expose report triggers. Registered readers get a prefilled,
-    editable report dialog; guests are routed to the existing sign-in gate. Report history is
-    available under `settings.html#section-support`.
+    editable report dialog; guests are routed to the existing sign-in gate. Reply reports carry
+    the parent tale/comment IDs, and the admin detail resolves the reply body and parent
+    context. Report history is available under `settings.html#section-support`.
   - The tale hero carries a report action, and the tale-not-found screen uses the same report
     dialog instead of a confirm-only toast.
 - **Guest Read-Only Gate**:

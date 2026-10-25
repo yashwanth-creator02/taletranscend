@@ -48,6 +48,9 @@ vi.mock('@fb/refs.js', () => ({
     reportPrivateNote: vi.fn((id) => `reportPrivateNote/${id}`),
     tale: vi.fn((id) => `tale/${id}`),
     comment: vi.fn((taleId, commentId) => `tale/${taleId}/comment/${commentId}`),
+    commentReply: vi.fn(
+      (taleId, commentId, replyId) => `tale/${taleId}/comment/${commentId}/reply/${replyId}`
+    ),
     user: vi.fn((uid) => `user/${uid}`),
   },
 }));
@@ -152,6 +155,32 @@ describe('reports service', () => {
         label: 'The Salt Road',
         detail: 'Mara Voss',
       },
+    });
+  });
+
+  it('loads a report together with a summary of its reply target', async () => {
+    mockGetDoc
+      .mockResolvedValueOnce(
+        docSnapshot('rep-1', {
+          ...REPORT,
+          targetType: 'reply',
+          targetId: 'reply-1',
+          taleId: 'tale-1',
+          commentId: 'comment-1',
+        })
+      )
+      .mockResolvedValueOnce(
+        docSnapshot('reply-1', { text: 'A reply body', authorName: 'Reader Two' })
+      )
+      .mockResolvedValueOnce({ exists: () => false });
+
+    const detail = await getReportDetail('rep-1');
+
+    expect(detail.targetSummary).toEqual({
+      type: 'reply',
+      id: 'reply-1',
+      label: 'A reply body',
+      detail: 'Reader Two / comment comment-1',
     });
   });
 
@@ -330,6 +359,17 @@ describe('reports service', () => {
 
     await expect(respondToReport('rep-1', { response: 'Too late.' })).rejects.toThrow(
       'Closed reports cannot receive a response.'
+    );
+
+    expect(mockUpdateDoc).not.toHaveBeenCalled();
+    expect(createNotificationForUser).not.toHaveBeenCalled();
+  });
+
+  it('refuses to respond to a resolved report', async () => {
+    mockGetDoc.mockResolvedValueOnce(docSnapshot('rep-1', { ...REPORT, status: 'resolved' }));
+
+    await expect(respondToReport('rep-1', { response: 'Too late.' })).rejects.toThrow(
+      'Resolved reports cannot receive a response.'
     );
 
     expect(mockUpdateDoc).not.toHaveBeenCalled();

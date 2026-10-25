@@ -138,7 +138,8 @@ Removing a tale, comment, or reply never drops the document. The record receives
 `previousStatus`/`previousVisibility` and move to `status: 'deleted'` /
 `visibility: 'private'`. Comments and replies have their public text cleared;
 the original text is preserved in staff-only `moderationArchive` so restore can
-return it intact.
+return it intact. Comment archives also retain `previousIsHidden`, so restoring a
+removed comment does not reveal a comment that was hidden before removal.
 
 The `softDeletions` registry provides cursor-friendly filters without scanning
 each entity collection. Registry IDs are deterministic:
@@ -152,9 +153,11 @@ each entity collection. Registry IDs are deterministic:
 Restore returns the tale to its previous status and visibility and notifies the
 owner. Comment/reply restore returns archived text. Permanent removal is
 administrator-only for tales and staff-authorized for comments/replies, requires
-a second confirmation, and is audited. Author-deleted comments and replies
-remain distinguishable from administrator moderation and are not restored by
-staff through the moderation flow.
+a second confirmation, and is audited. The entity deletion and the registry
+`purged` update commit in one batch, so the registry cannot be left claiming a
+missing record is still restorable. Author-deleted comments and replies remain
+distinguishable from administrator moderation and are not restored by staff
+through the moderation flow.
 
 ### Bulk tale removal
 
@@ -163,7 +166,9 @@ pages, excludes already-removed records, shows the selected count and titles
 before confirmation, and sends the selected IDs to
 `bulkSoftDeleteTales`. The service validates every record first, rejects more
 than 50 IDs, applies all updates and registry writes in one batch, and records
-one audit entry. A partial result is never reported as success.
+one audit entry. A partial result is never reported as success. The rules
+emulator exercises the full 50-tale batch, so the limit is verified against the
+deployed rule expression budget rather than assumed.
 
 ### Reports and responses
 
@@ -178,8 +183,10 @@ Report states are `pending`, `under_review`, `responded`, `resolved`, and
 Closed. Staff can mark under review, send a response, resolve, or close. A
 response appends to the report and history, optionally writes a private note,
 sends a `report_response` notification to the reporter's existing inbox, and is
-audited. Staff can also send a direct `admin_message` notification from the
-Reports workspace after the recipient is validated.
+audited. Resolved and closed reports cannot receive a further response. The
+detail target summary resolves tale, comment, reply, and user targets. Staff can
+also send a direct `admin_message` notification from the Reports workspace after
+the recipient is validated.
 
 The Settings Support & Reports section links the developer address
 `leo.two.dev@gmail.com`, opens the website report form, and lists the signed-in
@@ -218,8 +225,10 @@ primary workflow.
   profile role.
 - Approving a deletion petition no longer erases the tale document. It soft-removes
   the tale, records it in the Removed content registry, and notifies the author.
-  Chapter and comment subcollections remain intact for restoration. Permanent
-  removal is a separate administrator action and still does not cascade
+  Only an administrator can approve; moderators can reject a pending petition,
+  but the approval control is hidden and the service rejects approval before any
+  write. Chapter and comment subcollections remain intact for restoration.
+  Permanent removal is a separate administrator action and still does not cascade
   subcollections, which requires a trusted server-side cleanup job.
 - A deletion petition must target an existing tale owned by the petitioner.
   The profile form accepts a title or ID and resolves it to one of the caller's

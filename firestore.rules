@@ -1023,6 +1023,9 @@ service cloud.firestore {
                'status', 'reviewedBy', 'reviewedAt', 'adminNotes'
              ])
           && request.resource.data.status in ['approved', 'rejected']
+          // Approval performs an administrator-only tale removal, so a moderator
+          // may reject a petition but must not mark it approved.
+          && (request.resource.data.status != 'approved' || isAdministrator())
           && isValidTimestamp('reviewedAt')
           && isValidString('reviewedBy', 1, 100)
           && request.resource.data.reviewedBy == request.auth.uid

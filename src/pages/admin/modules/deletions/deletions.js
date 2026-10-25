@@ -92,7 +92,8 @@ function detailField(label, value, wide = false) {
  * @param {{ container: HTMLElement, access: import('../../admin.state.js').AdminAccess }} opts
  * @returns {() => void}
  */
-function mountPetitions({ container }) {
+function mountPetitions({ container, access }) {
+  const canApprove = access?.isAdmin === true;
   let items = [];
   let lastDoc = null;
   let hasMore = false;
@@ -200,16 +201,22 @@ function mountPetitions({ container }) {
                 ></textarea>
               </label>
               <div class="admin-actions">
-                <button
-                  type="button"
-                  class="admin-btn admin-btn--sm admin-btn--danger"
-                  data-action="decide"
-                  data-id="${escapeAdminHtml(detail.id)}"
-                  data-decision="approved"
-                  ${deciding ? 'disabled' : ''}
-                >
-                  ${deciding ? 'Processing...' : 'Approve and remove tale'}
-                </button>
+                ${
+                  canApprove
+                    ? `
+                      <button
+                        type="button"
+                        class="admin-btn admin-btn--sm admin-btn--danger"
+                        data-action="decide"
+                        data-id="${escapeAdminHtml(detail.id)}"
+                        data-decision="approved"
+                        ${deciding ? 'disabled' : ''}
+                      >
+                        ${deciding ? 'Processing...' : 'Approve and remove tale'}
+                      </button>
+                    `
+                    : ''
+                }
                 <button
                   type="button"
                   class="admin-btn admin-btn--sm admin-btn--secondary"
@@ -230,8 +237,12 @@ function mountPetitions({ container }) {
                 </button>
               </div>
               <p class="admin-readonly-note">
-                Approval removes the tale from public view and records it in Removed content. The
-                tale can be restored later; chapter and comment subcollections are left in place.
+                ${
+                  canApprove
+                    ? `Approval removes the tale from public view and records it in Removed content. The
+                       tale can be restored later; chapter and comment subcollections are left in place.`
+                    : `Approval requires an administrator. Moderators can still reject this request.`
+                }
               </p>
             `
             : `
@@ -457,6 +468,10 @@ function mountPetitions({ container }) {
     if (disposed || deciding) return;
     if (!requestId || !detail || detail.id !== requestId) return;
     if (decision !== 'approved' && decision !== 'rejected') return;
+    if (decision === 'approved' && !canApprove) {
+      showToast('Approval requires an administrator. You can still reject this request.', 'error');
+      return;
+    }
 
     const notesField = container.querySelector('[data-role="deletion-notes"]');
     const notes = notesField instanceof HTMLTextAreaElement ? notesField.value : '';

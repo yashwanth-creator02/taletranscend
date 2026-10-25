@@ -34,6 +34,7 @@ import {
   getDocs,
   deleteDoc,
   where,
+  writeBatch,
 } from 'firebase/firestore';
 import type { Firestore } from 'firebase/firestore';
 
@@ -1367,6 +1368,72 @@ describe('admin dashboard — five-role rules matrix', () => {
       );
     });
 
+    it('an administrator can soft-delete 50 tales and register them in one batch', async () => {
+      const taleIds = Array.from({ length: 50 }, (_, index) => `bulk-tale-${index + 1}`);
+
+      await testEnv.withSecurityRulesDisabled(async (ctx) => {
+        const seedBatch = writeBatch(ctx.firestore());
+        for (const taleId of taleIds) {
+          seedBatch.set(doc(ctx.firestore(), `${ROOT}/public/data/tales/${taleId}`), {
+            authorId: 'author-1',
+            title: `Bulk tale ${taleId}`,
+            status: 'published',
+            visibility: 'public',
+            readCount: 0,
+            commentCount: 0,
+            reactionCount: 0,
+            bookmarkCount: 0,
+            createdAt: new Date(),
+            updatedAt: new Date(Date.now() - 10_000),
+          });
+        }
+        await seedBatch.commit();
+      });
+
+      const adminDb = adminCtx().firestore();
+      const batch = writeBatch(adminDb);
+      for (const taleId of taleIds) {
+        batch.update(doc(adminDb, `${ROOT}/public/data/tales/${taleId}`), {
+          isDeleted: true,
+          deletedAt: serverTimestamp(),
+          deletedBy: 'admin-1',
+          deletionType: 'administrator',
+          deletionReason: 'Bulk archive removal test.',
+          moderationCategory: 'other',
+          previousStatus: 'published',
+          previousVisibility: 'public',
+          status: 'deleted',
+          visibility: 'private',
+          updatedAt: serverTimestamp(),
+        });
+        batch.set(doc(adminDb, `${ROOT}/softDeletions/tale_${taleId}`), {
+          entityType: 'tale',
+          entityId: taleId,
+          parentId: '',
+          parentCommentId: '',
+          title: `Bulk tale ${taleId}`,
+          preview: '',
+          ownerId: 'author-1',
+          ownerName: 'Author One',
+          deletedAt: serverTimestamp(),
+          deletedBy: 'admin-1',
+          deletionType: 'administrator',
+          deletionReason: 'Bulk archive removal test.',
+          moderationCategory: 'other',
+          status: 'deleted',
+          restoredAt: null,
+          restoredBy: null,
+          purgedAt: null,
+          purgedBy: null,
+          reportCount: 0,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+      }
+
+      await assertSucceeds(batch.commit());
+    });
+
     it('only staff can read or update the registry', async () => {
       await seed('softDeletions/comment-1', entry());
       for (const ctx of [authorCtx(), userCtx(), guestCtx()]) {
@@ -1502,20 +1569,28 @@ describe('admin dashboard — five-role rules matrix', () => {
       );
     });
 
-    it('an administrator or moderator CAN decide a pending petition', async () => {
+    it('an administrator can approve a pending petition, while a moderator can only reject', async () => {
       await seed('deletionRequests/req-1', request());
-      await assertSucceeds(
+      // Approval performs an administrator-only tale removal.
+      await assertFails(
         updateDoc(doc(moderatorCtx().firestore(), `${ROOT}/deletionRequests/req-1`), {
           status: 'approved',
           reviewedBy: 'mod-1',
           reviewedAt: new Date(),
         })
       );
-      // Once decided, the petition cannot be overwritten by a stale decision.
-      await assertFails(
+      await assertSucceeds(
         updateDoc(doc(moderatorCtx().firestore(), `${ROOT}/deletionRequests/req-1`), {
           status: 'rejected',
           reviewedBy: 'mod-1',
+          reviewedAt: new Date(),
+        })
+      );
+      // Once decided, the petition cannot be overwritten by a stale decision.
+      await assertFails(
+        updateDoc(doc(adminCtx().firestore(), `${ROOT}/deletionRequests/req-1`), {
+          status: 'approved',
+          reviewedBy: 'admin-1',
           reviewedAt: new Date(),
         })
       );

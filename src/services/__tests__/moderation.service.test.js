@@ -1,6 +1,14 @@
 // src/services/__tests__/moderation.service.test.js
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { bulkSoftDeleteTales, permanentlyDeleteTale, restoreTale } from '../moderation.service.js';
+import {
+  bulkSoftDeleteTales,
+  permanentlyDeleteComment,
+  permanentlyDeleteReply,
+  permanentlyDeleteTale,
+  restoreComment,
+  restoreTale,
+  softDeleteComment,
+} from '../moderation.service.js';
 
 const mocks = vi.hoisted(() => ({
   batchSet: vi.fn(),
@@ -26,6 +34,10 @@ vi.mock('@fb/index.js', () => ({
   query: vi.fn((...args) => ({ type: 'query', args })),
   refs: {
     tale: vi.fn((id) => `tale/${id}`),
+    comment: vi.fn((taleId, commentId) => `tale/${taleId}/comment/${commentId}`),
+    commentReply: vi.fn(
+      (taleId, commentId, replyId) => `tale/${taleId}/comment/${commentId}/reply/${replyId}`
+    ),
     softDeletion: vi.fn((id) => `softDeletion/${id}`),
     moderationArchiveEntry: vi.fn((id) => `archive/${id}`),
     reports: vi.fn(() => 'reports'),
@@ -218,5 +230,112 @@ describe('moderation service', () => {
     );
 
     expect(mocks.deleteDoc).not.toHaveBeenCalled();
+  });
+
+  it('purges a tale and its registry entry in one atomic batch', async () => {
+    mocks.getDoc.mockResolvedValueOnce(snapshot('tale-1', { isDeleted: true, status: 'deleted' }));
+
+    await permanentlyDeleteTale('tale-1');
+
+    expect(mocks.writeBatch).toHaveBeenCalledTimes(1);
+    expect(mocks.batchDelete).toHaveBeenCalledWith('tale/tale-1');
+    expect(mocks.batchSet).toHaveBeenCalledWith(
+      'softDeletion/tale_tale-1',
+      expect.objectContaining({ status: 'purged', purgedBy: 'admin-1' }),
+      { merge: true }
+    );
+    expect(mocks.batchCommit).toHaveBeenCalledTimes(1);
+    expect(mocks.deleteDoc).not.toHaveBeenCalled();
+  });
+
+  it('purges a comment and its registry entry in one atomic batch', async () => {
+    mocks.getDoc.mockResolvedValueOnce(snapshot('comment-1', { isDeleted: true }));
+
+    await permanentlyDeleteComment('tale-1', 'comment-1');
+
+    expect(mocks.writeBatch).toHaveBeenCalledTimes(1);
+    expect(mocks.batchDelete).toHaveBeenCalledWith('tale/tale-1/comment/comment-1');
+    expect(mocks.batchSet).toHaveBeenCalledWith(
+      'softDeletion/comment_tale-1_comment-1',
+      expect.objectContaining({ status: 'purged', purgedBy: 'admin-1' }),
+      { merge: true }
+    );
+    expect(mocks.batchCommit).toHaveBeenCalledTimes(1);
+    expect(mocks.deleteDoc).not.toHaveBeenCalled();
+  });
+
+  it('purges a reply and its registry entry in one atomic batch', async () => {
+    mocks.getDoc.mockResolvedValueOnce(snapshot('reply-1', { isDeleted: true }));
+
+    await permanentlyDeleteReply('tale-1', 'comment-1', 'reply-1');
+
+    expect(mocks.writeBatch).toHaveBeenCalledTimes(1);
+    expect(mocks.batchDelete).toHaveBeenCalledWith('tale/tale-1/comment/comment-1/reply/reply-1');
+    expect(mocks.batchSet).toHaveBeenCalledWith(
+      'softDeletion/reply_tale-1_comment-1_reply-1',
+      expect.objectContaining({ status: 'purged', purgedBy: 'admin-1' }),
+      { merge: true }
+    );
+    expect(mocks.batchCommit).toHaveBeenCalledTimes(1);
+    expect(mocks.deleteDoc).not.toHaveBeenCalled();
+  });
+
+  it('archives a comment hidden state before clearing it', async () => {
+    mocks.getDoc.mockResolvedValueOnce(
+      snapshot('comment-1', {
+        text: 'A hidden comment',
+        authorId: 'reader-2',
+        authorName: 'Reader Two',
+        isHidden: true,
+        isPinned: false,
+        reportCount: 1,
+      })
+    );
+
+    await softDeleteComment('tale-1', 'comment-1', {
+      reason: 'Hidden by staff.',
+      category: 'spam',
+    });
+
+    expect(mocks.batchSet).toHaveBeenCalledWith(
+      'archive/comment_tale-1_comment-1',
+      expect.objectContaining({ previousIsHidden: true, text: 'A hidden comment' })
+    );
+    expect(mocks.batchUpdate).toHaveBeenCalledWith(
+      'tale/tale-1/comment/comment-1',
+      expect.objectContaining({ isHidden: false, isDeleted: true, text: '' })
+    );
+  });
+
+  it('restores a comment with its pre-moderation hidden state', async () => {
+    mocks.getDoc
+      .mockResolvedValueOnce(
+        snapshot('comment-1', {
+          isDeleted: true,
+          isHidden: false,
+          isPinned: true,
+          reportCount: 2,
+        })
+      )
+      .mockResolvedValueOnce(
+        snapshot('comment-1', { text: 'The original comment', previousIsHidden: true })
+      );
+
+    await restoreComment('tale-1', 'comment-1');
+
+    expect(mocks.batchUpdate).toHaveBeenCalledWith(
+      'tale/tale-1/comment/comment-1',
+      expect.objectContaining({
+        isDeleted: false,
+        text: 'The original comment',
+        isHidden: true,
+        isPinned: true,
+      })
+    );
+    expect(mocks.batchSet).toHaveBeenCalledWith(
+      'softDeletion/comment_tale-1_comment-1',
+      expect.objectContaining({ status: 'restored' }),
+      { merge: true }
+    );
   });
 });

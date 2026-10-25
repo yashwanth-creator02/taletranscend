@@ -470,7 +470,8 @@ and support loop across the public site and dashboard:
   confirmed permanent removal.
 - An administrator-only Deletions registry with type/status/title filters,
   detail views, related reports, and all-or-nothing bulk removal of up to 50
-  tales.
+  tales. Deletion-petition approval is administrator-only; moderators can still
+  reject a pending petition.
 - An accessible community-guidelines dialog and contextual report entry points
   for comments, replies, tales, the tale-not-found screen, the global 404 page,
   and Settings.
@@ -504,8 +505,14 @@ text before clearing the public field. The public read paths reject
   the ordinary moderation flow.
 - Deletion petitions remain a separate author-initiated workflow. Approval now
   soft-removes the tale and registers it for restoration rather than erasing it.
+  Approval requires an administrator because it writes administrator-only tale
+  deletion fields and registry entries; rejection stays available to moderators.
 - Report history is intentionally a separate mirror so reporter reads never
-  depend on staff-only fields. Rules deny cross-reporter access.
+  depend on staff-only fields. Rules deny cross-reporter access. Resolved and
+  closed reports are immutable for responses, matching the rules.
+- Permanent purge deletes the entity and marks its registry entry `purged` in one
+  batch. Comment archives retain `previousIsHidden`, so restore cannot reveal a
+  comment that was hidden before removal.
 - Existing `users/{uid}/notifications` is the inbox. No second messaging
   collection was introduced.
 - Chapter registry entries are supported for future work, but chapter-level
@@ -524,6 +531,8 @@ Rules add:
 - Public denial for soft-deleted tales, comment/reply creation under deleted
   parents, likes on deleted comments, and edits to deleted comments/replies.
 - Administrator-only tale restore/purge fields and statuses.
+- Deletion-request approval requires `isAdministrator()`; moderators may still
+  reject a pending petition.
 
 Indexes add reporter history ordering, soft-deletion registry filters, and a
 collection-group `comments(isDeleted, createdAt)` index. See
@@ -531,14 +540,43 @@ collection-group `comments(isDeleted, createdAt)` index. See
 
 ### Verification
 
-- Unit suite: 134 test files, 1,251 passed, 2 skipped (1,253 total).
-- Rules emulator: 98/98 passed against the Firestore emulator.
+- Unit suite: 134 test files, 1,260 passed, 2 skipped (1,262 total).
+- Rules emulator: 99/99 passed against the Firestore emulator, including the
+  full 50-tale bulk removal batch.
 - `npm run format`, `npm run lint` (0 errors), `npm run lint:tokens`,
   `npm run type-check`, and `npm run build` all passed.
 - Browser E2E and a live authenticated walkthrough were not run for this
   branch; coverage comes from the unit, integration, and rules suites.
 - Do not treat historical numbers in sections 9 and 12 as evidence for this
   extension.
+
+### Follow-up audit fixes (2026-10-26)
+
+A post-deployment audit of client/rules/index mismatches found and fixed five
+issues:
+
+- Moderators could open a deletion petition and attempt approval, but the tale
+  deletion and registry writes require an administrator. Approval is now hidden
+  in the UI and rejected by the service before any read or write; the
+  `deletionRequests` rule also requires `isAdministrator()` for approval.
+- The report service allowed a response to a `resolved` report, while the rules
+  make resolved and closed reports immutable. The service now rejects both.
+- Reply reports had no target summary in the admin detail. The summary now
+  resolves the parent tale/comment and the reply body.
+- Permanent removal of a tale, comment, or reply deleted the entity and updated
+  the registry in two separate writes. Both writes now commit in one batch.
+- Restoring a comment lost its previous `isHidden` state. The archive now stores
+  `previousIsHidden` and restore uses it.
+
+Regression coverage adds nine unit tests and one rules-emulator test (the
+50-tale batch). Full verification after the fixes: 134 unit files, 1,260 passed,
+2 skipped; rules 99/99; format, lint, token lint, type-check, and build clean.
+
+The follow-up `firestore.rules` change was deployed to project `taletranscend`
+on 2026-10-26 and verified in the deployed source: petition approval now
+requires `isAdministrator()` at the rule layer as well as in the UI and service.
+No index changes were part of this follow-up; the indexes deployed on
+2026-10-25 remain in place, and all required moderation indexes report `READY`.
 
 ### Deployment
 

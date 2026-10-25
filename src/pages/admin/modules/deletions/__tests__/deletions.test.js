@@ -217,6 +217,34 @@ describe('deletion module', () => {
     unmount();
   });
 
+  it('hides approval from moderators while leaving rejection available', async () => {
+    vi.mocked(listDeletionRequestsPage).mockResolvedValue({
+      items: [REQUEST],
+      lastDoc: null,
+      hasMore: false,
+    });
+
+    const container = createContainer();
+    const moderator = { role: 'moderator', isAdmin: false, isModerator: true, isStaff: true };
+    const unmount = mount({ container, access: moderator });
+
+    await vi.waitFor(() => {
+      expect(container.querySelector('[data-action="view"]')).not.toBeNull();
+    });
+    container.querySelector('[data-action="view"]').click();
+
+    await vi.waitFor(() => {
+      expect(container.querySelector('.admin-detail-panel')).not.toBeNull();
+    });
+    expect(container.querySelector('[data-action="decide"][data-decision="approved"]')).toBeNull();
+    expect(
+      container.querySelector('[data-action="decide"][data-decision="rejected"]')
+    ).not.toBeNull();
+    expect(container.textContent).toContain('Approval requires an administrator');
+
+    unmount();
+  });
+
   it('confirms removal from public view before approving and passes reviewer notes', async () => {
     vi.mocked(listDeletionRequestsPage).mockResolvedValue({
       items: [REQUEST],

@@ -151,6 +151,21 @@ async function loadTargetSummary(report) {
       };
     }
 
+    if (report.targetType === 'reply') {
+      const taleId = report.taleId || report.targetTaleId;
+      const commentId = report.commentId || report.parentCommentId;
+      if (!taleId || !commentId) return null;
+      const snap = await getDoc(refs.commentReply(taleId, commentId, report.targetId));
+      if (!snap.exists()) return null;
+      const data = snap.data() ?? {};
+      return {
+        type: 'reply',
+        id: snap.id,
+        label: summarizeText(data.text) || 'Reply',
+        detail: [data.authorName, `comment ${commentId}`].filter(Boolean).join(' / '),
+      };
+    }
+
     if (report.targetType === 'user') {
       const snap = await getDoc(refs.user(report.targetId));
       if (!snap.exists()) return null;
@@ -329,6 +344,7 @@ export async function respondToReport(reportId, input = {}) {
   const report = await getReport(reportId);
   if (!report) throw new Error('Report not found.');
   if (report.status === 'dismissed') throw new Error('Closed reports cannot receive a response.');
+  if (report.status === 'resolved') throw new Error('Resolved reports cannot receive a response.');
 
   const existingResponses = Array.isArray(report.responses) ? report.responses : [];
   const responses = [
