@@ -559,6 +559,13 @@ for existing documents; legacy content simply has no `isDeleted` field and is
 treated as active. Backfill is only needed if a future query requires an
 explicit `isDeleted == false` equality, which this delivery does not.
 
+Released to project `taletranscend` on 2026-10-25 from this branch. The first
+live report attempt exposed the deployment gap: `createReport` writes `reports`
+and `reportHistory` in one batch, and the previously deployed ruleset had no
+`reportHistory` rule, so Firestore denied the whole batch. Deploying this
+branch's rules and indexes resolved it. Until the branch is merged, a rules
+deploy from `main` would replace the moderation/support rules.
+
 ### Assumptions and limitations
 
 - Existing anonymous sessions are guests; reporting requires a registered
