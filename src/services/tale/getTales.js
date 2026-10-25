@@ -62,11 +62,13 @@ export async function getTales({
 
     if (snap.empty) return [];
 
-    return snap.docs.map((d) => createTale(d.id, d.data()));
+    return snap.docs
+      .map((d) => createTale(d.id, d.data()))
+      .filter((tale) => tale.isDeleted !== true && tale.status !== 'deleted');
   };
 
   if (!after) {
-    return cacheService.fetchWithCache(`tales:list:${status}:${count}`, fetcher, {
+    return cacheService.fetchWithCache(`tales:list:${status}:${count}:v2`, fetcher, {
       ttl: 5 * 60 * 1000,
       pageUrl: typeof window !== 'undefined' ? window.location.href : null,
       onBackgroundUpdate,
@@ -112,7 +114,9 @@ export async function getTalesPage({ count = 20, after = null } = {}) {
   if (snap.empty) return { tales: [], lastDoc: null };
 
   return {
-    tales: snap.docs.map((d) => createTale(d.id, d.data())),
+    tales: snap.docs
+      .map((d) => createTale(d.id, d.data()))
+      .filter((tale) => tale.isDeleted !== true && tale.status !== 'deleted'),
     lastDoc: snap.docs[snap.docs.length - 1],
   };
 }
@@ -132,7 +136,7 @@ export async function getTalesPageNumbered({
   onBackgroundUpdate = null,
 } = {}) {
   return cacheService.fetchWithCache(
-    `tales:page:${page}:${perPage}`,
+    `tales:page:${page}:${perPage}:v2`,
     async () => {
       // Get total count first
       const countQuery = query(refs.tales(), where('status', '==', 'published'));
@@ -180,7 +184,9 @@ export async function getTalesPageNumbered({
         fallback: { empty: true, docs: [] },
         logContext: 'services.tale.getTalesPageNumbered.data',
       });
-      const tales = snap.docs.map((d) => createTale(d.id, d.data()));
+      const tales = snap.docs
+        .map((d) => createTale(d.id, d.data()))
+        .filter((tale) => tale.isDeleted !== true && tale.status !== 'deleted');
 
       return {
         tales,
@@ -207,7 +213,7 @@ export async function getTalesByAuthor(authorId) {
   if (!authorId) return [];
 
   return cacheService.fetchWithCache(
-    `tales:author:${authorId}`,
+    `tales:author:${authorId}:v2`,
     async () => {
       const q = query(refs.tales(), where('authorId', '==', authorId));
       const snap = await safeAsync(getDocs(q), {
@@ -217,7 +223,9 @@ export async function getTalesByAuthor(authorId) {
 
       if (snap.empty) return [];
 
-      return snap.docs.map((d) => createTale(d.id, d.data()));
+      return snap.docs
+        .map((d) => createTale(d.id, d.data()))
+        .filter((tale) => tale.isDeleted !== true && tale.status !== 'deleted');
     },
     { ttl: 5 * 60 * 1000 }
   );

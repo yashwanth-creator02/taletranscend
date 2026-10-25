@@ -23,7 +23,10 @@ export async function getTaleMeta(taleId) {
   if (!navigator.onLine) {
     log.info('Offline: loading tale meta from local storage');
     const local = await getTaleOffline(taleId);
-    if (local) return createTale(local.id, local);
+    if (local && local.isDeleted !== true && local.status !== 'deleted') {
+      return createTale(local.id, local);
+    }
+    return null;
   }
 
   return cacheService.fetchWithCache(
@@ -36,6 +39,10 @@ export async function getTaleMeta(taleId) {
           if (!snap.exists()) {
             log.error(`Tale not found: ${taleId}`);
             throw new Error(`Tale not found: ${taleId}`);
+          }
+          if (snap.data()?.isDeleted === true || snap.data()?.status === 'deleted') {
+            log.info(`Tale is soft-deleted: ${taleId}`);
+            return null;
           }
           log.info('Loaded tale meta', { taleId, title: snap.data()?.title });
           const tale = createTale(snap.id, snap.data());
@@ -89,6 +96,7 @@ export async function getChapters(taleId) {
           const snap = await getDocs(refs.chapters(taleId));
           const chapters = snap.docs
             .map((d) => createChapter(d.id, d.data()))
+            .filter((chapter) => chapter.isDeleted !== true)
             .sort((a, b) => a.chapterNum - b.chapterNum);
 
           // Update offline cache with full chapter list

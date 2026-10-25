@@ -88,6 +88,7 @@ async function _loadIcons() {
     Download: L.Download,
     Copy: L.Copy,
     RotateCcw: L.RotateCcw,
+    RefreshCw: L.RefreshCw,
     // Files & Content
     FileText: L.FileText,
     FileCode: L.FileCode,
@@ -183,6 +184,7 @@ async function _loadIcons() {
     Mail: L.Mail,
     Inbox: L.Inbox,
     HelpCircle: L.HelpCircle,
+    LifeBuoy: L.LifeBuoy,
     Database: L.Database,
     Cloud: L.Cloud,
     // UI Chrome

@@ -217,7 +217,7 @@ describe('deletion module', () => {
     unmount();
   });
 
-  it('confirms permanent deletion before approving and passes reviewer notes', async () => {
+  it('confirms removal from public view before approving and passes reviewer notes', async () => {
     vi.mocked(listDeletionRequestsPage).mockResolvedValue({
       items: [REQUEST],
       lastDoc: null,
@@ -246,14 +246,11 @@ describe('deletion module', () => {
 
     expect(showConfirmModal).toHaveBeenCalledWith(
       expect.objectContaining({
-        message: expect.stringContaining('permanently delete'),
+        message: expect.stringContaining('remove'),
       })
     );
     expect(showConfirmModal.mock.calls[0][0].message).toContain('The Long Night');
-    expect(showToast).toHaveBeenCalledWith(
-      expect.stringContaining('permanently deleted'),
-      'success'
-    );
+    expect(showToast).toHaveBeenCalledWith(expect.stringContaining('removed'), 'success');
 
     unmount();
   });

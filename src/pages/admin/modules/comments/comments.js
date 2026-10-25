@@ -8,7 +8,10 @@ import {
   getCommentDetail,
   listCommentsPage,
   moderateComment,
+  purgeComment,
+  restoreComment,
 } from '@services/admin/comments.service.js';
+import { MODERATION_CATEGORIES, MODERATION_CATEGORY_LABELS } from '@services/moderation.service.js';
 import { showConfirmModal } from '@/ui/components/confirmModal.js';
 import { showToast } from '@/ui/components/toast.js';
 import {
@@ -27,6 +30,7 @@ const FILTER_OPTIONS = [
   { value: 'visible', label: 'Visible only' },
   { value: 'hidden', label: 'Hidden only' },
   { value: 'pinned', label: 'Pinned only' },
+  { value: 'deleted', label: 'Removed only' },
 ];
 
 const DIRECTION_OPTIONS = [
@@ -77,8 +81,10 @@ export function mount({ container, access } = {}) {
       <h2 id="admin-comments-title" class="admin-section-title">Comments</h2>
       <p class="admin-note">
         Every comment across every tale. Hiding removes a comment from the public comment surfaces;
-        pinning raises it to the top there. Deletes are permanent. Lists are cursor-paginated, so use
-        Load More to continue.
+        pinning raises it to the top there. Removing a comment clears its public text, archives the
+        original for staff, and keeps a placeholder in the thread. Removed comments can be restored
+        or permanently deleted from this panel. Lists are cursor-paginated, so use Load More to
+        continue.
       </p>
 
       <div class="admin-toolbar">
@@ -151,8 +157,24 @@ export function mount({ container, access } = {}) {
 
   /** @param {Record<string, unknown>} comment */
   function commentBody(comment) {
-    if (comment?.isDeleted === true) return 'Removed by its author.';
+    if (comment?.isDeleted === true) {
+      return comment?.deletionType === 'author'
+        ? 'Removed by its author.'
+        : 'Removed from public view by an administrator.';
+    }
     return displayText(comment?.text) || 'No text in this comment.';
+  }
+
+  /** @param {Record<string, unknown>} comment */
+  function archivedBody(comment) {
+    const archived = displayText(comment?.archive?.text);
+    return archived || displayText(comment?.text) || 'No archived text was found.';
+  }
+
+  /** @param {Record<string, unknown>} comment */
+  function categoryLabel(comment) {
+    const key = displayText(comment?.moderationCategory);
+    return key ? (MODERATION_CATEGORY_LABELS[key] ?? key) : '';
   }
 
   /** @param {string} label @param {string} valueHtml @param {{ wide?: boolean }} [options] */
@@ -338,12 +360,87 @@ export function mount({ container, access } = {}) {
 
     const hidden = detail.isHidden === true;
     const pinned = detail.isPinned === true;
+    const deleted = detail.isDeleted === true;
     const taleId = String(detail.taleId ?? '');
     const taleTitle = detail.tale?.title ? String(detail.tale.title) : '';
     const taleLabel = taleTitle || `Tale ${truncateAdminText(taleId, 18)}`;
     const taleStatus = detail.tale
       ? `${detail.tale.status || 'unknown status'} / ${detail.tale.visibility || 'unknown visibility'}`
       : 'Tale record unavailable';
+    const categoryOptions = MODERATION_CATEGORIES.map(
+      (value) =>
+        `<option value="${value}" ${
+          value === 'other' ? 'selected' : ''
+        }>${escapeAdminHtml(MODERATION_CATEGORY_LABELS[value] ?? value)}</option>`
+    ).join('');
+
+    const deletionFields = deleted
+      ? `
+          ${buildDetailField('Removed', escapeAdminHtml(formatAdminDate(detail.deletedAt)))}
+          ${buildDetailField('Removal type', escapeAdminHtml(textOrDash(detail.deletionType)))}
+          ${buildDetailField('Category', escapeAdminHtml(categoryLabel(detail) || EMPTY_VALUE))}
+          ${buildDetailField('Reason', escapeAdminHtml(textOrDash(detail.deletionReason)))}
+        `
+      : '';
+
+    const actions = deleted
+      ? `
+          <button
+            type="button"
+            class="admin-btn"
+            data-action="restore-comment"
+            ${actionBusy ? 'disabled' : ''}
+          >
+            Restore comment
+          </button>
+          <button
+            type="button"
+            class="admin-btn admin-btn--danger"
+            data-action="purge-comment"
+            ${actionBusy ? 'disabled' : ''}
+          >
+            Permanently delete
+          </button>
+        `
+      : `
+          <button
+            type="button"
+            class="admin-btn"
+            data-action="toggle-hidden"
+            ${actionBusy ? 'disabled' : ''}
+          >
+            ${hidden ? 'Unhide comment' : 'Hide comment'}
+          </button>
+          <button
+            type="button"
+            class="admin-btn admin-btn--secondary"
+            data-action="toggle-pinned"
+            ${actionBusy || hidden ? 'disabled' : ''}
+          >
+            ${pinned ? 'Unpin comment' : 'Pin comment'}
+          </button>
+          <label class="admin-field">
+            <span class="admin-field__label">Removal category</span>
+            <select class="admin-select" data-role="removal-category">${categoryOptions}</select>
+          </label>
+          <label class="admin-field admin-field--grow">
+            <span class="admin-field__label">Removal reason</span>
+            <input
+              class="admin-input"
+              data-role="removal-reason"
+              maxlength="500"
+              placeholder="Shown in the audit record and public notice"
+            />
+          </label>
+          <button
+            type="button"
+            class="admin-btn admin-btn--danger"
+            data-action="delete-comment"
+            ${actionBusy ? 'disabled' : ''}
+          >
+            Remove from public view
+          </button>
+        `;
 
     detailEl.innerHTML = `
       <section class="admin-detail-panel" aria-labelledby="admin-comments-detail-title">
@@ -361,8 +458,12 @@ export function mount({ container, access } = {}) {
         </div>
 
         <div class="admin-detail-field admin-detail-field--wide">
-          <span class="admin-detail-field__label">Comment</span>
-          <div class="admin-detail-field__value">${escapeWithBreaks(commentBody(detail))}</div>
+          <span class="admin-detail-field__label">${
+            deleted ? 'Archived original (staff only)' : 'Comment'
+          }</span>
+          <div class="admin-detail-field__value">${escapeWithBreaks(
+            deleted ? archivedBody(detail) : commentBody(detail)
+          )}</div>
         </div>
 
         <div class="admin-detail-grid">
@@ -377,6 +478,7 @@ export function mount({ container, access } = {}) {
           ${buildDetailField('Likes', escapeAdminHtml(formatAdminCount(detail.likeCount)))}
           ${buildDetailField('Replies', escapeAdminHtml(formatAdminCount(detail.replyCount)))}
           ${buildDetailField('Comment ID', escapeAdminHtml(textOrDash(detail.id)))}
+          ${deletionFields}
           ${buildDetailField(
             'Public tale',
             `<a class="admin-btn admin-btn--sm admin-btn--secondary" href="tale.html?id=${encodeURIComponent(
@@ -385,37 +487,14 @@ export function mount({ container, access } = {}) {
           )}
         </div>
 
-        <div class="admin-actions">
-          <button
-            type="button"
-            class="admin-btn"
-            data-action="toggle-hidden"
-            ${actionBusy ? 'disabled' : ''}
-          >
-            ${hidden ? 'Unhide comment' : 'Hide comment'}
-          </button>
-          <button
-            type="button"
-            class="admin-btn admin-btn--secondary"
-            data-action="toggle-pinned"
-            ${actionBusy || hidden ? 'disabled' : ''}
-          >
-            ${pinned ? 'Unpin comment' : 'Pin comment'}
-          </button>
-          <button
-            type="button"
-            class="admin-btn admin-btn--danger"
-            data-action="delete-comment"
-            ${actionBusy ? 'disabled' : ''}
-          >
-            Delete comment
-          </button>
-        </div>
+        <div class="admin-actions">${actions}</div>
 
         <p class="admin-readonly-note">
-          Hiding removes the comment from public comment surfaces. Pinning raises it above ordinary
-          comments there; a hidden comment must be unhidden before it can be pinned. Deleting removes
-          the comment document permanently and leaves any replies in place.
+          ${
+            deleted
+              ? 'The public comment text is cleared and replaced with a moderation notice. The archived original above is visible to staff only. Restoring returns the original text to the thread; permanent deletion removes the comment document and cannot be undone.'
+              : 'Hiding removes the comment from public comment surfaces. Pinning raises it above ordinary comments there; a hidden comment must be unhidden before it can be pinned. Removing clears the public text, archives the original for staff, and keeps a placeholder so replies retain their context. Removed comments can be restored from this panel.'
+          }
         </p>
       </section>
     `;
@@ -431,7 +510,7 @@ export function mount({ container, access } = {}) {
   function setActionBusy(value) {
     actionBusy = value;
     const buttons = container.querySelectorAll(
-      '[data-action="toggle-hidden"], [data-action="toggle-pinned"], [data-action="delete-comment"]'
+      '[data-action="toggle-hidden"], [data-action="toggle-pinned"], [data-action="delete-comment"], [data-action="restore-comment"], [data-action="purge-comment"]'
     );
     buttons.forEach((button) => {
       button.disabled = value;
@@ -592,15 +671,79 @@ export function mount({ container, access } = {}) {
   async function removeComment() {
     if (!detail || actionBusy) return;
     const author = displayAuthor(detail);
+    const categoryField = container.querySelector('[data-role="removal-category"]');
+    const reasonField = container.querySelector('[data-role="removal-reason"]');
+    const category =
+      categoryField instanceof HTMLSelectElement &&
+      MODERATION_CATEGORIES.includes(categoryField.value)
+        ? categoryField.value
+        : 'other';
+    const reason = reasonField instanceof HTMLInputElement ? reasonField.value.trim() : '';
     const confirmed = await showConfirmModal({
-      title: 'Delete this comment?',
-      message: `Permanently delete the comment by <strong>${escapeAdminHtml(
+      title: 'Remove this comment from public view?',
+      message: `Remove the comment by <strong>${escapeAdminHtml(
         author
-      )}</strong>? This cannot be undone.`,
-      subtext:
-        'The comment document is removed. Replies are stored separately and are not deleted.',
-      confirmText: 'Delete comment',
+      )}</strong> from public view? The original text is archived for staff and the thread keeps a moderation notice.`,
+      subtext: 'You can restore the comment from this panel or from Deletions.',
+      confirmText: 'Remove from public view',
       cancelText: 'Keep comment',
+      confirmVariant: 'danger',
+      icon: 'eye-off',
+    });
+    if (!confirmed || destroyed) return;
+
+    setActionBusy(true);
+    try {
+      await deleteComment(selectedTaleId, selectedCommentId, { reason, category });
+      showToast('Comment removed from public view. It can be restored.', 'success');
+      closeDetail();
+      await loadFirstPage();
+    } catch (err) {
+      showToast(String(err?.message ?? '').trim() || 'Could not remove that comment.', 'error');
+    } finally {
+      if (!destroyed) setActionBusy(false);
+    }
+  }
+
+  async function restoreDeletedComment() {
+    if (!detail || actionBusy) return;
+    const confirmed = await showConfirmModal({
+      title: 'Restore this comment?',
+      message: `Restore the original text of the comment by <strong>${escapeAdminHtml(
+        displayAuthor(detail)
+      )}</strong> to the public thread?`,
+      subtext: 'The moderation notice is removed and the archived text becomes public again.',
+      confirmText: 'Restore comment',
+      cancelText: 'Cancel',
+      confirmVariant: 'primary',
+      icon: 'rotate-ccw',
+    });
+    if (!confirmed || destroyed) return;
+
+    setActionBusy(true);
+    try {
+      await restoreComment(selectedTaleId, selectedCommentId);
+      showToast('Comment restored.', 'success');
+      closeDetail();
+      await loadFirstPage();
+    } catch (err) {
+      showToast(String(err?.message ?? '').trim() || 'Could not restore that comment.', 'error');
+    } finally {
+      if (!destroyed) setActionBusy(false);
+    }
+  }
+
+  async function purgeDeletedComment() {
+    if (!detail || actionBusy) return;
+    const confirmed = await showConfirmModal({
+      title: 'Permanently delete this comment?',
+      message: `Permanently delete the removed comment by <strong>${escapeAdminHtml(
+        displayAuthor(detail)
+      )}</strong>?`,
+      subtext:
+        'This deletes the comment document and its staff archive. Replies are stored separately and are not deleted. This cannot be undone.',
+      confirmText: 'Delete permanently',
+      cancelText: 'Cancel',
       confirmVariant: 'danger',
       icon: 'trash-2',
     });
@@ -608,12 +751,15 @@ export function mount({ container, access } = {}) {
 
     setActionBusy(true);
     try {
-      await deleteComment(selectedTaleId, selectedCommentId);
-      showToast('Comment deleted.', 'success');
+      await purgeComment(selectedTaleId, selectedCommentId);
+      showToast('Comment permanently deleted.', 'success');
       closeDetail();
       await loadFirstPage();
     } catch (err) {
-      showToast(String(err?.message ?? '').trim() || 'Could not delete that comment.', 'error');
+      showToast(
+        String(err?.message ?? '').trim() || 'Could not permanently delete that comment.',
+        'error'
+      );
     } finally {
       if (!destroyed) setActionBusy(false);
     }
@@ -636,6 +782,10 @@ export function mount({ container, access } = {}) {
       moderate(detail?.isPinned === true ? 'unpin' : 'pin');
     } else if (action === 'delete-comment') {
       removeComment();
+    } else if (action === 'restore-comment') {
+      restoreDeletedComment();
+    } else if (action === 'purge-comment') {
+      purgeDeletedComment();
     }
   }
 

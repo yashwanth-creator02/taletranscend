@@ -7,6 +7,8 @@ const serviceMocks = vi.hoisted(() => ({
   getTaleDetail: vi.fn(),
   updateTale: vi.fn(),
   deleteTale: vi.fn(),
+  restoreTale: vi.fn(),
+  purgeTale: vi.fn(),
 }));
 
 const uiMocks = vi.hoisted(() => ({
@@ -19,6 +21,8 @@ vi.mock('@services/admin/content.service.js', () => ({
   getTaleDetail: serviceMocks.getTaleDetail,
   updateTale: serviceMocks.updateTale,
   deleteTale: serviceMocks.deleteTale,
+  restoreTale: serviceMocks.restoreTale,
+  purgeTale: serviceMocks.purgeTale,
   TALE_STATUSES: ['draft', 'submitted', 'published', 'rejected'],
   TALE_VISIBILITIES: ['public', 'private', 'unlisted'],
 }));
@@ -263,11 +267,17 @@ describe('admin content module', () => {
     await vi.waitFor(() => {
       expect(uiMocks.showConfirmModal).toHaveBeenCalled();
     });
-    expect(uiMocks.showConfirmModal.mock.calls[0][0].message).toContain('Delete');
+    expect(uiMocks.showConfirmModal.mock.calls[0][0].message).toContain('Remove');
     await vi.waitFor(() => {
-      expect(serviceMocks.deleteTale).toHaveBeenCalledWith('tale-1');
+      expect(serviceMocks.deleteTale).toHaveBeenCalledWith('tale-1', {
+        reason: '',
+        category: 'other',
+      });
     });
-    expect(uiMocks.showToast).toHaveBeenCalledWith('Tale deleted.', 'success');
+    expect(uiMocks.showToast).toHaveBeenCalledWith(
+      'Tale removed from public view. It can be restored from Deletions.',
+      'success'
+    );
 
     unmount();
   });

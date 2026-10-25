@@ -15,6 +15,7 @@ import * as localProgress from '@services/reader/localProgress.service.js';
 import * as cloudProgress from '@services/reader/cloudProgress.service.js';
 import * as downloadTale from '@services/tale/downloadTale.js';
 import * as confirmModal from '@ui/components/confirmModal.js';
+import * as reportDialog from '@ui/components/reportDialog.js';
 
 vi.mock('@services/reader/localProgress.service.js', () => ({
   markChapterRead: vi.fn(),
@@ -39,6 +40,10 @@ vi.mock('@services/tale/downloadTale.js', () => ({
 vi.mock('@ui/components/confirmModal.js', () => ({
   confirmTaleDownload: vi.fn(),
   showConfirmModal: vi.fn(),
+}));
+
+vi.mock('@ui/components/reportDialog.js', () => ({
+  showReportDialog: vi.fn(),
 }));
 
 vi.mock('@services/index.js', () => ({
@@ -462,7 +467,7 @@ describe('TaleInteractions', () => {
 
   describe('setupReportMissingTale', () => {
     it('dispatches report and updates button state on confirmation', async () => {
-      confirmModal.showConfirmModal.mockResolvedValue(true);
+      reportDialog.showReportDialog.mockResolvedValue(true);
       const { showToast } = await import('@ui/components/toast.js');
 
       setupReportMissingTale('missing-tale-abc');
@@ -470,14 +475,15 @@ describe('TaleInteractions', () => {
       const btn = document.getElementById('btn-report-missing-tale');
       await btn.click();
 
-      expect(confirmModal.showConfirmModal).toHaveBeenCalledWith(
+      expect(reportDialog.showReportDialog).toHaveBeenCalledWith(
         expect.objectContaining({
-          title: 'Report Missing Chronicle',
-          icon: 'flag',
-          confirmVariant: 'accent',
+          title: 'Report a missing chronicle',
+          category: 'bug',
+          targetType: 'tale',
+          targetId: 'missing-tale-abc',
         })
       );
-      expect(showToast).toHaveBeenCalledWith(
+      expect(showToast).not.toHaveBeenCalledWith(
         'Missing chronicle report dispatched to the archivists.',
         'success'
       );
@@ -485,8 +491,8 @@ describe('TaleInteractions', () => {
       expect(btn.textContent).toContain('Report Dispatched');
     });
 
-    it('does not dispatch report if user cancels confirmation modal', async () => {
-      confirmModal.showConfirmModal.mockResolvedValue(false);
+    it('does not dispatch report if the user cancels the dialog', async () => {
+      reportDialog.showReportDialog.mockResolvedValue(false);
       const { showToast } = await import('@ui/components/toast.js');
 
       setupReportMissingTale('missing-tale-abc');
@@ -494,7 +500,7 @@ describe('TaleInteractions', () => {
       const btn = document.getElementById('btn-report-missing-tale');
       await btn.click();
 
-      expect(confirmModal.showConfirmModal).toHaveBeenCalled();
+      expect(reportDialog.showReportDialog).toHaveBeenCalled();
       expect(showToast).not.toHaveBeenCalled();
       expect(btn.disabled).toBe(false);
     });

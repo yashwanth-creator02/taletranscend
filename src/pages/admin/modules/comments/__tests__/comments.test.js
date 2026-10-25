@@ -7,6 +7,8 @@ const serviceMocks = vi.hoisted(() => ({
   getCommentDetail: vi.fn(),
   moderateComment: vi.fn(),
   deleteComment: vi.fn(),
+  restoreComment: vi.fn(),
+  purgeComment: vi.fn(),
 }));
 
 const uiMocks = vi.hoisted(() => ({
@@ -19,7 +21,9 @@ vi.mock('@services/admin/comments.service.js', () => ({
   getCommentDetail: serviceMocks.getCommentDetail,
   moderateComment: serviceMocks.moderateComment,
   deleteComment: serviceMocks.deleteComment,
-  COMMENT_FILTERS: ['all', 'visible', 'hidden', 'pinned'],
+  restoreComment: serviceMocks.restoreComment,
+  purgeComment: serviceMocks.purgeComment,
+  COMMENT_FILTERS: ['all', 'visible', 'hidden', 'pinned', 'deleted'],
 }));
 
 vi.mock('@/ui/components/confirmModal.js', () => ({
@@ -219,11 +223,17 @@ describe('admin comments module', () => {
     await vi.waitFor(() => {
       expect(uiMocks.showConfirmModal).toHaveBeenCalled();
     });
-    expect(uiMocks.showConfirmModal.mock.calls[0][0].message.toLowerCase()).toContain('delete');
+    expect(uiMocks.showConfirmModal.mock.calls[0][0].message.toLowerCase()).toContain('remove');
     await vi.waitFor(() => {
-      expect(serviceMocks.deleteComment).toHaveBeenCalledWith('tale-1', 'comment-1');
+      expect(serviceMocks.deleteComment).toHaveBeenCalledWith('tale-1', 'comment-1', {
+        reason: '',
+        category: 'other',
+      });
     });
-    expect(uiMocks.showToast).toHaveBeenCalledWith('Comment deleted.', 'success');
+    expect(uiMocks.showToast).toHaveBeenCalledWith(
+      'Comment removed from public view. It can be restored.',
+      'success'
+    );
 
     unmount();
   });

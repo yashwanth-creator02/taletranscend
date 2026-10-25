@@ -5,6 +5,7 @@ import {
   editComment,
   deleteComment,
   deleteReply,
+  initCommunityGuidelines,
 } from '../comments.js';
 import * as fb from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
@@ -84,6 +85,29 @@ describe('TaleComments', () => {
       expect(fb.addDoc).not.toHaveBeenCalled();
 
       fb.auth.currentUser = previousUser;
+    });
+  });
+
+  describe('community guidelines', () => {
+    it('opens an accessible guidelines dialog and closes it with Escape', () => {
+      document.body.insertAdjacentHTML(
+        'beforeend',
+        '<button id="community-guidelines-btn" type="button">Community Guidelines</button>'
+      );
+      const trigger = document.getElementById('community-guidelines-btn');
+      initCommunityGuidelines();
+
+      trigger.click();
+
+      const dialog = document.getElementById('guidelines-dialog');
+      expect(dialog).not.toBeNull();
+      expect(dialog.querySelector('[role="dialog"]')).not.toBeNull();
+      expect(dialog.textContent).toContain('Community Guidelines');
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+
+      expect(document.getElementById('guidelines-dialog')).toBeNull();
+      expect(document.activeElement).toBe(trigger);
     });
   });
 
@@ -397,6 +421,10 @@ describe('TaleComments', () => {
           isDeleted: true,
           deletedAt: 'mock-ts',
           updatedAt: 'mock-ts',
+          deletedBy: 'u1',
+          deletionType: 'author',
+          deletionReason: 'Deleted by the author.',
+          moderationCategory: null,
         })
       );
       // Comment container remains present
@@ -494,6 +522,10 @@ describe('TaleComments', () => {
           isDeleted: true,
           deletedAt: 'mock-ts',
           updatedAt: 'mock-ts',
+          deletedBy: 'u1',
+          deletionType: 'author',
+          deletionReason: 'Deleted by the author.',
+          moderationCategory: null,
         })
       );
       expect(document.getElementById('reply-r1')).not.toBeNull();
@@ -554,6 +586,10 @@ describe('TaleComments', () => {
         isDeleted: true,
         deletedAt: 'mock-ts',
         updatedAt: 'mock-ts',
+        deletedBy: 'u1',
+        deletionType: 'author',
+        deletionReason: 'Deleted by the author.',
+        moderationCategory: null,
       });
     });
 
@@ -565,6 +601,10 @@ describe('TaleComments', () => {
         isDeleted: true,
         deletedAt: 'mock-ts',
         updatedAt: 'mock-ts',
+        deletedBy: 'u1',
+        deletionType: 'author',
+        deletionReason: 'Deleted by the author.',
+        moderationCategory: null,
       });
     });
   });
@@ -877,6 +917,10 @@ describe('TaleComments', () => {
             isDeleted: true,
             deletedAt: 'mock-ts',
             updatedAt: 'mock-ts',
+            deletedBy: 'u1',
+            deletionType: 'author',
+            deletionReason: 'Deleted by the author.',
+            moderationCategory: null,
           })
         );
 

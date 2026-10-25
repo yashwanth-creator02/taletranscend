@@ -72,18 +72,49 @@ v1/taletranscend/projects/v1/
      All three must move together; a UI that allows depth 4 or 5 while the rules cap 3 produces
      a silent `permission-denied` on submit.
 
-3. **Soft Deletion & Preservation Policy**:
-   - Comments and replies are never permanently deleted using `deleteDoc`.
-   - Soft-delete mutation: Sets `text: ''`, `isDeleted: true`, and `deletedAt: serverTimestamp()`.
-   - This preserves the comment thread tree and prevents orphaned child replies.
+3. **Soft Deletion, Registry & Preservation Policy**:
+   - Tales, comments, and replies are never removed with `deleteDoc` during ordinary moderation.
+   - Comments and replies: set `text: ''`, `isDeleted: true`, `deletedAt`, `deletedBy`,
+     `deletionType` (`author|administrator|automated`), `deletionReason`, and
+     `moderationCategory`; archive the original text in staff-only
+     `moderationArchive/{registryId}`. This preserves the thread tree and prevents orphaned
+     child replies.
+   - Tales: keep the document, chapters, comments, and relationships; set `isDeleted`,
+     `deletedAt`, `deletedBy`, `deletionType`, `deletionReason`, `moderationCategory`,
+     `previousStatus`, `previousVisibility`, `status: 'deleted'`, and
+     `visibility: 'private'`.
+   - Registry: write `softDeletions/{registryId}` with deterministic IDs
+     `tale_<taleId>`, `comment_<taleId>_<commentId>`, and
+     `reply_<taleId>_<commentId>_<replyId>` so staff can filter, restore, or purge without
+     scanning every entity collection.
+   - Public reads reject deleted tales and hide deleted comments/replies. Authors cannot edit
+     deleted records, reply under deleted parents, or like deleted comments.
+   - Permanent deletion is a separate staff action: administrator-only for tales, staff for
+     comments/replies, always confirmed and audited. It still does not cascade subcollections.
 
-4. **Edit Metadata Tracking**:
+4. **Reporting, Private Notes & Inbox**:
+   - `reports/{reportId}` is staff-visible and stores contextual target type/ID, category,
+     description, status, responses, reviewer, and timestamps.
+   - `reportHistory/{reportId}` is the reporter-safe mirror. A reporter may read only their own
+     history and create the initial pending mirror atomically with the report; private staff
+     notes never enter this collection.
+   - `reportPrivateNotes/{reportId}` is staff-only.
+   - Statuses: `pending`, `under_review`, `responded`, `resolved`, `dismissed`. Readers see
+     Submitted, Under Review, Responded, Resolved, and Closed.
+   - Responses append to both report and history and create a `report_response` notification in
+     `users/{uid}/notifications` with action URL `settings.html#section-support`. Direct staff
+     messages use `type: 'admin_message'`.
+   - Closed reports cannot be overwritten. Report creation requires a registered account and a
+     reason of 1-500 characters; the client uses the subject as `reason` and keeps the longer
+     description separately.
+
+5. **Edit Metadata Tracking**:
    - Inline edits set `text: newText`, `isEdited: true`, `editedAt: serverTimestamp()`, and `updatedAt: serverTimestamp()`.
 
-5. **Soul Resonance (Interactions)**:
+6. **Soul Resonance (Interactions)**:
    - Tracks resonance per user UID under tale interactions and reflects aggregated resonance counts on the tale document.
 
-6. **Inquiries & Missives (The Chronicler's Letter)**:
+7. **Inquiries & Missives (The Chronicler's Letter)**:
    - Path: `v1/taletranscend/projects/v1/inquiries/${inquiryId}` — **top-level**, NOT a tale
      subcollection. (An earlier revision of this directive described
      `tales/${taleId}/inquiries/${inquiryId}` with `readerId`/`status: 'unread'`; that shape
@@ -100,7 +131,7 @@ v1/taletranscend/projects/v1/
      (`authorId`+`taleId` and `senderId`+`taleId`), which Firestore will not serve from
      single-field indexes.
 
-7. **Drafts & Draft Chapters (authoring write contract)**:
+8. **Drafts & Draft Chapters (authoring write contract)**:
    - Paths: `v1/taletranscend/projects/v1/users/${userId}/drafts/${draftId}` and
      `.../drafts/${draftId}/chapters/${index}`.
    - `firestore.rules` requires `authorId == userId` and `status` on draft CREATE, and `status`
@@ -116,7 +147,7 @@ v1/taletranscend/projects/v1/
      (the "draft WITHOUT index/authorId is denied" cases). Any change to the editor's save
      payload must keep those tests passing.
 
-8. **Notifications & Admin Authority**:
+9. **Notifications & Admin Authority**:
    - Notification documents are created by an admin for a **different** user, so the create rule
      is `isAdmin()` — an owner-scoped create rule would deny the real flow.
    - `isAdmin()` reads custom claims ONLY (`request.auth.token.admin` / `.moderator`). The client
@@ -128,12 +159,13 @@ v1/taletranscend/projects/v1/
      `isRead` and `isPinned` must be booleans and `readAt` must be a timestamp, so the read/pin
      path cannot be used to store arbitrary values.
 
-9. **User Profile & Scribe Registry**:
-   - Path: `v1/taletranscend/projects/v1/users/${userId}`
-   - Author fields: `isAuthor: boolean`, `penName: string`, `authorEmail: string`, `authorBio: string`, `authorRegisteredAt: timestamp`.
-   - Author ownership: Read permitted publicly; write strictly restricted to `request.auth.uid == userId`.
+10. **User Profile & Scribe Registry**:
 
-10. **Published Tales & Chapters (the publish contract)**:
+- Path: `v1/taletranscend/projects/v1/users/${userId}`
+- Author fields: `isAuthor: boolean`, `penName: string`, `authorEmail: string`, `authorBio: string`, `authorRegisteredAt: timestamp`.
+- Author ownership: Read permitted publicly; write strictly restricted to `request.auth.uid == userId`.
+
+11. **Published Tales & Chapters (the publish contract)**:
     - Paths: `public/data/tales/${taleId}` and `.../tales/${taleId}/chapters/${index}`.
     - `src/pages/contribution/publish.js` writes the tale document ONCE, already
       `status: 'published'`. Do not reintroduce a follow-up `updateDoc` to flip the status:
@@ -160,25 +192,45 @@ v1/taletranscend/projects/v1/
 
 ### Composite Indexes
 
-All six legacy indexes plus three added in the 2026-10-19 audit. The three additions exist
-because these queries are double-equality or equality+orderBy, which Firestore refuses to serve
-from single-field indexes (`FAILED_PRECONDITION` at runtime, not at deploy time):
+`firestore.indexes.json` is the complete list. The table below records the
+high-traffic and moderation-critical entries; never hand-maintain a subset in
+production. Any new `where` + `where` or `where` + `orderBy` combination must add
+an entry in the same change, because a missing index is invisible until the query
+runs.
 
-| Collection         | Fields                             | Serves                                              |
-| ------------------ | ---------------------------------- | --------------------------------------------------- |
-| `tales`            | `status` ASC, `publishedAt` DESC   | Home/library feeds and the moderation pipeline      |
-| `tales`            | `authorId` ASC, `publishedAt` DESC | Author -> tales listing                             |
-| `comments`         | `taleId` ASC, `createdAt` DESC     | Echo stream ordering                                |
-| `drafts`           | `authorId` ASC, `updatedAt` DESC   | Draft shelf ordering                                |
-| `drafts`           | `userId` ASC, `updatedAt` DESC     | Draft shelf ordering (owner-scoped)                 |
-| `bookmarks`        | `userId` ASC, `createdAt` DESC     | Bookmark shelf ordering                             |
-| `inquiries`        | `authorId` ASC, `taleId` ASC       | `fetchAuthorInquiries` / `subscribeAuthorInquiries` |
-| `inquiries`        | `senderId` ASC, `taleId` ASC       | `fetchReaderInquiries` / `subscribeReaderInquiries` |
-| `deletionRequests` | `status` ASC, `createdAt` DESC     | Admin deletion-request queue                        |
+| Collection           | Fields                                                          | Serves                                         |
+| -------------------- | --------------------------------------------------------------- | ---------------------------------------------- |
+| `tales`              | `status` ASC, `publishedAt` DESC                                | Home/library feeds and the moderation pipeline |
+| `tales`              | `authorId` ASC, `publishedAt` DESC                              | Author -> tales listing                        |
+| `tales`              | `status` ASC, `updatedAt` DESC                                  | Admin global content list                      |
+| `tales`              | `status` ASC, `title` ASC                                       | Admin status-filtered title search             |
+| `comments`           | `taleId` ASC, `createdAt` DESC                                  | Echo stream ordering                           |
+| `comments`           | `taleId` ASC, `isHidden` ASC, `isPinned` DESC, `createdAt` DESC | Public visible/pinned ordering                 |
+| `comments` (group)   | `isHidden` ASC, `createdAt` DESC                                | Admin all/visible/hidden filters               |
+| `comments` (group)   | `isPinned` ASC, `createdAt` DESC                                | Admin pinned filter                            |
+| `comments` (group)   | `isDeleted` ASC, `createdAt` DESC                               | Admin removed-comment filter                   |
+| `drafts`             | `authorId` ASC, `updatedAt` DESC                                | Draft shelf ordering                           |
+| `drafts`             | `userId` ASC, `updatedAt` DESC                                  | Draft shelf ordering (owner-scoped)            |
+| `bookmarks`          | `userId` ASC, `createdAt` DESC                                  | Bookmark shelf ordering                        |
+| `inquiries`          | `authorId` ASC, `taleId` ASC                                    | Author inquiry feeds                           |
+| `inquiries`          | `senderId` ASC, `taleId` ASC                                    | Reader inquiry feeds                           |
+| `deletionRequests`   | `status` ASC, `createdAt` DESC                                  | Admin deletion-request queue                   |
+| `deletionRequests`   | `status` ASC, `taleId` ASC                                      | Admin tale-id prefix search                    |
+| `deletionRequests`   | `userId` ASC, `createdAt` DESC                                  | Author petition history                        |
+| `reports`            | `status` ASC, `createdAt` DESC                                  | Admin report queue                             |
+| `reports`            | `status` ASC, `targetId` ASC                                    | Admin target-id prefix search                  |
+| `reportHistory`      | `reporterId` ASC, `createdAt` DESC                              | Reader report history                          |
+| `softDeletions`      | `status` ASC, `deletedAt` DESC                                  | Removed-content registry                       |
+| `softDeletions`      | `status` ASC, `entityType` ASC, `deletedAt` DESC                | Type-filtered registry                         |
+| `softDeletions`      | `status` ASC, `title` ASC                                       | Registry title prefix search                   |
+| `softDeletions`      | `status` ASC, `entityType` ASC, `title` ASC                     | Type-filtered registry search                  |
+| `authorApplications` | `status` ASC, `createdAt` DESC                                  | Application queue                              |
+| `authorApplications` | `applicantId` ASC, `createdAt` DESC                             | Applicant history                              |
+| `authorApplications` | `status` ASC, `penName` ASC                                     | Admin pen-name prefix search                   |
 
-Deploy index changes with `firebase deploy --only firestore:indexes`. A missing index is
-invisible until the query runs, so any new `where` + `where` or `where` + `orderBy` combination
-must add an entry here in the same change.
+Deploy index changes with `firebase deploy --only firestore:indexes`. Deploy
+rules and indexes together for moderation/reporting changes; the report history,
+soft-deletion registry, and removed-comment filter depend on both.
 
 ## Outputs
 
@@ -188,7 +240,9 @@ must add an entry here in the same change.
 
 ## Edge Cases & Error Handling
 
-- Chronicle Preservation Policy: Rules strictly enforce author ownership and admin-only chronicle dissolution. Never relax permissions to allow non-owners or unauthenticated users to overwrite or delete tales.
+- Chronicle Preservation Policy: Rules strictly enforce author ownership and admin-only chronicle dissolution. Ordinary removal is a soft delete with a registry record and staff-only evidence; permanent dissolution is administrator-only, separately confirmed, and audited. Never relax permissions to allow non-owners or unauthenticated users to overwrite or delete tales.
+- Moderation evidence is staff-only: never expose `moderationArchive`, `reportPrivateNotes`, or private report fields to reporters. Reporter history is a separate mirror by design.
+- Deleted parents block new interactions: comments cannot be created on deleted tales, replies cannot be created under deleted comments/tales, and likes cannot target deleted comments. Author edits are denied on deleted comments/replies.
 - Anonymous Auth: Every visitor receives a persistent anonymous UID. Those sessions are guests and are read-only for content and contributions. Use `isRegistered()` / `isRegisteredOwner()` for every content, engagement, or contribution write; keep private reading aids (progress, bookmarks, lists, history, preferences) on `isOwner()`. See `docs/decisions/0007-guest-read-only.md`.
 - All ownership queries must reference `request.auth.uid`.
 - Nested Reply Rules Match: Always ensure `parentId` matches the top-level comment ID in payload when posting nested replies, otherwise Firestore rules reject with permission-denied.

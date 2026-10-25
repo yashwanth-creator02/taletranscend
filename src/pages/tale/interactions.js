@@ -8,7 +8,6 @@ import {
   createLogger,
   getRemainingTime,
   applyButtonCooldown,
-  escapeHtml,
 } from '@/utils';
 import {
   resolveResumePoint,
@@ -36,7 +35,8 @@ import {
   syncMarkAllChaptersUnread,
 } from '@services/reader/cloudProgress.service.js';
 import { downloadChronicle, downloadChapter } from '@services/tale/downloadTale.js';
-import { confirmTaleDownload, showConfirmModal } from '@ui/components/confirmModal.js';
+import { confirmTaleDownload } from '@ui/components/confirmModal.js';
+import { showReportDialog } from '@ui/components/reportDialog.js';
 
 const log = createLogger('TaleInteractions');
 
@@ -710,24 +710,22 @@ function _fadeAndGo(url) {
  */
 export function setupReportMissingTale(taleId) {
   const reportBtn = document.getElementById('btn-report-missing-tale');
-  if (!reportBtn) return;
+  if (!reportBtn || reportBtn.dataset.reportBound === 'true') return;
+  reportBtn.dataset.reportBound = 'true';
 
   reportBtn.addEventListener('click', async () => {
     try {
-      const confirmed = await showConfirmModal({
-        title: 'Report Missing Chronicle',
-        message: `Would you like to dispatch an archival report for unrecorded chronicle <span class="font-mono text-indigo-300 font-semibold">${escapeHtml(taleId || 'Unknown')}</span>?`,
-        subtext: 'Archivists will inspect missing indices under the Chronicle Preservation Policy.',
-        confirmText: 'Dispatch Report',
-        cancelText: 'Cancel',
-        confirmVariant: 'accent',
-        icon: 'flag',
+      const submitted = await showReportDialog({
+        title: 'Report a missing chronicle',
+        subject: `Missing tale: ${taleId || 'Unknown'}`,
+        category: 'bug',
+        description: `This tale link could not be resolved: ${taleId || 'Unknown'}`,
+        targetType: 'tale',
+        targetId: taleId || 'unknown',
+        taleId: taleId || '',
+        pageUrl: typeof window !== 'undefined' ? window.location.href : '',
       });
-
-      if (!confirmed) return;
-
-      log.info('Missing chronicle reported', { taleId });
-      showToast('Missing chronicle report dispatched to the archivists.', 'success');
+      if (!submitted) return;
 
       reportBtn.disabled = true;
       reportBtn.classList.add('opacity-60', 'cursor-not-allowed');

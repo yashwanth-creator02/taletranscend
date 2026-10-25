@@ -1,9 +1,17 @@
 // src/services/admin/__tests__/reports.service.test.js
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { listReportsPage, getReportDetail, resolveReport } from '../reports.service.js';
+import {
+  listReportsPage,
+  getReportDetail,
+  markReportUnderReview,
+  resolveReport,
+  respondToReport,
+  sendAdminMessage,
+} from '../reports.service.js';
 import { fetchAdminPage } from '../pagination.service.js';
 import { writeAdminAuditLog } from '../audit.service.js';
 import { getStaffIdentity } from '../session.service.js';
+import { createNotificationForUser } from '../../notification.service.js';
 
 vi.mock('../pagination.service.js', () => ({
   fetchAdminPage: vi.fn(),
@@ -17,11 +25,17 @@ vi.mock('../session.service.js', () => ({
   getStaffIdentity: vi.fn(),
 }));
 
+vi.mock('../../notification.service.js', () => ({
+  createNotificationForUser: vi.fn(),
+}));
+
 const mockGetDoc = vi.fn();
+const mockSetDoc = vi.fn();
 const mockUpdateDoc = vi.fn();
 
 vi.mock('@fb/index.js', () => ({
   getDoc: (...args) => mockGetDoc(...args),
+  setDoc: (...args) => mockSetDoc(...args),
   updateDoc: (...args) => mockUpdateDoc(...args),
   serverTimestamp: vi.fn(() => 'SERVER_TIMESTAMP'),
 }));
@@ -30,6 +44,8 @@ vi.mock('@fb/refs.js', () => ({
   refs: {
     reports: vi.fn(() => 'reports'),
     report: vi.fn((id) => `report/${id}`),
+    reportHistoryEntry: vi.fn((id) => `reportHistory/${id}`),
+    reportPrivateNote: vi.fn((id) => `reportPrivateNote/${id}`),
     tale: vi.fn((id) => `tale/${id}`),
     comment: vi.fn((taleId, commentId) => `tale/${taleId}/comment/${commentId}`),
     user: vi.fn((uid) => `user/${uid}`),
@@ -58,6 +74,9 @@ describe('reports service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetDoc.mockReset();
+    mockSetDoc.mockReset();
+    mockUpdateDoc.mockReset();
+    mockSetDoc.mockResolvedValue(undefined);
     mockUpdateDoc.mockResolvedValue(undefined);
     vi.mocked(fetchAdminPage).mockResolvedValue({ items: [], lastDoc: null, hasMore: false });
     vi.mocked(getStaffIdentity).mockResolvedValue({
@@ -67,6 +86,7 @@ describe('reports service', () => {
       displayName: 'Staff One',
     });
     vi.mocked(writeAdminAuditLog).mockResolvedValue({ success: true });
+    vi.mocked(createNotificationForUser).mockResolvedValue('notification-1');
   });
 
   it('pages pending reports newest first by default', async () => {
@@ -212,5 +232,146 @@ describe('reports service', () => {
 
     expect(getStaffIdentity).not.toHaveBeenCalled();
     expect(mockGetDoc).not.toHaveBeenCalled();
+  });
+
+  it('marks a pending report under review and mirrors the status for its reporter', async () => {
+    mockGetDoc.mockResolvedValueOnce(docSnapshot('rep-1', REPORT));
+
+    const result = await markReportUnderReview('rep-1');
+
+    expect(result).toEqual({ reportId: 'rep-1', status: 'under_review' });
+    expect(mockUpdateDoc).toHaveBeenCalledWith('report/rep-1', {
+      status: 'under_review',
+      reviewedBy: 'staff-1',
+      reviewedAt: 'SERVER_TIMESTAMP',
+      updatedAt: 'SERVER_TIMESTAMP',
+    });
+    expect(mockSetDoc).toHaveBeenCalledWith(
+      'reportHistory/rep-1',
+      expect.objectContaining({
+        status: 'under_review',
+        userVisibleStatus: 'Under Review',
+      }),
+      { merge: true }
+    );
+    expect(writeAdminAuditLog).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'report.under_review', targetId: 'rep-1' })
+    );
+  });
+
+  it('delivers a response to the reporter inbox and stores a private note', async () => {
+    mockGetDoc.mockResolvedValueOnce(
+      docSnapshot('rep-1', {
+        ...REPORT,
+        status: 'under_review',
+        subject: 'Unattributed chapter',
+        responses: [{ body: 'We are reviewing this.', status: 'under_review' }],
+      })
+    );
+
+    const result = await respondToReport('rep-1', {
+      response: 'The attribution has been corrected.',
+      status: 'resolved',
+      privateNote: 'Confirmed with the author.',
+    });
+
+    expect(result).toEqual({
+      reportId: 'rep-1',
+      status: 'resolved',
+      response: 'The attribution has been corrected.',
+    });
+    expect(mockUpdateDoc).toHaveBeenCalledWith(
+      'report/rep-1',
+      expect.objectContaining({
+        status: 'resolved',
+        latestResponse: 'The attribution has been corrected.',
+        userVisibleStatus: 'Resolved',
+        respondedBy: 'staff-1',
+      })
+    );
+    const update = mockUpdateDoc.mock.calls[0][1];
+    expect(update.responses).toHaveLength(2);
+    expect(update.responses[1]).toMatchObject({
+      body: 'The attribution has been corrected.',
+      status: 'resolved',
+      authorId: 'staff-1',
+    });
+    expect(mockSetDoc).toHaveBeenCalledWith(
+      'reportHistory/rep-1',
+      expect.objectContaining({
+        status: 'resolved',
+        latestResponse: 'The attribution has been corrected.',
+        userVisibleStatus: 'Resolved',
+      }),
+      { merge: true }
+    );
+    expect(mockSetDoc).toHaveBeenCalledWith('reportPrivateNote/rep-1', {
+      notes: 'Confirmed with the author.',
+      updatedBy: 'staff-1',
+      updatedAt: 'SERVER_TIMESTAMP',
+    });
+    expect(createNotificationForUser).toHaveBeenCalledWith(
+      'reader-1',
+      expect.objectContaining({
+        type: 'report_response',
+        title: 'Response to your report: Unattributed chapter',
+        body: 'The attribution has been corrected.',
+        actionUrl: 'settings.html#section-support',
+        reportId: 'rep-1',
+      })
+    );
+    expect(writeAdminAuditLog).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'report.resolved', targetId: 'rep-1' })
+    );
+  });
+
+  it('refuses to respond to a closed report', async () => {
+    mockGetDoc.mockResolvedValueOnce(docSnapshot('rep-1', { ...REPORT, status: 'dismissed' }));
+
+    await expect(respondToReport('rep-1', { response: 'Too late.' })).rejects.toThrow(
+      'Closed reports cannot receive a response.'
+    );
+
+    expect(mockUpdateDoc).not.toHaveBeenCalled();
+    expect(createNotificationForUser).not.toHaveBeenCalled();
+  });
+
+  it('sends a direct administrative message to an existing user inbox', async () => {
+    mockGetDoc.mockResolvedValueOnce(docSnapshot('reader-1', { displayName: 'Reader One' }));
+
+    const result = await sendAdminMessage({
+      recipientId: 'reader-1',
+      subject: 'A note from the archive',
+      body: 'Thank you for your report.',
+      reportId: 'rep-1',
+    });
+
+    expect(result).toEqual({ notificationId: 'notification-1', recipientId: 'reader-1' });
+    expect(createNotificationForUser).toHaveBeenCalledWith('reader-1', {
+      type: 'admin_message',
+      title: 'A note from the archive',
+      body: 'Thank you for your report.',
+      actionUrl: 'settings.html#section-support',
+      fromUserId: 'staff-1',
+      reportId: 'rep-1',
+    });
+    expect(writeAdminAuditLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'inbox.admin_message',
+        targetType: 'user',
+        targetId: 'reader-1',
+      })
+    );
+  });
+
+  it('rejects a direct message to a missing recipient', async () => {
+    mockGetDoc.mockResolvedValueOnce({ exists: () => false });
+
+    await expect(
+      sendAdminMessage({ recipientId: 'missing-user', subject: 'Hello', body: 'Are you there?' })
+    ).rejects.toThrow('That user could not be found.');
+
+    expect(createNotificationForUser).not.toHaveBeenCalled();
+    expect(writeAdminAuditLog).not.toHaveBeenCalled();
   });
 });

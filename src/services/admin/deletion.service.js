@@ -100,7 +100,7 @@ export async function getDeletionRequestDetail(requestId) {
   const request = await getDeletionRequest(requestId);
   if (!request) return null;
 
-  /** @type {{ id: string, title: string, authorId: string, authorName: string } | null} */
+  /** @type {{ id: string, title: string, authorId: string, authorName: string, status: string, visibility: string } | null} */
   let tale = null;
   if (request.taleId) {
     try {
@@ -112,6 +112,8 @@ export async function getDeletionRequestDetail(requestId) {
           title: data.title ?? '',
           authorId: data.authorId ?? '',
           authorName: data.authorName ?? '',
+          status: data.status ?? 'draft',
+          visibility: data.visibility ?? 'private',
         };
       }
     } catch {
@@ -181,7 +183,43 @@ export async function decideDeletionRequest(requestId, decision, { notes = '' } 
   const batch = writeBatch(db);
   batch.update(refs.deletionRequest(requestId), update);
   if (decision === 'approved') {
-    batch.delete(refs.tale(request.taleId));
+    const taleId = request.taleId;
+    batch.update(refs.tale(taleId), {
+      isDeleted: true,
+      deletedAt: serverTimestamp(),
+      deletedBy: identity.uid,
+      deletionType: 'author',
+      deletionReason: 'Author-requested archive deletion approved.',
+      moderationCategory: 'other',
+      previousStatus: request.tale?.status ?? 'draft',
+      previousVisibility: request.tale?.visibility ?? 'private',
+      status: 'deleted',
+      visibility: 'private',
+      updatedAt: serverTimestamp(),
+    });
+    batch.set(refs.softDeletion(`tale_${taleId}`), {
+      entityType: 'tale',
+      entityId: taleId,
+      parentId: '',
+      parentCommentId: '',
+      title: request.tale?.title ?? 'Untitled tale',
+      preview: '',
+      ownerId: request.tale?.authorId ?? request.userId ?? '',
+      ownerName: request.tale?.authorName ?? '',
+      deletedAt: serverTimestamp(),
+      deletedBy: identity.uid,
+      deletionType: 'author',
+      deletionReason: 'Author-requested archive deletion approved.',
+      moderationCategory: 'other',
+      status: 'deleted',
+      restoredAt: null,
+      restoredBy: null,
+      purgedAt: null,
+      purgedBy: null,
+      reportCount: 0,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
   }
   await batch.commit();
 
@@ -201,7 +239,7 @@ export async function decideDeletionRequest(requestId, decision, { notes = '' } 
   if (request.userId) {
     const approved = decision === 'approved';
     const notificationBody = approved
-      ? `Your deletion request for "${taleTitle}" was approved. The public tale record has been removed from the archive.`
+      ? `Your deletion request for "${taleTitle}" was approved. The tale has been moved out of public view and can be restored by an administrator.`
       : `Your deletion request for "${taleTitle}" was declined. The tale remains in the archive.`;
     await createNotificationForUser(request.userId, {
       type: 'system',

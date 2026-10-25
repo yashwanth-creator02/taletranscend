@@ -3,20 +3,36 @@
 // a notification: the only side effects are the status update and the audit
 // entry written under the caller's real identity.
 
-import { getDoc, serverTimestamp, updateDoc } from '@fb/index.js';
+import { getDoc, serverTimestamp, setDoc, updateDoc } from '@fb/index.js';
 import { refs } from '@fb/refs.js';
+import { createNotificationForUser } from '../notification.service.js';
+import {
+  REPORT_CATEGORY_LABELS,
+  REPORT_RESPONSE_MAX,
+  REPORT_STATUS_LABELS,
+} from '../report.service.js';
 import { fetchAdminPage } from './pagination.service.js';
 import { writeAdminAuditLog } from './audit.service.js';
 import { getStaffIdentity } from './session.service.js';
 
 /** Status values accepted by the list filter. `all` removes the where clause. */
-export const REPORT_STATUS_FILTERS = Object.freeze(['pending', 'resolved', 'dismissed', 'all']);
+export const REPORT_STATUS_FILTERS = Object.freeze([
+  'pending',
+  'under_review',
+  'responded',
+  'resolved',
+  'dismissed',
+  'all',
+]);
 
 /** Decisions a reviewer may record. */
 export const REPORT_RESOLUTIONS = Object.freeze(['resolved', 'dismissed']);
 
 /** Resolution notes are bounded to match the application-notes guard. */
 export const REPORT_NOTES_MAX = 1000;
+
+/** Private moderation notes are staff-only and never mirrored to the reporter. */
+export const REPORT_PRIVATE_NOTE_MAX = 2000;
 
 /**
  * @param {unknown} value
@@ -166,7 +182,20 @@ export async function getReportDetail(reportId) {
   const report = await getReport(reportId);
   if (!report) return null;
   const targetSummary = await loadTargetSummary(report);
-  return { ...report, targetSummary };
+  let privateNote = null;
+  try {
+    const noteSnap = await getDoc(refs.reportPrivateNote(reportId));
+    if (noteSnap.exists()) privateNote = { id: noteSnap.id, ...noteSnap.data() };
+  } catch {
+    privateNote = null;
+  }
+  return {
+    ...report,
+    targetSummary,
+    privateNote,
+    categoryLabel: REPORT_CATEGORY_LABELS[report.category] ?? 'General',
+    statusLabel: REPORT_STATUS_LABELS[report.status] ?? report.status,
+  };
 }
 
 /**
@@ -206,6 +235,19 @@ export async function resolveReport(reportId, resolution, { notes = '' } = {}) {
   if (resolutionNotes) update.resolutionNotes = resolutionNotes;
 
   await updateDoc(refs.report(reportId), update);
+  try {
+    await setDoc(
+      refs.reportHistoryEntry(reportId),
+      {
+        status: resolution,
+        userVisibleStatus: REPORT_STATUS_LABELS[resolution],
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+  } catch {
+    // A missing legacy mirror must not block the decision itself.
+  }
 
   const target = [report.targetType, report.targetId].filter(Boolean).join(' ');
   await writeAdminAuditLog({
@@ -218,4 +260,178 @@ export async function resolveReport(reportId, resolution, { notes = '' } = {}) {
   });
 
   return { reportId, status: resolution };
+}
+
+/**
+ * Marks a pending report as under review.
+ *
+ * @param {string} reportId
+ */
+export async function markReportUnderReview(reportId) {
+  if (!reportId) throw new Error('Report ID is required.');
+  const identity = await getStaffIdentity();
+  const report = await getReport(reportId);
+  if (!report) throw new Error('Report not found.');
+  if (!['pending', 'under_review'].includes(report.status)) {
+    throw new Error('This report has already been decided.');
+  }
+  await updateDoc(refs.report(reportId), {
+    status: 'under_review',
+    reviewedBy: identity.uid,
+    reviewedAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+  try {
+    await setDoc(
+      refs.reportHistoryEntry(reportId),
+      {
+        status: 'under_review',
+        userVisibleStatus: REPORT_STATUS_LABELS.under_review,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+  } catch {
+    // The report is authoritative; the mirror can be rebuilt by staff.
+  }
+  await writeAdminAuditLog({
+    actorId: identity.uid,
+    actorRole: identity.role,
+    action: 'report.under_review',
+    targetType: 'report',
+    targetId: reportId,
+    summary: 'Marked a report as under review.',
+  });
+  return { reportId, status: 'under_review' };
+}
+
+/**
+ * Sends a user-visible response, updates the reporter-safe history, stores a
+ * private staff note, and delivers the response to the reporter's inbox.
+ *
+ * @param {string} reportId
+ * @param {{ response: string, status?: 'responded'|'resolved', privateNote?: string }} input
+ */
+export async function respondToReport(reportId, input = {}) {
+  if (!reportId) throw new Error('Report ID is required.');
+  const response = String(input.response ?? '').trim();
+  if (!response) throw new Error('A response is required.');
+  if (response.length > REPORT_RESPONSE_MAX) {
+    throw new Error(`A response must be ${REPORT_RESPONSE_MAX} characters or fewer.`);
+  }
+  const status = input.status === 'resolved' ? 'resolved' : 'responded';
+  const privateNote = String(input.privateNote ?? '').trim();
+  if (privateNote.length > REPORT_PRIVATE_NOTE_MAX) {
+    throw new Error(`Private notes must be ${REPORT_PRIVATE_NOTE_MAX} characters or fewer.`);
+  }
+
+  const identity = await getStaffIdentity();
+  const report = await getReport(reportId);
+  if (!report) throw new Error('Report not found.');
+  if (report.status === 'dismissed') throw new Error('Closed reports cannot receive a response.');
+
+  const existingResponses = Array.isArray(report.responses) ? report.responses : [];
+  const responses = [
+    ...existingResponses,
+    { body: response, status, createdAt: new Date().toISOString(), authorId: identity.uid },
+  ];
+  const userVisibleStatus = REPORT_STATUS_LABELS[status] ?? 'Responded';
+
+  await updateDoc(refs.report(reportId), {
+    status,
+    latestResponse: response,
+    responses,
+    userVisibleStatus,
+    respondedBy: identity.uid,
+    respondedAt: serverTimestamp(),
+    reviewedBy: identity.uid,
+    reviewedAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+
+  try {
+    await setDoc(
+      refs.reportHistoryEntry(reportId),
+      {
+        status,
+        userVisibleStatus,
+        latestResponse: response,
+        responses,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+  } catch {
+    // The reporter may still see the response through the inbox notification.
+  }
+
+  if (privateNote) {
+    await setDoc(refs.reportPrivateNote(reportId), {
+      notes: privateNote,
+      updatedBy: identity.uid,
+      updatedAt: serverTimestamp(),
+    });
+  }
+
+  if (report.reporterId) {
+    await createNotificationForUser(report.reporterId, {
+      type: 'report_response',
+      title: `Response to your report: ${String(report.subject || 'Website report').slice(0, 120)}`,
+      body: response,
+      actionUrl: 'settings.html#section-support',
+      reportId,
+    });
+  }
+
+  await writeAdminAuditLog({
+    actorId: identity.uid,
+    actorRole: identity.role,
+    action: `report.${status}`,
+    targetType: 'report',
+    targetId: reportId,
+    summary: `Responded to report ${reportId} and delivered the response to the reporter's inbox.`,
+  });
+
+  return { reportId, status, response };
+}
+
+/**
+ * Sends a direct administrative message to a user's existing inbox.
+ *
+ * @param {{ recipientId: string, subject: string, body: string, reportId?: string }} input
+ */
+export async function sendAdminMessage(input = {}) {
+  const recipientId = String(input.recipientId ?? '').trim();
+  const subject = String(input.subject ?? '').trim();
+  const body = String(input.body ?? '').trim();
+  if (!recipientId) throw new Error('A recipient user ID is required.');
+  if (!subject) throw new Error('A message subject is required.');
+  if (!body) throw new Error('A message body is required.');
+  if (subject.length > 160) throw new Error('The subject must be 160 characters or fewer.');
+  if (body.length > 5000) throw new Error('The message must be 5,000 characters or fewer.');
+
+  const identity = await getStaffIdentity();
+  const recipient = await getDoc(refs.user(recipientId));
+  if (!recipient.exists()) throw new Error('That user could not be found.');
+
+  const notificationId = await createNotificationForUser(recipientId, {
+    type: 'admin_message',
+    title: subject,
+    body,
+    actionUrl: input.reportId ? 'settings.html#section-support' : 'profile.html',
+    fromUserId: identity.uid,
+    reportId: input.reportId ?? null,
+  });
+  if (!notificationId) throw new Error('The message could not be delivered.');
+
+  await writeAdminAuditLog({
+    actorId: identity.uid,
+    actorRole: identity.role,
+    action: 'inbox.admin_message',
+    targetType: 'user',
+    targetId: recipientId,
+    summary: `Sent an administrative inbox message: ${subject}`.slice(0, 1000),
+  });
+
+  return { notificationId, recipientId };
 }

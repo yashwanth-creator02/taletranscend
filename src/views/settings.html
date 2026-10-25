@@ -306,6 +306,20 @@
           <button
             type="button"
             class="settings-nav-item"
+            data-target="section-support"
+            role="tab"
+            aria-selected="false"
+            aria-controls="section-support"
+          >
+            <span class="settings-nav-mark" aria-hidden="true"
+              ><i data-lucide="life-buoy"></i
+            ></span>
+            <span class="settings-nav-label">Support &amp; Reports</span>
+          </button>
+
+          <button
+            type="button"
+            class="settings-nav-item"
             data-target="section-about"
             role="tab"
             aria-selected="false"
@@ -1467,6 +1481,107 @@
                 <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
               </a>
               instead.
+            </p>
+          </div>
+        </section>
+
+        <section
+          id="section-support"
+          class="settings-section hidden"
+          data-section-name="Support and Reports"
+        >
+          <div class="settings-section-header">
+            <span class="settings-section-mark" aria-hidden="true"
+              ><i data-lucide="life-buoy"></i
+            ></span>
+            <div class="settings-section-heading">
+              <h2 class="settings-section-title">Support &amp; Reports</h2>
+              <p class="settings-section-desc">
+                Contact the developer, report a problem, and follow the reports you have filed.
+              </p>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <div class="settings-row" data-setting-item>
+              <div class="settings-row__left">
+                <div class="settings-row__icon-wrap">
+                  <i data-lucide="mail" class="w-4 h-4 text-indigo-400"></i>
+                </div>
+                <div class="settings-row__text">
+                  <span class="settings-row__label">Connect with the Developer</span>
+                  <span class="settings-row__sub">
+                    For account, archive, or technical questions that need a direct reply.
+                  </span>
+                </div>
+              </div>
+              <div class="settings-row__right">
+                <a
+                  href="mailto:leo.two.dev@gmail.com"
+                  class="settings-btn-secondary"
+                  aria-label="Email the developer at leo.two.dev@gmail.com"
+                >
+                  <i data-lucide="send" class="w-4 h-4"></i>
+                  <span>Email</span>
+                </a>
+              </div>
+            </div>
+
+            <div class="settings-row" data-setting-item>
+              <div class="settings-row__left">
+                <div class="settings-row__icon-wrap">
+                  <i data-lucide="flag" class="w-4 h-4 text-indigo-400"></i>
+                </div>
+                <div class="settings-row__text">
+                  <span class="settings-row__label">Report a website problem</span>
+                  <span class="settings-row__sub">
+                    Send a report about a page, bug, or content issue to the administrator.
+                  </span>
+                </div>
+              </div>
+              <div class="settings-row__right">
+                <button type="button" id="btn-report-website" class="settings-btn-primary">
+                  <i data-lucide="flag" class="w-4 h-4"></i>
+                  <span>Report website</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-card" data-setting-item>
+            <div class="settings-row settings-row--stacked">
+              <div class="settings-row__left w-full">
+                <div class="settings-row__icon-wrap">
+                  <i data-lucide="history" class="w-4 h-4 text-indigo-400"></i>
+                </div>
+                <div class="settings-row__text">
+                  <span class="settings-row__label">Your report history</span>
+                  <span class="settings-row__sub">
+                    Submitted, Under Review, Responded, Resolved, and Closed reports appear here.
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  id="btn-refresh-reports"
+                  class="settings-btn-secondary settings-report-refresh"
+                >
+                  <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                  <span>Refresh</span>
+                </button>
+              </div>
+              <div
+                id="settings-report-history"
+                class="settings-report-history"
+                role="status"
+                aria-live="polite"
+              >
+                <p class="settings-report-empty">Loading your reports...</p>
+              </div>
+            </div>
+
+            <p class="settings-report-notice">
+              Please allow time for the administrator to review your report. If you do not receive a
+              reply within 3 business days, please contact us at leo.two.dev@gmail.com.
             </p>
           </div>
         </section>

@@ -19,16 +19,23 @@ const mocks = vi.hoisted(() => ({
   query: vi.fn((ref, ...constraints) => ({ ref, constraints })),
   serverTimestamp: vi.fn(() => 'server-timestamp'),
   updateDoc: vi.fn(),
+  writeBatch: vi.fn(),
+  batchSet: vi.fn(),
+  batchUpdate: vi.fn(),
+  batchCommit: vi.fn(),
   fetchAdminPage: vi.fn(),
   writeAdminAuditLog: vi.fn(),
   getStaffIdentity: vi.fn(),
+  createNotificationForUser: vi.fn(),
   tales: vi.fn(() => 'tales-collection'),
   tale: vi.fn((id) => `tale:${id}`),
   chapters: vi.fn((id) => `chapters:${id}`),
   comments: vi.fn((id) => `comments:${id}`),
+  softDeletion: vi.fn((id) => `softDeletion:${id}`),
 }));
 
 vi.mock('@fb/index.js', () => ({
+  db: { name: 'test-db' },
   deleteDoc: mocks.deleteDoc,
   getCountFromServer: mocks.getCountFromServer,
   getDoc: mocks.getDoc,
@@ -36,8 +43,16 @@ vi.mock('@fb/index.js', () => ({
   limit: mocks.limit,
   orderBy: mocks.orderBy,
   query: mocks.query,
+  refs: {
+    tales: mocks.tales,
+    tale: mocks.tale,
+    chapters: mocks.chapters,
+    comments: mocks.comments,
+    softDeletion: mocks.softDeletion,
+  },
   serverTimestamp: mocks.serverTimestamp,
   updateDoc: mocks.updateDoc,
+  writeBatch: mocks.writeBatch,
 }));
 
 vi.mock('@fb/refs.js', () => ({
@@ -60,6 +75,10 @@ vi.mock('../audit.service.js', () => ({
 
 vi.mock('../session.service.js', () => ({
   getStaffIdentity: mocks.getStaffIdentity,
+}));
+
+vi.mock('../../notification.service.js', () => ({
+  createNotificationForUser: mocks.createNotificationForUser,
 }));
 
 function makeSnapshot(id, data) {
@@ -108,6 +127,13 @@ describe('admin content service', () => {
     });
     mocks.updateDoc.mockResolvedValue(undefined);
     mocks.deleteDoc.mockResolvedValue(undefined);
+    mocks.writeBatch.mockReturnValue({
+      set: mocks.batchSet,
+      update: mocks.batchUpdate,
+      commit: mocks.batchCommit,
+    });
+    mocks.batchCommit.mockResolvedValue(undefined);
+    mocks.createNotificationForUser.mockResolvedValue('notif-1');
   });
 
   it('pages the whole tales collection newest-updated first', async () => {
@@ -308,19 +334,42 @@ describe('admin content service', () => {
     expect(mocks.writeAdminAuditLog).not.toHaveBeenCalled();
   });
 
-  it('deletes the tale record and audits the real caller', async () => {
+  it('soft-deletes the tale record, registers it, and audits the real caller', async () => {
     mocks.getDoc.mockResolvedValue(makeSnapshot('tale-1', TALE));
 
     const result = await deleteTale('tale-1');
 
-    expect(mocks.deleteDoc).toHaveBeenCalledWith('tale:tale-1');
+    expect(mocks.batchUpdate).toHaveBeenCalledWith(
+      'tale:tale-1',
+      expect.objectContaining({
+        isDeleted: true,
+        status: 'deleted',
+        visibility: 'private',
+        deletionType: 'administrator',
+      })
+    );
+    expect(mocks.batchSet).toHaveBeenCalledWith(
+      'softDeletion:tale_tale-1',
+      expect.objectContaining({
+        entityType: 'tale',
+        entityId: 'tale-1',
+        status: 'deleted',
+      })
+    );
     expect(result).toEqual({ id: 'tale-1', title: 'The Long Night' });
     expect(mocks.writeAdminAuditLog).toHaveBeenCalledWith(
       expect.objectContaining({
         actorId: 'staff-1',
-        action: 'tale.delete',
+        action: 'tale.soft_delete',
         targetType: 'tale',
         targetId: 'tale-1',
+      })
+    );
+    expect(mocks.createNotificationForUser).toHaveBeenCalledWith(
+      'author-1',
+      expect.objectContaining({
+        title: 'Tale removed from public view',
+        taleId: 'tale-1',
       })
     );
   });
@@ -329,7 +378,7 @@ describe('admin content service', () => {
     mocks.getDoc.mockResolvedValue(missingSnapshot('tale-1'));
 
     await expect(deleteTale('tale-1')).rejects.toThrow(/no longer exists/i);
-    expect(mocks.deleteDoc).not.toHaveBeenCalled();
+    expect(mocks.batchUpdate).not.toHaveBeenCalled();
     expect(mocks.writeAdminAuditLog).not.toHaveBeenCalled();
   });
 

@@ -41,10 +41,12 @@ Define the standard operating procedures, data structures, and UI behaviors for 
     - Soul Resonance: `resonance-btn-desktop` (Heart icon + `#resonance-count`, glass pill).
     - Shelf: `shelf-btn-desktop` ("Save to Shelf", glass pill).
     - Share: `share-btn-desktop` ("Share", glass pill).
+    - Report: `btn-report-tale` ("Report", glass pill) opens the contextual report dialog.
     - Do not render redundant separate "Soul Resonance Hearth" card boxes in the hero section.
   - **Mobile (`< lg`)**: Balanced two-tier grid:
     - Top tier: 2 equal-width columns for `start-btn` ("Initiate") and `resume-btn` ("Resume").
-    - Bottom tier: 3 equal-width columns for `resonance-btn-mobile` (Heart + count), `shelf-btn` ("Shelf"), and `share-btn` ("Share").
+    - Bottom tier: resonance, shelf, share, and report actions. Keep the report control reachable on
+      phones; do not hide contextual reporting behind a desktop-only deck.
 - **Soul Resonance Standard**:
   - Document path: `v1/taletranscend/projects/v1/reactions/${taleId}_${userId}`.
   - **No Verbose Status Labels**: Omit text like "Align Souls" or "Souls Aligned" from the hero button. The button renders strictly the heart icon and the resonance count.
@@ -122,9 +124,23 @@ Define the standard operating procedures, data structures, and UI behaviors for 
   - Updates Firestore document: `text: updatedText`, `isEdited: true`, `editedAt: serverTimestamp()`.
 - **Soft Deletion Protocol**:
   - Comments are never hard-deleted if descendant replies may exist.
-  - Firestore payload: `text: ''`, `isDeleted: true`, `deletedAt: serverTimestamp()`.
-  - UI representation: Displays "This has been deleted by the user." in muted, italic typography.
-  - Action triggers (reply, edit, delete) are hidden on soft-deleted items, while preserving the child reply tree.
+  - Author deletion payload: `text: ''`, `isDeleted: true`, `deletedAt`, `deletedBy`,
+    `deletionType: 'author'`, `deletionReason`, and `moderationCategory: null`.
+  - Administrator removal also archives the original text in staff-only
+    `moderationArchive` and writes a `softDeletions` registry record. The public document keeps
+    its ID and child replies.
+  - UI representation: author-deleted items show "This has been deleted by the user.";
+    administrator-removed items show a moderation notice with the category. Both use muted,
+    italic typography and preserve the child reply tree.
+  - Action triggers (reply, edit, delete, like, report) are hidden on soft-deleted items.
+- **Community Guidelines & Reporting**:
+  - The comments pane carries `#community-guidelines-btn` at its top-right. It opens an accessible
+    `role="dialog"` with focus trapping, Escape/backdrop close, and focus restoration.
+  - Non-owner comments and replies expose report triggers. Registered readers get a prefilled,
+    editable report dialog; guests are routed to the existing sign-in gate. Report history is
+    available under `settings.html#section-support`.
+  - The tale hero carries a report action, and the tale-not-found screen uses the same report
+    dialog instead of a confirm-only toast.
 - **Guest Read-Only Gate**:
   - Anonymous Firebase sessions are guests. Posting, replying, liking, editing, and deleting comments/replies must call `requireRegisteredUser()` from `src/services/auth.guard.js` before any write.
   - The gate shows a warning toast with a **Sign in or sign up** action whose `returnUrl` is the current page; Firestore rules enforce the same boundary with `isRegistered()`.
@@ -173,8 +189,9 @@ Define the standard operating procedures, data structures, and UI behaviors for 
     - Primary CTA: "Navigate to Library" linking directly to `/library.html`.
     - Secondary CTA: "Report Missing" button with quiet ghost styling.
 - **Report Missing Flow (`setupReportMissingTale`)**:
-  - Clicking "Report Missing" opens an accessible glassmorphic confirmation modal (`showConfirmModal`) confirming the report dispatch for the specific chronicle ID.
-  - Upon user confirmation, dispatches the archival report, fires a feedback toast ("Missing chronicle report dispatched to the archivists."), and transitions the button into a disabled state displaying "Report Dispatched".
+  - Clicking "Report Missing" opens the shared accessible report dialog (`showReportDialog`) prefilled with the unresolved chronicle ID, category `bug`, and target type `tale`.
+  - The reporter can edit subject, category, and description before submitting. On success the dialog reports success and the button becomes disabled with "Report Dispatched"; on cancel nothing changes.
+  - The global 404 page exposes the same dialog with target type `page`, and Settings exposes target type `website`.
 - **Anti-FOUC & Skeleton Clearance (`renderTaleNotFound`)**:
   - Hides `#hero-section` and `#tale-content-container`.
   - Purges all `.skeleton` pulse classes so no loading skeletons linger.

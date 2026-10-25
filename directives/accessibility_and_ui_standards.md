@@ -39,7 +39,7 @@ Define explicit standards for footer layout isolation, accessible toasting, keyb
   - A dedicated back button (`#settings-back-btn`) that navigates back to the previous address the page was opened from (`history.back()`), falling back gracefully to `/library.html`.
   - A live search filter input (`#settings-search-input`) with clear button (`#settings-search-clear`).
   - System reset trigger (`#btn-reset-settings`).
-- **Sidebar-Row Navigation**: Left sidebar provides a row for each section (`Profile`, `General & Theme`, `Reader`, `Atmosphere & Motion`, `Archival Storage`, `Accounts`, `About TaleTranscend`) with hash-driven section switching and an active-row indicator.
+- **Sidebar-Row Navigation**: Left sidebar provides a row for each section (`Profile`, `General & Theme`, `Reader`, `Atmosphere & Motion`, `Archival Storage`, `Accounts`, `Support & Reports`, `About TaleTranscend`) with hash-driven section switching and an active-row indicator.
 - **Divided Card Rows**: Settings items are organized into elevated cards with horizontal row dividers, maintaining single-source design token compliance and WCAG accessibility standards.
 
 ### 3. Accessible Toasting System (`src/ui/components/toast.js`)
@@ -62,6 +62,16 @@ Define explicit standards for footer layout isolation, accessible toasting, keyb
 - **Dialog & Modal Focus Trapping**:
   - Every modal must trap focus between its first and last focusable elements while open.
   - Pressing `Escape` must close the top-most modal and restore focus to the triggering element.
+- **Report and Community-Guidelines Dialogs**:
+  - The shared report dialog (`src/ui/components/reportDialog.js`) uses `role="dialog"`,
+    `aria-modal="true"`, a labelled heading, focus trapping, Escape/backdrop close, and focus
+    restoration. It is the single implementation for tales, comments, replies, pages, and the
+    website; do not fork confirm-only variants.
+  - The community-guidelines dialog follows the same contract and is opened from
+    `#community-guidelines-btn` at the top-right of the comments pane. It must remain reachable
+    on mobile and by keyboard.
+  - Report fields are prefilled from context but editable. Guests are stopped by the registered
+    user gate before any write.
 - **Meaningful ARIA Attributes**:
   - All icon-only buttons must include an explicit `aria-label`.
   - Decorative icons and marks must carry `aria-hidden="true"`.
@@ -162,6 +172,7 @@ The TaleTranscend brand mark is the mythical golden-trimmed black quill pen enci
     - **Atmosphere & Motion** (`#section-atmosphere`): particle, audio and reduced-motion toggles.
     - **Archival Storage** (`#section-storage`): local cache summary with clear action, plus the archived-records list of reading positions and inquiry threads stored on the device.
     - **Accounts** (`#section-accounts`): sign-in status, read-only email address, provider label, cloud archive state, guest elevation by email/password or Google, password update and reset for password accounts, and the Google-only state.
+    - **Support & Reports** (`#section-support`): developer contact `mailto:leo.two.dev@gmail.com`, the website report action, the exact three-business-day review notice, and the signed-in reader's own report history. Guests see a connect-account state; no report reads are attempted without a registered session.
     - **About TaleTranscend** (`#section-about`): engine, interface and archive colophon.
   - Hash navigation seamlessly resolves legacy hashes (`#themes` and `#system` -> `#section-general`, `#typography` -> `#section-reader`).
 - **Dedicated Sideheading & Below-Field Layout (`.settings-row--stacked`)**:

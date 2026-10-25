@@ -20,6 +20,7 @@ import {
   db,
 } from '@fb/index.js';
 import { showToast } from '@ui/components/toast.js';
+import { showReportDialog } from '@ui/components/reportDialog.js';
 import { requireRegisteredUser } from '@services/auth.guard.js';
 import { createComment } from '@state/index.js';
 import {
@@ -38,6 +39,17 @@ import { formatCommentDateTime, buildReplyTree } from '@/utils/comment.utils.ts'
 const log = createLogger('Comments');
 const PAGE_SIZE = 10;
 const COMMENT_COOLDOWN_MS = 30000; // 30s
+const MODERATION_CATEGORY_LABELS = {
+  harassment: 'Harassment or bullying',
+  hate_speech: 'Hate speech or discrimination',
+  threats: 'Threats or violence',
+  spam: 'Spam or advertising',
+  privacy: 'Personal information or privacy',
+  copyright: 'Copyright infringement',
+  inappropriate: 'Inappropriate content',
+  misinformation: 'Misinformation',
+  other: 'Community guidelines',
+};
 
 let _lastVisible = null;
 let _allLoaded = false;
@@ -77,6 +89,7 @@ export async function listenToComments(taleId, taleAuthorId = null) {
   const list = document.getElementById('comments-list');
   if (!list) return;
 
+  initCommunityGuidelines();
   _bindDelegatedEvents(list);
   await _fetchComments(true);
 }
@@ -584,6 +597,10 @@ export async function deleteComment(taleId, commentId) {
     text: '',
     isDeleted: true,
     deletedAt: serverTimestamp(),
+    deletedBy: auth.currentUser?.uid ?? null,
+    deletionType: 'author',
+    deletionReason: 'Deleted by the author.',
+    moderationCategory: null,
     updatedAt: serverTimestamp(),
   });
 }
@@ -604,6 +621,10 @@ export async function deleteReply(taleId, commentId, replyId) {
     text: '',
     isDeleted: true,
     deletedAt: serverTimestamp(),
+    deletedBy: auth.currentUser?.uid ?? null,
+    deletionType: 'author',
+    deletionReason: 'Deleted by the author.',
+    moderationCategory: null,
     updatedAt: serverTimestamp(),
   });
 }
@@ -666,6 +687,14 @@ export function getAuthorInitials(name) {
   return name.slice(0, 2).toUpperCase();
 }
 
+function _deletedNotice(c, entityLabel = 'comment') {
+  if (c.deletionType === 'administrator') {
+    const category = MODERATION_CATEGORY_LABELS[c.moderationCategory] || 'Community guidelines';
+    return `<p class="comment-moderation-notice">This ${entityLabel} was removed by an administrator for violating our community guidelines. <span class="text-[var(--text-muted)]">Category: ${escapeHtml(category)}.</span></p>`;
+  }
+  return `<p class="text-sm md:text-base text-muted italic font-medium">This has been deleted by the user.</p>`;
+}
+
 /**
  * @param {import('@state/schemas/tale.schema.js').Comment} c
  * @returns {string}
@@ -725,8 +754,23 @@ function _renderComment(c) {
       </button>`
     : '';
 
+  const reportBtnHtml =
+    !isOwner && !isDeleted
+      ? `<button
+          class="comment-action-btn report-comment-trigger group flex items-center gap-1.5 text-[8px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-amber-300 transition-all"
+          type="button"
+          data-comment-id="${c.id}"
+          data-author-name="${escapeHtml(c.authorName || 'Scribe')}"
+          aria-label="Report comment"
+          title="Report comment"
+        >
+          <i data-lucide="flag" class="w-3.5 h-3.5"></i>
+          <span>Report</span>
+        </button>`
+      : '';
+
   const textDisplayHtml = isDeleted
-    ? `<p id="comment-text-display-${c.id}" class="text-sm md:text-base text-muted italic font-medium">This has been deleted by the user.</p>`
+    ? `<div id="comment-text-display-${c.id}" class="italic">${_deletedNotice(c, 'comment')}</div>`
     : `<p id="comment-text-display-${c.id}" class="comment-body-text text-sm md:text-base text-[var(--text-primary)] leading-relaxed font-medium">${escapeHtml(c.text)}</p>`;
 
   const editFormHtml = isDeleted
@@ -794,6 +838,7 @@ function _renderComment(c) {
           ${replyBtnHtml}
           ${editBtnHtml}
           ${deleteBtnHtml}
+          ${reportBtnHtml}
         </div>
       </div>
 
@@ -888,8 +933,24 @@ function _renderReply(r, childrenHtml = '', currentDepth = 1) {
       </button>`
       : '';
 
+  const reportBtnHtml =
+    !isOwner && !isDeleted && r.id
+      ? `<button
+          class="comment-action-btn report-reply-trigger group flex items-center gap-1 text-[7px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-amber-300 transition-all"
+          type="button"
+          data-comment-id="${r.parentId || ''}"
+          data-reply-id="${r.id}"
+          data-author-name="${escapeHtml(r.authorName || 'Scribe')}"
+          aria-label="Report reply"
+          title="Report reply"
+        >
+          <i data-lucide="flag" class="w-2.5 h-2.5"></i>
+          <span>Report</span>
+        </button>`
+      : '';
+
   const replyTextHtml = isDeleted
-    ? `<p id="reply-text-display-${r.id || ''}" class="text-xs text-muted italic font-medium">This has been deleted by the user.</p>`
+    ? `<div id="reply-text-display-${r.id || ''}" class="italic">${_deletedNotice(r, 'reply')}</div>`
     : `<p id="reply-text-display-${r.id || ''}" class="comment-reply-text text-xs text-[var(--text-primary)] leading-relaxed font-medium">${escapeHtml(r.text || '')}</p>`;
 
   const replyEditFormHtml =
@@ -969,6 +1030,7 @@ function _renderReply(r, childrenHtml = '', currentDepth = 1) {
           ${replyBtnHtml}
           ${editBtnHtml}
           ${deleteBtnHtml}
+          ${reportBtnHtml}
         </div>
       </div>
 
@@ -988,6 +1050,76 @@ function _renderReply(r, childrenHtml = '', currentDepth = 1) {
 /* ─────────────────────────────────────────────
    Event Delegation
    ───────────────────────────────────────────── */
+
+/**
+ * Wires the comments-section information button to an accessible guidelines
+ * dialog. The dialog is built once and removed on close so it never traps
+ * stale focus between renders.
+ */
+export function initCommunityGuidelines() {
+  const trigger = document.getElementById('community-guidelines-btn');
+  if (!trigger || trigger.dataset.bound === 'true') return;
+  trigger.dataset.bound = 'true';
+  trigger.addEventListener('click', () => {
+    document.getElementById('guidelines-dialog')?.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'guidelines-dialog';
+    overlay.className = 'guidelines-dialog';
+    overlay.innerHTML = `
+      <div class="guidelines-dialog__backdrop" data-guidelines-close></div>
+      <div class="guidelines-dialog__panel" role="dialog" aria-modal="true" aria-labelledby="guidelines-title">
+        <div class="guidelines-dialog__header">
+          <div>
+            <p class="report-dialog__eyebrow">Community</p>
+            <h2 class="guidelines-dialog__title" id="guidelines-title">Community Guidelines</h2>
+          </div>
+          <button type="button" class="guidelines-dialog__close" data-guidelines-close aria-label="Close community guidelines">Close</button>
+        </div>
+        <ul class="guidelines-dialog__list">
+          <li><strong>Respectful discussion.</strong> Disagree with ideas, not people. Harassment, bullying, and personal attacks are not welcome.</li>
+          <li><strong>Hate, threats, and discrimination.</strong> Content that attacks people based on identity, threatens violence, or encourages harm will be removed.</li>
+          <li><strong>Spam and advertising.</strong> Repetitive comments, unsolicited promotion, and automated noise may be removed.</li>
+          <li><strong>Privacy.</strong> Do not share another person's private information, including addresses, phone numbers, or private messages.</li>
+          <li><strong>Copyright and inappropriate content.</strong> Only post work you have the right to share. Sexual content involving minors, graphic violence, and illegal material are prohibited.</li>
+          <li><strong>Reporting and moderation.</strong> Use the Report action on a comment or tale. Administrators may remove content, send a notice, or restrict participation. Reports are reviewed as capacity allows.</li>
+        </ul>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    const panel = overlay.querySelector('.guidelines-dialog__panel');
+    const close = () => {
+      document.removeEventListener('keydown', onKeydown);
+      overlay.remove();
+      trigger.focus();
+    };
+    const onKeydown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        close();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = panel.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    overlay.querySelectorAll('[data-guidelines-close]').forEach((button) => {
+      button.addEventListener('click', close);
+    });
+    document.addEventListener('keydown', onKeydown);
+    overlay.querySelector('button')?.focus();
+  });
+}
 
 function _bindDelegatedEvents(list) {
   list.addEventListener('click', async (e) => {
@@ -1050,6 +1182,35 @@ function _bindDelegatedEvents(list) {
 
     if (target.classList.contains('save-edit-trigger') && commentId) {
       await _handleSaveEditComment(commentId, target);
+      return;
+    }
+
+    if (target.classList.contains('report-comment-trigger') && commentId) {
+      await showReportDialog({
+        title: 'Report a comment',
+        subject: `Comment by ${target.dataset.authorName || 'a reader'}`,
+        category: 'harassment',
+        description: 'I am reporting this comment because it may violate the community guidelines.',
+        targetType: 'comment',
+        targetId: commentId,
+        taleId: _currentTaleId,
+        commentId,
+      });
+      return;
+    }
+
+    if (target.classList.contains('report-reply-trigger') && replyId) {
+      await showReportDialog({
+        title: 'Report a reply',
+        subject: `Reply by ${target.dataset.authorName || 'a reader'}`,
+        category: 'harassment',
+        description: 'I am reporting this reply because it may violate the community guidelines.',
+        targetType: 'reply',
+        targetId: replyId,
+        taleId: _currentTaleId,
+        commentId,
+        replyId,
+      });
       return;
     }
 

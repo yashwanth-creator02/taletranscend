@@ -4,6 +4,7 @@
 
 import '@css/base.css';
 import '@css/components.css';
+import '@css/components/moderation.css';
 import '@css/reader-themes.css';
 import '@css/pages/settings.css';
 
@@ -53,6 +54,12 @@ import {
   setStoredApiKey,
   clearStoredApiKey,
 } from '@/services/ai/apiKey.storage.js';
+import { showReportDialog } from '@ui/components/reportDialog.js';
+import {
+  getUserReports,
+  REPORT_CATEGORY_LABELS,
+  REPORT_STATUS_LABELS,
+} from '@services/report.service.js';
 
 const log = createLogger('Settings');
 
@@ -1176,6 +1183,145 @@ export function initProfileSettings() {
 }
 
 /**
+ * Formats a Firestore timestamp or ISO string for the support report list.
+ * @param {unknown} value
+ */
+function formatReportDate(value) {
+  if (!value) return '';
+  const date = typeof value?.toDate === 'function' ? value.toDate() : new Date(String(value));
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '';
+  return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+/**
+ * Renders the signed-in user's reporter-safe report history.
+ * @param {HTMLElement} container
+ * @param {Array<Record<string, unknown>>} reports
+ */
+function renderReportHistory(container, reports) {
+  if (!container) return;
+  if (!reports.length) {
+    container.innerHTML = `
+      <p class="settings-report-empty">
+        You have not filed a report yet. Use Report website or a report action on a tale,
+        comment, reply, or page.
+      </p>
+    `;
+    return;
+  }
+
+  container.innerHTML = reports
+    .map((report) => {
+      const status = String(report.status || 'pending');
+      const statusLabel = REPORT_STATUS_LABELS[status] || 'Submitted';
+      const categoryLabel = REPORT_CATEGORY_LABELS[report.category] || 'Other';
+      const subject = escapeHtml(String(report.subject || 'Report'));
+      const description = escapeHtml(String(report.description || '')).replace(/\r?\n/g, '<br />');
+      const latestResponse = escapeHtml(String(report.latestResponse || '')).replace(
+        /\r?\n/g,
+        '<br />'
+      );
+      const filed = formatReportDate(report.createdAt);
+      return `
+        <article class="settings-report-entry" data-status="${escapeHtml(status)}">
+          <div class="settings-report-entry__head">
+            <div>
+              <h3 class="settings-report-entry__title">${subject}</h3>
+              <p class="settings-report-entry__meta">
+                ${escapeHtml(categoryLabel)}${filed ? ` &middot; ${escapeHtml(filed)}` : ''}
+              </p>
+            </div>
+            <span class="settings-badge settings-report-status" data-status="${escapeHtml(status)}">
+              ${escapeHtml(statusLabel)}
+            </span>
+          </div>
+          ${description ? `<p class="settings-report-entry__body">${description}</p>` : ''}
+          ${
+            latestResponse
+              ? `<div class="settings-report-entry__response">
+                  <span class="settings-report-entry__response-label">Administrator response</span>
+                  <p>${latestResponse}</p>
+                </div>`
+              : ''
+          }
+        </article>
+      `;
+    })
+    .join('');
+}
+
+let supportAuthBound = false;
+
+/**
+ * Wires the Support & Reports section: developer contact, website reports, and
+ * the user's own report history. The report dialog itself enforces the
+ * registered-user requirement.
+ */
+export function initSupportSection() {
+  const reportBtn = document.getElementById('btn-report-website');
+  const refreshBtn = document.getElementById('btn-refresh-reports');
+  const historyEl = document.getElementById('settings-report-history');
+  if (!reportBtn && !refreshBtn && !historyEl) return;
+
+  let refreshing = false;
+
+  async function refreshReportHistory() {
+    if (!historyEl || refreshing) return;
+    refreshing = true;
+    if (refreshBtn) refreshBtn.disabled = true;
+
+    if (!auth?.currentUser || auth.currentUser.isAnonymous) {
+      historyEl.innerHTML = `
+        <p class="settings-report-empty">
+          Connect an email or Google account in Accounts to file reports and view their history.
+        </p>
+      `;
+      refreshing = false;
+      if (refreshBtn) refreshBtn.disabled = false;
+      return;
+    }
+
+    historyEl.innerHTML = '<p class="settings-report-empty">Loading your reports...</p>';
+    const reports = await getUserReports(auth.currentUser.uid);
+    renderReportHistory(historyEl, Array.isArray(reports) ? reports : []);
+    refreshing = false;
+    if (refreshBtn) refreshBtn.disabled = false;
+  }
+
+  if (reportBtn && reportBtn.dataset.bound !== 'true') {
+    reportBtn.dataset.bound = 'true';
+    reportBtn.addEventListener('click', async () => {
+      const submitted = await showReportDialog({
+        title: 'Report a website problem',
+        subject: 'Website report',
+        category: 'bug',
+        description: 'Please describe the problem you encountered on the website.',
+        targetType: 'website',
+        targetId: 'settings',
+        pageUrl: typeof window !== 'undefined' ? window.location.href : '',
+      });
+      if (submitted) await refreshReportHistory();
+    });
+  }
+
+  if (refreshBtn && refreshBtn.dataset.bound !== 'true') {
+    refreshBtn.dataset.bound = 'true';
+    refreshBtn.addEventListener('click', () => {
+      refreshReportHistory();
+    });
+  }
+
+  if (!supportAuthBound && auth) {
+    supportAuthBound = true;
+    onAuthStateChanged(auth, () => {
+      refreshReportHistory();
+    });
+  }
+
+  refreshReportHistory();
+}
+
+/**
  * Initializes interactive controls on the Settings page.
  */
 export function initSettingsInteractions() {
@@ -1850,6 +1996,7 @@ export function initSettingsPage() {
   initSettingsInteractions();
   setupAuthDisplay();
   setupAccountSettings();
+  initSupportSection();
   initIcons();
   readyReveal();
   log.info('Settings page initialized successfully');

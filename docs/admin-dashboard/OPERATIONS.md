@@ -83,21 +83,23 @@ mistyped or forbidden route is visible to the operator. The page is marked
 
 ## Data and actions
 
-| Module           | Reads                                                                                                                                                        | Writes                                                                                                                                                                                             |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Overview         | `getCountFromServer` for published tales, reader profiles, pending reports, applications and deletions; five recent audit entries                            | None                                                                                                                                                                                               |
-| Users            | `users` collection (newest or name order), exact UID lookup, per-user tale count on demand                                                                   | `isVerifiedWriter`, `updatedAt`; audit entry                                                                                                                                                       |
-| Tales & Chapters | Every tale, including drafts, filtered by status and searched by title or exact ID; cursor-paginated. Detail adds up to 50 chapters and a live comment count | `title`, `status`, `visibility`, the four required counters when missing, `publishedAt` on first publication, `updatedAt`; delete tale; audit entry. Chapter text stays author-owned and read-only |
-| Deletions        | `deletionRequests` filtered by status and searched by tale-id prefix, joined to the tale and requester profile                                               | Decision status, reviewer, timestamp, notes; approval deletes the tale in the same batch and notifies the author; audit entry                                                                      |
-| Reports          | `reports` filtered by status and searched by target-id prefix                                                                                                | `status`, reviewer, timestamp; audit entry                                                                                                                                                         |
-| Comments         | Collection-group read across every tale's `comments`, filtered by visible/hidden/pinned and paginated; detail adds the parent tale summary                   | `isHidden`, `isPinned`, `reportCount`, `updatedAt`; delete comment; audit entry. Public comment surfaces honour both flags                                                                         |
-| Applications     | `authorApplications` filtered by status and searched by case-sensitive pen-name prefix                                                                       | `status`, `reviewedBy`, `reviewedAt`, `notes`; approval also grants the applicant the profile `author` role; audit entry (administrators only)                                                     |
-| Audit            | `adminAuditLogs`, newest first, paginated                                                                                                                    | Append-only; never edited or deleted from the client                                                                                                                                               |
-| Author Studio    | The signed-in author's tales and deletion requests                                                                                                           | New deletion request (reason 5–2000 characters); no staff audit writes                                                                                                                             |
+| Module           | Reads                                                                                                                                                                                                                                                                                          | Writes                                                                                                                                                                                                                                                                    |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Overview         | `getCountFromServer` for published tales, reader profiles, pending reports, applications and deletions; five recent audit entries                                                                                                                                                              | None                                                                                                                                                                                                                                                                      |
+| Users            | `users` collection (newest or name order), exact UID lookup, per-user tale count on demand                                                                                                                                                                                                     | `isVerifiedWriter`, `updatedAt`; audit entry                                                                                                                                                                                                                              |
+| Tales & Chapters | Every tale, including drafts and soft-deleted records, filtered by status and searched by title or exact ID; cursor-paginated. Detail adds up to 50 chapters, a live comment count, and deletion metadata                                                                                      | `title`, `status`, `visibility`, the four required counters when missing, `publishedAt` on first publication, `updatedAt`; soft removal with reason/category; restore; separately confirmed permanent removal; audit entry. Chapter text stays author-owned and read-only |
+| Deletions        | Two tabs. Requests: `deletionRequests` filtered by status and searched by tale-id prefix, joined to the tale and requester profile. Removed content: `softDeletions` registry filtered by entity type/status and searched by title prefix, with live entity, archive text, and related reports | Petition decisions; approval soft-removes the tale and registers it for restore. Registry restore and separately confirmed permanent removal. Administrator-only bulk soft removal of up to 50 tales, all-or-nothing and audited                                          |
+| Reports          | `reports` filtered by Submitted/Under review/Responded/Resolved/Closed, searched by target-id prefix; detail includes subject, category, description, target summary, private staff note, and response history                                                                                 | Mark under review, send user-visible response (optionally mark resolved), resolve/close with notes, write private notes, and send direct inbox messages; every write audited                                                                                              |
+| Comments         | Collection-group read across every tale's `comments`, filtered by visible/hidden/pinned/removed and paginated; detail adds the parent tale summary, staff-only archived text, and deletion metadata                                                                                            | `isHidden`, `isPinned`, `reportCount`, `updatedAt`; soft removal with reason/category; restore; separately confirmed permanent removal; audit entry. Public comment surfaces honour all flags                                                                             |
+| Applications     | `authorApplications` filtered by status and searched by case-sensitive pen-name prefix                                                                                                                                                                                                         | `status`, `reviewedBy`, `reviewedAt`, `notes`; approval also grants the applicant the profile `author` role; audit entry (administrators only)                                                                                                                            |
+| Audit            | `adminAuditLogs`, newest first, paginated                                                                                                                                                                                                                                                      | Append-only; never edited or deleted from the client                                                                                                                                                                                                                      |
+| Author Studio    | The signed-in author's tales and deletion requests                                                                                                                                                                                                                                             | New deletion request (reason 5–2000 characters); no staff audit writes                                                                                                                                                                                                    |
 
 Counters that fail to load render an em dash rather than a fabricated number.
-All destructive actions require an explicit confirmation; deletion approval
-states that the public tale record will be removed.
+All destructive actions require an explicit confirmation. Removal keeps the
+record and moves it out of public view; permanent deletion is a separate action
+available only after review in the Removed content tab, and bulk removal states
+the selected count and types before confirmation.
 
 ### Global comment rule and indexes
 
@@ -125,6 +127,63 @@ isPinned + createdAt` index. Legacy comments written before those fields existed
 would be invisible to an equality query; the live project had 51 such comments,
 which were backfilled to `isHidden: false` and `isPinned: false` without changing
 any other field.
+
+## Moderation, reporting, and inbox operations
+
+### Soft deletion and restoration
+
+Removing a tale, comment, or reply never drops the document. The record receives
+`isDeleted`, `deletedAt`, `deletedBy`, `deletionType`, `deletionReason`,
+`moderationCategory`, and `updatedAt`. Tales additionally store
+`previousStatus`/`previousVisibility` and move to `status: 'deleted'` /
+`visibility: 'private'`. Comments and replies have their public text cleared;
+the original text is preserved in staff-only `moderationArchive` so restore can
+return it intact.
+
+The `softDeletions` registry provides cursor-friendly filters without scanning
+each entity collection. Registry IDs are deterministic:
+
+- `tale_<taleId>`
+- `comment_<taleId>_<commentId>`
+- `reply_<taleId>_<commentId>_<replyId>`
+- `chapter_<taleId>_<chapterIndex>` (registry support only; chapter removal is
+  not exposed as a separate operation in this delivery)
+
+Restore returns the tale to its previous status and visibility and notifies the
+owner. Comment/reply restore returns archived text. Permanent removal is
+administrator-only for tales and staff-authorized for comments/replies, requires
+a second confirmation, and is audited. Author-deleted comments and replies
+remain distinguishable from administrator moderation and are not restored by
+staff through the moderation flow.
+
+### Bulk tale removal
+
+The Removed content tab exposes an administrator-only bulk flow. It loads tale
+pages, excludes already-removed records, shows the selected count and titles
+before confirmation, and sends the selected IDs to
+`bulkSoftDeleteTales`. The service validates every record first, rejects more
+than 50 IDs, applies all updates and registry writes in one batch, and records
+one audit entry. A partial result is never reported as success.
+
+### Reports and responses
+
+Registered readers can report a tale, comment, reply, broken page, or the
+website. The report dialog prefills context but lets the reporter edit subject,
+category, and description. `createReport` writes the staff record and the
+reporter-safe `reportHistory` mirror atomically. Reporters read only their own
+history; private notes live in `reportPrivateNotes` and are staff-only.
+
+Report states are `pending`, `under_review`, `responded`, `resolved`, and
+`dismissed`; readers see Submitted, Under Review, Responded, Resolved, and
+Closed. Staff can mark under review, send a response, resolve, or close. A
+response appends to the report and history, optionally writes a private note,
+sends a `report_response` notification to the reporter's existing inbox, and is
+audited. Staff can also send a direct `admin_message` notification from the
+Reports workspace after the recipient is validated.
+
+The Settings Support & Reports section links the developer address
+`leo.two.dev@gmail.com`, opens the website report form, and lists the signed-in
+reader's own report history with the latest user-visible response.
 
 ## Verification
 
@@ -157,9 +216,11 @@ primary workflow.
   same reason: writing `role` cannot grant a claim. Application approval grants
   the author capability, but never changes an administrator or moderator
   profile role.
-- Approving a deletion removes the tale document. Chapter and comment
-  subcollections are not enumerable from the client after that point, so they
-  are left for server-side cleanup rather than deleted here.
+- Approving a deletion petition no longer erases the tale document. It soft-removes
+  the tale, records it in the Removed content registry, and notifies the author.
+  Chapter and comment subcollections remain intact for restoration. Permanent
+  removal is a separate administrator action and still does not cascade
+  subcollections, which requires a trusted server-side cleanup job.
 - A deletion petition must target an existing tale owned by the petitioner.
   The profile form accepts a title or ID and resolves it to one of the caller's
   own tales before writing the request; approval re-checks the owner.
@@ -180,11 +241,13 @@ primary workflow.
 - Tale edits are restricted to title, status and visibility, with the required
   counters and timestamp. Firestore enforces a five-second cooldown between
   updates. Chapter text remains author-owned and is read-only here; staff can
-  delete a tale but not rewrite its chapters.
-- Comment moderation can hide, unhide, pin, unpin or delete. Hidden comments are
-  removed from the tale and reader comment surfaces, and pinned comments sort
-  first. Deleting a comment does not cascade to its replies, because replies are
-  a separate subcollection.
+  soft-remove a tale but cannot rewrite its chapters.
+- Comment moderation can hide, unhide, pin, unpin, soft-remove, restore, or
+  permanently remove. Hidden and removed comments are absent from the tale and
+  reader comment surfaces, and pinned comments sort first. Removing a comment
+  does not cascade to its replies; replies are a separate subcollection and have
+  their own registry records. Staff-only archived text is shown in the detail
+  panel for removed comments.
 - The Comments module has status filters and cursor pagination but no full-text
   search; an unbounded text scan would defeat the Spark-plan page limits.
 - Admin tables scroll horizontally inside their container on narrow screens. The
@@ -194,8 +257,9 @@ primary workflow.
   `status + field` composite indexes in `firestore.indexes.json`; they are not
   unbounded collection scans. Audit search and author request-state checks
   operate on the pages already loaded.
-- The dashboard intentionally has no bulk actions and no client-side user
-  deletion.
+- The only bulk action is administrator-only soft removal of up to 50 tales,
+  validated all-or-nothing in one batch. There is no client-side user deletion.
+  Permanent removal remains a separate per-record action.
 - The Site Settings module was removed. It edited `appConfig/site` and four
   feature-flag documents (`betaAccess`, `darkMode`, `newReaderFlow`,
   `enhancedSearch`), but no reader bundle in this repository reads

@@ -28,10 +28,12 @@ vi.mock('../../notification.service.js', () => ({
 
 const mockGetDoc = vi.fn();
 const mockBatchUpdate = vi.fn();
+const mockBatchSet = vi.fn();
 const mockBatchDelete = vi.fn();
 const mockBatchCommit = vi.fn();
 const mockBatch = {
   update: (...args) => mockBatchUpdate(...args),
+  set: (...args) => mockBatchSet(...args),
   delete: (...args) => mockBatchDelete(...args),
   commit: () => mockBatchCommit(),
 };
@@ -49,6 +51,7 @@ vi.mock('@fb/refs.js', () => ({
     deletionRequests: vi.fn(() => 'deletionRequests'),
     deletionRequest: vi.fn((id) => `deletionRequest/${id}`),
     tale: vi.fn((id) => `tale/${id}`),
+    softDeletion: vi.fn((id) => `softDeletion/${id}`),
   },
 }));
 
@@ -80,6 +83,7 @@ describe('deletion service', () => {
     vi.clearAllMocks();
     mockGetDoc.mockReset();
     mockBatchUpdate.mockReset();
+    mockBatchSet.mockReset();
     mockBatchDelete.mockReset();
     mockBatchCommit.mockReset();
     mockBatchCommit.mockResolvedValue(undefined);
@@ -170,7 +174,7 @@ describe('deletion service', () => {
     await expect(getDeletionRequestDetail('missing')).resolves.toBeNull();
   });
 
-  it('approves a request by deleting the tale and recording the real actor', async () => {
+  it('approves a request by soft-deleting the tale and recording the real actor', async () => {
     mockGetDoc
       .mockResolvedValueOnce(docSnapshot('req-1', REQUEST))
       .mockResolvedValueOnce(docSnapshot('tale-1', TALE));
@@ -186,7 +190,24 @@ describe('deletion service', () => {
       reviewedAt: 'SERVER_TIMESTAMP',
       adminNotes: 'Confirmed by the archive council.',
     });
-    expect(mockBatchDelete).toHaveBeenCalledWith('tale/tale-1');
+    expect(mockBatchUpdate).toHaveBeenCalledWith(
+      'tale/tale-1',
+      expect.objectContaining({
+        isDeleted: true,
+        status: 'deleted',
+        visibility: 'private',
+        deletionType: 'author',
+      })
+    );
+    expect(mockBatchSet).toHaveBeenCalledWith(
+      'softDeletion/tale_tale-1',
+      expect.objectContaining({
+        entityType: 'tale',
+        entityId: 'tale-1',
+        deletionType: 'author',
+        status: 'deleted',
+      })
+    );
     expect(mockBatchCommit).toHaveBeenCalledTimes(1);
     expect(writeAdminAuditLog).toHaveBeenCalledWith(
       expect.objectContaining({

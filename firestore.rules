@@ -499,8 +499,11 @@ service cloud.firestore {
 
       match /public/data/tales/{taleId} {
         // Public read for published tales; drafts hidden
-        allow read: if resource.data.visibility == 'public'
-          || resource.data.status == 'published'
+        allow read: if (
+            (resource.data.visibility == 'public'
+              || resource.data.status == 'published')
+            && resource.data.get('isDeleted', false) != true
+          )
           || isAuthor()
           || isAdmin();
 
@@ -557,6 +560,17 @@ service cloud.firestore {
         // even though nothing writes them client-side yet, so this doesn't
         // need revisiting if that gets wired up later.
         allow update: if (
+            isAdministrator()
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                 'isDeleted', 'deletedAt', 'deletedBy', 'deletionType',
+                 'deletionReason', 'moderationCategory', 'previousStatus',
+                 'previousVisibility', 'status', 'visibility', 'restoredAt',
+                 'restoredBy', 'updatedAt'
+               ])
+            && request.resource.data.get('status', '') in ['draft', 'submitted', 'published', 'rejected', 'deleted']
+            && request.resource.data.get('visibility', '') in ['public', 'private', 'unlisted']
+            && isValidTimestamp('updatedAt')
+          ) || (
             ((isRegistered() && isAuthor()) || isAdministrator())
             && respectsCooldown()
             && isValidString('title', 1, 200)
@@ -641,6 +655,7 @@ service cloud.firestore {
           // is enough to guard against a malicious payload, without
           // re-validating each one individually.
           allow create: if isRegistered()
+            && get(/databases/$(database)/documents/v1/taletranscend/projects/v1/public/data/tales/$(taleId)).data.get('isDeleted', false) != true
             && isValidString('text', 1, 5000)
             && request.resource.data.text.trim().size() > 0
             && isValidString('taleId', 1, 100)
@@ -667,7 +682,8 @@ service cloud.firestore {
               && (
                 // Author editing text
                 (
-                  isValidString('text', 1, 5000)
+                  resource.data.get('isDeleted', false) != true
+                  && isValidString('text', 1, 5000)
                   && request.resource.data.text.trim().size() > 0
                   && isValidBool('isEdited')
                   && request.resource.data.isEdited == true
@@ -706,6 +722,8 @@ service cloud.firestore {
               || isAdmin();
 
             allow create: if isRegistered()
+              && get(/databases/$(database)/documents/v1/taletranscend/projects/v1/public/data/tales/$(taleId)).data.get('isDeleted', false) != true
+              && get(/databases/$(database)/documents/v1/taletranscend/projects/v1/public/data/tales/$(taleId)/comments/$(commentId)).data.get('isDeleted', false) != true
               && isValidString('text', 1, 5000)
               && request.resource.data.text.trim().size() > 0
               && isValidString('taleId', 1, 100)
@@ -724,7 +742,8 @@ service cloud.firestore {
                 && (
                   // Author editing reply text
                   (
-                    isValidString('text', 1, 5000)
+                    resource.data.get('isDeleted', false) != true
+                    && isValidString('text', 1, 5000)
                     && request.resource.data.text.trim().size() > 0
                     && isValidBool('isEdited')
                     && request.resource.data.isEdited == true
@@ -750,7 +769,9 @@ service cloud.firestore {
           // COMMENT LIKES  —  .../comments/{commentId}/likes/{uid}
           match /likes/{uid} {
             allow read: if true;
-            allow create: if isRegisteredOwner(uid);
+            allow create: if isRegisteredOwner(uid)
+              && get(/databases/$(database)/documents/v1/taletranscend/projects/v1/public/data/tales/$(taleId)).data.get('isDeleted', false) != true
+              && get(/databases/$(database)/documents/v1/taletranscend/projects/v1/public/data/tales/$(taleId)/comments/$(commentId)).data.get('isDeleted', false) != true;
             allow delete: if isRegisteredOwner(uid) || isAdmin();
           }
         }
@@ -836,7 +857,7 @@ service cloud.firestore {
           && request.resource.data.reporterId == request.auth.uid
           && isValidString('targetId', 1, 100)
           && isValidString('targetType', 1, 50)
-          && request.resource.data.targetType in ['tale', 'comment', 'user']
+          && request.resource.data.targetType in ['tale', 'comment', 'reply', 'user', 'page', 'website']
           && isValidString('reason', 1, 500)
           && isValidString('status', 1, 50)
           && request.resource.data.status == 'pending'
@@ -844,17 +865,63 @@ service cloud.firestore {
 
         allow read: if isAdmin();
         allow update: if isAdmin()
-          && resource.data.status == 'pending'
+          && resource.data.status in ['pending', 'under_review', 'responded']
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-               'status', 'reviewedAt', 'reviewedBy', 'resolutionNotes'
+               'status', 'reviewedAt', 'reviewedBy', 'resolutionNotes',
+               'respondedAt', 'respondedBy', 'latestResponse', 'responses',
+               'userVisibleStatus', 'updatedAt'
              ])
-          && request.resource.data.status in ['resolved', 'dismissed']
-          && isValidTimestamp('reviewedAt')
-          && isValidString('reviewedBy', 1, 100)
-          && request.resource.data.reviewedBy == request.auth.uid
+          && request.resource.data.status in ['under_review', 'responded', 'resolved', 'dismissed']
+          && (!('reviewedBy' in request.resource.data)
+              || (isValidString('reviewedBy', 1, 100)
+                  && request.resource.data.reviewedBy == request.auth.uid))
+          && (!('respondedBy' in request.resource.data)
+              || (isValidString('respondedBy', 1, 100)
+                  && request.resource.data.respondedBy == request.auth.uid))
           && (!('resolutionNotes' in request.resource.data)
-              || isValidString('resolutionNotes', 0, 1000));
+              || isValidString('resolutionNotes', 0, 1000))
+          && (!('latestResponse' in request.resource.data)
+              || isValidString('latestResponse', 0, 5000));
         allow delete: if isAdmin();
+      }
+
+      // REPORTER-SAFE HISTORY  --  reportHistory/{reportId}
+      // The mirror deliberately contains no private moderation notes. A
+      // reporter may read only their own entry; staff maintain the mirror.
+      match /reportHistory/{reportId} {
+        allow read: if isAdmin()
+          || (isAuthenticated() && resource.data.reporterId == request.auth.uid);
+        allow create: if isRegistered()
+          && request.resource.data.reporterId == request.auth.uid
+          && request.resource.data.status == 'pending'
+          && request.resource.data.latestResponse == ''
+          && isValidTimestamp('createdAt');
+        allow update: if isAdmin();
+        allow delete: if isAdmin();
+      }
+
+      // PRIVATE REPORT NOTES  --  reportPrivateNotes/{reportId}
+      match /reportPrivateNotes/{reportId} {
+        allow read, write: if isAdmin();
+      }
+
+      // SOFT-DELETION REGISTRY  --  softDeletions/{entryId}
+      match /softDeletions/{entryId} {
+        allow read: if isAdmin();
+        allow create: if isAdmin()
+          && request.resource.data.entityType in ['tale', 'comment', 'reply', 'chapter']
+          && request.resource.data.status in ['deleted', 'restored', 'purged']
+          && (request.resource.data.entityType != 'tale' || isAdministrator());
+        allow update: if isAdmin()
+          && request.resource.data.entityType in ['tale', 'comment', 'reply', 'chapter']
+          && request.resource.data.status in ['deleted', 'restored', 'purged']
+          && (request.resource.data.entityType != 'tale' || isAdministrator());
+        allow delete: if isAdministrator();
+      }
+
+      // MODERATION ARCHIVE  --  moderationArchive/{entryId}
+      match /moderationArchive/{entryId} {
+        allow read, write: if isAdmin();
       }
 
       // MODERATION LOG  —  moderationLogs/{logId}

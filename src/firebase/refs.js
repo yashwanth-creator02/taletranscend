@@ -198,6 +198,30 @@ export const refs = {
   /** Single report document */
   report: (id) => doc(db, PATHS.report(id)),
 
+  /** Reporter-safe report history collection. */
+  reportHistory: () => collection(db, PATHS.reportHistory()),
+
+  /** Reporter-safe report history document. */
+  reportHistoryEntry: (id) => doc(db, PATHS.reportHistoryEntry(id)),
+
+  /** Staff-only private report notes collection. */
+  reportPrivateNotes: () => collection(db, PATHS.reportPrivateNotes()),
+
+  /** Staff-only private report note document. */
+  reportPrivateNote: (id) => doc(db, PATHS.reportPrivateNote(id)),
+
+  /** Soft-deletion registry collection. */
+  softDeletions: () => collection(db, PATHS.softDeletions()),
+
+  /** Soft-deletion registry document. */
+  softDeletion: (id) => doc(db, PATHS.softDeletion(id)),
+
+  /** Staff-only moderation archive collection. */
+  moderationArchive: () => collection(db, PATHS.moderationArchive()),
+
+  /** Staff-only moderation archive document. */
+  moderationArchiveEntry: (id) => doc(db, PATHS.moderationArchiveEntry(id)),
+
   /** All legacy moderation logs */
   moderationLogs: () => collection(db, PATHS.moderationLogs()),
 

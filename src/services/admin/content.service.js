@@ -8,7 +8,6 @@
 // document; Firestore does not cascade subcollections.
 
 import {
-  deleteDoc,
   getCountFromServer,
   getDoc,
   getDocs,
@@ -20,6 +19,12 @@ import {
 } from '@fb/index.js';
 import { refs } from '@fb/refs.js';
 import { createLogger } from '@/utils';
+import {
+  bulkSoftDeleteTales,
+  permanentlyDeleteTale,
+  restoreTale as restoreSoftDeletedTale,
+  softDeleteTale,
+} from '../moderation.service.js';
 import { ADMIN_PAGE_SIZE, fetchAdminPage } from './pagination.service.js';
 import { writeAdminAuditLog } from './audit.service.js';
 import { getStaffIdentity } from './session.service.js';
@@ -33,6 +38,7 @@ export const CONTENT_STATUS_FILTERS = Object.freeze([
   'draft',
   'submitted',
   'rejected',
+  'deleted',
 ]);
 
 /** Statuses the tale update rule accepts. */
@@ -278,43 +284,41 @@ export async function updateTale(taleId, changes = {}) {
 }
 
 /**
- * Permanently delete the public tale document.
- *
- * Chapter and comment subcollections are left in place because Firestore does
- * not cascade collection deletes. The confirmation text in the dashboard says
- * this explicitly. The audit entry is written after the delete succeeds.
+ * Soft-delete the public tale record. The record and its subcollections stay
+ * in Firestore; status/visibility remove it from public discovery and a
+ * registry entry makes it available in the Deletions workspace.
  *
  * @param {string} taleId
+ * @param {{ reason?: string, category?: string }} [options]
  * @returns {Promise<{ id: string, title: string }>}
  */
-export async function deleteTale(taleId) {
+export async function deleteTale(taleId, { reason = '', category = 'other' } = {}) {
   const id = String(taleId ?? '').trim();
   if (!id) throw new Error('A tale id is required.');
 
-  const identity = await getStaffIdentity();
   const snap = await getDoc(refs.tale(id));
   if (!snap.exists()) throw new Error('That tale no longer exists.');
   const title = cleanText(snap.data()?.title, 200) || id;
 
-  await deleteDoc(refs.tale(id));
-
-  try {
-    const audit = await writeAdminAuditLog({
-      actorId: identity.uid,
-      actorRole: identity.role,
-      action: 'tale.delete',
-      targetType: 'tale',
-      targetId: id,
-      summary:
-        `Deleted the public tale record "${title}". Subcollections were left in place.`.slice(
-          0,
-          1000
-        ),
-    });
-    if (!audit?.success) log.warn('The tale delete was saved but its audit entry failed', { id });
-  } catch (err) {
-    log.warn('The tale delete was saved but its audit entry failed', err);
-  }
+  await softDeleteTale(id, {
+    reason: cleanText(reason, 500) || 'Removed from the admin content workspace.',
+    category,
+  });
 
   return { id, title };
+}
+
+/** Restore a soft-deleted tale. */
+export async function restoreTale(taleId) {
+  return restoreSoftDeletedTale(taleId);
+}
+
+/** Permanently remove a previously soft-deleted tale. */
+export async function purgeTale(taleId) {
+  return permanentlyDeleteTale(taleId);
+}
+
+/** Bulk soft-delete selected tales with all-or-nothing validation. */
+export async function bulkDeleteTales(taleIds, options = {}) {
+  return bulkSoftDeleteTales(taleIds, options);
 }

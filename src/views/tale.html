@@ -301,7 +301,7 @@
                 </button>
               </div>
 
-              <div class="grid grid-cols-3 gap-2">
+              <div class="grid grid-cols-4 gap-2">
                 <button
                   id="resonance-btn-mobile"
                   class="btn btn-secondary h-10 px-2 rounded-xl text-xs font-semibold group"
@@ -333,6 +333,16 @@
                 >
                   <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
                   <span>Share</span>
+                </button>
+
+                <button
+                  id="btn-report-tale-mobile"
+                  class="btn btn-secondary h-10 px-2 rounded-xl text-xs font-semibold"
+                  title="Report this tale"
+                  aria-label="Report this tale"
+                >
+                  <i data-lucide="flag" class="w-3.5 h-3.5"></i>
+                  <span>Report</span>
                 </button>
               </div>
 
@@ -444,6 +454,16 @@
                 >
                   <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
                   <span>Share</span>
+                </button>
+
+                <button
+                  id="btn-report-tale"
+                  class="btn btn-secondary py-3 px-4 rounded-xl text-xs font-semibold shrink-0"
+                  title="Report this tale"
+                  aria-label="Report this tale"
+                >
+                  <i data-lucide="flag" class="w-3.5 h-3.5"></i>
+                  <span>Report</span>
                 </button>
 
                 <!-- Author Quick Edit (Desktop) -->
@@ -754,6 +774,18 @@
 
           <!-- Tab 3: Echoes (Comments) Pane -->
           <div id="content-comments" class="tab-content hidden animate-fade-in space-y-6">
+            <div class="flex items-center justify-end">
+              <button
+                type="button"
+                id="community-guidelines-btn"
+                class="px-3 py-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-2"
+                aria-haspopup="dialog"
+                aria-controls="guidelines-dialog"
+              >
+                <i data-lucide="info" class="w-3.5 h-3.5"></i>
+                <span>Community Guidelines</span>
+              </button>
+            </div>
             <div
               class="glass-card-strong p-6 sm:p-8 rounded-3xl border border-white/6 shadow-xl space-y-4"
             >

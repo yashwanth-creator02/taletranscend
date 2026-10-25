@@ -1,0 +1,212 @@
+/* Shared moderation surfaces: report dialog, guidelines, notices. */
+
+.report-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+}
+
+.report-dialog__backdrop {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--text-primary) 72%, transparent);
+}
+
+.report-dialog__panel {
+  position: relative;
+  width: min(100%, 34rem);
+  max-height: min(90vh, 48rem);
+  overflow-y: auto;
+  background: var(--bg-overlay);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+}
+
+.report-dialog__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border-bottom: 1px solid var(--border);
+}
+
+.report-dialog__eyebrow {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.report-dialog__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  line-height: 1.2;
+}
+
+.report-dialog__close,
+.report-dialog__secondary,
+.report-dialog__primary {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-primary);
+  border-radius: var(--radius-md);
+  padding: 0.55rem 0.8rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.report-dialog__close {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.report-dialog__form {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+.report-dialog__field {
+  display: grid;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.report-dialog__field input,
+.report-dialog__field select,
+.report-dialog__field textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  color: var(--text-primary);
+  padding: 0.65rem 0.75rem;
+  font: inherit;
+}
+
+.report-dialog__field textarea {
+  resize: vertical;
+  min-height: 8rem;
+}
+
+.report-dialog__context,
+.report-dialog__note {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+  line-height: 1.6;
+}
+
+.report-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
+
+.report-dialog__primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-on-accent);
+}
+
+.report-dialog__primary:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+@media (max-width: 640px) {
+  .report-dialog {
+    padding: var(--space-2);
+  }
+
+  .report-dialog__header,
+  .report-dialog__form {
+    padding: var(--space-4);
+  }
+}
+
+/* Community guidelines modal */
+.guidelines-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+}
+
+.guidelines-dialog__backdrop {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--text-primary) 72%, transparent);
+}
+
+.guidelines-dialog__panel {
+  position: relative;
+  width: min(100%, 42rem);
+  max-height: min(90vh, 48rem);
+  overflow-y: auto;
+  background: var(--bg-overlay);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  padding: var(--space-5);
+}
+
+.guidelines-dialog__header {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  align-items: flex-start;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: var(--space-3);
+}
+
+.guidelines-dialog__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+}
+
+.guidelines-dialog__close {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-primary);
+  border-radius: var(--radius-md);
+  padding: 0.45rem 0.7rem;
+  cursor: pointer;
+}
+
+.guidelines-dialog__list {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-4) 0 0;
+  padding-left: 1.2rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.guidelines-dialog__list strong {
+  color: var(--text-primary);
+}
+
+/* Public moderation notice on removed comments. */
+.comment-moderation-notice {
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--warning);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+}

@@ -30,6 +30,7 @@ import {
   updateBioCharCount,
   updateGeminiKeyBadge,
   initGeminiKeyModal,
+  initSupportSection,
 } from '../settings.js';
 import {
   READER_STORAGE_KEYS,
@@ -74,6 +75,31 @@ vi.mock('@ui/icons.js', () => ({
 
 vi.mock('@ui/components/toast.js', () => ({
   showToast: vi.fn(),
+}));
+
+const supportMocks = vi.hoisted(() => ({
+  showReportDialog: vi.fn(),
+  getUserReports: vi.fn(),
+}));
+
+vi.mock('@ui/components/reportDialog.js', () => ({
+  showReportDialog: supportMocks.showReportDialog,
+}));
+
+vi.mock('@services/report.service.js', () => ({
+  getUserReports: supportMocks.getUserReports,
+  REPORT_CATEGORY_LABELS: {
+    harassment: 'Harassment',
+    bug: 'Bug or technical issue',
+    other: 'Other',
+  },
+  REPORT_STATUS_LABELS: {
+    pending: 'Submitted',
+    under_review: 'Under Review',
+    responded: 'Responded',
+    resolved: 'Resolved',
+    dismissed: 'Closed',
+  },
 }));
 
 vi.mock('@/utils', async (importOriginal) => {
@@ -1335,6 +1361,85 @@ describe('Settings Page Controller', () => {
         'Sync with System'
       );
       expect(showToast).toHaveBeenCalledWith(expect.stringContaining('Sync with System'), 'info');
+    });
+  });
+
+  describe('Support & Reports', () => {
+    beforeEach(() => {
+      document.body.innerHTML = `
+        <button id="btn-report-website" type="button">Report website</button>
+        <button id="btn-refresh-reports" type="button">Refresh</button>
+        <div id="settings-report-history"></div>
+      `;
+      supportMocks.getUserReports.mockReset();
+      supportMocks.showReportDialog.mockReset();
+    });
+
+    it('renders the signed-in user report history with status labels and responses', async () => {
+      auth.currentUser = { uid: 'reader-1', isAnonymous: false };
+      supportMocks.getUserReports.mockResolvedValue([
+        {
+          id: 'report-1',
+          subject: 'Broken reader page',
+          category: 'bug',
+          description: 'The chapter controls did not load.',
+          status: 'responded',
+          latestResponse: 'We deployed a fix.',
+          createdAt: '2026-10-20T10:00:00.000Z',
+        },
+      ]);
+
+      initSupportSection();
+
+      await vi.waitFor(() => {
+        expect(document.getElementById('settings-report-history').textContent).toContain(
+          'Broken reader page'
+        );
+      });
+      expect(supportMocks.getUserReports).toHaveBeenCalledWith('reader-1');
+      const history = document.getElementById('settings-report-history');
+      expect(history.textContent).toContain('Responded');
+      expect(history.textContent).toContain('We deployed a fix.');
+      expect(history.textContent).toContain('Bug or technical issue');
+    });
+
+    it('shows the account requirement for anonymous visitors without reading reports', async () => {
+      auth.currentUser = { uid: 'guest-1', isAnonymous: true };
+
+      initSupportSection();
+
+      await vi.waitFor(() => {
+        expect(document.getElementById('settings-report-history').textContent).toContain(
+          'Connect an email or Google account'
+        );
+      });
+      expect(supportMocks.getUserReports).not.toHaveBeenCalled();
+    });
+
+    it('opens a website report dialog and refreshes history after submission', async () => {
+      auth.currentUser = { uid: 'reader-1', isAnonymous: false };
+      supportMocks.getUserReports.mockResolvedValue([]);
+      supportMocks.showReportDialog.mockResolvedValue(true);
+
+      initSupportSection();
+      await vi.waitFor(() => {
+        expect(supportMocks.getUserReports).toHaveBeenCalledTimes(1);
+      });
+      supportMocks.getUserReports.mockClear();
+
+      document.getElementById('btn-report-website').click();
+
+      await vi.waitFor(() => {
+        expect(supportMocks.getUserReports).toHaveBeenCalledWith('reader-1');
+      });
+      expect(supportMocks.showReportDialog).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Report a website problem',
+          targetType: 'website',
+          targetId: 'settings',
+          category: 'bug',
+        })
+      );
     });
   });
 });

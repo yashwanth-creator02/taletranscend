@@ -4131,3 +4131,113 @@
     min-width: auto;
   }
 }
+
+/* Support & Reports */
+
+.settings-report-refresh {
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+.settings-report-history {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.settings-report-empty {
+  margin: 0;
+  padding: var(--space-4);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.settings-report-entry {
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+}
+
+.settings-report-entry__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.settings-report-entry__title {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.settings-report-entry__meta {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+.settings-report-entry__body {
+  margin: var(--space-3) 0 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.settings-report-entry__response {
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  border-left: 2px solid var(--accent-border);
+  background: var(--accent-subtle);
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.settings-report-entry__response p {
+  margin: var(--space-1) 0 0;
+}
+
+.settings-report-entry__response-label {
+  color: var(--accent-tint);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.settings-report-status[data-status='pending'] {
+  color: var(--text-secondary);
+}
+
+.settings-report-status[data-status='under_review'] {
+  color: var(--warning);
+  border-color: var(--warning);
+}
+
+.settings-report-status[data-status='responded'],
+.settings-report-status[data-status='resolved'] {
+  color: var(--success);
+  border-color: var(--success);
+}
+
+.settings-report-status[data-status='dismissed'] {
+  color: var(--text-muted);
+}
+
+.settings-report-notice {
+  margin: var(--space-4) 0 0;
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.7;
+}

@@ -56,6 +56,12 @@ export * from './author.service.js';
 // User notifications retrieval and read state management
 export * from './notification.service.js';
 
+// Reader reports, reporter-safe history, and status labels
+export * from './report.service.js';
+
+// Soft deletion, restoration, permanent removal, and bulk tale deletion
+export * from './moderation.service.js';
+
 // ── AI ────────────────────────────────────────────────────────────────
 // Gemini-powered title suggestions and text refinement
 export * from './ai.service.js';

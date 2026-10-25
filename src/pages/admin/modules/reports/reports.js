@@ -1,9 +1,17 @@
 // src/pages/admin/modules/reports/reports.js
+// Report triage, user-visible responses, staff-only notes, and direct inbox
+// messaging. Reports are staff-readable; responses are mirrored into the
+// reporter's history and delivered through the existing notification inbox.
+
 import {
-  listReportsPage,
   getReportDetail,
+  listReportsPage,
+  markReportUnderReview,
   resolveReport,
+  respondToReport,
+  sendAdminMessage,
 } from '@services/admin/reports.service.js';
+import { REPORT_CATEGORY_LABELS, REPORT_STATUS_LABELS } from '@services/report.service.js';
 import { showConfirmModal } from '@/ui/components/confirmModal.js';
 import { showToast } from '@/ui/components/toast.js';
 import {
@@ -16,11 +24,15 @@ import {
 import { buildAdminEmptyState, buildModuleLoading } from '../../admin.templates.js';
 
 const SEARCH_DEBOUNCE_MS = 300;
+const RESPONSE_MAX = 5000;
+const PRIVATE_NOTE_MAX = 2000;
 
 const STATUS_OPTIONS = [
-  { value: 'pending', label: 'Pending' },
+  { value: 'pending', label: 'Submitted' },
+  { value: 'under_review', label: 'Under review' },
+  { value: 'responded', label: 'Responded' },
   { value: 'resolved', label: 'Resolved' },
-  { value: 'dismissed', label: 'Dismissed' },
+  { value: 'dismissed', label: 'Closed' },
   { value: 'all', label: 'All statuses' },
 ];
 
@@ -31,16 +43,24 @@ const DIRECTION_OPTIONS = [
 
 const EMPTY_STATES = {
   pending: {
-    title: 'No pending reports',
-    body: 'Every reader report has been triaged. No action is required.',
+    title: 'No submitted reports',
+    body: 'Every reader report has been opened. No action is required.',
+  },
+  under_review: {
+    title: 'No reports under review',
+    body: 'No report is currently marked as under review.',
+  },
+  responded: {
+    title: 'No responded reports',
+    body: 'No report has received a user-visible response yet.',
   },
   resolved: {
     title: 'No resolved reports',
     body: 'No reports have been marked resolved.',
   },
   dismissed: {
-    title: 'No dismissed reports',
-    body: 'No reports have been dismissed.',
+    title: 'No closed reports',
+    body: 'No reports have been closed without action.',
   },
   all: {
     title: 'No reports',
@@ -54,8 +74,17 @@ const EMPTY_STATES = {
  */
 function statusBadge(value) {
   const status = String(value ?? '').toLowerCase();
-  const tone = ['pending', 'resolved', 'dismissed'].includes(status) ? status : 'pending';
-  return `<span class="admin-badge admin-badge--${tone}">${escapeAdminHtml(status || 'unknown')}</span>`;
+  const tone =
+    status === 'under_review'
+      ? 'warning'
+      : status === 'responded'
+        ? 'published'
+        : ['pending', 'resolved', 'dismissed'].includes(status)
+          ? status
+          : 'pending';
+  return `<span class="admin-badge admin-badge--${tone}">${escapeAdminHtml(
+    REPORT_STATUS_LABELS[status] ?? (status || 'unknown')
+  )}</span>`;
 }
 
 /**
@@ -87,11 +116,32 @@ function detailField(label, value, wide = false) {
   `;
 }
 
+/** @param {unknown} value */
+function escapeWithBreaks(value) {
+  return escapeAdminHtml(value).replace(/\r?\n/g, '<br />');
+}
+
+/** @param {Record<string, unknown>} report */
+function reportSubject(report) {
+  return (
+    String(report?.subject ?? '').trim() || String(report?.reason ?? '').trim() || 'Untitled report'
+  );
+}
+
+/** @param {Record<string, unknown>} report */
+function categoryLabel(report) {
+  return (
+    report?.categoryLabel ||
+    REPORT_CATEGORY_LABELS[String(report?.category ?? '').toLowerCase()] ||
+    'General'
+  );
+}
+
 /**
  * @param {{ container: HTMLElement, access: import('../../admin.state.js').AdminAccess }} opts
  * @returns {() => void}
  */
-export function mount({ container }) {
+export function mount({ container, access }) {
   let items = [];
   let lastDoc = null;
   let hasMore = false;
@@ -109,6 +159,19 @@ export function mount({ container }) {
   let detailLoading = false;
   let loadVersion = 0;
   let disposed = false;
+  let composeBusy = false;
+
+  if (!access?.isStaff) {
+    container.innerHTML = `
+      <section aria-labelledby="reports-denied-title">
+        <h2 id="reports-denied-title" class="admin-section-title">Reports</h2>
+        <p class="admin-readonly-note">
+          Report triage is available to administrators and moderators only.
+        </p>
+      </section>
+    `;
+    return () => {};
+  }
 
   function renderToolbar() {
     return `
@@ -144,6 +207,101 @@ export function mount({ container }) {
     `;
   }
 
+  function renderResponses(report) {
+    const responses = Array.isArray(report.responses) ? report.responses : [];
+    if (!responses.length) {
+      return '<p class="admin-note">No user-visible response has been sent.</p>';
+    }
+    return `
+      <div class="admin-table-wrapper">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Response</th>
+              <th>Status</th>
+              <th>Sent</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${responses
+              .map(
+                (response) => `
+                  <tr>
+                    <td class="admin-table__cell--wide">${escapeWithBreaks(
+                      response?.body ?? ''
+                    )}</td>
+                    <td>${escapeAdminHtml(
+                      REPORT_STATUS_LABELS[response?.status] ?? response?.status ?? ''
+                    )}</td>
+                    <td>${escapeAdminHtml(formatAdminDate(response?.createdAt))}</td>
+                  </tr>
+                `
+              )
+              .join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  function renderResponseForm(report) {
+    const canRespond = ['pending', 'under_review', 'responded'].includes(report.status);
+    if (!canRespond) return '';
+
+    return `
+      <div class="admin-detail-field admin-detail-field--wide">
+        <span class="admin-detail-field__label">Send a response</span>
+        <div class="admin-detail-field__value">
+          <label class="admin-field admin-field--grow" for="report-response-body">
+            <span class="admin-field__label">User-visible response</span>
+            <textarea
+              class="admin-textarea"
+              id="report-response-body"
+              data-role="response-body"
+              maxlength="${RESPONSE_MAX}"
+              rows="5"
+              placeholder="Explain the outcome or the action taken. This is delivered to the reporter's inbox."
+            ></textarea>
+          </label>
+          <label class="admin-field admin-field--grow" for="report-private-note">
+            <span class="admin-field__label">Private staff note (optional)</span>
+            <textarea
+              class="admin-textarea"
+              id="report-private-note"
+              data-role="private-note"
+              maxlength="${PRIVATE_NOTE_MAX}"
+              rows="3"
+              placeholder="Internal context. Never shown to the reporter."
+            ></textarea>
+          </label>
+          <label class="admin-checkbox-row" for="report-resolve-after">
+            <input type="checkbox" id="report-resolve-after" data-role="resolve-after" />
+            <span>Mark this report resolved after sending the response</span>
+          </label>
+          <div class="admin-actions">
+            <button
+              type="button"
+              class="admin-btn"
+              data-action="send-response"
+              data-id="${escapeAdminHtml(report.id)}"
+              ${deciding ? 'disabled' : ''}
+            >
+              ${deciding ? 'Sending...' : 'Send response'}
+            </button>
+            <button
+              type="button"
+              class="admin-btn admin-btn--sm admin-btn--secondary"
+              data-action="close-detail"
+              ${deciding ? 'disabled' : ''}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   function renderDetail() {
     if (!selectedId) return '';
 
@@ -158,18 +316,22 @@ export function mount({ container }) {
     if (!detail) return '';
 
     const pending = detail.status === 'pending';
+    const canTriage = ['pending', 'under_review', 'responded'].includes(detail.status);
     const target = detail.targetSummary;
+    const privateNote = detail.privateNote?.notes || '';
+    const description = detail.description || detail.reason || '';
 
     return `
       <section class="admin-detail-panel" aria-labelledby="report-detail-title">
         <div class="admin-detail-panel__header">
           <div>
-            <h3 id="report-detail-title" class="admin-detail-panel__title">Report ${escapeAdminHtml(
-              detail.id
+            <h3 id="report-detail-title" class="admin-detail-panel__title">${escapeAdminHtml(
+              reportSubject(detail)
             )}</h3>
             <p class="admin-detail-panel__subtitle">
               ${escapeAdminHtml(detail.targetType || 'unknown target')} /
-              ${escapeAdminHtml(detail.targetId || 'unknown id')}
+              ${escapeAdminHtml(detail.targetId || 'unknown id')} /
+              ${escapeAdminHtml(categoryLabel(detail))}
             </p>
           </div>
           ${statusBadge(detail.status)}
@@ -178,13 +340,19 @@ export function mount({ container }) {
           ${detailField('Reporter', detail.reporterId)}
           ${detailField('Target type', detail.targetType)}
           ${detailField('Target ID', detail.targetId)}
+          ${detailField('Category', categoryLabel(detail))}
           ${detailField('Filed', formatAdminDate(detail.createdAt))}
-          ${detailField('Reviewed by', detail.reviewedBy || 'Not decided')}
+          ${detailField('Reviewed by', detail.reviewedBy || 'Not opened')}
           ${detailField(
             'Reviewed at',
-            detail.reviewedAt ? formatAdminDate(detail.reviewedAt) : 'Not decided'
+            detail.reviewedAt ? formatAdminDate(detail.reviewedAt) : 'Not opened'
           )}
-          ${detailField('Reason', detail.reason, true)}
+          ${detailField(
+            'Responded at',
+            detail.respondedAt ? formatAdminDate(detail.respondedAt) : 'No response'
+          )}
+          ${detailField('Subject', reportSubject(detail), true)}
+          ${detailField('Description', description, true)}
           ${detailField(
             'Target summary',
             target
@@ -193,44 +361,82 @@ export function mount({ container }) {
             true
           )}
           ${detail.resolutionNotes ? detailField('Resolution notes', detail.resolutionNotes, true) : ''}
+          ${
+            privateNote
+              ? `<div class="admin-detail-field admin-detail-field--wide">
+                   <span class="admin-detail-field__label">Private staff note</span>
+                   <div class="admin-detail-field__value">${escapeWithBreaks(privateNote)}</div>
+                 </div>`
+              : ''
+          }
         </div>
+
+        <div class="admin-detail-field admin-detail-field--wide">
+          <span class="admin-detail-field__label">Response history</span>
+          <div class="admin-detail-field__value">${renderResponses(detail)}</div>
+        </div>
+
         ${
-          pending
+          canTriage
             ? `
-              <label class="admin-field admin-field--grow" for="report-resolution-notes">
-                <span class="admin-field__label">Resolution notes (optional)</span>
-                <textarea
-                  class="admin-textarea"
-                  id="report-resolution-notes"
-                  data-role="resolution-notes"
-                  maxlength="1000"
-                  placeholder="Context for this decision, kept on the report record."
-                ></textarea>
-              </label>
+              ${renderResponseForm(detail)}
+              ${
+                pending
+                  ? `<label class="admin-field admin-field--wide">
+                       <span class="admin-field__label">Resolution notes (optional)</span>
+                       <textarea
+                         class="admin-textarea"
+                         rows="3"
+                         maxlength="2000"
+                         data-role="resolution-notes"
+                         placeholder="Context for resolving or closing this report. Visible to staff only."
+                       ></textarea>
+                     </label>`
+                  : ''
+              }
               <div class="admin-actions">
+                ${
+                  pending
+                    ? `<button
+                         type="button"
+                         class="admin-btn admin-btn--secondary"
+                         data-action="mark-under-review"
+                         data-id="${escapeAdminHtml(detail.id)}"
+                         ${deciding ? 'disabled' : ''}
+                       >
+                         Mark under review
+                       </button>`
+                    : ''
+                }
+                ${
+                  pending
+                    ? `
+                      <button
+                        type="button"
+                        class="admin-btn admin-btn--secondary"
+                        data-action="decide"
+                        data-id="${escapeAdminHtml(detail.id)}"
+                        data-resolution="resolved"
+                        ${deciding ? 'disabled' : ''}
+                      >
+                        Resolve without response
+                      </button>
+                      <button
+                        type="button"
+                        class="admin-btn admin-btn--sm"
+                        data-action="decide"
+                        data-id="${escapeAdminHtml(detail.id)}"
+                        data-resolution="dismissed"
+                        ${deciding ? 'disabled' : ''}
+                      >
+                        Close without action
+                      </button>
+                    `
+                    : ''
+                }
                 <button
                   type="button"
                   class="admin-btn admin-btn--sm admin-btn--secondary"
-                  data-action="decide"
-                  data-id="${escapeAdminHtml(detail.id)}"
-                  data-resolution="resolved"
-                  ${deciding ? 'disabled' : ''}
-                >
-                  ${deciding ? 'Processing...' : 'Resolve report'}
-                </button>
-                <button
-                  type="button"
-                  class="admin-btn admin-btn--sm"
-                  data-action="decide"
-                  data-id="${escapeAdminHtml(detail.id)}"
-                  data-resolution="dismissed"
-                  ${deciding ? 'disabled' : ''}
-                >
-                  Dismiss report
-                </button>
-                <button
-                  type="button"
-                  class="admin-btn admin-btn--sm"
                   data-action="close-detail"
                   ${deciding ? 'disabled' : ''}
                 >
@@ -238,8 +444,8 @@ export function mount({ container }) {
                 </button>
               </div>
               <p class="admin-readonly-note">
-                Resolving or dismissing records a decision on this report. The reporter is not
-                notified by this action.
+                Responses are visible to the reporter in Support &amp; Reports and are also sent to
+                their inbox. Private staff notes never leave the dashboard.
               </p>
             `
             : `
@@ -249,8 +455,9 @@ export function mount({ container }) {
                 </button>
               </div>
               <p class="admin-readonly-note">
-                This report has already been ${escapeAdminHtml(detail.status)} and cannot be
-                decided again.
+                This report is ${escapeAdminHtml(
+                  REPORT_STATUS_LABELS[detail.status] ?? detail.status
+                )}. Use the direct message form below if the reporter needs a further reply.
               </p>
             `
         }
@@ -263,18 +470,18 @@ export function mount({ container }) {
       .map(
         (report) => `
           <tr>
-            <td class="admin-table__cell--left">${escapeAdminHtml(
-              report.targetType || 'unknown'
-            )}</td>
+            <td class="admin-table__cell--wide">
+              <div class="admin-table__name">${escapeAdminHtml(
+                truncateAdminText(reportSubject(report), 90)
+              )}</div>
+              <div class="admin-table__sub">${escapeAdminHtml(
+                `${report.targetType || 'unknown'} / ${report.targetId || 'unknown id'}`
+              )}</div>
+            </td>
             <td class="admin-table__cell--left font-mono">${escapeAdminHtml(
-              truncateAdminText(report.targetId, 32)
+              truncateAdminText(report.reporterId, 24)
             )}</td>
-            <td class="admin-table__cell--left font-mono">${escapeAdminHtml(
-              truncateAdminText(report.reporterId, 28)
-            )}</td>
-            <td class="admin-table__cell--wide">${escapeAdminHtml(
-              truncateAdminText(report.reason, 100)
-            )}</td>
+            <td>${escapeAdminHtml(categoryLabel(report))}</td>
             <td>${escapeAdminHtml(formatAdminDate(report.createdAt))}</td>
             <td>${statusBadge(report.status)}</td>
             <td class="admin-table__cell--right">
@@ -299,10 +506,9 @@ export function mount({ container }) {
         <table class="admin-table">
           <thead>
             <tr>
-              <th class="admin-table__cell--left">Target</th>
-              <th class="admin-table__cell--left">Target ID</th>
+              <th class="admin-table__cell--left">Subject</th>
               <th class="admin-table__cell--left">Reporter</th>
-              <th class="admin-table__cell--wide">Reason</th>
+              <th>Category</th>
               <th>Filed</th>
               <th>Status</th>
               <th class="admin-table__cell--right">Actions</th>
@@ -327,6 +533,68 @@ export function mount({ container }) {
           `
           : ''
       }
+    `;
+  }
+
+  function renderCompose() {
+    return `
+      <section class="admin-detail-panel" aria-labelledby="admin-compose-title">
+        <div class="admin-detail-panel__header">
+          <div>
+            <h3 id="admin-compose-title" class="admin-detail-panel__title">Message a reader</h3>
+            <p class="admin-detail-panel__subtitle">
+              Delivers a direct administrative message to an existing user inbox.
+            </p>
+          </div>
+        </div>
+        <div class="admin-detail-grid">
+          <div class="admin-detail-field admin-detail-field--wide">
+            <label class="admin-field__label" for="admin-message-recipient">Recipient user ID</label>
+            <input
+              class="admin-input"
+              id="admin-message-recipient"
+              data-role="message-recipient"
+              maxlength="128"
+              placeholder="Firebase user ID"
+            />
+          </div>
+          <div class="admin-detail-field admin-detail-field--wide">
+            <label class="admin-field__label" for="admin-message-subject">Subject</label>
+            <input
+              class="admin-input"
+              id="admin-message-subject"
+              data-role="message-subject"
+              maxlength="160"
+              placeholder="Short, specific subject"
+            />
+          </div>
+          <div class="admin-detail-field admin-detail-field--wide">
+            <label class="admin-field__label" for="admin-message-body">Message</label>
+            <textarea
+              class="admin-textarea"
+              id="admin-message-body"
+              data-role="message-body"
+              maxlength="5000"
+              rows="4"
+              placeholder="Message body delivered to the reader inbox."
+            ></textarea>
+          </div>
+        </div>
+        <div class="admin-actions">
+          <button
+            type="button"
+            class="admin-btn"
+            data-action="send-message"
+            ${composeBusy ? 'disabled' : ''}
+          >
+            ${composeBusy ? 'Sending...' : 'Send message'}
+          </button>
+        </div>
+        <p class="admin-readonly-note">
+          Direct messages appear in the reader's existing notifications inbox. They are not posted
+          publicly and do not change report status.
+        </p>
+      </section>
     `;
   }
 
@@ -360,12 +628,13 @@ export function mount({ container }) {
       <section aria-labelledby="reports-title">
         <h2 id="reports-title" class="admin-section-title">Reports</h2>
         <p class="admin-note">
-          Triage reader reports. Decisions are recorded in the audit trail; this screen does not
-          send a notification.
+          Triage reader reports, record private notes, and send user-visible responses. Responses
+          are mirrored into the reporter's Support &amp; Reports history and delivered to their inbox.
         </p>
         ${renderToolbar()}
         ${renderDetail()}
         ${body}
+        ${renderCompose()}
       </section>
     `;
     restoreAdminSearchFocus(container, pendingSearchFocus);
@@ -464,6 +733,82 @@ export function mount({ container }) {
     }
   }
 
+  async function refreshDetail(reportId) {
+    try {
+      const result = await getReportDetail(reportId);
+      if (!disposed && selectedId === reportId && result) {
+        detail = result;
+      }
+    } catch (err) {
+      console.error('[reports] failed to refresh report detail', err);
+    }
+  }
+
+  async function handleMarkUnderReview(reportId) {
+    if (disposed || deciding || !reportId) return;
+    deciding = true;
+    render();
+    try {
+      await markReportUnderReview(reportId);
+      showToast('Report marked under review.', 'success');
+      await refreshDetail(reportId);
+      if (!disposed) {
+        items = items.map((item) =>
+          item.id === reportId ? { ...item, status: 'under_review' } : item
+        );
+      }
+    } catch (err) {
+      console.error('[reports] failed to mark report under review', err);
+      showToast(
+        err instanceof Error && err.message ? err.message : 'The report was not updated.',
+        'error'
+      );
+    } finally {
+      deciding = false;
+      if (!disposed) render();
+    }
+  }
+
+  async function handleSendResponse(reportId) {
+    if (disposed || deciding || !reportId || !detail || detail.id !== reportId) return;
+    const responseField = container.querySelector('[data-role="response-body"]');
+    const noteField = container.querySelector('[data-role="private-note"]');
+    const resolveField = container.querySelector('[data-role="resolve-after"]');
+    const response = responseField instanceof HTMLTextAreaElement ? responseField.value.trim() : '';
+    const privateNote = noteField instanceof HTMLTextAreaElement ? noteField.value.trim() : '';
+    const resolveAfter = resolveField instanceof HTMLInputElement && resolveField.checked;
+    if (!response) {
+      showToast('Write a response before sending.', 'error');
+      return;
+    }
+
+    deciding = true;
+    render();
+    try {
+      await respondToReport(reportId, {
+        response,
+        privateNote,
+        status: resolveAfter ? 'resolved' : 'responded',
+      });
+      showToast('Response delivered to the reporter inbox.', 'success');
+      await refreshDetail(reportId);
+      if (!disposed) {
+        items = items.map((item) =>
+          item.id === reportId ? { ...item, status: resolveAfter ? 'resolved' : 'responded' } : item
+        );
+      }
+    } catch (err) {
+      console.error('[reports] failed to send response', err);
+      showToast(
+        err instanceof Error && err.message ? err.message : 'The response was not sent.',
+        'error'
+      );
+    } finally {
+      deciding = false;
+      if (!disposed) render();
+    }
+  }
+
   async function handleDecision(reportId, resolution) {
     if (disposed || deciding) return;
     if (!reportId || !detail || detail.id !== reportId) return;
@@ -474,11 +819,11 @@ export function mount({ container }) {
     const resolved = resolution === 'resolved';
 
     const confirmed = await showConfirmModal({
-      title: resolved ? 'Resolve this report?' : 'Dismiss this report?',
+      title: resolved ? 'Resolve this report?' : 'Close this report?',
       message: resolved
-        ? 'Mark this report as <strong>resolved</strong>? The decision is recorded against your staff account and cannot be changed from this screen.'
-        : 'Dismiss this report as <strong>not actionable</strong>? The decision is recorded against your staff account and cannot be changed from this screen.',
-      confirmText: resolved ? 'Resolve' : 'Dismiss',
+        ? 'Mark this report as <strong>resolved</strong>? The reporter sees the resolved status in Support &amp; Reports.'
+        : 'Close this report as <strong>not actionable</strong>? The reporter sees the closed status in Support &amp; Reports.',
+      confirmText: resolved ? 'Resolve' : 'Close report',
       confirmVariant: resolved ? 'primary' : 'accent',
     });
     if (!confirmed) return;
@@ -489,10 +834,13 @@ export function mount({ container }) {
 
     try {
       await resolveReport(reportId, resolution, { notes });
-      showToast(resolved ? 'Report resolved.' : 'Report dismissed.', 'success');
-      selectedId = null;
-      detail = null;
-      await loadFirstPage();
+      showToast(resolved ? 'Report resolved.' : 'Report closed.', 'success');
+      await refreshDetail(reportId);
+      if (!disposed) {
+        items = items.map((item) =>
+          item.id === reportId ? { ...item, status: resolution } : item
+        );
+      }
     } catch (err) {
       console.error('[reports] decision failed', err);
       showToast(
@@ -502,7 +850,46 @@ export function mount({ container }) {
       if (!disposed) render();
     } finally {
       deciding = false;
-      if (!disposed && !loading) render();
+      if (!disposed) render();
+    }
+  }
+
+  async function handleSendMessage() {
+    if (disposed || composeBusy) return;
+    const recipientField = container.querySelector('[data-role="message-recipient"]');
+    const subjectField = container.querySelector('[data-role="message-subject"]');
+    const bodyField = container.querySelector('[data-role="message-body"]');
+    const recipientId =
+      recipientField instanceof HTMLInputElement ? recipientField.value.trim() : '';
+    const subject = subjectField instanceof HTMLInputElement ? subjectField.value.trim() : '';
+    const body = bodyField instanceof HTMLTextAreaElement ? bodyField.value.trim() : '';
+    if (!recipientId || !subject || !body) {
+      showToast('Recipient, subject, and message are required.', 'error');
+      return;
+    }
+
+    composeBusy = true;
+    render();
+    try {
+      await sendAdminMessage({
+        recipientId,
+        subject,
+        body,
+        reportId: selectedId || undefined,
+      });
+      showToast('Administrative message delivered to the reader inbox.', 'success');
+      composeBusy = false;
+      render();
+      return;
+    } catch (err) {
+      console.error('[reports] failed to send admin message', err);
+      showToast(
+        err instanceof Error && err.message ? err.message : 'The message was not delivered.',
+        'error'
+      );
+    } finally {
+      composeBusy = false;
+      if (!disposed) render();
     }
   }
 
@@ -529,8 +916,20 @@ export function mount({ container }) {
       render();
       return;
     }
+    if (action === 'mark-under-review') {
+      handleMarkUnderReview(target.getAttribute('data-id'));
+      return;
+    }
+    if (action === 'send-response') {
+      handleSendResponse(target.getAttribute('data-id'));
+      return;
+    }
     if (action === 'decide') {
       handleDecision(target.getAttribute('data-id'), target.getAttribute('data-resolution'));
+      return;
+    }
+    if (action === 'send-message') {
+      handleSendMessage();
     }
   }
 

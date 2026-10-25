@@ -9,8 +9,11 @@ import {
   deleteTale,
   getTaleDetail,
   listTalesPage,
+  purgeTale,
+  restoreTale,
   updateTale,
 } from '@services/admin/content.service.js';
+import { MODERATION_CATEGORIES, MODERATION_CATEGORY_LABELS } from '@services/moderation.service.js';
 import { showConfirmModal } from '@/ui/components/confirmModal.js';
 import { showToast } from '@/ui/components/toast.js';
 import {
@@ -32,6 +35,7 @@ const STATUS_OPTIONS = [
   { value: 'draft', label: 'Draft' },
   { value: 'submitted', label: 'Submitted' },
   { value: 'rejected', label: 'Rejected' },
+  { value: 'deleted', label: 'Deleted' },
 ];
 
 const STATUS_BADGES = {
@@ -39,6 +43,7 @@ const STATUS_BADGES = {
   draft: 'admin-badge--draft',
   submitted: 'admin-badge--pending',
   rejected: 'admin-badge--rejected',
+  deleted: 'admin-badge--dismissed',
 };
 
 const VISIBILITY_LABELS = {
@@ -341,6 +346,7 @@ export function mount({ container, access } = {}) {
 
     const id = String(detail.id ?? '');
     const title = displayTitle(detail.title);
+    const deleted = detail.isDeleted === true || String(detail.status ?? '') === 'deleted';
     const chapters = Array.isArray(detail.chapters) ? detail.chapters : null;
     const chapterRows = chapters
       ? chapters
@@ -430,12 +436,46 @@ export function mount({ container, access } = {}) {
           )}
           ${buildDetailField(
             'Status',
-            `<select class="admin-select" data-role="tale-status">${statusOptions}</select>`
+            `<select class="admin-select" data-role="tale-status" ${
+              deleted ? 'disabled' : ''
+            }>${statusOptions}</select>`
           )}
           ${buildDetailField(
             'Visibility',
-            `<select class="admin-select" data-role="tale-visibility">${visibilityOptions}</select>`
+            `<select class="admin-select" data-role="tale-visibility" ${
+              deleted ? 'disabled' : ''
+            }>${visibilityOptions}</select>`
           )}
+          ${
+            deleted
+              ? buildDetailField('Deleted at', escapeAdminHtml(formatAdminDate(detail.deletedAt)))
+              : ''
+          }
+          ${
+            deleted
+              ? buildDetailField(
+                  'Deletion type',
+                  escapeAdminHtml(detail.deletionType || 'administrator')
+                )
+              : ''
+          }
+          ${
+            deleted
+              ? buildDetailField(
+                  'Moderation category',
+                  escapeAdminHtml(
+                    MODERATION_CATEGORY_LABELS[detail.moderationCategory] ||
+                      detail.moderationCategory ||
+                      'Other'
+                  )
+                )
+              : ''
+          }
+          ${
+            deleted && detail.deletionReason
+              ? buildDetailField('Removal reason', escapeAdminHtml(detail.deletionReason), true)
+              : ''
+          }
           ${buildDetailField('Author', escapeAdminHtml(displayAuthor(detail)))}
           ${buildDetailField('Chapters', escapeAdminHtml(formatAdminCount(detail.chapterCount)))}
           ${buildDetailField('Words', escapeAdminHtml(formatAdminCount(detail.wordCount)))}
@@ -444,30 +484,83 @@ export function mount({ container, access } = {}) {
           ${buildDetailField('Published', escapeAdminHtml(formatAdminDate(detail.publishedAt)))}
           ${buildDetailField(
             'Public link',
-            `<a class="admin-btn admin-btn--sm admin-btn--secondary" href="tale.html?id=${encodeURIComponent(
-              id
-            )}">Open tale</a>`
+            deleted
+              ? '<span class="admin-note">Unavailable while deleted</span>'
+              : `<a class="admin-btn admin-btn--sm admin-btn--secondary" href="tale.html?id=${encodeURIComponent(
+                  id
+                )}">Open tale</a>`
           )}
         </div>
 
         <div class="admin-actions">
-          <button type="button" class="admin-btn" data-action="save-tale">
-            ${actionBusy ? 'Saving...' : 'Save changes'}
-          </button>
+          ${
+            deleted
+              ? `
+                <button
+                  type="button"
+                  class="admin-btn"
+                  data-action="restore-tale"
+                  ${actionBusy ? 'disabled' : ''}
+                >
+                  ${actionBusy ? 'Working...' : 'Restore tale'}
+                </button>
+                <button
+                  type="button"
+                  class="admin-btn admin-btn--danger"
+                  data-action="purge-tale"
+                  ${actionBusy ? 'disabled' : ''}
+                >
+                  Permanently delete
+                </button>
+              `
+              : `
+                <button type="button" class="admin-btn" data-action="save-tale">
+                  ${actionBusy ? 'Saving...' : 'Save changes'}
+                </button>
+                <label class="admin-field">
+                  <span class="admin-field__label">Removal category</span>
+                  <select class="admin-select" data-role="delete-category">
+                    ${MODERATION_CATEGORIES.map(
+                      (value) =>
+                        `<option value="${value}"${
+                          value === 'other' ? ' selected' : ''
+                        }>${escapeAdminHtml(MODERATION_CATEGORY_LABELS[value] ?? value)}</option>`
+                    ).join('')}
+                  </select>
+                </label>
+                <label class="admin-field admin-field--grow">
+                  <span class="admin-field__label">Removal reason (optional)</span>
+                  <input
+                    class="admin-input"
+                    data-role="delete-reason"
+                    maxlength="500"
+                    placeholder="Why this tale is being removed from public view"
+                  />
+                </label>
+                <button
+                  type="button"
+                  class="admin-btn admin-btn--danger"
+                  data-action="delete-tale"
+                  ${actionBusy ? 'disabled' : ''}
+                >
+                  Remove from public view
+                </button>
+              `
+          }
           <button
             type="button"
-            class="admin-btn admin-btn--danger"
-            data-action="delete-tale"
-            ${actionBusy ? 'disabled' : ''}
+            class="admin-btn admin-btn--sm admin-btn--secondary"
+            data-action="close-detail"
           >
-            Delete tale
+            Close
           </button>
         </div>
 
         <p class="admin-readonly-note">
           Firestore permits staff to change the title, status, and visibility. Chapter text is
-          author-owned and remains read-only here. Deleting a tale removes its public document but
-          does not cascade to chapter or comment subcollections.
+          author-owned and remains read-only here. Removing a tale is a soft deletion: the record
+          and its subcollections stay in place, the tale leaves public discovery, and it can be
+          restored from this panel or the Deletions workspace.
         </p>
 
         <h4 class="admin-detail-panel__title">Chapters</h4>
@@ -487,11 +580,15 @@ export function mount({ container, access } = {}) {
     actionBusy = value;
     const saveButton = container.querySelector('[data-action="save-tale"]');
     const deleteButton = container.querySelector('[data-action="delete-tale"]');
+    const restoreButton = container.querySelector('[data-action="restore-tale"]');
+    const purgeButton = container.querySelector('[data-action="purge-tale"]');
     if (saveButton) {
       saveButton.disabled = value;
       saveButton.textContent = value ? 'Saving...' : 'Save changes';
     }
     if (deleteButton) deleteButton.disabled = value;
+    if (restoreButton) restoreButton.disabled = value;
+    if (purgeButton) purgeButton.disabled = value;
   }
 
   async function loadFirstPage() {
@@ -653,15 +750,67 @@ export function mount({ container, access } = {}) {
   async function removeTale() {
     if (!detail || actionBusy) return;
     const title = displayTitle(detail.title);
+    const reasonField = container.querySelector('[data-role="delete-reason"]');
+    const categoryField = container.querySelector('[data-role="delete-category"]');
+    const reason = reasonField instanceof HTMLInputElement ? reasonField.value.trim() : '';
+    const category =
+      categoryField instanceof HTMLSelectElement && categoryField.value
+        ? categoryField.value
+        : 'other';
     const confirmed = await showConfirmModal({
-      title: 'Delete this tale?',
-      message: `Delete <strong>${escapeAdminHtml(
+      title: 'Remove this tale from public view?',
+      message: `Remove <strong>${escapeAdminHtml(
         title
-      )}</strong> from the public tale archive? This cannot be undone.`,
+      )}</strong> from public discovery? The tale can be restored later from the Deletions workspace.`,
       subtext:
-        'The tale document is removed. Chapter and comment subcollections are left in place because Firestore does not cascade deletes.',
-      confirmText: 'Delete tale',
+        'The tale document, chapters, and comments stay in Firestore. Its public status is set to deleted and its visibility to private.',
+      confirmText: 'Remove from public view',
       cancelText: 'Keep tale',
+      confirmVariant: 'danger',
+      icon: 'eye-off',
+    });
+    if (!confirmed || destroyed) return;
+
+    setActionBusy(true);
+    try {
+      await deleteTale(detail.id, { reason, category });
+      showToast('Tale removed from public view. It can be restored from Deletions.', 'success');
+      closeDetail();
+      await loadFirstPage();
+    } catch (err) {
+      showToast(String(err?.message ?? '').trim() || 'Could not remove that tale.', 'error');
+    } finally {
+      if (!destroyed) setActionBusy(false);
+    }
+  }
+
+  async function restoreDeletedTale() {
+    if (!detail || actionBusy) return;
+    setActionBusy(true);
+    try {
+      await restoreTale(detail.id);
+      showToast('Tale restored.', 'success');
+      closeDetail();
+      await loadFirstPage();
+    } catch (err) {
+      showToast(String(err?.message ?? '').trim() || 'Could not restore that tale.', 'error');
+    } finally {
+      if (!destroyed) setActionBusy(false);
+    }
+  }
+
+  async function purgeDeletedTale() {
+    if (!detail || actionBusy) return;
+    const title = displayTitle(detail.title);
+    const confirmed = await showConfirmModal({
+      title: 'Permanently delete this tale?',
+      message: `Permanently delete <strong>${escapeAdminHtml(
+        title
+      )}</strong>? This cannot be undone and the tale document will be removed.`,
+      subtext:
+        'Chapter and comment subcollections are not cascaded by Firestore and may remain after the tale document is removed.',
+      confirmText: 'Delete permanently',
+      cancelText: 'Cancel',
       confirmVariant: 'danger',
       icon: 'trash-2',
     });
@@ -669,12 +818,15 @@ export function mount({ container, access } = {}) {
 
     setActionBusy(true);
     try {
-      await deleteTale(detail.id);
-      showToast('Tale deleted.', 'success');
+      await purgeTale(detail.id);
+      showToast('Tale permanently deleted.', 'success');
       closeDetail();
       await loadFirstPage();
     } catch (err) {
-      showToast(String(err?.message ?? '').trim() || 'Could not delete that tale.', 'error');
+      showToast(
+        String(err?.message ?? '').trim() || 'Could not permanently delete that tale.',
+        'error'
+      );
     } finally {
       if (!destroyed) setActionBusy(false);
     }
@@ -691,6 +843,8 @@ export function mount({ container, access } = {}) {
     else if (action === 'retry-detail' && selectedId) openDetail(selectedId, true);
     else if (action === 'save-tale') saveTale();
     else if (action === 'delete-tale') removeTale();
+    else if (action === 'restore-tale') restoreDeletedTale();
+    else if (action === 'purge-tale') purgeDeletedTale();
   }
 
   function handleInput(event) {

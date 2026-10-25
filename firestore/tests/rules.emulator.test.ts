@@ -1234,6 +1234,208 @@ describe('admin dashboard — five-role rules matrix', () => {
     });
   });
 
+  describe('report history, private notes, and moderation archives', () => {
+    const history = (reporterId = 'author-1', overrides: Record<string, unknown> = {}) => ({
+      reporterId,
+      status: 'pending',
+      userVisibleStatus: 'Submitted',
+      latestResponse: '',
+      responses: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      ...overrides,
+    });
+
+    it('a reporter can create and read only their own history mirror', async () => {
+      const ctx = authorCtx();
+      await assertSucceeds(
+        setDoc(doc(ctx.firestore(), `${ROOT}/reportHistory/report-1`), history())
+      );
+      await assertSucceeds(getDoc(doc(ctx.firestore(), `${ROOT}/reportHistory/report-1`)));
+
+      await assertFails(
+        setDoc(doc(ctx.firestore(), `${ROOT}/reportHistory/report-2`), history('user-1'))
+      );
+      await seed('reportHistory/report-2', history('user-1'));
+      await assertFails(getDoc(doc(ctx.firestore(), `${ROOT}/reportHistory/report-2`)));
+      await assertFails(getDoc(doc(guestCtx().firestore(), `${ROOT}/reportHistory/report-2`)));
+      await assertSucceeds(getDoc(doc(adminCtx().firestore(), `${ROOT}/reportHistory/report-2`)));
+    });
+
+    it('only staff can update a history mirror, and a reporter cannot edit it', async () => {
+      await seed('reportHistory/report-1', history());
+      await assertFails(
+        updateDoc(doc(authorCtx().firestore(), `${ROOT}/reportHistory/report-1`), {
+          status: 'resolved',
+        })
+      );
+      await assertSucceeds(
+        updateDoc(doc(moderatorCtx().firestore(), `${ROOT}/reportHistory/report-1`), {
+          status: 'resolved',
+          userVisibleStatus: 'Resolved',
+          latestResponse: 'The report was reviewed.',
+          updatedAt: new Date(),
+        })
+      );
+    });
+
+    it('private report notes are staff-only', async () => {
+      await assertSucceeds(
+        setDoc(doc(moderatorCtx().firestore(), `${ROOT}/reportPrivateNotes/report-1`), {
+          notes: 'Internal note.',
+          updatedBy: 'mod-1',
+          updatedAt: new Date(),
+        })
+      );
+      await assertSucceeds(
+        getDoc(doc(adminCtx().firestore(), `${ROOT}/reportPrivateNotes/report-1`))
+      );
+      await assertFails(
+        getDoc(doc(authorCtx().firestore(), `${ROOT}/reportPrivateNotes/report-1`))
+      );
+      await assertFails(
+        setDoc(doc(authorCtx().firestore(), `${ROOT}/reportPrivateNotes/report-1`), {
+          notes: 'Forged.',
+        })
+      );
+    });
+
+    it('moderation archives are staff-only and preserve removed text', async () => {
+      await assertSucceeds(
+        setDoc(
+          doc(moderatorCtx().firestore(), `${ROOT}/moderationArchive/comment_tale-1_comment-1`),
+          {
+            entityType: 'comment',
+            entityId: 'comment-1',
+            text: 'Original text.',
+            createdAt: new Date(),
+          }
+        )
+      );
+      const snap = await assertSucceeds(
+        getDoc(doc(adminCtx().firestore(), `${ROOT}/moderationArchive/comment_tale-1_comment-1`))
+      );
+      expect(snap.data()?.text).toBe('Original text.');
+      await assertFails(
+        getDoc(doc(authorCtx().firestore(), `${ROOT}/moderationArchive/comment_tale-1_comment-1`))
+      );
+      await assertFails(
+        setDoc(doc(authorCtx().firestore(), `${ROOT}/moderationArchive/comment_tale-1_comment-1`), {
+          text: 'Forged.',
+        })
+      );
+    });
+  });
+
+  describe('soft-deletion registry — staff triage, administrator tale authority', () => {
+    const entry = (overrides: Record<string, unknown> = {}) => ({
+      entityType: 'comment',
+      entityId: 'comment-1',
+      parentId: 'tale-1',
+      parentCommentId: '',
+      title: 'A reflection',
+      preview: 'Original text.',
+      ownerId: 'reader-2',
+      ownerName: 'Reader Two',
+      deletedAt: new Date(),
+      deletedBy: 'mod-1',
+      deletionType: 'administrator',
+      deletionReason: 'Removed for violating the community guidelines.',
+      moderationCategory: 'harassment',
+      status: 'deleted',
+      reportCount: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      ...overrides,
+    });
+
+    it('a moderator can register comment and reply removals but not tale removals', async () => {
+      await assertSucceeds(
+        setDoc(doc(moderatorCtx().firestore(), `${ROOT}/softDeletions/comment-1`), entry())
+      );
+      await assertFails(
+        setDoc(
+          doc(moderatorCtx().firestore(), `${ROOT}/softDeletions/tale-1`),
+          entry({ entityType: 'tale', entityId: 'tale-1' })
+        )
+      );
+      await assertSucceeds(
+        setDoc(
+          doc(adminCtx().firestore(), `${ROOT}/softDeletions/tale-1`),
+          entry({ entityType: 'tale', entityId: 'tale-1' })
+        )
+      );
+    });
+
+    it('only staff can read or update the registry', async () => {
+      await seed('softDeletions/comment-1', entry());
+      for (const ctx of [authorCtx(), userCtx(), guestCtx()]) {
+        await assertFails(getDoc(doc(ctx.firestore(), `${ROOT}/softDeletions/comment-1`)));
+      }
+      await assertSucceeds(
+        getDoc(doc(moderatorCtx().firestore(), `${ROOT}/softDeletions/comment-1`))
+      );
+      await assertSucceeds(
+        updateDoc(doc(moderatorCtx().firestore(), `${ROOT}/softDeletions/comment-1`), {
+          entityType: 'comment',
+          status: 'restored',
+          restoredAt: new Date(),
+          restoredBy: 'mod-1',
+          updatedAt: new Date(),
+        })
+      );
+    });
+  });
+
+  describe('reports — extended contextual targets and statuses', () => {
+    it('accepts page and website reports from a registered reader', async () => {
+      for (const targetType of ['page', 'website']) {
+        await assertSucceeds(
+          setDoc(doc(authorCtx().firestore(), `${ROOT}/reports/${targetType}-1`), {
+            reporterId: 'author-1',
+            targetId: `${targetType}-1`,
+            targetType,
+            reason: 'Broken page or site issue.',
+            status: 'pending',
+            createdAt: new Date(),
+          })
+        );
+      }
+    });
+
+    it('staff can move a report through under review and responded', async () => {
+      await seed('reports/report-1', {
+        reporterId: 'author-1',
+        targetId: 'tale-1',
+        targetType: 'tale',
+        reason: 'This tale violates the archive policy.',
+        status: 'pending',
+        createdAt: new Date(),
+      });
+      await assertSucceeds(
+        updateDoc(doc(moderatorCtx().firestore(), `${ROOT}/reports/report-1`), {
+          status: 'under_review',
+          reviewedBy: 'mod-1',
+          reviewedAt: new Date(),
+          updatedAt: new Date(),
+        })
+      );
+      await assertSucceeds(
+        updateDoc(doc(moderatorCtx().firestore(), `${ROOT}/reports/report-1`), {
+          status: 'responded',
+          latestResponse: 'We are reviewing this.',
+          responses: [{ body: 'We are reviewing this.', status: 'responded' }],
+          userVisibleStatus: 'Responded',
+          respondedBy: 'mod-1',
+          respondedAt: new Date(),
+          reviewedBy: 'mod-1',
+          reviewedAt: new Date(),
+          updatedAt: new Date(),
+        })
+      );
+    });
+  });
+
   describe('moderationLogs — staff-only action record', () => {
     const entry = (moderatorId = 'mod-1') => ({
       moderatorId,
@@ -1409,9 +1611,25 @@ describe('admin dashboard — five-role rules matrix', () => {
         })
       );
 
-      await assertSucceeds(deleteDoc(doc(adminCtx().firestore(), commentPath)));
-      const deleted = await assertSucceeds(getDoc(doc(adminCtx().firestore(), commentPath)));
-      expect(deleted.exists()).toBe(false);
+      await assertSucceeds(
+        updateDoc(doc(adminCtx().firestore(), commentPath), {
+          isDeleted: true,
+          text: '',
+          deletedAt: serverTimestamp(),
+          deletedBy: 'admin-1',
+          deletionType: 'administrator',
+          deletionReason: 'Removed for violating the community guidelines.',
+          moderationCategory: 'harassment',
+          isHidden: false,
+          isPinned: false,
+          reportCount: 0,
+          updatedAt: serverTimestamp(),
+        })
+      );
+      const removed = await assertSucceeds(getDoc(doc(adminCtx().firestore(), commentPath)));
+      expect(removed.exists()).toBe(true);
+      expect(removed.data()?.isDeleted).toBe(true);
+      expect(removed.data()?.text).toBe('');
     });
 
     it('staff can read a private draft and update the fields the dashboard exposes', async () => {
@@ -1469,10 +1687,72 @@ describe('admin dashboard — five-role rules matrix', () => {
         )
       );
       await assertFails(
-        deleteDoc(doc(moderatorCtx().firestore(), `${ROOT}/public/data/tales/draft-3`))
+        updateDoc(doc(moderatorCtx().firestore(), `${ROOT}/public/data/tales/draft-3`), {
+          isDeleted: true,
+          deletedAt: serverTimestamp(),
+          deletedBy: 'mod-1',
+          deletionType: 'administrator',
+          deletionReason: 'Removed from public view.',
+          moderationCategory: 'other',
+          previousStatus: 'draft',
+          previousVisibility: 'private',
+          status: 'deleted',
+          visibility: 'private',
+          updatedAt: serverTimestamp(),
+        })
       );
       await assertSucceeds(
-        deleteDoc(doc(adminCtx().firestore(), `${ROOT}/public/data/tales/draft-3`))
+        updateDoc(doc(adminCtx().firestore(), `${ROOT}/public/data/tales/draft-3`), {
+          isDeleted: true,
+          deletedAt: serverTimestamp(),
+          deletedBy: 'admin-1',
+          deletionType: 'administrator',
+          deletionReason: 'Removed from public view.',
+          moderationCategory: 'other',
+          previousStatus: 'draft',
+          previousVisibility: 'private',
+          status: 'deleted',
+          visibility: 'private',
+          updatedAt: serverTimestamp(),
+        })
+      );
+      const removed = await assertSucceeds(
+        getDoc(doc(adminCtx().firestore(), `${ROOT}/public/data/tales/draft-3`))
+      );
+      expect(removed.data()?.isDeleted).toBe(true);
+      expect(removed.data()?.status).toBe('deleted');
+    });
+
+    it('a soft-deleted published tale disappears from public reads but stays staff-readable', async () => {
+      await seedTale('author-1', 'tale-soft-1');
+      await assertSucceeds(
+        getDoc(doc(userCtx().firestore(), `${ROOT}/public/data/tales/tale-soft-1`))
+      );
+
+      await assertSucceeds(
+        updateDoc(doc(adminCtx().firestore(), `${ROOT}/public/data/tales/tale-soft-1`), {
+          isDeleted: true,
+          deletedAt: serverTimestamp(),
+          deletedBy: 'admin-1',
+          deletionType: 'administrator',
+          deletionReason: 'Removed from public view.',
+          moderationCategory: 'other',
+          previousStatus: 'published',
+          previousVisibility: 'public',
+          status: 'deleted',
+          visibility: 'private',
+          updatedAt: serverTimestamp(),
+        })
+      );
+
+      await assertFails(
+        getDoc(doc(userCtx().firestore(), `${ROOT}/public/data/tales/tale-soft-1`))
+      );
+      await assertFails(
+        getDoc(doc(guestCtx().firestore(), `${ROOT}/public/data/tales/tale-soft-1`))
+      );
+      await assertSucceeds(
+        getDoc(doc(adminCtx().firestore(), `${ROOT}/public/data/tales/tale-soft-1`))
       );
     });
   });

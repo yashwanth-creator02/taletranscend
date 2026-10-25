@@ -198,6 +198,30 @@ export const PATHS = {
   /** Single report */
   report: (id) => `${APP_ROOT}/reports/${id}`,
 
+  /** Reporter-safe mirror of a report (no private moderation notes). */
+  reportHistory: () => `${APP_ROOT}/reportHistory`,
+
+  /** Single reporter-safe report history document, keyed by report id. */
+  reportHistoryEntry: (id) => `${APP_ROOT}/reportHistory/${id}`,
+
+  /** Staff-only private notes attached to a report. */
+  reportPrivateNotes: () => `${APP_ROOT}/reportPrivateNotes`,
+
+  /** Single private report note document, keyed by report id. */
+  reportPrivateNote: (id) => `${APP_ROOT}/reportPrivateNotes/${id}`,
+
+  /** Soft-deletion registry used by the admin Deletions workspace. */
+  softDeletions: () => `${APP_ROOT}/softDeletions`,
+
+  /** Single soft-deletion registry entry. */
+  softDeletion: (id) => `${APP_ROOT}/softDeletions/${id}`,
+
+  /** Staff-only archive of moderated content that was removed from public view. */
+  moderationArchive: () => `${APP_ROOT}/moderationArchive`,
+
+  /** Single moderation archive entry. */
+  moderationArchiveEntry: (id) => `${APP_ROOT}/moderationArchive/${id}`,
+
   /** Immutable moderation action log (legacy collection) */
   moderationLogs: () => `${APP_ROOT}/moderationLogs`,
 

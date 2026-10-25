@@ -1,10 +1,12 @@
 // src/pages/tale/tale.js
 import { initPageReveal, readyReveal, setupAuthTimeout, createLogger } from '@/utils';
+import { showReportDialog } from '@ui/components/reportDialog.js';
 // Tale Archive page entry point.
 // Orchestrates data hydration and all user interactions.
 
 import '@css/base.css';
 import '@css/components.css';
+import '@css/components/moderation.css';
 import '@css/pages/tale.css';
 
 import {
@@ -144,6 +146,21 @@ export async function initTalePage(authUser = null) {
     isShelved
   );
   setupShareButton(currentTaleId);
+
+  document.querySelectorAll('#btn-report-tale, #btn-report-tale-mobile').forEach((button) => {
+    button.addEventListener('click', () => {
+      showReportDialog({
+        title: 'Report this tale',
+        subject: `Tale: ${tale?.title || currentTaleId}`,
+        category: 'inappropriate',
+        description: 'I am reporting this tale because it may violate the community guidelines.',
+        targetType: 'tale',
+        targetId: currentTaleId,
+        taleId: currentTaleId,
+        pageUrl: window.location.href,
+      });
+    });
+  });
 
   // 5. Real-time listeners
   listenToComments(currentTaleId, tale?.authorId || null);

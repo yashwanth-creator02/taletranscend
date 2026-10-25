@@ -682,3 +682,34 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `public/logo-wide.png` — Wide golden-quill logo used as the og:image and twitter:image social preview.
 - `public/logo.png` — Square golden-quill logo used in the navbar and page footers.
 - `public/sitemap.xml` — Generated static sitemap for core routes and known tales; written by scripts/generate-sitemap.js.
+
+## Moderation & Support Extension (2026-10-25)
+
+New tracked files:
+
+- `src/services/report.service.js` — Report categories, target types, statuses and labels; atomic `reports` + reporter-safe `reportHistory` creation; `getUserReports`, `getReportHistoryEntry`, `appendReportResponse`, and `buildHistory`.
+- `src/services/moderation.service.js` — Soft-delete, restore, and permanent-removal helpers for tales, comments, and replies; `softDeletions` registry listing/detail; all-or-nothing bulk tale removal (max 50) with audit and owner notification.
+- `src/ui/components/reportDialog.js` — Shared accessible report dialog with registered-user gate, prefilled/editable fields, the exact three-business-day notice, focus trap, Escape/backdrop close, and focus restoration.
+- `src/assets/css/components/moderation.css` — Token-only styles for the report dialog, community-guidelines dialog, and public moderation notices.
+- `src/pages/admin/modules/deletions/registry.js` — Admin Removed content workspace: type/status/title filters, cursor pagination, detail with live entity/archive/related reports, restore, separately confirmed permanent removal, and administrator-only bulk tale removal.
+- `src/services/__tests__/report.service.test.js` — Atomic report/history writes, normalization, anonymous rejection, reporter history query, and response preservation.
+- `src/services/__tests__/moderation.service.test.js` — Bulk limit/all-or-nothing validation, successful bulk registry writes and audit, tale restore metadata/notification, and non-admin permanent-removal denial.
+- `src/pages/404/__tests__/404.test.js` — Global 404 report trigger and contextual page target.
+
+Substantially extended files:
+
+- `src/services/admin/reports.service.js` — Under-review transition, user-visible responses delivered to the reporter inbox, staff private notes, direct admin messages, and closed-report immutability.
+- `src/services/admin/deletion.service.js` — Petition approval now soft-removes and registers the tale instead of erasing it.
+- `src/services/admin/content.service.js` — Tale soft removal, restore, permanent removal, and bulk wrappers.
+- `src/services/admin/comments.service.js` — Removed-comment filter, archive-aware detail, soft removal, restore, and permanent removal.
+- `src/pages/admin/modules/deletions/deletions.js` — Tab shell preserving the petition workflow and mounting the Removed content registry.
+- `src/pages/admin/modules/reports/reports.js` — Extended statuses, subject/category/description detail, response form, private notes, and direct inbox compose.
+- `src/pages/admin/modules/content/content.js` — Deleted filter/badge, deletion metadata, soft removal, restore, and separately confirmed purge.
+- `src/pages/admin/modules/comments/comments.js` — Removed filter, archived text, moderation metadata, soft removal, restore, and separately confirmed purge.
+- `src/pages/settings/settings.js` and `src/views/settings.html` — Support & Reports section with developer contact, website report action, exact notice, and own report history.
+- `src/pages/404/404.js` and `src/views/404.html` — Report-this-page entry point using the shared dialog.
+- `src/pages/tale/tale.js`, `src/pages/tale/interactions.js`, `src/pages/tale/comments.js`, and `src/views/tale.html` — Tale report action, report-missing dialog, comment/reply reporting, moderation notices, and community-guidelines dialog.
+- `firestore.rules` — Report/history/private-note/registry/archive rules, soft-deleted read denial, deleted-parent interaction guards, and administrator restore/purge branches.
+- `firestore.indexes.json` — Report history, soft-deletion registry, and removed-comment collection-group indexes.
+- `firestore/tests/rules.emulator.test.ts` — Soft-deletion, report history/private notes/archive, registry authority, contextual report targets, and status-transition coverage.
+- `docs/admin-dashboard/OPERATIONS.md`, `docs/admin-dashboard/PROGRESS.md`, `directives/firestore_management.md`, `directives/tale_interactions_and_comments.md`, and `directives/accessibility_and_ui_standards.md` — Moderation/support operations, schema, rules, index, UI, and accessibility documentation.

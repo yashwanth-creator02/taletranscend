@@ -6,9 +6,14 @@
 // update and delete. Moderation writes include all three fields the admin
 // branch validates (isHidden, isPinned, reportCount), never a partial patch.
 
-import { deleteDoc, getDoc, serverTimestamp, updateDoc } from '@fb/index.js';
+import { getDoc, serverTimestamp, updateDoc } from '@fb/index.js';
 import { refs } from '@fb/refs.js';
 import { createLogger } from '@/utils';
+import {
+  permanentlyDeleteComment,
+  restoreComment as restoreSoftDeletedComment,
+  softDeleteComment,
+} from '../moderation.service.js';
 import { ADMIN_PAGE_SIZE, fetchAdminPage } from './pagination.service.js';
 import { writeAdminAuditLog } from './audit.service.js';
 import { getStaffIdentity } from './session.service.js';
@@ -16,7 +21,7 @@ import { getStaffIdentity } from './session.service.js';
 const log = createLogger('AdminComments');
 
 /** Filters accepted by the global comment list. */
-export const COMMENT_FILTERS = Object.freeze(['all', 'visible', 'hidden', 'pinned']);
+export const COMMENT_FILTERS = Object.freeze(['all', 'visible', 'hidden', 'pinned', 'deleted']);
 
 /** Moderation actions accepted by the service. */
 export const COMMENT_ACTIONS = Object.freeze(['hide', 'unhide', 'pin', 'unpin']);
@@ -58,7 +63,7 @@ function normalizeComment(id, data = {}) {
  * separate isPinned index declared in firestore.indexes.json.
  *
  * @param {{
- *   filter?: 'all' | 'visible' | 'hidden' | 'pinned',
+ *   filter?: 'all' | 'visible' | 'hidden' | 'pinned' | 'deleted',
  *   direction?: 'asc' | 'desc',
  *   cursor?: unknown,
  *   pageSize?: number
@@ -74,7 +79,8 @@ export async function listCommentsPage(options = {}) {
 
   /** @type {Array<[string, '==' | 'in', unknown]>} */
   let conditions;
-  if (filter === 'visible') conditions = [['isHidden', '==', false]];
+  if (filter === 'deleted') conditions = [['isDeleted', '==', true]];
+  else if (filter === 'visible') conditions = [['isHidden', '==', false]];
   else if (filter === 'hidden') conditions = [['isHidden', '==', true]];
   else if (filter === 'pinned') conditions = [['isPinned', '==', true]];
   else conditions = [['isHidden', 'in', [true, false]]];
@@ -130,7 +136,17 @@ export async function getCommentDetail(taleId, commentId) {
     log.warn(`Could not read the tale summary for comment ${id}`, err);
   }
 
-  return { ...normalizeComment(snap.id, snap.data()), tale };
+  let archive = null;
+  if (snap.data()?.isDeleted === true) {
+    try {
+      const archiveSnap = await getDoc(refs.moderationArchiveEntry(`comment_${parentId}_${id}`));
+      if (archiveSnap.exists()) archive = archiveSnap.data() ?? null;
+    } catch (err) {
+      log.warn(`Could not read the moderation archive for comment ${id}`, err);
+    }
+  }
+
+  return { ...normalizeComment(snap.id, snap.data()), tale, archive };
 }
 
 /**
@@ -201,39 +217,37 @@ export async function moderateComment(taleId, commentId, action) {
 }
 
 /**
- * Permanently delete a comment. Replies are left in place because they are a
- * separate subcollection and Firestore does not cascade the delete.
+ * Soft-delete a comment for a community-guidelines violation. The original
+ * text is archived for staff review and the public record keeps a placeholder
+ * with the administrative notice.
  *
  * @param {string} taleId
  * @param {string} commentId
- * @returns {Promise<{ commentId: string, authorName: string }>}
+ * @param {{ reason?: string, category?: string }} [options]
  */
-export async function deleteComment(taleId, commentId) {
+export async function deleteComment(taleId, commentId, options = {}) {
   const parentId = String(taleId ?? '').trim();
   const id = String(commentId ?? '').trim();
   if (!parentId || !id) throw new Error('A tale id and comment id are required.');
 
-  const identity = await getStaffIdentity();
   const snap = await getDoc(refs.comment(parentId, id));
   if (!snap.exists()) throw new Error('That comment no longer exists.');
   const authorName = cleanText(snap.data()?.authorName, 100) || 'Unknown author';
 
-  await deleteDoc(refs.comment(parentId, id));
-
-  try {
-    const audit = await writeAdminAuditLog({
-      actorId: identity.uid,
-      actorRole: identity.role,
-      action: 'comment.delete',
-      targetType: 'comment',
-      targetId: id,
-      summary: `Deleted a comment by ${authorName} on tale ${parentId}.`.slice(0, 1000),
-    });
-    if (!audit?.success)
-      log.warn('The comment delete was saved but its audit entry failed', { id });
-  } catch (err) {
-    log.warn('The comment delete was saved but its audit entry failed', err);
-  }
+  await softDeleteComment(parentId, id, {
+    reason: options.reason ?? 'Removed for violating the community guidelines.',
+    category: options.category ?? 'other',
+  });
 
   return { commentId: id, authorName };
+}
+
+/** Restore a moderated comment from the staff-only archive. */
+export async function restoreComment(taleId, commentId) {
+  return restoreSoftDeletedComment(taleId, commentId);
+}
+
+/** Permanently remove a previously soft-deleted comment. */
+export async function purgeComment(taleId, commentId) {
+  return permanentlyDeleteComment(taleId, commentId);
 }

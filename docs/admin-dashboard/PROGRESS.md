@@ -457,3 +457,119 @@ All declared rules and indexes were deployed to project `taletranscend` on
 2026-10-23. The four Phase 2 indexes are READY. The five global-view indexes
 were verified READY through the Firebase Admin API, and the `comments`
 collection-group read rule is deployed at the database root.
+
+## 13. Moderation & Support Extension (`feature/moderation-support`)
+
+### Scope delivered
+
+This branch builds on `feature/admin-dashboard` and adds a complete moderation
+and support loop across the public site and dashboard:
+
+- Soft deletion for tales, comments, and replies, with deletion metadata,
+  staff-only text archives, a cursor-friendly registry, restore, and separately
+  confirmed permanent removal.
+- An administrator-only Deletions registry with type/status/title filters,
+  detail views, related reports, and all-or-nothing bulk removal of up to 50
+  tales.
+- An accessible community-guidelines dialog and contextual report entry points
+  for comments, replies, tales, the tale-not-found screen, the global 404 page,
+  and Settings.
+- A registered-reader report history with Submitted, Under Review, Responded,
+  Resolved, and Closed states, plus the exact administrator-review notice and
+  the developer contact `leo.two.dev@gmail.com`.
+- Staff report triage with subject, category, description, private notes,
+  user-visible responses, status transitions, and filtering.
+- Administrator-to-reader inbox messages delivered through the existing
+  notification collection, with rule-enforced recipient and reporter privacy.
+
+### Data model additions
+
+| Collection           | Purpose                                                                                             |
+| -------------------- | --------------------------------------------------------------------------------------------------- |
+| `reports`            | Staff-visible report record with target context, category, description, status, responses, reviewer |
+| `reportHistory`      | Reporter-safe mirror; status and user-visible responses only, no private notes                      |
+| `reportPrivateNotes` | Staff-only triage notes keyed by report ID                                                          |
+| `softDeletions`      | Registry of removed tales/comments/replies with restore and purge state                             |
+| `moderationArchive`  | Staff-only archived comment/reply text                                                              |
+
+Soft-deleted entities keep their document IDs and relationships. Tales store
+`previousStatus` and `previousVisibility`; comments/replies archive original
+text before clearing the public field. The public read paths reject
+`isDeleted == true` and `status == 'deleted'`.
+
+### Decisions
+
+- Soft deletion is the default for every content-removal surface. Permanent
+  deletion is a second, administrator-confirmed action and never happens from
+  the ordinary moderation flow.
+- Deletion petitions remain a separate author-initiated workflow. Approval now
+  soft-removes the tale and registers it for restoration rather than erasing it.
+- Report history is intentionally a separate mirror so reporter reads never
+  depend on staff-only fields. Rules deny cross-reporter access.
+- Existing `users/{uid}/notifications` is the inbox. No second messaging
+  collection was introduced.
+- Chapter registry entries are supported for future work, but chapter-level
+  removal is not exposed in this delivery. Tale removal covers its chapters.
+
+### Rules and indexes
+
+Rules add:
+
+- Report target types for tale/comment/reply/user/page/website, bounded report
+  updates, and closed-report immutability.
+- Reporter-owned `reportHistory` creation/read, staff updates, and staff-only
+  `reportPrivateNotes` and `moderationArchive`.
+- Staff-readable/creatable `softDeletions`; tale registry writes require
+  `isAdministrator()`.
+- Public denial for soft-deleted tales, comment/reply creation under deleted
+  parents, likes on deleted comments, and edits to deleted comments/replies.
+- Administrator-only tale restore/purge fields and statuses.
+
+Indexes add reporter history ordering, soft-deletion registry filters, and a
+collection-group `comments(isDeleted, createdAt)` index. See
+`firestore.indexes.json` for the exact definitions.
+
+### Verification
+
+- Unit suite: 134 test files, 1,251 passed, 2 skipped (1,253 total).
+- Rules emulator: 98/98 passed against the Firestore emulator.
+- `npm run format`, `npm run lint` (0 errors), `npm run lint:tokens`,
+  `npm run type-check`, and `npm run build` all passed.
+- Browser E2E and a live authenticated walkthrough were not run for this
+  branch; coverage comes from the unit, integration, and rules suites.
+- Do not treat historical numbers in sections 9 and 12 as evidence for this
+  extension.
+
+### Deployment
+
+```powershell
+npm run format
+npm run lint
+npm run lint:tokens
+npm run type-check
+npm test
+npm run test:rules
+npm run build
+firebase deploy --only firestore:rules,firestore:indexes
+```
+
+Deploy rules and indexes together: the new report/soft-deletion queries and
+collection-group comment filter depend on both. No data migration is required
+for existing documents; legacy content simply has no `isDeleted` field and is
+treated as active. Backfill is only needed if a future query requires an
+explicit `isDeleted == false` equality, which this delivery does not.
+
+### Assumptions and limitations
+
+- Existing anonymous sessions are guests; reporting requires a registered
+  account in both UI and rules.
+- Permanent deletion does not cascade subcollections. The registry and staff
+  archive preserve evidence, but chapter/comment cleanup after a permanent tale
+  purge remains a trusted server-side task.
+- Chapter-level soft deletion is represented in the registry schema but has no
+  dedicated UI or rule branch in this delivery.
+- Report responses are delivered to the existing notification inbox; they do
+  not send email. The Settings notice explains the three-business-day response
+  expectation and provides the developer address.
+- The admin dashboard remains table-first and cursor-paginated. Bulk removal is
+  limited to 50 tales per operation to stay within free-tier write budgets.

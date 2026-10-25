@@ -14,19 +14,34 @@ const mocks = vi.hoisted(() => ({
   getDoc: vi.fn(),
   serverTimestamp: vi.fn(() => 'server-timestamp'),
   updateDoc: vi.fn(),
+  writeBatch: vi.fn(),
+  batchSet: vi.fn(),
+  batchUpdate: vi.fn(),
+  batchCommit: vi.fn(),
   fetchAdminPage: vi.fn(),
   writeAdminAuditLog: vi.fn(),
   getStaffIdentity: vi.fn(),
   allComments: vi.fn(() => 'all-comments'),
   comment: vi.fn((taleId, commentId) => `comment:${taleId}/${commentId}`),
   tale: vi.fn((taleId) => `tale:${taleId}`),
+  moderationArchiveEntry: vi.fn((id) => `archive:${id}`),
+  softDeletion: vi.fn((id) => `softDeletion:${id}`),
 }));
 
 vi.mock('@fb/index.js', () => ({
+  db: { name: 'test-db' },
   deleteDoc: mocks.deleteDoc,
   getDoc: mocks.getDoc,
+  refs: {
+    allComments: mocks.allComments,
+    comment: mocks.comment,
+    tale: mocks.tale,
+    moderationArchiveEntry: mocks.moderationArchiveEntry,
+    softDeletion: mocks.softDeletion,
+  },
   serverTimestamp: mocks.serverTimestamp,
   updateDoc: mocks.updateDoc,
+  writeBatch: mocks.writeBatch,
 }));
 
 vi.mock('@fb/refs.js', () => ({
@@ -90,10 +105,16 @@ describe('admin comments service', () => {
     });
     mocks.updateDoc.mockResolvedValue(undefined);
     mocks.deleteDoc.mockResolvedValue(undefined);
+    mocks.writeBatch.mockReturnValue({
+      set: mocks.batchSet,
+      update: mocks.batchUpdate,
+      commit: mocks.batchCommit,
+    });
+    mocks.batchCommit.mockResolvedValue(undefined);
   });
 
   it('exposes the supported filters and actions', () => {
-    expect(COMMENT_FILTERS).toEqual(['all', 'visible', 'hidden', 'pinned']);
+    expect(COMMENT_FILTERS).toEqual(['all', 'visible', 'hidden', 'pinned', 'deleted']);
     expect(COMMENT_ACTIONS).toEqual(['hide', 'unhide', 'pin', 'unpin']);
   });
 
@@ -249,17 +270,41 @@ describe('admin comments service', () => {
     expect(mocks.writeAdminAuditLog).not.toHaveBeenCalled();
   });
 
-  it('deletes a comment and audits the real caller', async () => {
+  it('soft-deletes a comment, archives its text, and audits the real caller', async () => {
     mocks.getDoc.mockResolvedValue(makeSnapshot('comment-1', COMMENT));
 
     const result = await deleteComment('tale-1', 'comment-1');
 
-    expect(mocks.deleteDoc).toHaveBeenCalledWith('comment:tale-1/comment-1');
+    expect(mocks.batchUpdate).toHaveBeenCalledWith(
+      'comment:tale-1/comment-1',
+      expect.objectContaining({
+        isDeleted: true,
+        text: '',
+        deletionType: 'administrator',
+        moderationCategory: 'other',
+      })
+    );
+    expect(mocks.batchSet).toHaveBeenCalledWith(
+      'archive:comment_tale-1_comment-1',
+      expect.objectContaining({
+        entityType: 'comment',
+        entityId: 'comment-1',
+        text: 'A fine reflection.',
+      })
+    );
+    expect(mocks.batchSet).toHaveBeenCalledWith(
+      'softDeletion:comment_tale-1_comment-1',
+      expect.objectContaining({
+        entityType: 'comment',
+        entityId: 'comment-1',
+        status: 'deleted',
+      })
+    );
     expect(result).toEqual({ commentId: 'comment-1', authorName: 'Reader One' });
     expect(mocks.writeAdminAuditLog).toHaveBeenCalledWith(
       expect.objectContaining({
         actorId: 'staff-1',
-        action: 'comment.delete',
+        action: 'comment.soft_delete',
         targetType: 'comment',
         targetId: 'comment-1',
       })
@@ -270,7 +315,7 @@ describe('admin comments service', () => {
     mocks.getDoc.mockResolvedValue(missingSnapshot('comment-1'));
 
     await expect(deleteComment('tale-1', 'comment-1')).rejects.toThrow(/no longer exists/i);
-    expect(mocks.deleteDoc).not.toHaveBeenCalled();
+    expect(mocks.batchUpdate).not.toHaveBeenCalled();
     expect(mocks.writeAdminAuditLog).not.toHaveBeenCalled();
   });
 

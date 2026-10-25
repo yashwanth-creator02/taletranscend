@@ -14,6 +14,7 @@ import {
   restoreAdminSearchFocus,
 } from '../../admin.utils.js';
 import { buildAdminEmptyState, buildModuleLoading } from '../../admin.templates.js';
+import { mountRegistry } from './registry.js';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -91,7 +92,7 @@ function detailField(label, value, wide = false) {
  * @param {{ container: HTMLElement, access: import('../../admin.state.js').AdminAccess }} opts
  * @returns {() => void}
  */
-export function mount({ container }) {
+function mountPetitions({ container }) {
   let items = [];
   let lastDoc = null;
   let hasMore = false;
@@ -207,7 +208,7 @@ export function mount({ container }) {
                   data-decision="approved"
                   ${deciding ? 'disabled' : ''}
                 >
-                  ${deciding ? 'Processing...' : 'Approve and delete tale'}
+                  ${deciding ? 'Processing...' : 'Approve and remove tale'}
                 </button>
                 <button
                   type="button"
@@ -229,8 +230,8 @@ export function mount({ container }) {
                 </button>
               </div>
               <p class="admin-readonly-note">
-                Approval deletes the public tale record. It cannot be undone from this dashboard.
-                Chapter and comment subcollections may remain until server-side cleanup.
+                Approval removes the tale from public view and records it in Removed content. The
+                tale can be restored later; chapter and comment subcollections are left in place.
               </p>
             `
             : `
@@ -347,8 +348,9 @@ export function mount({ container }) {
       <section aria-labelledby="deletions-title">
         <h2 id="deletions-title" class="admin-section-title">Tale Deletion Requests</h2>
         <p class="admin-note">
-          Review the petition before deciding. Approval removes the public tale record from the
-          archive; rejection keeps it in place.
+          Review the petition before deciding. Approval removes the public tale record from discovery
+          and direct access, then records it in Removed content for restoration; rejection keeps it
+          in place.
         </p>
         ${renderToolbar()}
         ${renderDetail()}
@@ -462,15 +464,15 @@ export function mount({ container }) {
     const approved = decision === 'approved';
 
     const confirmed = await showConfirmModal({
-      title: approved ? 'Permanently delete this tale record?' : 'Reject this deletion request?',
+      title: approved ? 'Remove this tale from public view?' : 'Reject this deletion request?',
       message: approved
-        ? `Approving this request will <strong>permanently delete the public tale record</strong> for <strong>${escapeAdminHtml(
+        ? `Approving this request will <strong>remove the public tale record</strong> for <strong>${escapeAdminHtml(
             title
-          )}</strong>. The record cannot be restored from this dashboard. This action is irreversible.`
+          )}</strong> from discovery and direct access. The record is retained in Removed content and can be restored.`
         : `Reject this request and keep <strong>${escapeAdminHtml(
             title
           )}</strong> in the archive? The author will be notified of the decision.`,
-      confirmText: approved ? 'Delete tale record permanently' : 'Reject request',
+      confirmText: approved ? 'Remove tale from public view' : 'Reject request',
       confirmVariant: approved ? 'danger' : 'primary',
     });
     if (!confirmed) return;
@@ -483,7 +485,7 @@ export function mount({ container }) {
       await decideDeletionRequest(requestId, decision, { notes });
       showToast(
         approved
-          ? 'Deletion request approved. The public tale record was permanently deleted.'
+          ? 'Deletion request approved. The tale was removed from public view and can be restored.'
           : 'Deletion request rejected. The tale was kept.',
         'success'
       );
@@ -575,6 +577,101 @@ export function mount({ container }) {
     container.removeEventListener('click', handleClick);
     container.removeEventListener('change', handleChange);
     container.removeEventListener('input', handleInput);
+  };
+}
+
+/**
+ * Deletions workspace shell. Petitions and removed content have separate
+ * cursors and state, so each tab mounts its own module and is disposed when the
+ * other tab is opened.
+ *
+ * @param {{ container: HTMLElement, access?: import('../../admin.state.js').AdminAccess }} options
+ * @returns {() => void}
+ */
+export function mount({ container, access } = {}) {
+  if (!container) return () => {};
+  if (!access?.isStaff) {
+    container.innerHTML = `
+      <section aria-labelledby="deletions-denied-title">
+        <h2 id="deletions-denied-title" class="admin-section-title">Deletions</h2>
+        <p class="admin-readonly-note">
+          Deletion review is available to administrators and moderators only.
+        </p>
+      </section>
+    `;
+    return () => {};
+  }
+
+  let activeTab = 'requests';
+  let childCleanup = null;
+  let disposed = false;
+
+  container.innerHTML = `
+    <section aria-labelledby="deletions-title">
+      <h2 id="deletions-title" class="admin-section-title">Deletions</h2>
+      <p class="admin-note">
+        Review author deletion petitions and the registry of content removed from public view.
+        Removed tales, comments, and replies keep their identifiers and relationships; restore them
+        here, or permanently delete a record only after a separate confirmation.
+      </p>
+      <div class="admin-actions" role="tablist" aria-label="Deletion workspaces">
+        <button
+          type="button"
+          class="admin-btn"
+          role="tab"
+          data-tab="requests"
+          aria-selected="true"
+        >
+          Deletion requests
+        </button>
+        <button
+          type="button"
+          class="admin-btn admin-btn--secondary"
+          role="tab"
+          data-tab="registry"
+          aria-selected="false"
+        >
+          Removed content
+        </button>
+      </div>
+      <div data-region="panel"></div>
+    </section>
+  `;
+
+  const panel = container.querySelector('[data-region="panel"]');
+
+  function activate(tab) {
+    if (disposed || !panel) return;
+    activeTab = tab === 'registry' ? 'registry' : 'requests';
+    container.querySelectorAll('[data-tab]').forEach((button) => {
+      const selected = button.getAttribute('data-tab') === activeTab;
+      button.setAttribute('aria-selected', String(selected));
+      button.classList.toggle('admin-btn--secondary', !selected);
+    });
+    if (typeof childCleanup === 'function') childCleanup();
+    childCleanup = null;
+    panel.innerHTML = '';
+    childCleanup =
+      activeTab === 'registry'
+        ? mountRegistry({ container: panel, access })
+        : mountPetitions({ container: panel, access });
+  }
+
+  function handleClick(event) {
+    const button = event.target instanceof Element ? event.target.closest('[data-tab]') : null;
+    if (!button || !container.contains(button)) return;
+    const tab = button.getAttribute('data-tab');
+    if (tab && tab !== activeTab) activate(tab);
+  }
+
+  container.addEventListener('click', handleClick);
+  activate(activeTab);
+
+  return () => {
+    disposed = true;
+    container.removeEventListener('click', handleClick);
+    if (typeof childCleanup === 'function') childCleanup();
+    childCleanup = null;
   };
 }
 
