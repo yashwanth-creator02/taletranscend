@@ -15,6 +15,7 @@
  * @property {string}              actionUrl
  * @property {string|null}         taleId
  * @property {string|null}         commentId
+ * @property {string|null}         reportId
  * @property {string|null}         fromUserId
  * @property {string|null}         fromUserName
  * @property {string|null}         fromUserAvatarUrl
@@ -40,6 +41,7 @@ export function createNotification(id, data = {}) {
     actionUrl: data.actionUrl ?? data.link ?? '',
     taleId: data.taleId ?? null,
     commentId: data.commentId ?? null,
+    reportId: data.reportId ?? null,
     fromUserId: data.fromUserId ?? null,
     fromUserName: data.fromUserName ?? null,
     fromUserAvatarUrl: data.fromUserAvatarUrl ?? null,

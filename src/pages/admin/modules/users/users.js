@@ -8,6 +8,7 @@ import {
   getUserDetail,
   updateWriterVerification,
 } from '@services/admin/users.service.js';
+import { sendAdminMessage } from '@services/admin/reports.service.js';
 import { showToast } from '@/ui/components/toast.js';
 import {
   formatAdminDate,
@@ -53,6 +54,8 @@ export function mount({ container, access } = {}) {
   let detailLoading = false;
   let detailError = '';
   let actionBusy = false;
+  let messageOpen = false;
+  let messageBusy = false;
   let searchTimer = null;
   let listVersion = 0;
   let detailVersion = 0;
@@ -140,6 +143,73 @@ export function mount({ container, access } = {}) {
           ${verified ? 'Verified writer' : 'Unverified'}
         </span>
       </span>
+    `;
+  }
+
+  /**
+   * Builds the inline administrator message composer for the selected reader.
+   *
+   * @param {string} uid
+   * @returns {string}
+   */
+  function buildMessageComposer(uid) {
+    return `
+      <div class="admin-message-composer" aria-labelledby="admin-user-message-title">
+        <h4 id="admin-user-message-title" class="admin-detail-panel__title">Message this reader</h4>
+        <p class="admin-detail-panel__subtitle">
+          Delivers a direct administrative message to this user's inbox.
+        </p>
+        <div class="admin-detail-grid">
+          <div class="admin-detail-field admin-detail-field--wide">
+            <label class="admin-field__label" for="admin-user-message-recipient">Recipient user ID</label>
+            <input
+              class="admin-input"
+              id="admin-user-message-recipient"
+              value="${escapeAdminHtml(uid)}"
+              readonly
+            />
+          </div>
+          <div class="admin-detail-field admin-detail-field--wide">
+            <label class="admin-field__label" for="admin-user-message-subject">Subject</label>
+            <input
+              class="admin-input"
+              id="admin-user-message-subject"
+              data-role="user-message-subject"
+              maxlength="160"
+              autocomplete="off"
+            />
+          </div>
+          <div class="admin-detail-field admin-detail-field--wide">
+            <label class="admin-field__label" for="admin-user-message-body">Message</label>
+            <textarea
+              class="admin-textarea"
+              id="admin-user-message-body"
+              data-role="user-message-body"
+              maxlength="5000"
+              rows="4"
+            ></textarea>
+          </div>
+        </div>
+        <div class="admin-actions">
+          <button
+            type="button"
+            class="admin-btn admin-btn--sm"
+            data-action="send-user-message"
+            data-uid="${escapeAdminHtml(uid)}"
+            ${messageBusy ? 'disabled' : ''}
+          >
+            ${messageBusy ? 'Sending...' : 'Send message'}
+          </button>
+          <button
+            type="button"
+            class="admin-btn admin-btn--sm admin-btn--secondary"
+            data-action="cancel-user-message"
+            ${messageBusy ? 'disabled' : ''}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
     `;
   }
 
@@ -304,7 +374,7 @@ export function mount({ container, access } = {}) {
     const name = displayName(detail);
     const role = displayRole(detail);
     const isVerified = detail.isVerifiedWriter === true;
-    const disabled = actionBusy ? 'disabled' : '';
+    const disabled = actionBusy || messageOpen ? 'disabled' : '';
     const taleCountLabel =
       detail.taleCount === null || detail.taleCount === undefined
         ? 'Unavailable'
@@ -345,6 +415,15 @@ export function mount({ container, access } = {}) {
         <div class="admin-actions">
           <button
             type="button"
+            class="admin-btn admin-btn--sm admin-btn--secondary"
+            data-action="open-message"
+            data-uid="${escapeAdminHtml(uid)}"
+            ${disabled}
+          >
+            Message
+          </button>
+          <button
+            type="button"
             class="admin-btn admin-btn--sm"
             data-action="toggle-verified"
             data-uid="${escapeAdminHtml(uid)}"
@@ -353,6 +432,8 @@ export function mount({ container, access } = {}) {
             ${isVerified ? 'Remove verification' : 'Verify writer'}
           </button>
         </div>
+
+        ${messageOpen ? buildMessageComposer(uid) : ''}
 
         <p class="admin-readonly-note">
           Writer verification unlocks the Author Studio. Role labels are shown as stored profile
@@ -425,6 +506,8 @@ export function mount({ container, access } = {}) {
     detail = null;
     detailError = '';
     detailLoading = true;
+    messageOpen = false;
+    messageBusy = false;
     const version = ++detailVersion;
 
     renderDetail();
@@ -455,6 +538,8 @@ export function mount({ container, access } = {}) {
     detail = null;
     detailError = '';
     detailLoading = false;
+    messageOpen = false;
+    messageBusy = false;
     detailVersion += 1;
     renderDetail();
     renderResults();
@@ -505,6 +590,62 @@ export function mount({ container, access } = {}) {
     );
   }
 
+  /**
+   * Delivers an administrative message to the selected reader through the
+   * shared reports service, which owns validation, notification creation, and
+   * the audit trail.
+   *
+   * @param {string} uid
+   */
+  async function handleSendMessage(uid) {
+    if (!detail || messageBusy) return;
+    const detailUid = String(detail.uid ?? detail.id ?? '');
+    if (detailUid !== uid) return;
+
+    const subjectField = container.querySelector('[data-role="user-message-subject"]');
+    const bodyField = container.querySelector('[data-role="user-message-body"]');
+    const subject = subjectField instanceof HTMLInputElement ? subjectField.value.trim() : '';
+    const body = bodyField instanceof HTMLTextAreaElement ? bodyField.value.trim() : '';
+
+    if (!subject || !body) {
+      showToast('Subject and message are required.', 'error');
+      return;
+    }
+
+    messageBusy = true;
+    const sendButton = container.querySelector('[data-action="send-user-message"]');
+    const cancelButton = container.querySelector('[data-action="cancel-user-message"]');
+    if (sendButton instanceof HTMLButtonElement) {
+      sendButton.disabled = true;
+      sendButton.textContent = 'Sending...';
+    }
+    if (cancelButton instanceof HTMLButtonElement) cancelButton.disabled = true;
+
+    try {
+      await sendAdminMessage({ recipientId: uid, subject, body });
+      if (destroyed) return;
+      messageOpen = false;
+      showToast('Message delivered to the reader inbox.', 'success');
+      renderDetail();
+    } catch (error) {
+      if (destroyed) return;
+      console.error('[users] failed to send administrative message', error);
+      showToast(
+        error instanceof Error && error.message
+          ? error.message
+          : 'The message could not be delivered.',
+        'error'
+      );
+      if (sendButton instanceof HTMLButtonElement) {
+        sendButton.disabled = false;
+        sendButton.textContent = 'Send message';
+      }
+      if (cancelButton instanceof HTMLButtonElement) cancelButton.disabled = false;
+    } finally {
+      messageBusy = false;
+    }
+  }
+
   /** @param {MouseEvent} event */
   function handleClick(event) {
     const target = event.target instanceof Element ? event.target.closest('[data-action]') : null;
@@ -533,6 +674,20 @@ export function mount({ container, access } = {}) {
         break;
       case 'toggle-verified':
         if (uid) handleToggleVerified(uid);
+        break;
+      case 'open-message':
+        if (!uid || messageBusy) break;
+        messageOpen = true;
+        renderDetail();
+        container.querySelector('[data-role="user-message-subject"]')?.focus();
+        break;
+      case 'cancel-user-message':
+        if (messageBusy) break;
+        messageOpen = false;
+        renderDetail();
+        break;
+      case 'send-user-message':
+        if (uid) handleSendMessage(uid);
         break;
       default:
         break;

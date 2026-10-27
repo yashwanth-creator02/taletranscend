@@ -109,14 +109,24 @@ v1/taletranscend/projects/v1/
    - Statuses: `pending`, `under_review`, `responded`, `resolved`, `dismissed`. Readers see
      Submitted, Under Review, Responded, Resolved, and Closed.
    - Responses append to both report and history and create a `report_response` notification in
-     `users/{uid}/notifications` with action URL `settings.html#section-inbox`. Direct staff
-     messages use `type: 'admin_message'` and the same Inbox target. If a response saves but the
-     notification cannot be created, staff see a warning and the audit record notes the failed
-     delivery.
-   - Settings reads this collection with a 20-message cursor page. Mark-all sweeps unread batches of
-     50 up to a practical 1,000-message cap. Owner-scoped writes touch only `isRead`, `readAt`, and
-     `isPinned`. Notification links pass through `resolveSafeInternalHref`, which rejects absolute,
-     protocol-relative, hash-only, scheme-bearing, backslash/control-character, and off-origin targets.
+     `users/{uid}/notifications` with action URL `settings.html#section-inbox` and the originating
+     `reportId`. Direct staff messages use `type: 'admin_message'` and the same Inbox target; the
+     admin Users detail panel's Message action calls the same `sendAdminMessage` service, so
+     validation, notification creation, and the `inbox.admin_message` audit entry stay in one
+     place. If a response saves but the notification cannot be created, staff see a warning and the
+     audit record notes the failed delivery.
+   - The Settings Inbox is registered-only. Anonymous Firebase sessions and signed-out visitors
+     never reveal the section, never run the notification query, and never open the unread
+     subscription; the sidebar entry, command-palette entry, and search results are all gated on
+     `isRegisteredUser()`.
+   - Settings reads this collection with a 20-message cursor page and a live unread count from
+     `subscribeUnreadNotifications`. Type and text filters apply client-side to the loaded pages, so
+     the cursor pager stays intact. Mark-all sweeps unread batches of 50 up to a practical
+     1,000-message cap. Owner-scoped writes touch only `isRead`, `readAt`, and `isPinned`, and
+     owners may delete their own notification documents. Report replies that carry `reportId` link
+     to the report thread in Support & Reports. Notification links pass through
+     `resolveSafeInternalHref`, which rejects absolute, protocol-relative, hash-only,
+     scheme-bearing, backslash/control-character, and off-origin targets.
    - Resolved and closed reports cannot be overwritten or receive a response. Report creation
      requires a registered account and a reason of 1-500 characters; the client uses the
      subject as `reason` and keeps the longer description separately.
@@ -170,7 +180,9 @@ v1/taletranscend/projects/v1/
      `setModeratorClaim` callable, never by editing `role`.
    - An owner may update only `isRead`, `readAt`, and `isPinned` on their own notifications.
      `isRead` and `isPinned` must be booleans and `readAt` must be a timestamp, so the read/pin
-     path cannot be used to store arbitrary values.
+     path cannot be used to store arbitrary values. An owner may also delete their own
+     notifications; the Settings Inbox uses that path for message deletion instead of adding an
+     `isArchived` field or changing the update rule.
 
 10. **User Profile & Scribe Registry**:
 

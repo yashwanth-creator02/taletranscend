@@ -653,11 +653,11 @@ messages, moderation notices, and system notices all share one archive.
   tale/profile targets. If a report response is saved but the inbox notification
   cannot be delivered, staff see a warning and the audit record distinguishes the
   failed delivery.
-- Signed-out visitors see a sign-in prompt; the page never reads another user's
-  notifications. Any authenticated owner, including an anonymous Firebase
-  session, sees only their own inbox. The notification rules already allow owner
-  reads and updates limited to `isRead`, `readAt`, and `isPinned`, so no rules or
-  indexes changed.
+- Signed-out visitors and anonymous guests see a connect-account prompt; the page
+  never reads another user's notifications. Section 15 tightened this from "any
+  authenticated owner" to registered accounts only. The notification rules
+  already allow owner reads and updates limited to `isRead`, `readAt`, and
+  `isPinned`, so no rules or indexes changed.
 
 ### Decisions
 
@@ -686,3 +686,51 @@ messages, moderation notices, and system notices all share one archive.
 Neither branch is merged to `main`; explicit approval is required before any
 merge. The production ruleset deployed on 2026-10-26 already permits the inbox's
 owner-scoped notification reads and read/pin writes.
+
+## 15. Inbox access and messaging enhancements (`feature/inbox-enhancements`)
+
+### Scope delivered
+
+`feature/inbox-enhancements` builds on `feature/user-inbox` at `832e800`.
+
+- The Inbox is registered-only. Anonymous Firebase sessions and signed-out
+  visitors never see the sidebar entry or the section, search cannot reveal it,
+  a restricted hash falls back to Profile, and no notification query or unread
+  subscription runs for a guest. The same gate hides the command-palette entry.
+- A rectangular unread badge on the Inbox nav tracks the live unread count
+  (capped at `99+`) through `subscribeUnreadNotifications`, and updates
+  immediately after mark-read, mark-unread, mark-all, and delete.
+- Readers can mark a read message unread again. The service writes only
+  `isRead: false`, which stays inside the existing owner update rule.
+- Type and text filters narrow the loaded messages client-side. Type options
+  group community activity and unknown notices, the summary reports visible
+  versus loaded counts, and an empty filter result preserves the cursor pager.
+- Report replies that carry `reportId` link to the report thread in Support &
+  Reports instead of the generic inbox target. The notification schema and
+  factory now expose `reportId`.
+- Readers can delete a message after a danger confirmation. Deletion uses the
+  owner delete rule that already existed; no `isArchived` field or rules change
+  was needed.
+- The administrator Users detail panel now offers Message beside writer
+  verification. It opens a prefilled composer and calls the existing
+  `sendAdminMessage` service, so recipient validation, notification creation,
+  and the `inbox.admin_message` audit entry stay in one place. Failed delivery
+  keeps the draft and surfaces the service error.
+
+### Verification
+
+- Unit suite: 135 test files, 1,311 passed, 2 skipped (1,313 total), including
+  guest gating, deep-link restoration, unread badge, mark-unread, filter/search,
+  delete confirmation, report-thread linking, registered-only command palette,
+  and admin user messaging tests.
+- Rules emulator: 99/99 passed. No rules or indexes changed.
+- `npm run format`, `npm run lint` (0 errors), `npm run lint:tokens`,
+  `npm run type-check`, and `npm run build` all passed.
+- Browser E2E and a live authenticated walkthrough were not run; coverage comes
+  from the unit and rules suites.
+
+### Branch state
+
+`feature/inbox-enhancements` is based on `feature/user-inbox` at `832e800`.
+Neither branch is merged to `main`; explicit approval is required before any
+merge.

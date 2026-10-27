@@ -6,11 +6,13 @@ import {
   getUserDetail,
   updateWriterVerification,
 } from '@services/admin/users.service.js';
+import { sendAdminMessage } from '@services/admin/reports.service.js';
 
 const serviceMocks = vi.hoisted(() => ({
   listUsersPage: vi.fn(),
   getUserDetail: vi.fn(),
   updateWriterVerification: vi.fn(),
+  sendAdminMessage: vi.fn(),
 }));
 
 const uiMocks = vi.hoisted(() => ({
@@ -21,6 +23,10 @@ vi.mock('@services/admin/users.service.js', () => ({
   listUsersPage: serviceMocks.listUsersPage,
   getUserDetail: serviceMocks.getUserDetail,
   updateWriterVerification: serviceMocks.updateWriterVerification,
+}));
+
+vi.mock('@services/admin/reports.service.js', () => ({
+  sendAdminMessage: serviceMocks.sendAdminMessage,
 }));
 
 vi.mock('@/ui/components/toast.js', () => ({
@@ -79,6 +85,7 @@ describe('admin users module', () => {
     serviceMocks.listUsersPage.mockResolvedValue(makePage([]));
     serviceMocks.getUserDetail.mockResolvedValue(null);
     serviceMocks.updateWriterVerification.mockResolvedValue({ isVerifiedWriter: false });
+    serviceMocks.sendAdminMessage.mockResolvedValue({ id: 'notification-1' });
   });
 
   it('blocks non-administrators without reading user data', () => {
@@ -344,6 +351,125 @@ describe('admin users module', () => {
       expect(updateWriterVerification).toHaveBeenCalledWith('user-1', true);
     });
     expect(uiMocks.showToast).toHaveBeenCalledWith('Writer verified.', 'success');
+
+    unmount();
+  });
+
+  it('opens a prefilled composer and delivers a message to the selected reader', async () => {
+    serviceMocks.listUsersPage.mockResolvedValue(makePage([makeUser()]));
+    serviceMocks.getUserDetail.mockResolvedValue({ ...makeUser(), taleCount: 0 });
+
+    const { container, unmount } = setup();
+
+    await vi.waitFor(() => {
+      expect(container.querySelector('[data-action="view-user"]')).not.toBeNull();
+    });
+    await openDetailFor(container);
+
+    container.querySelector('[data-action="open-message"]').click();
+
+    const recipient = container.querySelector('#admin-user-message-recipient');
+    expect(recipient.value).toBe('user-1');
+    expect(recipient.readOnly).toBe(true);
+
+    const subject = container.querySelector('[data-role="user-message-subject"]');
+    const body = container.querySelector('[data-role="user-message-body"]');
+    subject.value = 'Archive access';
+    body.value = 'Your account is ready.';
+    container.querySelector('[data-action="send-user-message"]').click();
+
+    await vi.waitFor(() => {
+      expect(sendAdminMessage).toHaveBeenCalledWith({
+        recipientId: 'user-1',
+        subject: 'Archive access',
+        body: 'Your account is ready.',
+      });
+    });
+    expect(uiMocks.showToast).toHaveBeenCalledWith(
+      'Message delivered to the reader inbox.',
+      'success'
+    );
+    await vi.waitFor(() => {
+      expect(container.querySelector('.admin-message-composer')).toBeNull();
+    });
+
+    unmount();
+  });
+
+  it('requires a subject and message before sending', async () => {
+    serviceMocks.listUsersPage.mockResolvedValue(makePage([makeUser()]));
+    serviceMocks.getUserDetail.mockResolvedValue({ ...makeUser(), taleCount: 0 });
+
+    const { container, unmount } = setup();
+
+    await vi.waitFor(() => {
+      expect(container.querySelector('[data-action="view-user"]')).not.toBeNull();
+    });
+    await openDetailFor(container);
+
+    container.querySelector('[data-action="open-message"]').click();
+    container.querySelector('[data-action="send-user-message"]').click();
+
+    expect(sendAdminMessage).not.toHaveBeenCalled();
+    expect(uiMocks.showToast).toHaveBeenCalledWith('Subject and message are required.', 'error');
+
+    unmount();
+  });
+
+  it('keeps the draft and surfaces the service error when delivery fails', async () => {
+    serviceMocks.listUsersPage.mockResolvedValue(makePage([makeUser()]));
+    serviceMocks.getUserDetail.mockResolvedValue({ ...makeUser(), taleCount: 0 });
+    serviceMocks.sendAdminMessage.mockRejectedValueOnce(
+      new Error('Recipient user profile does not exist.')
+    );
+
+    const { container, unmount } = setup();
+
+    await vi.waitFor(() => {
+      expect(container.querySelector('[data-action="view-user"]')).not.toBeNull();
+    });
+    await openDetailFor(container);
+
+    container.querySelector('[data-action="open-message"]').click();
+    container.querySelector('[data-role="user-message-subject"]').value = 'Archive access';
+    container.querySelector('[data-role="user-message-body"]').value = 'Your account is ready.';
+    container.querySelector('[data-action="send-user-message"]').click();
+
+    await vi.waitFor(() => {
+      expect(uiMocks.showToast).toHaveBeenCalledWith(
+        'Recipient user profile does not exist.',
+        'error'
+      );
+    });
+
+    expect(container.querySelector('.admin-message-composer')).not.toBeNull();
+    expect(container.querySelector('[data-role="user-message-subject"]').value).toBe(
+      'Archive access'
+    );
+    const sendButton = container.querySelector('[data-action="send-user-message"]');
+    expect(sendButton.disabled).toBe(false);
+    expect(sendButton.textContent.trim()).toBe('Send message');
+
+    unmount();
+  });
+
+  it('cancels the composer without sending', async () => {
+    serviceMocks.listUsersPage.mockResolvedValue(makePage([makeUser()]));
+    serviceMocks.getUserDetail.mockResolvedValue({ ...makeUser(), taleCount: 0 });
+
+    const { container, unmount } = setup();
+
+    await vi.waitFor(() => {
+      expect(container.querySelector('[data-action="view-user"]')).not.toBeNull();
+    });
+    await openDetailFor(container);
+
+    container.querySelector('[data-action="open-message"]').click();
+    container.querySelector('[data-role="user-message-subject"]').value = 'Draft';
+    container.querySelector('[data-action="cancel-user-message"]').click();
+
+    expect(container.querySelector('.admin-message-composer')).toBeNull();
+    expect(sendAdminMessage).not.toHaveBeenCalled();
 
     unmount();
   });

@@ -89,6 +89,30 @@ describe('Nav Command Palette', () => {
       }
     });
 
+    it('offers the inbox to registered users only', () => {
+      navState.currentUser = { uid: 'reader-1', isAnonymous: false };
+      renderCommandList('inbox');
+      const item = document.querySelector('.command-item[data-href="settings.html#inbox"]');
+
+      expect(item).not.toBeNull();
+      expect(item?.textContent).toContain('Inbox');
+    });
+
+    it('withholds the inbox from anonymous guests', () => {
+      navState.currentUser = { uid: 'guest-1', isAnonymous: true };
+      renderCommandList('inbox');
+
+      expect(document.querySelector('.command-item[data-href="settings.html#inbox"]')).toBeNull();
+      expect(document.getElementById('nav-command-list').textContent).toContain('No results');
+    });
+
+    it('withholds the inbox when signed out', () => {
+      navState.currentUser = null;
+      renderCommandList('inbox');
+
+      expect(document.querySelector('.command-item[data-href="settings.html#inbox"]')).toBeNull();
+    });
+
     it('finds the table of contents through its contents alias', () => {
       renderCommandList('contents');
       const list = document.getElementById('nav-command-list');

@@ -5,13 +5,18 @@
 import { auth, onAuthStateChanged } from '@fb/index.js';
 import { initIcons } from '@ui/icons.js';
 import { showToast } from '@ui/components/toast.js';
+import { showConfirmModal } from '@ui/components/confirmModal.js';
+import { isRegisteredUser } from '@services/auth.guard.js';
 import { createLogger, escapeHtml, resolveSafeInternalHref } from '@/utils';
 import {
   INBOX_PAGE_SIZE,
+  deleteNotification,
   getUserNotificationsPage,
   markAllNotificationsAsRead,
   markNotificationAsRead,
+  markNotificationAsUnread,
   setNotificationPinned,
+  subscribeUnreadNotifications,
 } from '@services/notification.service.js';
 
 const log = createLogger('SettingsInbox');
@@ -28,9 +33,26 @@ const NOTIFICATION_TYPE_LABELS = Object.freeze({
   tale_featured: 'Tale featured',
 });
 
+/** Community activity grouped under one filter option. */
+const COMMUNITY_TYPES = new Set([
+  'new_comment',
+  'reply',
+  'new_chapter',
+  'new_follower',
+  'tale_featured',
+]);
+
+/** Notification types with a dedicated filter option. */
+const DIRECT_TYPE_FILTERS = new Set(['admin_message', 'report_response', 'moderation', 'system']);
+
+const REPORT_THREAD_HREF = resolveSafeInternalHref('settings.html#section-support');
+const GUEST_INBOX_MESSAGE = 'Connect an email or Google account in Accounts to use the inbox.';
+
 let unsubscribeAuth = null;
+let unsubscribeUnread = null;
 let boundList = null;
 const boundButtons = [];
+const boundFilters = [];
 const busyIds = new Set();
 let currentUserId = null;
 let items = [];
@@ -40,6 +62,10 @@ let loading = false;
 let bulkBusy = false;
 let sweptAllRead = false;
 let requestToken = 0;
+let unreadCount = 0;
+let unreadVersion = 0;
+let typeFilter = 'all';
+let searchQuery = '';
 
 /**
  * Resolves a notification type to its visible label.
@@ -51,6 +77,101 @@ function notificationTypeLabel(type) {
   return Object.hasOwn(NOTIFICATION_TYPE_LABELS, type)
     ? NOTIFICATION_TYPE_LABELS[type]
     : 'Archive notice';
+}
+
+/**
+ * Returns true when a message matches the selected type filter.
+ *
+ * @param {{ type?: string }} item
+ * @returns {boolean}
+ */
+function matchesTypeFilter(item) {
+  if (typeFilter === 'all') return true;
+  if (typeFilter === 'community') return COMMUNITY_TYPES.has(item.type);
+  if (typeFilter === 'other') {
+    return !DIRECT_TYPE_FILTERS.has(item.type) && !COMMUNITY_TYPES.has(item.type);
+  }
+  return item.type === typeFilter;
+}
+
+/**
+ * Returns true when a message matches the current free-text search.
+ *
+ * @param {{ type?: string, title?: string, body?: string }} item
+ * @returns {boolean}
+ */
+function matchesSearch(item) {
+  if (!searchQuery) return true;
+
+  const haystack =
+    `${item.title || ''} ${item.body || ''} ${notificationTypeLabel(item.type)}`.toLowerCase();
+  return haystack.includes(searchQuery);
+}
+
+/**
+ * Returns the messages currently visible under the active filters.
+ *
+ * @returns {Array<import('@state/schemas/notification.schema.js').Notification>}
+ */
+function visibleItems() {
+  return items.filter((item) => matchesTypeFilter(item) && matchesSearch(item));
+}
+
+/**
+ * Updates the sidebar unread badge and the Inbox button's accessible name.
+ *
+ * @param {number} [count]
+ */
+function updateUnreadBadge(count = unreadCount) {
+  unreadCount = Math.max(0, Number.isFinite(count) ? count : 0);
+
+  const badge = document.getElementById('settings-inbox-unread');
+  const nav = document.getElementById('settings-inbox-nav');
+
+  if (badge) {
+    badge.textContent = unreadCount > 99 ? '99+' : String(unreadCount);
+    badge.hidden = unreadCount === 0;
+  }
+
+  if (nav) {
+    nav.setAttribute('aria-label', unreadCount ? `Inbox, ${unreadCount} unread` : 'Inbox');
+  }
+}
+
+/**
+ * Applies a relative change to the unread badge without going below zero.
+ *
+ * @param {number} delta
+ */
+function adjustUnreadCount(delta) {
+  updateUnreadBadge(Math.max(0, unreadCount + delta));
+}
+
+/**
+ * Clears the type and text filters, including their controls.
+ */
+function resetFilters() {
+  typeFilter = 'all';
+  searchQuery = '';
+
+  const typeEl = document.getElementById('settings-inbox-type-filter');
+  if (typeEl instanceof HTMLSelectElement) typeEl.value = 'all';
+
+  const searchEl = document.getElementById('settings-inbox-search');
+  if (searchEl instanceof HTMLInputElement) searchEl.value = '';
+}
+
+/**
+ * Subscribes the sidebar badge to the registered user's unread count.
+ *
+ * @param {string} userId
+ */
+function subscribeToUnread(userId) {
+  unsubscribeUnread?.();
+  unsubscribeUnread = subscribeUnreadNotifications(userId, (count) => {
+    unreadVersion += 1;
+    updateUnreadBadge(count);
+  });
 }
 
 /**
@@ -153,7 +274,11 @@ function findPinButton(notificationId) {
 function buildEntry(item) {
   const isUnread = !item.isRead;
   const isPinned = Boolean(item.isPinned);
-  const href = resolveSafeInternalHref(item.actionUrl ?? item.link);
+  const isReportReply = item.type === 'report_response' && Boolean(item.reportId);
+  // A report reply's actionUrl points back at the inbox, so it gets a direct
+  // link to the report thread instead of a redundant Open action.
+  const href = isReportReply ? '' : resolveSafeInternalHref(item.actionUrl ?? item.link);
+  const reportHref = isReportReply ? REPORT_THREAD_HREF : '';
   const date = formatNotificationDate(item.createdAt);
   const safeId = escapeHtml(item.id);
   const safeTitle = escapeHtml(item.title || 'Archive notice');
@@ -192,9 +317,14 @@ function buildEntry(item) {
             : ''
         }
         ${
+          reportHref
+            ? `<a href="${escapeHtml(reportHref)}" class="settings-btn-secondary" data-inbox-report aria-label="View report thread: ${safeTitle}">View report thread</a>`
+            : ''
+        }
+        ${
           isUnread
             ? `<button type="button" class="settings-btn-secondary" data-inbox-read aria-label="Mark read: ${safeTitle}">Mark read</button>`
-            : ''
+            : `<button type="button" class="settings-btn-secondary" data-inbox-mark-unread aria-label="Mark unread: ${safeTitle}">Mark unread</button>`
         }
         <button
           type="button"
@@ -204,6 +334,14 @@ function buildEntry(item) {
           aria-label="${isPinned ? 'Unpin' : 'Pin'} message: ${safeTitle}"
         >
           ${isPinned ? 'Unpin' : 'Pin'}
+        </button>
+        <button
+          type="button"
+          class="settings-btn-secondary settings-btn-danger"
+          data-inbox-delete
+          aria-label="Delete message: ${safeTitle}"
+        >
+          Delete
         </button>
       </div>
     </article>
@@ -216,16 +354,23 @@ function buildEntry(item) {
 function updateSummary() {
   const summaryEl = document.getElementById('settings-inbox-summary');
   const markAllBtn = document.getElementById('btn-mark-inbox-read');
+  const visible = visibleItems();
   const unread = items.filter((item) => !item.isRead).length;
   const olderMayBeUnread = hasMore && !sweptAllRead;
+  const filtered = typeFilter !== 'all' || searchQuery.length > 0;
 
   if (summaryEl) {
     if (!currentUserId) {
       summaryEl.textContent = 'Not signed in';
     } else if (!items.length) {
       summaryEl.textContent = 'No messages';
+    } else if (!visible.length) {
+      summaryEl.textContent = 'No messages match these filters';
     } else {
-      summaryEl.textContent = `${items.length} ${items.length === 1 ? 'message' : 'messages'}${
+      const countLabel = filtered
+        ? `${visible.length} of ${items.length} ${items.length === 1 ? 'message' : 'messages'}`
+        : `${visible.length} ${visible.length === 1 ? 'message' : 'messages'}`;
+      summaryEl.textContent = `${countLabel}${
         unread ? ` / ${unread} unread` : olderMayBeUnread ? ' / older pages may contain unread' : ''
       }`;
     }
@@ -297,8 +442,20 @@ function renderInbox() {
     return;
   }
 
+  const visible = visibleItems();
   listEl.setAttribute('aria-busy', 'false');
-  listEl.innerHTML = items.map(buildEntry).join('');
+
+  if (!visible.length) {
+    listEl.innerHTML = '<p class="settings-inbox-empty">No messages match these filters.</p>';
+    // Keep the pager available so a filter can still reach older pages.
+    if (footer) footer.hidden = !hasMore;
+    if (loadMoreBtn) loadMoreBtn.disabled = false;
+    if (refreshBtn) refreshBtn.disabled = false;
+    updateSummary();
+    return;
+  }
+
+  listEl.innerHTML = visible.map(buildEntry).join('');
   if (footer) footer.hidden = !hasMore;
   if (loadMoreBtn) loadMoreBtn.disabled = false;
   if (refreshBtn) refreshBtn.disabled = false;
@@ -317,7 +474,7 @@ async function loadInbox({ reset }) {
   if (loading) return;
 
   if (!currentUserId) {
-    renderEmpty('Sign in to view your inbox.');
+    renderEmpty(GUEST_INBOX_MESSAGE);
     return;
   }
 
@@ -401,6 +558,7 @@ async function markOneRead(notificationId, { silent = false } = {}) {
   busyIds.add(notificationId);
   if (readButton) readButton.disabled = true;
 
+  const unreadVersionBefore = unreadVersion;
   const updated = await markNotificationAsRead(currentUserId, notificationId);
   busyIds.delete(notificationId);
 
@@ -411,15 +569,85 @@ async function markOneRead(notificationId, { silent = false } = {}) {
   }
 
   item.isRead = true;
-  if (row) {
-    row.classList.remove('settings-inbox-entry--unread');
-    row.querySelector('[data-inbox-unread-label]')?.remove();
-    row.querySelector('[data-inbox-read]')?.remove();
-    row.focus({ preventScroll: true });
-  }
+  // The live subscription may already include this write; only apply the
+  // optimistic delta when no snapshot arrived while the write was in flight.
+  if (unreadVersion === unreadVersionBefore) adjustUnreadCount(-1);
+  renderInbox();
+  findRow(notificationId)?.focus({ preventScroll: true });
   announce('Message marked as read.');
-  updateSummary();
   return true;
+}
+
+/**
+ * Marks one read message as unread again.
+ *
+ * @param {string} notificationId
+ * @returns {Promise<boolean>}
+ */
+async function markOneUnread(notificationId) {
+  if (!currentUserId || !notificationId || busyIds.has(notificationId)) return false;
+
+  const item = items.find((entry) => entry.id === notificationId);
+  if (!item || !item.isRead) return false;
+
+  const row = findRow(notificationId);
+  const unreadButton = row?.querySelector('[data-inbox-mark-unread]') ?? null;
+  busyIds.add(notificationId);
+  if (unreadButton) unreadButton.disabled = true;
+
+  const unreadVersionBefore = unreadVersion;
+  const updated = await markNotificationAsUnread(currentUserId, notificationId);
+  busyIds.delete(notificationId);
+
+  if (!updated) {
+    if (unreadButton) unreadButton.disabled = false;
+    showToast('The message could not be marked as unread.', 'error');
+    return false;
+  }
+
+  item.isRead = false;
+  if (unreadVersion === unreadVersionBefore) adjustUnreadCount(1);
+  renderInbox();
+  findRow(notificationId)?.focus({ preventScroll: true });
+  announce('Message marked as unread.');
+  return true;
+}
+
+/**
+ * Permanently deletes one message after confirmation.
+ *
+ * @param {string} notificationId
+ */
+async function deleteOne(notificationId) {
+  if (!currentUserId || !notificationId || busyIds.has(notificationId)) return;
+
+  const item = items.find((entry) => entry.id === notificationId);
+  if (!item) return;
+
+  const confirmed = await showConfirmModal({
+    title: 'Delete this message?',
+    message: 'This removes the message from your inbox permanently. This cannot be undone.',
+    confirmText: 'Delete message',
+    confirmVariant: 'danger',
+    icon: 'trash-2',
+  });
+  if (!confirmed || !currentUserId || busyIds.has(notificationId)) return;
+
+  busyIds.add(notificationId);
+  const unreadVersionBefore = unreadVersion;
+  const deleted = await deleteNotification(currentUserId, notificationId);
+  busyIds.delete(notificationId);
+
+  if (!deleted) {
+    showToast('The message could not be deleted.', 'error');
+    return;
+  }
+
+  if (!item.isRead && unreadVersion === unreadVersionBefore) adjustUnreadCount(-1);
+  items = items.filter((entry) => entry.id !== notificationId);
+  renderInbox();
+  showToast('Message deleted.', 'success');
+  announce('Message deleted.');
 }
 
 /**
@@ -474,6 +702,7 @@ async function markAllRead() {
 
   sweptAllRead = true;
   items = items.map((item) => ({ ...item, isRead: true }));
+  updateUnreadBadge(0);
   renderInbox();
   showToast('All messages marked as read.', 'success');
   announce('All messages marked as read.');
@@ -506,7 +735,21 @@ async function handleListClick(event) {
     return;
   }
 
-  const openLink = target.closest('[data-inbox-open]');
+  const unreadButton = target.closest('[data-inbox-mark-unread]');
+  if (unreadButton) {
+    event.preventDefault();
+    await markOneUnread(notificationId);
+    return;
+  }
+
+  const deleteButton = target.closest('[data-inbox-delete]');
+  if (deleteButton) {
+    event.preventDefault();
+    await deleteOne(notificationId);
+    return;
+  }
+
+  const openLink = target.closest('[data-inbox-open], [data-inbox-report]');
   if (!openLink) return;
 
   // Preserve browser and assistive-technology link semantics for modified clicks.
@@ -552,6 +795,12 @@ export function initSettingsInbox() {
     boundButtons.push({ element, handler });
   };
 
+  const bindFilter = (element, eventName, handler) => {
+    if (!element) return;
+    element.addEventListener(eventName, handler);
+    boundFilters.push({ element, eventName, handler });
+  };
+
   bindButton('btn-refresh-inbox', () => {
     if (currentUserId) void loadInbox({ reset: true });
   });
@@ -564,10 +813,29 @@ export function initSettingsInbox() {
     if (currentUserId && hasMore && !loading) void loadInbox({ reset: false });
   });
 
+  const typeFilterEl = document.getElementById('settings-inbox-type-filter');
+  if (typeFilterEl instanceof HTMLSelectElement) {
+    typeFilterEl.value = typeFilter;
+    bindFilter(typeFilterEl, 'change', () => {
+      typeFilter = typeFilterEl.value || 'all';
+      renderInbox();
+    });
+  }
+
+  const searchEl = document.getElementById('settings-inbox-search');
+  if (searchEl instanceof HTMLInputElement) {
+    searchEl.value = searchQuery;
+    bindFilter(searchEl, 'input', () => {
+      searchQuery = searchEl.value.trim().toLowerCase();
+      renderInbox();
+    });
+  }
+
   unsubscribeAuth?.();
   unsubscribeAuth = onAuthStateChanged(auth, (user) => {
     requestToken += 1;
-    currentUserId = user?.uid || null;
+    const registered = isRegisteredUser(user);
+    currentUserId = registered ? user.uid : null;
     items = [];
     nextCursor = null;
     hasMore = false;
@@ -575,12 +843,20 @@ export function initSettingsInbox() {
     bulkBusy = false;
     sweptAllRead = false;
     busyIds.clear();
+    resetFilters();
 
-    if (!currentUserId) {
-      renderEmpty('Sign in to view your inbox.');
+    unsubscribeUnread?.();
+    unsubscribeUnread = null;
+    updateUnreadBadge(0);
+
+    if (!registered) {
+      // Guests are anonymous Firebase sessions. They must never trigger a
+      // notification read; the Inbox panel itself is hidden for them.
+      renderEmpty(GUEST_INBOX_MESSAGE);
       return;
     }
 
+    subscribeToUnread(currentUserId);
     void loadInbox({ reset: true });
   });
 }
@@ -594,6 +870,9 @@ export function destroySettingsInbox() {
     unsubscribeAuth = null;
   }
 
+  unsubscribeUnread?.();
+  unsubscribeUnread = null;
+
   const listEl = getListElement();
   if (listEl && boundList === listEl) {
     listEl.removeEventListener('click', handleListClick);
@@ -603,6 +882,11 @@ export function destroySettingsInbox() {
     element.removeEventListener('click', handler);
   }
   boundButtons.length = 0;
+
+  for (const { element, eventName, handler } of boundFilters) {
+    element.removeEventListener(eventName, handler);
+  }
+  boundFilters.length = 0;
   busyIds.clear();
 
   boundList = null;
@@ -614,4 +898,6 @@ export function destroySettingsInbox() {
   bulkBusy = false;
   sweptAllRead = false;
   requestToken = 0;
+  resetFilters();
+  updateUnreadBadge(0);
 }

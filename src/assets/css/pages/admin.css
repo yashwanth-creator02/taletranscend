@@ -959,6 +959,16 @@
   grid-column: 1 / -1;
 }
 
+.admin-message-composer {
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.admin-message-composer .admin-detail-grid {
+  margin-bottom: var(--space-3);
+}
+
 .admin-actions {
   display: flex;
   flex-wrap: wrap;

@@ -10,7 +10,7 @@ import '@css/pages/settings.css';
 
 import { initIcons } from '@ui/icons.js';
 import { showToast } from '@ui/components/toast.js';
-import { requireRegisteredUser } from '@services/auth.guard.js';
+import { isRegisteredUser, requireRegisteredUser } from '@services/auth.guard.js';
 import {
   auth,
   onAuthStateChanged,
@@ -126,6 +126,63 @@ export function normalizeSectionId(id) {
 }
 
 /**
+ * Returns true when a settings section is restricted to registered accounts.
+ *
+ * @param {Element | null} section
+ * @returns {boolean}
+ */
+function sectionRequiresRegistration(section) {
+  return section instanceof Element && section.dataset.requiresRegistered === 'true';
+}
+
+/**
+ * Hides or reveals every registered-only settings surface (nav item and panel).
+ *
+ * @param {boolean} registered
+ */
+function applyRestrictedSectionVisibility(registered) {
+  document.querySelectorAll('[data-requires-registered="true"]').forEach((element) => {
+    element.hidden = !registered;
+  });
+}
+
+/**
+ * Aligns registered-only settings surfaces with the current auth state and
+ * moves a guest off a restricted section they may have landed on.
+ *
+ * Guests are anonymous Firebase sessions. Hiding the Inbox here prevents the
+ * page from ever reading a guest notification collection.
+ *
+ * @param {{ isAnonymous?: boolean } | null} [user]
+ * @param {{ resolved?: boolean }} [options] `resolved` is true only for a real
+ *   auth callback, where a null user is a confirmed signed-out visitor rather
+ *   than Firebase still restoring a session.
+ */
+export function syncRegisteredSectionAccess(user = auth?.currentUser, { resolved = false } = {}) {
+  const registered = isRegisteredUser(user);
+  applyRestrictedSectionVisibility(registered);
+
+  if (registered) {
+    // Restore a registered deep link once Firebase finishes restoring the session.
+    const hashTarget = normalizeSectionId(window.location.hash);
+    if (sectionRequiresRegistration(document.getElementById(hashTarget))) {
+      switchSettingsSection(hashTarget, false);
+    }
+    return;
+  }
+
+  const activeNav = document.querySelector('.settings-nav-item.active');
+  const activeTarget = activeNav?.dataset?.target || '';
+  const activeSection = activeTarget ? document.getElementById(activeTarget) : null;
+  const hashTarget = resolved ? normalizeSectionId(window.location.hash) : '';
+  const hashSection = hashTarget ? document.getElementById(hashTarget) : null;
+
+  if (sectionRequiresRegistration(activeSection) || sectionRequiresRegistration(hashSection)) {
+    switchSettingsSection('section-profile', true);
+  }
+}
+
+/**
  * Switches the visible settings panel to the target section, hiding all others.
  * Updates sidebar active states and synchronizes the URL hash.
  * @param {string} targetId
@@ -151,6 +208,18 @@ export function switchSettingsSection(targetId, updateHash = true) {
   if (!targetSection) {
     targetSection = document.getElementById('section-profile') || sections[0];
   }
+
+  // Registered-only sections are unreachable for guests, including deep links.
+  // A null user during startup may still be a registered session Firebase has
+  // not restored yet, so show Profile without discarding the hash; the auth
+  // callback either restores the deep link or clears it.
+  const currentUser = auth?.currentUser ?? null;
+  let shouldUpdateHash = updateHash;
+  if (sectionRequiresRegistration(targetSection) && !isRegisteredUser(currentUser)) {
+    targetSection = document.getElementById('section-profile') || sections[0];
+    shouldUpdateHash = Boolean(currentUser);
+  }
+
   const finalId = targetSection ? targetSection.id : resolvedId;
 
   // Show target section exclusively; hide all others
@@ -174,7 +243,7 @@ export function switchSettingsSection(targetId, updateHash = true) {
   });
 
   // Sync URL hash without triggering extra pushState events
-  if (updateHash && typeof window !== 'undefined' && window.location) {
+  if (shouldUpdateHash && typeof window !== 'undefined' && window.location) {
     const hashName = finalId.replace(/^section-/, '');
     const currentHash = (window.location.hash || '').replace(/^#/, '');
     if (currentHash !== hashName) {
@@ -259,6 +328,13 @@ export function initSettingsSearch() {
     }
 
     sections.forEach((section) => {
+      // Search must never reveal a registered-only panel to a guest.
+      if (sectionRequiresRegistration(section) && !isRegisteredUser(auth?.currentUser)) {
+        section.classList.add('hidden');
+        section.style.display = 'none';
+        return;
+      }
+
       const sectionName = (section.getAttribute('data-section-name') || '').toLowerCase();
       const rows = section.querySelectorAll('[data-setting-item]');
       let sectionMatches = 0;
@@ -298,6 +374,22 @@ export function initSettingsSearch() {
       searchInput.focus();
     });
   }
+}
+
+let settingsAccessBound = false;
+
+/**
+ * Wires registered-only settings visibility to auth changes. Anonymous
+ * Firebase sessions are guests and never see the Inbox entry or panel.
+ */
+export function initSettingsAccess() {
+  syncRegisteredSectionAccess();
+  if (settingsAccessBound || !auth) return;
+
+  settingsAccessBound = true;
+  onAuthStateChanged(auth, (user) => {
+    syncRegisteredSectionAccess(user, { resolved: true });
+  });
 }
 
 /**
@@ -1994,6 +2086,7 @@ initPageReveal();
 export function initSettingsPage() {
   initAppTheme();
   loadReaderFontStylesheets();
+  initSettingsAccess();
   initSettingsInteractions();
   setupAuthDisplay();
   setupAccountSettings();

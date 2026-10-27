@@ -19,6 +19,7 @@ import {
   switchSettingsSection,
   initSettingsSidebar,
   initSettingsSearch,
+  syncRegisteredSectionAccess,
   renderProfileGenres,
   getSelectedGenres,
   setSelectedGenres,
@@ -245,6 +246,36 @@ describe('Settings Page Controller', () => {
 
       switchSettingsSection('section-typography', false);
       expect(document.getElementById('section-reader').classList.contains('hidden')).toBe(false);
+    });
+
+    it('redirects guests away from registered-only sections', () => {
+      document.body.innerHTML = `
+        <button class="settings-nav-item active" data-target="section-profile" aria-selected="true">Profile</button>
+        <button class="settings-nav-item" data-target="section-inbox" aria-selected="false" data-requires-registered="true" hidden>Inbox</button>
+        <section id="section-profile" class="settings-section"></section>
+        <section id="section-inbox" class="settings-section hidden" data-requires-registered="true" hidden></section>
+      `;
+      auth.currentUser = { uid: 'guest-1', isAnonymous: true };
+
+      switchSettingsSection('section-inbox', false);
+
+      expect(document.getElementById('section-profile').classList.contains('hidden')).toBe(false);
+      expect(document.getElementById('section-inbox').classList.contains('hidden')).toBe(true);
+    });
+
+    it('allows registered users into registered-only sections', () => {
+      document.body.innerHTML = `
+        <button class="settings-nav-item active" data-target="section-profile" aria-selected="true">Profile</button>
+        <button class="settings-nav-item" data-target="section-inbox" aria-selected="false" data-requires-registered="true" hidden>Inbox</button>
+        <section id="section-profile" class="settings-section"></section>
+        <section id="section-inbox" class="settings-section hidden" data-requires-registered="true" hidden></section>
+      `;
+      auth.currentUser = { uid: 'reader-1', isAnonymous: false };
+
+      switchSettingsSection('section-inbox', false);
+
+      expect(document.getElementById('section-inbox').classList.contains('hidden')).toBe(false);
+      expect(document.getElementById('section-profile').classList.contains('hidden')).toBe(true);
     });
   });
 
@@ -840,6 +871,132 @@ describe('Settings Page Controller', () => {
       document.querySelectorAll('.settings-section').forEach((s) => {
         expect(s.style.display).toBe('');
       });
+    });
+
+    it('never reveals registered-only sections to guests through search', () => {
+      document.body.innerHTML = `
+        <input type="search" id="settings-search-input" />
+        <button id="settings-search-clear" class="hidden"></button>
+        <div id="settings-no-results" class="hidden"></div>
+        <section class="settings-section" data-section-name="Reader Identity">
+          <div data-setting-item>Scribe Signature</div>
+        </section>
+        <section
+          class="settings-section hidden"
+          data-section-name="Inbox"
+          data-requires-registered="true"
+          hidden
+        >
+          <div data-setting-item>Administrator messages</div>
+        </section>
+      `;
+      auth.currentUser = { uid: 'guest-1', isAnonymous: true };
+
+      initSettingsSearch();
+
+      const searchInput = document.getElementById('settings-search-input');
+      searchInput.value = 'administrator';
+      searchInput.dispatchEvent(new Event('input'));
+
+      const inboxSection = document.querySelector('[data-requires-registered="true"]');
+      expect(inboxSection.style.display).toBe('none');
+      expect(inboxSection.classList.contains('hidden')).toBe(true);
+      expect(document.getElementById('settings-no-results').classList.contains('hidden')).toBe(
+        false
+      );
+    });
+  });
+
+  describe('syncRegisteredSectionAccess', () => {
+    let originalLocation;
+    let fakeLocation;
+    let replaceStateSpy;
+
+    /** @param {string} hash */
+    const setHash = (hash) => {
+      fakeLocation.hash = hash;
+    };
+
+    beforeEach(() => {
+      document.body.innerHTML = `
+        <button class="settings-nav-item active" data-target="section-profile" aria-selected="true">Profile</button>
+        <button class="settings-nav-item" data-target="section-inbox" data-requires-registered="true" hidden>Inbox</button>
+        <section id="section-profile" class="settings-section"></section>
+        <section id="section-inbox" class="settings-section hidden" data-requires-registered="true" hidden></section>
+      `;
+
+      // Earlier navigation tests replace window.location with a stub, so give
+      // this suite a controllable location and mirror replaceState into it.
+      originalLocation = window.location;
+      fakeLocation = { ...originalLocation, hash: '' };
+      Object.defineProperty(window, 'location', {
+        configurable: true,
+        value: fakeLocation,
+      });
+      replaceStateSpy = vi
+        .spyOn(window.history, 'replaceState')
+        .mockImplementation((_state, _title, url) => {
+          const next = String(url ?? '');
+          const index = next.indexOf('#');
+          fakeLocation.hash = index >= 0 ? next.slice(index) : '';
+        });
+    });
+
+    afterEach(() => {
+      replaceStateSpy.mockRestore();
+      Object.defineProperty(window, 'location', {
+        configurable: true,
+        value: originalLocation,
+      });
+    });
+
+    it('reveals registered-only surfaces for registered users', () => {
+      syncRegisteredSectionAccess({ uid: 'reader-1', isAnonymous: false });
+
+      document.querySelectorAll('[data-requires-registered="true"]').forEach((element) => {
+        expect(element.hidden).toBe(false);
+      });
+    });
+
+    it('hides registered-only surfaces for guests', () => {
+      syncRegisteredSectionAccess({ uid: 'guest-1', isAnonymous: true });
+
+      document.querySelectorAll('[data-requires-registered="true"]').forEach((element) => {
+        expect(element.hidden).toBe(true);
+      });
+    });
+
+    it('restores a registered deep link after the auth state resolves', () => {
+      setHash('#inbox');
+      auth.currentUser = { uid: 'reader-1', isAnonymous: false };
+
+      syncRegisteredSectionAccess({ uid: 'reader-1', isAnonymous: false }, { resolved: true });
+
+      expect(document.getElementById('section-inbox').classList.contains('hidden')).toBe(false);
+      expect(document.getElementById('section-profile').classList.contains('hidden')).toBe(true);
+      expect(window.location.hash).toBe('#inbox');
+    });
+
+    it('moves a resolved guest off a restricted deep link and clears the hash', () => {
+      setHash('#inbox');
+      auth.currentUser = { uid: 'guest-1', isAnonymous: true };
+
+      syncRegisteredSectionAccess({ uid: 'guest-1', isAnonymous: true }, { resolved: true });
+
+      expect(document.getElementById('section-profile').classList.contains('hidden')).toBe(false);
+      expect(document.getElementById('section-inbox').classList.contains('hidden')).toBe(true);
+      expect(window.location.hash).toBe('#profile');
+    });
+
+    it('keeps the hash while the session is still restoring', () => {
+      setHash('#inbox');
+      auth.currentUser = null;
+
+      syncRegisteredSectionAccess(null, { resolved: false });
+
+      expect(document.getElementById('section-profile').classList.contains('hidden')).toBe(false);
+      expect(document.getElementById('section-inbox').classList.contains('hidden')).toBe(true);
+      expect(window.location.hash).toBe('#inbox');
     });
   });
 

@@ -6,6 +6,7 @@ import {
   getDocs,
   updateDoc,
   addDoc,
+  deleteDoc,
   serverTimestamp,
   query,
   orderBy,
@@ -205,6 +206,56 @@ export async function markNotificationAsRead(userId, notificationId) {
     {
       fallback: false,
       logContext: 'services.notification.markNotificationAsRead',
+    }
+  );
+}
+
+/**
+ * Marks one notification as unread for the user.
+ *
+ * `readAt` is intentionally left untouched: the owner update rule allows
+ * `isRead`, `readAt`, and `isPinned`, and a mark-unread write only needs to
+ * flip the flag.
+ *
+ * @param {string} userId
+ * @param {string} notificationId
+ * @returns {Promise<boolean>}
+ */
+export async function markNotificationAsUnread(userId, notificationId) {
+  if (!userId || !notificationId) return false;
+
+  return safeAsync(
+    (async () => {
+      await updateDoc(refs.notification(userId, notificationId), {
+        isRead: false,
+      });
+      return true;
+    })(),
+    {
+      fallback: false,
+      logContext: 'services.notification.markNotificationAsUnread',
+    }
+  );
+}
+
+/**
+ * Permanently removes one notification from the user's inbox.
+ *
+ * @param {string} userId
+ * @param {string} notificationId
+ * @returns {Promise<boolean>}
+ */
+export async function deleteNotification(userId, notificationId) {
+  if (!userId || !notificationId) return false;
+
+  return safeAsync(
+    (async () => {
+      await deleteDoc(refs.notification(userId, notificationId));
+      return true;
+    })(),
+    {
+      fallback: false,
+      logContext: 'services.notification.deleteNotification',
     }
   );
 }

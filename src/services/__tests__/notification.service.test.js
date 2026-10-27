@@ -7,6 +7,7 @@ vi.mock('@fb/index.js', () => ({
   },
   getDocs: vi.fn(),
   updateDoc: vi.fn(() => Promise.resolve()),
+  deleteDoc: vi.fn(() => Promise.resolve()),
   addDoc: vi.fn(() => Promise.resolve({ id: 'n1' })),
   serverTimestamp: vi.fn(() => 'mock-timestamp'),
   query: vi.fn((...args) => ({ args })),
@@ -34,7 +35,7 @@ vi.mock('@/utils', async (importOriginal) => {
   };
 });
 
-import { getDocs, updateDoc, query, startAfter } from '@fb/index.js';
+import { getDocs, updateDoc, deleteDoc, query, startAfter } from '@fb/index.js';
 import {
   getUserNotifications,
   getUserNotificationsPage,
@@ -43,6 +44,8 @@ import {
   subscribeUnreadNotifications,
   markAllNotificationsAsRead,
   markNotificationAsRead,
+  markNotificationAsUnread,
+  deleteNotification,
 } from '../notification.service.js';
 
 describe('notification.service', () => {
@@ -202,6 +205,41 @@ describe('notification.service', () => {
         expect.objectContaining({ path: 'users/u1/notifications/n1' }),
         { isRead: true, readAt: 'mock-timestamp' }
       );
+    });
+  });
+
+  describe('markNotificationAsUnread', () => {
+    it('flips isRead back to false without touching readAt', async () => {
+      const result = await markNotificationAsUnread('u1', 'n1');
+
+      expect(result).toBe(true);
+      expect(updateDoc).toHaveBeenCalledWith(
+        expect.objectContaining({ path: 'users/u1/notifications/n1' }),
+        { isRead: false }
+      );
+    });
+
+    it('rejects missing identifiers without writing', async () => {
+      expect(await markNotificationAsUnread(null, 'n1')).toBe(false);
+      expect(await markNotificationAsUnread('u1', null)).toBe(false);
+      expect(updateDoc).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('deleteNotification', () => {
+    it('deletes the owner notification document', async () => {
+      const result = await deleteNotification('u1', 'n1');
+
+      expect(result).toBe(true);
+      expect(deleteDoc).toHaveBeenCalledWith(
+        expect.objectContaining({ path: 'users/u1/notifications/n1' })
+      );
+    });
+
+    it('rejects missing identifiers without deleting', async () => {
+      expect(await deleteNotification(null, 'n1')).toBe(false);
+      expect(await deleteNotification('u1', null)).toBe(false);
+      expect(deleteDoc).not.toHaveBeenCalled();
     });
   });
 

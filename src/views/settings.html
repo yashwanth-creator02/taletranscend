@@ -305,14 +305,23 @@
 
           <button
             type="button"
+            id="settings-inbox-nav"
             class="settings-nav-item"
             data-target="section-inbox"
+            data-requires-registered="true"
             role="tab"
             aria-selected="false"
             aria-controls="section-inbox"
+            hidden
           >
             <span class="settings-nav-mark" aria-hidden="true"><i data-lucide="inbox"></i></span>
             <span class="settings-nav-label">Inbox</span>
+            <span
+              class="settings-nav-badge"
+              id="settings-inbox-unread"
+              aria-hidden="true"
+              hidden
+            ></span>
           </button>
 
           <button
@@ -1497,7 +1506,13 @@
           </div>
         </section>
 
-        <section id="section-inbox" class="settings-section hidden" data-section-name="Inbox">
+        <section
+          id="section-inbox"
+          class="settings-section hidden"
+          data-section-name="Inbox"
+          data-requires-registered="true"
+          hidden
+        >
           <div class="settings-section-header">
             <span class="settings-section-mark" aria-hidden="true"
               ><i data-lucide="inbox"></i
@@ -1534,6 +1549,34 @@
                   <span>Refresh</span>
                 </button>
               </div>
+            </div>
+
+            <div class="settings-inbox-filters">
+              <label class="settings-inbox-filter" for="settings-inbox-type-filter">
+                <span class="settings-inbox-filter__label">Type</span>
+                <select id="settings-inbox-type-filter" class="settings-inbox-filter__control">
+                  <option value="all">All messages</option>
+                  <option value="admin_message">Administrator messages</option>
+                  <option value="report_response">Report replies</option>
+                  <option value="moderation">Moderation notices</option>
+                  <option value="system">System notices</option>
+                  <option value="community">Community activity</option>
+                  <option value="other">Other</option>
+                </select>
+              </label>
+              <label
+                class="settings-inbox-filter settings-inbox-filter--search"
+                for="settings-inbox-search"
+              >
+                <span class="settings-inbox-filter__label">Search</span>
+                <input
+                  id="settings-inbox-search"
+                  class="settings-inbox-filter__control"
+                  type="search"
+                  placeholder="Search messages"
+                  autocomplete="off"
+                />
+              </label>
             </div>
 
             <div

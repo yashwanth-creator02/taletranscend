@@ -64,6 +64,16 @@ function getCommandItems() {
   const commands = [...BASE_COMMANDS];
 
   if (navState.currentUser) {
+    if (navState.currentUser.isAnonymous !== true) {
+      commands.push({
+        href: 'settings.html#inbox',
+        icon: 'inbox',
+        label: 'Inbox',
+        description: 'Read administrator messages and report replies',
+        category: 'System & Preferences',
+        keywords: ['messages', 'notifications', 'mail', 'replies'],
+      });
+    }
     if (navState.isStaff) {
       commands.push({
         href: 'admin.html',
