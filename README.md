@@ -154,7 +154,7 @@ Deletions workspace.
 - **Reader Text Highlighting & Quote Share Cards:** Highlighted passages are marked directly in the reader view with theme-aware accent colors and smooth scroll-to-jump navigation; readers can generate luxury editorial quote share cards with tale cover art backgrounds and copyable quotes.
 - **Moderation Without Data Loss:** Tales, comments, and replies use soft deletion. Public surfaces hide removed content while preserving documents, IDs, relationships, and staff-only archives for review and restore. Permanent removal is a separate, administrator-confirmed action in Deletions.
 - **Contextual Reporting:** Registered readers can report tales, comments, replies, broken pages, and the website from the surface where the problem occurs. Reports are prefilled from context but remain editable, and reporters can follow Submitted, Under Review, Responded, Resolved, and Closed states in Settings.
-- **Support Inbox:** Administrator responses and direct staff messages arrive through the existing notification inbox. Reporter history never exposes private staff notes, and cross-user reads are denied by rules.
+- **Settings Inbox:** A dedicated Settings section lists the signed-in reader's full message history from the existing notification collection, with cursor pagination, read/pin/mark-all controls, a screen-reader status announcer, and safe in-app links. Administrator responses and direct staff messages arrive here; reporter history never exposes private staff notes, and cross-user reads are denied by rules. Any authenticated account, including an anonymous session, sees only its own inbox.
 - **Image Storage:** Cover images use external URLs with subtle 8px backdrop blurring.
 
 ## Agent Architecture & Directives

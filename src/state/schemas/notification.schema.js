@@ -3,7 +3,7 @@
 // users/{uid}/notifications/{notificationId}
 
 /**
- * @typedef {'new_comment'|'new_chapter'|'new_follower'|'tale_featured'|'reply'|'system'} NotificationType
+ * @typedef {'new_comment'|'new_chapter'|'new_follower'|'tale_featured'|'reply'|'system'|'report_response'|'admin_message'|'moderation'} NotificationType
  *
  * @typedef {Object} Notification
  * @property {string}              id

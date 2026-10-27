@@ -107,7 +107,7 @@ One-line duty for every file tracked by git in this repository, grouped by area 
 - `src/views/profile.html` — Chronicler profile shell with back pill, identity pillar, scribe registry card and sign-out; loads `../pages/profile/profile.js`.
   > > > > > > > feat/comprehensive-improvements
 - `src/views/reader.html` — Distraction-free reader shell whose `#app` carries `reader-surface` and `data-reader-theme`; loads `../pages/reader/reader.js`.
-- `src/views/settings.html` — Settings shell with back button, settings search, a seven-section contents sidebar (Profile, General & Theme, Reader, Atmosphere & Motion, Archival Storage, Accounts, About TaleTranscend) and section views, including the Accounts identity, guest-elevation and password panels; loads `../pages/settings/settings.js`.
+- `src/views/settings.html` — Settings shell with back button, settings search, a nine-section contents sidebar (Profile, General & Theme, Reader, Atmosphere & Motion, Archival Storage, Accounts, Inbox, Support & Reports, About TaleTranscend) and section views, including the Accounts identity, guest-elevation and password panels, the Inbox message list, and the Support & Reports history; loads `../pages/settings/settings.js`.
 - `src/views/shelf.html` — Scribe's Vault shell for drafts, fragments and published chronicles; loads `../pages/shelf/shelf.js` plus tale-cards styles.
 - `src/views/tale.html` — Tale detail shell for chapters, resonance and discussion, plus a hero cover with a "View Shelf" shortcut revealed while the tale is on the visitor's shelf; loads `../pages/tale/tale.js`.
 - `src/views/toc.html` — HTML sitemap shell with archive stats, portal cards and chronicle index; loads `../pages/toc/toc.js`.
@@ -235,8 +235,10 @@ Each directory under `src/pages/` holds the JavaScript for one HTML shell in `sr
 
 ### Settings (`src/pages/settings`)
 
-- `src/pages/settings/settings.js` — Settings page controller: section navigation and search, profile save to Firestore, reader/app theme and typography controls, toggles, Gemini API key modal, archival storage listing, and the Accounts panel (guest elevation by email/password or Google, read-only email display, password update and reset).
+- `src/pages/settings/settings.js` — Settings page controller: section navigation and search, profile save to Firestore, reader/app theme and typography controls, toggles, Gemini API key modal, archival storage listing, the Accounts panel (guest elevation by email/password or Google, read-only email display, password update and reset), and initialization of the Settings Inbox and Support & Reports sections.
+- `src/pages/settings/inbox.js` — Settings Inbox controller: owner-scoped notification paging with a 20-message cursor and lookahead, type labels, timestamps, unread/pinned markers, read and pin actions with in-flight guards, mark-all-read including older pages, safe same-origin link resolution, screen-reader status announcements, row focus after mark-read, loading/empty/error/signed-out states, and teardown of auth, button, and delegated listeners.
 - `src/pages/settings/__tests__/settings.test.js` — Vitest tests for `src/pages/settings/settings.js` — saved settings, section switching, search filtering, preview updates, theme/font rendering, profile save, Gemini key modal, app themes, storage archive listing, and Accounts guest/elevation/password states.
+- `src/pages/settings/__tests__/inbox.test.js` — Vitest tests for `src/pages/settings/inbox.js` — rendering, type labels, unread and pinned states, unsafe link rejection, empty and signed-out states, load-more pagination and failure preservation, single-message read with focus, pin toggling, mark-all-read, and mark-all when older pages may contain unread messages.
 
 ### Login (`src/pages/login`)
 
@@ -509,7 +511,7 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `src/utils/function.utils.ts` — debounce, throttle, and once higher-order wrappers for limiting or caching function calls.
 - `src/utils/index.ts` — Barrel module re-exporting every utils module plus ROUTES, getRouteByUrl, and isAppShellRoute from routes.js.
 - `src/utils/logger.ts` — createLogger builds context-prefixed console methods gated by VITE_DEV_MODE; also exports the default TT logger.
-- `src/utils/navigation.ts` — resolveHref normalization, taleUrl/readerUrl builders, the remembered-login gate (isNewUser/acknowledgeGate/checkNewUserGate), navigateTo fade transitions, and initPageReveal boot.
+- `src/utils/navigation.ts` — resolveHref normalization, resolveSafeInternalHref for stored notification targets, taleUrl/readerUrl builders, the remembered-login gate (isNewUser/acknowledgeGate/checkNewUserGate), navigateTo fade transitions, and initPageReveal boot.
 - `src/utils/network.utils.ts` — initNetworkListeners toggles the body is-offline class from browser online/offline events and the initial navigator state.
 - `src/utils/offline-storage.utils.ts` — idb IndexedDB reader and shelf stores backing offline tale reads and bookmarks via save/get/remove/sync functions.
 - `src/utils/progress.utils.ts` — getOverallProgress computes tale reading percentage from 0-based chapter progress maps in flat or nested entry shapes.
@@ -527,7 +529,7 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `src/utils/__tests__/epub.utils.test.js` — Vitest tests for `src/utils/epub.utils.ts` — calculateCrc32 known vectors, escapeXml, formatChapterXhtml conversion, ZIP signatures, buildEpubBlob MIME/structure.
 - `src/utils/__tests__/format.utils.test.js` — Vitest tests for `src/utils/format.utils.ts` — formatDate input shapes, formatRelativeTime relative labels, formatNumber thousands compaction.
 - `src/utils/__tests__/function.utils.test.js` — Vitest tests for `src/utils/function.utils.ts` — debounce, throttle timer windows, and once single-execution result caching under fake timers.
-- `src/utils/__tests__/navigation.test.js` — Vitest tests for `src/utils/navigation.ts` — initPageReveal/readyReveal, resolveHref normalization, navigateTo transitions, and the remembered-login gate (isNewUser/markUserVisited/acknowledgeGate/checkNewUserGate, including corrupt and unknown-version records).
+- `src/utils/__tests__/navigation.test.js` — Vitest tests for `src/utils/navigation.ts` — initPageReveal/readyReveal, resolveHref normalization, resolveSafeInternalHref rejection and resolution rules, navigateTo transitions, and the remembered-login gate (isNewUser/markUserVisited/acknowledgeGate/checkNewUserGate, including corrupt and unknown-version records).
 - `src/utils/__tests__/network.utils.test.js` — Vitest tests for `src/utils/network.utils.ts` — initNetworkListeners applying/clearing the body is-offline class on init and online/offline events.
 - `src/utils/__tests__/offline-storage.utils.test.ts` — Vitest tests for `src/utils/offline-storage.utils.ts` — tale save/get/remove, bookmark save/list, syncBookmarksOffline against a mocked idb module.
 - `src/utils/__tests__/progress.utils.test.js` — Vitest tests for `src/utils/progress.utils.ts` — getOverallProgress with flat and nested maps, missing chapters, zero chapters, clamping.
@@ -706,7 +708,7 @@ Substantially extended files:
 - `src/pages/admin/modules/reports/reports.js` — Extended statuses, subject/category/description detail, response form, private notes, and direct inbox compose.
 - `src/pages/admin/modules/content/content.js` — Deleted filter/badge, deletion metadata, soft removal, restore, and separately confirmed purge.
 - `src/pages/admin/modules/comments/comments.js` — Removed filter, archived text, moderation metadata, soft removal, restore, and separately confirmed purge.
-- `src/pages/settings/settings.js` and `src/views/settings.html` — Support & Reports section with developer contact, website report action, exact notice, and own report history.
+- `src/pages/settings/settings.js`, `src/pages/settings/inbox.js`, and `src/views/settings.html` — Support & Reports section with developer contact, website report action, exact notice, and own report history; Settings Inbox with paginated notification history, read/pin controls, and safe links.
 - `src/pages/404/404.js` and `src/views/404.html` — Report-this-page entry point using the shared dialog.
 - `src/pages/tale/tale.js`, `src/pages/tale/interactions.js`, `src/pages/tale/comments.js`, and `src/views/tale.html` — Tale report action, report-missing dialog, comment/reply reporting, moderation notices, and community-guidelines dialog.
 - `firestore.rules` — Report/history/private-note/registry/archive rules, soft-deleted read denial, deleted-parent interaction guards, and administrator restore/purge branches.

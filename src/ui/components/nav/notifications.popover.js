@@ -9,7 +9,7 @@ import {
   subscribeUnreadNotifications,
 } from '@services/notification.service.js';
 import { renderIcons } from './nav.utils.js';
-import { createLogger, resolveHref, timeAgo, escapeHtml } from '@/utils';
+import { createLogger, resolveSafeInternalHref, timeAgo, escapeHtml } from '@/utils';
 
 const log = createLogger('NotificationsPopover');
 
@@ -133,22 +133,6 @@ function toDate(value) {
 }
 
 /**
- * Resolves a notice target into a safe in-app href. Schemes and
- * protocol-relative URLs are rejected so a stored value can never become an
- * execution vector; relative targets are resolved against the app base.
- *
- * @param {unknown} value
- * @returns {string} Empty string when the notice has no usable target.
- */
-function toSafeNotificationHref(value) {
-  const url = typeof value === 'string' ? value.trim() : '';
-  if (!url || url === '#' || url.startsWith('//') || /^[a-z][a-z0-9+.-]*:/i.test(url)) {
-    return '';
-  }
-  return resolveHref(url);
-}
-
-/**
  * Finds the pin control for a notice, if the row is currently rendered.
  *
  * @param {string} notificationId
@@ -173,7 +157,7 @@ function buildNotificationItem(item) {
   const formattedTime = created ? timeAgo(created) : 'Recently';
   const safeTitle = escapeHtml(item.title || 'Archival Update');
   const safeBody = escapeHtml(item.body || '');
-  const href = toSafeNotificationHref(item.actionUrl ?? item.link);
+  const href = resolveSafeInternalHref(item.actionUrl ?? item.link);
   const id = escapeHtml(item.id);
   const pinLabel = isPinned ? 'Unpin notice' : 'Pin notice';
 

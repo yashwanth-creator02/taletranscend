@@ -5,6 +5,7 @@ import {
   readyReveal,
   navigateTo,
   resolveHref,
+  resolveSafeInternalHref,
   VIEWS_PATH,
   isNewUser,
   markUserVisited,
@@ -109,6 +110,42 @@ describe('Navigation Utils', () => {
       expect(resolveHref('/logo.png')).toBe('/logo.png');
       expect(resolveHref('icon.svg')).toBe('/icon.svg');
       expect(resolveHref('./logo.png')).toBe('/logo.png');
+    });
+  });
+
+  describe('resolveSafeInternalHref', () => {
+    it('rejects empty, hash-only and protocol-relative targets', () => {
+      expect(resolveSafeInternalHref('')).toBe('');
+      expect(resolveSafeInternalHref('   ')).toBe('');
+      expect(resolveSafeInternalHref(null)).toBe('');
+      expect(resolveSafeInternalHref(undefined)).toBe('');
+      expect(resolveSafeInternalHref('#section')).toBe('');
+      expect(resolveSafeInternalHref('//evil.example.com')).toBe('');
+    });
+
+    it('rejects absolute URLs and non-web schemes', () => {
+      expect(resolveSafeInternalHref('javascript:alert(1)')).toBe('');
+      expect(resolveSafeInternalHref('https://example.com')).toBe('');
+      expect(resolveSafeInternalHref('mailto:a@b.co')).toBe('');
+      expect(resolveSafeInternalHref('tel:+123')).toBe('');
+    });
+
+    it('rejects backslash and control-character origin escapes', () => {
+      expect(resolveSafeInternalHref('/\\evil.example')).toBe('');
+      expect(resolveSafeInternalHref('/\tevil.example')).toBe('');
+      expect(resolveSafeInternalHref('/\nevil.example')).toBe('');
+      expect(resolveSafeInternalHref('/\u0000evil.example')).toBe('');
+    });
+
+    it('resolves in-app view targets and preserves hashes', () => {
+      expect(resolveSafeInternalHref('settings.html#section-inbox')).toBe(
+        '/settings.html#section-inbox'
+      );
+      expect(resolveSafeInternalHref('tale?id=abc')).toBe('/tale.html?id=abc');
+    });
+
+    it('leaves root-relative paths alone', () => {
+      expect(resolveSafeInternalHref('/tales/x')).toBe('/tales/x');
     });
   });
 

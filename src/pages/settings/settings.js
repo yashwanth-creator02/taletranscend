@@ -60,6 +60,7 @@ import {
   REPORT_CATEGORY_LABELS,
   REPORT_STATUS_LABELS,
 } from '@services/report.service.js';
+import { initSettingsInbox } from './inbox.js';
 
 const log = createLogger('Settings');
 
@@ -1996,6 +1997,7 @@ export function initSettingsPage() {
   initSettingsInteractions();
   setupAuthDisplay();
   setupAccountSettings();
+  initSettingsInbox();
   initSupportSection();
   initIcons();
   readyReveal();

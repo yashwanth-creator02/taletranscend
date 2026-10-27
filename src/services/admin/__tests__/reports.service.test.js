@@ -308,6 +308,7 @@ describe('reports service', () => {
       reportId: 'rep-1',
       status: 'resolved',
       response: 'The attribution has been corrected.',
+      delivered: true,
     });
     expect(mockUpdateDoc).toHaveBeenCalledWith(
       'report/rep-1',
@@ -345,12 +346,41 @@ describe('reports service', () => {
         type: 'report_response',
         title: 'Response to your report: Unattributed chapter',
         body: 'The attribution has been corrected.',
-        actionUrl: 'settings.html#section-support',
+        actionUrl: 'settings.html#section-inbox',
         reportId: 'rep-1',
       })
     );
     expect(writeAdminAuditLog).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'report.resolved', targetId: 'rep-1' })
+    );
+  });
+
+  it('records a failed inbox delivery without losing the response', async () => {
+    vi.mocked(createNotificationForUser).mockResolvedValueOnce(null);
+    mockGetDoc.mockResolvedValueOnce(
+      docSnapshot('rep-1', {
+        ...REPORT,
+        status: 'under_review',
+        subject: 'Unattributed chapter',
+      })
+    );
+
+    const result = await respondToReport('rep-1', {
+      response: 'The attribution has been corrected.',
+    });
+
+    expect(result).toEqual({
+      reportId: 'rep-1',
+      status: 'responded',
+      response: 'The attribution has been corrected.',
+      delivered: false,
+    });
+    expect(mockUpdateDoc).toHaveBeenCalled();
+    expect(writeAdminAuditLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'report.responded',
+        summary: expect.stringContaining('could not be delivered'),
+      })
     );
   });
 
@@ -391,7 +421,7 @@ describe('reports service', () => {
       type: 'admin_message',
       title: 'A note from the archive',
       body: 'Thank you for your report.',
-      actionUrl: 'settings.html#section-support',
+      actionUrl: 'settings.html#section-inbox',
       fromUserId: 'staff-1',
       reportId: 'rep-1',
     });

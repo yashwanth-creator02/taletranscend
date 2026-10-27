@@ -200,6 +200,45 @@ export function resolveHref(target: string): string {
 }
 
 /**
+ * Resolves a stored in-app target into a safe href.
+ *
+ * Notification payloads can contain arbitrary strings. Absolute schemes and
+ * protocol-relative URLs are rejected so a stored value can never become an
+ * execution vector. Relative targets are resolved against the app base.
+ *
+ * @param target - Stored target value
+ * @returns Empty string when the target is missing or unsafe
+ */
+export function resolveSafeInternalHref(target: string | null | undefined): string {
+  const value = typeof target === 'string' ? target.trim() : '';
+  if (
+    !value ||
+    value.startsWith('#') ||
+    value.startsWith('//') ||
+    /[\\\u0000-\u001F\u007F]/.test(value) ||
+    /^[a-z][a-z0-9+.-]*:/i.test(value)
+  ) {
+    return '';
+  }
+
+  const href = resolveHref(value);
+  if (!href.startsWith('/') || href.startsWith('//')) return '';
+
+  // Browsers normalize backslashes and tabs into path separators. Reject any
+  // resolved target that leaves the current origin before it reaches an anchor.
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    try {
+      const resolved = new URL(href, window.location.origin);
+      if (resolved.origin !== window.location.origin) return '';
+    } catch {
+      return '';
+    }
+  }
+
+  return href;
+}
+
+/**
  * Returns the canonical hierarchical URL for a tale detail page.
  * Produces `/tales/{taleId}` which Firebase rewrites to `/tale.html`.
  *

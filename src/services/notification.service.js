@@ -10,6 +10,7 @@ import {
   query,
   orderBy,
   limit,
+  startAfter,
   where,
   onSnapshot,
   refs,
@@ -22,6 +23,9 @@ log.debug('Notification service initialized');
 
 /** Upper bound for the count subscriptions and pinned window. */
 const NOTIFICATION_QUERY_LIMIT = 50;
+
+/** Default page size for the settings inbox. */
+export const INBOX_PAGE_SIZE = 20;
 
 /**
  * Builds the single-field pinned query (no composite index required).
@@ -91,6 +95,38 @@ export async function getUserNotifications(userId, maxCount = 20) {
 }
 
 /**
+ * Fetches one chronological page of a user's inbox for the Settings view.
+ *
+ * Unlike {@link getUserNotifications}, this keeps pinned notices in their
+ * natural place so the inbox reads as a complete message history. The cursor
+ * is the last Firestore document from the previous page.
+ *
+ * @param {string} userId
+ * @param {{ pageSize?: number, cursor?: import('firebase/firestore').QueryDocumentSnapshot | null }} [options]
+ * @returns {Promise<{ items: Array<import('@state/schemas/notification.schema.js').Notification>, nextCursor: import('firebase/firestore').QueryDocumentSnapshot | null, hasMore: boolean }>}
+ */
+export async function getUserNotificationsPage(
+  userId,
+  { pageSize = INBOX_PAGE_SIZE, cursor = null } = {}
+) {
+  if (!userId) return { items: [], nextCursor: null, hasMore: false };
+
+  const size = Math.min(Math.max(Number(pageSize) || INBOX_PAGE_SIZE, 1), 50);
+  const constraints = [orderBy('createdAt', 'desc'), limit(size + 1)];
+  if (cursor) constraints.push(startAfter(cursor));
+
+  const snap = await getDocs(query(refs.notifications(userId), ...constraints));
+  const pageDocs = snap.docs.slice(0, size);
+  const items = sortByNewestFirst(pageDocs.map((doc) => createNotification(doc.id, doc.data())));
+
+  return {
+    items,
+    nextCursor: pageDocs.length ? pageDocs[pageDocs.length - 1] : null,
+    hasMore: snap.docs.length > size,
+  };
+}
+
+/**
  * Subscribes to real-time changes in the unread notifications count.
  *
  * @param {string} userId
@@ -149,6 +185,31 @@ export function subscribePinnedNotificationCount(userId, onUpdate) {
 }
 
 /**
+ * Marks one notification as read for the user.
+ *
+ * @param {string} userId
+ * @param {string} notificationId
+ * @returns {Promise<boolean>}
+ */
+export async function markNotificationAsRead(userId, notificationId) {
+  if (!userId || !notificationId) return false;
+
+  return safeAsync(
+    (async () => {
+      await updateDoc(refs.notification(userId, notificationId), {
+        isRead: true,
+        readAt: serverTimestamp(),
+      });
+      return true;
+    })(),
+    {
+      fallback: false,
+      logContext: 'services.notification.markNotificationAsRead',
+    }
+  );
+}
+
+/**
  * Pins or unpins a single notification for the user.
  *
  * @param {string} userId
@@ -184,21 +245,29 @@ export async function markAllNotificationsAsRead(userId) {
 
   return safeAsync(
     (async () => {
-      const q = query(
-        refs.notifications(userId),
-        where('isRead', '==', false),
-        limit(NOTIFICATION_QUERY_LIMIT)
-      );
-      const snap = await getDocs(q);
-      // firestore.rules allows an owner to change only isRead + readAt; write
-      // both so the rule's allowlist and the stored data stay aligned.
-      const updates = snap.docs.map((docSnap) =>
-        updateDoc(refs.notification(userId, docSnap.id), {
-          isRead: true,
-          readAt: serverTimestamp(),
-        })
-      );
-      await Promise.all(updates);
+      // Keep paging until no unread notice remains. A single 50-document window
+      // would leave older notices unread in a busy inbox.
+      for (let pass = 0; pass < 20; pass += 1) {
+        const q = query(
+          refs.notifications(userId),
+          where('isRead', '==', false),
+          limit(NOTIFICATION_QUERY_LIMIT)
+        );
+        const snap = await getDocs(q);
+        if (!snap.docs.length) break;
+
+        // firestore.rules allows an owner to change only isRead + readAt; write
+        // both so the rule's allowlist and the stored data stay aligned.
+        const updates = snap.docs.map((docSnap) =>
+          updateDoc(refs.notification(userId, docSnap.id), {
+            isRead: true,
+            readAt: serverTimestamp(),
+          })
+        );
+        await Promise.all(updates);
+
+        if (snap.docs.length < NOTIFICATION_QUERY_LIMIT) break;
+      }
       return true;
     })(),
     {

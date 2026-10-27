@@ -306,6 +306,18 @@
           <button
             type="button"
             class="settings-nav-item"
+            data-target="section-inbox"
+            role="tab"
+            aria-selected="false"
+            aria-controls="section-inbox"
+          >
+            <span class="settings-nav-mark" aria-hidden="true"><i data-lucide="inbox"></i></span>
+            <span class="settings-nav-label">Inbox</span>
+          </button>
+
+          <button
+            type="button"
+            class="settings-nav-item"
             data-target="section-support"
             role="tab"
             aria-selected="false"
@@ -1482,6 +1494,64 @@
               </a>
               instead.
             </p>
+          </div>
+        </section>
+
+        <section id="section-inbox" class="settings-section hidden" data-section-name="Inbox">
+          <div class="settings-section-header">
+            <span class="settings-section-mark" aria-hidden="true"
+              ><i data-lucide="inbox"></i
+            ></span>
+            <div class="settings-section-heading">
+              <h2 class="settings-section-title">Inbox</h2>
+              <p class="settings-section-desc">
+                Administrator messages, report replies, and archive notices delivered to this
+                account.
+              </p>
+            </div>
+          </div>
+
+          <div class="settings-card settings-inbox-card" data-setting-item>
+            <div class="settings-inbox-toolbar">
+              <div class="settings-inbox-toolbar__heading">
+                <span class="settings-inbox-toolbar__title">All messages</span>
+                <span class="settings-inbox-toolbar__sub" id="settings-inbox-summary"
+                  >Reading your inbox...</span
+                >
+              </div>
+              <div class="settings-inbox-toolbar__actions">
+                <button
+                  type="button"
+                  id="btn-mark-inbox-read"
+                  class="settings-btn-secondary"
+                  disabled
+                >
+                  <i data-lucide="check-check" class="w-3.5 h-3.5"></i>
+                  <span>Mark all read</span>
+                </button>
+                <button type="button" id="btn-refresh-inbox" class="settings-btn-secondary">
+                  <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                  <span>Refresh</span>
+                </button>
+              </div>
+            </div>
+
+            <div
+              id="settings-inbox-list"
+              class="settings-inbox-list"
+              role="region"
+              aria-label="Message list"
+              aria-busy="true"
+            >
+              <p class="settings-inbox-empty">Loading your messages...</p>
+            </div>
+            <p id="settings-inbox-announcer" class="sr-only" role="status" aria-live="polite"></p>
+
+            <div class="settings-inbox-footer" id="settings-inbox-footer" hidden>
+              <button type="button" id="btn-load-more-inbox" class="settings-btn-secondary">
+                Load older messages
+              </button>
+            </div>
           </div>
         </section>
 

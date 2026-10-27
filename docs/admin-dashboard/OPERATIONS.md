@@ -182,15 +182,50 @@ Report states are `pending`, `under_review`, `responded`, `resolved`, and
 `dismissed`; readers see Submitted, Under Review, Responded, Resolved, and
 Closed. Staff can mark under review, send a response, resolve, or close. A
 response appends to the report and history, optionally writes a private note,
-sends a `report_response` notification to the reporter's existing inbox, and is
-audited. Resolved and closed reports cannot receive a further response. The
-detail target summary resolves tale, comment, reply, and user targets. Staff can
-also send a direct `admin_message` notification from the Reports workspace after
-the recipient is validated.
+sends a `report_response` notification to the Settings Inbox, and is audited. If
+the response saves but the notification cannot be delivered, staff see a warning
+and the audit record notes the failed delivery. Resolved and closed reports
+cannot receive a further response. The detail target
+summary resolves tale, comment, reply, and user targets. Staff can also send a
+direct `admin_message` notification from the Reports workspace after the
+recipient is validated.
 
 The Settings Support & Reports section links the developer address
 `leo.two.dev@gmail.com`, opens the website report form, and lists the signed-in
 reader's own report history with the latest user-visible response.
+
+### Settings Inbox
+
+Settings includes an Inbox section that reads `users/{uid}/notifications`, the
+same collection used by the navigation popover. It is the full message history
+rather than the popover's recent slice:
+
+- `getUserNotificationsPage` orders by `createdAt` descending and returns 20
+  messages per page with a cursor. "Load older messages" appends the next page;
+  the footer disappears when the collection is exhausted.
+- Readers can mark one message as read, mark every unread message as read, and
+  pin or unpin a message. Mark-all remains available while older pages may
+  contain unread messages; the service sweeps unread batches of 50 until fewer
+  than 50 remain, with a practical 1,000-message cap per click. These writes
+  update only `isRead`, `readAt`, and `isPinned`, which the notification rules
+  allow the owner to change.
+- Links are resolved with `resolveSafeInternalHref`, which rejects absolute URLs,
+  protocol-relative URLs, hash-only targets, non-web schemes, backslash and
+  control-character escapes, and resolved URLs that leave the current origin
+  before an anchor is rendered.
+- The message list is a labelled `region`; a separate `sr-only` status element
+  announces loads, errors, and read/pin changes without re-announcing the whole
+  list. Marking a message read moves focus to its row, and per-message plus
+  bulk in-flight guards prevent duplicate writes.
+- Report responses and direct administrator messages now point at
+  `settings.html#section-inbox`. Moderation and system notices keep their
+  tale/profile targets.
+- Any authenticated owner, including an anonymous Firebase session, sees only
+  their own inbox, consistent with the navigation popover. A signed-out visitor
+  sees a sign-in prompt; no notification read is attempted without an owner.
+- Read failures surface an error state. A failed first page shows the archive
+  error; a failed "Load older messages" request keeps the existing rows visible
+  and reports the failure without clearing the list.
 
 ## Verification
 

@@ -140,7 +140,8 @@ Define the standard operating procedures, data structures, and UI behaviors for 
   - Non-owner comments and replies expose report triggers. Registered readers get a prefilled,
     editable report dialog; guests are routed to the existing sign-in gate. Reply reports carry
     the parent tale/comment IDs, and the admin detail resolves the reply body and parent
-    context. Report history is available under `settings.html#section-support`.
+    context. Report history is available under `settings.html#section-support`; administrator
+    responses also appear in the Settings Inbox at `settings.html#section-inbox`.
   - The tale hero carries a report action, and the tale-not-found screen uses the same report
     dialog instead of a confirm-only toast.
 - **Guest Read-Only Gate**:

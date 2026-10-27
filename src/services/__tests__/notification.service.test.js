@@ -12,6 +12,7 @@ vi.mock('@fb/index.js', () => ({
   query: vi.fn((...args) => ({ args })),
   orderBy: vi.fn((field, dir) => ({ field, dir })),
   limit: vi.fn((n) => ({ limit: n })),
+  startAfter: vi.fn((cursor) => ({ startAfter: cursor })),
   where: vi.fn((field, op, val) => ({ field, op, val })),
   onSnapshot: vi.fn((q, cb) => {
     cb({ size: 4 });
@@ -33,13 +34,15 @@ vi.mock('@/utils', async (importOriginal) => {
   };
 });
 
-import { getDocs, updateDoc } from '@fb/index.js';
+import { getDocs, updateDoc, query, startAfter } from '@fb/index.js';
 import {
   getUserNotifications,
+  getUserNotificationsPage,
   setNotificationPinned,
   subscribePinnedNotificationCount,
   subscribeUnreadNotifications,
   markAllNotificationsAsRead,
+  markNotificationAsRead,
 } from '../notification.service.js';
 
 describe('notification.service', () => {
@@ -122,6 +125,86 @@ describe('notification.service', () => {
     });
   });
 
+  describe('getUserNotificationsPage', () => {
+    it('returns one page with a cursor and reports whether more pages exist', async () => {
+      const first = {
+        id: 'n1',
+        data: () => ({ title: 'First', createdAt: { toMillis: () => 300 } }),
+      };
+      const second = {
+        id: 'n2',
+        data: () => ({ title: 'Second', createdAt: { toMillis: () => 200 } }),
+      };
+      const third = {
+        id: 'n3',
+        data: () => ({ title: 'Third', createdAt: { toMillis: () => 100 } }),
+      };
+      vi.mocked(getDocs).mockResolvedValueOnce({ docs: [first, second, third] });
+
+      const result = await getUserNotificationsPage('u1', { pageSize: 2 });
+
+      expect(result.items.map((item) => item.id)).toEqual(['n1', 'n2']);
+      expect(result.nextCursor).toBe(second);
+      expect(result.hasMore).toBe(true);
+    });
+
+    it('does not advertise another page when the result ends exactly on the page size', async () => {
+      const first = {
+        id: 'n1',
+        data: () => ({ title: 'First', createdAt: { toMillis: () => 300 } }),
+      };
+      const second = {
+        id: 'n2',
+        data: () => ({ title: 'Second', createdAt: { toMillis: () => 200 } }),
+      };
+      vi.mocked(getDocs).mockResolvedValueOnce({ docs: [first, second] });
+
+      const result = await getUserNotificationsPage('u1', { pageSize: 2 });
+
+      expect(result.items.map((item) => item.id)).toEqual(['n1', 'n2']);
+      expect(result.nextCursor).toBe(second);
+      expect(result.hasMore).toBe(false);
+    });
+
+    it('applies startAfter when a cursor is supplied', async () => {
+      const cursor = { id: 'n2' };
+      vi.mocked(getDocs).mockResolvedValueOnce({ docs: [] });
+
+      await getUserNotificationsPage('u1', { pageSize: 2, cursor });
+
+      expect(startAfter).toHaveBeenCalledWith(cursor);
+      const constraints = vi.mocked(query).mock.calls.at(-1).slice(1);
+      expect(constraints).toContainEqual({ startAfter: cursor });
+    });
+
+    it('returns an empty page without a user', async () => {
+      expect(await getUserNotificationsPage(null)).toEqual({
+        items: [],
+        nextCursor: null,
+        hasMore: false,
+      });
+      expect(getDocs).not.toHaveBeenCalled();
+    });
+
+    it('propagates read errors so the inbox can show an error state', async () => {
+      vi.mocked(getDocs).mockRejectedValueOnce(new Error('permission-denied'));
+
+      await expect(getUserNotificationsPage('u1')).rejects.toThrow('permission-denied');
+    });
+  });
+
+  describe('markNotificationAsRead', () => {
+    it('writes isRead and readAt for one notification', async () => {
+      const result = await markNotificationAsRead('u1', 'n1');
+
+      expect(result).toBe(true);
+      expect(updateDoc).toHaveBeenCalledWith(
+        expect.objectContaining({ path: 'users/u1/notifications/n1' }),
+        { isRead: true, readAt: 'mock-timestamp' }
+      );
+    });
+  });
+
   describe('subscribeUnreadNotifications', () => {
     it('returns noop if userId is missing', () => {
       const unsub = subscribeUnreadNotifications(null, vi.fn());
@@ -184,6 +267,19 @@ describe('notification.service', () => {
         isRead: true,
         readAt: 'mock-timestamp',
       });
+    });
+
+    it('continues past the first 50 unread notifications', async () => {
+      const firstPass = Array.from({ length: 50 }, (_, index) => ({ id: `n${index}` }));
+      vi.mocked(getDocs)
+        .mockResolvedValueOnce({ docs: firstPass })
+        .mockResolvedValueOnce({ docs: [{ id: 'n50' }] });
+
+      const result = await markAllNotificationsAsRead('u1');
+
+      expect(result).toBe(true);
+      expect(getDocs).toHaveBeenCalledTimes(2);
+      expect(updateDoc).toHaveBeenCalledTimes(51);
     });
   });
 });

@@ -618,3 +618,71 @@ deploy from `main` would replace the moderation/support rules.
   expectation and provides the developer address.
 - The admin dashboard remains table-first and cursor-paginated. Bulk removal is
   limited to 50 tales per operation to stay within free-tier write budgets.
+
+## 14. Settings Inbox (`feature/user-inbox`)
+
+### Scope delivered
+
+The Settings page now exposes the reader's full message history as a dedicated
+Inbox section between Accounts and Support & Reports. It reads the existing
+`users/{uid}/notifications` collection, so administrator responses, direct staff
+messages, moderation notices, and system notices all share one archive.
+
+- Cursor pagination returns 20 messages per page. Each query fetches one extra
+  row to determine whether another page exists, so "Load older messages" only
+  appears when the collection truly continues and the footer disappears when it
+  is exhausted.
+- Each entry shows its type, title, body, timestamp, and rectangular Unread and
+  Pinned markers. Readers can mark one message or every unread message as read,
+  and pin or unpin a message. Mark-all remains available while older pages may
+  contain unread messages; the service sweeps unread batches until fewer than 50
+  remain, up to a practical 1,000-message cap per click.
+- Read failures surface an error state. A failed first page shows the archive
+  error; a failed "Load older messages" request keeps the existing rows visible
+  and reports the failure without clearing the list.
+- Stored `actionUrl` values pass through `resolveSafeInternalHref` before an
+  anchor is rendered. Absolute URLs, protocol-relative URLs, hash-only targets,
+  non-web schemes, backslash/control-character escapes, and resolved URLs that
+  leave the current origin are rejected.
+- The message list is a labelled region with a separate screen-reader status
+  announcer. Marking a message read focuses the row instead of dropping focus
+  with the removed button, and per-message/bulk in-flight guards prevent duplicate
+  writes from rapid clicks.
+- Report responses and direct administrator messages now target
+  `settings.html#section-inbox`. Moderation and system notices keep their
+  tale/profile targets. If a report response is saved but the inbox notification
+  cannot be delivered, staff see a warning and the audit record distinguishes the
+  failed delivery.
+- Signed-out visitors see a sign-in prompt; the page never reads another user's
+  notifications. Any authenticated owner, including an anonymous Firebase
+  session, sees only their own inbox. The notification rules already allow owner
+  reads and updates limited to `isRead`, `readAt`, and `isPinned`, so no rules or
+  indexes changed.
+
+### Decisions
+
+- The Settings Inbox is a full-history view over notifications, not a second
+  messaging collection. This preserves the existing notification producers and
+  the navigation popover while giving readers a durable, paginated archive.
+- The inbox loads on auth state changes and uses a request token so a late page
+  response cannot overwrite a newer account's list.
+- Read and pin actions update the rendered row in place; mark-all-read updates
+  the loaded page and lets the service page through additional unread batches.
+
+### Verification
+
+- Unit suite: 135 test files, 1,283 passed, 2 skipped (1,285 total), including
+  the new inbox, notification paging, error-state, safe-link, focus, mark-all
+  older-page, and report-delivery tests.
+- Rules emulator: 99/99 passed. No rules or indexes changed for this feature.
+- `npm run format`, `npm run lint` (0 errors), `npm run lint:tokens`,
+  `npm run type-check`, and `npm run build` all passed.
+- Browser E2E and a live authenticated walkthrough were not run; coverage comes
+  from the unit and rules suites.
+
+### Branch state
+
+`feature/user-inbox` is based on `feature/moderation-support` at `4916d34`.
+Neither branch is merged to `main`; explicit approval is required before any
+merge. The production ruleset deployed on 2026-10-26 already permits the inbox's
+owner-scoped notification reads and read/pin writes.

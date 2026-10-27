@@ -389,15 +389,15 @@ export async function respondToReport(reportId, input = {}) {
     });
   }
 
-  if (report.reporterId) {
-    await createNotificationForUser(report.reporterId, {
-      type: 'report_response',
-      title: `Response to your report: ${String(report.subject || 'Website report').slice(0, 120)}`,
-      body: response,
-      actionUrl: 'settings.html#section-support',
-      reportId,
-    });
-  }
+  const notificationId = report.reporterId
+    ? await createNotificationForUser(report.reporterId, {
+        type: 'report_response',
+        title: `Response to your report: ${String(report.subject || 'Website report').slice(0, 120)}`,
+        body: response,
+        actionUrl: 'settings.html#section-inbox',
+        reportId,
+      })
+    : null;
 
   await writeAdminAuditLog({
     actorId: identity.uid,
@@ -405,10 +405,12 @@ export async function respondToReport(reportId, input = {}) {
     action: `report.${status}`,
     targetType: 'report',
     targetId: reportId,
-    summary: `Responded to report ${reportId} and delivered the response to the reporter's inbox.`,
+    summary: notificationId
+      ? `Responded to report ${reportId} and delivered the response to the reporter's inbox.`
+      : `Responded to report ${reportId}, but the reporter's inbox notification could not be delivered.`,
   });
 
-  return { reportId, status, response };
+  return { reportId, status, response, delivered: Boolean(notificationId) };
 }
 
 /**
@@ -434,7 +436,7 @@ export async function sendAdminMessage(input = {}) {
     type: 'admin_message',
     title: subject,
     body,
-    actionUrl: input.reportId ? 'settings.html#section-support' : 'profile.html',
+    actionUrl: 'settings.html#section-inbox',
     fromUserId: identity.uid,
     reportId: input.reportId ?? null,
   });

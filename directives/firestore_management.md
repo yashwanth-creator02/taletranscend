@@ -109,8 +109,14 @@ v1/taletranscend/projects/v1/
    - Statuses: `pending`, `under_review`, `responded`, `resolved`, `dismissed`. Readers see
      Submitted, Under Review, Responded, Resolved, and Closed.
    - Responses append to both report and history and create a `report_response` notification in
-     `users/{uid}/notifications` with action URL `settings.html#section-support`. Direct staff
-     messages use `type: 'admin_message'`.
+     `users/{uid}/notifications` with action URL `settings.html#section-inbox`. Direct staff
+     messages use `type: 'admin_message'` and the same Inbox target. If a response saves but the
+     notification cannot be created, staff see a warning and the audit record notes the failed
+     delivery.
+   - Settings reads this collection with a 20-message cursor page. Mark-all sweeps unread batches of
+     50 up to a practical 1,000-message cap. Owner-scoped writes touch only `isRead`, `readAt`, and
+     `isPinned`. Notification links pass through `resolveSafeInternalHref`, which rejects absolute,
+     protocol-relative, hash-only, scheme-bearing, backslash/control-character, and off-origin targets.
    - Resolved and closed reports cannot be overwritten or receive a response. Report creation
      requires a registered account and a reason of 1-500 characters; the client uses the
      subject as `reason` and keeps the longer description separately.

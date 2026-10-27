@@ -785,12 +785,16 @@ export function mount({ container, access }) {
     deciding = true;
     render();
     try {
-      await respondToReport(reportId, {
+      const result = await respondToReport(reportId, {
         response,
         privateNote,
         status: resolveAfter ? 'resolved' : 'responded',
       });
-      showToast('Response delivered to the reporter inbox.', 'success');
+      if (result?.delivered === false) {
+        showToast('Response saved, but the inbox notification could not be delivered.', 'warning');
+      } else {
+        showToast('Response delivered to the reporter inbox.', 'success');
+      }
       await refreshDetail(reportId);
       if (!disposed) {
         items = items.map((item) =>
