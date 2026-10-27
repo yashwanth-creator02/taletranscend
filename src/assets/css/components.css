@@ -1270,6 +1270,26 @@
   text-align: left;
 }
 
+.error-report-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: color var(--dur-fast) var(--ease-standard);
+}
+
+.error-report-btn:hover {
+  color: var(--text-primary);
+}
+
+.error-report-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
 /* ══════════════════════════════════════════════════════════════════════════
    TOAST NOTIFICATION SYSTEM (Theme-Sensitive & Accessible)
    ══════════════════════════════════════════════════════════════════════════ */

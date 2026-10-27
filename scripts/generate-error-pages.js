@@ -326,6 +326,13 @@ function renderPage(page) {
           ${page.actions.map(renderAction).join('\n')}
         </div>
 
+        <div class="mt-5">
+          <button type="button" class="error-report-btn" data-error-report>
+            <i data-lucide="flag" class="w-3.5 h-3.5" aria-hidden="true"></i>
+            Report this error
+          </button>
+        </div>
+
         <section id="error-context" class="error-context" aria-label="Request details" hidden>
           <div class="error-context__row">
             <span class="error-context__label">Requested</span>

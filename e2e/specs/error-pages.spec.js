@@ -33,6 +33,7 @@ test.describe('Error pages', () => {
       await expect(page.locator('h2')).toHaveText(title);
       await expect(page.locator('body')).toHaveAttribute('data-error-code', String(code));
       await expect(page).toHaveTitle(new RegExp(`\\| TaleTranscend$`));
+      await expect(page.locator('[data-error-report]')).toBeVisible();
     });
   }
 
