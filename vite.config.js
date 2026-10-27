@@ -1,6 +1,6 @@
 // vite.config.js
 //
-// TaleTranscend is a multi-page app: nine independent HTML entry points that
+// TaleTranscend is a multi-page app: independent HTML entry points that
 // share a module graph. Two things in this file exist specifically to make
 // that work correctly, and both were wrong before:
 //
@@ -39,7 +39,11 @@ function worktreePort() {
 }
 const r = (p) => path.resolve(__dirname, p);
 
-/** The ten entry points. Adding a page means adding one line here. */
+/** The static error pages. Kept in sync with scripts/generate-error-pages.js. */
+const ERROR_PAGES = ['400', '401', '403', '404', '405', '408', '429', '500', '502', '503', '504'];
+const ERROR_PAGE_PATTERN = new RegExp(`^/(?:${ERROR_PAGES.join('|')})/?$`);
+
+/** Every HTML entry point. Adding a page means adding one line here. */
 const PAGES = [
   'index',
   'library',
@@ -51,7 +55,7 @@ const PAGES = [
   'login',
   'settings',
   'toc',
-  '404',
+  ...ERROR_PAGES,
 ];
 
 function hierarchicalRoutesPlugin() {
@@ -63,7 +67,9 @@ function hierarchicalRoutesPlugin() {
         const query = (req.url || '').includes('?') ? '?' + (req.url || '').split('?')[1] : '';
         const url = rawUrl.replace(/^\/\.\./, '');
 
-        if (/^\/tales\/[^/]+\/(?:read|chapters?|fragments?)(\/.*)?$/.test(url)) {
+        if (ERROR_PAGE_PATTERN.test(url)) {
+          req.url = url.replace(/\/$/, '') + '.html' + query;
+        } else if (/^\/tales\/[^/]+\/(?:read|chapters?|fragments?)(\/.*)?$/.test(url)) {
           req.url = '/reader.html' + query;
         } else if (/^\/(?:reader|chapters?|fragments?)(\/.*)?$/.test(url)) {
           req.url = '/reader.html' + query;

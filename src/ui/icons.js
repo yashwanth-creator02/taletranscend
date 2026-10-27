@@ -88,6 +88,8 @@ async function _loadIcons() {
     Download: L.Download,
     Copy: L.Copy,
     RotateCcw: L.RotateCcw,
+    RotateCw: L.RotateCw,
+    RefreshCw: L.RefreshCw,
     // Files & Content
     FileText: L.FileText,
     FileCode: L.FileCode,

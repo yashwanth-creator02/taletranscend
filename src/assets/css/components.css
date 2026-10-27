@@ -1194,9 +1194,9 @@
   }
 }
 
-/* ── Error 404 Display ─────────────────────────────────────────────────── */
+/* ── Error Pages ───────────────────────────────────────────────────────── */
 
-.error-404-title {
+.error-code-title {
   font-size: 8rem;
   line-height: 1;
   font-weight: 900;
@@ -1207,7 +1207,7 @@
   -webkit-text-fill-color: transparent;
 }
 
-[data-app-theme='light'] .error-404-title {
+[data-app-theme='light'] .error-code-title {
   background: linear-gradient(
     180deg,
     var(--accent) 0%,
@@ -1217,6 +1217,57 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   filter: drop-shadow(0 2px 12px rgb(var(--accent-rgb) / 0.15));
+}
+
+.error-context {
+  margin-top: var(--space-6);
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-1);
+  text-align: left;
+}
+
+.error-context[hidden],
+.error-offline-hint[hidden] {
+  display: none;
+}
+
+.error-context__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-1) 0;
+}
+
+.error-context__label {
+  flex: none;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.error-context__value {
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.error-offline-hint {
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid rgb(var(--warning-rgb) / 0.24);
+  border-radius: var(--radius-md);
+  background: rgb(var(--warning-rgb) / 0.06);
+  color: var(--warning);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  text-align: left;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════

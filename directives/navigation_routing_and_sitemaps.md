@@ -9,11 +9,13 @@ Define and enforce standards for URL structure, deep-path route resolution, clie
 - Adding or updating internal links, navigation bars, docks, or router utilities.
 - Creating or editing deep routes under `/tales/` or `/tales/:id/read/:chapter`.
 - Modifying `src/utils/navigation.ts`, `vite.config.js`, or `firebase.json` routing configurations.
+- Adding or updating an error page under `src/views/{400,401,403,404,405,408,429,500,502,503,504}.html`.
 - Regenerating or indexing sitemaps (`public/sitemap.xml`, `src/views/toc.html`).
 
 ## Inputs
 
 - Navigation utility: `src/utils/navigation.ts`.
+- Failure routing: `src/utils/error-navigation.ts`, `src/pages/errors/error.js`, `scripts/generate-error-pages.js`.
 - Routing configuration: `firebase.json`, `vite.config.js`.
 - Template builders: `src/ui/components/nav/nav.templates.js`.
 - Sitemap assets: `public/sitemap.xml`, `src/views/toc.html`, `src/pages/toc/`.
@@ -111,6 +113,22 @@ The header brand block splits into three roles; keep them from re-merging:
 - **Chrome**: The dock is a floating rectangular bar (`--radius-lg`), theme-aware translucent `--bg-overlay-rgb` fill with backdrop blur, a hairline border, and a restrained shadow. It must not regress to a 9999px pill, gradient shimmer, glow, or pulsing dot. The active tab is an accent-tinted 28px icon plate plus a 2px accent rule at the item's bottom edge; labels are 9px uppercase.
 - **Targets & Fit**: The bar is 58px tall and each item fills the 56px content box, clearing the 44px touch target. It grows with the label under text scaling (`min-height`, not a fixed height). The bar caps at `min(344px, calc(100vw - 24px))` and sits above `env(safe-area-inset-bottom)`, so it fits a 390px viewport without horizontal overflow.
 - **Shelf Page Exception**: `src/assets/css/pages/shelf.css` hides `#mobile-dock-container` on `body.page-shelf` because the vault page ships its own sticky header and Back control. The Shelf dock item still routes there; do not remove that hide rule without redesigning the shelf header.
+
+### 9. Static Error Pages & Failure Routing
+
+TaleTranscend ships eleven standalone error documents: `400`, `401`, `403`, `404`, `405`, `408`, `429`, `500`, `502`, `503`, and `504`.
+
+- **Generated, not hand-edited**: `scripts/generate-error-pages.js` owns the page copy, metadata, actions, and shell markup. It writes `src/views/<code>.html` and runs automatically from `npm run dev` and `npm run build`; use `npm run generate:errors` to regenerate directly. Change the script's `PAGES` table, then commit both the script and the regenerated HTML.
+- **One shared entry**: every error page loads `../pages/errors/error.js`. The page supplies its code through `<body data-error-code="403">`; the entry reads that value, renders the optional request context, wires `[data-error-retry]`, shows the offline hint, and calls `readyReveal()`. Do not create per-code page scripts.
+- **Context hand-off**: `navigateToErrorPage(code, {source, reason})` in `src/utils/error-navigation.ts` writes a short-lived `tt_error_context` record to sessionStorage and calls `location.replace`. `readErrorContext()` rejects expired or malformed records. Render values with `textContent`, never `innerHTML`.
+- **Classification**: `classifyError()` maps Firebase codes (`permission-denied` → 403, `unauthenticated` → 401, `unavailable` → 503, `deadline-exceeded` → 504, `resource-exhausted` → 429), HTTP `status`/`response.status`, chunk-load failures (→ 500), and network `TypeError`s (→ 503). Page controllers call `routeError(err, {fallback?})`; unknown handled errors may keep their inline retry UI.
+- **Global boundary**: `installErrorBoundary()` is installed from `initPageReveal()` on every page. It ignores cancellations and cross-origin script errors, and it is a no-op while already on an error page. That loop guard is mandatory: an error page must never redirect to itself.
+- **Onboarding gate exception**: `initPageReveal()` skips `checkNewUserGate()` on error paths so a first-time visitor can read the failure instead of being sent to `/login.html`.
+- **Routes**:
+  - Vite dev: `hierarchicalRoutesPlugin` rewrites `/(400|401|403|404|405|408|429|500|502|503|504)/?` to `/<code>.html`, preserving the query string.
+  - Firebase Hosting: explicit exact rewrites for each code map to `/<code>.html`.
+  - Vercel: `cleanUrls: true` serves `/<code>` from `<code>.html`; no explicit rewrite is required.
+- **Indexing**: every error page is `noindex` and must stay out of `sitemap.xml` and the TOC sitemap. The 404 page's visible copy is part of the archive's voice; preserve it when changing the generator.
 
 ## Tools / Scripts to Use
 

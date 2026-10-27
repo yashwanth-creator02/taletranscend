@@ -20,6 +20,7 @@ import {
   readerUrl,
   debounce,
   createLogger,
+  routeError,
 } from '@/utils';
 
 const log = createLogger('TOC');
@@ -52,7 +53,9 @@ async function initTOC() {
     _bindFilterEvents();
   } catch (err) {
     log.error('Failed to load tales for TOC', err);
-    _renderError();
+    if (!routeError(err)) {
+      _renderError();
+    }
   } finally {
     readyReveal();
   }
