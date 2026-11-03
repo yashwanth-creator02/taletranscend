@@ -7,8 +7,8 @@
 @media print {
   html,
   body {
-    background: #fff !important;
-    color: #000 !important;
+    background: var(--print-paper) !important;
+    color: var(--print-ink) !important;
   }
 
   /* App shell: navigation, docks, floating actions, overlays. */
@@ -67,8 +67,8 @@
     text-shadow: none !important;
     filter: none !important;
     backdrop-filter: none !important;
-    color: #000 !important;
-    border-color: #999 !important;
+    color: var(--print-ink) !important;
+    border-color: var(--print-rule) !important;
   }
 
   /* Readable body text on paper, independent of the reader's on-screen size. */

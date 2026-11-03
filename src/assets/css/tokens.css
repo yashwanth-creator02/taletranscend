@@ -944,3 +944,11 @@ html[data-app-theme='light'],
    Anywhere else, a hex or rgba() literal is a bug. `npm run lint:tokens`
    fails on one.
    ══════════════════════════════════════════════════════════════════════════ */
+
+/* Print primitives. Paper is ink on stock, so these deliberately ignore the
+   app theme: a printed page must not come out white-on-black. */
+:root {
+  --print-ink: #000;
+  --print-paper: #fff;
+  --print-rule: #999;
+}

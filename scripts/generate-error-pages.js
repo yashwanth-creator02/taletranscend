@@ -14,26 +14,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Mirrors src/assets/css/tokens.css: primitive values.
 // Update with tokens.css: it is the source of truth.
-const THEME_TOKENS = {
-  transcendental: {
-    accent: '99 102 241',
-    bgBase: '3 3 5',
-    textPrimary: '226 232 240',
-    shadowGlow: '99 102 241',
-  },
-  dark: {
-    accent: '129 140 248',
-    bgBase: '11 13 19',
-    textPrimary: '248 250 252',
-    shadowGlow: '129 140 248',
-  },
-  light: {
-    accent: '79 70 229',
-    bgBase: '246 243 237',
-    textPrimary: '28 37 48',
-    shadowGlow: '79 70 229',
-  },
-};
 
 const root = path.resolve(__dirname, '..');
 const viewsDir = path.resolve(root, 'src/views');
