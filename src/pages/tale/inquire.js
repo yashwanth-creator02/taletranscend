@@ -197,13 +197,13 @@ function _renderAuthorMissiveCard(m, _taleId, _authorName) {
 
   let statusBadgeHtml = '';
   if (m.isBlocked) {
-    statusBadgeHtml = `<span class="px-2 py-0.5 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-400 text-[9px] font-bold uppercase tracking-wider">Blocked</span>`;
+    statusBadgeHtml = `<span class="px-2 py-0.5 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-400 text-[11px] font-bold uppercase tracking-wider">Blocked</span>`;
   } else if (m.isReported) {
-    statusBadgeHtml = `<span class="px-2 py-0.5 rounded-md bg-rose-500/10 border border-rose-500/30 text-rose-400 text-[9px] font-bold uppercase tracking-wider">Reported</span>`;
+    statusBadgeHtml = `<span class="px-2 py-0.5 rounded-md bg-rose-500/10 border border-rose-500/30 text-rose-400 text-[11px] font-bold uppercase tracking-wider">Reported</span>`;
   } else if (m.replyText || m.status === 'replied') {
-    statusBadgeHtml = `<span class="px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[9px] font-bold uppercase tracking-wider">Replied</span>`;
+    statusBadgeHtml = `<span class="px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-bold uppercase tracking-wider">Replied</span>`;
   } else {
-    statusBadgeHtml = `<span class="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[9px] font-bold uppercase tracking-wider">Pending</span>`;
+    statusBadgeHtml = `<span class="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-bold uppercase tracking-wider">Pending</span>`;
   }
 
   const contactHtml = m.senderContact
@@ -255,7 +255,7 @@ function _renderAuthorMissiveCard(m, _taleId, _authorName) {
           <div class="min-w-0 leading-tight">
             <div class="flex items-center gap-2 flex-wrap">
               <span class="text-sm font-semibold text-[var(--text-primary)] truncate">${escapeHtml(senderName)}</span>
-              <span class="px-2 py-0.5 rounded-md bg-white/4 border border-white/8 text-[9px] font-bold uppercase tracking-wider text-indigo-300">${categoryLabel}</span>
+              <span class="px-2 py-0.5 rounded-md bg-white/4 border border-white/8 text-[11px] font-bold uppercase tracking-wider text-indigo-300">${categoryLabel}</span>
               ${statusBadgeHtml}
             </div>
             <div class="flex items-center gap-2 mt-1 text-[11px] text-slate-400">
@@ -496,14 +496,14 @@ function _renderReaderSentInquiries(taleId, currentUserId, authorName = 'The Scr
         }[m.category] || 'General Inquiry';
 
       const statusBadgeHtml = m.replyText
-        ? `<span class="px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[9px] font-bold uppercase tracking-wider">Response Received</span>`
-        : `<span class="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[9px] font-bold uppercase tracking-wider">Awaiting Scribe Response</span>`;
+        ? `<span class="px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-bold uppercase tracking-wider">Response Received</span>`
+        : `<span class="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-bold uppercase tracking-wider">Awaiting Scribe Response</span>`;
 
       const replyHtml = m.replyText
         ? `<div class="missive-reply-bubble mt-3 space-y-1.5 animate-fade-in">
             <div class="flex items-center justify-between text-xs">
               <div class="flex items-center gap-2">
-                <div class="w-5 h-5 rounded-full bg-indigo-600 text-white font-bold text-[9px] flex items-center justify-center font-serif">
+                <div class="w-5 h-5 rounded-full bg-indigo-600 text-white font-bold text-[11px] flex items-center justify-center font-serif">
                   ${getAuthorInitials(m.replyAuthorName || authorName)}
                 </div>
                 <span class="text-xs font-semibold text-[var(--text-primary)]">${escapeHtml(m.replyAuthorName || authorName)}</span>
@@ -518,7 +518,7 @@ function _renderReaderSentInquiries(taleId, currentUserId, authorName = 'The Scr
         <div class="missive-card animate-fade-in" id="reader-inquiry-${m.id}">
           <div class="flex items-center justify-between gap-2 flex-wrap mb-2">
             <div class="flex items-center gap-2">
-              <span class="px-2 py-0.5 rounded-md bg-white/4 border border-white/8 text-[9px] font-bold uppercase tracking-wider text-indigo-300">${categoryLabel}</span>
+              <span class="px-2 py-0.5 rounded-md bg-white/4 border border-white/8 text-[11px] font-bold uppercase tracking-wider text-indigo-300">${categoryLabel}</span>
               ${statusBadgeHtml}
             </div>
             <span class="text-[10px] text-slate-400">${dateStr}</span>

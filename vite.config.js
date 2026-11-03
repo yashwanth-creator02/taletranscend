@@ -178,7 +178,10 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        // Code, styles and the HTML shells only. Covers and illustrations are
+        // content, not shell: precaching them pushed the install payload past
+        // 3 MB and delayed the first load for a benefit nobody sees offline.
+        globPatterns: ['**/*.{js,css,html,ico,svg,woff2}'],
         // The reader is the one screen that must work offline, and its
         // chunk graph is the largest in the app. The default 2 MB ceiling
         // silently drops files above it from the precache manifest.

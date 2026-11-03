@@ -730,7 +730,7 @@ body:has(#sidebar.sidebar--mobile-open) .scroll-to-top {
 
 .mobile-dock__label {
   font-family: var(--font-sans);
-  font-size: 9px;
+  font-size: 0.6875rem;
   font-weight: 700;
   line-height: 1;
   letter-spacing: 0.08em;

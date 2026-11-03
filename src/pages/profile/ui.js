@@ -478,7 +478,7 @@ function _renderAuthorRegistry(data) {
     if (badge) {
       badge.textContent = 'Verified Scribe';
       badge.className =
-        'text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-300';
+        'text-[11px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-300';
     }
     if (penNameEl) penNameEl.textContent = data.penName || data.name || 'Anonymous Scribe';
     if (emailEl) emailEl.textContent = data.authorEmail || '';
@@ -494,7 +494,7 @@ function _renderAuthorRegistry(data) {
     if (badge) {
       badge.textContent = 'Reader';
       badge.className =
-        'text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-slate-700 bg-slate-800/60 text-slate-400';
+        'text-[11px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-slate-700 bg-slate-800/60 text-slate-400';
     }
   }
 
@@ -664,7 +664,7 @@ function _buildContinueReadingCard(tale) {
         />
         <div class="card-overlay"></div>
         <div class="absolute bottom-2.5 left-2.5">
-          <span class="px-2 py-0.5 bg-black/70 backdrop-blur-md border border-white/10 rounded-md text-[8.5px] font-black text-white/90 uppercase tracking-widest">
+          <span class="px-2 py-0.5 bg-black/70 backdrop-blur-md border border-white/10 rounded-md text-[11px] font-black text-white/90 uppercase tracking-widest">
             ${escapeHtml(tale.era || 'Mythic Era')}
           </span>
         </div>
@@ -681,7 +681,7 @@ function _buildContinueReadingCard(tale) {
         </div>
 
         <div class="pt-2 space-y-1.5 border-t border-white/5 mt-auto">
-          <div class="flex items-center justify-between text-[9px] font-black text-slate-500 uppercase tracking-[0.15em]">
+          <div class="flex items-center justify-between text-[11px] font-black text-slate-500 uppercase tracking-[0.15em]">
             <span>Progress</span>
             <span class="text-indigo-400">${tale.percent}%</span>
           </div>
@@ -808,7 +808,7 @@ export function renderAchievements(context = {}) {
               <h4 class="font-cinzel text-xs sm:text-sm font-bold text-[var(--text-primary)] truncate">
                 ${escapeHtml(def.title)}
               </h4>
-              <span class="achievement-tier-shield text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded">
+              <span class="achievement-tier-shield text-[11px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded">
                 ${def.tier}
               </span>
             </div>
@@ -819,7 +819,7 @@ export function renderAchievements(context = {}) {
         </div>
 
         <div class="mt-3 pt-2.5 border-t border-white/5 space-y-1.5">
-          <div class="flex items-center justify-between text-[8.5px] font-bold text-slate-500 uppercase tracking-wider">
+          <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider">
             <span>${isUnlocked ? 'Earned' : progressLabel}</span>
             <span>${progress}%</span>
           </div>
@@ -928,10 +928,10 @@ function _buildPublishedCard(tale) {
           class="w-full h-full object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-500" loading="lazy" />
         <div class="absolute inset-0 bg-linear-to-t from-black/90 via-black/30 to-transparent"></div>
         <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap">
-          <span class="px-2.5 py-0.5 bg-emerald-500/15 text-emerald-400 text-[8.5px] font-black uppercase tracking-widest rounded-xs border border-emerald-500/25 backdrop-blur-md">
+          <span class="px-2.5 py-0.5 bg-emerald-500/15 text-emerald-400 text-[11px] font-black uppercase tracking-widest rounded-xs border border-emerald-500/25 backdrop-blur-md">
             Published
           </span>
-          <span class="px-2 py-0.5 ${statusBadgeClass} text-[8.5px] font-bold uppercase tracking-widest rounded-xs border backdrop-blur-md">
+          <span class="px-2 py-0.5 ${statusBadgeClass} text-[11px] font-bold uppercase tracking-widest rounded-xs border backdrop-blur-md">
             ${statusLabel}
           </span>
         </div>
@@ -1004,10 +1004,10 @@ function _buildDraftCard(draft) {
       class="group block bg-white/2 border border-white/5 rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 hover:bg-white/4 hover:border-amber-500/30 hover:-translate-y-1 transition-all duration-300"
     >
       <div class="flex items-center justify-between gap-2 mb-2.5">
-        <span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 text-[8.5px] font-black uppercase tracking-widest rounded-xs border border-amber-500/20">
+        <span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 text-[11px] font-black uppercase tracking-widest rounded-xs border border-amber-500/20">
           Draft
         </span>
-        <span class="text-[9.5px] font-medium text-slate-400 uppercase tracking-wider">${updated}</span>
+        <span class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">${updated}</span>
       </div>
       <h3 class="font-cinzel font-bold text-[var(--text-primary)] text-sm sm:text-base group-hover:text-amber-400 transition-colors truncate mb-1">
         ${safeTitle}

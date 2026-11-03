@@ -1,83 +1,123 @@
-/* Print styles */
+/* Print styles. Paper is black on white, full flow, no chrome.
+   Kept deliberately small: hide the shell, release every scroller, drop
+   decoration. Anything that must not appear on paper is listed by selector,
+   never by "hide everything except" — that inverted form is what clipped the
+   reading page to a single screenful. */
 
 @media print {
-  /* Hide interactive chrome */
-  body
-    *
-    :not(
-      main a,
-      main strong,
-      main em,
-      main u,
-      main s,
-      main code,
-      main blockquote,
-      main pre,
-      main h1,
-      main h2,
-      main h3,
-      main h4,
-      main h5,
-      main h6,
-      main p,
-      main ul,
-      main ol,
-      main li,
-      main table,
-      main caption,
-      main th,
-      main tr,
-      main td
-    ) {
-    visibility: hidden;
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
   }
 
-  /* Show main content, but make it printable */
+  /* App shell: navigation, docks, floating actions, overlays. */
+  nav,
+  aside,
+  footer,
+  button,
+  [role='dialog'],
+  [aria-hidden='true'],
+  .top-bar,
+  .mobile-dock,
+  .nav-shell,
+  .nav-notifications-popover,
+  .command-panel,
+  .chapter-nav,
+  .reader-discussion,
+  .scroll-to-top,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Every page scrolls inside its own container on screen; on paper the
+     document has to be one continuous flow. */
+  html,
+  body,
   main,
   main * {
-    visibility: visible;
-    background-color: var(--color-background);
-    color: var(--color-ink) !important;
-    font-size: 12pt !important;
-    line-height: 1.5 !important;
-  }
-
-  /* Release scroller */
-  main {
     height: auto !important;
+    max-height: none !important;
     overflow: visible !important;
     position: static !important;
+    float: none !important;
   }
 
-  /* Avoid breaking chapters/comments mid-block */
-  /* This is a best-effort approach; complex DOM structures might still break */
-  section,
-  article,
-  div {
-    page-break-inside: avoid !important;
+  main {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    /* The reading layout is a full-height flex child; on paper it has to be
+       in normal flow or a long chapter is cut at one screenful. */
+    flex: none !important;
+    min-height: 0 !important;
   }
+
+  body {
+    display: block !important;
+  }
+
+  main *,
+  main *::before,
+  main *::after {
+    background: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+    color: #000 !important;
+    border-color: #999 !important;
+  }
+
+  /* Readable body text on paper, independent of the reader's on-screen size. */
+  main p,
+  main li,
+  main blockquote,
+  main td,
+  main th {
+    font-size: 11pt !important;
+    line-height: 1.45 !important;
+    orphans: 3;
+    widows: 3;
+  }
+
+  main h1 {
+    font-size: 20pt !important;
+  }
+  main h2 {
+    font-size: 15pt !important;
+  }
+  main h3 {
+    font-size: 12.5pt !important;
+  }
+
+  /* Break between blocks, never inside a line or a heading. */
   h1,
   h2,
   h3,
   h4,
   h5,
-  h6,
-  p,
-  ul,
-  ol,
-  table {
-    page-break-inside: avoid !important;
+  h6 {
+    break-after: avoid;
+    page-break-after: avoid;
   }
-
-  /* Expand no URLs */
+  p,
+  li,
+  blockquote,
+  pre,
+  tr,
+  img {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
   a[href^='http']::after {
     content: ' (' attr(href) ')';
-    font-size: 0.8em;
-    color: var(--color-ink);
+    font-size: 9pt;
   }
 
-  /* Ensure content is not clipped */
   @page {
-    margin: 1cm;
+    margin: 16mm 14mm;
   }
 }
