@@ -22,6 +22,7 @@ body[data-reader-theme='noir'],
   --reader-accent: #8b7cf6;
   --reader-accent-rgb: 139 124 246;
   --reader-accent-contrast: #ffffff;
+  --reader-accent-contrast-small: #030305; /* ≥4.5:1 contrast for 11-12px text on accent fills */
   --reader-border: rgb(255 255 255 / 0.08);
   --reader-border-subtle: rgb(255 255 255 / 0.04);
   --reader-card-bg: rgb(255 255 255 / 0.03);
@@ -44,6 +45,7 @@ body[data-reader-theme='parchment'],
   --reader-accent: #f59e0b;
   --reader-accent-rgb: 245 158 11;
   --reader-accent-contrast: #14100c;
+  --reader-accent-contrast-small: #14100c;
   --reader-border: rgb(245 158 11 / 0.14);
   --reader-border-subtle: rgb(245 158 11 / 0.07);
   --reader-card-bg: rgb(245 158 11 / 0.04);
@@ -66,6 +68,7 @@ body[data-reader-theme='sepia'],
   --reader-accent: #8c3e10;
   --reader-accent-rgb: 140 62 16;
   --reader-accent-contrast: #ffffff;
+  --reader-accent-contrast-small: #ffffff;
   --reader-border: rgb(77 59 40 / 0.18);
   --reader-border-subtle: rgb(77 59 40 / 0.1);
   --reader-card-bg: rgb(77 59 40 / 0.05);
@@ -88,6 +91,7 @@ body[data-reader-theme='light'],
   --reader-accent: #4f46e5;
   --reader-accent-rgb: 79 70 229;
   --reader-accent-contrast: #ffffff;
+  --reader-accent-contrast-small: #ffffff;
   --reader-border: rgb(18 18 23 / 0.14);
   --reader-border-subtle: rgb(18 18 23 / 0.07);
   --reader-card-bg: rgb(18 18 23 / 0.03);
@@ -110,6 +114,7 @@ body[data-reader-theme='midnight'],
   --reader-accent: #60a5fa;
   --reader-accent-rgb: 96 165 250;
   --reader-accent-contrast: #080c19;
+  --reader-accent-contrast-small: #080c19;
   --reader-border: rgb(96 165 250 / 0.15);
   --reader-border-subtle: rgb(96 165 250 / 0.08);
   --reader-card-bg: rgb(96 165 250 / 0.04);
@@ -132,6 +137,7 @@ body[data-reader-theme='emerald'],
   --reader-accent: #34d399;
   --reader-accent-rgb: 52 211 153;
   --reader-accent-contrast: #03120c;
+  --reader-accent-contrast-small: #03120c;
   --reader-border: rgb(52 211 153 / 0.15);
   --reader-border-subtle: rgb(52 211 153 / 0.08);
   --reader-card-bg: rgb(52 211 153 / 0.04);
@@ -154,6 +160,7 @@ body[data-reader-theme='rose'],
   --reader-accent: #f472b6;
   --reader-accent-rgb: 244 114 182;
   --reader-accent-contrast: #150811;
+  --reader-accent-contrast-small: #150811;
   --reader-border: rgb(244 114 182 / 0.15);
   --reader-border-subtle: rgb(244 114 182 / 0.08);
   --reader-card-bg: rgb(244 114 182 / 0.04);
@@ -176,6 +183,7 @@ body[data-reader-theme='solar'],
   --reader-accent: #9e6b00;
   --reader-accent-rgb: 158 107 0;
   --reader-accent-contrast: #ffffff;
+  --reader-accent-contrast-small: #ffffff;
   --reader-border: rgb(7 54 66 / 0.18);
   --reader-border-subtle: rgb(7 54 66 / 0.1);
   --reader-card-bg: rgb(7 54 66 / 0.04);
@@ -198,6 +206,7 @@ body[data-reader-theme='ocean'],
   --reader-accent: #22d3ee;
   --reader-accent-rgb: 34 211 238;
   --reader-accent-contrast: #020d14;
+  --reader-accent-contrast-small: #020d14;
   --reader-border: rgb(34 211 238 / 0.15);
   --reader-border-subtle: rgb(34 211 238 / 0.08);
   --reader-card-bg: rgb(34 211 238 / 0.04);
@@ -220,6 +229,7 @@ body[data-reader-theme='sunset'],
   --reader-accent: #fb923c;
   --reader-accent-rgb: 251 146 60;
   --reader-accent-contrast: #150803;
+  --reader-accent-contrast-small: #150803;
   --reader-border: rgb(251 146 60 / 0.15);
   --reader-border-subtle: rgb(251 146 60 / 0.08);
   --reader-card-bg: rgb(251 146 60 / 0.04);
@@ -242,6 +252,7 @@ body[data-reader-theme='forest'],
   --reader-accent: #a3e635;
   --reader-accent-rgb: 163 230 53;
   --reader-accent-contrast: #081109;
+  --reader-accent-contrast-small: #081109;
   --reader-border: rgb(163 230 53 / 0.15);
   --reader-border-subtle: rgb(163 230 53 / 0.08);
   --reader-card-bg: rgb(163 230 53 / 0.04);
@@ -264,6 +275,7 @@ body[data-reader-theme='ink'],
   --reader-accent: #1c1917;
   --reader-accent-rgb: 28 25 23;
   --reader-accent-contrast: #ffffff;
+  --reader-accent-contrast-small: #ffffff;
   --reader-border: rgb(10 10 10 / 0.18);
   --reader-border-subtle: rgb(10 10 10 / 0.1);
   --reader-card-bg: rgb(10 10 10 / 0.04);

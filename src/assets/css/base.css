@@ -17,6 +17,7 @@
    ══════════════════════════════════════════════════════════════════════════ */
 
 @import './tokens.css';
+@import './print.css';
 @import 'tailwindcss';
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -240,14 +241,29 @@ select:focus-visible {
   *,
   *::before,
   *::after {
+    animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 1ms !important;
+    transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
 
   .particle-field,
-  .atmosphere-base {
+  .particles,
+  .atmosphere-base,
+  #boot-crest,
+  .reliquary-lamp,
+  .shelf-spinner,
+  .nav-notifications-spinner,
+  .comment-card,
+  .command-panel {
     animation: none !important;
+  }
+
+  /* shortcut: loading spinner remains visible as a static indicator when motion is reduced */
+  .shelf-spinner,
+  .nav-notifications-spinner,
+  .spinner {
+    opacity: 1 !important;
   }
 }
 
@@ -629,7 +645,7 @@ select:focus-visible {
   backdrop-filter: blur(var(--blur-sm, 8px));
   -webkit-backdrop-filter: blur(var(--blur-sm, 8px));
   color: rgb(var(--light-rgb) / var(--a-80));
-  font-size: 0.7rem;
+  font-size: var(--text-2xs);
   font-weight: 500;
   line-height: 1.4;
   text-align: center;

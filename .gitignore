@@ -105,3 +105,6 @@ agents/skills/
 .vercel
 # Per-worktree dev server port, written by execution/setup_worktree.py
 .dev-port
+
+# Graphify knowledge-graph output (regenerated locally)
+graphify-out/

@@ -3,6 +3,8 @@
 // All reader modules read/write through this object.
 //
 
+import { DEFAULT_FONT } from '@config/theme.config.js';
+
 /**
  * @typedef {Object} ReaderState
  * @property {string|null}   taleId
@@ -60,7 +62,7 @@ export const readerState = {
 
   // Typography — defaults are authoritative here; theme.config.js holds bounds
   theme: 'noir',
-  fontFamily: 'serif',
+  fontFamily: DEFAULT_FONT,
   fontSize: 18,
   lineHeight: 1.75,
   measure: 68,

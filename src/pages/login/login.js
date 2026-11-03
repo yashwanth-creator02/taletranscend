@@ -37,6 +37,7 @@ import {
 } from '@services/auth-memory.storage.js';
 import { initIcons } from '@ui/icons.js';
 import { showToast } from '@ui/components/toast.js';
+import { mountReadingScene } from '@ui/components/reading-scene.js';
 
 const log = createLogger('Login');
 
@@ -413,6 +414,7 @@ export function initLoginPage() {
   log.info('Login page initialized with split-screen vignette');
   initIcons();
   readyReveal();
+  mountReadingScene();
 
   acknowledgeGate();
   _setupResponsiveSvgArt();

@@ -11,6 +11,30 @@ import { fileURLToPath } from 'node:url';
 import prettier from 'prettier';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Mirrors src/assets/css/tokens.css: primitive values.
+// Update with tokens.css: it is the source of truth.
+const THEME_TOKENS = {
+  transcendental: {
+    accent: '99 102 241',
+    bgBase: '3 3 5',
+    textPrimary: '226 232 240',
+    shadowGlow: '99 102 241',
+  },
+  dark: {
+    accent: '129 140 248',
+    bgBase: '11 13 19',
+    textPrimary: '248 250 252',
+    shadowGlow: '129 140 248',
+  },
+  light: {
+    accent: '79 70 229',
+    bgBase: '246 243 237',
+    textPrimary: '28 37 48',
+    shadowGlow: '79 70 229',
+  },
+};
+
 const root = path.resolve(__dirname, '..');
 const viewsDir = path.resolve(root, 'src/views');
 
@@ -206,17 +230,25 @@ function renderPage(page) {
 
     <style>
       /* Critical Anti-FOUC Gate */
-      html {
-        background-color: #030305;
-        color: #e2e8f0;
+      :root,
+      html[data-app-theme='transcendental'] {
+        --theme-bg-base: rgb(3 3 5);
+        --theme-text-primary: rgb(226 232 240);
+        --theme-accent-rgb: 99 102 241;
       }
       html[data-app-theme='dark'] {
-        background-color: #0b0d13;
-        color: #f8fafc;
+        --theme-bg-base: rgb(11 13 19);
+        --theme-text-primary: rgb(248 250 252);
+        --theme-accent-rgb: 129 140 248;
       }
       html[data-app-theme='light'] {
-        background-color: #f7f5f0;
-        color: #1e293b;
+        --theme-bg-base: rgb(246 243 237);
+        --theme-text-primary: rgb(28 37 48);
+        --theme-accent-rgb: 79 70 229;
+      }
+      html {
+        background-color: var(--theme-bg-base);
+        color: var(--theme-text-primary);
       }
       body {
         background-color: inherit;
@@ -255,10 +287,14 @@ function renderPage(page) {
         align-items: center;
         justify-content: center;
         border-radius: 12px;
-        background: rgba(99, 102, 241, 0.08);
-        border: 1px solid rgba(99, 102, 241, 0.2);
-        box-shadow: 0 0 25px rgba(99, 102, 241, 0.2);
-        animation: boot-pulse 1.4s ease-in-out infinite;
+        background: rgba(var(--theme-accent-rgb), 0.08);
+        border: 1px solid rgba(var(--theme-accent-rgb), 0.2);
+        box-shadow: 0 0 25px rgba(var(--theme-accent-rgb), 0.2);
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        .boot-crest {
+          animation: boot-pulse 1.4s ease-in-out infinite;
+        }
       }
       @keyframes boot-pulse {
         0%,
@@ -270,6 +306,34 @@ function renderPage(page) {
           transform: scale(1.04);
           opacity: 1;
         }
+      }
+      .error-report-btn {
+        min-height: 32px;
+        min-width: 32px;
+        padding: 0.5rem 1rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(var(--theme-accent-rgb), 0.1);
+        color: var(--theme-text-primary);
+        border: 1px solid rgba(var(--theme-accent-rgb), 0.2);
+        cursor: pointer;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: background 0.15s ease, border-color 0.15s ease;
+      }
+      .error-report-btn:hover {
+        background: rgba(var(--theme-accent-rgb), 0.2);
+      }
+      @media (pointer: coarse) {
+        .error-report-btn {
+          min-height: 44px;
+          min-width: 44px;
+        }
+      }
+      .error-report-btn:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 2px var(--theme-bg-base), 0 0 0 4px rgba(var(--theme-accent-rgb), 0.9);
       }
     </style>
     <script>
@@ -353,6 +417,23 @@ function renderPage(page) {
         </p>
       </div>
     </main>
+    <script>
+      (function () {
+        var btn = document.querySelector('[data-error-report]');
+        if (btn) {
+          btn.addEventListener('click', function () {
+            var code = document.body.getAttribute('data-error-code') || 'unknown';
+            var url =
+              'https://github.com/yashwanth-creator02/taletranscend/issues/new' +
+              '?title=' +
+              encodeURIComponent('Error ' + code) +
+              '&body=' +
+              encodeURIComponent('URL: ' + window.location.href + '%0AError code: ' + code);
+            window.open(url, '_blank', 'noopener');
+          });
+        }
+      })();
+    </script>
   </body>
 </html>
 `;

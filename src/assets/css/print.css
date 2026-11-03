@@ -1,0 +1,83 @@
+/* Print styles */
+
+@media print {
+  /* Hide interactive chrome */
+  body
+    *
+    :not(
+      main a,
+      main strong,
+      main em,
+      main u,
+      main s,
+      main code,
+      main blockquote,
+      main pre,
+      main h1,
+      main h2,
+      main h3,
+      main h4,
+      main h5,
+      main h6,
+      main p,
+      main ul,
+      main ol,
+      main li,
+      main table,
+      main caption,
+      main th,
+      main tr,
+      main td
+    ) {
+    visibility: hidden;
+  }
+
+  /* Show main content, but make it printable */
+  main,
+  main * {
+    visibility: visible;
+    background-color: var(--color-background);
+    color: var(--color-ink) !important;
+    font-size: 12pt !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Release scroller */
+  main {
+    height: auto !important;
+    overflow: visible !important;
+    position: static !important;
+  }
+
+  /* Avoid breaking chapters/comments mid-block */
+  /* This is a best-effort approach; complex DOM structures might still break */
+  section,
+  article,
+  div {
+    page-break-inside: avoid !important;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  ul,
+  ol,
+  table {
+    page-break-inside: avoid !important;
+  }
+
+  /* Expand no URLs */
+  a[href^='http']::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.8em;
+    color: var(--color-ink);
+  }
+
+  /* Ensure content is not clipped */
+  @page {
+    margin: 1cm;
+  }
+}
