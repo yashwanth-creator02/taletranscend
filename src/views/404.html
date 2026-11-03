@@ -25,9 +25,6 @@
     <meta name="twitter:title" content="Page Not Found | TaleTranscend" />
     <meta name="twitter:description" content="This path leads nowhere. Return to the archive." />
 
-    <!-- One font request, identical on every page. Nine different Google
-         Fonts URLs across nine pages meant every navigation re-fetched a
-         slightly different family set and re-rendered the whole document. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -54,17 +51,25 @@
 
     <style>
       /* Critical Anti-FOUC Gate */
-      html {
-        background-color: #030305;
-        color: #e2e8f0;
+      :root,
+      html[data-app-theme='transcendental'] {
+        --theme-bg-base: rgb(3 3 5);
+        --theme-text-primary: rgb(226 232 240);
+        --theme-accent-rgb: 99 102 241;
       }
       html[data-app-theme='dark'] {
-        background-color: #0b0d13;
-        color: #f8fafc;
+        --theme-bg-base: rgb(11 13 19);
+        --theme-text-primary: rgb(248 250 252);
+        --theme-accent-rgb: 129 140 248;
       }
       html[data-app-theme='light'] {
-        background-color: #f7f5f0;
-        color: #1e293b;
+        --theme-bg-base: rgb(246 243 237);
+        --theme-text-primary: rgb(28 37 48);
+        --theme-accent-rgb: 79 70 229;
+      }
+      html {
+        background-color: var(--theme-bg-base);
+        color: var(--theme-text-primary);
       }
       body {
         background-color: inherit;
@@ -103,10 +108,14 @@
         align-items: center;
         justify-content: center;
         border-radius: 12px;
-        background: rgba(99, 102, 241, 0.08);
-        border: 1px solid rgba(99, 102, 241, 0.2);
-        box-shadow: 0 0 25px rgba(99, 102, 241, 0.2);
-        animation: boot-pulse 1.4s ease-in-out infinite;
+        background: rgba(var(--theme-accent-rgb), 0.08);
+        border: 1px solid rgba(var(--theme-accent-rgb), 0.2);
+        box-shadow: 0 0 25px rgba(var(--theme-accent-rgb), 0.2);
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        .boot-crest {
+          animation: boot-pulse 1.4s ease-in-out infinite;
+        }
       }
       @keyframes boot-pulse {
         0%,
@@ -118,6 +127,38 @@
           transform: scale(1.04);
           opacity: 1;
         }
+      }
+      .error-report-btn {
+        min-height: 32px;
+        min-width: 32px;
+        padding: 0.5rem 1rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(var(--theme-accent-rgb), 0.1);
+        color: var(--theme-text-primary);
+        border: 1px solid rgba(var(--theme-accent-rgb), 0.2);
+        cursor: pointer;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition:
+          background 0.15s ease,
+          border-color 0.15s ease;
+      }
+      .error-report-btn:hover {
+        background: rgba(var(--theme-accent-rgb), 0.2);
+      }
+      @media (pointer: coarse) {
+        .error-report-btn {
+          min-height: 44px;
+          min-width: 44px;
+        }
+      }
+      .error-report-btn:focus-visible {
+        outline: none;
+        box-shadow:
+          0 0 0 2px var(--theme-bg-base),
+          0 0 0 4px rgba(var(--theme-accent-rgb), 0.9);
       }
     </style>
     <script>
@@ -139,13 +180,13 @@
       </style>
     </noscript>
 
-    <script type="module" src="../pages/404/404.js"></script>
+    <script type="module" src="../pages/errors/error.js"></script>
   </head>
 
   <body
     class="antialiased selection:bg-indigo-500/30 page-fade-in flex flex-col h-screen overflow-hidden"
+    data-error-code="404"
   >
-    <!-- App Boot Curtain (Prevents FOUC on slower networks) -->
     <div id="app-boot-curtain" aria-hidden="true">
       <div class="boot-crest">
         <img src="/logo.png" alt="" width="26" height="26" class="object-contain" />
@@ -153,7 +194,7 @@
     </div>
 
     <a class="skip-link" href="#main-content">Skip to content</a>
-    <!-- Background -->
+
     <div class="fixed inset-0 -z-10 bg-bg-base">
       <div
         class="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(99,102,241,0.08),transparent_50%)]"
@@ -163,20 +204,16 @@
       ></div>
     </div>
 
-    <!-- Content -->
     <main id="main-content" class="flex-1 flex items-center justify-center px-6">
       <div class="text-center max-w-md">
-        <!-- 404 Number -->
-        <h1 class="error-404-title">404</h1>
+        <h1 class="error-code-title">404</h1>
 
-        <!-- Message -->
         <h2 class="mt-4 text-2xl font-bold text-ink font-cinzel">Lost in the Archives</h2>
         <p class="mt-3 text-sm text-muted leading-relaxed">
           The tale you seek has vanished into the mists of time. Perhaps it was never written, or
           the pages have turned to dust.
         </p>
 
-        <!-- Actions -->
         <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
           <a href="/index.html" class="btn btn-primary px-6 py-3 rounded-xl text-sm font-semibold">
             <i data-lucide="home" class="w-4 h-4"></i>
@@ -187,7 +224,50 @@
             Browse Library
           </a>
         </div>
+
+        <div class="mt-5">
+          <button type="button" class="error-report-btn" data-error-report>
+            <i data-lucide="flag" class="w-3.5 h-3.5" aria-hidden="true"></i>
+            Report this error
+          </button>
+        </div>
+
+        <section id="error-context" class="error-context" aria-label="Request details" hidden>
+          <div class="error-context__row">
+            <span class="error-context__label">Requested</span>
+            <span id="error-context-source" class="error-context__value"></span>
+          </div>
+          <div id="error-context-reason-row" class="error-context__row" hidden>
+            <span class="error-context__label">Reason</span>
+            <span id="error-context-reason" class="error-context__value"></span>
+          </div>
+          <div class="error-context__row">
+            <span class="error-context__label">Logged</span>
+            <time id="error-context-time" class="error-context__value"></time>
+          </div>
+        </section>
+
+        <p id="error-offline-hint" class="error-offline-hint" hidden>
+          You appear to be offline. Reconnect, then try again.
+        </p>
       </div>
     </main>
+    <script>
+      (function () {
+        var btn = document.querySelector('[data-error-report]');
+        if (btn) {
+          btn.addEventListener('click', function () {
+            var code = document.body.getAttribute('data-error-code') || 'unknown';
+            var url =
+              'https://github.com/yashwanth-creator02/taletranscend/issues/new' +
+              '?title=' +
+              encodeURIComponent('Error ' + code) +
+              '&body=' +
+              encodeURIComponent('URL: ' + window.location.href + '%0AError code: ' + code);
+            window.open(url, '_blank', 'noopener');
+          });
+        }
+      })();
+    </script>
   </body>
 </html>

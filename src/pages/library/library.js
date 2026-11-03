@@ -9,7 +9,7 @@ import '@css/pages/library.css';
 import { initAuth } from '@fb/index.js';
 import { initNav } from '@ui/components/nav/nav.js';
 import { initIcons } from '@ui/icons.js';
-import { initPageReveal, readyReveal, createLogger, navigateTo } from '@/utils';
+import { initPageReveal, readyReveal, createLogger, navigateTo, routeError } from '@/utils';
 
 const log = createLogger('Library');
 
@@ -75,7 +75,9 @@ export async function initLibraryPage() {
         initIcons();
       } catch (err) {
         log.error('Init failed:', err);
-        showGridError();
+        if (!routeError(err)) {
+          showGridError();
+        }
         readyReveal();
       }
     })();

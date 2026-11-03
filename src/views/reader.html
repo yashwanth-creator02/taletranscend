@@ -291,8 +291,12 @@
         <!-- Main Content Scroller -->
         <main class="main-scroll ghost-scroll" id="scroller" tabindex="-1">
           <div class="content-wrapper" id="reader-vars">
-            <header class="article-header">
-              <nav class="breadcrumbs materialize" id="breadcrumbs"></nav>
+            <div class="article-header">
+              <nav
+                class="breadcrumbs materialize"
+                id="breadcrumbs"
+                aria-label="Breadcrumb navigation"
+              ></nav>
               <div class="chapter-meta materialize materialize-delay-1">
                 <i data-lucide="book-open" style="width: 14px; height: 14px"></i>
                 <span
@@ -324,7 +328,7 @@
                 </span>
               </div>
               <hr class="article-divider" />
-            </header>
+            </div>
 
             <article class="reader-article materialize materialize-delay-3" id="article-body">
               <!-- Content populated by content.js -->

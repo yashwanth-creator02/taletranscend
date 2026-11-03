@@ -227,7 +227,7 @@ async function _fetchComments(isInitial = false) {
       list.insertAdjacentHTML(
         'beforeend',
         `<div id="load-more-btn-container" class="text-center pt-10">
-          <button id="load-more-btn" class="px-8 py-3.5 glass-strong rounded-xl text-[9px] font-black uppercase tracking-[0.4em] text-indigo-300 hover:text-white transition-all">
+          <button id="load-more-btn" class="px-8 py-3.5 glass-strong rounded-xl text-[11px] font-black uppercase tracking-[0.4em] text-indigo-300 hover:text-white transition-all">
             Retrieve More Echoes
           </button>
         </div>`
@@ -503,7 +503,7 @@ async function _handleSaveEditComment(commentId, btn) {
     if (tagsContainer && !tagsContainer.querySelector('.edited-badge')) {
       tagsContainer.insertAdjacentHTML(
         'beforeend',
-        `<span class="edited-badge edited-tag inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-[8px] font-bold uppercase tracking-wider text-slate-400" title="Edited"><i data-lucide="edit-3" class="w-2.5 h-2.5"></i> Edited</span>`
+        `<span class="edited-badge edited-tag inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-[11px] font-bold uppercase tracking-wider text-slate-400" title="Edited"><i data-lucide="edit-3" class="w-2.5 h-2.5"></i> Edited</span>`
       );
       initIcons(tagsContainer);
     }
@@ -678,7 +678,7 @@ function _renderComment(c) {
   const editBtnHtml =
     isOwner && !isDeleted
       ? `<button
-        class="comment-action-btn edit-comment-trigger group flex items-center gap-1.5 text-[8px] font-black uppercase tracking-[0.2em] text-indigo-300 hover:text-white transition-all ml-1"
+        class="comment-action-btn edit-comment-trigger group flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.2em] text-indigo-300 hover:text-white transition-all ml-1"
         type="button"
         data-comment-id="${c.id}"
         aria-label="Edit Echo"
@@ -692,7 +692,7 @@ function _renderComment(c) {
   const deleteBtnHtml =
     isOwner && !isDeleted
       ? `<button
-        class="comment-action-btn delete-comment-trigger group flex items-center gap-1.5 text-[8px] font-black uppercase tracking-[0.2em] text-red-400/70 hover:text-red-400 transition-all ml-1"
+        class="comment-action-btn delete-comment-trigger group flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.2em] text-red-400/70 hover:text-red-400 transition-all ml-1"
         type="button"
         data-comment-id="${c.id}"
         aria-label="Silence Echo"
@@ -705,7 +705,7 @@ function _renderComment(c) {
 
   const replyBtnHtml = !isDeleted
     ? `<button
-        class="comment-action-btn reply-trigger group flex items-center gap-1.5 text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-all"
+        class="comment-action-btn reply-trigger group flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-all"
         type="button"
         data-comment-id="${c.id}"
         aria-label="Echo Back"
@@ -731,12 +731,12 @@ function _renderComment(c) {
         <div class="flex justify-end gap-2 mt-2">
           <button
             type="button"
-            class="comment-cancel-btn cancel-edit-trigger py-1.5 px-3 text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors"
+            class="comment-cancel-btn cancel-edit-trigger py-1.5 px-3 text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors"
             data-comment-id="${c.id}"
           >Cancel</button>
           <button
             type="button"
-            class="save-edit-trigger py-1.5 px-4 rounded-lg bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 text-[9px] font-black uppercase tracking-widest hover:bg-indigo-500/30 hover:text-white transition-all"
+            class="save-edit-trigger py-1.5 px-4 rounded-lg bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 text-[11px] font-black uppercase tracking-widest hover:bg-indigo-500/30 hover:text-white transition-all"
             data-comment-id="${c.id}"
           >Save</button>
         </div>
@@ -754,12 +754,12 @@ function _renderComment(c) {
           <div class="flex justify-end gap-3 mt-3">
             <button
               type="button"
-              class="comment-cancel-btn cancel-reply py-2 px-4 text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-white"
+              class="comment-cancel-btn cancel-reply py-2 px-4 text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-white"
               data-comment-id="${c.id}"
             >Cancel</button>
             <button
               type="button"
-              class="submit-reply py-2 px-6 rounded-lg bg-indigo-600/10 border border-indigo-500/20 text-indigo-400 text-[9px] font-black uppercase tracking-widest hover:bg-indigo-500/20"
+              class="submit-reply py-2 px-6 rounded-lg bg-indigo-600/10 border border-indigo-500/20 text-indigo-400 text-[11px] font-black uppercase tracking-widest hover:bg-indigo-500/20"
               data-comment-id="${c.id}"
             >Transmit</button>
           </div>
@@ -895,12 +895,12 @@ function _renderReply(r, childrenHtml = '', currentDepth = 1) {
         <div class="flex justify-end gap-2 mt-2">
           <button
             type="button"
-            class="comment-cancel-btn cancel-reply-edit-trigger py-1 px-2.5 text-[8px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors"
+            class="comment-cancel-btn cancel-reply-edit-trigger py-1 px-2.5 text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors"
             data-reply-id="${r.id || ''}"
           >Cancel</button>
           <button
             type="button"
-            class="save-reply-edit-trigger py-1 px-3 rounded-lg bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 text-[8px] font-black uppercase tracking-widest hover:bg-indigo-500/30 hover:text-white transition-all"
+            class="save-reply-edit-trigger py-1 px-3 rounded-lg bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 text-[11px] font-black uppercase tracking-widest hover:bg-indigo-500/30 hover:text-white transition-all"
             data-comment-id="${r.parentId || ''}"
             data-reply-id="${r.id || ''}"
           >Save</button>
@@ -912,7 +912,7 @@ function _renderReply(r, childrenHtml = '', currentDepth = 1) {
       ? ''
       : `<div id="reply-to-reply-form-${r.id}" class="comment-inline-form hidden mt-2">
         <div class="relative">
-          <div class="flex items-center gap-1 text-[8px] font-bold text-indigo-300 mb-1.5">
+          <div class="flex items-center gap-1 text-[11px] font-bold text-indigo-300 mb-1.5">
             <i data-lucide="corner-down-right" class="w-2.5 h-2.5"></i>
             <span>Replying to @${escapeHtml(r.authorName || 'Scribe')}</span>
           </div>
@@ -925,12 +925,12 @@ function _renderReply(r, childrenHtml = '', currentDepth = 1) {
           <div class="flex justify-end gap-2 mt-2">
             <button
               type="button"
-              class="comment-cancel-btn cancel-reply-to-reply py-1 px-2.5 text-[8px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors"
+              class="comment-cancel-btn cancel-reply-to-reply py-1 px-2.5 text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors"
               data-reply-id="${r.id}"
             >Cancel</button>
             <button
               type="button"
-              class="submit-reply-to-reply py-1 px-3.5 rounded-lg bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 text-[8px] font-black uppercase tracking-widest hover:bg-indigo-500/30 hover:text-white transition-all"
+              class="submit-reply-to-reply py-1 px-3.5 rounded-lg bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 text-[11px] font-black uppercase tracking-widest hover:bg-indigo-500/30 hover:text-white transition-all"
               data-comment-id="${r.parentId || ''}"
               data-reply-id="${r.id}"
               data-author-name="${escapeHtml(r.authorName || 'Scribe')}"

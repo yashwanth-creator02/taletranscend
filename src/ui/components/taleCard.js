@@ -33,7 +33,7 @@ function _metaItem(icon, label) {
   return `
     <div class="tale-card__meta flex items-center gap-1 sm:gap-2 text-muted group-hover:text-accent transition-colors">
       <i data-lucide="${icon}" class="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 opacity-60"></i>
-      <span class="text-[8px] sm:text-[9px] font-bold uppercase tracking-[0.14em] sm:tracking-[0.18em] truncate">${escapeHtml(label)}</span>
+      <span class="text-[11px] sm:text-[11px] font-bold uppercase tracking-[0.14em] sm:tracking-[0.18em] truncate">${escapeHtml(label)}</span>
     </div>
   `;
 }
@@ -48,7 +48,7 @@ function _reactionItem(count) {
       aria-label="${escapeHtml(description)}"
     >
       <i data-lucide="heart" class="tale-card__likes-icon h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0"></i>
-      <span class="text-[8px] sm:text-[9px] font-bold uppercase tracking-[0.14em] sm:tracking-[0.18em] truncate">${label}</span>
+      <span class="text-[11px] sm:text-[11px] font-bold uppercase tracking-[0.14em] sm:tracking-[0.18em] truncate">${label}</span>
     </div>
   `;
 }
@@ -386,7 +386,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
         <div class="tale-card__body flex-1 flex flex-col justify-start">
           <div class="tale-card__kicker flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
             <span class="h-px w-3 sm:w-4 bg-indigo-500/40"></span>
-            <span class="text-[8px] sm:text-[9px] font-bold text-muted uppercase tracking-widest">Scroll #${id.slice(-4)}</span>
+            <span class="text-[11px] sm:text-[11px] font-bold text-muted uppercase tracking-widest">Scroll #${id.slice(-4)}</span>
           </div>
 
           <h3 class="tale-card__title mb-1 sm:mb-1.5 line-clamp-1 text-xs sm:text-base font-bold font-cinzel text-ink group-hover:text-accent transition-colors">
@@ -409,7 +409,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
             type="button"
             data-action="resume"
             data-id="${escapeHtml(id)}"
-            class="card-button text-[8px] sm:text-[10px] px-2 py-1 sm:px-3 sm:py-1.5 shrink-0"
+            class="card-button text-[11px] sm:text-[10px] px-2 py-1 sm:px-3 sm:py-1.5 shrink-0"
           >
             <span>${isFinished ? 'Completed' : 'Read'}</span>
             <i data-lucide="chevron-right" class="h-2.5 w-2.5 sm:h-3 sm:w-3"></i>

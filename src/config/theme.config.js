@@ -186,7 +186,7 @@ export const DEFAULT_THEME = 'noir';
 export const FONTS = {
   serif: {
     label: 'Cinzel',
-    sub: 'Serif',
+    sub: 'Display',
     css: '"Cinzel", "Cormorant Garamond", Georgia, serif',
   },
   sans: {
@@ -277,12 +277,21 @@ export const FONTS = {
   dyslexic: {
     label: 'OpenDyslexic',
     sub: 'Accessible',
-    css: '"OpenDyslexic", "Comic Sans MS", sans-serif',
+    // The jsDelivr stylesheet registers this family as 'OpenDyslexicRegular';
+    // asking for 'OpenDyslexic' silently fell through to Comic Sans MS.
+    // Verdana is the fallback because it is the conventional accessible face.
+    css: '"OpenDyslexicRegular", Verdana, sans-serif',
   },
 };
 
-/** Default font applied when no preference is stored */
-export const DEFAULT_FONT = 'serif';
+/**
+ * Default font applied when no preference is stored.
+ *
+ * Merriweather, not Cinzel: Cinzel is an inscriptional face whose lowercase
+ * glyphs are small capitals, so body prose set in it renders as shouting. It
+ * stays available in the picker for display use.
+ */
+export const DEFAULT_FONT = 'literary';
 
 /**
  * Stylesheets that must be loaded for the FONTS above to actually render.

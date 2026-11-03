@@ -1,5 +1,5 @@
 // src/pages/tale/tale.js
-import { initPageReveal, readyReveal, setupAuthTimeout, createLogger } from '@/utils';
+import { initPageReveal, readyReveal, setupAuthTimeout, createLogger, routeError } from '@/utils';
 // Tale Archive page entry point.
 // Orchestrates data hydration and all user interactions.
 
@@ -96,7 +96,7 @@ export async function initTalePage(authUser = null) {
   try {
     const results = await Promise.all([
       loadTale(currentTaleId, user),
-      loadChapters(currentTaleId).catch(() => []),
+      loadChapters(currentTaleId),
       getResonanceStatus(currentTaleId, userId).catch(() => false),
       isBookmarked({ userId, taleId: currentTaleId }).catch(() => false),
     ]);
@@ -106,6 +106,7 @@ export async function initTalePage(authUser = null) {
     isShelved = Boolean(results[3]);
   } catch (err) {
     log.error('Hydration failed', err);
+    if (routeError(err, { fallback: 500 })) return;
   }
 
   if (!tale) {

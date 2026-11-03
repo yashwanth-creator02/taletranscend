@@ -47,7 +47,7 @@ export async function loadTale(taleId, user) {
     return createTale(draftSnap.id, draftSnap.data());
   } catch (err) {
     log.warn('Failed to load tale from archive', err);
-    return null;
+    throw err;
   }
 }
 
@@ -70,6 +70,6 @@ export async function loadChapters(taleId) {
       .sort((a, b) => a.chapterNum - b.chapterNum);
   } catch (err) {
     log.warn('Failed to load chapters for tale', err);
-    return [];
+    throw err;
   }
 }

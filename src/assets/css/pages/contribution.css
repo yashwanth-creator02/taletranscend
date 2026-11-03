@@ -299,6 +299,11 @@
   box-shadow: none !important;
 }
 
+.manuscript-title:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
 .manuscript-title::placeholder {
   color: rgb(var(--text-secondary-rgb) / var(--a-05));
   font-style: italic;
@@ -334,6 +339,11 @@
 .manuscript-textarea:focus {
   outline: none !important;
   box-shadow: none !important;
+}
+
+.manuscript-textarea:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .manuscript-textarea::placeholder {
@@ -405,7 +415,7 @@
 }
 
 .scribe-sidebar-btn__label {
-  font-size: 0.5625rem;
+  font-size: 0.6875rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;

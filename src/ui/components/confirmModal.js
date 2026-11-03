@@ -113,7 +113,7 @@ export function showConfirmModal({
           <div class="format-choice-container mb-6 text-left" role="radiogroup" aria-label="Archive Format">
             <div class="flex items-center justify-between mb-2">
               <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Archive Format</span>
-              <span id="${CONFIRM_MODAL_ID}-format-indicator" class="text-[9px] font-mono font-bold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-md uppercase">
+              <span id="${CONFIRM_MODAL_ID}-format-indicator" class="text-[11px] font-mono font-bold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-md uppercase">
                 ${defaultFormat.toUpperCase()} Selected
               </span>
             </div>
@@ -131,7 +131,7 @@ export function showConfirmModal({
               >
                 <div class="flex items-center justify-between w-full">
                   <span class="text-xs font-bold text-white tracking-tight">Markdown</span>
-                  <span class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-white/10 text-indigo-300">.MD</span>
+                  <span class="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded bg-white/10 text-indigo-300">.MD</span>
                 </div>
                 <p class="text-[10px] text-zinc-400 leading-snug">Plaintext archive for notes & Obsidian</p>
               </button>
@@ -148,7 +148,7 @@ export function showConfirmModal({
               >
                 <div class="flex items-center justify-between w-full">
                   <span class="text-xs font-bold text-zinc-200 tracking-tight">EPUB Book</span>
-                  <span class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-white/10 text-amber-300">.EPUB</span>
+                  <span class="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded bg-white/10 text-amber-300">.EPUB</span>
                 </div>
                 <p class="text-[10px] text-zinc-400 leading-snug">Electronic book for Apple Books & e-readers</p>
               </button>

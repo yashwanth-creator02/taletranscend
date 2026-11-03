@@ -438,7 +438,7 @@ export function renderChapters(userId, chapters, taleId, sortOrder = null) {
             </div>
             <div class="min-w-0">
               <div class="flex items-center gap-2 mb-0.5">
-                <span class="text-[9px] font-black text-indigo-400/70 uppercase tracking-[0.2em] block">Scroll #${idx + 1}</span>
+                <span class="text-[11px] font-black text-indigo-400/70 uppercase tracking-[0.2em] block">Scroll #${idx + 1}</span>
               </div>
               <h4 class="text-xs sm:text-sm font-bold text-[var(--text-primary)] uppercase tracking-tight truncate">${escapeHtml(ch.title || 'Untitled')}</h4>
             </div>

@@ -8,6 +8,7 @@
 
 import { initDevMode } from './dev.utils.ts';
 import { createLogger } from './logger.ts';
+import { installErrorBoundary, isErrorPagePath } from './error-navigation.ts';
 import { initRouter, softNavigate, isSmallChange } from './router.js';
 import { cacheService } from '@services/cache.service.js';
 import { HAS_VISITED_KEY, getAuthMemory, rememberAuth } from '@services/auth-memory.storage.js';
@@ -144,7 +145,13 @@ export function checkNewUserGate(ignoreTestEnv = false): boolean {
 export function initPageReveal(): void {
   initDevMode();
   if (typeof document !== 'undefined') {
-    if (checkNewUserGate()) {
+    installErrorBoundary({ fatalFallback: 500 });
+
+    // Error pages are destinations, not onboarding surfaces. Sending a
+    // first-time visitor from /403 to /login.html would hide the failure
+    // they are trying to understand.
+    const onErrorPage = isErrorPagePath(window.location.pathname);
+    if (!onErrorPage && checkNewUserGate()) {
       return;
     }
     initRouter();

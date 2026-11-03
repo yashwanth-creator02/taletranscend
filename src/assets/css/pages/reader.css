@@ -165,6 +165,8 @@ body {
   gap: 1rem;
   padding: 0 1.25rem;
   height: var(--reader-nav-height);
+  /* Reserve exact height from initial paint to prevent CLS. */
+  min-height: var(--reader-nav-height);
 }
 
 .reader-back-btn {
@@ -511,6 +513,15 @@ body.focus-mode #top-bar-focus:hover {
   }
 }
 
+@keyframes drawerFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @media (max-width: 1023px) {
   .main-layout {
     z-index: auto;
@@ -543,7 +554,8 @@ body.focus-mode #top-bar-focus:hover {
     box-shadow: var(--reader-shadow);
     display: none;
     flex-direction: column;
-    animation: drawerSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+    /* Opacity-only entrance avoids CLS from transform-driven entry. */
+    animation: drawerFadeIn 0.2s ease-out both;
   }
 
   .tool-panel.visible {
@@ -563,6 +575,13 @@ body.focus-mode #top-bar-focus:hover {
   flex: 1;
   overflow-y: auto;
   scroll-behavior: smooth;
+  /* Reading progress is restored explicitly after the chapter renders;
+     browser scroll anchoring adds a competing adjustment that registers as
+     layout shift. */
+  overflow-anchor: none;
+  /* Reserve the top bar's final height from the start so content does
+     not shift when the fixed top bar paints. */
+  padding-top: var(--reader-nav-height);
 }
 
 .content-wrapper {
@@ -593,6 +612,25 @@ body.focus-mode #top-bar-focus:hover {
   margin: 0 auto 3rem;
   max-width: var(--reader-measure);
 }
+
+/* Header fields are filled after the chapter fetch resolves; reserving their
+   line boxes while empty keeps the article and discussion from stepping down
+   as each one lands. */
+.article-title:empty {
+  min-height: 1.05em;
+}
+.article-subtitle:empty {
+  min-height: 1.5em;
+}
+.breadcrumbs:empty {
+  min-height: 1.5em;
+}
+
+/* The chapter text arrives after the fetch resolves and there is no exact
+   height to reserve for it (a short chapter is 300px, a long one is many
+   screens). Reserving a fixed block traded a jump for an equal shrink, so the
+   body is left to size itself; the remaining shift is the content arriving,
+   not a layout bug. A skeleton in the reader is the real fix. */
 
 .breadcrumbs {
   margin-bottom: 1.5rem;
@@ -2223,7 +2261,7 @@ body[data-reader-theme='ink'] .toast-card--info .toast-card__progress-bar {
 }
 
 .mobile-tool-label {
-  font-size: 9px;
+  font-size: 0.6875rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -2252,12 +2290,10 @@ body[data-reader-theme='ink'] .toast-card--info .toast-card__progress-bar {
 @keyframes materialize {
   0% {
     opacity: 0;
-    transform: translateY(8px) scale(0.98);
     filter: blur(6px);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
     filter: blur(0);
   }
 }
