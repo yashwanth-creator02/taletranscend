@@ -417,3 +417,36 @@ are for opaque surfaces only; text over an unparseable gradient was excluded
 rather than guessed. Timing figures come from one local machine, so treat the
 milliseconds as indicative and the **CLS values, byte totals and contrast ratios
 as reproducible**.
+
+## Remediation status
+
+Everything below is fixed on `fix/design-audit-2026-11` and was measured
+against the built output, not inferred from the diff.
+
+| Finding                                | Now                                                                                          | Evidence                                                |
+| -------------------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| Reader prose set in Cinzel             | Merriweather is the default; Cinzel stays in the picker                                      | `src/config/theme.config.js`                            |
+| 16 of 19 reader typefaces never loaded | all stylesheets requested on reader mount; OpenDyslexic registers under its real family name | network log: googleapis, gstatic Merriweather, jsDelivr |
+| Login scene empty                      | `#login-scene` 620x680 with the scene mounted                                                | built output                                            |
+| Error-page report button dead          | GitHub issue link, 44px on coarse pointers, focus ring                                       | `scripts/generate-error-pages.js`                       |
+| Print clipped to one page              | a 60-paragraph chapter paginates to 28 sheets; chrome hidden                                 | A4 PDF of the built reader                              |
+| 8-9px micro-labels                     | every declaration and utility at the 11px floor; 10px only for decorative eyebrows           | sweep of all 11 routes                                  |
+| Muted text 4.20-4.33:1                 | 4.59 / 4.62 / 7.21:1 against each theme lightest surface                                     | `tokens.css`                                            |
+| No reduced motion                      | animations neutralised, spinners stay visible                                                | `base.css`                                              |
+| Missing h1 on two views                | exactly one h1 per view; extra banner landmarks removed                                      | structural sweep                                        |
+| 21 undersized targets                  | 7 left: four inline text links, a skip link, a breadcrumb                                    | target sweep                                            |
+| 411 kB icon bundle                     | 25.2 kB (7.6 kB gzip)                                                                        | build output                                            |
+| 3352 KiB precache                      | 2535 KiB; covers and PNG illustrations no longer precached                                   | build output                                            |
+| Reader CLS 0.328                       | 0.290: the entrance no longer translates, header fields reserve their line box               | layout-shift trace                                      |
+
+### Deferred, with the reason
+
+- **Reader CLS 0.290** (target 0.1). The residual 0.2263 is the chapter body
+  arriving after the fetch. Reserving a fixed height made it worse (a short
+  chapter then shrank), so the honest fix is a skeleton in the reader that is
+  replaced in place. That is a design decision, not a CSS patch.
+- **Four inline text links under 24px** ("Browse Library" and the toc
+  breadcrumb). WCAG 2.2 exempts links inside a sentence; they are left as text.
+- **Light theme tag and pill contrast.** Backgrounds using `oklch()` could not
+  be composited by the scanner, so those pairs were excluded rather than
+  guessed.

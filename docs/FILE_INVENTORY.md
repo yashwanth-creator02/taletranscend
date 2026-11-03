@@ -25,10 +25,10 @@ One-line duty for every file tracked by git in this repository, grouped by area 
 - `package.json` — Root manifest: scripts (dev, build, verify, test:rules, e2e), dependencies, lint-staged hook config, Node >=20 engine.
   <<<<<<< HEAD
   <<<<<<< HEAD
-- # `playwright.config.js` — Playwright config: desktop (chromium, firefox) and mobile (Pixel 7, iPhone 14/WebKit) projects over `e2e/` specs, with an auto-started Vite dev server on this worktree's allocated port (`.dev-port`, default 5173, overridable via `E2E_PORT`).
+- `playwright.config.js` — Playwright config: desktop (chromium, firefox) and mobile (Pixel 7, iPhone 14/WebKit) projects over `e2e/` specs, with an auto-started Vite dev server on this worktree's allocated port (`.dev-port`, default 5173, overridable via `E2E_PORT`).
 - `playwright.config.js` — Playwright config: `e2e/` specs in chromium and firefox against this worktree's allocated dev port (read from `.dev-port`, defaulting to 5173) with an auto-started Vite dev server.
   > > > > > > > # feat/login-reading-scene
-- `playwright.config.js` — Playwright config: `e2e/` specs in chromium and firefox against this worktree's allocated dev port (read from `.dev-port`, defaulting to 5173) with an auto-started Vite dev server.
+  > > > > > > >
   > > > > > > > feat/comprehensive-improvements
 - `skills-lock.json` — Lockfile recording source, path and hash for agent skills fetched from `firebase/agent-skills`.
 - `tsconfig.json` — TypeScript config for `src/`: ESNext with bundler resolution, `@`-prefixed path aliases, noEmit and strict; used by `npm run type-check`.
@@ -49,10 +49,10 @@ One-line duty for every file tracked by git in this repository, grouped by area 
 <<<<<<< HEAD
 <<<<<<< HEAD
 
-- # `AGENTS.md` — Agent-facing repo orientation and operating principles: stack overview, developer commands, 3-layer architecture, git safety, and the documentation/clarification protocol.
+- `AGENTS.md` — Agent-facing repo orientation and operating principles: stack overview, developer commands, 3-layer architecture, git safety, and the documentation/clarification protocol.
 - `AGENTS.md` — Agent-facing repo orientation and operating principles: stack overview, developer commands, 3-layer architecture, git safety (commit/push delivery, no-ff merges), and the documentation/clarification protocol.
   > > > > > > > # feat/login-reading-scene
-- `AGENTS.md` — Agent-facing repo orientation and operating principles: stack overview, developer commands, 3-layer architecture, git safety (commit/push delivery, no-ff merges), and the documentation/clarification protocol.
+  > > > > > > >
   > > > > > > > feat/comprehensive-improvements
 - `directives/accessibility_and_ui_standards.md` — Agent directive governing footer isolation, accessible toasts, keyboard shortcuts, theming, and brand asset standards.
 - `directives/author_registration_and_correspondence.md` — Agent directive governing the author registration wall, scribe registry, and reader-author inquiry correspondence.
@@ -60,10 +60,10 @@ One-line duty for every file tracked by git in this repository, grouped by area 
 - `directives/deploy_application.md` — Agent directive governing production builds and Firebase Hosting and Vercel deployment workflows.
   <<<<<<< HEAD
   <<<<<<< HEAD
-- # `directives/developer_verification.md` — Agent directive governing the mandatory format, lint, token, type-check, and test pipeline before commits.
+- `directives/developer_verification.md` — Agent directive governing the mandatory format, lint, token, type-check, and test pipeline before commits.
 - `directives/developer_verification.md` — Agent directive governing the mandatory format, lint, token, type-check, and test pipeline before commits and pushes, plus commit/push and no-ff merge policy and offline/e2e environment notes.
   > > > > > > > # feat/login-reading-scene
-- `directives/developer_verification.md` — Agent directive governing the mandatory format, lint, token, type-check, and test pipeline before commits and pushes, plus commit/push and no-ff merge policy and offline/e2e environment notes.
+  > > > > > > >
   > > > > > > > feat/comprehensive-improvements
 - `directives/firestore_management.md` — Agent directive governing Firestore paths, indexes, security rules, seeding, and the Chronicle Preservation Policy.
 - `directives/mcp_servers.md` — Agent directive governing project-local MCP server setup and troubleshooting for Chrome DevTools, Firebase, and Vercel.
@@ -86,7 +86,7 @@ One-line duty for every file tracked by git in this repository, grouped by area 
 - `docs/decisions/0005-remembered-login-gate.md` — Decision record: the first-visit login gate reads one explicit auth-memory record; the Keep-me-signed-in checkbox governs its scope and sign-out clears it.
 - `docs/reports/2026-10-18-code-redundancy-audit.md` — Audit report listing 17 dead-code and duplication findings with severities and their same-day resolutions.
   <<<<<<< HEAD
-- # `docs/reports/2026-10-19-mobile-audit.md` — Full mobile sweep (11 routes × 7 widths), overflow matrix, root-caused defects with fix directions, and the verification protocol for the mobile pass.
+- `docs/reports/2026-10-19-mobile-audit.md` — Full mobile sweep (11 routes × 7 widths), overflow matrix, root-caused defects with fix directions, and the verification protocol for the mobile pass.
   > > > > > > > feat/login-reading-scene
 
 ## Application Views (`src/views`)
@@ -108,10 +108,10 @@ One-line duty for every file tracked by git in this repository, grouped by area 
 - `src/views/login.html` — Split-screen sign-in and sign-up shell with email, phone, Google and guest options; loads `../pages/login/login.js`.
   <<<<<<< HEAD
   <<<<<<< HEAD
-- # `src/views/profile.html` — Chronicler profile shell with identity pillar, scribe registry card and sign-out; loads `../pages/profile/profile.js`.
+- `src/views/profile.html` — Chronicler profile shell with identity pillar, scribe registry card and sign-out; loads `../pages/profile/profile.js`.
 - `src/views/profile.html` — Chronicler profile shell with back pill, identity pillar, scribe registry card and sign-out; loads `../pages/profile/profile.js`.
   > > > > > > > # feat/login-reading-scene
-- `src/views/profile.html` — Chronicler profile shell with back pill, identity pillar, scribe registry card and sign-out; loads `../pages/profile/profile.js`.
+  > > > > > > >
   > > > > > > > feat/comprehensive-improvements
 - `src/views/reader.html` — Distraction-free reader shell whose `#app` carries `reader-surface` and `data-reader-theme`; loads `../pages/reader/reader.js`.
 - `src/views/settings.html` — Settings shell with back button, settings search, a seven-section contents sidebar (Profile, General & Theme, Reader, Atmosphere & Motion, Archival Storage, Accounts, About TaleTranscend) and section views, including the Accounts identity, guest-elevation and password panels; loads `../pages/settings/settings.js`.
@@ -211,18 +211,11 @@ Each directory under `src/pages/` holds the JavaScript for one HTML shell in `sr
 - `src/pages/profile/state.js` — `profileState` singleton and the GENRE_OPTIONS list used by the profile form.
 - `src/pages/profile/sync.js` — Firestore profile listener, profile save with validation, author registry save, computed stats.
 - `src/pages/profile/ui.js` — Profile UI: modal/tabs, genre chips, avatar preview, AI name button, achievements, continue reading, contributions, drafts, skeletons.
-- # `src/pages/profile/__tests__/profile.test.js` — Vitest tests for `src/pages/profile/profile.js` — auth init, sync start, form submit, sign-out.
+- `src/pages/profile/__tests__/profile.test.js` — Vitest tests for `src/pages/profile/profile.js` — auth init, sync start, form submit, sign-out.
 - `src/pages/profile/profile.js` — Profile page entry: auth, profile sync, continue reading, contributions, drafts, account deletion, sign-out, and back-pill navigation (`handleProfileBack` / `initProfileBackButton`).
-- `src/pages/profile/state.js` — `profileState` singleton and the GENRE_OPTIONS list used by the profile form.
-- `src/pages/profile/sync.js` — Firestore profile listener, profile save with validation, author registry save, computed stats.
-- `src/pages/profile/ui.js` — Profile UI: modal/tabs, genre chips, avatar preview, AI name button, achievements, continue reading, contributions, drafts, skeletons.
 - `src/pages/profile/__tests__/profile.test.js` — Vitest tests for `src/pages/profile/profile.js` — auth init, sync start, form submit, sign-out, back-pill navigation.
   > > > > > > > # feat/login-reading-scene
-- `src/pages/profile/profile.js` — Profile page entry: auth, profile sync, continue reading, contributions, drafts, account deletion, sign-out, and back-pill navigation (`handleProfileBack` / `initProfileBackButton`).
-- `src/pages/profile/state.js` — `profileState` singleton and the GENRE_OPTIONS list used by the profile form.
-- `src/pages/profile/sync.js` — Firestore profile listener, profile save with validation, author registry save, computed stats.
-- `src/pages/profile/ui.js` — Profile UI: modal/tabs, genre chips, avatar preview, AI name button, achievements, continue reading, contributions, drafts, skeletons.
-- `src/pages/profile/__tests__/profile.test.js` — Vitest tests for `src/pages/profile/profile.js` — auth init, sync start, form submit, sign-out, back-pill navigation.
+  > > > > > > >
   > > > > > > > feat/comprehensive-improvements
 - `src/pages/profile/__tests__/sync.test.js` — Vitest tests for `src/pages/profile/sync.js` — profile listener, saveProfile, saveAuthorRegistry, computeAndSyncStats.
 - `src/pages/profile/__tests__/ui.test.js` — Vitest tests for `src/pages/profile/ui.js` — modal, tabs, field population, continue reading, contributions, drafts, achievements.
@@ -266,13 +259,11 @@ Global UI layer: the icon registry, shared components, and the nav shell; each c
 <<<<<<< HEAD
 <<<<<<< HEAD
 
-- `src/ui/icons.js` — Central Lucide icon registry: lazily imports the icon set, retries on failure, and renders `[data-lucide]` icons via `initIcons(scope)`.
-- # `src/ui/__tests__/icons.test.js` — Vitest tests for `src/ui/icons.js` — initIcons rendering, scoped calls, icon map registration, and that every view's `data-lucide` name resolves.
-- `src/ui/icons.js` - Central Lucide icon registry: lazily imports the icon set, retries on failure, renders `[data-lucide]` icons via `initIcons(scope)`, and defines the custom composite `look-up` glyph (eye with an upward arrow) used by the quick-tools trigger and palette field, plus Lucide `Menu` for the brand-mark account-menu affordance and `Pin` for the notification pin control.
+- `src/ui/icons.js` — Central Lucide icon registry. Named imports from `lucide` keep the bundle to the glyphs listed in the map; `initIcons(scope)` renders `[data-lucide]` elements and always resolves, so a failed render leaves icons blank instead of breaking the page.
+- `src/ui/__tests__/icons.test.js` — Vitest tests for `src/ui/icons.js` — initIcons rendering, scoped calls, icon map registration, and that every view's `data-lucide` name resolves.
 - `src/ui/__tests__/icons.test.js` — Vitest tests for `src/ui/icons.js` — initIcons rendering, scoped calls, icon map registration (including the custom `LookUp` glyph shape and the `Menu` brand-mark glyph), and that every view's `data-lucide` name resolves.
   > > > > > > > # feat/login-reading-scene
-- `src/ui/icons.js` - Central Lucide icon registry: lazily imports the icon set, retries on failure, renders `[data-lucide]` icons via `initIcons(scope)`, and defines the custom composite `look-up` glyph (eye with an upward arrow) used by the quick-tools trigger and palette field, plus Lucide `Menu` for the brand-mark account-menu affordance and `Pin` for the notification pin control.
-- `src/ui/__tests__/icons.test.js` — Vitest tests for `src/ui/icons.js` — initIcons rendering, scoped calls, icon map registration (including the custom `LookUp` glyph shape and the `Menu` brand-mark glyph), and that every view's `data-lucide` name resolves.
+  > > > > > > >
   > > > > > > > feat/comprehensive-improvements
 - `src/ui/components/badge.js` — Shared `renderBadge` helper producing an escaped `.badge` span used by tale and shelf cards.
 - `src/ui/components/confirmModal.js` — Accessible promise-based confirmation dialog plus the tale/fragment download prompt with MD/EPUB format choice.
@@ -292,7 +283,7 @@ Global UI layer: the icon registry, shared components, and the nav shell; each c
   <<<<<<< HEAD
   <<<<<<< HEAD
 - `src/ui/components/nav/nav.command-palette.js` — Manages command palette open/close, fuzzy list rendering, keyboard focus movement, and command execution (navigation, sign out, themes).
-- # `src/ui/components/nav/nav.config.js` — Declares primary header links, user dropdown links, mobile dock items, and base command palette entries.
+- `src/ui/components/nav/nav.config.js` — Declares primary header links, user dropdown links, mobile dock items, and base command palette entries.
 - `src/ui/components/nav/nav.command-palette.js` — Manages command palette open/close, fuzzy list rendering with `<mark>` query highlighting, keyboard focus movement, and command execution (navigation, sign out, themes).
 - `src/ui/components/nav/nav.config.js` - Declares primary header links, user dropdown links, the three mobile dock items (Home, Library, Shelf), and base command palette entries.
   > > > > > > > feat/comprehensive-improvements
@@ -311,24 +302,12 @@ Global UI layer: the icon registry, shared components, and the nav shell; each c
 - `src/ui/components/nav/__tests__/nav.utils.test.js` — Vitest tests for `src/ui/components/nav/nav.utils.js` — getCurrentPage pathname fallbacks, getAvatarSeed derivation, getNavElements DOM lookups.
   <<<<<<< HEAD
   =======
-- `src/ui/components/nav/nav.command-palette.js` — Manages command palette open/close, fuzzy list rendering with `<mark>` query highlighting, keyboard focus movement, and command execution (navigation, sign out, themes).
-- `src/ui/components/nav/nav.config.js` — Declares primary header links, user dropdown links, mobile dock items, and base command palette entries.
-- `src/ui/components/nav/nav.global.js` — Dynamically mounts the command palette and registers the global Ctrl/Cmd+K shortcut on pages lacking the full nav.
 - `src/ui/components/nav/nav.interactions.js` - Delegated nav click/keydown handling, scroll progress bar, command-palette focus trap (real tab stops only), brand-mark menu button and notification toggles, notification pin toggles, Escape closing of the notification drawer, auth-to-DOM updates (brand slot + user area + dock), listener lifecycle (subscription teardown runs unconditionally on detach).
-- `src/ui/components/nav/nav.js` - Public nav lifecycle: initNav injects header, mobile dock, palette, and the floating notifications trigger (body-level, right after the header) and starts the auth watch; destroyNav tears everything down.
-- `src/ui/components/nav/nav.state.js` — Shared mutable nav state singleton holding the current user, palette open/focus flags, listener and cleanup handles, and the account dropdown's pending hide-animation timer.
 - `src/ui/components/nav/nav.templates.js` - Pure HTML string builders for header links, the quick-tools search trigger (look-up glyph), the brand mark (guest home link / member account-menu button with hamburger glyph), the account dropdown panel, the avatar profile link, guest area, mobile dock, the floating notifications trigger (`buildNotifications` / `alertsHtml`, hidden by default), command items, the lookup-style palette shell, and nav shell.
-- `src/ui/components/nav/nav.utils.js` — Nav helpers: getCurrentPage path resolution, getAvatarSeed, live getNavElements lookups, and escapeHtml/renderIcons re-exports.
-- `src/ui/components/nav/notifications.popover.js` - Floating notifications trigger and drawer: unread badge, pin/unpin toggling, pinned-first list rendering, safe in-app href resolution (schemes/protocol-relative URLs dropped), Firestore Timestamp normalization, failure state instead of a stuck spinner, real-time unread and pinned count subscriptions, and the visibility rule (`is-hidden` while unread and pinned are both zero).
-- `src/ui/components/nav/__tests__/nav.command-palette.test.js` — Vitest tests for `src/ui/components/nav/nav.command-palette.js` — palette open/close state, query filtering, match highlighting and escaping, focus movement wrapping, href/theme command execution.
-- `src/ui/components/nav/__tests__/nav.global.test.js` — Vitest tests for `src/ui/components/nav/nav.global.js` — global palette shortcut listener attachment and dynamic palette mounting/opening on standalone pages.
-- `src/ui/components/nav/__tests__/nav.interactions.test.js` — Vitest tests for `src/ui/components/nav/nav.interactions.js` — dropdown open/close (including the brand menu button toggle), click delegation (palette, upgrade), updateNavUser rendering, keyboard shortcuts/focus navigation, palette Tab-trap containment.
 - `src/ui/components/nav/__tests__/nav.templates.test.js` — Vitest tests for `src/ui/components/nav/nav.templates.js` — template builders for active links, the brand mark (guest link vs member menu button), the account menu panel, the avatar profile link, guest area, mobile dock, command items, lookup palette shell ordering (including the look-up glyph), nav shell ordering.
-- `src/ui/components/nav/__tests__/nav.test.js` — Vitest tests for `src/ui/components/nav/nav.js` — initNav header/dock injection, idempotency, destroyNav DOM and auth-unsubscribe cleanup.
-- `src/ui/components/nav/__tests__/nav.utils.test.js` — Vitest tests for `src/ui/components/nav/nav.utils.js` — getCurrentPage pathname fallbacks, getAvatarSeed derivation, getNavElements DOM lookups.
 - `src/ui/components/nav/__tests__/notifications.popover.test.js` — Vitest tests for `src/ui/components/nav/notifications.popover.js` — floating-trigger visibility (unread, pinned, both zero), focus release when hiding, unread/pinned subscriptions, drawer toggling, and pin-control rendering plus toggle-through-service behavior.
   > > > > > > > # feat/login-reading-scene
-- `src/ui/components/nav/__tests__/notifications.popover.test.js` — Vitest tests for `src/ui/components/nav/notifications.popover.js` — floating-trigger visibility (unread, pinned, both zero), focus release when hiding, unread/pinned subscriptions, drawer toggling, and pin-control rendering plus toggle-through-service behavior.
+  > > > > > > >
   > > > > > > > feat/comprehensive-improvements
 
 ## Services (`src/services`)
@@ -347,10 +326,10 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `src/services/markFinish.service.js` — Marks a tale finished: batch-writes 100% chapter progress and finished tale progress, syncs local storage, invalidates caches.
   <<<<<<< HEAD
   <<<<<<< HEAD
-- # `src/services/notification.service.js` — Notifications at users/{uid}/notifications: fetch newest, subscribe to unread count, mark all read, create for user.
+- `src/services/notification.service.js` — Notifications at users/{uid}/notifications: fetch newest, subscribe to unread count, mark all read, create for user.
 - `src/services/notification.service.js` - Notifications at users/{uid}/notifications: fetch recent plus pinned (merged pinned-first), subscribe to unread and pinned counts, pin/unpin a notice, mark all read, create for user.
   > > > > > > > # feat/login-reading-scene
-- `src/services/notification.service.js` - Notifications at users/{uid}/notifications: fetch recent plus pinned (merged pinned-first), subscribe to unread and pinned counts, pin/unpin a notice, mark all read, create for user.
+  > > > > > > >
   > > > > > > > feat/comprehensive-improvements
 - `src/services/profile.service.js` — Profile data: continue-reading, published tales, drafts, word-count stats, account deletion, deletion requests, follow toggling.
 - `src/services/progress.utils.service.js` — getTaleProgressData reads users/{uid}/readerProgress/{taleId}/chapters and maps chapter index to scrollPercent.
@@ -366,10 +345,10 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `src/services/__tests__/markFinish.service.test.js` — Vitest tests for `src/services/markFinish.service.js` — batch writes, fallback chapter count, pre-existing docs, cache invalidation.
   <<<<<<< HEAD
   <<<<<<< HEAD
-- # `src/services/__tests__/notification.service.test.js` — Vitest tests for `src/services/notification.service.js` — fetching, unread subscription, and mark-all-read behavior.
+- `src/services/__tests__/notification.service.test.js` — Vitest tests for `src/services/notification.service.js` — fetching, unread subscription, and mark-all-read behavior.
 - `src/services/__tests__/notification.service.test.js` - Vitest tests for `src/services/notification.service.js` - fetching (recent + pinned merge ordering/dedupe), unread and pinned subscriptions, pin/unpin writes, and mark-all-read behavior.
   > > > > > > > # feat/login-reading-scene
-- `src/services/__tests__/notification.service.test.js` - Vitest tests for `src/services/notification.service.js` - fetching (recent + pinned merge ordering/dedupe), unread and pinned subscriptions, pin/unpin writes, and mark-all-read behavior.
+  > > > > > > >
   > > > > > > > feat/comprehensive-improvements
 - `src/services/__tests__/profile.service.test.js` — Vitest tests for `src/services/profile.service.js` — continue reading, drafts, stats sync, deletion, deletion requests, follows.
 - `src/services/__tests__/progress.utils.service.test.js` — Vitest tests for `src/services/progress.utils.service.js` — chapter scrollPercent map building and error fallback to empty object.
@@ -424,10 +403,10 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `src/state/schemas/draft.schema.js` — createDraft/createDraftChapter factories and Firestore payload strippers for users/{uid}/drafts and nested chapters.
   <<<<<<< HEAD
   <<<<<<< HEAD
-- # `src/state/schemas/notification.schema.js` — createNotification factory for users/{uid}/notifications documents with type, read state, and actor fields.
+- `src/state/schemas/notification.schema.js` — createNotification factory for users/{uid}/notifications documents with type, read state, and actor fields.
 - `src/state/schemas/notification.schema.js` - createNotification factory for users/{uid}/notifications documents with type, read and pinned state, actor fields, and normalization of legacy `link` / `message` writes onto `actionUrl` / `body`.
   > > > > > > > # feat/login-reading-scene
-- `src/state/schemas/notification.schema.js` - createNotification factory for users/{uid}/notifications documents with type, read and pinned state, actor fields, and normalization of legacy `link` / `message` writes onto `actionUrl` / `body`.
+  > > > > > > >
   > > > > > > > feat/comprehensive-improvements
 - `src/state/schemas/progress.schema.js` — Factories for tale/chapter reader progress, localStorage progress shapes, and reading-history entries.
 - `src/state/schemas/tale.schema.js` — createTale/createChapter/createComment factories defining canonical Firestore tale, chapter, and comment document shapes.
@@ -437,10 +416,10 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `src/state/schemas/__tests__/draft.schema.test.js` — Vitest tests for `src/state/schemas/draft.schema.js` — createDraft and createDraftChapter safe defaults and data merging.
   <<<<<<< HEAD
   <<<<<<< HEAD
-- # `src/state/schemas/__tests__/notification.schema.test.js` — Vitest tests for `src/state/schemas/notification.schema.js` — createNotification defaults and partial data merging.
+- `src/state/schemas/__tests__/notification.schema.test.js` — Vitest tests for `src/state/schemas/notification.schema.js` — createNotification defaults and partial data merging.
 - `src/state/schemas/__tests__/notification.schema.test.js` - Vitest tests for `src/state/schemas/notification.schema.js` - createNotification defaults (including `isPinned`) and partial data merging.
   > > > > > > > # feat/login-reading-scene
-- `src/state/schemas/__tests__/notification.schema.test.js` - Vitest tests for `src/state/schemas/notification.schema.js` - createNotification defaults (including `isPinned`) and partial data merging.
+  > > > > > > >
   > > > > > > > feat/comprehensive-improvements
 - `src/state/schemas/__tests__/progress.schema.test.js` — Vitest tests for `src/state/schemas/progress.schema.js` — createTaleProgress, createChapterProgress (finished=100%), createLocalTaleProgress.
 - `src/state/schemas/__tests__/tale.schema.test.js` — Vitest tests for `src/state/schemas/tale.schema.js` — createTale defaults/numeric coercion and createChapter/createComment default shapes.
@@ -507,19 +486,20 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `src/assets/css/components.css` — Shared component primitives: glass surfaces, buttons, inputs, progress, dividers, footer, toasts, modals and 404 styles.
   <<<<<<< HEAD
   <<<<<<< HEAD
-- # `src/assets/css/nav.css` — Styles the global top nav, user dropdown, mobile bottom dock, command palette, notifications drawer and scroll progress.
+- `src/assets/css/nav.css` — Styles the global top nav, user dropdown, mobile bottom dock, command palette, notifications drawer and scroll progress.
 - `src/assets/css/nav.css` - Styles the global top nav, the quick-tools search trigger (mirrors the palette field chrome), the brand mark (guest home link / `--menu` account-menu button with hover hamburger glyph swap), brand-anchored account dropdown, avatar profile link, mobile bottom dock, lookup-style command palette (field row, look-up glyph, match highlights), the floating notification trigger below the nav bar with its pin controls and toast-column shift, notifications drawer, and scroll progress.
   > > > > > > > # feat/login-reading-scene
 - `src/assets/css/nav.css` - Styles the global top nav, the accent-gradient quick-tools search trigger (a 38px icon square below 1024px), the `.nav-icon-btn` shell used by the floating notification trigger, the brand mark (guest home link / `--menu` account-menu button with hover hamburger glyph swap), brand-anchored account dropdown, avatar profile link, the refined floating mobile dock (rectangular hairline bar, translucent theme-aware surface, accent icon plate plus 2px active rule), lookup-style command palette (field row, look-up glyph, match highlights), the floating notification trigger below the nav bar with its pin controls and toast-column shift, notifications drawer, and scroll progress.
   > > > > > > > feat/comprehensive-improvements
 - `src/assets/css/reader-themes.css` — Twelve reader colour themes scoped to [data-reader-theme], plus light-theme atmosphere and glow adjustments.
+- `src/assets/css/print.css` — Print-only rules: hides the app chrome by selector, releases every scroller into normal flow so long chapters paginate, and sets paper typography.
 - `src/assets/css/tokens.css` — Single source of design tokens: colour channels, semantic roles, the three app themes and reader typography defaults.
 - `src/assets/css/pages/contribution.css` — Styles the Scribe's Atelier workspace: tool sidebar, manuscript canvas, lore cards, chips and readiness seals.
 - `src/assets/css/pages/home.css` — Styles the landing page hero, search field, topic tags, trending grid, newsletter CTA and footer.
 - `src/assets/css/pages/library.css` — Styles the library archive layout: sidebar, header, filter command bar, card grid and pagination.
 - `src/assets/css/pages/login.css` — Styles the login split screen: reading-vignette art column, tabbed auth card, inputs and alternate buttons.
 - `src/assets/css/pages/profile.css` — Styles the profile sanctuary: identity pillar, avatar frame, scribe registry card and responsive columns.
-- `src/assets/css/pages/reader.css` — Styles the reader layout, top bar, sidebar tools, panels and typography variables that the reader themes drive.
+- `src/assets/css/pages/reader.css` — Styles the reader layout, top bar, sidebar tools, panels and typography variables that the reader themes drive. Also owns the reading column's first-paint reservations (empty header fields reserve their line box) and the opacity/blur-only `materialize` entrance.
 - `src/assets/css/pages/settings.css` — Styles the settings page chrome (library-vellum top bar and contents sidebar), setting rows and cards, theme/font specimens, archival storage list, Accounts panels and responsive section views.
 - `src/assets/css/pages/shelf.css` — Styles the shelf/vault cards and layout while suppressing the global nav and mobile dock on that page.
 - `src/assets/css/pages/tale-cards.css` — Shared compact tale-card styling, imported by the taleCard component and the shelf page.
@@ -561,14 +541,11 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 
 - `firestore.rules` — Security rules for the v1/taletranscend/projects/v1 tree: per-collection ownership checks, field validation, and a deny-all fallback.
 - `firestore.indexes.json` — Composite index definitions for tales, comments, drafts, and bookmarks queries; deployed via `firebase deploy --only firestore:indexes`.
-- # `firestore/tests/rules.emulator.test.ts` — Emulator-backed Vitest suite asserting `firestore.rules` decisions for reactions, reader progress, followers, inquiries, and fallback paths.
+- `firestore/tests/rules.emulator.test.ts` — Emulator-backed Vitest suite asserting `firestore.rules` decisions for reactions, reader progress, followers, inquiries, and fallback paths.
 - `firestore.rules` - Security rules for the v1/taletranscend/projects/v1 tree: per-collection ownership checks, field validation, and a deny-all fallback. Notification updates are allowlisted to `isRead`, `readAt`, and `isPinned` for the owner.
-- `firestore.indexes.json` — Composite index definitions for tales, comments, drafts, and bookmarks queries; deployed via `firebase deploy --only firestore:indexes`.
 - `firestore/tests/rules.emulator.test.ts` - Emulator-backed Vitest suite asserting `firestore.rules` decisions for reactions, reader progress, followers, inquiries, notification pin/read allowlisting, and fallback paths.
   > > > > > > > # feat/login-reading-scene
-- `firestore.rules` - Security rules for the v1/taletranscend/projects/v1 tree: per-collection ownership checks, field validation, and a deny-all fallback. Notification updates are allowlisted to `isRead`, `readAt`, and `isPinned` for the owner.
-- `firestore.indexes.json` — Composite index definitions for tales, comments, drafts, and bookmarks queries; deployed via `firebase deploy --only firestore:indexes`.
-- `firestore/tests/rules.emulator.test.ts` - Emulator-backed Vitest suite asserting `firestore.rules` decisions for reactions, reader progress, followers, inquiries, notification pin/read allowlisting, and fallback paths.
+  > > > > > > >
   > > > > > > > feat/comprehensive-improvements
 
 ## Scripts and Verification
@@ -584,7 +561,7 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 - `execution/verify_navigation_and_ui.py` — Runner enforcing index-only footer and brand-asset checks, then token lint, type-check and navigation/nav/toast/toc suites.
   <<<<<<< HEAD
   <<<<<<< HEAD
-- # `execution/capture_responsive_audit.mjs` — Playwright runner capturing full-page screenshots and horizontal-overflow offenders for every page at 320/390/768/1280/1440 into .tmp/responsive-audit/; seeds the visited flag so the onboarding gate cannot turn captures into login-page shots.
+- `execution/capture_responsive_audit.mjs` — Playwright runner capturing full-page screenshots and horizontal-overflow offenders for every page at 320/390/768/1280/1440 into .tmp/responsive-audit/; seeds the visited flag so the onboarding gate cannot turn captures into login-page shots.
   > > > > > > > # feat/login-reading-scene
   > > > > > > >
   > > > > > > > feat/comprehensive-improvements
@@ -596,12 +573,11 @@ Business logic and data access (Firestore, localStorage, external APIs); pages a
 <<<<<<< HEAD
 
 - `e2e/specs/library.spec.js` — Playwright spec for library.html covering tale-card loading, search filtering, and pagination; seeds tt_has_visited so the first-visit gate does not redirect fresh contexts.
-- # `e2e/specs/mobile-shell.spec.js` — Mobile smoke spec asserting every page renders without horizontal overflow at 320/390/768px under the Pixel 7 and iPhone 14 projects; seeds tt_has_visited and fails if a page lands on login.
+- `e2e/specs/mobile-shell.spec.js` — Mobile smoke spec asserting every page renders without horizontal overflow at 320/390/768px under the Pixel 7 and iPhone 14 projects; seeds tt_has_visited and fails if a page lands on login.
 - `e2e/specs/library.spec.js` - Playwright spec for library.html covering tale-card loading, search filtering, and pagination.
 - `e2e/specs/nav-brand-menu.spec.js` — Playwright spec for the brand block: guest mark as home link, wordmark navigation, member account-menu trigger with hover hamburger glyph, brand-anchored dropdown geometry plus Escape/outside-click closing, avatar profile link, and mobile fit. Blocks Firebase network and drives `updateNavUser()` from the page for deterministic state; run with `--workers=1`.
 - `e2e/specs/nav-notifications.spec.js` — Playwright spec for the floating notification trigger: body-level mounting outside the header, hidden start state, unread badge and geometry below the nav bar, pinned-only visibility, `body:has()` toast-column shift, drawer anchoring with Escape/outside-click closing, and mobile fit. Blocks Firebase network and drives the page's own notification module for deterministic state; run with `--workers=1`.
   > > > > > > > # feat/login-reading-scene
-- `e2e/specs/library.spec.js` - Playwright spec for library.html covering tale-card loading, search filtering, and pagination.
 - `e2e/specs/login-gate.spec.js` — Playwright spec for the first-visit login gate: first-visit redirect, gate acknowledgement on the login page, durable and session-only bypass, corrupt records, and re-gating after the memory is cleared.
 - `e2e/specs/mobile-dock.spec.js` - Playwright spec for the mobile bottom dock at 390px: exactly Home/Library/Shelf with root-relative hrefs, retired Write/Profile entries absent, single active tab with `aria-current="page"` on library plus its computed accent plate/rule, >=44px touch targets inside the viewport with no horizontal overflow, themed non-pill chrome across all three themes, and label-growth without clipping. Blocks Firebase network for deterministic state.
 - `e2e/specs/nav-brand-menu.spec.js` - Playwright spec for the brand block: guest mark as home link, wordmark navigation, member account-menu trigger with hover hamburger glyph, brand-anchored dropdown geometry plus Escape/outside-click closing, avatar profile link, and mobile fit. Also covers the header-actions contract: no standalone Settings icon, Settings reachable from the account menu, the accent-filled quick-tools trigger across all three themes, and the 38px mobile trigger with no horizontal overflow. Blocks Firebase network and drives `updateNavUser()` from the page for deterministic state; run with `--workers=1`.

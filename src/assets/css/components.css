@@ -1651,3 +1651,39 @@
   background: var(--surface-2);
   border-color: var(--border-subtle);
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Target size floor
+   WCAG 2.2 AA (2.5.8) wants a 24x24 hit area. These controls are deliberately
+   compact, so they gain padding and a negative margin: the hit area grows, the
+   painted position does not move.
+   ────────────────────────────────────────────────────────────────────────── */
+.footer-link,
+.comment-action-btn,
+.settings-sidebar__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+}
+
+.footer-link {
+  padding-block: 4px;
+  margin-block: -4px;
+}
+
+.comment-action-btn {
+  padding-block: 4px;
+  margin-block: -4px;
+}
+
+.auth-checkbox {
+  min-width: 24px;
+  min-height: 24px;
+}
+
+/* Dense table-of-contents rows: the row link is the target, not the text. */
+.toc-chronicle-item a {
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+}

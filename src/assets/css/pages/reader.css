@@ -613,9 +613,9 @@ body.focus-mode #top-bar-focus:hover {
   max-width: var(--reader-measure);
 }
 
-/* Header fields are filled after the chapter fetch resolves. Reserving their
-   height while empty stops the article and discussion jumping down when the
-   text arrives (CLS). */
+/* Header fields are filled after the chapter fetch resolves; reserving their
+   line boxes while empty keeps the article and discussion from stepping down
+   as each one lands. */
 .article-title:empty {
   min-height: 1.05em;
 }
@@ -625,9 +625,12 @@ body.focus-mode #top-bar-focus:hover {
 .breadcrumbs:empty {
   min-height: 1.5em;
 }
-#article-body:empty {
-  min-height: 55vh;
-}
+
+/* The chapter text arrives after the fetch resolves and there is no exact
+   height to reserve for it (a short chapter is 300px, a long one is many
+   screens). Reserving a fixed block traded a jump for an equal shrink, so the
+   body is left to size itself; the remaining shift is the content arriving,
+   not a layout bug. A skeleton in the reader is the real fix. */
 
 .breadcrumbs {
   margin-bottom: 1.5rem;
