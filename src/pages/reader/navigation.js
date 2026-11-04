@@ -44,7 +44,12 @@ export function applyNavigation(nav) {
       </div>
       <i data-lucide="chevron-right" class="shrink-0" style="width:20px;height:20px;color:var(--accent-tint);transition:transform 200ms"></i>
     </button>`
-    : `<div class="glass flex items-center justify-center rounded-2xl p-4 text-xs" style="color:var(--text-muted)">End of ${escapeHtml(readerState.taleTitle)}</div>`;
+    : `<div class="chapter-nav-end glass flex flex-wrap items-center justify-center gap-3 rounded-2xl p-4 text-xs" style="color:var(--text-muted)">
+        <span>End of ${escapeHtml(readerState.taleTitle)}</span>
+        <button class="chapter-nav-end-link" type="button" data-back-to-tale>
+          Back to tale
+        </button>
+      </div>`;
 
   container.innerHTML = prev + next;
 
@@ -53,6 +58,10 @@ export function applyNavigation(nav) {
       const nextIndex = Number(btn.dataset.navIndex);
       navigateTo(readerUrl(readerState.taleId, nextIndex));
     });
+  });
+
+  container.querySelectorAll('[data-back-to-tale]').forEach((btn) => {
+    btn.addEventListener('click', goBackToTale);
   });
 
   initIcons(container);

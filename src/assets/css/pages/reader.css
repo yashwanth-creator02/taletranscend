@@ -990,6 +990,37 @@ body.focus-mode #top-bar-focus:hover {
   text-overflow: ellipsis;
 }
 
+/* Sits beside the "End of …" line so the last chapter still has a way out. */
+.chapter-nav-end-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 4px 10px;
+  border: 1px solid var(--reader-border);
+  border-radius: var(--radius-md);
+  background: var(--reader-card-bg);
+  color: var(--reader-fg);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    color var(--dur-base) ease,
+    background-color var(--dur-base) ease,
+    border-color var(--dur-base) ease;
+}
+
+.chapter-nav-end-link:hover {
+  color: var(--accent-tint);
+  border-color: var(--accent-tint);
+}
+
+.chapter-nav-end-link:focus-visible {
+  outline: 2px solid var(--accent-tint);
+  outline-offset: 2px;
+}
+
 /* ──────────────────────────────────────────────────────────────────────────
    Chapter Discussion
    ────────────────────────────────────────────────────────────────────────── */
