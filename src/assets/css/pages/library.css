@@ -133,7 +133,13 @@
   cursor: pointer;
   text-align: left;
   white-space: nowrap;
-  transition: all 180ms ease;
+  transition:
+    color 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease,
+    opacity 180ms ease;
 }
 
 .sidebar-filter:hover {
@@ -177,7 +183,13 @@
   cursor: pointer;
   border: 1px solid transparent;
   white-space: nowrap;
-  transition: all 180ms ease;
+  transition:
+    color 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease,
+    opacity 180ms ease;
 }
 
 .era-chip--active {
@@ -208,7 +220,13 @@
   background: rgb(var(--light-rgb) / var(--a-01));
   border: 1px solid rgb(var(--light-rgb) / var(--a-03));
   white-space: nowrap;
-  transition: all var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast),
+    opacity var(--transition-fast);
   cursor: pointer;
 }
 

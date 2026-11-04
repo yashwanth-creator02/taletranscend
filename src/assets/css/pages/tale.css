@@ -117,7 +117,13 @@
 /* ── Tabs ────────────────────────────────────────────────────── */
 
 .tab-btn {
-  transition: all var(--dur-fast) ease;
+  transition:
+    color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease,
+    transform var(--dur-fast) ease,
+    opacity var(--dur-fast) ease;
   color: var(--text-muted);
   border: 1px solid transparent;
   cursor: pointer;
@@ -147,7 +153,13 @@
 /* ── Chapter Item ───────────────────────────────────────────── */
 
 .chapter-item {
-  transition: all var(--dur-base) ease;
+  transition:
+    color var(--dur-base) ease,
+    background-color var(--dur-base) ease,
+    border-color var(--dur-base) ease,
+    box-shadow var(--dur-base) ease,
+    transform var(--dur-base) ease,
+    opacity var(--dur-base) ease;
   background: rgb(var(--light-rgb) / var(--a-01));
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
@@ -173,7 +185,13 @@
   background: rgb(var(--dark-rgb) / 0.4);
   border: 1px solid rgb(var(--light-rgb) / var(--a-03));
   color: var(--text-primary);
-  transition: all var(--dur-base) ease;
+  transition:
+    color var(--dur-base) ease,
+    background-color var(--dur-base) ease,
+    border-color var(--dur-base) ease,
+    box-shadow var(--dur-base) ease,
+    transform var(--dur-base) ease,
+    opacity var(--dur-base) ease;
   resize: none;
 }
 
@@ -321,7 +339,13 @@
   color: var(--text-muted);
   border: 1px solid rgb(var(--light-rgb) / var(--a-04));
   cursor: pointer;
-  transition: all var(--dur-base);
+  transition:
+    color var(--dur-base),
+    background-color var(--dur-base),
+    border-color var(--dur-base),
+    box-shadow var(--dur-base),
+    transform var(--dur-base),
+    opacity var(--dur-base);
   box-sizing: border-box;
   display: inline-flex;
   align-items: center;
@@ -372,7 +396,13 @@
 /* ── Shared components ──────────────────────────────────────── */
 
 .action-btn {
-  transition: all var(--dur-fast) ease;
+  transition:
+    color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease,
+    transform var(--dur-fast) ease,
+    opacity var(--dur-fast) ease;
 }
 
 .action-btn:hover {
@@ -477,7 +507,13 @@
   border: 1px solid rgb(var(--light-rgb) / var(--a-06));
   color: var(--text-secondary);
   cursor: pointer;
-  transition: all var(--dur-base) ease;
+  transition:
+    color var(--dur-base) ease,
+    background-color var(--dur-base) ease,
+    border-color var(--dur-base) ease,
+    box-shadow var(--dur-base) ease,
+    transform var(--dur-base) ease,
+    opacity var(--dur-base) ease;
   user-select: none;
 }
 
@@ -531,7 +567,13 @@
   background: rgb(var(--dark-rgb) / 0.5);
   border: 1px solid rgb(var(--light-rgb) / var(--a-06));
   color: var(--text-primary);
-  transition: all var(--dur-base) ease;
+  transition:
+    color var(--dur-base) ease,
+    background-color var(--dur-base) ease,
+    border-color var(--dur-base) ease,
+    box-shadow var(--dur-base) ease,
+    transform var(--dur-base) ease,
+    opacity var(--dur-base) ease;
   box-shadow: inset 0 2px 4px rgb(var(--dark-rgb) / 0.2);
 }
 
@@ -566,7 +608,13 @@
   background: rgb(var(--light-rgb) / var(--a-02));
   color: var(--text-secondary);
   cursor: pointer;
-  transition: all var(--dur-base) ease;
+  transition:
+    color var(--dur-base) ease,
+    background-color var(--dur-base) ease,
+    border-color var(--dur-base) ease,
+    box-shadow var(--dur-base) ease,
+    transform var(--dur-base) ease,
+    opacity var(--dur-base) ease;
 }
 
 .filter-chip:hover {
@@ -616,7 +664,13 @@
   background: rgb(var(--light-rgb) / var(--a-02));
   color: var(--text-secondary);
   cursor: pointer;
-  transition: all var(--dur-base) ease;
+  transition:
+    color var(--dur-base) ease,
+    background-color var(--dur-base) ease,
+    border-color var(--dur-base) ease,
+    box-shadow var(--dur-base) ease,
+    transform var(--dur-base) ease,
+    opacity var(--dur-base) ease;
 }
 
 .missive-action-btn:hover {
@@ -928,7 +982,13 @@
 }
 
 .lore-tag-pill {
-  transition: all var(--dur-fast) ease;
+  transition:
+    color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease,
+    transform var(--dur-fast) ease,
+    opacity var(--dur-fast) ease;
 }
 
 [data-app-theme='light'] .lore-tag-pill,

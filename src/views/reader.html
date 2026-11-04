@@ -337,11 +337,15 @@
             <!-- Navigation between chapters -->
             <div class="chapter-nav" id="chapter-nav"></div>
 
-            <!-- Chapter Discussion Section -->
+            <!-- Chapter Discussion Section.
+                 Held back until the first render: an empty block that fills in
+                 after the reveal pushes everything below the article down,
+                 which is layout shift the reader cannot see coming. -->
             <section
               class="reader-discussion glass"
               id="reader-discussion"
               aria-labelledby="discussion-heading"
+              hidden
             >
               <div class="reader-discussion-header">
                 <div class="flex items-center gap-2">

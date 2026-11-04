@@ -163,7 +163,13 @@
   text-transform: uppercase;
   letter-spacing: 0.12em;
   box-shadow: 0 1px 4px rgb(var(--accent-rgb) / var(--a-04));
-  transition: all var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast),
+    opacity var(--transition-fast);
 }
 
 .badge-era {
@@ -204,7 +210,13 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  transition: all var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast),
+    opacity var(--transition-fast);
 }
 
 .card-button:hover {
@@ -466,7 +478,13 @@
 .scroll-container::-webkit-scrollbar-thumb {
   background: rgb(var(--light-rgb) / var(--a-04));
   border-radius: 8px;
-  transition: all var(--transition-base);
+  transition:
+    color var(--transition-base),
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base),
+    opacity var(--transition-base);
 }
 
 .scroll-container:hover::-webkit-scrollbar-thumb {

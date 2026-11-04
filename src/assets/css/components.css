@@ -719,7 +719,13 @@
   color: var(--text-secondary);
   cursor: pointer;
   position: relative;
-  transition: all var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast),
+    opacity var(--transition-fast);
 }
 
 .footer-theme-control__box:hover:not(.active) {
@@ -1555,7 +1561,13 @@
   background: transparent;
   color: var(--text-muted);
   cursor: pointer;
-  transition: all var(--dur-fast) ease;
+  transition:
+    color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease,
+    transform var(--dur-fast) ease,
+    opacity var(--dur-fast) ease;
 }
 
 .gemini-modal-close:hover,
@@ -1630,7 +1642,13 @@
   font-family: var(--font-mono, monospace);
   font-size: var(--text-xs);
   outline: none;
-  transition: all var(--dur-fast) ease;
+  transition:
+    color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease,
+    transform var(--dur-fast) ease,
+    opacity var(--dur-fast) ease;
 }
 
 .gemini-modal-input:focus {

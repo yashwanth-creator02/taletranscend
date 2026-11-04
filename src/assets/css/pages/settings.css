@@ -55,7 +55,13 @@
   background: rgb(var(--light-rgb) / var(--a-02));
   color: var(--text-secondary);
   cursor: pointer;
-  transition: all var(--dur-fast) ease;
+  transition:
+    color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease,
+    transform var(--dur-fast) ease,
+    opacity var(--dur-fast) ease;
 }
 
 .settings-back-btn:hover {
@@ -113,7 +119,13 @@
   border: 1px solid rgb(var(--light-rgb) / var(--a-08));
   color: var(--text-primary);
   font-size: var(--text-xs);
-  transition: all var(--dur-fast) ease;
+  transition:
+    color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease,
+    transform var(--dur-fast) ease,
+    opacity var(--dur-fast) ease;
   outline: none;
 }
 
@@ -197,7 +209,13 @@
   font-size: var(--text-xs);
   font-weight: 600;
   cursor: pointer;
-  transition: all var(--dur-fast) ease;
+  transition:
+    color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease,
+    transform var(--dur-fast) ease,
+    opacity var(--dur-fast) ease;
 }
 
 .settings-reset-btn:hover {
@@ -287,7 +305,13 @@
   border-left: 3px solid transparent;
   text-align: left;
   cursor: pointer;
-  transition: all var(--dur-fast) ease;
+  transition:
+    color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease,
+    transform var(--dur-fast) ease,
+    opacity var(--dur-fast) ease;
   white-space: nowrap;
 }
 
@@ -517,7 +541,13 @@
   color: var(--text-primary);
   font-size: var(--text-xs);
   outline: none;
-  transition: all var(--dur-fast) ease;
+  transition:
+    color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease,
+    transform var(--dur-fast) ease,
+    opacity var(--dur-fast) ease;
 }
 
 .settings-textarea {
@@ -580,7 +610,13 @@
   font-size: 11px;
   font-weight: 600;
   line-height: 1;
-  transition: all var(--dur-fast) ease;
+  transition:
+    color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease,
+    transform var(--dur-fast) ease,
+    opacity var(--dur-fast) ease;
 }
 
 .settings-status-badge--active {
@@ -608,7 +644,13 @@
   font-weight: 600;
   cursor: pointer;
   border: 1px solid rgb(var(--accent-rgb) / var(--a-40));
-  transition: all var(--dur-fast) ease;
+  transition:
+    color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease,
+    transform var(--dur-fast) ease,
+    opacity var(--dur-fast) ease;
 }
 
 .settings-btn-primary:hover {
@@ -634,7 +676,13 @@
   font-size: var(--text-xs);
   font-weight: 600;
   cursor: pointer;
-  transition: all var(--dur-fast) ease;
+  transition:
+    color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease,
+    transform var(--dur-fast) ease,
+    opacity var(--dur-fast) ease;
 }
 
 .settings-btn-secondary:hover {
@@ -660,7 +708,13 @@
   font-size: var(--text-xs);
   font-weight: 600;
   cursor: pointer;
-  transition: all var(--dur-fast) ease;
+  transition:
+    color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease,
+    transform var(--dur-fast) ease,
+    opacity var(--dur-fast) ease;
 }
 
 .settings-btn-danger:hover {
@@ -685,7 +739,13 @@
   font-size: var(--text-xs);
   font-weight: 600;
   text-decoration: none;
-  transition: all var(--dur-fast) ease;
+  transition:
+    color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease,
+    transform var(--dur-fast) ease,
+    opacity var(--dur-fast) ease;
 }
 
 .settings-row-link:hover {
@@ -726,7 +786,13 @@
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
-  transition: all var(--dur-fast) ease;
+  transition:
+    color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease,
+    transform var(--dur-fast) ease,
+    opacity var(--dur-fast) ease;
 }
 
 .genre-chip:hover {
@@ -858,7 +924,13 @@
   font-size: var(--text-xs);
   font-weight: 600;
   cursor: pointer;
-  transition: all var(--dur-fast) ease;
+  transition:
+    color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease,
+    transform var(--dur-fast) ease,
+    opacity var(--dur-fast) ease;
 }
 
 .setting-measure-btn:hover {
@@ -904,7 +976,13 @@
   background: rgb(var(--light-rgb) / var(--a-02));
   border: 1px solid rgb(var(--light-rgb) / var(--a-06));
   cursor: pointer;
-  transition: all var(--dur-fast) ease;
+  transition:
+    color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease,
+    transform var(--dur-fast) ease,
+    opacity var(--dur-fast) ease;
   user-select: none;
   text-align: left;
   width: 100%;
@@ -1074,7 +1152,13 @@
   border: 1px solid rgb(var(--light-rgb) / var(--a-06));
   color: var(--text-secondary);
   cursor: pointer;
-  transition: all var(--dur-fast) ease;
+  transition:
+    color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease,
+    transform var(--dur-fast) ease,
+    opacity var(--dur-fast) ease;
   width: 100%;
   text-align: left;
 }
@@ -1122,7 +1206,13 @@
   border-radius: var(--radius-xl);
   border: 1px solid rgb(var(--light-rgb) / var(--a-08));
   padding: var(--space-5);
-  transition: all var(--dur-normal) ease;
+  transition:
+    color var(--dur-normal) ease,
+    background-color var(--dur-normal) ease,
+    border-color var(--dur-normal) ease,
+    box-shadow var(--dur-normal) ease,
+    transform var(--dur-normal) ease,
+    opacity var(--dur-normal) ease;
   box-shadow: inset 0 2px 8px rgb(var(--dark-rgb) / 0.4);
   width: 100%;
 }
@@ -1185,7 +1275,13 @@
   background: rgb(var(--light-rgb) / var(--a-02));
   border: 1px solid rgb(var(--light-rgb) / var(--a-06));
   cursor: pointer;
-  transition: all var(--dur-fast) ease;
+  transition:
+    color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease,
+    transform var(--dur-fast) ease,
+    opacity var(--dur-fast) ease;
   user-select: none;
   text-align: left;
   outline: none;
@@ -1588,7 +1684,13 @@
   backdrop-filter: blur(var(--blur-sm));
   -webkit-backdrop-filter: blur(var(--blur-sm));
   color: transparent;
-  transition: all var(--dur-fast) ease;
+  transition:
+    color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease,
+    transform var(--dur-fast) ease,
+    opacity var(--dur-fast) ease;
 }
 
 .app-theme-card.active .app-theme-card__indicator {
@@ -1680,7 +1782,13 @@
   background: transparent;
   color: var(--text-muted);
   cursor: pointer;
-  transition: all var(--dur-fast) ease;
+  transition:
+    color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease,
+    transform var(--dur-fast) ease,
+    opacity var(--dur-fast) ease;
 }
 
 .settings-modal-close:hover {

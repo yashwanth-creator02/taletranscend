@@ -180,7 +180,13 @@ body {
   color: var(--reader-fg);
   box-shadow: 0 0 16px -4px rgb(var(--reader-accent-rgb) / var(--a-08));
   cursor: pointer;
-  transition: all var(--dur-base) ease;
+  transition:
+    color var(--dur-base) ease,
+    background-color var(--dur-base) ease,
+    border-color var(--dur-base) ease,
+    box-shadow var(--dur-base) ease,
+    transform var(--dur-base) ease,
+    opacity var(--dur-base) ease;
 }
 
 .reader-back-btn:hover {
@@ -291,7 +297,13 @@ body {
   border: 1px solid var(--reader-border);
   color: var(--reader-muted);
   cursor: pointer;
-  transition: all var(--dur-base) ease;
+  transition:
+    color var(--dur-base) ease,
+    background-color var(--dur-base) ease,
+    border-color var(--dur-base) ease,
+    box-shadow var(--dur-base) ease,
+    transform var(--dur-base) ease,
+    opacity var(--dur-base) ease;
 }
 
 .top-bar-action-btn:hover {
@@ -647,6 +659,13 @@ body.focus-mode #top-bar-focus:hover {
 .breadcrumb-item {
   cursor: pointer;
   transition: color var(--dur-base);
+  /* WCAG 2.2 target size: 12px label, so the hit area needs the padding; the
+     negative block margin keeps the baseline where it was. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding-block: 4px;
+  margin-block: -4px;
 }
 
 .breadcrumb-item:hover {
@@ -842,7 +861,13 @@ body.focus-mode #top-bar-focus:hover {
   height: 44px;
   border-radius: 12px;
   color: var(--reader-muted);
-  transition: all var(--dur-base) cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition:
+    color var(--dur-base) cubic-bezier(0.2, 0.7, 0.2, 1),
+    background-color var(--dur-base) cubic-bezier(0.2, 0.7, 0.2, 1),
+    border-color var(--dur-base) cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow var(--dur-base) cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform var(--dur-base) cubic-bezier(0.2, 0.7, 0.2, 1),
+    opacity var(--dur-base) cubic-bezier(0.2, 0.7, 0.2, 1);
   background: transparent;
   border: none;
   cursor: pointer;
@@ -928,7 +953,13 @@ body.focus-mode #top-bar-focus:hover {
   border: 1px solid var(--reader-border);
   background: var(--reader-card-bg);
   color: var(--reader-fg);
-  transition: all var(--dur-base) ease;
+  transition:
+    color var(--dur-base) ease,
+    background-color var(--dur-base) ease,
+    border-color var(--dur-base) ease,
+    box-shadow var(--dur-base) ease,
+    transform var(--dur-base) ease,
+    opacity var(--dur-base) ease;
   text-decoration: none;
 }
 
@@ -1066,7 +1097,13 @@ body.focus-mode #top-bar-focus:hover {
   cursor: pointer;
   border: 1px solid var(--reader-border);
   background: var(--reader-card-bg);
-  transition: all var(--dur-base);
+  transition:
+    color var(--dur-base),
+    background-color var(--dur-base),
+    border-color var(--dur-base),
+    box-shadow var(--dur-base),
+    transform var(--dur-base),
+    opacity var(--dur-base);
   color: var(--reader-fg);
 }
 
@@ -1119,7 +1156,13 @@ body.focus-mode #top-bar-focus:hover {
   cursor: pointer;
   background: var(--reader-card-bg);
   color: var(--reader-fg);
-  transition: all var(--dur-base);
+  transition:
+    color var(--dur-base),
+    background-color var(--dur-base),
+    border-color var(--dur-base),
+    box-shadow var(--dur-base),
+    transform var(--dur-base),
+    opacity var(--dur-base);
   min-width: 0;
 }
 
@@ -1190,7 +1233,13 @@ body.focus-mode #top-bar-focus:hover {
   cursor: pointer;
   background: var(--reader-card-bg);
   color: var(--reader-fg);
-  transition: all var(--dur-base);
+  transition:
+    color var(--dur-base),
+    background-color var(--dur-base),
+    border-color var(--dur-base),
+    box-shadow var(--dur-base),
+    transform var(--dur-base),
+    opacity var(--dur-base);
 }
 
 .lh-btn:hover {
@@ -1272,7 +1321,13 @@ body.focus-mode #top-bar-focus:hover {
   color: var(--reader-muted);
   border: 1px solid var(--reader-border);
   cursor: pointer;
-  transition: all var(--dur-base);
+  transition:
+    color var(--dur-base),
+    background-color var(--dur-base),
+    border-color var(--dur-base),
+    box-shadow var(--dur-base),
+    transform var(--dur-base),
+    opacity var(--dur-base);
   box-sizing: border-box;
   display: inline-flex;
   align-items: center;
@@ -1660,7 +1715,13 @@ body.focus-mode #top-bar-focus:hover {
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all var(--dur-base);
+  transition:
+    color var(--dur-base),
+    background-color var(--dur-base),
+    border-color var(--dur-base),
+    box-shadow var(--dur-base),
+    transform var(--dur-base),
+    opacity var(--dur-base);
   border: 1px solid transparent;
 }
 
@@ -1825,7 +1886,13 @@ body.focus-mode #top-bar-focus:hover {
   border-radius: 0.75rem;
   border: 1px solid var(--reader-border);
   background: var(--reader-card-bg);
-  transition: all var(--dur-base);
+  transition:
+    color var(--dur-base),
+    background-color var(--dur-base),
+    border-color var(--dur-base),
+    box-shadow var(--dur-base),
+    transform var(--dur-base),
+    opacity var(--dur-base);
   position: relative;
 }
 
@@ -1880,7 +1947,13 @@ body.focus-mode #top-bar-focus:hover {
   background: transparent;
   color: var(--reader-muted);
   cursor: pointer;
-  transition: all var(--dur-fast);
+  transition:
+    color var(--dur-fast),
+    background-color var(--dur-fast),
+    border-color var(--dur-fast),
+    box-shadow var(--dur-fast),
+    transform var(--dur-fast),
+    opacity var(--dur-fast);
 }
 
 .toc-menu-trigger:hover,
@@ -2224,7 +2297,13 @@ body[data-reader-theme='ink'] .toast-card--info .toast-card__progress-bar {
   border: none;
   color: var(--reader-muted);
   cursor: pointer;
-  transition: all var(--dur-base) ease;
+  transition:
+    color var(--dur-base) ease,
+    background-color var(--dur-base) ease,
+    border-color var(--dur-base) ease,
+    box-shadow var(--dur-base) ease,
+    transform var(--dur-base) ease,
+    opacity var(--dur-base) ease;
   border-radius: var(--radius-lg);
 }
 
@@ -2248,7 +2327,13 @@ body[data-reader-theme='ink'] .toast-card--info .toast-card__progress-bar {
   width: 32px;
   height: 32px;
   border-radius: var(--radius-md);
-  transition: all var(--dur-base) ease;
+  transition:
+    color var(--dur-base) ease,
+    background-color var(--dur-base) ease,
+    border-color var(--dur-base) ease,
+    box-shadow var(--dur-base) ease,
+    transform var(--dur-base) ease,
+    opacity var(--dur-base) ease;
 }
 
 .mobile-tool-btn:active .mobile-tool-icon-wrap {

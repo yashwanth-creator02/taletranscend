@@ -602,6 +602,10 @@ function _renderDiscussion() {
   );
   _bindCommentEvents();
 
+  // Matches the `hidden` attribute in reader.html: the block joins the layout
+  // only once it has content, so it cannot grow under the reader.
+  document.getElementById('reader-discussion')?.removeAttribute('hidden');
+
   const countEl = document.getElementById('discussion-count');
   if (countEl) {
     const len = readerState.comments?.length || 0;

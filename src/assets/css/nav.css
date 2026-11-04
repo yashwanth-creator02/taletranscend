@@ -14,7 +14,13 @@
   backdrop-filter: blur(var(--nav-blur));
   -webkit-backdrop-filter: blur(var(--nav-blur));
   border-bottom: 1px solid var(--nav-border);
-  transition: all var(--nav-transition);
+  transition:
+    color var(--nav-transition),
+    background-color var(--nav-transition),
+    border-color var(--nav-transition),
+    box-shadow var(--nav-transition),
+    transform var(--nav-transition),
+    opacity var(--nav-transition);
 }
 
 .app-nav.is-scrolled {
@@ -69,7 +75,13 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 0 16px rgb(var(--accent-rgb) / var(--a-07));
-  transition: all var(--transition-base);
+  transition:
+    color var(--transition-base),
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base),
+    opacity var(--transition-base);
   position: relative;
   overflow: hidden;
   cursor: pointer;
@@ -160,7 +172,13 @@
   padding: 4px;
   border-radius: 14px;
   border: 1px solid var(--border);
-  transition: all var(--transition-base);
+  transition:
+    color var(--transition-base),
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base),
+    opacity var(--transition-base);
 }
 
 .nav-link {
@@ -176,7 +194,13 @@
   align-items: center;
   gap: 8px;
   border: 1px solid transparent;
-  transition: all var(--transition-base);
+  transition:
+    color var(--transition-base),
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base),
+    opacity var(--transition-base);
 }
 
 .nav-link:hover {
@@ -270,7 +294,13 @@
   border: 1px solid var(--border);
   color: var(--text-muted);
   cursor: pointer;
-  transition: all var(--transition-base);
+  transition:
+    color var(--transition-base),
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base),
+    opacity var(--transition-base);
   text-decoration: none;
   flex-shrink: 0;
 }
@@ -310,7 +340,13 @@
   border-radius: 50%;
   border: 2px solid var(--border);
   background: var(--surface-2);
-  transition: all var(--transition-base);
+  transition:
+    color var(--transition-base),
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base),
+    opacity var(--transition-base);
 }
 
 .nav-avatar:hover .avatar-img,
@@ -335,7 +371,13 @@
   text-transform: uppercase;
   letter-spacing: 0.1em;
   box-shadow: 0 4px 15px rgb(var(--accent-rgb) / var(--a-07));
-  transition: all var(--transition-base);
+  transition:
+    color var(--transition-base),
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base),
+    opacity var(--transition-base);
 }
 
 .signin-btn:hover {
@@ -459,7 +501,13 @@
   text-decoration: none;
   font-size: 13px;
   font-weight: 600;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dropdown-link:hover,
@@ -851,7 +899,13 @@ body:has(#sidebar.sidebar--mobile-open) .scroll-to-top {
   border-radius: 10px;
   color: var(--text-secondary);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast),
+    opacity var(--transition-fast);
 }
 
 .command-close__kbd {
@@ -863,7 +917,13 @@ body:has(#sidebar.sidebar--mobile-open) .scroll-to-top {
   border-radius: 4px;
   border: 1px solid rgb(var(--light-rgb) / var(--a-03));
   font-family: var(--font-mono);
-  transition: all var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast),
+    opacity var(--transition-fast);
 }
 
 .command-close__icon {
@@ -953,7 +1013,13 @@ body:has(#sidebar.sidebar--mobile-open) .scroll-to-top {
   color: var(--text-muted);
   cursor: pointer;
   padding: 0;
-  transition: all var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast),
+    opacity var(--transition-fast);
 }
 
 .command-search__clear-icon {
@@ -1007,7 +1073,13 @@ body:has(#sidebar.sidebar--mobile-open) .scroll-to-top {
   color: var(--text-secondary);
   text-align: left;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast),
+    opacity var(--transition-fast);
 }
 
 .command-item:hover,
@@ -1043,7 +1115,13 @@ body:has(#sidebar.sidebar--mobile-open) .scroll-to-top {
   align-items: center;
   justify-content: center;
   color: var(--text-muted);
-  transition: all var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast),
+    opacity var(--transition-fast);
 }
 
 .command-item__icon {
@@ -1118,7 +1196,13 @@ body:has(#sidebar.sidebar--mobile-open) .scroll-to-top {
 .command-item__arrow {
   opacity: 0;
   transform: translateX(-4px);
-  transition: all var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast),
+    opacity var(--transition-fast);
   color: var(--accent);
   display: flex;
   align-items: center;

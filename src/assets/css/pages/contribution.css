@@ -36,7 +36,13 @@
   border: 1px solid rgb(var(--light-rgb) / var(--a-03));
   backdrop-filter: blur(24px) saturate(160%);
   -webkit-backdrop-filter: blur(24px) saturate(160%);
-  transition: all var(--transition-spring);
+  transition:
+    color var(--transition-spring),
+    background-color var(--transition-spring),
+    border-color var(--transition-spring),
+    box-shadow var(--transition-spring),
+    transform var(--transition-spring),
+    opacity var(--transition-spring);
 }
 
 .atelier-card:focus-within {
@@ -45,7 +51,13 @@
 }
 
 .shelf-input {
-  transition: all var(--transition-base);
+  transition:
+    color var(--transition-base),
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base),
+    opacity var(--transition-base);
 }
 
 .shelf-input:focus {
@@ -68,7 +80,13 @@
   color: var(--text-secondary);
   background: transparent;
   border: 1px solid transparent;
-  transition: all var(--transition-base);
+  transition:
+    color var(--transition-base),
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base),
+    opacity var(--transition-base);
   cursor: pointer;
   white-space: nowrap;
 }
@@ -265,7 +283,13 @@
   background: rgb(var(--dark-rgb) / var(--a-03));
   border: 1px solid rgb(var(--light-rgb) / var(--a-02));
   padding: 1.25rem 1.5rem;
-  transition: all var(--transition-base);
+  transition:
+    color var(--transition-base),
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base),
+    opacity var(--transition-base);
 }
 
 @media (min-width: 640px) {
@@ -387,7 +411,13 @@
   color: var(--text-secondary);
   background: transparent;
   border: 1px solid transparent;
-  transition: all var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast),
+    opacity var(--transition-fast);
   cursor: pointer;
   text-decoration: none;
 }
@@ -472,7 +502,13 @@
   border-radius: 1rem;
   border: 1px solid transparent;
   padding: 8px 10px;
-  transition: all var(--transition-base);
+  transition:
+    color var(--transition-base),
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base),
+    opacity var(--transition-base);
   margin-bottom: 4px;
 }
 
@@ -514,7 +550,13 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: all var(--transition-base);
+  transition:
+    color var(--transition-base),
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base),
+    opacity var(--transition-base);
 }
 
 .chapter-row--active .chapter-row__num {
@@ -543,7 +585,13 @@
   gap: 3px;
   opacity: 0;
   transform: translateX(4px);
-  transition: all var(--transition-base);
+  transition:
+    color var(--transition-base),
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base),
+    opacity var(--transition-base);
 }
 
 .chapter-row:hover .chapter-row__actions,
@@ -563,7 +611,13 @@
   background: none;
   color: var(--text-disabled);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast),
+    opacity var(--transition-fast);
 }
 
 .chapter-row__action:hover:not(:disabled) {
@@ -613,7 +667,13 @@
   text-transform: uppercase;
   letter-spacing: 0.14em;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast),
+    opacity var(--transition-fast);
 }
 
 .cover-preset-chip:hover {
@@ -636,7 +696,13 @@
   color: var(--text-secondary);
   background: rgb(var(--light-rgb) / var(--a-02));
   border: 1px solid rgb(var(--light-rgb) / var(--a-03));
-  transition: all var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast),
+    opacity var(--transition-fast);
   cursor: pointer;
 }
 
@@ -663,7 +729,13 @@
   border-radius: 1rem;
   border: 1px solid rgb(var(--light-rgb) / var(--a-03));
   background: rgb(var(--light-rgb) / var(--a-01));
-  transition: all var(--transition-base);
+  transition:
+    color var(--transition-base),
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base),
+    opacity var(--transition-base);
 }
 
 .readiness-seal-card.passed {
