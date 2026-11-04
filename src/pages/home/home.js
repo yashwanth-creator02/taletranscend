@@ -15,6 +15,7 @@ import {
   escapeHtml as escapeHtml,
   taleUrl,
   createLogger,
+  sizedCoverUrl,
 } from '@/utils';
 import { initIcons } from '@ui/icons.js';
 import { showToast } from '@ui/components/toast.js';
@@ -368,7 +369,7 @@ function _renderTrendingCard(tale) {
     >
       <div class="home-tale-card__media">
         <img
-          src="${cover}"
+          src="${escapeHtml(sizedCoverUrl(cover, 640))}"
           alt="${safeTitle}"
           class="home-tale-card__img"
           loading="lazy"

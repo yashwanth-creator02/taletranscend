@@ -9,6 +9,7 @@ import {
   formatNumber,
   escapeHtml as escapeHtml,
   createLogger,
+  sizedCoverUrl,
 } from '@/utils';
 import { DEFAULT_COVER_URL } from '@config/app.config.js';
 import { renderEmptyState, renderErrorState, renderEmptySearchState } from './feedback.js';
@@ -356,7 +357,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
         <!-- Dedicated Portrait Book Cover (3:4 ratio) -->
         <div class="tale-card__cover card-image-wrap mb-2.5 sm:mb-3.5">
           <img
-            src="${escapeHtml(cover)}"
+            src="${escapeHtml(sizedCoverUrl(cover, 480))}"
             alt="${safeTitle}"
             class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
             loading="lazy"
