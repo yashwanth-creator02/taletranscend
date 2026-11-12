@@ -108,6 +108,13 @@ example, added because the profile page's motion needed a step the
 original four-step duration scale didn't have) — not be worked around with
 a page-local re-declaration of the same name.
 
+**Known gap (measured 2026-11-13):** roughly 70% of spacing declarations and
+49% of radius declarations in page stylesheets still bypass the token layer,
+and `lint:tokens` only scans `.css` — so the ~800 hardcoded design values in
+markup sit outside the guardrail entirely. The light theme consequently has
+146 measured WCAG AA contrast failures. Read `docs/DESIGN_AUDIT.md` before
+adding a new page stylesheet.
+
 ### Multi-Theme System
 
 TaleTranscend features three global interface themes configured in `src/assets/css/tokens.css` and managed via `src/config/theme.config.js`:

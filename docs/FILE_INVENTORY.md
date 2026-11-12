@@ -77,6 +77,7 @@ One-line duty for every file tracked by git in this repository, grouped by area 
 - `ARCHITECTURE.md` — Developer reference on MPA structure, data flow, state management, Firestore paths, design tokens, security model, testing, and limits.
 - `CONTRIBUTING.md` — Contributor doc covering setup, code style, token rules, testing expectations, the quality checklist, and documentation duties before PRs.
 - `docs/CONVENTIONS.md` — Contributor doc recording codebase patterns: file suffixes, folder rules, path aliases, escaping, lean rules, BYOK, and test conventions.
+- `docs/DESIGN_AUDIT.md` — Measured design-system and UI-consistency audit: token adoption rates, light-theme WCAG failures, duplicate component implementations, heading and navigation defects, and a phased remediation plan. Supersedes the UX/accessibility rating in `docs/AUDIT_REPORT.md`.
 - `docs/FILE_INVENTORY.md` — This file: the duty of every git-tracked file in the repository; update it when tracked files are added, renamed, moved, or deleted.
 - `docs/MIGRATION_PLAN.md` — Status doc tracking repo restructuring phases, their outcomes, sandbox-versus-repo notes, and remaining work.
 - `docs/decisions/0001-keep-nested-firestore-path.md` — Decision record: keep the nested `v1/taletranscend/projects/v1` Firestore prefix and rewrite rules to match it.
