@@ -339,7 +339,7 @@ function renderPage(page) {
   </head>
 
   <body
-    class="antialiased selection:bg-indigo-500/30 page-fade-in flex flex-col h-screen overflow-hidden"
+    class="antialiased page-fade-in flex flex-col h-screen overflow-hidden"
     data-error-code="${page.code}"
   >
     <div id="app-boot-curtain" aria-hidden="true">

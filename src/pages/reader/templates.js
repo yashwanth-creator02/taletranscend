@@ -243,10 +243,10 @@ export function renderHighlightsPanel(highlights) {
             </div>`
               : ''
           }
-          <div class="flex items-center justify-between text-xs pt-1.5 border-t border-white/[0.04]" style="color:var(--reader-muted)">
+          <div class="flex items-center justify-between text-xs pt-1.5 border-t border-line-subtle" style="color:var(--reader-muted)">
             <span class="text-[11px]">${h.at ? new Date(h.at).toLocaleDateString() : 'Just now'}</span>
             <div class="flex items-center gap-2">
-              <button type="button" class="highlight-share-btn text-slate-400 hover:text-white transition-colors p-1" data-share-quote="${h.id}" title="Create Share Card" aria-label="Create Share Card">
+              <button type="button" class="highlight-share-btn text-ink-soft hover:text-ink transition-colors p-1" data-share-quote="${h.id}" title="Create Share Card" aria-label="Create Share Card">
                 <i data-lucide="share-2" style="width:13px;height:13px"></i>
               </button>
               <button type="button" class="transition-opacity hover-text-red text-[11px]" data-rm-hl="${h.id}">Remove</button>
@@ -315,7 +315,7 @@ export function renderQuoteCardModal({
                   <div class="quote-card-tale-title">${safeTitle}</div>
                   <div class="quote-card-author">by ${safeAuthor}</div>
                 </div>
-                <div class="shrink-0 px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-widest text-slate-400 border border-white/[0.08] bg-white/[0.02]">
+                <div class="shrink-0 px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-widest text-ink-soft border border-line-subtle bg-surface-1">
                   Fragment ${chapterNum}
                 </div>
               </div>
@@ -387,7 +387,7 @@ function _renderReplyNode(r, commentId, currentUserId) {
             : ''
         }
         <div class="comment-inline-form hidden mt-2" id="reply-to-reply-form-${r.id}">
-          <div class="text-[10px] text-indigo-300 mb-1 flex items-center gap-1 font-semibold">
+          <div class="text-[10px] text-accent-tint mb-1 flex items-center gap-1 font-semibold">
             <i data-lucide="corner-down-right" style="width:10px;height:10px"></i>
             <span>Replying to @${safeReplyAuthor}</span>
           </div>

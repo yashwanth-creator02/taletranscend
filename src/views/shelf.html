@@ -150,7 +150,7 @@
   </head>
 
   <body
-    class="page-shelf antialiased selection:bg-amber-500/30 selection:text-white page-fade-in flex flex-col h-screen overflow-hidden"
+    class="page-shelf antialiased selection:bg-rune/30 selection:text-ink page-fade-in flex flex-col h-screen overflow-hidden"
   >
     <!-- App Boot Curtain (Prevents FOUC on slower networks) -->
     <div id="app-boot-curtain" aria-hidden="true">
@@ -163,8 +163,8 @@
     <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10" aria-hidden="true">
       <div class="atmosphere-base"></div>
       <div class="particle-field"></div>
-      <div class="ambient-orb w-96 h-96 bg-amber-500/10 -top-20 -right-20"></div>
-      <div class="ambient-orb w-96 h-96 bg-indigo-500/10 -bottom-20 -left-20"></div>
+      <div class="ambient-orb w-96 h-96 bg-rune/10 -top-20 -right-20"></div>
+      <div class="ambient-orb w-96 h-96 bg-accent-soft -bottom-20 -left-20"></div>
     </div>
 
     <!-- ── Vault Sticky Header (Replaces global nav & floating dock) ─────────────────────────── -->
@@ -204,7 +204,7 @@
             id="tab-drafts"
             data-tab="drafts"
             type="button"
-            class="shelf-tab inline-flex items-center gap-1 sm:gap-2 rounded-xs px-2 sm:px-3.5 py-1 sm:py-1.5 text-[11px] sm:text-xs font-semibold transition text-slate-400 hover:text-[var(--text-primary)] cursor-pointer"
+            class="shelf-tab inline-flex items-center gap-1 sm:gap-2 rounded-xs px-2 sm:px-3.5 py-1 sm:py-1.5 text-[11px] sm:text-xs font-semibold transition text-ink-soft hover:text-[var(--text-primary)] cursor-pointer"
           >
             <i data-lucide="scroll-text" class="h-3 w-3 sm:h-3.5 sm:w-3.5"></i>
             <span>Drafts</span>
@@ -214,7 +214,7 @@
             id="tab-recent"
             data-tab="recent"
             type="button"
-            class="shelf-tab inline-flex items-center gap-1 sm:gap-2 rounded-xs px-2 sm:px-3.5 py-1 sm:py-1.5 text-[11px] sm:text-xs font-semibold transition text-slate-400 hover:text-[var(--text-primary)] cursor-pointer"
+            class="shelf-tab inline-flex items-center gap-1 sm:gap-2 rounded-xs px-2 sm:px-3.5 py-1 sm:py-1.5 text-[11px] sm:text-xs font-semibold transition text-ink-soft hover:text-[var(--text-primary)] cursor-pointer"
           >
             <i data-lucide="clock-3" class="h-3 w-3 sm:h-3.5 sm:w-3.5"></i>
             <span class="hidden sm:inline">Recent</span>
@@ -230,7 +230,7 @@
             class="btn btn-ghost btn--sm"
             aria-label="Voice Note"
           >
-            <i data-lucide="mic" class="h-3.5 w-3.5 text-amber-400"></i>
+            <i data-lucide="mic" class="h-3.5 w-3.5 text-rune"></i>
             <span class="hidden md:inline">Voice Note</span>
           </button>
 
@@ -255,11 +255,11 @@
       <!-- Hero Banner -->
       <section class="relative">
         <div
-          class="glass-panel-elevated vault-hero-card rounded-[1.75rem] sm:rounded-[2.5rem] p-4 sm:p-7 md:p-10 lg:p-12 overflow-hidden relative border border-white/8 bg-gradient-to-b from-white/[0.03] to-white/[0.01]"
+          class="glass-panel-elevated vault-hero-card rounded-[1.75rem] sm:rounded-[2.5rem] p-4 sm:p-7 md:p-10 lg:p-12 overflow-hidden relative border border-line bg-gradient-to-b from-white/[0.03] to-white/[0.01]"
         >
           <!-- Top Amber filigree line -->
           <div
-            class="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-px bg-gradient-to-r from-transparent via-amber-500/50 to-transparent"
+            class="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-px bg-gradient-to-r from-transparent via-rune/50 to-transparent"
           ></div>
 
           <div
@@ -273,7 +273,7 @@
               </h1>
 
               <p
-                class="mt-3 sm:mt-4 text-slate-400 max-w-2xl leading-relaxed text-xs sm:text-sm md:text-base"
+                class="mt-3 sm:mt-4 text-ink-soft max-w-2xl leading-relaxed text-xs sm:text-sm md:text-base"
               >
                 A sanctuary of unfinished manuscripts, preserved fragments, forgotten drafts, and
                 mythic chronicles waiting to awaken.
@@ -282,7 +282,7 @@
               <!-- Stat Chips -->
               <div class="mt-6 sm:mt-8 grid grid-cols-3 gap-2 sm:gap-4 max-w-lg">
                 <div
-                  class="glass-panel rounded-xl sm:rounded-2xl p-2.5 sm:p-4 border border-white/6 bg-white/[0.02] text-center sm:text-left"
+                  class="glass-panel rounded-xl sm:rounded-2xl p-2.5 sm:p-4 border border-line-subtle bg-surface-1 text-center sm:text-left"
                 >
                   <p
                     id="hero-stat-drafts"
@@ -291,14 +291,14 @@
                     —
                   </p>
                   <p
-                    class="text-[11px] sm:text-[10px] uppercase tracking-wider text-slate-400 mt-1 truncate"
+                    class="text-[11px] sm:text-[10px] uppercase tracking-wider text-ink-soft mt-1 truncate"
                   >
                     Drafts
                   </p>
                 </div>
 
                 <div
-                  class="glass-panel rounded-xl sm:rounded-2xl p-2.5 sm:p-4 border border-white/6 bg-white/[0.02] text-center sm:text-left"
+                  class="glass-panel rounded-xl sm:rounded-2xl p-2.5 sm:p-4 border border-line-subtle bg-surface-1 text-center sm:text-left"
                 >
                   <p
                     id="hero-stat-bookmarks"
@@ -307,14 +307,14 @@
                     —
                   </p>
                   <p
-                    class="text-[11px] sm:text-[10px] uppercase tracking-wider text-slate-400 mt-1 truncate"
+                    class="text-[11px] sm:text-[10px] uppercase tracking-wider text-ink-soft mt-1 truncate"
                   >
                     Saved
                   </p>
                 </div>
 
                 <div
-                  class="glass-panel rounded-xl sm:rounded-2xl p-2.5 sm:p-4 border border-white/6 bg-white/[0.02] text-center sm:text-left"
+                  class="glass-panel rounded-xl sm:rounded-2xl p-2.5 sm:p-4 border border-line-subtle bg-surface-1 text-center sm:text-left"
                 >
                   <p
                     id="hero-stat-words"
@@ -323,7 +323,7 @@
                     —
                   </p>
                   <p
-                    class="text-[11px] sm:text-[10px] uppercase tracking-wider text-slate-400 mt-1 truncate"
+                    class="text-[11px] sm:text-[10px] uppercase tracking-wider text-ink-soft mt-1 truncate"
                   >
                     Words
                   </p>
@@ -339,7 +339,7 @@
                 href="/library.html"
                 class="btn btn-ghost px-4 py-3 sm:px-5 sm:py-3.5 rounded-xl sm:rounded-2xl flex items-center justify-center gap-2.5 text-xs font-semibold"
               >
-                <i data-lucide="compass" class="w-4 h-4 text-slate-400"></i>
+                <i data-lucide="compass" class="w-4 h-4 text-ink-soft"></i>
                 <span>Explore Library</span>
               </a>
               <a
@@ -357,19 +357,19 @@
       <!-- Filter & Sort Controls -->
       <section class="relative z-20">
         <div
-          class="flex items-center justify-between gap-2.5 sm:gap-4 glass-panel rounded-2xl sm:rounded-3xl p-2 sm:p-3.5 border border-white/8 bg-white/[0.02]"
+          class="flex items-center justify-between gap-2.5 sm:gap-4 glass-panel rounded-2xl sm:rounded-3xl p-2 sm:p-3.5 border border-line bg-surface-1"
         >
           <div class="flex-1 relative">
             <i
               data-lucide="search"
-              class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500"
+              class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted"
             ></i>
             <input
               id="shelf-filter-input"
               type="text"
               placeholder="Filter fragments, drafts..."
               aria-label="Filter saved fragments and drafts"
-              class="w-full pl-10 pr-3 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border border-line text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-muted bg-surface-2 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/30 transition"
+              class="w-full pl-10 pr-3 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border border-line text-xs sm:text-sm text-[var(--text-primary)] placeholder:text-muted bg-surface-2 focus:outline-none focus:border-rune/50 focus:ring-1 focus:ring-rune/30 transition"
             />
           </div>
 
@@ -382,7 +382,7 @@
               aria-label="Sort saved stories"
               class="control-chip px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl text-[10px] sm:text-[11px] uppercase tracking-[0.2em] text-secondary font-bold flex items-center gap-1.5 sm:gap-2 hover:text-[var(--text-primary)] cursor-pointer"
             >
-              <i data-lucide="arrow-up-down" class="w-3.5 h-3.5 text-amber-400"></i>
+              <i data-lucide="arrow-up-down" class="w-3.5 h-3.5 text-rune"></i>
               <span>Sort</span>
             </button>
             <div
@@ -405,14 +405,14 @@
             <!-- Loading State -->
             <div class="col-span-full">
               <div
-                class="glass-panel-elevated rounded-3xl py-20 px-8 text-center border border-white/6"
+                class="glass-panel-elevated rounded-3xl py-20 px-8 text-center border border-line-subtle"
               >
                 <div class="relative inline-flex items-center justify-center">
                   <div
-                    class="absolute inset-0 rounded-full blur-2xl bg-amber-500/20 animate-pulse"
+                    class="absolute inset-0 rounded-full blur-2xl bg-rune/20 animate-pulse"
                   ></div>
                   <div
-                    class="relative w-14 h-14 rounded-full border-2 border-amber-500/20 border-t-amber-400 animate-spin"
+                    class="relative w-14 h-14 rounded-full border-2 border-rune/20 border-t-amber-400 animate-spin"
                   ></div>
                 </div>
 
@@ -420,7 +420,7 @@
                   Accessing the Archive
                 </h3>
 
-                <p class="mt-2 text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
+                <p class="mt-2 text-sm text-ink-soft max-w-md mx-auto leading-relaxed">
                   Gathering preserved fragments, unfinished chronicles, and sacred manuscripts from
                   your private collection.
                 </p>
@@ -431,8 +431,8 @@
 
         <!-- Right Rail: Vault Rituals & Notes -->
         <aside class="sticky top-20 space-y-6">
-          <div class="glass-panel-elevated rounded-3xl p-6 border border-white/8 bg-white/[0.02]">
-            <div class="flex items-center gap-2 text-amber-400 mb-5">
+          <div class="glass-panel-elevated rounded-3xl p-6 border border-line bg-surface-1">
+            <div class="flex items-center gap-2 text-rune mb-5">
               <i data-lucide="sparkles" class="w-4 h-4"></i>
               <span class="text-[10px] font-bold uppercase tracking-[0.25em]">Vault Rituals</span>
             </div>
@@ -441,78 +441,78 @@
               <button
                 id="ritual-new-draft"
                 type="button"
-                class="w-full control-chip rounded-2xl p-3.5 flex items-center justify-between text-left transition hover:border-amber-500/30 group cursor-pointer"
+                class="w-full control-chip rounded-2xl p-3.5 flex items-center justify-between text-left transition hover:border-rune/30 group cursor-pointer"
               >
                 <div>
                   <p
-                    class="text-xs font-semibold text-[var(--text-primary)] group-hover:text-amber-300 transition"
+                    class="text-xs font-semibold text-[var(--text-primary)] group-hover:text-rune transition"
                   >
                     New Tale
                   </p>
-                  <p class="text-[10px] text-slate-500 mt-0.5">Open fresh manuscript</p>
+                  <p class="text-[10px] text-muted mt-0.5">Open fresh manuscript</p>
                 </div>
                 <i
                   data-lucide="plus"
-                  class="w-4 h-4 text-slate-500 group-hover:text-amber-400 transition"
+                  class="w-4 h-4 text-muted group-hover:text-rune transition"
                 ></i>
               </button>
 
               <button
                 id="ritual-voice-note"
                 type="button"
-                class="w-full control-chip rounded-2xl p-3.5 flex items-center justify-between text-left transition hover:border-amber-500/30 group cursor-pointer"
+                class="w-full control-chip rounded-2xl p-3.5 flex items-center justify-between text-left transition hover:border-rune/30 group cursor-pointer"
               >
                 <div>
                   <p
-                    class="text-xs font-semibold text-[var(--text-primary)] group-hover:text-amber-300 transition"
+                    class="text-xs font-semibold text-[var(--text-primary)] group-hover:text-rune transition"
                   >
                     Oral Chronicle
                   </p>
-                  <p class="text-[10px] text-slate-500 mt-0.5">Voice recording hook</p>
+                  <p class="text-[10px] text-muted mt-0.5">Voice recording hook</p>
                 </div>
                 <i
                   data-lucide="mic"
-                  class="w-4 h-4 text-slate-500 group-hover:text-amber-400 transition"
+                  class="w-4 h-4 text-muted group-hover:text-rune transition"
                 ></i>
               </button>
 
               <button
                 id="ritual-publish"
                 type="button"
-                class="w-full control-chip rounded-2xl p-3.5 flex items-center justify-between text-left transition hover:border-amber-500/30 group cursor-pointer"
+                class="w-full control-chip rounded-2xl p-3.5 flex items-center justify-between text-left transition hover:border-rune/30 group cursor-pointer"
               >
                 <div>
                   <p
-                    class="text-xs font-semibold text-[var(--text-primary)] group-hover:text-amber-300 transition"
+                    class="text-xs font-semibold text-[var(--text-primary)] group-hover:text-rune transition"
                   >
                     Publishing Chamber
                   </p>
-                  <p class="text-[10px] text-slate-500 mt-0.5">Prepare for lore release</p>
+                  <p class="text-[10px] text-muted mt-0.5">Prepare for lore release</p>
                 </div>
                 <i
                   data-lucide="send"
-                  class="w-4 h-4 text-slate-500 group-hover:text-amber-400 transition"
+                  class="w-4 h-4 text-muted group-hover:text-rune transition"
                 ></i>
               </button>
             </div>
           </div>
 
-          <div class="glass-panel rounded-3xl p-6 border border-white/6 bg-white/[0.01]">
-            <div class="flex items-center gap-2 text-indigo-400 mb-4">
+          <div class="glass-panel rounded-3xl p-6 border border-line-subtle bg-surface-1">
+            <div class="flex items-center gap-2 text-accent-tint mb-4">
               <i data-lucide="scroll" class="w-4 h-4"></i>
               <span class="text-[10px] font-bold uppercase tracking-[0.25em]">Archival Notes</span>
             </div>
 
             <div class="space-y-3 text-xs">
-              <div class="p-3.5 rounded-2xl border border-white/6 bg-white/[0.01]">
-                <p class="text-slate-300 font-medium">Automatic Synchronization</p>
-                <p class="text-slate-500 text-[11px] mt-1 leading-relaxed">
+              <div class="p-3.5 rounded-2xl border border-line-subtle bg-surface-1">
+                <p class="text-ink font-medium">Automatic Synchronization</p>
+                <p class="text-muted text-[11px] mt-1 leading-relaxed">
                   Drafts and bookmarks sync continuously across devices via your scribe profile.
                 </p>
               </div>
-              <div class="p-3.5 rounded-2xl border border-white/6 bg-white/[0.01]">
-                <p class="text-slate-300 font-medium">Mythic Resonances</p>
-                <p class="text-slate-500 text-[11px] mt-1 leading-relaxed">
+              <div class="p-3.5 rounded-2xl border border-line-subtle bg-surface-1">
+                <p class="text-ink font-medium">Mythic Resonances</p>
+                <p class="text-muted text-[11px] mt-1 leading-relaxed">
                   Read chapters record dynamic scroll progress directly into your personal vault.
                 </p>
               </div>

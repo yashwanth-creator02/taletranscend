@@ -111,7 +111,7 @@ describe('TaleUI', () => {
       await renderTale('author-123', mockTale, 'tale-abc');
 
       expect(document.getElementById('display-status').textContent).toBe('Completed');
-      expect(document.getElementById('display-status-dot').className).toContain('bg-indigo-400');
+      expect(document.getElementById('display-status-dot').className).toContain('bg-accent');
       const editBtn = document.getElementById('edit-tale-btn-desktop');
       expect(editBtn.classList.contains('hidden')).toBe(false);
       expect(editBtn.style.display).toBe('inline-flex');

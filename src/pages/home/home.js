@@ -132,12 +132,12 @@ function _initInteractions() {
         suggestionsBox.innerHTML = matches
           .map(
             (m) => `
-            <a href="/reader.html?id=${encodeURIComponent(m.id)}" class="flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition-colors group">
+            <a href="/reader.html?id=${encodeURIComponent(m.id)}" class="flex items-center justify-between p-2 rounded-lg hover:bg-surface-1 transition-colors group">
               <div class="min-w-0 pr-2">
-                <p class="text-xs font-cinzel font-bold text-white group-hover:text-indigo-400 transition-colors truncate">${escapeHtml(m.title || 'Untitled')}</p>
-                <p class="text-[10px] text-slate-400 truncate">${escapeHtml(m.era || 'Mythic')} · ${escapeHtml(m.authorName || 'Ancient Chronicler')}</p>
+                <p class="text-xs font-cinzel font-bold text-ink group-hover:text-accent-tint transition-colors truncate">${escapeHtml(m.title || 'Untitled')}</p>
+                <p class="text-[10px] text-ink-soft truncate">${escapeHtml(m.era || 'Mythic')} · ${escapeHtml(m.authorName || 'Ancient Chronicler')}</p>
               </div>
-              <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-400 transition-colors shrink-0"></i>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-muted group-hover:text-accent-tint transition-colors shrink-0"></i>
             </a>
           `
           )
@@ -267,7 +267,7 @@ function _showSkeletons(container) {
         <div class="skeleton h-4 w-3/4 rounded mb-2"></div>
         <div class="skeleton h-3 w-full rounded mb-1"></div>
         <div class="skeleton h-3 w-4/5 rounded mb-3"></div>
-        <div class="flex items-center justify-between pt-2 border-t border-white/5">
+        <div class="flex items-center justify-between pt-2 border-t border-line-subtle">
           <div class="skeleton h-3 w-20 rounded"></div>
           <div class="skeleton h-3 w-8 rounded"></div>
         </div>

@@ -20,6 +20,13 @@
 @import './print.css';
 @import 'tailwindcss';
 
+/* Vite's `root` is src/views (see vite.config.js), so Tailwind's automatic
+   source detection only walks that folder and every utility string that lives
+   in the JS modules under src/pages, src/ui and src/services is invisible to
+   it — the class renders, but no rule is ever generated for it. Declaring the
+   real source tree here makes the scan independent of the Vite root. */
+@source '../../**/*.{js,ts,html}';
+
 /* ══════════════════════════════════════════════════════════════════════════
    Tailwind ↔ token bridge
 
@@ -30,7 +37,7 @@
    definition in tokens.css.
 
    Before this, the two systems were unrelated: markup used `bg-zinc-950/40`
-   and `text-slate-400` from Tailwind's stock palette while the stylesheets
+   and `text-ink-soft` from Tailwind's stock palette while the stylesheets
    used `--surface-2` and `--text-secondary`, so changing the theme moved
    half the interface and left the other half behind.
 
@@ -57,8 +64,11 @@
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-muted);
   --color-accent-tint: var(--accent-tint);
+  --color-accent-active: var(--accent-active);
+  --color-accent-line: var(--accent-border);
   --color-accent-2: var(--accent-secondary);
   --color-rune: var(--rune);
+  --color-on-accent: var(--text-on-accent);
 
   --color-success: var(--success);
   --color-warning: var(--warning);
@@ -67,6 +77,7 @@
 
   --color-line: var(--border);
   --color-line-strong: var(--border-strong);
+  --color-line-subtle: var(--border-subtle);
 
   --color-section-alt: var(--section-alt-bg);
   --color-footer-bg: var(--footer-bg);

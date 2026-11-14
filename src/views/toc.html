@@ -148,7 +148,7 @@
     <script type="module" src="../pages/toc/toc.js"></script>
   </head>
 
-  <body class="antialiased selection:bg-indigo-500/30 page-fade-in min-h-screen">
+  <body class="antialiased selection:bg-accent-active page-fade-in min-h-screen">
     <!-- App Boot Curtain -->
     <div id="app-boot-curtain" aria-hidden="true">
       <div class="boot-crest">
@@ -166,18 +166,18 @@
     >
       <!-- Breadcrumb -->
       <nav aria-label="Breadcrumb" class="mb-6">
-        <ol class="flex items-center space-x-2 text-xs text-slate-400">
-          <li><a href="/" class="hover:text-indigo-400 transition-colors">Home</a></li>
+        <ol class="flex items-center space-x-2 text-xs text-ink-soft">
+          <li><a href="/" class="hover:text-accent-tint transition-colors">Home</a></li>
           <li><span>/</span></li>
-          <li class="text-indigo-300 font-medium">Table of Contents</li>
+          <li class="text-accent-tint font-medium">Table of Contents</li>
         </ol>
       </nav>
 
       <!-- Header Section -->
-      <div class="toc-header border-b border-white/10 pb-8 mb-10">
+      <div class="toc-header border-b border-line pb-8 mb-10">
         <div class="flex flex-wrap items-center justify-between gap-4 mb-3">
           <span
-            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xs text-[11px] font-semibold tracking-wider uppercase bg-indigo-500/10 text-indigo-300 border border-indigo-500/20"
+            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xs text-[11px] font-semibold tracking-wider uppercase bg-accent-soft text-accent-tint border border-accent-line"
           >
             <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
             Archival Hierarchy & Sitemap
@@ -189,7 +189,7 @@
             class="btn btn-ghost btn--sm rounded-md"
             title="Raw XML Sitemap for search engines"
           >
-            <i data-lucide="file-code" class="w-3.5 h-3.5 text-amber-400"></i>
+            <i data-lucide="file-code" class="w-3.5 h-3.5 text-rune"></i>
             <span>View XML Sitemap</span>
           </a>
         </div>
@@ -199,7 +199,7 @@
         >
           Table of Contents
         </h1>
-        <p class="text-slate-400 text-sm sm:text-base max-w-3xl leading-relaxed">
+        <p class="text-ink-soft text-sm sm:text-base max-w-3xl leading-relaxed">
           The complete table of contents for TaleTranscend. Explore preserved folklore, mythic
           fiction, sacred oral traditions, and direct chapter links organized chronologically and by
           cultural pantheon.
@@ -208,19 +208,19 @@
         <!-- Stats Overview Row -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-8">
           <div class="toc-stat-card">
-            <span class="toc-stat-card__number text-indigo-400" id="stat-total-tales">—</span>
+            <span class="toc-stat-card__number text-accent-tint" id="stat-total-tales">—</span>
             <span class="toc-stat-card__label">Preserved Chronicles</span>
           </div>
           <div class="toc-stat-card">
-            <span class="toc-stat-card__number text-amber-400" id="stat-total-chapters">—</span>
+            <span class="toc-stat-card__number text-rune" id="stat-total-chapters">—</span>
             <span class="toc-stat-card__label">Total Chapters</span>
           </div>
           <div class="toc-stat-card">
-            <span class="toc-stat-card__number text-emerald-400" id="stat-total-eras">—</span>
+            <span class="toc-stat-card__number text-success" id="stat-total-eras">—</span>
             <span class="toc-stat-card__label">Mythic Eras</span>
           </div>
           <div class="toc-stat-card">
-            <span class="toc-stat-card__number text-rose-400" id="stat-total-words">—</span>
+            <span class="toc-stat-card__number text-danger" id="stat-total-words">—</span>
             <span class="toc-stat-card__label">Archive Words</span>
           </div>
         </div>
@@ -232,70 +232,70 @@
           id="heading-core-portals"
           class="font-cinzel text-xl font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2"
         >
-          <i data-lucide="compass" class="w-5 h-5 text-indigo-400"></i>
+          <i data-lucide="compass" class="w-5 h-5 text-accent-tint"></i>
           Core Sanctuaries & Portals
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <a href="/" class="toc-portal-card group">
             <div class="flex items-center gap-3 mb-2">
-              <span class="toc-portal-icon group-hover:bg-indigo-500/20 text-indigo-400">
+              <span class="toc-portal-icon group-hover:bg-accent-soft text-accent-tint">
                 <i data-lucide="home" class="w-4 h-4"></i>
               </span>
               <h3
-                class="font-cinzel font-semibold text-[var(--text-primary)] group-hover:text-indigo-400 transition-colors"
+                class="font-cinzel font-semibold text-[var(--text-primary)] group-hover:text-accent-tint transition-colors"
               >
                 Home Portal
               </h3>
             </div>
-            <p class="text-xs text-slate-400 leading-relaxed">
+            <p class="text-xs text-ink-soft leading-relaxed">
               Featured myths, trending chronicles, and the archive reliquary.
             </p>
           </a>
 
           <a href="/library.html" class="toc-portal-card group">
             <div class="flex items-center gap-3 mb-2">
-              <span class="toc-portal-icon group-hover:bg-indigo-500/20 text-indigo-400">
+              <span class="toc-portal-icon group-hover:bg-accent-soft text-accent-tint">
                 <i data-lucide="library" class="w-4 h-4"></i>
               </span>
               <h3
-                class="font-cinzel font-semibold text-[var(--text-primary)] group-hover:text-indigo-400 transition-colors"
+                class="font-cinzel font-semibold text-[var(--text-primary)] group-hover:text-accent-tint transition-colors"
               >
                 Grand Library
               </h3>
             </div>
-            <p class="text-xs text-slate-400 leading-relaxed">
+            <p class="text-xs text-ink-soft leading-relaxed">
               Faceted filtering, sorting, genre tags, and deep text search.
             </p>
           </a>
 
           <a href="/shelf.html" class="toc-portal-card group">
             <div class="flex items-center gap-3 mb-2">
-              <span class="toc-portal-icon group-hover:bg-indigo-500/20 text-indigo-400">
+              <span class="toc-portal-icon group-hover:bg-accent-soft text-accent-tint">
                 <i data-lucide="bookmark" class="w-4 h-4"></i>
               </span>
               <h3
-                class="font-cinzel font-semibold text-[var(--text-primary)] group-hover:text-indigo-400 transition-colors"
+                class="font-cinzel font-semibold text-[var(--text-primary)] group-hover:text-accent-tint transition-colors"
               >
                 Your Shelf
               </h3>
             </div>
-            <p class="text-xs text-slate-400 leading-relaxed">
+            <p class="text-xs text-ink-soft leading-relaxed">
               Bookmarked scriptures, unfinished reads, and personalized reading progress.
             </p>
           </a>
 
           <a href="/contribution.html" class="toc-portal-card group">
             <div class="flex items-center gap-3 mb-2">
-              <span class="toc-portal-icon group-hover:bg-indigo-500/20 text-indigo-400">
+              <span class="toc-portal-icon group-hover:bg-accent-soft text-accent-tint">
                 <i data-lucide="feather" class="w-4 h-4"></i>
               </span>
               <h3
-                class="font-cinzel font-semibold text-[var(--text-primary)] group-hover:text-indigo-400 transition-colors"
+                class="font-cinzel font-semibold text-[var(--text-primary)] group-hover:text-accent-tint transition-colors"
               >
                 Scribe Sanctuary
               </h3>
             </div>
-            <p class="text-xs text-slate-400 leading-relaxed">
+            <p class="text-xs text-ink-soft leading-relaxed">
               Transcribe new legends, draft mythic chapters, and publish into the canon.
             </p>
           </a>
@@ -305,19 +305,19 @@
       <!-- Filter & Search Controls -->
       <section class="mb-8 w-full min-w-0" aria-label="Archive Filtering">
         <div
-          class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between bg-white/[0.02] border border-white/5 p-4 rounded-xl w-full min-w-0"
+          class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between bg-surface-1 border border-line-subtle p-4 rounded-xl w-full min-w-0"
         >
           <div class="relative flex-1 min-w-0">
             <i
               data-lucide="search"
-              class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
+              class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-soft"
             ></i>
             <input
               type="search"
               id="toc-search"
               placeholder="Search chronicles, authors, or eras..."
               aria-label="Search chronicles, authors, or eras"
-              class="w-full pl-10 pr-4 py-2 bg-surface-2 border border-line rounded-lg text-sm text-[var(--text-primary)] placeholder:text-muted focus:outline-hidden focus:border-indigo-500/50"
+              class="w-full pl-10 pr-4 py-2 bg-surface-2 border border-line rounded-lg text-sm text-[var(--text-primary)] placeholder:text-muted focus:outline-hidden focus:border-accent-line"
             />
           </div>
           <div
@@ -336,19 +336,19 @@
             id="heading-chronicles"
             class="font-cinzel text-xl font-bold text-[var(--text-primary)] flex items-center gap-2"
           >
-            <i data-lucide="scroll" class="w-5 h-5 text-indigo-400"></i>
+            <i data-lucide="scroll" class="w-5 h-5 text-accent-tint"></i>
             Chronicles & Chapter Hierarchies
           </h2>
-          <span id="toc-count-label" class="text-xs text-slate-400">Loading chronicles...</span>
+          <span id="toc-count-label" class="text-xs text-ink-soft">Loading chronicles...</span>
         </div>
 
         <!-- Dynamic Container -->
         <div id="toc-list" class="space-y-6">
-          <div class="p-8 text-center bg-white/[0.02] border border-white/5 rounded-2xl">
+          <div class="p-8 text-center bg-surface-1 border border-line-subtle rounded-2xl">
             <div
-              class="inline-block w-8 h-8 border-2 border-indigo-400/30 border-t-indigo-400 rounded-full animate-spin mb-3"
+              class="inline-block w-8 h-8 border-2 border-accent-line border-t-indigo-400 rounded-full animate-spin mb-3"
             ></div>
-            <p class="text-sm text-slate-400">Unrolling archival manuscripts...</p>
+            <p class="text-sm text-ink-soft">Unrolling archival manuscripts...</p>
           </div>
         </div>
       </section>

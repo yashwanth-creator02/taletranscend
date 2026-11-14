@@ -72,24 +72,24 @@ export function renderCardsSkeleton(container, count = 8) {
         <div class="tale-card animate-pulse">
           <div class="tale-card__inner p-2.5 sm:p-4 flex flex-col">
             <div class="tale-card__top mb-2 sm:mb-3 flex items-center justify-between gap-1.5 sm:gap-2">
-              <div class="h-4 sm:h-5 w-14 sm:w-20 rounded-sm bg-white/6"></div>
-              <div class="h-6 w-6 sm:h-7 sm:w-7 rounded-lg bg-white/5"></div>
+              <div class="h-4 sm:h-5 w-14 sm:w-20 rounded-sm bg-surface-1"></div>
+              <div class="h-6 w-6 sm:h-7 sm:w-7 rounded-lg bg-surface-1"></div>
             </div>
-            <div class="tale-card__cover card-image-wrap mb-2.5 sm:mb-3.5 bg-white/6"></div>
+            <div class="tale-card__cover card-image-wrap mb-2.5 sm:mb-3.5 bg-surface-1"></div>
             <div class="tale-card__body space-y-1.5 sm:space-y-2 flex-1">
-              <div class="h-2.5 sm:h-3 w-1/3 rounded bg-white/5"></div>
-              <div class="h-4 sm:h-5 w-3/4 rounded bg-white/6"></div>
+              <div class="h-2.5 sm:h-3 w-1/3 rounded bg-surface-1"></div>
+              <div class="h-4 sm:h-5 w-3/4 rounded bg-surface-1"></div>
               <div class="space-y-1 sm:space-y-1.5 mt-1.5 sm:mt-2">
-                <div class="h-2.5 sm:h-3 w-full rounded bg-white/5"></div>
-                <div class="hidden sm:block h-3 w-5/6 rounded bg-white/5"></div>
+                <div class="h-2.5 sm:h-3 w-full rounded bg-surface-1"></div>
+                <div class="hidden sm:block h-3 w-5/6 rounded bg-surface-1"></div>
               </div>
             </div>
-            <div class="tale-card__footer mt-3 sm:mt-4 flex items-center justify-between pt-2 sm:pt-3 border-t border-white/5">
+            <div class="tale-card__footer mt-3 sm:mt-4 flex items-center justify-between pt-2 sm:pt-3 border-t border-line-subtle">
               <div class="flex gap-2">
-                <div class="h-3 w-10 sm:w-14 rounded bg-white/5"></div>
-                <div class="h-3 w-5 sm:w-7 rounded bg-white/5"></div>
+                <div class="h-3 w-10 sm:w-14 rounded bg-surface-1"></div>
+                <div class="h-3 w-5 sm:w-7 rounded bg-surface-1"></div>
               </div>
-              <div class="h-5 sm:h-6 w-12 sm:w-16 rounded-lg bg-white/5"></div>
+              <div class="h-5 sm:h-6 w-12 sm:w-16 rounded-lg bg-surface-1"></div>
             </div>
           </div>
         </div>
@@ -202,7 +202,7 @@ export async function renderCardsGrid(userId, tales, { showSkeleton = false } = 
       message: 'No tales found in the archives.',
       subMessage: 'Try a different filter or come back later.',
       classes:
-        'col-span-full rounded-[2rem] border border-white/8 bg-white/5 px-6 py-20 text-center shadow-2xl shadow-black/20 backdrop-blur-xl',
+        'col-span-full rounded-[2rem] border border-line bg-surface-1 px-6 py-20 text-center shadow-2xl shadow-black/20 backdrop-blur-xl',
     });
     return;
   }
@@ -265,8 +265,8 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
 
   const timeBadge = readTimeLabel ? renderBadge(readTimeLabel, 'badge-subtle') : '';
   const statusBadgeClasses = isFinished
-    ? 'badge-finished border-emerald-500/20'
-    : 'badge-era border-indigo-500/20';
+    ? 'badge-finished border-success/20'
+    : 'badge-era border-accent-line';
   const bookmarkedAction = isBookmarked ? 'decouple' : 'couple';
   const bookmarkedLabel = isBookmarked ? 'Remove from shelf' : 'Save to shelf';
   const bookmarkedIcon = isBookmarked ? 'bookmark-minus' : 'bookmark-plus';
@@ -372,7 +372,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
           <div class="tale-card__progress absolute inset-x-0 bottom-0 p-2 sm:p-2.5 z-10">
             <div class="card-progress-meta">
               <span class="card-progress-label">Progress</span>
-              <span class="card-progress-val text-accent-tint text-indigo-300">${_progressLabel(progress)}</span>
+              <span class="card-progress-val text-accent-tint text-accent-tint">${_progressLabel(progress)}</span>
             </div>
             <div class="progress-bar">
               <div class="progress-fill" style="width: ${progress}%"></div>
@@ -386,7 +386,7 @@ function _createTaleCard(tale, progressPercent, readTimeMap = {}, bookmarkMap = 
         <!-- Middle: Fragment Tag, Title, and Description -->
         <div class="tale-card__body flex-1 flex flex-col justify-start">
           <div class="tale-card__kicker flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
-            <span class="h-px w-3 sm:w-4 bg-indigo-500/40"></span>
+            <span class="h-px w-3 sm:w-4 bg-accent-active"></span>
             <span class="text-[11px] sm:text-[11px] font-bold text-muted uppercase tracking-widest">Scroll #${id.slice(-4)}</span>
           </div>
 

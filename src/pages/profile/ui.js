@@ -299,8 +299,8 @@ function _bindAiNameButton() {
       if (keyInput) {
         keyInput.focus();
         keyInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        keyInput.classList.add('ring-2', 'ring-amber-500/50');
-        setTimeout(() => keyInput.classList.remove('ring-2', 'ring-amber-500/50'), 2500);
+        keyInput.classList.add('ring-2', 'ring-rune');
+        setTimeout(() => keyInput.classList.remove('ring-2', 'ring-rune'), 2500);
       }
       return;
     }
@@ -478,7 +478,7 @@ function _renderAuthorRegistry(data) {
     if (badge) {
       badge.textContent = 'Verified Scribe';
       badge.className =
-        'text-[11px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-300';
+        'text-[11px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-success/30 bg-success/10 text-success';
     }
     if (penNameEl) penNameEl.textContent = data.penName || data.name || 'Anonymous Scribe';
     if (emailEl) emailEl.textContent = data.authorEmail || '';
@@ -494,7 +494,7 @@ function _renderAuthorRegistry(data) {
     if (badge) {
       badge.textContent = 'Reader';
       badge.className =
-        'text-[11px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-slate-700 bg-slate-800/60 text-slate-400';
+        'text-[11px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-line-strong bg-surface-3 text-ink-soft';
     }
   }
 
@@ -509,25 +509,25 @@ function _renderRank(wordCount) {
   if (!badges.length) return;
 
   let rank = 'Explorer';
-  let colorCls = 'text-indigo-300';
-  let bgCls = 'bg-indigo-500/15';
-  let borderCls = 'border-indigo-500/30';
+  let colorCls = 'text-accent-tint';
+  let bgCls = 'bg-accent-soft';
+  let borderCls = 'border-accent-line';
 
   if (wordCount >= 100000) {
     rank = 'Ancient One';
-    colorCls = 'text-amber-400';
-    bgCls = 'bg-amber-500/20';
-    borderCls = 'border-amber-500/40';
+    colorCls = 'text-rune';
+    bgCls = 'bg-rune/20';
+    borderCls = 'border-rune/40';
   } else if (wordCount >= 50000) {
     rank = 'Sage';
-    colorCls = 'text-emerald-400';
-    bgCls = 'bg-emerald-500/20';
-    borderCls = 'border-emerald-500/40';
+    colorCls = 'text-success';
+    bgCls = 'bg-success/20';
+    borderCls = 'border-success/40';
   } else if (wordCount >= 10000) {
     rank = 'Chronicler';
-    colorCls = 'text-violet-300';
-    bgCls = 'bg-violet-500/20';
-    borderCls = 'border-violet-500/40';
+    colorCls = 'text-accent-2';
+    bgCls = 'bg-accent-2/20';
+    borderCls = 'border-accent-2/40';
   }
 
   badges.forEach((badge) => {
@@ -541,7 +541,7 @@ function _renderGenrePills(genres) {
   const container = document.getElementById('profile-genres');
   if (!container) return;
   if (!genres.length) {
-    container.innerHTML = '<span class="text-xs text-slate-400 italic">No genres set</span>';
+    container.innerHTML = '<span class="text-xs text-ink-soft italic">No genres set</span>';
     return;
   }
   container.innerHTML = genres
@@ -614,10 +614,10 @@ export function renderContinueReading(tales) {
 
   if (!tales || !tales.length) {
     container.innerHTML = `
-      <div class="flex items-center gap-3 py-6 px-4 text-xs sm:text-sm text-slate-400 italic bg-white/1 rounded-2xl border border-white/5 w-full">
-        <i data-lucide="book-open-check" class="w-4 h-4 text-slate-500 not-italic shrink-0"></i>
+      <div class="flex items-center gap-3 py-6 px-4 text-xs sm:text-sm text-ink-soft italic bg-surface-1 rounded-2xl border border-line-subtle w-full">
+        <i data-lucide="book-open-check" class="w-4 h-4 text-muted not-italic shrink-0"></i>
         <span>No tales in progress.</span>
-        <a href="/library.html" class="text-indigo-400 hover:text-indigo-300 font-semibold not-italic ml-1">Browse Library →</a>
+        <a href="/library.html" class="text-accent-tint hover:text-accent-tint font-semibold not-italic ml-1">Browse Library →</a>
       </div>
     `;
     initIcons(container);
@@ -653,9 +653,9 @@ function _buildContinueReadingCard(tale) {
   return `
     <a
       href="${readerUrl(tale.id, tale.lastChapterIndex)}"
-      class="continue-card group snap-start shrink-0 w-60 sm:w-64 bg-white/2 border border-white/5 rounded-2xl overflow-hidden hover:bg-white/4 hover:border-white/10 transition-all duration-300 flex flex-col justify-between"
+      class="continue-card group snap-start shrink-0 w-60 sm:w-64 bg-surface-1 border border-line-subtle rounded-2xl overflow-hidden hover:bg-surface-1 hover:border-line transition-all duration-300 flex flex-col justify-between"
     >
-      <div class="relative h-32 w-full bg-zinc-950 overflow-hidden shrink-0">
+      <div class="relative h-32 w-full bg-surface-3 overflow-hidden shrink-0">
         <img
           src="${cover}"
           alt="${safeTitle}"
@@ -664,7 +664,7 @@ function _buildContinueReadingCard(tale) {
         />
         <div class="card-overlay"></div>
         <div class="absolute bottom-2.5 left-2.5">
-          <span class="px-2 py-0.5 bg-black/70 backdrop-blur-md border border-white/10 rounded-md text-[11px] font-black text-white/90 uppercase tracking-widest">
+          <span class="px-2 py-0.5 bg-black/70 backdrop-blur-md border border-line rounded-md text-[11px] font-black text-white/90 uppercase tracking-widest">
             ${escapeHtml(tale.era || 'Mythic Era')}
           </span>
         </div>
@@ -672,22 +672,22 @@ function _buildContinueReadingCard(tale) {
 
       <div class="p-3.5 flex flex-col flex-1 justify-between gap-2.5">
         <div class="space-y-1">
-          <h3 class="font-cinzel text-sm sm:text-base font-bold text-[var(--text-primary)] group-hover:text-indigo-400 transition-colors truncate h-6 leading-6">
+          <h3 class="font-cinzel text-sm sm:text-base font-bold text-[var(--text-primary)] group-hover:text-accent-tint transition-colors truncate h-6 leading-6">
             ${safeTitle}
           </h3>
-          <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed font-medium h-9 overflow-hidden">
+          <p class="text-xs text-ink-soft line-clamp-2 leading-relaxed font-medium h-9 overflow-hidden">
             ${safeDescription}
           </p>
         </div>
 
-        <div class="pt-2 space-y-1.5 border-t border-white/5 mt-auto">
-          <div class="flex items-center justify-between text-[11px] font-black text-slate-500 uppercase tracking-[0.15em]">
+        <div class="pt-2 space-y-1.5 border-t border-line-subtle mt-auto">
+          <div class="flex items-center justify-between text-[11px] font-black text-muted uppercase tracking-[0.15em]">
             <span>Progress</span>
-            <span class="text-indigo-400">${tale.percent}%</span>
+            <span class="text-accent-tint">${tale.percent}%</span>
           </div>
-          <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+          <div class="h-1 w-full bg-surface-1 rounded-full overflow-hidden">
             <div
-              class="h-full bg-linear-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-700"
+              class="h-full bg-linear-to-r from-accent to-accent-2 rounded-full transition-all duration-700"
               style="width: ${Math.max(3, tale.percent)}%"
             ></div>
           </div>
@@ -812,18 +812,18 @@ export function renderAchievements(context = {}) {
                 ${def.tier}
               </span>
             </div>
-            <p class="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+            <p class="text-[11px] text-ink-soft line-clamp-2 leading-relaxed">
               ${escapeHtml(def.description)}
             </p>
           </div>
         </div>
 
-        <div class="mt-3 pt-2.5 border-t border-white/5 space-y-1.5">
-          <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+        <div class="mt-3 pt-2.5 border-t border-line-subtle space-y-1.5">
+          <div class="flex items-center justify-between text-[11px] font-bold text-muted uppercase tracking-wider">
             <span>${isUnlocked ? 'Earned' : progressLabel}</span>
             <span>${progress}%</span>
           </div>
-          <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+          <div class="h-1 w-full bg-surface-1 rounded-full overflow-hidden">
             <div
               class="h-full achievement-progress-bar rounded-full transition-all duration-700"
               style="width: ${progress}%"
@@ -861,15 +861,15 @@ export function renderPublishedTales(tales) {
 
   if (!tales || !tales.length) {
     const emptyHtml = `
-      <div class="contribution-empty-state flex flex-col justify-center p-5 sm:p-6 rounded-2xl bg-white/2 border border-white/5 text-slate-400">
+      <div class="contribution-empty-state flex flex-col justify-center p-5 sm:p-6 rounded-2xl bg-surface-1 border border-line-subtle text-ink-soft">
         <div class="flex items-center gap-2.5 text-[var(--text-primary)] font-cinzel font-bold text-sm mb-1.5">
-          <i data-lucide="scroll" class="w-4 h-4 text-indigo-400"></i>
+          <i data-lucide="scroll" class="w-4 h-4 text-accent-tint"></i>
           <span>No Published Legends Yet</span>
         </div>
-        <p class="text-xs text-slate-500 leading-relaxed mb-3">
+        <p class="text-xs text-muted leading-relaxed mb-3">
           Your chronicles have not yet been woven into the Great Library.
         </p>
-        <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest flex items-center gap-1">
+        <span class="text-[10px] font-bold text-accent-tint uppercase tracking-widest flex items-center gap-1">
           Record a new story to publish <i data-lucide="arrow-right" class="w-3 h-3"></i>
         </span>
       </div>
@@ -908,27 +908,27 @@ function _buildPublishedCard(tale) {
     'ongoing'
   ).toLowerCase();
   let statusLabel = 'Ongoing';
-  let statusBadgeClass = 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25';
+  let statusBadgeClass = 'bg-success/15 text-success border-success/25';
 
   if (rawStatus === 'completed') {
     statusLabel = 'Completed';
-    statusBadgeClass = 'bg-indigo-500/15 text-indigo-400 border-indigo-500/25';
+    statusBadgeClass = 'bg-accent-soft text-accent-tint border-accent-line';
   } else if (rawStatus === 'hiatus') {
     statusLabel = 'Hiatus';
-    statusBadgeClass = 'bg-amber-500/15 text-amber-400 border-amber-500/25';
+    statusBadgeClass = 'bg-rune/15 text-rune border-rune/25';
   } else if (rawStatus === 'cancelled' || rawStatus === 'stopped') {
     statusLabel = 'Cancelled';
-    statusBadgeClass = 'bg-rose-500/15 text-rose-400 border-rose-500/25';
+    statusBadgeClass = 'bg-danger/15 text-danger border-danger/25';
   }
 
   return `
-    <div class="contribution-card group block bg-white/2 border border-white/5 rounded-2xl sm:rounded-3xl overflow-hidden hover:bg-white/4 hover:border-indigo-500/30 hover:-translate-y-1 transition-all duration-300">
-      <a href="${taleUrl(tale.id)}" class="block relative h-28 sm:h-32 bg-zinc-950 overflow-hidden">
+    <div class="contribution-card group block bg-surface-1 border border-line-subtle rounded-2xl sm:rounded-3xl overflow-hidden hover:bg-surface-1 hover:border-accent-line hover:-translate-y-1 transition-all duration-300">
+      <a href="${taleUrl(tale.id)}" class="block relative h-28 sm:h-32 bg-surface-3 overflow-hidden">
         <img src="${cover}" alt="${safeTitle}"
           class="w-full h-full object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-500" loading="lazy" />
         <div class="absolute inset-0 bg-linear-to-t from-black/90 via-black/30 to-transparent"></div>
         <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap">
-          <span class="px-2.5 py-0.5 bg-emerald-500/15 text-emerald-400 text-[11px] font-black uppercase tracking-widest rounded-xs border border-emerald-500/25 backdrop-blur-md">
+          <span class="px-2.5 py-0.5 bg-success/15 text-success text-[11px] font-black uppercase tracking-widest rounded-xs border border-success/25 backdrop-blur-md">
             Published
           </span>
           <span class="px-2 py-0.5 ${statusBadgeClass} text-[11px] font-bold uppercase tracking-widest rounded-xs border backdrop-blur-md">
@@ -936,26 +936,26 @@ function _buildPublishedCard(tale) {
           </span>
         </div>
         <div class="absolute bottom-2.5 left-3 right-3">
-          <h3 class="font-cinzel font-bold text-white text-sm sm:text-base leading-snug group-hover:text-indigo-300 transition-colors truncate">
+          <h3 class="font-cinzel font-bold text-ink text-sm sm:text-base leading-snug group-hover:text-accent-tint transition-colors truncate">
             ${safeTitle}
           </h3>
         </div>
       </a>
       <div class="p-3.5 sm:p-4 space-y-2.5">
-        <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed font-medium">${safeDescription}</p>
-        <div class="flex items-center justify-between pt-2 border-t border-white/5">
-          <div class="flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+        <p class="text-xs text-ink-soft line-clamp-2 leading-relaxed font-medium">${safeDescription}</p>
+        <div class="flex items-center justify-between pt-2 border-t border-line-subtle">
+          <div class="flex items-center gap-3 text-[10px] font-bold text-ink-soft uppercase tracking-widest">
             <span class="flex items-center gap-1.5">
-              <i data-lucide="layers" class="w-3.5 h-3.5 text-slate-400"></i>
+              <i data-lucide="layers" class="w-3.5 h-3.5 text-ink-soft"></i>
               ${tale.chapterCount || 0} ch
             </span>
-            ${tale.readCount ? `<span class="flex items-center gap-1.5"><i data-lucide="eye" class="w-3.5 h-3.5 text-slate-400"></i>${formatNumber(tale.readCount)}</span>` : ''}
+            ${tale.readCount ? `<span class="flex items-center gap-1.5"><i data-lucide="eye" class="w-3.5 h-3.5 text-ink-soft"></i>${formatNumber(tale.readCount)}</span>` : ''}
           </div>
           <div class="flex items-center gap-2">
-            <a href="/contribution.html?taleId=${encodeURIComponent(tale.id)}" class="px-2 py-1 rounded-lg bg-white/4 hover:bg-amber-500/20 border border-white/8 hover:border-amber-500/40 text-[10px] font-bold text-amber-300 hover:text-amber-200 transition-colors flex items-center gap-1" title="Edit Chronicle">
+            <a href="/contribution.html?taleId=${encodeURIComponent(tale.id)}" class="px-2 py-1 rounded-lg bg-surface-1 hover:bg-rune/20 border border-line hover:border-rune/40 text-[10px] font-bold text-rune hover:text-rune transition-colors flex items-center gap-1" title="Edit Chronicle">
               <i data-lucide="edit-3" class="w-3 h-3"></i> Edit
             </a>
-            <a href="${taleUrl(tale.id)}" class="flex items-center gap-1 text-[10px] font-bold text-indigo-400 hover:text-indigo-300">
+            <a href="${taleUrl(tale.id)}" class="flex items-center gap-1 text-[10px] font-bold text-accent-tint hover:text-accent-tint">
               Read <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i>
             </a>
           </div>
@@ -976,10 +976,10 @@ export function renderDrafts(drafts) {
 
   if (!drafts || !drafts.length) {
     container.innerHTML = `
-      <div class="col-span-full flex items-center gap-3 py-6 px-4 text-xs sm:text-sm text-slate-400 italic bg-white/1 rounded-2xl border border-white/5 font-medium">
-        <i data-lucide="feather" class="w-4 h-4 text-slate-500 not-italic shrink-0"></i>
+      <div class="col-span-full flex items-center gap-3 py-6 px-4 text-xs sm:text-sm text-ink-soft italic bg-surface-1 rounded-2xl border border-line-subtle font-medium">
+        <i data-lucide="feather" class="w-4 h-4 text-muted not-italic shrink-0"></i>
         <span>No drafts awaiting preservation.</span>
-        <a href="/contribution.html" class="text-indigo-400 hover:text-indigo-300 font-semibold not-italic ml-1">Begin a Draft →</a>
+        <a href="/contribution.html" class="text-accent-tint hover:text-accent-tint font-semibold not-italic ml-1">Begin a Draft →</a>
       </div>
     `;
     initIcons(container);
@@ -1001,26 +1001,26 @@ function _buildDraftCard(draft) {
   return `
     <a
       href="/contribution.html?draft=${draft.id}"
-      class="group block bg-white/2 border border-white/5 rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 hover:bg-white/4 hover:border-amber-500/30 hover:-translate-y-1 transition-all duration-300"
+      class="group block bg-surface-1 border border-line-subtle rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 hover:bg-surface-1 hover:border-rune/30 hover:-translate-y-1 transition-all duration-300"
     >
       <div class="flex items-center justify-between gap-2 mb-2.5">
-        <span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 text-[11px] font-black uppercase tracking-widest rounded-xs border border-amber-500/20">
+        <span class="px-2 py-0.5 bg-rune/10 text-rune text-[11px] font-black uppercase tracking-widest rounded-xs border border-rune/20">
           Draft
         </span>
-        <span class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">${updated}</span>
+        <span class="text-[11px] font-medium text-ink-soft uppercase tracking-wider">${updated}</span>
       </div>
-      <h3 class="font-cinzel font-bold text-[var(--text-primary)] text-sm sm:text-base group-hover:text-amber-400 transition-colors truncate mb-1">
+      <h3 class="font-cinzel font-bold text-[var(--text-primary)] text-sm sm:text-base group-hover:text-rune transition-colors truncate mb-1">
         ${safeTitle}
       </h3>
-      <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed mb-3 font-medium">
+      <p class="text-xs text-ink-soft line-clamp-2 leading-relaxed mb-3 font-medium">
         ${safeSynopsis}
       </p>
-      <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-slate-400 pt-2 border-t border-white/5">
+      <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-ink-soft pt-2 border-t border-line-subtle">
         <span class="flex items-center gap-1.5">
-          <i data-lucide="book-type" class="w-3.5 h-3.5 text-slate-400"></i>
+          <i data-lucide="book-type" class="w-3.5 h-3.5 text-ink-soft"></i>
           ${draft.chapterCount || 0} ch
         </span>
-        <span class="flex items-center gap-1 text-amber-400 group-hover:gap-1.5 transition-all">
+        <span class="flex items-center gap-1 text-rune group-hover:gap-1.5 transition-all">
           Resume <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
         </span>
       </div>
@@ -1060,7 +1060,7 @@ export function showContinueReadingSkeleton() {
   container.innerHTML = Array.from(
     { length: 3 },
     () => `
-    <div class="shrink-0 w-60 sm:w-64 rounded-2xl overflow-hidden bg-white/2 border border-white/5 p-3">
+    <div class="shrink-0 w-60 sm:w-64 rounded-2xl overflow-hidden bg-surface-1 border border-line-subtle p-3">
       <div class="h-28 skeleton rounded-xl mb-3"></div>
       <div class="space-y-2">
         <div class="skeleton h-4 w-3/4 rounded-md"></div>
@@ -1082,7 +1082,7 @@ export function showContributionsSkeleton() {
   const skeletons = Array.from(
     { length: 2 },
     () => `
-    <div class="skeleton-card rounded-2xl sm:rounded-3xl overflow-hidden bg-white/2 border border-white/5">
+    <div class="skeleton-card rounded-2xl sm:rounded-3xl overflow-hidden bg-surface-1 border border-line-subtle">
       <div class="h-28 sm:h-32 skeleton"></div>
       <div class="p-3.5 sm:p-4 space-y-2.5">
         <div class="skeleton h-4 w-2/3 rounded-md"></div>

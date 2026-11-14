@@ -179,20 +179,20 @@ export async function renderTale(userId, tale, taleId, isResonated = false) {
     'ongoing'
   ).toLowerCase();
   let statusLabel = 'Ongoing';
-  let dotClass = 'bg-emerald-400';
+  let dotClass = 'bg-success';
 
   if (rawStatus === 'completed') {
     statusLabel = 'Completed';
-    dotClass = 'bg-indigo-400';
+    dotClass = 'bg-accent';
   } else if (rawStatus === 'hiatus') {
     statusLabel = 'Hiatus';
-    dotClass = 'bg-amber-400';
+    dotClass = 'bg-rune';
   } else if (rawStatus === 'stopped' || rawStatus === 'cancelled') {
     statusLabel = 'Cancelled';
-    dotClass = 'bg-rose-400';
+    dotClass = 'bg-danger';
   } else {
     statusLabel = rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1);
-    dotClass = 'bg-emerald-400';
+    dotClass = 'bg-success';
   }
 
   setTextIfExists('display-status', statusLabel);
@@ -308,15 +308,14 @@ export async function renderTale(userId, tale, taleId, isResonated = false) {
       tagList.innerHTML = tale.tags
         .map(
           (t) => `
-            <span class="lore-tag-pill px-2.5 py-1 rounded-lg bg-white/4 border border-white/6 text-[10px] font-bold uppercase tracking-wider text-slate-300">
+            <span class="lore-tag-pill px-2.5 py-1 rounded-lg bg-surface-1 border border-line-subtle text-[10px] font-bold uppercase tracking-wider text-ink">
               ${escapeHtml(t)}
             </span>
           `
         )
         .join('');
     } else {
-      tagList.innerHTML =
-        '<span class="text-xs text-slate-500 italic">No lore tags designated.</span>';
+      tagList.innerHTML = '<span class="text-xs text-muted italic">No lore tags designated.</span>';
     }
   }
 
@@ -337,24 +336,24 @@ export async function renderTale(userId, tale, taleId, isResonated = false) {
       btn.querySelector('span:not([id*="resonance-count"])');
 
     if (isResonated) {
-      btn.classList.add('border-red-500/50', 'bg-red-500/15', 'text-red-400', 'is-aligned');
-      btn.classList.remove('border-white/8', 'border-white/10', 'text-slate-300');
+      btn.classList.add('border-danger/50', 'bg-danger/15', 'text-danger', 'is-aligned');
+      btn.classList.remove('border-line', 'border-line', 'text-ink');
       if (label) label.textContent = 'Souls Aligned';
       const icon = btn.querySelector('i, svg');
       if (icon) {
-        icon.classList.remove('text-slate-400', 'text-slate-500');
-        icon.classList.add('text-red-500', 'fill-red-500');
+        icon.classList.remove('text-ink-soft', 'text-muted');
+        icon.classList.add('text-danger', 'fill-danger');
         icon.setAttribute('fill', 'currentColor');
         icon.style.fill = 'currentColor';
       }
     } else {
-      btn.classList.remove('border-red-500/50', 'bg-red-500/15', 'text-red-400', 'is-aligned');
-      btn.classList.add('border-white/8', 'text-slate-300');
+      btn.classList.remove('border-danger/50', 'bg-danger/15', 'text-danger', 'is-aligned');
+      btn.classList.add('border-line', 'text-ink');
       if (label) label.textContent = 'Align Souls';
       const icon = btn.querySelector('i, svg');
       if (icon) {
-        icon.classList.remove('text-red-500', 'fill-red-500');
-        icon.classList.add('text-slate-400');
+        icon.classList.remove('text-danger', 'fill-danger');
+        icon.classList.add('text-ink-soft');
         icon.setAttribute('fill', 'none');
         icon.style.fill = 'none';
       }
@@ -367,8 +366,8 @@ export async function renderTale(userId, tale, taleId, isResonated = false) {
     resonanceBtns.forEach((btn) => {
       const renderedSvg = btn.querySelector('svg');
       if (renderedSvg) {
-        renderedSvg.classList.remove('text-slate-400', 'text-slate-500');
-        renderedSvg.classList.add('text-red-500', 'fill-red-500');
+        renderedSvg.classList.remove('text-ink-soft', 'text-muted');
+        renderedSvg.classList.add('text-danger', 'fill-danger');
         renderedSvg.setAttribute('fill', 'currentColor');
         renderedSvg.style.fill = 'currentColor';
       }
@@ -395,7 +394,7 @@ export function renderChapters(userId, chapters, taleId, sortOrder = null) {
 
   if (!chapters.length) {
     log.info('No chapters found to render');
-    list.innerHTML = `<div class="glass p-8 sm:p-12 rounded-2xl text-center text-slate-500 text-[11px] font-bold uppercase tracking-widest">No chronicles detected in this archive.</div>`;
+    list.innerHTML = `<div class="glass p-8 sm:p-12 rounded-2xl text-center text-muted text-[11px] font-bold uppercase tracking-widest">No chronicles detected in this archive.</div>`;
     return;
   }
 
@@ -418,27 +417,27 @@ export function renderChapters(userId, chapters, taleId, sortOrder = null) {
       if (isCompleted) completedCount++;
 
       let icon = 'circle';
-      let iconCls = 'text-slate-400';
+      let iconCls = 'text-ink-soft';
 
       if (state === 'in_progress') {
         icon = 'clock';
-        iconCls = 'text-amber-400';
+        iconCls = 'text-rune';
       }
 
       if (state === 'completed') {
         icon = 'check-circle-2';
-        iconCls = 'text-emerald-400';
+        iconCls = 'text-success';
       }
 
       return `
-        <div data-chapter-index="${idx}" class="chapter-item ${state} glass-card p-3.5 sm:p-4 rounded-2xl flex items-center justify-between gap-3 group cursor-pointer hover:border-indigo-500/30 transition-all">
+        <div data-chapter-index="${idx}" class="chapter-item ${state} glass-card p-3.5 sm:p-4 rounded-2xl flex items-center justify-between gap-3 group cursor-pointer hover:border-accent-line transition-all">
           <div class="flex items-center gap-3 sm:gap-3.5 min-w-0">
-            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/4 border border-white/6 flex items-center justify-center text-xs font-bold text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-all shrink-0">
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-surface-1 border border-line-subtle flex items-center justify-center text-xs font-bold text-accent-tint group-hover:bg-accent group-hover:text-on-accent transition-all shrink-0">
               ${String(idx + 1).padStart(2, '0')}
             </div>
             <div class="min-w-0">
               <div class="flex items-center gap-2 mb-0.5">
-                <span class="text-[11px] font-black text-indigo-400/70 uppercase tracking-[0.2em] block">Scroll #${idx + 1}</span>
+                <span class="text-[11px] font-black text-accent-tint/70 uppercase tracking-[0.2em] block">Scroll #${idx + 1}</span>
               </div>
               <h4 class="text-xs sm:text-sm font-bold text-[var(--text-primary)] uppercase tracking-tight truncate">${escapeHtml(ch.title || 'Untitled')}</h4>
             </div>
@@ -450,7 +449,7 @@ export function renderChapters(userId, chapters, taleId, sortOrder = null) {
               data-action="download-chapter"
               data-chapter-index="${idx}"
               title="Download fragment (.md)"
-              class="p-2 rounded-xl border border-white/6 bg-white/3 hover:bg-white/10 hover:border-white/15 text-muted hover:text-[var(--text-primary)] transition-all cursor-pointer active:scale-95"
+              class="p-2 rounded-xl border border-line-subtle bg-surface-1 hover:bg-surface-2 hover:border-line-strong text-muted hover:text-[var(--text-primary)] transition-all cursor-pointer active:scale-95"
             >
               <i data-lucide="download" class="w-3.5 h-3.5"></i>
             </button>
@@ -460,9 +459,9 @@ export function renderChapters(userId, chapters, taleId, sortOrder = null) {
               data-action="${isCompleted ? 'mark-unread' : 'mark-read'}"
               data-chapter-index="${idx}"
               title="${isCompleted ? 'Mark as unread' : 'Mark as read'}"
-              class="px-2.5 py-1.5 rounded-xl border ${isCompleted ? 'border-white/8 bg-white/4 hover:bg-white/10 text-slate-300 hover:text-white' : 'border-indigo-500/20 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 hover:text-white'} text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+              class="px-2.5 py-1.5 rounded-xl border ${isCompleted ? 'border-line bg-surface-1 hover:bg-surface-2 text-ink hover:text-ink' : 'border-accent-line bg-accent-soft hover:bg-accent-soft text-accent-tint hover:text-ink'} text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
             >
-              <i data-lucide="${isCompleted ? 'rotate-ccw' : 'check'}" class="w-3.5 h-3.5 ${isCompleted ? 'text-slate-400' : 'text-emerald-400'}"></i>
+              <i data-lucide="${isCompleted ? 'rotate-ccw' : 'check'}" class="w-3.5 h-3.5 ${isCompleted ? 'text-ink-soft' : 'text-success'}"></i>
               <span class="hidden md:inline">${isCompleted ? 'Unread' : 'Mark Read'}</span>
             </button>
             <!-- Status Icon -->

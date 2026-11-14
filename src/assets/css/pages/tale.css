@@ -792,7 +792,7 @@
   display: none !important;
 }
 
-[data-app-theme='light'] #hero-section span.bg-indigo-500\/10 {
+[data-app-theme='light'] #hero-section span.bg-accent\/10 {
   background: var(--accent-subtle) !important;
   border-color: var(--border-accent) !important;
   color: var(--accent) !important;
@@ -1119,13 +1119,13 @@
   color: var(--accent) !important;
 }
 
-[data-app-theme='light'] .comment-card .text-slate-400,
-[data-app-theme='light'] .comment-card .text-slate-500 {
+[data-app-theme='light'] .comment-card .text-ink-soft,
+[data-app-theme='light'] .comment-card .text-muted {
   color: var(--text-muted) !important;
 }
 
-[data-app-theme='light'] .comment-card .text-slate-200,
-[data-app-theme='light'] .comment-card .text-slate-300 {
+[data-app-theme='light'] .comment-card .text-ink,
+[data-app-theme='light'] .comment-card .text-ink {
   color: var(--text-primary) !important;
 }
 
@@ -1156,12 +1156,12 @@
   color: var(--accent) !important;
 }
 
-[data-app-theme='light'] #content-letter .text-slate-300,
-[data-app-theme='light'] #content-letter .text-slate-400 {
+[data-app-theme='light'] #content-letter .text-ink,
+[data-app-theme='light'] #content-letter .text-ink-soft {
   color: var(--text-secondary) !important;
 }
 
-[data-app-theme='light'] #content-letter .text-slate-500 {
+[data-app-theme='light'] #content-letter .text-muted {
   color: var(--text-muted) !important;
 }
 

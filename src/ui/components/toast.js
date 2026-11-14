@@ -107,10 +107,10 @@ export function showToast(message, typeOrOptions = 'success', extraOptions = {})
     options.duration !== undefined ? options.duration : options.persistent ? 0 : TOAST_DURATION;
 
   const colorMap = {
-    success: 'border-emerald-500/20 text-emerald-400 bg-emerald-500/5 toast-card--success',
-    error: 'border-rose-500/20 text-rose-400 bg-rose-500/5 toast-card--error',
-    info: 'border-indigo-500/20 text-indigo-400 bg-indigo-500/5 toast-card--info',
-    warning: 'border-amber-500/20 text-amber-400 bg-amber-500/5 toast-card--warning',
+    success: 'border-success/20 text-success bg-success/5 toast-card--success',
+    error: 'border-danger/20 text-danger bg-danger/5 toast-card--error',
+    info: 'border-accent-line text-accent-tint bg-accent-soft toast-card--info',
+    warning: 'border-rune/20 text-rune bg-rune/5 toast-card--warning',
   };
 
   const iconMap = {

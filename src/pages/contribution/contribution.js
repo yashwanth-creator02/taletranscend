@@ -249,12 +249,12 @@ function bindMetadataEvents() {
 
       // Update button styles
       document.querySelectorAll('[data-visibility]').forEach((b) => {
-        b.classList.toggle('border-indigo-500/50', b.dataset.visibility === value);
-        b.classList.toggle('bg-slate-800', b.dataset.visibility === value);
-        b.classList.toggle('text-white', b.dataset.visibility === value);
-        b.classList.toggle('border-slate-800', b.dataset.visibility !== value);
-        b.classList.toggle('bg-slate-900', b.dataset.visibility !== value);
-        b.classList.toggle('text-slate-500', b.dataset.visibility !== value);
+        b.classList.toggle('border-accent-line', b.dataset.visibility === value);
+        b.classList.toggle('bg-surface-3', b.dataset.visibility === value);
+        b.classList.toggle('text-ink', b.dataset.visibility === value);
+        b.classList.toggle('border-line-strong', b.dataset.visibility !== value);
+        b.classList.toggle('bg-surface-3', b.dataset.visibility !== value);
+        b.classList.toggle('text-muted', b.dataset.visibility !== value);
       });
 
       state.isDirty = true;
@@ -581,7 +581,7 @@ export function updateChecklist() {
 
     if (icon) {
       icon.setAttribute('data-lucide', passed ? 'check-circle-2' : 'circle');
-      icon.className = `h-4 w-4 ${passed ? 'text-emerald-400' : 'text-zinc-600'}`;
+      icon.className = `h-4 w-4 ${passed ? 'text-success' : 'text-faint'}`;
     }
 
     item.classList.toggle('opacity-50', !passed);
@@ -606,12 +606,12 @@ export function setStatus(message, type) {
   status.className = status.className.replace(/text-\w+-\d+/g, '').trim();
 
   const colors = {
-    success: 'text-emerald-400',
-    error: 'text-red-400',
-    neutral: 'text-zinc-500',
+    success: 'text-success',
+    error: 'text-danger',
+    neutral: 'text-muted',
   };
 
-  status.classList.add(colors[type] ?? 'text-zinc-500');
+  status.classList.add(colors[type] ?? 'text-muted');
   status.textContent = message;
 }
 

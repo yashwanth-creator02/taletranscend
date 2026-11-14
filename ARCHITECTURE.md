@@ -108,12 +108,20 @@ example, added because the profile page's motion needed a step the
 original four-step duration scale didn't have) — not be worked around with
 a page-local re-declaration of the same name.
 
-**Known gap (measured 2026-11-13):** roughly 70% of spacing declarations and
-49% of radius declarations in page stylesheets still bypass the token layer,
-and `lint:tokens` only scans `.css` — so the ~800 hardcoded design values in
-markup sit outside the guardrail entirely. The light theme consequently has
-146 measured WCAG AA contrast failures. Read `docs/DESIGN_AUDIT.md` before
-adding a new page stylesheet.
+**Known gap (measured 2026-11-13, partially closed 2026-11-15):** roughly 70%
+of spacing declarations and 49% of radius declarations in page stylesheets
+still bypass the token layer, and raw colour literals in markup (199 hex, 153
+`rgba()`) are outside the guardrail. `lint:tokens` now also scans `.html`,
+`.js` and `.ts` for stock Tailwind palette utilities, which is why the
+146 measured light-theme contrast failures are resolved rather than merely
+documented — but spacing, radius and markup-level hex are still unguarded.
+Read `docs/DESIGN_AUDIT.md` (and its §13.1 remediation log) before adding a
+new page stylesheet.
+
+Tailwind scans `src/**` explicitly via `@source '../../**/*.{js,ts,html}';` in
+`base.css`. Do not remove it: `vite.config.js` sets `root` to `src/views`, and
+without the directive every utility class written in `src/pages/**`,
+`src/ui/**` or `src/services/**` is silently dropped from the build.
 
 ### Multi-Theme System
 

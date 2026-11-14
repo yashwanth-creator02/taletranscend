@@ -563,7 +563,7 @@ export function renderFonts(activeFont) {
           style="font-family: ${font.css};"
           >Aa</span
         >
-        <i data-lucide="check" class="w-4 h-4 text-indigo-400 font-check ${isActive ? '' : 'hidden'}"></i>
+        <i data-lucide="check" class="w-4 h-4 text-accent-tint font-check ${isActive ? '' : 'hidden'}"></i>
       </button>
     `;
     })

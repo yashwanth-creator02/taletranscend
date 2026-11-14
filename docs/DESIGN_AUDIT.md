@@ -326,6 +326,8 @@ A single page's stylesheet is 2.6× the size of the entire design system. This i
 
 Ordered by impact per day of effort. Phases 0 and 1 are what I would do first.
 
+Status as of 2026-11-15: **phases 0 and 1 are done** — see §13.1. Phases 2–8 are open.
+
 | Phase | Work                                                                                                                                         | Effort | Closes                |
 | ----- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------ | --------------------- |
 | **0** | Light theme: replace palette classes with semantic utilities; re-derive the 5 failing tokens; make `color-scheme`/`theme-color` theme-driven | 2–3 d  | 146 WCAG failures, §3 |
@@ -339,6 +341,47 @@ Ordered by impact per day of effort. Phases 0 and 1 are what I would do first.
 | **8** | Token layering, dedupe fonts, CSS weight                                                                                                     | 1–2 d  | §11, §12              |
 
 Total: roughly **2.5–3 weeks** of focused work for a fully consistent, AA-compliant UI.
+
+### 13.1 What phase 0 and 1 actually changed (2026-11-15)
+
+**A latent build bug, found while verifying the fix.** `vite.config.js` sets
+`root` to `src/views`, and Tailwind v4 derives its automatic content scan from
+the Vite root. The result was that no utility class written inside
+`src/pages/**/*.js`, `src/ui/**` or `src/services/**` was ever generated: the
+class name appeared in the DOM and no rule existed for it. `base.css` now
+declares the real source tree explicitly:
+
+```css
+@source '../../**/*.{js,ts,html}';
+```
+
+Verified by building before and after — `bg-danger`, `bg-rune`, `ring-accent`
+and `fill-danger` were absent from `dist/assets/*.css` before the directive and
+present after. Any styling defect that only appears in JS-rendered markup
+should be re-measured after this, because the previous measurements were taken
+against a stylesheet that was missing those rules.
+
+**Palette → semantic codemod.** Every stock Tailwind palette utility in `src`
+(including the tinted washes such as `bg-amber-500/10`) was replaced with its
+semantic equivalent: `slate/zinc/gray → ink / line / surface`,
+`indigo → accent`, `amber → rune`, `emerald → success`, `rose/red → danger`,
+`violet/purple → accent-2`, `orange/yellow → warning`, `sky/blue → info`.
+Alpha suffixes were preserved, since Tailwind resolves `<token>/<alpha>`
+through `color-mix` and needs no extra token per opacity step. Residual count
+outside `__tests__` is zero.
+
+**Token re-derivation.** `--success`, `--rune` and `--danger` (light theme) were
+the three tokens failing AA on their own surfaces at 2.06, 2.88 and 3.40. They
+were re-derived against the parchment floor rather than patched per call site.
+
+**Guardrail.** `scripts/lint-tokens.mjs` now scans `.html`, `.js` and `.ts` in
+addition to `.css` for stock palette utilities, with block comments blanked so
+migration notes can still name the old classes. Negative-tested: a re-inserted
+`text-slate-400` fails the lint.
+
+Still outside the guardrail, and still open: raw hex/`rgba()` literals in
+markup (199 hex + 153 `rgba()` occurrences), spacing and radius literals in
+page stylesheets, and the `rgb(R G B)` space form in CSS.
 
 ---
 

@@ -61,7 +61,7 @@ describe('geminiModal component', () => {
 
       const badge = document.getElementById('gemini-modal-status-badge');
       expect(badge?.textContent).toBe('Not Configured');
-      expect(badge?.className).toContain('text-amber-400');
+      expect(badge?.className).toContain('text-rune');
     });
 
     it('populates input and displays Configured badge when key exists', () => {
@@ -73,7 +73,7 @@ describe('geminiModal component', () => {
 
       expect(input?.value).toBe('AIzaSyExistingKey123');
       expect(badge?.textContent).toBe('Configured');
-      expect(badge?.className).toContain('text-emerald-400');
+      expect(badge?.className).toContain('text-success');
     });
   });
 

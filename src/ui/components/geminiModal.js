@@ -28,8 +28,8 @@ const MODAL_HTML = `
     <div class="gemini-modal-card settings-modal-card">
       <header class="gemini-modal-header settings-modal-header">
         <div class="flex items-center gap-2.5">
-          <div class="w-7 h-7 rounded-lg flex items-center justify-center bg-amber-500/10 border border-amber-500/20 text-amber-400">
-            <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+          <div class="w-7 h-7 rounded-lg flex items-center justify-center bg-rune/10 border border-rune/20 text-rune">
+            <i data-lucide="sparkles" class="w-4 h-4 text-rune"></i>
           </div>
           <div>
             <h3 id="modal-gemini-title" class="gemini-modal-title settings-modal-title">Google API Key</h3>
@@ -48,10 +48,10 @@ const MODAL_HTML = `
 
       <div class="gemini-modal-body settings-modal-body space-y-4">
         <div class="gemini-info-box settings-info-box">
-          <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
-          <div class="text-xs text-slate-300 space-y-1">
-            <p class="font-semibold text-slate-100">Stored locally</p>
-            <p class="text-slate-400 text-[11px] leading-relaxed">
+          <i data-lucide="shield-check" class="w-4 h-4 text-success shrink-0 mt-0.5"></i>
+          <div class="text-xs text-ink space-y-1">
+            <p class="font-semibold text-ink">Stored locally</p>
+            <p class="text-ink-soft text-[11px] leading-relaxed">
               Your key is stored only in this browser's local storage. It is never sent to
               TaleTranscend servers, and it communicates directly with Google's Gemini API.
             </p>
@@ -60,14 +60,14 @@ const MODAL_HTML = `
 
         <div class="space-y-1.5">
           <div class="flex items-center justify-between">
-            <label for="input-gemini-key-modal" class="text-xs font-semibold text-slate-200">
+            <label for="input-gemini-key-modal" class="text-xs font-semibold text-ink">
               Google API Key
             </label>
             <a
               href="https://aistudio.google.com/app/apikey"
               target="_blank"
               rel="noopener noreferrer"
-              class="text-[11px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-medium"
+              class="text-[11px] text-accent-tint hover:text-accent-tint flex items-center gap-1 font-medium"
             >
               Get free key from Google AI Studio
               <i data-lucide="external-link" class="w-2.5 h-2.5"></i>
@@ -91,11 +91,11 @@ const MODAL_HTML = `
               Show
             </button>
           </div>
-          <div class="flex items-center justify-between text-[11px] text-slate-400 pt-0.5">
+          <div class="flex items-center justify-between text-[11px] text-ink-soft pt-0.5">
             <p id="gemini-modal-status-text">
-              Status: <span id="gemini-modal-status-badge" class="font-semibold text-amber-400">Not Configured</span>
+              Status: <span id="gemini-modal-status-badge" class="font-semibold text-rune">Not Configured</span>
             </p>
-            <p id="modal-gemini-hint" class="text-[11px] text-slate-500 font-mono">
+            <p id="modal-gemini-hint" class="text-[11px] text-muted font-mono">
               Prefix: AIzaSy…
             </p>
           </div>
@@ -159,10 +159,10 @@ function _updateStatusBadge(modal) {
   if (badge) {
     if (key) {
       badge.textContent = 'Configured';
-      badge.className = 'font-semibold text-emerald-400';
+      badge.className = 'font-semibold text-success';
     } else {
       badge.textContent = 'Not Configured';
-      badge.className = 'font-semibold text-amber-400';
+      badge.className = 'font-semibold text-rune';
     }
   }
 }

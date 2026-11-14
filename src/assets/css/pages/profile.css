@@ -1448,11 +1448,11 @@ a:focus-visible,
   border-color: rgb(var(--accent-rgb) / var(--a-08));
 }
 
-[data-app-theme='light'] #btn-upgrade-account .text-indigo-300 {
+[data-app-theme='light'] #btn-upgrade-account .text-accent-tint {
   color: var(--text-primary);
 }
 
-[data-app-theme='light'] #btn-upgrade-account .text-indigo-500\/70 {
+[data-app-theme='light'] #btn-upgrade-account .text-accent\/70 {
   color: var(--accent);
 }
 

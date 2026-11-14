@@ -228,7 +228,7 @@
         <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
           <span
             id="stat-status"
-            class="hidden 2xl:inline-block text-[10px] font-bold uppercase tracking-[0.22em] text-zinc-400"
+            class="hidden 2xl:inline-block text-[10px] font-bold uppercase tracking-[0.22em] text-ink-soft"
             aria-live="polite"
           >
             Ready
@@ -270,7 +270,7 @@
         <div class="space-y-4">
           <div class="flex items-center justify-between pb-2 border-b border-line">
             <div>
-              <p class="text-[11px] font-black uppercase tracking-[0.28em] text-indigo-400">
+              <p class="text-[11px] font-black uppercase tracking-[0.28em] text-accent-tint">
                 Manuscript Codex
               </p>
               <h1
@@ -293,7 +293,7 @@
           <button
             id="add-chapter-btn"
             type="button"
-            class="inline-flex w-full items-center justify-center gap-2 rounded-xs border border-dashed border-line bg-surface-1 py-2.5 text-[11px] font-bold text-secondary transition hover:border-indigo-400/40 hover:bg-surface-2 hover:text-[var(--text-primary)]"
+            class="inline-flex w-full items-center justify-center gap-2 rounded-xs border border-dashed border-line bg-surface-1 py-2.5 text-[11px] font-bold text-secondary transition hover:border-accent-line hover:bg-surface-2 hover:text-[var(--text-primary)]"
           >
             <i data-lucide="plus" class="h-3.5 w-3.5"></i>
             Add New Chapter
@@ -302,14 +302,14 @@
           <!-- Quick Metrics Card -->
           <div class="mt-6 rounded-2xl border border-line bg-surface-2 p-3.5">
             <div class="flex items-center justify-between mb-2">
-              <span class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">
+              <span class="text-[11px] font-black uppercase tracking-[0.2em] text-muted">
                 Live Inscription
               </span>
-              <i data-lucide="sparkles" class="h-3 w-3 text-amber-400"></i>
+              <i data-lucide="sparkles" class="h-3 w-3 text-rune"></i>
             </div>
             <div class="grid grid-cols-2 gap-2 text-center">
-              <div class="rounded-lg bg-white/2 p-2 border border-white/4">
-                <p class="text-[11px] uppercase tracking-wider text-slate-500">Words</p>
+              <div class="rounded-lg bg-surface-1 p-2 border border-line-subtle">
+                <p class="text-[11px] uppercase tracking-wider text-muted">Words</p>
                 <p
                   id="stat-words-right"
                   class="text-sm font-bold text-[var(--text-primary)] mt-0.5"
@@ -317,8 +317,8 @@
                   0
                 </p>
               </div>
-              <div class="rounded-lg bg-white/2 p-2 border border-white/4">
-                <p class="text-[11px] uppercase tracking-wider text-slate-500">Read Time</p>
+              <div class="rounded-lg bg-surface-1 p-2 border border-line-subtle">
+                <p class="text-[11px] uppercase tracking-wider text-muted">Read Time</p>
                 <p
                   id="stat-reading-time"
                   class="text-sm font-bold text-[var(--text-primary)] mt-0.5"
@@ -332,7 +332,7 @@
               class="mt-2.5 pt-2.5 border-t border-line text-[11px] text-muted flex items-center justify-between"
             >
               <span>Goal: 800–2,000 words</span>
-              <span id="stat-word-goal-status" class="text-indigo-400 font-bold">Inscribing</span>
+              <span id="stat-word-goal-status" class="text-accent-tint font-bold">Inscribing</span>
             </div>
           </div>
 
@@ -347,7 +347,7 @@
               class="w-full flex items-center justify-between font-bold text-ink uppercase tracking-wider text-[10px] py-1 min-h-6"
               aria-expanded="true"
             >
-              <span class="flex items-center gap-1.5 text-indigo-400">
+              <span class="flex items-center gap-1.5 text-accent-tint">
                 <i data-lucide="book-open" class="h-3.5 w-3.5"></i>
                 Scribe's Primer
               </span>
@@ -386,7 +386,7 @@
               <span
                 class="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-accent-light"
               >
-                <i data-lucide="sparkles" class="h-3.5 w-3.5 text-amber-400"></i>
+                <i data-lucide="sparkles" class="h-3.5 w-3.5 text-rune"></i>
                 Google Gemini
               </span>
               <span class="text-[11px] uppercase tracking-widest text-muted">Gemini 2.0</span>
@@ -400,7 +400,7 @@
                 title="Generate a title from your synopsis"
               >
                 <span class="flex items-center gap-2">
-                  <i data-lucide="type" class="h-3.5 w-3.5 text-indigo-400"></i>
+                  <i data-lucide="type" class="h-3.5 w-3.5 text-accent-tint"></i>
                   Suggest Title
                 </span>
                 <i data-lucide="chevron-right" class="h-3 w-3 text-muted"></i>
@@ -413,7 +413,7 @@
                 title="Refine selected text with Google Gemini"
               >
                 <span class="flex items-center gap-2">
-                  <i data-lucide="wand-2" class="h-3.5 w-3.5 text-indigo-400"></i>
+                  <i data-lucide="wand-2" class="h-3.5 w-3.5 text-accent-tint"></i>
                   Refine Passage
                 </span>
                 <i data-lucide="chevron-right" class="h-3 w-3 text-muted"></i>
@@ -426,7 +426,7 @@
                 title="Generate the next 150-250 words of the chronicle"
               >
                 <span class="flex items-center gap-2">
-                  <i data-lucide="feather" class="h-3.5 w-3.5 text-indigo-400"></i>
+                  <i data-lucide="feather" class="h-3.5 w-3.5 text-accent-tint"></i>
                   Continue Writing
                 </span>
                 <i data-lucide="chevron-right" class="h-3 w-3 text-muted"></i>
@@ -437,7 +437,7 @@
               class="pt-1.5 border-t border-line flex items-center justify-between text-[11px] text-muted"
             >
               <span>Powered by Gemini</span>
-              <a href="/settings.html#general" class="text-indigo-400 hover:underline"
+              <a href="/settings.html#general" class="text-accent-tint hover:underline"
                 >Google API Key</a
               >
             </div>
@@ -455,13 +455,13 @@
           <div class="manuscript-card flex flex-col md:flex-row overflow-hidden">
             <!-- Attached Manuscript Tool Sidebar -->
             <aside
-              class="manuscript-tools-sidebar flex flex-row md:flex-col items-center justify-between md:justify-start gap-1 sm:gap-2 p-2.5 sm:p-3 border-b md:border-b-0 md:border-r border-white/6 shrink-0"
+              class="manuscript-tools-sidebar flex flex-row md:flex-col items-center justify-between md:justify-start gap-1 sm:gap-2 p-2.5 sm:p-3 border-b md:border-b-0 md:border-r border-line-subtle shrink-0"
               aria-label="Manuscript Inscription Tools"
             >
               <div
-                class="hidden md:flex flex-col items-center py-1.5 border-b border-white/6 w-full mb-1"
+                class="hidden md:flex flex-col items-center py-1.5 border-b border-line-subtle w-full mb-1"
               >
-                <span class="text-[11px] font-black uppercase tracking-[0.22em] text-slate-500">
+                <span class="text-[11px] font-black uppercase tracking-[0.22em] text-muted">
                   Tools
                 </span>
               </div>
@@ -543,7 +543,7 @@
                 <div
                   class="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent"
                 ></div>
-                <span class="text-[10px] font-mono tracking-widest text-amber-400/40">✦ ✦ ✦</span>
+                <span class="text-[10px] font-mono tracking-widest text-rune/40">✦ ✦ ✦</span>
                 <div
                   class="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent"
                 ></div>
@@ -561,16 +561,16 @@
 
               <!-- Manuscript HUD & Mobile Controls -->
               <div
-                class="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-white/6 pt-5"
+                class="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-line-subtle pt-5"
               >
                 <div
-                  class="flex flex-wrap items-center gap-4 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500"
+                  class="flex flex-wrap items-center gap-4 text-[10px] font-bold uppercase tracking-[0.2em] text-muted"
                 >
                   <span id="stat-words">0 Words</span>
-                  <span class="h-3 w-px bg-white/10"></span>
+                  <span class="h-3 w-px bg-surface-2"></span>
                   <span id="stat-chars">0 Characters</span>
-                  <span class="h-3 w-px bg-white/10"></span>
-                  <span class="rounded-full bg-white/3 px-2 py-0.5 text-slate-400">
+                  <span class="h-3 w-px bg-surface-2"></span>
+                  <span class="rounded-full bg-surface-1 px-2 py-0.5 text-ink-soft">
                     Auto-saved locally
                   </span>
                 </div>
@@ -580,14 +580,14 @@
                   <button
                     id="save-draft-btn-mobile"
                     type="button"
-                    class="rounded-xl border border-white/10 bg-white/4 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400"
+                    class="rounded-xl border border-line bg-surface-1 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-ink-soft"
                   >
                     Save
                   </button>
                   <button
                     id="publish-btn-mobile"
                     type="button"
-                    class="rounded-xl bg-indigo-600 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-white"
+                    class="rounded-xl bg-accent px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-on-accent"
                   >
                     <span data-label="Post">Post</span>
                   </button>
@@ -609,7 +609,7 @@
           <section class="atelier-card rounded-3xl p-5">
             <div class="mb-4 flex items-center justify-between">
               <div>
-                <p class="text-[11px] font-black uppercase tracking-[0.28em] text-indigo-400">
+                <p class="text-[11px] font-black uppercase tracking-[0.28em] text-accent-tint">
                   Grimoire Artwork
                 </p>
                 <h2 class="mt-0.5 text-sm font-semibold text-[var(--text-primary)]">Tome Cover</h2>
@@ -619,7 +619,7 @@
                 type="button"
                 class="inline-flex items-center gap-1.5 rounded-xs border border-line bg-surface-2 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-secondary transition hover:bg-surface-3 hover:text-[var(--text-primary)]"
               >
-                <i data-lucide="sparkles" class="h-3 w-3 text-amber-400"></i>
+                <i data-lucide="sparkles" class="h-3 w-3 text-rune"></i>
                 Suggest
               </button>
             </div>
@@ -636,7 +636,7 @@
                 class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none"
               ></div>
               <span
-                class="absolute left-3 top-3 rounded-full border border-white/10 bg-black/60 px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-white/80"
+                class="absolute left-3 top-3 rounded-full border border-line bg-black/60 px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.2em] text-white/80"
               >
                 Manuscript Cover
               </span>
@@ -644,7 +644,7 @@
               <!-- Voice Dictation for cover -->
               <button
                 type="button"
-                class="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-black/60 text-white transition hover:bg-white/20"
+                class="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full border border-line bg-black/60 text-ink transition hover:bg-surface-3"
                 aria-label="Voice input for cover prompt"
                 data-voice-target="cover-url"
                 data-voice-label="Voice cover"
@@ -655,7 +655,7 @@
 
             <!-- 1-Click Curated Mythic Placeholder Covers -->
             <div class="mt-3">
-              <p class="mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
+              <p class="mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted">
                 1-Click Preset Covers
               </p>
               <div class="flex flex-wrap gap-2">
@@ -664,7 +664,7 @@
                   class="cover-preset-chip"
                   data-preset-cover="/images/placeholders/mythic-temple.jpg"
                 >
-                  <i data-lucide="image" class="h-3 w-3 text-amber-400"></i>
+                  <i data-lucide="image" class="h-3 w-3 text-rune"></i>
                   <span>Mythic Temple</span>
                 </button>
                 <button
@@ -672,7 +672,7 @@
                   class="cover-preset-chip"
                   data-preset-cover="/images/placeholders/celestial-spire.jpg"
                 >
-                  <i data-lucide="image" class="h-3 w-3 text-indigo-400"></i>
+                  <i data-lucide="image" class="h-3 w-3 text-accent-tint"></i>
                   <span>Celestial Spire</span>
                 </button>
                 <button
@@ -680,7 +680,7 @@
                   class="cover-preset-chip"
                   data-preset-cover="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200&auto=format&fit=crop"
                 >
-                  <i data-lucide="image" class="h-3 w-3 text-emerald-400"></i>
+                  <i data-lucide="image" class="h-3 w-3 text-success"></i>
                   <span>Castle Gate</span>
                 </button>
               </div>
@@ -689,7 +689,7 @@
             <!-- Cover URL input -->
             <div class="mt-4 space-y-1.5">
               <label
-                class="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-400"
+                class="text-[11px] font-bold uppercase tracking-[0.22em] text-ink-soft"
                 for="cover-url"
               >
                 Custom Cover URL
@@ -706,7 +706,7 @@
           <!-- Story Core (Title & Synopsis) -->
           <section class="atelier-card rounded-3xl p-5 space-y-4">
             <div>
-              <p class="text-[11px] font-black uppercase tracking-[0.28em] text-indigo-400">
+              <p class="text-[11px] font-black uppercase tracking-[0.28em] text-accent-tint">
                 Core Lore
               </p>
               <h2 class="mt-0.5 text-sm font-semibold text-[var(--text-primary)]">Story Genesis</h2>
@@ -715,7 +715,7 @@
             <div class="space-y-1.5">
               <div class="flex items-center justify-between">
                 <label
-                  class="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-400"
+                  class="text-[11px] font-bold uppercase tracking-[0.22em] text-ink-soft"
                   for="tale-title"
                 >
                   Tale Title
@@ -725,7 +725,7 @@
                   type="button"
                   data-voice-target="tale-title"
                   data-voice-label="Dictate Title"
-                  class="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500 hover:text-white"
+                  class="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-[0.16em] text-muted hover:text-ink"
                 >
                   <i data-lucide="mic" class="h-3 w-3"></i>
                   <span>Dictate</span>
@@ -742,7 +742,7 @@
             <div class="space-y-1.5">
               <div class="flex items-center justify-between">
                 <label
-                  class="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-400"
+                  class="text-[11px] font-bold uppercase tracking-[0.22em] text-ink-soft"
                   for="tale-synopsis"
                 >
                   Synopsis & Legend Arc
@@ -752,7 +752,7 @@
                   type="button"
                   data-voice-target="tale-synopsis"
                   data-voice-label="Dictate Synopsis"
-                  class="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500 hover:text-white"
+                  class="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-[0.16em] text-muted hover:text-ink"
                 >
                   <i data-lucide="mic" class="h-3 w-3"></i>
                   <span>Dictate</span>
@@ -770,7 +770,7 @@
           <!-- Classification & World Setting -->
           <section class="atelier-card rounded-3xl p-5 space-y-4">
             <div>
-              <p class="text-[11px] font-black uppercase tracking-[0.28em] text-indigo-400">
+              <p class="text-[11px] font-black uppercase tracking-[0.28em] text-accent-tint">
                 Classification
               </p>
               <h2 class="mt-0.5 text-sm font-semibold text-[var(--text-primary)]">
@@ -781,7 +781,7 @@
             <!-- Era with quick pills -->
             <div class="space-y-2">
               <label
-                class="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-400"
+                class="text-[11px] font-bold uppercase tracking-[0.22em] text-ink-soft"
                 for="tale-era"
               >
                 Mythic Era
@@ -807,7 +807,7 @@
             <div class="space-y-1.5">
               <div class="flex items-center justify-between">
                 <label
-                  class="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-400"
+                  class="text-[11px] font-bold uppercase tracking-[0.22em] text-ink-soft"
                   for="genre-tags"
                 >
                   Genre Runes / Tags
@@ -817,7 +817,7 @@
                   type="button"
                   data-voice-target="genre-tags"
                   data-voice-label="Dictate Tags"
-                  class="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500 hover:text-white"
+                  class="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-[0.16em] text-muted hover:text-ink"
                 >
                   <i data-lucide="mic" class="h-3 w-3"></i>
                   <span>Dictate</span>
@@ -829,14 +829,14 @@
                 placeholder="Folklore, myth, adventure, quest…"
                 class="shelf-input w-full rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-muted"
               />
-              <p class="text-[10px] text-slate-600">Comma-separated tags.</p>
+              <p class="text-[10px] text-faint">Comma-separated tags.</p>
             </div>
 
             <!-- Tone & Language -->
             <div class="grid grid-cols-2 gap-3">
               <div class="space-y-1.5">
                 <label
-                  class="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-400"
+                  class="text-[11px] font-bold uppercase tracking-[0.22em] text-ink-soft"
                   for="story-tone"
                 >
                   Tone
@@ -857,7 +857,7 @@
 
               <div class="space-y-1.5">
                 <label
-                  class="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-400"
+                  class="text-[11px] font-bold uppercase tracking-[0.22em] text-ink-soft"
                   for="story-language"
                 >
                   Language
@@ -881,7 +881,7 @@
             <div class="grid grid-cols-2 gap-3">
               <div class="space-y-1.5">
                 <label
-                  class="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-400"
+                  class="text-[11px] font-bold uppercase tracking-[0.22em] text-ink-soft"
                   for="story-visibility"
                 >
                   Visibility
@@ -898,7 +898,7 @@
 
               <div class="space-y-1.5">
                 <label
-                  class="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-400"
+                  class="text-[11px] font-bold uppercase tracking-[0.22em] text-ink-soft"
                   for="target-audience"
                 >
                   Audience
@@ -920,14 +920,14 @@
             <div class="space-y-1.5 pt-1">
               <div class="flex items-center justify-between">
                 <label
-                  class="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-400"
+                  class="text-[11px] font-bold uppercase tracking-[0.22em] text-ink-soft"
                   for="story-publication-status"
                 >
                   Chronicle Status
                 </label>
                 <span
                   id="publication-status-indicator"
-                  class="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400"
+                  class="flex items-center gap-1.5 text-[10px] font-bold text-success"
                 >
                   <span id="publication-status-text">Ongoing</span>
                 </span>
@@ -941,35 +941,35 @@
                 <option value="hiatus">Hiatus (On Temporary Pause)</option>
                 <option value="cancelled">Cancelled (Stopped)</option>
               </select>
-              <p class="text-[10px] text-slate-500">
+              <p class="text-[10px] text-muted">
                 Signals to readers whether new fragments and chapters are actively being penned.
               </p>
             </div>
 
             <!-- Visibility Toggle Buttons -->
             <div class="space-y-1.5 pt-1">
-              <label class="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
+              <label class="text-[11px] font-bold uppercase tracking-[0.2em] text-muted">
                 Archive Exposure
               </label>
               <div class="grid grid-cols-3 gap-1.5">
                 <button
                   type="button"
                   data-visibility="Public"
-                  class="rounded-xl border border-indigo-500/50 bg-slate-800 px-2 py-2 text-[10px] font-bold text-white transition"
+                  class="rounded-xl border border-accent-line bg-surface-3 px-2 py-2 text-[10px] font-bold text-ink transition"
                 >
                   Public
                 </button>
                 <button
                   type="button"
                   data-visibility="Unlisted"
-                  class="rounded-xl border border-slate-800 bg-slate-900 px-2 py-2 text-[10px] font-bold text-slate-500 transition hover:text-slate-300"
+                  class="rounded-xl border border-line-strong bg-surface-3 px-2 py-2 text-[10px] font-bold text-muted transition hover:text-ink"
                 >
                   Unlisted
                 </button>
                 <button
                   type="button"
                   data-visibility="Draft"
-                  class="rounded-xl border border-slate-800 bg-slate-900 px-2 py-2 text-[10px] font-bold text-slate-500 transition hover:text-slate-300"
+                  class="rounded-xl border border-line-strong bg-surface-3 px-2 py-2 text-[10px] font-bold text-muted transition hover:text-ink"
                 >
                   Draft
                 </button>
@@ -980,7 +980,7 @@
             <div class="space-y-3 pt-2">
               <div class="space-y-1.5">
                 <label
-                  class="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-400"
+                  class="text-[11px] font-bold uppercase tracking-[0.22em] text-ink-soft"
                   for="content-warnings"
                 >
                   Content Warnings
@@ -995,7 +995,7 @@
 
               <div class="space-y-1.5">
                 <label
-                  class="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-400"
+                  class="text-[11px] font-bold uppercase tracking-[0.22em] text-ink-soft"
                   for="world-setting"
                 >
                   World Setting
@@ -1010,7 +1010,7 @@
 
               <div class="space-y-1.5">
                 <label
-                  class="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-400"
+                  class="text-[11px] font-bold uppercase tracking-[0.22em] text-ink-soft"
                   for="story-notes"
                 >
                   Author's Research Notes
@@ -1028,7 +1028,7 @@
           <!-- Archive Seal of Readiness (Checklist) -->
           <section class="atelier-card rounded-3xl p-5 space-y-3">
             <div>
-              <p class="text-[11px] font-black uppercase tracking-[0.28em] text-indigo-400">
+              <p class="text-[11px] font-black uppercase tracking-[0.28em] text-accent-tint">
                 Archive Verification
               </p>
               <h2 class="mt-0.5 text-sm font-semibold text-[var(--text-primary)]">
@@ -1038,20 +1038,18 @@
 
             <div class="space-y-2">
               <div id="check-title-synopsis" class="readiness-seal-card opacity-50">
-                <i data-lucide="circle" class="h-4 w-4 text-zinc-600"></i>
-                <span class="text-xs font-semibold text-slate-300">Title & Synopsis forged</span>
+                <i data-lucide="circle" class="h-4 w-4 text-faint"></i>
+                <span class="text-xs font-semibold text-ink">Title & Synopsis forged</span>
               </div>
 
               <div id="check-cover-era" class="readiness-seal-card opacity-50">
-                <i data-lucide="circle" class="h-4 w-4 text-zinc-600"></i>
-                <span class="text-xs font-semibold text-slate-300">Mythic Era defined</span>
+                <i data-lucide="circle" class="h-4 w-4 text-faint"></i>
+                <span class="text-xs font-semibold text-ink">Mythic Era defined</span>
               </div>
 
               <div id="check-chapter" class="readiness-seal-card opacity-50">
-                <i data-lucide="circle" class="h-4 w-4 text-zinc-600"></i>
-                <span class="text-xs font-semibold text-slate-300"
-                  >Manuscript chapter inscribed</span
-                >
+                <i data-lucide="circle" class="h-4 w-4 text-faint"></i>
+                <span class="text-xs font-semibold text-ink">Manuscript chapter inscribed</span>
               </div>
             </div>
           </section>
@@ -1068,13 +1066,13 @@
       aria-labelledby="wall-modal-title"
     >
       <div
-        class="glass-card-strong w-full max-w-lg p-6 sm:p-8 rounded-3xl border border-white/10 shadow-2xl relative space-y-6"
+        class="glass-card-strong w-full max-w-lg p-6 sm:p-8 rounded-3xl border border-line shadow-2xl relative space-y-6"
       >
         <!-- Header -->
-        <div class="space-y-2 border-b border-white/6 pb-5">
-          <div class="flex items-center gap-2 text-indigo-400">
+        <div class="space-y-2 border-b border-line-subtle pb-5">
+          <div class="flex items-center gap-2 text-accent-tint">
             <i data-lucide="feather" class="w-4 h-4"></i>
-            <span class="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-300">
+            <span class="text-[10px] font-black uppercase tracking-[0.25em] text-accent-tint">
               Scribe Registry Required
             </span>
           </div>
@@ -1096,16 +1094,16 @@
           <div class="space-y-1.5">
             <label
               for="wall-pen-name"
-              class="block text-xs font-bold uppercase tracking-wider text-slate-300"
+              class="block text-xs font-bold uppercase tracking-wider text-ink"
             >
-              Scribe / Pen Name <span class="text-indigo-400">*</span>
+              Scribe / Pen Name <span class="text-accent-tint">*</span>
             </label>
             <input
               type="text"
               id="wall-pen-name"
               required
               maxlength="80"
-              class="shelf-input w-full px-3.5 py-2.5 rounded-xl border border-line bg-surface-2 text-sm text-[var(--text-primary)] placeholder:text-muted focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50"
+              class="shelf-input w-full px-3.5 py-2.5 rounded-xl border border-line bg-surface-2 text-sm text-[var(--text-primary)] placeholder:text-muted focus:border-accent-line focus:ring-1 focus:ring-accent"
               placeholder="e.g. Chronicler Valen"
             />
           </div>
@@ -1113,19 +1111,19 @@
           <div class="space-y-1.5">
             <label
               for="wall-author-email"
-              class="block text-xs font-bold uppercase tracking-wider text-slate-300"
+              class="block text-xs font-bold uppercase tracking-wider text-ink"
             >
-              Author Correspondence Email <span class="text-indigo-400">*</span>
+              Author Correspondence Email <span class="text-accent-tint">*</span>
             </label>
             <input
               type="email"
               id="wall-author-email"
               required
               maxlength="100"
-              class="shelf-input w-full px-3.5 py-2.5 rounded-xl border border-line bg-surface-2 text-sm text-[var(--text-primary)] placeholder:text-muted focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50"
+              class="shelf-input w-full px-3.5 py-2.5 rounded-xl border border-line bg-surface-2 text-sm text-[var(--text-primary)] placeholder:text-muted focus:border-accent-line focus:ring-1 focus:ring-accent"
               placeholder="author@example.com"
             />
-            <p class="text-[10px] text-slate-400 leading-tight">
+            <p class="text-[10px] text-ink-soft leading-tight">
               Inquiries from readers via The Chronicler's Letter will be connected to this address.
             </p>
           </div>
@@ -1133,24 +1131,24 @@
           <div class="space-y-1.5">
             <label
               for="wall-author-bio"
-              class="block text-xs font-bold uppercase tracking-wider text-slate-300"
+              class="block text-xs font-bold uppercase tracking-wider text-ink"
             >
               Scribe Creed / Author Bio
-              <span class="text-slate-500 font-normal text-[10px] lowercase">(optional)</span>
+              <span class="text-muted font-normal text-[10px] lowercase">(optional)</span>
             </label>
             <textarea
               id="wall-author-bio"
               rows="3"
               maxlength="500"
-              class="shelf-input w-full px-3.5 py-2.5 rounded-xl border border-line bg-surface-2 text-sm text-[var(--text-primary)] placeholder:text-muted focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 resize-none"
+              class="shelf-input w-full px-3.5 py-2.5 rounded-xl border border-line bg-surface-2 text-sm text-[var(--text-primary)] placeholder:text-muted focus:border-accent-line focus:ring-1 focus:ring-accent resize-none"
               placeholder="A few words about your chronicles, inspirations, or realm…"
             ></textarea>
           </div>
 
-          <p id="wall-form-error" class="hidden text-xs text-rose-400 font-medium"></p>
+          <p id="wall-form-error" class="hidden text-xs text-danger font-medium"></p>
 
           <!-- Actions -->
-          <div class="flex items-center justify-end gap-3 pt-3 border-t border-white/6">
+          <div class="flex items-center justify-end gap-3 pt-3 border-t border-line-subtle">
             <button
               type="button"
               id="btn-cancel-wall"

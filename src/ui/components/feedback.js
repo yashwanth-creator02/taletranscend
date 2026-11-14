@@ -24,11 +24,11 @@ export function renderEmptyState(
 
   container.innerHTML = `
     <div class="${classes}">
-      <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-white/5">
-        <i data-lucide="${icon}" class="h-6 w-6 text-zinc-500"></i>
+      <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-surface-1">
+        <i data-lucide="${icon}" class="h-6 w-6 text-muted"></i>
       </div>
-      <p class="text-sm font-medium text-zinc-400">${escapeHtml(message)}</p>
-      ${subMessage ? `<p class="mt-2 text-xs text-zinc-600">${escapeHtml(subMessage)}</p>` : ''}
+      <p class="text-sm font-medium text-ink-soft">${escapeHtml(message)}</p>
+      ${subMessage ? `<p class="mt-2 text-xs text-faint">${escapeHtml(subMessage)}</p>` : ''}
     </div>
   `;
 
@@ -50,12 +50,12 @@ export function renderErrorState(
   if (!container) return;
 
   container.innerHTML = `
-    <div class="col-span-full rounded-4xl border border-red-500/10 bg-red-500/5 px-6 py-16 text-center shadow-2xl shadow-black/20 backdrop-blur-xl">
-      <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-500/10">
-        <i data-lucide="triangle-alert" class="h-6 w-6 text-red-400"></i>
+    <div class="col-span-full rounded-4xl border border-danger/10 bg-danger/5 px-6 py-16 text-center shadow-2xl shadow-black/20 backdrop-blur-xl">
+      <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-danger/10">
+        <i data-lucide="triangle-alert" class="h-6 w-6 text-danger"></i>
       </div>
-      <p class="text-sm font-medium text-red-200">${escapeHtml(message)}</p>
-      <p class="mt-2 text-xs text-red-300/70">${escapeHtml(subMessage)}</p>
+      <p class="text-sm font-medium text-danger">${escapeHtml(message)}</p>
+      <p class="mt-2 text-xs text-danger/70">${escapeHtml(subMessage)}</p>
     </div>
   `;
 
@@ -96,7 +96,7 @@ export function renderEmptySearchState(
       (topic) => `
       <button
         type="button"
-        class="empty-search-topic-btn px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-xs text-slate-300 hover:text-white transition-colors"
+        class="empty-search-topic-btn px-3 py-1.5 rounded-lg border border-line bg-surface-1 hover:bg-surface-2 text-xs text-ink hover:text-ink transition-colors"
         data-topic="${escapeHtml(topic)}"
       >
         ${escapeHtml(topic)}
@@ -107,16 +107,16 @@ export function renderEmptySearchState(
 
   container.innerHTML = `
     <div class="col-span-full flex flex-col items-center gap-6 py-20 text-center animate-fade-in max-w-lg mx-auto">
-      <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shadow-2xl">
-        <i data-lucide="compass" class="w-8 h-8 text-indigo-400"></i>
+      <div class="w-16 h-16 rounded-2xl bg-accent-soft border border-accent-line flex items-center justify-center shadow-2xl">
+        <i data-lucide="compass" class="w-8 h-8 text-accent-tint"></i>
       </div>
       <div class="space-y-2">
-        <h3 class="text-xl font-cinzel font-bold text-white tracking-tight">${headingText}</h3>
-        <p class="text-xs text-zinc-400 leading-relaxed font-medium">${subtitleText}</p>
+        <h3 class="text-xl font-cinzel font-bold text-ink tracking-tight">${headingText}</h3>
+        <p class="text-xs text-ink-soft leading-relaxed font-medium">${subtitleText}</p>
       </div>
 
       <div class="w-full pt-2">
-        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-3">Suggested Inscriptions</p>
+        <p class="text-[10px] font-bold uppercase tracking-wider text-muted mb-3">Suggested Inscriptions</p>
         <div class="flex flex-wrap items-center justify-center gap-2">
           ${suggestionsHtml}
         </div>
@@ -126,7 +126,7 @@ export function renderEmptySearchState(
         <button
           type="button"
           id="empty-search-reset-btn"
-          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors shadow-lg shadow-indigo-600/20"
+          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-accent hover:bg-accent text-on-accent text-xs font-semibold transition-colors shadow-lg shadow-indigo-600/20"
         >
           <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
           <span>Browse All Chronicles</span>

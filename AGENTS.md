@@ -47,6 +47,8 @@ This document provides high-signal instructions for agent sessions to quickly un
   - `src/services/`: Business logic and data access.
   - `src/utils/`: TypeScript utility modules.
 - **Pre-commit Hooks**: Husky is configured (`package.json`, `prepare` script) to run linting and formatting on staged files using `lint-staged`.
+- **Tailwind source scanning**: `base.css` declares `@source '../../**/*.{js,ts,html}';` because `vite.config.js` sets Vite `root` to `src/views`. Removing it silently drops every utility class written in `src/pages/**`, `src/ui/**` and `src/services/**` from the build.
+- **Design tokens**: all colour comes from `src/assets/css/tokens.css` via the `@theme inline` bridge in `base.css`. Stock Tailwind palette utilities (`text-slate-400`, `bg-amber-500/10`, …) are banned and `npm run lint:tokens` fails on one in `.css`, `.html`, `.js` or `.ts`.
 
 ---
 

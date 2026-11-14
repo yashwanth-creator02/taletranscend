@@ -46,7 +46,7 @@ describe('Toast Component', () => {
     showToast('Success Message', 'success');
     const container = document.getElementById('mythic-toast-hub');
     expect(container.textContent).toContain('Success Message');
-    const toast = container.querySelector('.text-emerald-400');
+    const toast = container.querySelector('.text-success');
     expect(toast).toBeTruthy();
     expect(initIcons).toHaveBeenCalled();
   });
@@ -78,13 +78,13 @@ describe('Toast Component', () => {
 
   it('handles different toast types', () => {
     showToast('Error', 'error');
-    expect(document.querySelector('.text-rose-400')).toBeTruthy();
+    expect(document.querySelector('.text-danger')).toBeTruthy();
 
     showToast('Info', 'info');
-    expect(document.querySelector('.text-indigo-400')).toBeTruthy();
+    expect(document.querySelector('.text-accent-tint')).toBeTruthy();
 
     showToast('Warning', 'warning');
-    expect(document.querySelector('.text-amber-400')).toBeTruthy();
+    expect(document.querySelector('.text-rune')).toBeTruthy();
   });
 
   it('supports options object as second parameter', () => {
@@ -102,16 +102,16 @@ describe('Toast Component', () => {
 
   it('provides shorthand helpers (success, error, warning, info)', () => {
     showToast.success('Shorthand Success');
-    expect(document.querySelector('.text-emerald-400')).toBeTruthy();
+    expect(document.querySelector('.text-success')).toBeTruthy();
 
     showToast.error('Shorthand Error');
-    expect(document.querySelector('.text-rose-400')).toBeTruthy();
+    expect(document.querySelector('.text-danger')).toBeTruthy();
 
     showToast.warning('Shorthand Warning');
-    expect(document.querySelector('.text-amber-400')).toBeTruthy();
+    expect(document.querySelector('.text-rune')).toBeTruthy();
 
     showToast.info('Shorthand Info');
-    expect(document.querySelector('.text-indigo-400')).toBeTruthy();
+    expect(document.querySelector('.text-accent-tint')).toBeTruthy();
   });
 
   it('pauses timer on hover and resumes on mouseleave', () => {

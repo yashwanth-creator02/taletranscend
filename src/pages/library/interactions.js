@@ -341,16 +341,16 @@ async function _handleMarkFinished(userId, taleId) {
       const badgesContainer = cardEl.querySelector(
         '.flex.items-center.gap-1.sm\\:gap-1\\.5.flex-wrap'
       );
-      if (badgesContainer && !badgesContainer.querySelector('.border-emerald-500\\/20')) {
+      if (badgesContainer && !badgesContainer.querySelector('.border-success\\/20')) {
         const badge = document.createElement('span');
-        badge.className = 'badge bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+        badge.className = 'badge bg-success/10 text-success border-success/20';
         badge.textContent = 'Finished';
         badgesContainer.appendChild(badge);
       }
 
       // 2. Set progress percentage and fill to 100%
       const progressLabel = cardEl.querySelector(
-        '.card-progress-val, .text-indigo-300, .text-accent-tint'
+        '.card-progress-val, .text-accent-tint, .text-accent-tint'
       );
       if (progressLabel) {
         progressLabel.textContent = '100%';
@@ -364,8 +364,8 @@ async function _handleMarkFinished(userId, taleId) {
       const sealBtn = cardEl.querySelector('[data-action="mark-finished"]');
       if (sealBtn) {
         sealBtn.dataset.action = '';
-        sealBtn.classList.remove('text-zinc-300', 'hover:bg-white/10', 'hover:text-white');
-        sealBtn.classList.add('opacity-40', 'text-zinc-600');
+        sealBtn.classList.remove('text-ink', 'hover:bg-surface-2', 'hover:text-ink');
+        sealBtn.classList.add('opacity-40', 'text-faint');
         sealBtn.innerHTML = `<i data-lucide="check-circle" class="h-4 w-4 shrink-0"></i><span>Already Sealed</span>`;
       }
     }
@@ -391,8 +391,8 @@ async function _handleCouple(userId, taleId, btn) {
     await addToBookmarks({ userId: uid, taleId, tale });
     btn.dataset.action = 'decouple';
     btn.innerHTML = `<i data-lucide="bookmark-minus" class="w-3.5 h-3.5"></i> Remove from shelf`;
-    btn.classList.remove('text-emerald-400', 'hover:bg-emerald-500/20');
-    btn.classList.add('text-red-400', 'hover:bg-red-500/20');
+    btn.classList.remove('text-success', 'hover:bg-success/20');
+    btn.classList.add('text-danger', 'hover:bg-danger/20');
     initIcons();
     _closeAllMenus();
     showToast('Added to shelf.', 'success');
@@ -415,8 +415,8 @@ async function _handleDecouple(userId, taleId, btn) {
     await removeFromBookmarks({ userId: uid, taleId });
     btn.dataset.action = 'couple';
     btn.innerHTML = `<i data-lucide="bookmark-plus" class="w-3.5 h-3.5"></i> Add to shelf`;
-    btn.classList.remove('text-red-400', 'hover:bg-red-500/20');
-    btn.classList.add('text-emerald-400', 'hover:bg-emerald-500/20');
+    btn.classList.remove('text-danger', 'hover:bg-danger/20');
+    btn.classList.add('text-success', 'hover:bg-success/20');
     initIcons();
     _closeAllMenus();
     showToast('Removed from shelf.', 'info');

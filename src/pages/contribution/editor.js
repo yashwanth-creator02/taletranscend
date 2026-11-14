@@ -29,7 +29,7 @@ export const autoSaveLocal = debounce(function () {
   const status = document.getElementById('stat-status');
   if (status) {
     status.className = status.className.replace(/text-(indigo|emerald|red|zinc)-\d+/g, '');
-    status.classList.add('text-zinc-500');
+    status.classList.add('text-muted');
     status.textContent = 'Unsaved changes';
   }
 }, 600);

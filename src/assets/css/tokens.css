@@ -430,7 +430,7 @@ html[data-app-theme='light'],
   --accent-rgb: 79 70 229; /* Royal Imperial Indigo                */
   --accent-2-rgb: 109 40 217; /* Deep Royal Violet                 */
   --accent-3-rgb: 180 83 9; /* Burnished Gold                      */
-  --rune-rgb: 217 119 6; /* Warm Amber Rune                        */
+  --rune-rgb: 146 64 14; /* Burnished amber — 6.40:1 on vellum    */
 
   --light-rgb: 26 31 44; /* Dark ink overlay on light ground       */
   --dark-rgb: 0 0 0; /* Drop shadows                               */
@@ -483,6 +483,16 @@ html[data-app-theme='light'],
   --accent-muted: rgb(var(--accent-rgb) / 0.1);
   --accent-active: rgb(var(--accent-rgb) / 0.15);
   --accent-border: rgb(var(--accent-rgb) / 0.3);
+
+  /* Status colours, light-ground values.
+     The dark values (#22c55e, #f59e0b, #ef4444, #38bdf8) are tuned for an
+     obsidian floor and measure 2.06, 2.88, 3.40 and 2.15 against this
+     parchment — every one an AA failure. These are the same hues taken to the
+     dark end of each ramp, measured at 6.44, 6.40, 5.84 and 5.36. */
+  --success: #166534;
+  --warning: #b45309;
+  --danger: #b91c1c;
+  --info: #0369a1;
 
   --accent-gradient: linear-gradient(
     135deg,
@@ -648,7 +658,7 @@ html[data-app-theme='light'],
   /* ══ 3. TYPOGRAPHY ══════════════════════════════════════════════════════ */
 
   --font-display: 'Cinzel', 'Cormorant Garamond', Georgia, serif;
-  --font-serif: 'Cinzel', 'Cormorant Garamond', Georgia, serif;
+  --font-serif: var(--font-display);
   --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
   --font-reading: 'Merriweather', Georgia, 'Times New Roman', serif;

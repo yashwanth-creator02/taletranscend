@@ -136,42 +136,42 @@ function _updateResonanceUI(btn, countEls, active, count) {
     btn.querySelector('.resonance-label') || btn.querySelector('span:not([id*="resonance-count"])');
 
   if (active) {
-    btn.classList.add('border-red-500/50', 'bg-red-500/15', 'text-red-400', 'is-aligned');
+    btn.classList.add('border-danger/50', 'bg-danger/15', 'text-danger', 'is-aligned');
     btn.classList.remove(
-      'border-white/8',
-      'border-white/10',
-      'text-slate-300',
-      'border-orange-500/40',
-      'bg-orange-500/10',
-      'text-orange-300'
+      'border-line',
+      'border-line',
+      'text-ink',
+      'border-warning/40',
+      'bg-warning/10',
+      'text-warning'
     );
 
     const icon = btn.querySelector('i, svg');
     if (icon) {
       icon.setAttribute('data-lucide', 'heart');
-      icon.classList.remove('text-slate-400', 'text-slate-500', 'text-orange-400');
-      icon.classList.add('text-red-500', 'fill-red-500');
+      icon.classList.remove('text-ink-soft', 'text-muted', 'text-warning');
+      icon.classList.add('text-danger', 'fill-danger');
       icon.setAttribute('fill', 'currentColor');
       icon.style.fill = 'currentColor';
     }
     if (label) label.textContent = 'Souls Aligned';
   } else {
     btn.classList.remove(
-      'border-red-500/50',
-      'bg-red-500/15',
-      'text-red-400',
+      'border-danger/50',
+      'bg-danger/15',
+      'text-danger',
       'is-aligned',
-      'border-orange-500/40',
-      'bg-orange-500/10',
-      'text-orange-300'
+      'border-warning/40',
+      'bg-warning/10',
+      'text-warning'
     );
-    btn.classList.add('border-white/8', 'text-slate-300');
+    btn.classList.add('border-line', 'text-ink');
 
     const icon = btn.querySelector('i, svg');
     if (icon) {
       icon.setAttribute('data-lucide', 'heart');
-      icon.classList.remove('text-red-500', 'fill-red-500', 'text-orange-400');
-      icon.classList.add('text-slate-400');
+      icon.classList.remove('text-danger', 'fill-danger', 'text-warning');
+      icon.classList.add('text-ink-soft');
       icon.setAttribute('fill', 'none');
       icon.style.fill = 'none';
     }
@@ -183,13 +183,13 @@ function _updateResonanceUI(btn, countEls, active, count) {
   const renderedSvg = btn.querySelector('svg');
   if (renderedSvg) {
     if (active) {
-      renderedSvg.classList.remove('text-slate-400', 'text-slate-500');
-      renderedSvg.classList.add('text-red-500', 'fill-red-500');
+      renderedSvg.classList.remove('text-ink-soft', 'text-muted');
+      renderedSvg.classList.add('text-danger', 'fill-danger');
       renderedSvg.setAttribute('fill', 'currentColor');
       renderedSvg.style.fill = 'currentColor';
     } else {
-      renderedSvg.classList.remove('text-red-500', 'fill-red-500');
-      renderedSvg.classList.add('text-slate-400');
+      renderedSvg.classList.remove('text-danger', 'fill-danger');
+      renderedSvg.classList.add('text-ink-soft');
       renderedSvg.setAttribute('fill', 'none');
       renderedSvg.style.fill = 'none';
     }
@@ -569,9 +569,9 @@ function _updateShelfUI(btn, shelved) {
   if (icon) icon.setAttribute('data-lucide', shelved ? 'bookmark-check' : 'bookmark-plus');
   btn.classList.toggle('active', shelved);
   if (shelved) {
-    btn.classList.add('border-indigo-500/40', 'bg-indigo-500/10', 'text-indigo-300');
+    btn.classList.add('border-accent-line', 'bg-accent-soft', 'text-accent-tint');
   } else {
-    btn.classList.remove('border-indigo-500/40', 'bg-indigo-500/10', 'text-indigo-300');
+    btn.classList.remove('border-accent-line', 'bg-accent-soft', 'text-accent-tint');
   }
   initIcons(btn);
 }
@@ -714,7 +714,7 @@ export function setupReportMissingTale(taleId) {
     try {
       const confirmed = await showConfirmModal({
         title: 'Report Missing Chronicle',
-        message: `Would you like to dispatch an archival report for unrecorded chronicle <span class="font-mono text-indigo-300 font-semibold">${escapeHtml(taleId || 'Unknown')}</span>?`,
+        message: `Would you like to dispatch an archival report for unrecorded chronicle <span class="font-mono text-accent-tint font-semibold">${escapeHtml(taleId || 'Unknown')}</span>?`,
         subtext: 'Archivists will inspect missing indices under the Chronicle Preservation Policy.',
         confirmText: 'Dispatch Report',
         cancelText: 'Cancel',
@@ -730,7 +730,7 @@ export function setupReportMissingTale(taleId) {
       reportBtn.disabled = true;
       reportBtn.classList.add('opacity-60', 'cursor-not-allowed');
       reportBtn.innerHTML = `
-        <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+        <i data-lucide="check" class="w-4 h-4 text-success"></i>
         <span>Report Dispatched</span>
       `;
       initIcons();

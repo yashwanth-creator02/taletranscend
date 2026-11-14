@@ -22,15 +22,15 @@ describe('Contribution Page Controller', () => {
       setStatus('Saving...', 'neutral');
       const status = document.getElementById('stat-status');
       expect(status.textContent).toBe('Saving...');
-      expect(status.classList.contains('text-zinc-500')).toBe(true);
+      expect(status.classList.contains('text-muted')).toBe(true);
 
       setStatus('Error!', 'error');
       expect(status.textContent).toBe('Error!');
-      expect(status.classList.contains('text-red-400')).toBe(true);
+      expect(status.classList.contains('text-danger')).toBe(true);
 
       setStatus('Success!', 'success');
       expect(status.textContent).toBe('Success!');
-      expect(status.classList.contains('text-emerald-400')).toBe(true);
+      expect(status.classList.contains('text-success')).toBe(true);
     });
   });
 

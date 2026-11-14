@@ -26,7 +26,7 @@ export function setupAuthTimeout(
     const container = document.getElementById(containerId);
     if (container) {
       container.innerHTML = `
-        <div class="col-span-full text-center py-20 text-red-500 font-medium">
+        <div class="col-span-full text-center py-20 text-danger font-medium">
           ${escapeHtml(message)}
         </div>
       `;

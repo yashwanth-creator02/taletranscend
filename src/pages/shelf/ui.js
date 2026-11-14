@@ -45,7 +45,7 @@ export function setGridLoading() {
   grid.innerHTML = Array.from(
     { length: 6 },
     () => `
-    <div class="rounded-2xl overflow-hidden border border-white/[0.04]">
+    <div class="rounded-2xl overflow-hidden border border-line-subtle">
       <div class="aspect-[16/10] max-h-36 skeleton"></div>
       <div class="p-3 sm:p-3.5 space-y-2.5">
         <div class="skeleton h-3.5 w-2/3 rounded-lg"></div>
@@ -68,16 +68,16 @@ export function setGridEmpty(message) {
 
   grid.innerHTML = `
     <div class="col-span-full">
-      <div class="glass-panel-elevated rounded-[2rem] py-20 px-8 text-center border border-white/[0.04] flex flex-col items-center gap-5">
-        <div class="w-14 h-14 rounded-2xl bg-indigo-500/[0.07] border border-indigo-500/15 flex items-center justify-center">
-          <i data-lucide="archive" class="w-6 h-6 text-indigo-500/50"></i>
+      <div class="glass-panel-elevated rounded-[2rem] py-20 px-8 text-center border border-line-subtle flex flex-col items-center gap-5">
+        <div class="w-14 h-14 rounded-2xl bg-accent-soft border border-accent-line flex items-center justify-center">
+          <i data-lucide="archive" class="w-6 h-6 text-accent/50"></i>
         </div>
         <div>
           <h3 class="text-base font-cinzel font-bold text-[var(--text-primary)] mb-2">Nothing here yet</h3>
-          <p class="text-sm text-slate-400 max-w-sm leading-relaxed">${escapeHtml(message)}</p>
+          <p class="text-sm text-ink-soft max-w-sm leading-relaxed">${escapeHtml(message)}</p>
         </div>
         <a href="/library.html"
-          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold uppercase tracking-[0.15em] hover:bg-indigo-500/20 transition-colors">
+          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-accent-soft border border-accent-line text-accent-tint text-[10px] font-bold uppercase tracking-[0.15em] hover:bg-accent-soft transition-colors">
           <i data-lucide="compass" class="w-3.5 h-3.5"></i>
           Browse Library
         </a>
@@ -94,7 +94,7 @@ export function setGridError() {
 
   grid.innerHTML = `
     <div class="col-span-full text-center py-16">
-      <div class="inline-flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-red-500/[0.07] border border-red-500/15 text-red-400 text-sm">
+      <div class="inline-flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-danger/[0.07] border border-danger/15 text-danger text-sm">
         <i data-lucide="alert-triangle" class="w-4 h-4"></i>
         Failed to load. Check your connection and
         <button id="shelf-error-reload-btn" class="underline hover:no-underline ml-1">refresh</button>.
@@ -141,7 +141,7 @@ export function buildBookmarkCard(tale) {
   const menuId = `menu-${id}`;
   const isFinished = progress >= 100;
 
-  const statusBadgeClasses = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+  const statusBadgeClasses = 'bg-success/10 text-success border-success/20';
   const isBookmarked = true;
   const bookmarkedAction = 'decouple';
   const bookmarkedIcon = 'bookmark-minus';
@@ -158,7 +158,7 @@ export function buildBookmarkCard(tale) {
           type="button"
           data-action="options"
           data-menu-id="${escapeHtml(menuId)}"
-          class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg bg-surface-2 backdrop-blur-md border border-line text-muted transition-all hover:bg-indigo-500/20 hover:border-indigo-500/40 hover:text-[var(--text-primary)]"
+          class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg bg-surface-2 backdrop-blur-md border border-line text-muted transition-all hover:bg-accent-soft hover:border-accent-line hover:text-[var(--text-primary)]"
           aria-expanded="false"
           aria-haspopup="menu"
           aria-label="Chronicle Options"
@@ -172,8 +172,8 @@ export function buildBookmarkCard(tale) {
           role="menu"
           hidden
         >
-          <div class="px-3 py-2 border-b border-white/5 mb-1">
-            <span class="text-[11px] font-black uppercase tracking-widest text-zinc-400">Chronicle Options</span>
+          <div class="px-3 py-2 border-b border-line-subtle mb-1">
+            <span class="text-[11px] font-black uppercase tracking-widest text-ink-soft">Chronicle Options</span>
           </div>
 
           <button type="button" data-action="copy-link" data-id="${escapeHtml(id)}"
@@ -188,7 +188,7 @@ export function buildBookmarkCard(tale) {
             <span>Download Chronicle</span>
           </button>
 
-          <div class="h-px bg-white/5 my-1"></div>
+          <div class="h-px bg-surface-1 my-1"></div>
 
           <button type="button"
             class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] transition-colors ${isFinished ? 'opacity-40 text-muted' : 'text-secondary hover:bg-surface-2 hover:text-[var(--text-primary)]'}"
@@ -197,10 +197,10 @@ export function buildBookmarkCard(tale) {
             <span>${isFinished ? 'Already Sealed' : 'Seal Chronicle'}</span>
           </button>
 
-          <div class="h-px bg-white/5 my-1"></div>
+          <div class="h-px bg-surface-1 my-1"></div>
 
           <button type="button"
-            class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] transition-colors ${isBookmarked ? 'text-rose-400 hover:bg-rose-500/10' : 'text-emerald-400 hover:bg-emerald-500/10'}"
+            class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] transition-colors ${isBookmarked ? 'text-danger hover:bg-danger/10' : 'text-success hover:bg-success/10'}"
             data-action="${bookmarkedAction}" data-id="${escapeHtml(id)}">
             <i data-lucide="${bookmarkedIcon}" class="h-3.5 w-3.5"></i>
             <span>${bookmarkedLabel}</span>
@@ -228,11 +228,11 @@ export function buildBookmarkCard(tale) {
         <div class="absolute bottom-0 left-0 right-0 px-2.5 sm:px-3 pb-2 pt-4 z-10">
           <div class="flex items-center justify-between mb-1">
             <span class="card-progress-label text-[11px] sm:text-[11px] font-bold uppercase tracking-wider">Progress</span>
-            <span class="card-progress-val text-[11px] sm:text-[11px] font-bold text-indigo-400">${isFinished ? 'Done' : `${progressPercent}%`}</span>
+            <span class="card-progress-val text-[11px] sm:text-[11px] font-bold text-accent-tint">${isFinished ? 'Done' : `${progressPercent}%`}</span>
           </div>
           <div class="progress-bar h-1 w-full rounded-full overflow-hidden">
             <div
-              class="progress-fill h-full rounded-full transition-all duration-700 ${isFinished ? 'bg-indigo-400 shadow-[0_0_8px_rgba(99,102,241,0.6)]' : 'bg-gradient-to-r from-indigo-500 to-violet-500'}"
+              class="progress-fill h-full rounded-full transition-all duration-700 ${isFinished ? 'bg-accent shadow-[0_0_8px_rgba(99,102,241,0.6)]' : 'bg-gradient-to-r from-accent to-accent-2'}"
               style="width: ${Math.max(isFinished ? 100 : 2, progressPercent)}%"
             ></div>
           </div>
@@ -240,23 +240,23 @@ export function buildBookmarkCard(tale) {
       </div>
 
       <div class="p-3 sm:p-3.5">
-        <p class="text-[11px] sm:text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-500/60 mb-1 truncate">${safeAuthor}</p>
-        <h3 class="font-bold text-[var(--text-primary)] text-xs sm:text-sm leading-snug mb-1 group-hover:text-indigo-400 transition-colors line-clamp-1">
+        <p class="text-[11px] sm:text-[11px] font-bold uppercase tracking-[0.16em] text-accent/60 mb-1 truncate">${safeAuthor}</p>
+        <h3 class="font-bold text-[var(--text-primary)] text-xs sm:text-sm leading-snug mb-1 group-hover:text-accent-tint transition-colors line-clamp-1">
           ${safeTitle}
         </h3>
-        <p class="text-[11px] text-slate-400 line-clamp-2 leading-relaxed mb-2.5">
+        <p class="text-[11px] text-ink-soft line-clamp-2 leading-relaxed mb-2.5">
           ${safeDescription}
         </p>
 
-        <div class="flex items-center justify-between pt-2 border-t border-white/[0.04]">
-          <div class="flex items-center gap-2 text-[11px] sm:text-[10px] text-slate-400">
+        <div class="flex items-center justify-between pt-2 border-t border-line-subtle">
+          <div class="flex items-center gap-2 text-[11px] sm:text-[10px] text-ink-soft">
             <span class="flex items-center gap-1">
               <i data-lucide="layers" class="w-2.5 h-2.5 sm:w-3 sm:h-3"></i>
               ${chapterCount} ch
             </span>
           </div>
           <button
-            class="flex items-center gap-1 text-[11px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-500 hover:text-indigo-400 transition-colors group/btn"
+            class="flex items-center gap-1 text-[11px] sm:text-[10px] font-bold uppercase tracking-wider text-muted hover:text-accent-tint transition-colors group/btn"
             type="button"
             data-action="resume"
             data-id="${id}"
@@ -317,7 +317,7 @@ export function buildDraftCard(draft) {
               type="button"
               data-action="options"
               data-menu-id="${escapeHtml(menuId)}"
-              class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg bg-surface-2 border border-line text-muted transition-all hover:bg-indigo-500/10 hover:border-indigo-500/30 hover:text-[var(--text-primary)]"
+              class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg bg-surface-2 border border-line text-muted transition-all hover:bg-accent-soft hover:border-accent-line hover:text-[var(--text-primary)]"
               aria-expanded="false"
               aria-haspopup="menu"
               aria-label="Draft Options"
@@ -331,8 +331,8 @@ export function buildDraftCard(draft) {
               role="menu"
               hidden
             >
-              <div class="px-3 py-2 border-b border-white/5 mb-1">
-                <span class="text-[11px] font-black uppercase tracking-widest text-zinc-600">Draft Operations</span>
+              <div class="px-3 py-2 border-b border-line-subtle mb-1">
+                <span class="text-[11px] font-black uppercase tracking-widest text-faint">Draft Operations</span>
               </div>
 
               <button type="button" data-action="copy-link" data-id="${escapeHtml(id)}"
@@ -341,10 +341,10 @@ export function buildDraftCard(draft) {
                 <span>Copy Draft Link</span>
               </button>
 
-              <div class="h-px bg-white/5 my-1"></div>
+              <div class="h-px bg-surface-1 my-1"></div>
 
               <button type="button" data-action="delete-draft" data-id="${escapeHtml(id)}"
-                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] text-rose-400/70 transition-colors hover:bg-rose-500/10 hover:text-rose-400">
+                class="menu-btn flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[10px] font-black uppercase tracking-[0.22em] text-danger/70 transition-colors hover:bg-danger/10 hover:text-danger">
                 <i data-lucide="trash-2" class="h-3.5 w-3.5"></i>
                 <span>Discard Draft</span>
               </button>
@@ -352,30 +352,30 @@ export function buildDraftCard(draft) {
           </div>
         </div>
 
-        <h3 class="font-bold text-[var(--text-primary)] text-xs sm:text-sm leading-snug mb-1 group-hover:text-indigo-400 transition-colors line-clamp-1">
+        <h3 class="font-bold text-[var(--text-primary)] text-xs sm:text-sm leading-snug mb-1 group-hover:text-accent-tint transition-colors line-clamp-1">
           ${safeTitle}
         </h3>
 
-        <p class="text-[11px] text-slate-400 line-clamp-2 leading-relaxed mb-2">
+        <p class="text-[11px] text-ink-soft line-clamp-2 leading-relaxed mb-2">
           ${safeSynopsis || 'No synopsis yet. Open the editor to add one.'}
         </p>
 
-        <div class="grid grid-cols-2 gap-2 py-2 border-t border-white/[0.04] mb-2 text-[11px] sm:text-[10px]">
-          <div class="flex items-center gap-1.5 text-slate-400 truncate">
-            <i data-lucide="layers" class="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-500 shrink-0"></i>
+        <div class="grid grid-cols-2 gap-2 py-2 border-t border-line-subtle mb-2 text-[11px] sm:text-[10px]">
+          <div class="flex items-center gap-1.5 text-ink-soft truncate">
+            <i data-lucide="layers" class="w-2.5 h-2.5 sm:w-3 sm:h-3 text-muted shrink-0"></i>
             <span class="truncate">${chapterCount} ${chapterCount === 1 ? 'chapter' : 'chapters'}</span>
           </div>
-          <div class="flex items-center gap-1.5 text-slate-400 truncate">
-            <i data-lucide="file-text" class="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-500 shrink-0"></i>
+          <div class="flex items-center gap-1.5 text-ink-soft truncate">
+            <i data-lucide="file-text" class="w-2.5 h-2.5 sm:w-3 sm:h-3 text-muted shrink-0"></i>
             <span class="truncate">${wordLabel}</span>
           </div>
         </div>
 
         <div class="flex items-center justify-between pt-1">
-          <span class="text-[11px] sm:text-[11px] text-slate-400 truncate">Last updated ${updated}</span>
+          <span class="text-[11px] sm:text-[11px] text-ink-soft truncate">Last updated ${updated}</span>
           <a
             href="/contribution.html?draft=${id}"
-            class="flex items-center gap-1 text-[11px] sm:text-[10px] font-bold uppercase tracking-wider text-indigo-400 hover:text-indigo-300 transition-colors group/btn shrink-0"
+            class="flex items-center gap-1 text-[11px] sm:text-[10px] font-bold uppercase tracking-wider text-accent-tint hover:text-accent-tint transition-colors group/btn shrink-0"
           >
             Edit
             <i data-lucide="arrow-right" class="w-2.5 h-2.5 sm:w-3 sm:h-3 group-hover/btn:translate-x-0.5 transition-transform"></i>
@@ -484,11 +484,11 @@ export function setActiveTab(activeTab) {
   document.querySelectorAll('.shelf-tab').forEach((btn) => {
     const isActive = btn.dataset.tab === activeTab;
     btn.classList.toggle('shelf-tab-active', isActive);
-    btn.classList.toggle('text-zinc-500', !isActive && btn.dataset.tab !== 'recent');
-    btn.classList.toggle('text-zinc-600', !isActive && btn.dataset.tab === 'recent');
+    btn.classList.toggle('text-muted', !isActive && btn.dataset.tab !== 'recent');
+    btn.classList.toggle('text-faint', !isActive && btn.dataset.tab === 'recent');
 
     if (isActive) {
-      btn.classList.remove('text-zinc-500', 'text-zinc-600');
+      btn.classList.remove('text-muted', 'text-faint');
     }
   });
 }

@@ -278,9 +278,9 @@ describe('Contribution Cloud', () => {
     updatePublicationStatusIndicator('completed');
 
     expect(document.getElementById('publication-status-text').textContent).toBe('Completed');
-    expect(document.getElementById('publication-status-dot').className).toContain('bg-indigo-400');
+    expect(document.getElementById('publication-status-dot').className).toContain('bg-accent');
     expect(document.getElementById('publication-status-indicator').className).toContain(
-      'text-indigo-400'
+      'text-accent-tint'
     );
   });
 });

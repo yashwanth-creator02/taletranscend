@@ -134,7 +134,7 @@ export async function saveToCloud() {
     const statusEl = document.getElementById('stat-status');
     if (statusEl) {
       statusEl.className = statusEl.className.replace(/text-\w+-\d+/g, '');
-      statusEl.classList.add('text-emerald-400');
+      statusEl.classList.add('text-success');
       statusEl.textContent = 'Saved to cloud';
     }
     return;
@@ -183,7 +183,7 @@ export async function saveToCloud() {
   const statusEl = document.getElementById('stat-status');
   if (statusEl) {
     statusEl.className = statusEl.className.replace(/text-\w+-\d+/g, '');
-    statusEl.classList.add('text-emerald-400');
+    statusEl.classList.add('text-success');
     statusEl.textContent = 'Saved to cloud';
   }
 }
@@ -445,10 +445,10 @@ export function updatePublicationStatusIndicator(status) {
   const indicatorEl = document.getElementById('publication-status-indicator');
 
   const configs = {
-    ongoing: { label: 'Ongoing', color: 'text-emerald-400', dot: 'bg-emerald-400' },
-    completed: { label: 'Completed', color: 'text-indigo-400', dot: 'bg-indigo-400' },
-    hiatus: { label: 'Hiatus', color: 'text-amber-400', dot: 'bg-amber-400' },
-    cancelled: { label: 'Cancelled', color: 'text-rose-400', dot: 'bg-rose-400' },
+    ongoing: { label: 'Ongoing', color: 'text-success', dot: 'bg-success' },
+    completed: { label: 'Completed', color: 'text-accent-tint', dot: 'bg-accent' },
+    hiatus: { label: 'Hiatus', color: 'text-rune', dot: 'bg-rune' },
+    cancelled: { label: 'Cancelled', color: 'text-danger', dot: 'bg-danger' },
   };
 
   const config = configs[normStatus] || configs.ongoing;

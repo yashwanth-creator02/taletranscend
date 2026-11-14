@@ -192,7 +192,7 @@ export function showGridSkeleton(count = 8) {
   grid.innerHTML = Array.from(
     { length: count },
     () => `
-    <div class="tale-card animate-pulse rounded-2xl overflow-hidden border border-white/5 bg-white/2">
+    <div class="tale-card animate-pulse rounded-2xl overflow-hidden border border-line-subtle bg-surface-1">
       <div class="tale-card__inner p-2.5 sm:p-4 flex flex-col justify-between">
         <div class="tale-card__top mb-2 sm:mb-3 flex items-center justify-between gap-1.5 sm:gap-2">
           <div class="skeleton h-4 sm:h-5 w-14 sm:w-20 rounded-sm"></div>
@@ -207,7 +207,7 @@ export function showGridSkeleton(count = 8) {
             <div class="hidden sm:block skeleton h-3 w-2/3 rounded"></div>
           </div>
         </div>
-        <div class="tale-card__footer flex items-center justify-between pt-2 sm:pt-3 mt-auto border-t border-white/5">
+        <div class="tale-card__footer flex items-center justify-between pt-2 sm:pt-3 mt-auto border-t border-line-subtle">
           <div class="flex gap-2">
             <div class="skeleton h-3 w-10 sm:w-12 rounded"></div>
             <div class="skeleton h-3 w-5 sm:w-6 rounded"></div>
@@ -229,16 +229,16 @@ export function showGridEmpty(message = 'No tales found in the archives.') {
 
   grid.innerHTML = `
     <div class="col-span-full flex flex-col items-center gap-6 py-28 text-center animate-fade-in">
-      <div class="w-16 h-16 rounded-3xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shadow-2xl">
-        <i data-lucide="scroll-text" class="w-7 h-7 text-indigo-400"></i>
+      <div class="w-16 h-16 rounded-3xl bg-accent-soft border border-accent-line flex items-center justify-center shadow-2xl">
+        <i data-lucide="scroll-text" class="w-7 h-7 text-accent-tint"></i>
       </div>
       <div class="space-y-1.5">
-        <h3 class="text-xl font-cinzel font-bold text-white tracking-tight">The Weave is Silent</h3>
-        <p class="text-xs text-zinc-400 max-w-xs mx-auto leading-relaxed font-medium italic">${escapeHtml(message)}</p>
+        <h3 class="text-xl font-cinzel font-bold text-ink tracking-tight">The Weave is Silent</h3>
+        <p class="text-xs text-ink-soft max-w-xs mx-auto leading-relaxed font-medium italic">${escapeHtml(message)}</p>
       </div>
       <button
         id="empty-search-focus-btn"
-        class="group inline-flex items-center gap-2.5 px-6 py-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-bold uppercase tracking-wider hover:bg-indigo-500/20 hover:text-white transition-all shadow-lg shadow-indigo-500/10"
+        class="group inline-flex items-center gap-2.5 px-6 py-2.5 rounded-xl bg-accent-soft border border-accent-line text-accent-tint text-[10px] font-bold uppercase tracking-wider hover:bg-accent-soft hover:text-ink transition-all shadow-lg shadow-indigo-500/10"
       >
         <i data-lucide="search" class="w-3.5 h-3.5 group-hover:scale-110 transition-transform"></i>
         Search the Archive
@@ -259,17 +259,17 @@ export function showGridError() {
 
   grid.innerHTML = `
     <div class="col-span-full text-center py-24 animate-fade-in">
-      <div class="inline-flex flex-col items-center gap-4 px-8 py-8 rounded-3xl bg-rose-500/5 border border-rose-500/15">
-        <div class="w-12 h-12 rounded-2xl bg-rose-500/10 flex items-center justify-center mb-1">
-          <i data-lucide="alert-triangle" class="w-6 h-6 text-rose-400"></i>
+      <div class="inline-flex flex-col items-center gap-4 px-8 py-8 rounded-3xl bg-danger/5 border border-danger/15">
+        <div class="w-12 h-12 rounded-2xl bg-danger/10 flex items-center justify-center mb-1">
+          <i data-lucide="alert-triangle" class="w-6 h-6 text-danger"></i>
         </div>
         <div class="space-y-1">
-          <h3 class="text-base font-bold text-rose-400">Archive Connection Interrupted</h3>
-          <p class="text-xs text-rose-400/70 font-medium uppercase tracking-wider">Database connection failed</p>
+          <h3 class="text-base font-bold text-danger">Archive Connection Interrupted</h3>
+          <p class="text-xs text-danger/70 font-medium uppercase tracking-wider">Database connection failed</p>
         </div>
         <button
           id="grid-error-reload-btn"
-          class="mt-3 px-5 py-2 rounded-xl bg-rose-500/10 text-rose-300 text-[10px] font-bold uppercase tracking-wider border border-rose-500/20 hover:bg-rose-500/20 transition-all"
+          class="mt-3 px-5 py-2 rounded-xl bg-danger/10 text-danger text-[10px] font-bold uppercase tracking-wider border border-danger/20 hover:bg-danger/20 transition-all"
         >
           Re-establish Connection
         </button>

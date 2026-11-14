@@ -31,19 +31,28 @@ const PATTERNS = [
   { re: /hsla?\s*\(\s*\d/g, what: 'hsl() literal' },
 ];
 
-function walk(dir, out = []) {
+/** Stock Tailwind palette utilities are the pre-bridge vocabulary: they are
+ *  hard-coded to one theme's colours, so `text-slate-400` stays grey when the
+ *  light theme needs dark ink. The bridge in base.css maps the semantic
+ *  equivalents (`text-ink-soft`, `bg-surface-2`, `border-line`); every call
+ *  site was migrated to it, and this stops the palette creeping back in.
+ *  The lookbehind keeps project class names like `.hover-text-red` out of it. */
+const PALETTE_RE =
+  /(?<![\w-])(?:text|bg|border|ring|fill|stroke|divide|from|via|to)-(?:slate|zinc|gray|neutral|stone|indigo|amber|emerald|rose|red|orange|yellow|lime|green|teal|cyan|sky|blue|violet|purple|fuchsia|pink)-\d{2,3}(?:\/[\w.[\]]+)?/g;
+
+function walk(dir, exts, out = []) {
   for (const entry of readdirSync(dir)) {
     if (entry === 'node_modules' || entry === 'dist' || entry.startsWith('.')) continue;
     const full = join(dir, entry);
-    if (statSync(full).isDirectory()) walk(full, out);
-    else if (extname(full) === '.css') out.push(full);
+    if (statSync(full).isDirectory()) walk(full, exts, out);
+    else if (exts.includes(extname(full))) out.push(full);
   }
   return out;
 }
 
 const violations = [];
 
-for (const file of walk(join(ROOT, 'src'))) {
+for (const file of walk(join(ROOT, 'src'), ['.css'])) {
   const rel = relative(ROOT, file).split('\\').join('/');
   if (ALLOWLIST.has(rel)) continue;
 
@@ -59,6 +68,28 @@ for (const file of walk(join(ROOT, 'src'))) {
       const match = re.exec(code);
       if (match) violations.push({ rel, line: i + 1, what, text: match[0] });
     }
+  });
+}
+
+// Palette classes live in markup and in the JS that renders it, not in the
+// stylesheets, so this check has to reach beyond `.css`. Block comments are
+// blanked (preserving line numbers) because the migration notes name the old
+// classes on purpose.
+const blankComments = (text) =>
+  text
+    .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+    .replace(/^[ \t]*\/\/.*$/gm, (m) => ' '.repeat(m.length));
+
+for (const file of walk(join(ROOT, 'src'), ['.css', '.html', '.js', '.ts'])) {
+  const rel = relative(ROOT, file).split('\\').join('/');
+  if (ALLOWLIST.has(rel)) continue;
+
+  const lines = blankComments(readFileSync(file, 'utf8')).split('\n');
+  lines.forEach((line, i) => {
+    PALETTE_RE.lastIndex = 0;
+    const match = PALETTE_RE.exec(line);
+    if (match)
+      violations.push({ rel, line: i + 1, what: 'Tailwind palette utility', text: match[0] });
   });
 }
 

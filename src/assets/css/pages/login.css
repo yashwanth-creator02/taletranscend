@@ -141,7 +141,7 @@
   cursor: pointer;
   outline: none;
   color: var(--text-muted);
-  font-family: var(--font-body);
+  font-family: var(--font-sans);
   transition: color var(--transition-fast);
 }
 
@@ -176,7 +176,7 @@
 
 /* Form Inputs */
 .auth-input {
-  font-family: var(--font-body);
+  font-family: var(--font-sans);
   transition:
     border-color var(--transition-fast),
     box-shadow var(--transition-fast);

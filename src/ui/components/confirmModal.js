@@ -67,8 +67,8 @@ export function showConfirmModal({
 
     const iconColorClass =
       confirmVariant === 'danger'
-        ? 'text-red-400 bg-red-500/10 border-red-500/20'
-        : 'text-amber-400 bg-amber-500/10 border-amber-500/20';
+        ? 'text-danger bg-danger/10 border-danger/20'
+        : 'text-rune bg-rune/10 border-rune/20';
 
     overlay.innerHTML = `
       <div
@@ -77,7 +77,7 @@ export function showConfirmModal({
       >
         <button
           type="button"
-          class="confirm-modal-close absolute top-4 right-4 p-2 text-zinc-400 hover:text-white rounded-xl hover:bg-white/5 transition-colors"
+          class="confirm-modal-close absolute top-4 right-4 p-2 text-ink-soft hover:text-ink rounded-xl hover:bg-surface-1 transition-colors"
           aria-label="Close dialog"
         >
           <i data-lucide="x" class="w-5 h-5"></i>
@@ -89,21 +89,21 @@ export function showConfirmModal({
 
         <h3
           id="${CONFIRM_MODAL_ID}-title"
-          class="text-lg sm:text-xl font-cinzel font-bold text-white uppercase tracking-tight mb-2"
+          class="text-lg sm:text-xl font-cinzel font-bold text-ink uppercase tracking-tight mb-2"
         >
           ${escapeHtml(title)}
         </h3>
 
         <div
           id="${CONFIRM_MODAL_ID}-desc"
-          class="text-sm text-zinc-300 leading-relaxed mb-2"
+          class="text-sm text-ink leading-relaxed mb-2"
         >
           ${message}
         </div>
 
         ${
           subtext
-            ? `<p class="text-xs text-zinc-400 leading-relaxed mb-4 italic">${escapeHtml(subtext)}</p>`
+            ? `<p class="text-xs text-ink-soft leading-relaxed mb-4 italic">${escapeHtml(subtext)}</p>`
             : '<div class="mb-4"></div>'
         }
 
@@ -112,8 +112,8 @@ export function showConfirmModal({
             ? `
           <div class="format-choice-container mb-6 text-left" role="radiogroup" aria-label="Archive Format">
             <div class="flex items-center justify-between mb-2">
-              <span class="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Archive Format</span>
-              <span id="${CONFIRM_MODAL_ID}-format-indicator" class="text-[11px] font-mono font-bold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-md uppercase">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-ink-soft">Archive Format</span>
+              <span id="${CONFIRM_MODAL_ID}-format-indicator" class="text-[11px] font-mono font-bold text-accent-tint bg-accent-soft border border-accent-line px-2 py-0.5 rounded-md uppercase">
                 ${defaultFormat.toUpperCase()} Selected
               </span>
             </div>
@@ -125,15 +125,15 @@ export function showConfirmModal({
                 aria-checked="${defaultFormat === 'md' ? 'true' : 'false'}"
                 class="format-choice-btn p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-1 ${
                   defaultFormat === 'md'
-                    ? 'border-indigo-500/50 bg-indigo-500/15 text-white ring-1 ring-indigo-500/30'
-                    : 'border-white/8 bg-white/4 text-zinc-400 hover:text-zinc-200 hover:border-white/15 hover:bg-white/6'
+                    ? 'border-accent-line bg-accent-soft text-ink ring-1 ring-accent'
+                    : 'border-line bg-surface-1 text-ink-soft hover:text-ink hover:border-line-strong hover:bg-surface-1'
                 }"
               >
                 <div class="flex items-center justify-between w-full">
-                  <span class="text-xs font-bold text-white tracking-tight">Markdown</span>
-                  <span class="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded bg-white/10 text-indigo-300">.MD</span>
+                  <span class="text-xs font-bold text-ink tracking-tight">Markdown</span>
+                  <span class="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded bg-surface-2 text-accent-tint">.MD</span>
                 </div>
-                <p class="text-[10px] text-zinc-400 leading-snug">Plaintext archive for notes & Obsidian</p>
+                <p class="text-[10px] text-ink-soft leading-snug">Plaintext archive for notes & Obsidian</p>
               </button>
               <button
                 type="button"
@@ -142,15 +142,15 @@ export function showConfirmModal({
                 aria-checked="${defaultFormat === 'epub' ? 'true' : 'false'}"
                 class="format-choice-btn p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-1 ${
                   defaultFormat === 'epub'
-                    ? 'border-indigo-500/50 bg-indigo-500/15 text-white ring-1 ring-indigo-500/30'
-                    : 'border-white/8 bg-white/4 text-zinc-400 hover:text-zinc-200 hover:border-white/15 hover:bg-white/6'
+                    ? 'border-accent-line bg-accent-soft text-ink ring-1 ring-accent'
+                    : 'border-line bg-surface-1 text-ink-soft hover:text-ink hover:border-line-strong hover:bg-surface-1'
                 }"
               >
                 <div class="flex items-center justify-between w-full">
-                  <span class="text-xs font-bold text-zinc-200 tracking-tight">EPUB Book</span>
-                  <span class="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded bg-white/10 text-amber-300">.EPUB</span>
+                  <span class="text-xs font-bold text-ink tracking-tight">EPUB Book</span>
+                  <span class="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded bg-surface-2 text-rune">.EPUB</span>
                 </div>
-                <p class="text-[10px] text-zinc-400 leading-snug">Electronic book for Apple Books & e-readers</p>
+                <p class="text-[10px] text-ink-soft leading-snug">Electronic book for Apple Books & e-readers</p>
               </button>
             </div>
           </div>
@@ -198,10 +198,10 @@ export function showConfirmModal({
             b.setAttribute('aria-checked', isMatch ? 'true' : 'false');
             if (isMatch) {
               b.className =
-                'format-choice-btn p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-1 border-indigo-500/50 bg-indigo-500/15 text-white ring-1 ring-indigo-500/30';
+                'format-choice-btn p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-1 border-accent-line bg-accent-soft text-ink ring-1 ring-accent';
             } else {
               b.className =
-                'format-choice-btn p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-1 border-white/8 bg-white/4 text-zinc-400 hover:text-zinc-200 hover:border-white/15 hover:bg-white/6';
+                'format-choice-btn p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-1 border-line bg-surface-1 text-ink-soft hover:text-ink hover:border-line-strong hover:bg-surface-1';
             }
           });
 
@@ -308,7 +308,7 @@ export async function confirmTaleDownload({
     const safeFrag = escapeHtml(fragmentTitle || 'Fragment');
     return showConfirmModal({
       title: 'Download Fragment?',
-      message: `Download <span class="text-amber-300 font-semibold font-serif">"${safeFrag}"</span> from <span class="text-white font-medium">${safeTitle}</span>?`,
+      message: `Download <span class="text-rune font-semibold font-serif">"${safeFrag}"</span> from <span class="text-ink font-medium">${safeTitle}</span>?`,
       subtext: 'Choose your desired archive format below to save on your device.',
       confirmText: 'Download Fragment',
       cancelText: 'Cancel',
@@ -321,8 +321,8 @@ export async function confirmTaleDownload({
 
   const subtext =
     chapterCount > 0
-      ? `All ${chapterCount} fragments from <span class="text-amber-300 font-semibold font-serif">"${safeTitle}"</span> will be compiled for offline reading.`
-      : `Download <span class="text-amber-300 font-semibold font-serif">"${safeTitle}"</span> for offline reading?`;
+      ? `All ${chapterCount} fragments from <span class="text-rune font-semibold font-serif">"${safeTitle}"</span> will be compiled for offline reading.`
+      : `Download <span class="text-rune font-semibold font-serif">"${safeTitle}"</span> for offline reading?`;
 
   return showConfirmModal({
     title: 'Download Chronicle?',

@@ -314,14 +314,14 @@ async function _handleCardAction(action, id, e) {
           const sealBtn = cardEl.querySelector('[data-action="mark-finished"]');
           if (sealBtn) {
             sealBtn.dataset.action = '';
-            sealBtn.classList.remove('text-zinc-300', 'hover:bg-white/10', 'hover:text-white');
-            sealBtn.classList.add('opacity-40', 'text-zinc-600');
+            sealBtn.classList.remove('text-ink', 'hover:bg-surface-2', 'hover:text-ink');
+            sealBtn.classList.add('opacity-40', 'text-faint');
             sealBtn.innerHTML = `<i data-lucide="check-circle" class="h-4 w-4 shrink-0"></i><span>Already Sealed</span>`;
           }
           const progressFill = cardEl.querySelector('.progress-fill');
           if (progressFill) progressFill.style.width = '100%';
           const progressLabel = cardEl.querySelector(
-            '.card-progress-val, .text-indigo-300, .text-indigo-400'
+            '.card-progress-val, .text-accent-tint, .text-accent-tint'
           );
           if (progressLabel) progressLabel.textContent = '100%';
         }

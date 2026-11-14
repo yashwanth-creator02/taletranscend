@@ -168,8 +168,8 @@ function _renderChroniclesList(tales) {
 
   if (tales.length === 0) {
     listContainer.innerHTML = `
-      <div class="p-12 text-center bg-white/[0.02] border border-white/5 rounded-2xl">
-        <p class="text-sm text-slate-400">No chronicles match your search criteria.</p>
+      <div class="p-12 text-center bg-surface-1 border border-line-subtle rounded-2xl">
+        <p class="text-sm text-ink-soft">No chronicles match your search criteria.</p>
       </div>
     `;
     return;
@@ -201,7 +201,7 @@ function _renderChroniclesList(tales) {
             const chapterReadUrl = readerUrl(tale.id, i);
             return `
               <a href="${chapterReadUrl}" class="toc-chapter-pill" title="Read Chapter ${chNum} of ${safeTitle}">
-                <i data-lucide="book-open" class="w-3 h-3 text-indigo-400"></i>
+                <i data-lucide="book-open" class="w-3 h-3 text-accent-tint"></i>
                 <span>Ch. ${chNum}</span>
               </a>
             `;
@@ -212,14 +212,14 @@ function _renderChroniclesList(tales) {
               <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-3">
                 <div class="space-y-1">
                   <div class="flex items-center gap-2 flex-wrap">
-                    <h4 class="font-cinzel text-base sm:text-lg font-bold text-[var(--text-primary)] hover:text-indigo-400 transition-colors">
+                    <h4 class="font-cinzel text-base sm:text-lg font-bold text-[var(--text-primary)] hover:text-accent-tint transition-colors">
                       <a href="${taleCanonicalUrl}">${safeTitle}</a>
                     </h4>
-                    <span class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-xs bg-white/5 border border-white/10 text-slate-400">
+                    <span class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-xs bg-surface-1 border border-line text-ink-soft">
                       ${escapeHtml(tale.genre || 'Mythology')}
                     </span>
                   </div>
-                  <p class="text-xs text-slate-400">
+                  <p class="text-xs text-ink-soft">
                     Penned by <span class="text-secondary font-medium">${safeAuthor}</span>
                     ${tale.wordCount ? ` • ${tale.wordCount.toLocaleString()} words` : ''}
                   </p>
@@ -227,7 +227,7 @@ function _renderChroniclesList(tales) {
                 <div class="shrink-0">
                   <a
                     href="${taleCanonicalUrl}"
-                    class="inline-flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 transition-colors font-medium"
+                    class="inline-flex items-center gap-1 text-xs text-accent-tint hover:text-accent-tint transition-colors font-medium"
                   >
                     <span>Overview & Info</span>
                     <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
@@ -235,13 +235,13 @@ function _renderChroniclesList(tales) {
                 </div>
               </div>
 
-              <p class="text-xs sm:text-sm text-slate-400 line-clamp-2 mb-4 leading-relaxed">
+              <p class="text-xs sm:text-sm text-ink-soft line-clamp-2 mb-4 leading-relaxed">
                 ${safeDesc}
               </p>
 
               <!-- Chapters Hierarchy -->
-              <div class="pt-3 border-t border-white/5">
-                <span class="block text-[11px] font-semibold tracking-wider uppercase text-slate-500 mb-2">
+              <div class="pt-3 border-t border-line-subtle">
+                <span class="block text-[11px] font-semibold tracking-wider uppercase text-muted mb-2">
                   Chapters (${chapterCount})
                 </span>
                 <div class="flex flex-wrap gap-1.5">
@@ -256,11 +256,11 @@ function _renderChroniclesList(tales) {
       return `
         <div class="toc-era-group">
           <div class="toc-era-header">
-            <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+            <i data-lucide="sparkles" class="w-4 h-4 text-rune"></i>
             <h3 class="font-cinzel text-base sm:text-lg font-bold text-[var(--text-primary)] tracking-wide">
               ${escapeHtml(era)}
             </h3>
-            <span class="text-xs text-slate-500">(${eraTales.length} chronicle${eraTales.length === 1 ? '' : 's'})</span>
+            <span class="text-xs text-muted">(${eraTales.length} chronicle${eraTales.length === 1 ? '' : 's'})</span>
           </div>
           <div class="space-y-4">
             ${chroniclesHtml}
@@ -278,8 +278,8 @@ function _renderError() {
   const listContainer = document.getElementById('toc-list');
   if (!listContainer) return;
   listContainer.innerHTML = `
-    <div class="p-8 text-center bg-rose-500/5 border border-rose-500/20 rounded-2xl">
-      <p class="text-sm text-rose-300 mb-2">Failed to load the archive table of contents.</p>
+    <div class="p-8 text-center bg-danger/5 border border-danger/20 rounded-2xl">
+      <p class="text-sm text-danger mb-2">Failed to load the archive table of contents.</p>
       <button
         onclick="location.reload()"
         class="text-xs text-[var(--text-primary)] bg-surface-2 hover:bg-surface-3 px-3 py-1.5 rounded-xs transition-colors"

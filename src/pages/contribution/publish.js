@@ -555,12 +555,12 @@ export function setPublishStatus(message, type) {
   status.className = status.className.replace(/text-\w+-\d+/g, '').trim();
 
   const colors = {
-    loading: 'text-indigo-400',
-    success: 'text-emerald-400',
-    error: 'text-red-400',
+    loading: 'text-accent-tint',
+    success: 'text-success',
+    error: 'text-danger',
   };
 
-  status.classList.add(colors[type] ?? 'text-zinc-500');
+  status.classList.add(colors[type] ?? 'text-muted');
   status.textContent = message;
 }
 

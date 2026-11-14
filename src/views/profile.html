@@ -151,7 +151,7 @@
   </head>
 
   <body
-    class="antialiased selection:bg-indigo-500/30 page-fade-in flex flex-col h-screen overflow-hidden"
+    class="antialiased selection:bg-accent-active page-fade-in flex flex-col h-screen overflow-hidden"
   >
     <!-- App Boot Curtain (Prevents FOUC on slower networks) -->
     <div id="app-boot-curtain" aria-hidden="true">
@@ -165,8 +165,8 @@
     <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10" aria-hidden="true">
       <div class="atmosphere-base"></div>
       <div class="particle-field"></div>
-      <div class="ambient-orb w-96 h-96 bg-indigo-500/10 -top-20 -left-20"></div>
-      <div class="ambient-orb w-96 h-96 bg-amber-500/10 -bottom-20 -right-20"></div>
+      <div class="ambient-orb w-96 h-96 bg-accent-soft -top-20 -left-20"></div>
+      <div class="ambient-orb w-96 h-96 bg-rune/10 -bottom-20 -right-20"></div>
     </div>
 
     <!-- Toast container -->
@@ -201,7 +201,7 @@
             <button
               id="btn-edit-desktop"
               type="button"
-              class="identity-edit-btn-corner absolute top-4 right-4 z-20 w-8 h-8 rounded-lg flex items-center justify-center border border-white/10 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all cursor-pointer group"
+              class="identity-edit-btn-corner absolute top-4 right-4 z-20 w-8 h-8 rounded-lg flex items-center justify-center border border-line bg-surface-1 hover:bg-surface-2 text-ink-soft hover:text-ink transition-all cursor-pointer group"
               aria-label="Customise Identity"
               title="Customise Identity"
             >
@@ -270,7 +270,7 @@
               <div class="identity-details-drawer w-full mt-4 space-y-3 hidden sm:block">
                 <!-- Metadata -->
                 <div
-                  class="flex flex-wrap items-center justify-center gap-3 text-[11px] text-slate-500 font-bold uppercase tracking-wider"
+                  class="flex flex-wrap items-center justify-center gap-3 text-[11px] text-muted font-bold uppercase tracking-wider"
                 >
                   <span id="profile-location" class="flex items-center gap-1.5"></span>
                   <span id="profile-joined" class="flex items-center gap-1.5"></span>
@@ -278,7 +278,7 @@
 
                 <!-- Genres -->
                 <div id="profile-genres" class="flex flex-wrap justify-center gap-1.5">
-                  <span class="text-xs text-slate-600 italic">No genres set</span>
+                  <span class="text-xs text-faint italic">No genres set</span>
                 </div>
 
                 <!-- Socials -->
@@ -289,7 +289,7 @@
                       target="_blank"
                       rel="noopener"
                       aria-label="Twitter profile"
-                      class="w-9 h-9 rounded-xl bg-white/3 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/8 hover:border-white/20 transition-all"
+                      class="w-9 h-9 rounded-xl bg-surface-1 border border-line flex items-center justify-center text-ink-soft hover:text-ink hover:bg-surface-2 hover:border-line-strong transition-all"
                     >
                       <i data-lucide="badge-x" class="w-4 h-4"></i>
                     </a>
@@ -300,7 +300,7 @@
                       target="_blank"
                       rel="noopener"
                       aria-label="Instagram profile"
-                      class="w-9 h-9 rounded-xl bg-white/3 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/8 hover:border-white/20 transition-all"
+                      class="w-9 h-9 rounded-xl bg-surface-1 border border-line flex items-center justify-center text-ink-soft hover:text-ink hover:bg-surface-2 hover:border-line-strong transition-all"
                     >
                       <i data-lucide="instagram" class="w-4 h-4"></i>
                     </a>
@@ -311,7 +311,7 @@
                       target="_blank"
                       rel="noopener"
                       aria-label="Personal website"
-                      class="w-9 h-9 rounded-xl bg-white/3 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/8 hover:border-white/20 transition-all"
+                      class="w-9 h-9 rounded-xl bg-surface-1 border border-line flex items-center justify-center text-ink-soft hover:text-ink hover:bg-surface-2 hover:border-line-strong transition-all"
                     >
                       <i data-lucide="globe" class="w-4 h-4"></i>
                     </a>
@@ -323,27 +323,26 @@
               <button
                 type="button"
                 id="btn-upgrade-account"
-                class="hidden items-center justify-between w-full p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-indigo-500/5 border border-indigo-500/20 hover:bg-indigo-500/10 hover:border-indigo-500/30 transition-all group !mt-3 cursor-pointer"
+                class="hidden items-center justify-between w-full p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-accent-soft border border-accent-line hover:bg-accent-soft hover:border-accent-line transition-all group !mt-3 cursor-pointer"
               >
                 <div class="flex items-center gap-3">
                   <div
-                    class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-indigo-500/10 flex items-center justify-center group-hover:bg-indigo-500/20 transition-colors"
+                    class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-accent-soft flex items-center justify-center group-hover:bg-accent-soft transition-colors"
                   >
-                    <i data-lucide="shield-check" class="w-4 h-4 text-indigo-400"></i>
+                    <i data-lucide="shield-check" class="w-4 h-4 text-accent-tint"></i>
                   </div>
                   <div class="flex flex-col items-start">
-                    <span
-                      class="text-xs sm:text-sm font-bold text-indigo-300 group-hover:text-white"
+                    <span class="text-xs sm:text-sm font-bold text-accent-tint group-hover:text-ink"
                       >Secure Account</span
                     >
-                    <span class="text-[11px] text-indigo-500/70 font-bold uppercase tracking-wider"
+                    <span class="text-[11px] text-accent/70 font-bold uppercase tracking-wider"
                       >Link to Google</span
                     >
                   </div>
                 </div>
                 <i
                   data-lucide="arrow-right"
-                  class="w-4 h-4 text-indigo-500/50 group-hover:text-white group-hover:translate-x-1 transition-all"
+                  class="w-4 h-4 text-accent/50 group-hover:text-ink group-hover:translate-x-1 transition-all"
                 ></i>
               </button>
             </div>
@@ -352,24 +351,24 @@
           <!-- Author / Scribe Registry Card -->
           <div
             id="author-registry-card"
-            class="identity-card p-4 sm:p-5 relative rounded-2xl border border-white/10 bg-white/2 backdrop-blur-md space-y-3.5 transition-all"
+            class="identity-card p-4 sm:p-5 relative rounded-2xl border border-line bg-surface-1 backdrop-blur-md space-y-3.5 transition-all"
           >
             <!-- Header Row -->
-            <div class="flex items-center justify-between gap-2 border-b border-white/6 pb-2.5">
+            <div class="flex items-center justify-between gap-2 border-b border-line-subtle pb-2.5">
               <div class="flex items-center gap-2">
                 <div
-                  class="w-7 h-7 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400"
+                  class="w-7 h-7 rounded-lg bg-accent-soft flex items-center justify-center text-accent-tint"
                 >
                   <i data-lucide="feather" class="w-3.5 h-3.5"></i>
                 </div>
-                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-300">
+                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-accent-tint">
                   Scribe Registry
                 </span>
               </div>
               <!-- Status Shield -->
               <span
                 id="profile-author-badge"
-                class="text-[11px] font-black uppercase tracking-wider px-2 py-0.5 rounded-xs border border-slate-700 bg-slate-800/60 text-slate-400"
+                class="text-[11px] font-black uppercase tracking-wider px-2 py-0.5 rounded-xs border border-line-strong bg-surface-3 text-ink-soft"
               >
                 Reader
               </span>
@@ -377,59 +376,56 @@
 
             <!-- Content: Unregistered View -->
             <div id="author-registry-unregistered" class="space-y-3">
-              <p class="text-xs text-slate-400 leading-relaxed">
+              <p class="text-xs text-ink-soft leading-relaxed">
                 Register proactively as a verified author to seal chronicles into the eternal
                 archives and receive missives from readers via The Chronicler's Letter.
               </p>
 
               <!-- What is a Scribe Accordion -->
               <details
-                class="group rounded-xl border border-white/8 bg-white/3 overflow-hidden text-xs"
+                class="group rounded-xl border border-line bg-surface-1 overflow-hidden text-xs"
               >
                 <summary
-                  class="flex items-center justify-between p-3 cursor-pointer text-slate-300 font-medium hover:text-white transition-colors"
+                  class="flex items-center justify-between p-3 cursor-pointer text-ink font-medium hover:text-ink transition-colors"
                 >
                   <span class="flex items-center gap-2">
-                    <i data-lucide="help-circle" class="w-3.5 h-3.5 text-indigo-400"></i>
+                    <i data-lucide="help-circle" class="w-3.5 h-3.5 text-accent-tint"></i>
                     <span>What is a Verified Scribe?</span>
                   </span>
                   <i
                     data-lucide="chevron-down"
-                    class="w-3.5 h-3.5 text-slate-400 group-open:rotate-180 transition-transform"
+                    class="w-3.5 h-3.5 text-ink-soft group-open:rotate-180 transition-transform"
                   ></i>
                 </summary>
                 <div
-                  class="px-3 pb-3 pt-1 space-y-2 text-[11px] text-slate-400 border-t border-white/5"
+                  class="px-3 pb-3 pt-1 space-y-2 text-[11px] text-ink-soft border-t border-line-subtle"
                 >
                   <div class="flex items-start gap-2">
-                    <i
-                      data-lucide="shield-check"
-                      class="w-3 h-3 text-emerald-400 mt-0.5 shrink-0"
-                    ></i>
+                    <i data-lucide="shield-check" class="w-3 h-3 text-success mt-0.5 shrink-0"></i>
                     <p>
-                      <strong class="text-slate-200">Archival Crest:</strong> Distinctive Verified
-                      Scribe badge affixed to all your chronicles and chapters.
+                      <strong class="text-ink">Archival Crest:</strong> Distinctive Verified Scribe
+                      badge affixed to all your chronicles and chapters.
                     </p>
                   </div>
                   <div class="flex items-start gap-2">
-                    <i data-lucide="mail" class="w-3 h-3 text-indigo-400 mt-0.5 shrink-0"></i>
+                    <i data-lucide="mail" class="w-3 h-3 text-accent-tint mt-0.5 shrink-0"></i>
                     <p>
-                      <strong class="text-slate-200">Reader Missives:</strong> Receive reader
-                      questions and appreciations directly to your correspondence inbox.
+                      <strong class="text-ink">Reader Missives:</strong> Receive reader questions
+                      and appreciations directly to your correspondence inbox.
                     </p>
                   </div>
                   <div class="flex items-start gap-2">
-                    <i data-lucide="sparkles" class="w-3 h-3 text-amber-400 mt-0.5 shrink-0"></i>
+                    <i data-lucide="sparkles" class="w-3 h-3 text-rune mt-0.5 shrink-0"></i>
                     <p>
-                      <strong class="text-slate-200">Google Gemini Tools:</strong> Priority access
-                      to title suggestions, prose refinement, and continuation tools.
+                      <strong class="text-ink">Google Gemini Tools:</strong> Priority access to
+                      title suggestions, prose refinement, and continuation tools.
                     </p>
                   </div>
                   <div class="flex items-start gap-2">
-                    <i data-lucide="book-marked" class="w-3 h-3 text-sky-400 mt-0.5 shrink-0"></i>
+                    <i data-lucide="book-marked" class="w-3 h-3 text-info mt-0.5 shrink-0"></i>
                     <p>
-                      <strong class="text-slate-200">Eternal Preservation:</strong> Chapters are
-                      sealed under the Chronicle Preservation Policy.
+                      <strong class="text-ink">Eternal Preservation:</strong> Chapters are sealed
+                      under the Chronicle Preservation Policy.
                     </p>
                   </div>
                 </div>
@@ -438,7 +434,7 @@
               <button
                 type="button"
                 id="btn-register-scribe-open"
-                class="w-full py-2.5 px-3 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/25 hover:text-white transition-all text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                class="w-full py-2.5 px-3 rounded-xl bg-accent-soft border border-accent-line text-accent-tint hover:bg-accent-active hover:text-ink transition-all text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-sm"
               >
                 <i data-lucide="pen-tool" class="w-3.5 h-3.5"></i>
                 <span>Register as Scribe</span>
@@ -448,7 +444,7 @@
             <!-- Content: Registered View (Hidden by default) -->
             <div id="author-registry-registered" class="hidden space-y-3">
               <div class="space-y-1">
-                <span class="text-[11px] font-bold uppercase tracking-widest text-slate-500 block">
+                <span class="text-[11px] font-bold uppercase tracking-widest text-muted block">
                   Pen Name / Moniker
                 </span>
                 <p
@@ -460,25 +456,22 @@
               </div>
 
               <div class="space-y-1">
-                <span class="text-[11px] font-bold uppercase tracking-widest text-slate-500 block">
+                <span class="text-[11px] font-bold uppercase tracking-widest text-muted block">
                   Correspondence Email
                 </span>
                 <p
                   id="profile-author-email-display"
-                  class="text-xs font-mono text-indigo-300 truncate"
+                  class="text-xs font-mono text-accent-tint truncate"
                 >
                   —
                 </p>
               </div>
 
               <div id="profile-author-bio-wrap" class="hidden space-y-1">
-                <span class="text-[11px] font-bold uppercase tracking-widest text-slate-500 block">
+                <span class="text-[11px] font-bold uppercase tracking-widest text-muted block">
                   Scribe Creed
                 </span>
-                <p
-                  id="profile-author-bio-display"
-                  class="text-xs text-slate-300 line-clamp-2 italic"
-                >
+                <p id="profile-author-bio-display" class="text-xs text-ink line-clamp-2 italic">
                   —
                 </p>
               </div>
@@ -486,7 +479,7 @@
               <button
                 type="button"
                 id="btn-edit-scribe-open"
-                class="w-full py-2.5 px-3 rounded-xl bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 transition-all text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
+                class="w-full py-2.5 px-3 rounded-xl bg-surface-1 border border-line text-ink hover:text-ink hover:bg-surface-2 transition-all text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
               >
                 <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
                 <span>Edit Scribe Details</span>
@@ -498,40 +491,40 @@
           <div class="pillar-nav-links space-y-2.5 sm:space-y-3">
             <a
               href="/library.html"
-              class="flex items-center justify-between p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white/2 border border-white/5 hover:bg-white/5 hover:border-white/10 transition-all group"
+              class="flex items-center justify-between p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-surface-1 border border-line-subtle hover:bg-surface-1 hover:border-line transition-all group"
             >
               <div class="flex items-center gap-3.5">
                 <div
-                  class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-500/5 flex items-center justify-center group-hover:bg-indigo-500/10 transition-colors"
+                  class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-accent-soft flex items-center justify-center group-hover:bg-accent-soft transition-colors"
                 >
-                  <i data-lucide="book-open" class="w-4 h-4 text-indigo-400"></i>
+                  <i data-lucide="book-open" class="w-4 h-4 text-accent-tint"></i>
                 </div>
-                <span class="text-xs sm:text-sm font-bold text-slate-300 group-hover:text-white"
+                <span class="text-xs sm:text-sm font-bold text-ink group-hover:text-ink"
                   >Great Library</span
                 >
               </div>
               <i
                 data-lucide="chevron-right"
-                class="w-4 h-4 text-slate-600 group-hover:translate-x-1 transition-transform"
+                class="w-4 h-4 text-faint group-hover:translate-x-1 transition-transform"
               ></i>
             </a>
             <a
               href="/shelf.html"
-              class="flex items-center justify-between p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white/2 border border-white/5 hover:bg-white/5 hover:border-white/10 transition-all group"
+              class="flex items-center justify-between p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-surface-1 border border-line-subtle hover:bg-surface-1 hover:border-line transition-all group"
             >
               <div class="flex items-center gap-3.5">
                 <div
-                  class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-violet-500/5 flex items-center justify-center group-hover:bg-violet-500/10 transition-colors"
+                  class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-accent-2/5 flex items-center justify-center group-hover:bg-accent-2/10 transition-colors"
                 >
-                  <i data-lucide="bookmark" class="w-4 h-4 text-violet-400"></i>
+                  <i data-lucide="bookmark" class="w-4 h-4 text-accent-2"></i>
                 </div>
-                <span class="text-xs sm:text-sm font-bold text-slate-300 group-hover:text-white"
+                <span class="text-xs sm:text-sm font-bold text-ink group-hover:text-ink"
                   >Saved Fragments</span
                 >
               </div>
               <i
                 data-lucide="chevron-right"
-                class="w-4 h-4 text-slate-600 group-hover:translate-x-1 transition-transform"
+                class="w-4 h-4 text-faint group-hover:translate-x-1 transition-transform"
               ></i>
             </a>
 
@@ -539,25 +532,25 @@
             <button
               type="button"
               id="btn-sign-out"
-              class="flex items-center justify-between w-full p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white/2 border border-white/5 hover:bg-red-500/5 hover:border-red-500/20 transition-all group cursor-pointer"
+              class="flex items-center justify-between w-full p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-surface-1 border border-line-subtle hover:bg-danger/5 hover:border-danger/20 transition-all group cursor-pointer"
             >
               <div class="flex items-center gap-3.5">
                 <div
-                  class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-red-500/5 flex items-center justify-center group-hover:bg-red-500/10 transition-colors"
+                  class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-danger/5 flex items-center justify-center group-hover:bg-danger/10 transition-colors"
                 >
                   <i
                     data-lucide="log-out"
-                    class="w-4 h-4 text-red-400/60 group-hover:text-red-400 transition-colors"
+                    class="w-4 h-4 text-danger/60 group-hover:text-danger transition-colors"
                   ></i>
                 </div>
                 <span
-                  class="text-xs sm:text-sm font-bold text-slate-500 group-hover:text-red-400 transition-colors"
+                  class="text-xs sm:text-sm font-bold text-muted group-hover:text-danger transition-colors"
                   >Sign Out</span
                 >
               </div>
               <i
                 data-lucide="chevron-right"
-                class="w-4 h-4 text-slate-700 group-hover:text-red-400/60 group-hover:translate-x-1 transition-all"
+                class="w-4 h-4 text-faint group-hover:text-danger/60 group-hover:translate-x-1 transition-all"
               ></i>
             </button>
           </div>
@@ -598,7 +591,7 @@
                   <div class="info-tooltip-wrap">
                     <button
                       type="button"
-                      class="p-2 -m-1 text-slate-500 hover:text-indigo-400 transition-colors cursor-help"
+                      class="p-2 -m-1 text-muted hover:text-accent-tint transition-colors cursor-help"
                       aria-label="Continue reading section info"
                     >
                       <i data-lucide="info" class="w-3.5 h-3.5"></i>
@@ -609,7 +602,7 @@
                   </div>
                 </div>
                 <div class="rune-divider"></div>
-                <p class="text-slate-500 text-xs sm:text-sm mt-2 max-w-md font-medium">
+                <p class="text-muted text-xs sm:text-sm mt-2 max-w-md font-medium">
                   Resume your journey through the woven memories.
                 </p>
               </div>
@@ -619,9 +612,7 @@
               id="continue-reading-list"
               class="flex gap-4 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0"
             >
-              <div class="text-xs sm:text-sm text-slate-500 italic py-6">
-                Loading reading progress…
-              </div>
+              <div class="text-xs sm:text-sm text-muted italic py-6">Loading reading progress…</div>
             </div>
           </section>
 
@@ -640,7 +631,7 @@
                   <div class="info-tooltip-wrap">
                     <button
                       type="button"
-                      class="p-2 -m-1 text-slate-500 hover:text-indigo-400 transition-colors cursor-help"
+                      class="p-2 -m-1 text-muted hover:text-accent-tint transition-colors cursor-help"
                       aria-label="Archive section info"
                     >
                       <i data-lucide="info" class="w-3.5 h-3.5"></i>
@@ -651,7 +642,7 @@
                   </div>
                 </div>
                 <div class="rune-divider"></div>
-                <p class="text-slate-500 text-xs sm:text-sm mt-2 max-w-md font-medium">
+                <p class="text-muted text-xs sm:text-sm mt-2 max-w-md font-medium">
                   The legends you've preserved for eternity.
                 </p>
               </div>
@@ -681,16 +672,16 @@
                 <!-- New Tale CTA -->
                 <button
                   id="btn-new-story"
-                  class="group relative bg-white/2 border-2 border-dashed border-white/10 hover:border-indigo-500/40 rounded-2xl sm:rounded-3xl flex flex-col items-center justify-center p-6 transition-all min-h-[190px] h-[200px] overflow-hidden cursor-pointer"
+                  class="group relative bg-surface-1 border-2 border-dashed border-line hover:border-accent-line rounded-2xl sm:rounded-3xl flex flex-col items-center justify-center p-6 transition-all min-h-[190px] h-[200px] overflow-hidden cursor-pointer"
                 >
                   <div
-                    class="absolute inset-0 bg-linear-to-br from-indigo-500/0 to-violet-500/0 group-hover:from-indigo-500/4 group-hover:to-violet-500/4 transition-all duration-500"
+                    class="absolute inset-0 bg-linear-to-br from-accent to-accent-2/0 group-hover:from-accent group-hover:to-accent-2/4 transition-all duration-500"
                   ></div>
                   <div class="relative z-10 flex flex-col items-center gap-3">
                     <div
-                      class="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center border border-indigo-500/20 group-hover:scale-110 group-hover:bg-indigo-500/20 transition-all duration-300"
+                      class="w-12 h-12 bg-accent-soft rounded-2xl flex items-center justify-center border border-accent-line group-hover:scale-110 group-hover:bg-accent-soft transition-all duration-300"
                     >
-                      <i data-lucide="feather" class="text-indigo-400 w-5 h-5"></i>
+                      <i data-lucide="feather" class="text-accent-tint w-5 h-5"></i>
                     </div>
                     <div class="text-center">
                       <span
@@ -698,7 +689,7 @@
                         >Record a New Legend</span
                       >
                       <span
-                        class="block text-[11px] text-slate-500 mt-1 font-black uppercase tracking-[0.25em]"
+                        class="block text-[11px] text-muted mt-1 font-black uppercase tracking-[0.25em]"
                         >Expand the Archive</span
                       >
                     </div>
@@ -728,7 +719,7 @@
                   <div class="info-tooltip-wrap">
                     <button
                       type="button"
-                      class="p-2 -m-1 text-slate-500 hover:text-indigo-400 transition-colors cursor-help"
+                      class="p-2 -m-1 text-muted hover:text-accent-tint transition-colors cursor-help"
                       aria-label="Achievements section info"
                     >
                       <i data-lucide="info" class="w-3.5 h-3.5"></i>
@@ -740,7 +731,7 @@
                   </div>
                 </div>
                 <div class="rune-divider"></div>
-                <p class="text-slate-500 text-xs sm:text-sm mt-2 max-w-md font-medium">
+                <p class="text-muted text-xs sm:text-sm mt-2 max-w-md font-medium">
                   Milestones forged through reading and authorship.
                 </p>
               </div>
@@ -748,10 +739,10 @@
               <!-- Unlocked Counter Shield -->
               <div
                 id="achievements-unlocked-badge"
-                class="mythic-badge flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/10 bg-white/3 shrink-0"
+                class="mythic-badge flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-line bg-surface-1 shrink-0"
               >
-                <i data-lucide="award" class="w-3.5 h-3.5 text-amber-400"></i>
-                <span class="text-xs font-bold text-slate-300">
+                <i data-lucide="award" class="w-3.5 h-3.5 text-rune"></i>
+                <span class="text-xs font-bold text-ink">
                   <span id="achievements-unlocked-count">0</span> / 12 Unlocked
                 </span>
               </div>
@@ -791,13 +782,13 @@
           <section>
             <div class="mb-5 sm:mb-6">
               <div class="flex items-center gap-2">
-                <h3 class="text-xs font-black text-slate-500 uppercase tracking-[0.3em]">
+                <h3 class="text-xs font-black text-muted uppercase tracking-[0.3em]">
                   Legacy Metrics
                 </h3>
                 <div class="info-tooltip-wrap">
                   <button
                     type="button"
-                    class="p-1.5 -m-1 text-slate-500 hover:text-indigo-400 transition-colors cursor-help"
+                    class="p-1.5 -m-1 text-muted hover:text-accent-tint transition-colors cursor-help"
                     aria-label="Legacy metrics info"
                   >
                     <i data-lucide="info" class="w-3 h-3"></i>
@@ -808,14 +799,14 @@
                   </div>
                 </div>
               </div>
-              <div class="h-px w-8 bg-indigo-500/30 mt-2"></div>
+              <div class="h-px w-8 bg-accent-active mt-2"></div>
             </div>
 
             <div class="insights-metric-grid space-y-3 sm:space-y-4">
               <div class="stat-card-mythic">
                 <div class="flex items-center justify-between mb-2 sm:mb-3">
-                  <div class="w-9 h-9 rounded-xl bg-indigo-500/10 flex items-center justify-center">
-                    <i data-lucide="scroll-text" class="w-4 h-4 text-indigo-400"></i>
+                  <div class="w-9 h-9 rounded-xl bg-accent-soft flex items-center justify-center">
+                    <i data-lucide="scroll-text" class="w-4 h-4 text-accent-tint"></i>
                   </div>
                   <span
                     id="stat-words-written"
@@ -823,15 +814,15 @@
                     >—</span
                   >
                 </div>
-                <span class="text-[11px] text-slate-500 font-black uppercase tracking-[0.2em] block"
+                <span class="text-[11px] text-muted font-black uppercase tracking-[0.2em] block"
                   >Words Written</span
                 >
               </div>
 
               <div class="stat-card-mythic">
                 <div class="flex items-center justify-between mb-2 sm:mb-3">
-                  <div class="w-9 h-9 rounded-xl bg-violet-500/10 flex items-center justify-center">
-                    <i data-lucide="users-2" class="w-4 h-4 text-violet-400"></i>
+                  <div class="w-9 h-9 rounded-xl bg-accent-2/10 flex items-center justify-center">
+                    <i data-lucide="users-2" class="w-4 h-4 text-accent-2"></i>
                   </div>
                   <span
                     id="stat-total-readers"
@@ -839,17 +830,15 @@
                     >—</span
                   >
                 </div>
-                <span class="text-[11px] text-slate-500 font-black uppercase tracking-[0.2em] block"
+                <span class="text-[11px] text-muted font-black uppercase tracking-[0.2em] block"
                   >Soul Readers</span
                 >
               </div>
 
               <div class="stat-card-mythic">
                 <div class="flex items-center justify-between mb-2 sm:mb-3">
-                  <div
-                    class="w-9 h-9 rounded-xl bg-fuchsia-500/10 flex items-center justify-center"
-                  >
-                    <i data-lucide="clock-4" class="w-4 h-4 text-fuchsia-400"></i>
+                  <div class="w-9 h-9 rounded-xl bg-accent-2/10 flex items-center justify-center">
+                    <i data-lucide="clock-4" class="w-4 h-4 text-accent-2"></i>
                   </div>
                   <span
                     id="stat-reading-time-given"
@@ -857,17 +846,15 @@
                     >—</span
                   >
                 </div>
-                <span class="text-[11px] text-slate-500 font-black uppercase tracking-[0.2em] block"
+                <span class="text-[11px] text-muted font-black uppercase tracking-[0.2em] block"
                   >Time Preserved</span
                 >
               </div>
 
               <div class="stat-card-mythic">
                 <div class="flex items-center justify-between mb-2 sm:mb-3">
-                  <div
-                    class="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center"
-                  >
-                    <i data-lucide="flame" class="w-4 h-4 text-emerald-400"></i>
+                  <div class="w-9 h-9 rounded-xl bg-success/10 flex items-center justify-center">
+                    <i data-lucide="flame" class="w-4 h-4 text-success"></i>
                   </div>
                   <span
                     id="stat-streak"
@@ -875,7 +862,7 @@
                     >—</span
                   >
                 </div>
-                <span class="text-[11px] text-slate-500 font-black uppercase tracking-[0.2em] block"
+                <span class="text-[11px] text-muted font-black uppercase tracking-[0.2em] block"
                   >Active Streak</span
                 >
               </div>
@@ -886,13 +873,13 @@
           <section>
             <div class="mb-5 sm:mb-6">
               <div class="flex items-center gap-2">
-                <h3 class="text-xs font-black text-slate-500 uppercase tracking-[0.3em]">
+                <h3 class="text-xs font-black text-muted uppercase tracking-[0.3em]">
                   Chronicle Goal
                 </h3>
                 <div class="info-tooltip-wrap">
                   <button
                     type="button"
-                    class="p-1.5 -m-1 text-slate-500 hover:text-indigo-400 transition-colors cursor-help"
+                    class="p-1.5 -m-1 text-muted hover:text-accent-tint transition-colors cursor-help"
                     aria-label="Chronicle goal info"
                   >
                     <i data-lucide="info" class="w-3 h-3"></i>
@@ -903,57 +890,57 @@
                   </div>
                 </div>
               </div>
-              <div class="h-px w-8 bg-violet-500/30 mt-2"></div>
+              <div class="h-px w-8 bg-accent-2/30 mt-2"></div>
             </div>
 
             <div
               class="chronicle-goal-card p-4 sm:p-5 rounded-2xl sm:rounded-3xl relative overflow-hidden group"
             >
               <div
-                class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-3xl pointer-events-none group-hover:bg-indigo-500/10 transition-colors"
+                class="absolute top-0 right-0 w-32 h-32 bg-accent-soft blur-3xl pointer-events-none group-hover:bg-accent-soft transition-colors"
               ></div>
               <div class="flex items-center justify-between mb-3">
-                <span class="text-[11px] font-black uppercase tracking-[0.25em] text-slate-500"
+                <span class="text-[11px] font-black uppercase tracking-[0.25em] text-muted"
                   >Annual Path</span
                 >
                 <span
                   id="reading-goal-target"
-                  class="text-[11px] text-indigo-400 font-black tracking-widest"
+                  class="text-[11px] text-accent-tint font-black tracking-widest"
                   >12 TALES</span
                 >
               </div>
-              <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden mb-2.5">
+              <div class="h-1.5 w-full bg-surface-1 rounded-full overflow-hidden mb-2.5">
                 <div
                   id="reading-goal-bar"
-                  class="h-full bg-linear-to-r from-indigo-500 to-violet-600 shadow-[0_0_10px_rgb(var(--accent-rgb)/var(--a-08))]"
+                  class="h-full bg-linear-to-r from-accent to-accent-2 shadow-[0_0_10px_rgb(var(--accent-rgb)/var(--a-08))]"
                   style="--progress: 0.25"
                 ></div>
               </div>
-              <p class="text-[10px] text-slate-500 font-medium">
+              <p class="text-[10px] text-muted font-medium">
                 3 of 12 chronicles preserved this year
               </p>
             </div>
           </section>
 
           <!-- Quick Stats (Legacy) -->
-          <div class="pt-6 border-t border-white/5 grid grid-cols-3 gap-2">
+          <div class="pt-6 border-t border-line-subtle grid grid-cols-3 gap-2">
             <div class="text-center">
               <span
                 id="sidebar-tale-count"
                 class="block text-lg sm:text-xl font-bold text-[var(--text-primary)]"
                 >—</span
               >
-              <span class="text-[11px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1"
+              <span class="text-[11px] text-muted font-black uppercase tracking-[0.2em] mt-1"
                 >Tales</span
               >
             </div>
-            <div class="text-center border-x border-white/5">
+            <div class="text-center border-x border-line-subtle">
               <span
                 id="sidebar-reader-count"
                 class="block text-lg sm:text-xl font-bold text-[var(--text-primary)]"
                 >—</span
               >
-              <span class="text-[11px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1"
+              <span class="text-[11px] text-muted font-black uppercase tracking-[0.2em] mt-1"
                 >Readers</span
               >
             </div>
@@ -963,7 +950,7 @@
                 class="block text-lg sm:text-xl font-bold text-[var(--text-primary)]"
                 >—</span
               >
-              <span class="text-[11px] text-slate-500 font-black uppercase tracking-[0.2em] mt-1"
+              <span class="text-[11px] text-muted font-black uppercase tracking-[0.2em] mt-1"
                 >Saved</span
               >
             </div>
@@ -988,7 +975,7 @@
       >
         <!-- Top glow line -->
         <div
-          class="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px bg-linear-to-r from-transparent via-indigo-500/40 to-transparent pointer-events-none"
+          class="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px bg-linear-to-r from-transparent via-accent to-transparent pointer-events-none"
         ></div>
 
         <!-- Modal header -->
@@ -1000,7 +987,7 @@
           <button
             id="btn-close-modal"
             aria-label="Close edit profile dialog"
-            class="text-slate-600 hover:text-white p-2 hover:bg-white/5 rounded-xl transition-all group"
+            class="text-faint hover:text-ink p-2 hover:bg-surface-1 rounded-xl transition-all group"
           >
             <i
               data-lucide="x"
@@ -1037,7 +1024,7 @@
           </button>
           <button
             data-tab="account"
-            class="tab-btn--inactive flex-1 py-2 rounded-xl text-[10px] font-bold uppercase tracking-[0.15em] border transition-all text-rose-400 hover:text-rose-300"
+            class="tab-btn--inactive flex-1 py-2 rounded-xl text-[10px] font-bold uppercase tracking-[0.15em] border transition-all text-danger hover:text-danger"
           >
             Account
           </button>
@@ -1051,9 +1038,9 @@
               <!-- Avatar -->
               <div class="flex items-center gap-4 p-4 profile-panel rounded-2xl mb-5">
                 <div
-                  class="w-14 h-14 bg-zinc-800 rounded-xl flex items-center justify-center border border-white/7 overflow-hidden shrink-0"
+                  class="w-14 h-14 bg-surface-3 rounded-xl flex items-center justify-center border border-line overflow-hidden shrink-0"
                 >
-                  <i data-lucide="user" class="w-6 h-6 text-slate-700 avatar-placeholder"></i>
+                  <i data-lucide="user" class="w-6 h-6 text-faint avatar-placeholder"></i>
                   <img
                     id="modal-avatar-preview"
                     src=""
@@ -1079,7 +1066,7 @@
                   <div class="flex items-center gap-2">
                     <label
                       for="input-name"
-                      class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
+                      class="flex items-center gap-2 text-[10px] font-bold text-accent-tint uppercase tracking-[0.15em] ml-1"
                     >
                       <i data-lucide="signature" class="w-3 h-3"></i>
                       Display Name
@@ -1087,7 +1074,7 @@
                     <div class="info-tooltip-wrap">
                       <button
                         type="button"
-                        class="p-1.5 -m-1 text-slate-500 hover:text-indigo-400 transition-colors cursor-help"
+                        class="p-1.5 -m-1 text-muted hover:text-accent-tint transition-colors cursor-help"
                         aria-label="Display name info"
                       >
                         <i data-lucide="info" class="w-3 h-3"></i>
@@ -1101,7 +1088,7 @@
                     type="button"
                     id="btn-suggest-name"
                     aria-label="Suggest AI display name based on bio"
-                    class="px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[11px] font-bold uppercase tracking-[0.12em] hover:bg-indigo-500/20 hover:text-white transition-colors cursor-pointer"
+                    class="px-2.5 py-1 rounded-lg bg-accent-soft border border-accent-line text-accent-tint text-[11px] font-bold uppercase tracking-[0.12em] hover:bg-accent-soft hover:text-ink transition-colors cursor-pointer"
                   >
                     Suggest Name
                   </button>
@@ -1120,7 +1107,7 @@
                 <div class="flex items-center gap-2">
                   <label
                     for="input-bio"
-                    class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
+                    class="flex items-center gap-2 text-[10px] font-bold text-accent-tint uppercase tracking-[0.15em] ml-1"
                   >
                     <i data-lucide="scroll" class="w-3 h-3"></i>
                     Short Bio
@@ -1128,7 +1115,7 @@
                   <div class="info-tooltip-wrap">
                     <button
                       type="button"
-                      class="p-1.5 -m-1 text-slate-500 hover:text-indigo-400 transition-colors cursor-help"
+                      class="p-1.5 -m-1 text-muted hover:text-accent-tint transition-colors cursor-help"
                       aria-label="Bio info"
                     >
                       <i data-lucide="info" class="w-3 h-3"></i>
@@ -1145,7 +1132,7 @@
                   class="input-mythic w-full rounded-xl px-4 py-3.5 text-sm resize-none"
                   placeholder="Tell us your story… (used for AI name suggestions)"
                 ></textarea>
-                <p class="text-[10px] text-slate-400 ml-1">Max 160 characters</p>
+                <p class="text-[10px] text-ink-soft ml-1">Max 160 characters</p>
               </div>
 
               <!-- Pronouns -->
@@ -1153,7 +1140,7 @@
                 <div class="flex items-center gap-2">
                   <label
                     for="input-pronouns"
-                    class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
+                    class="flex items-center gap-2 text-[10px] font-bold text-accent-tint uppercase tracking-[0.15em] ml-1"
                   >
                     <i data-lucide="user-check" class="w-3 h-3"></i>
                     Pronouns
@@ -1161,7 +1148,7 @@
                   <div class="info-tooltip-wrap">
                     <button
                       type="button"
-                      class="p-1.5 -m-1 text-slate-500 hover:text-indigo-400 transition-colors cursor-help"
+                      class="p-1.5 -m-1 text-muted hover:text-accent-tint transition-colors cursor-help"
                       aria-label="Pronouns info"
                     >
                       <i data-lucide="info" class="w-3 h-3"></i>
@@ -1181,20 +1168,20 @@
               </div>
 
               <!-- Google API Key -->
-              <div class="space-y-1.5 pt-3 border-t border-white/5">
+              <div class="space-y-1.5 pt-3 border-t border-line-subtle">
                 <div class="flex items-center justify-between ml-1">
                   <div class="flex items-center gap-2">
                     <label
                       for="input-gemini-key"
-                      class="flex items-center gap-2 text-[10px] font-bold text-amber-400 uppercase tracking-[0.15em]"
+                      class="flex items-center gap-2 text-[10px] font-bold text-rune uppercase tracking-[0.15em]"
                     >
-                      <i data-lucide="sparkles" class="w-3 h-3 text-amber-400"></i>
+                      <i data-lucide="sparkles" class="w-3 h-3 text-rune"></i>
                       Google API Key
                     </label>
                     <div class="info-tooltip-wrap">
                       <button
                         type="button"
-                        class="p-1.5 -m-1 text-slate-500 hover:text-amber-400 transition-colors cursor-help"
+                        class="p-1.5 -m-1 text-muted hover:text-rune transition-colors cursor-help"
                         aria-label="Google API Key info"
                       >
                         <i data-lucide="info" class="w-3 h-3"></i>
@@ -1208,7 +1195,7 @@
                     href="https://aistudio.google.com/app/apikey"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="text-[10px] font-semibold text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1"
+                    class="text-[10px] font-semibold text-accent-tint hover:text-accent-tint transition-colors flex items-center gap-1"
                   >
                     Get free key
                     <i data-lucide="external-link" class="w-2.5 h-2.5"></i>
@@ -1228,7 +1215,7 @@
                       type="button"
                       id="btn-toggle-gemini-key"
                       aria-label="Toggle API key visibility"
-                      class="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 text-[10px] font-medium transition-colors cursor-pointer"
+                      class="px-2.5 py-1 rounded-lg text-ink-soft hover:text-ink hover:bg-surface-1 text-[10px] font-medium transition-colors cursor-pointer"
                     >
                       Show
                     </button>
@@ -1236,13 +1223,13 @@
                       type="button"
                       id="btn-save-gemini-key"
                       aria-label="Save Google API Key"
-                      class="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 hover:bg-amber-500/25 hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer active:scale-95 shadow-sm"
+                      class="px-2.5 py-1 rounded-lg bg-rune/15 border border-rune/30 text-rune hover:bg-rune/25 hover:text-ink text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer active:scale-95 shadow-sm"
                     >
                       Save
                     </button>
                   </div>
                 </div>
-                <p class="text-[10px] text-slate-500 ml-1">
+                <p class="text-[10px] text-muted ml-1">
                   Stored only in your browser's local storage. Powers name suggestions and text
                   refinement.
                 </p>
@@ -1256,7 +1243,7 @@
                 <div class="flex items-center gap-2">
                   <label
                     for="input-location"
-                    class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
+                    class="flex items-center gap-2 text-[10px] font-bold text-accent-tint uppercase tracking-[0.15em] ml-1"
                   >
                     <i data-lucide="map-pin" class="w-3 h-3"></i>
                     Location
@@ -1264,7 +1251,7 @@
                   <div class="info-tooltip-wrap">
                     <button
                       type="button"
-                      class="p-1.5 -m-1 text-slate-500 hover:text-indigo-400 transition-colors cursor-help"
+                      class="p-1.5 -m-1 text-muted hover:text-accent-tint transition-colors cursor-help"
                       aria-label="Location info"
                     >
                       <i data-lucide="info" class="w-3 h-3"></i>
@@ -1287,7 +1274,7 @@
               <div class="space-y-2">
                 <div class="flex items-center gap-2">
                   <label
-                    class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
+                    class="flex items-center gap-2 text-[10px] font-bold text-accent-tint uppercase tracking-[0.15em] ml-1"
                   >
                     <i data-lucide="tags" class="w-3 h-3"></i>
                     Favourite Genres
@@ -1295,7 +1282,7 @@
                   <div class="info-tooltip-wrap">
                     <button
                       type="button"
-                      class="p-1.5 -m-1 text-slate-500 hover:text-indigo-400 transition-colors cursor-help"
+                      class="p-1.5 -m-1 text-muted hover:text-accent-tint transition-colors cursor-help"
                       aria-label="Favourite genres info"
                     >
                       <i data-lucide="info" class="w-3 h-3"></i>
@@ -1305,7 +1292,7 @@
                     </div>
                   </div>
                 </div>
-                <p class="text-[10px] text-slate-400 ml-1 mb-2">Select all that apply.</p>
+                <p class="text-[10px] text-ink-soft ml-1 mb-2">Select all that apply.</p>
                 <div id="genre-selector" class="flex flex-wrap gap-2">
                   <!-- Chips built by _buildGenreSelector() in ui.js -->
                 </div>
@@ -1319,7 +1306,7 @@
                   <div class="flex items-center gap-2">
                     <label
                       for="input-website"
-                      class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
+                      class="flex items-center gap-2 text-[10px] font-bold text-accent-tint uppercase tracking-[0.15em] ml-1"
                     >
                       <i data-lucide="globe" class="w-3 h-3"></i>
                       Website
@@ -1327,7 +1314,7 @@
                     <div class="info-tooltip-wrap">
                       <button
                         type="button"
-                        class="p-1.5 -m-1 text-slate-500 hover:text-indigo-400 transition-colors cursor-help"
+                        class="p-1.5 -m-1 text-muted hover:text-accent-tint transition-colors cursor-help"
                         aria-label="Website info"
                       >
                         <i data-lucide="info" class="w-3 h-3"></i>
@@ -1350,7 +1337,7 @@
                   <div class="flex items-center gap-2">
                     <label
                       for="input-twitter"
-                      class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
+                      class="flex items-center gap-2 text-[10px] font-bold text-accent-tint uppercase tracking-[0.15em] ml-1"
                     >
                       <i data-lucide="badge-x" class="w-3 h-3"></i>
                       Twitter / X
@@ -1358,7 +1345,7 @@
                     <div class="info-tooltip-wrap">
                       <button
                         type="button"
-                        class="p-1.5 -m-1 text-slate-500 hover:text-indigo-400 transition-colors cursor-help"
+                        class="p-1.5 -m-1 text-muted hover:text-accent-tint transition-colors cursor-help"
                         aria-label="Twitter info"
                       >
                         <i data-lucide="info" class="w-3 h-3"></i>
@@ -1369,7 +1356,7 @@
                     </div>
                   </div>
                   <div class="relative">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-ink-soft text-sm"
                       >@</span
                     >
                     <input
@@ -1386,7 +1373,7 @@
                   <div class="flex items-center gap-2">
                     <label
                       for="input-instagram"
-                      class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
+                      class="flex items-center gap-2 text-[10px] font-bold text-accent-tint uppercase tracking-[0.15em] ml-1"
                     >
                       <i data-lucide="instagram" class="w-3 h-3"></i>
                       Instagram
@@ -1394,7 +1381,7 @@
                     <div class="info-tooltip-wrap">
                       <button
                         type="button"
-                        class="p-1.5 -m-1 text-slate-500 hover:text-indigo-400 transition-colors cursor-help"
+                        class="p-1.5 -m-1 text-muted hover:text-accent-tint transition-colors cursor-help"
                         aria-label="Instagram info"
                       >
                         <i data-lucide="info" class="w-3 h-3"></i>
@@ -1403,7 +1390,7 @@
                     </div>
                   </div>
                   <div class="relative">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-ink-soft text-sm"
                       >@</span
                     >
                     <input
@@ -1425,7 +1412,7 @@
                   <div class="flex items-center gap-2">
                     <label
                       for="input-reading-goal"
-                      class="flex items-center gap-2 text-[10px] font-bold text-indigo-400 uppercase tracking-[0.15em] ml-1"
+                      class="flex items-center gap-2 text-[10px] font-bold text-accent-tint uppercase tracking-[0.15em] ml-1"
                     >
                       <i data-lucide="target" class="w-3 h-3"></i>
                       Yearly Reading Goal
@@ -1433,7 +1420,7 @@
                     <div class="info-tooltip-wrap">
                       <button
                         type="button"
-                        class="p-1.5 -m-1 text-slate-500 hover:text-indigo-400 transition-colors cursor-help"
+                        class="p-1.5 -m-1 text-muted hover:text-accent-tint transition-colors cursor-help"
                         aria-label="Yearly reading goal info"
                       >
                         <i data-lucide="info" class="w-3 h-3"></i>
@@ -1443,7 +1430,7 @@
                       </div>
                     </div>
                   </div>
-                  <p class="text-[10px] text-slate-400 ml-1">
+                  <p class="text-[10px] text-ink-soft ml-1">
                     How many tales do you want to read this year?
                   </p>
                   <input
@@ -1458,14 +1445,14 @@
                 </div>
 
                 <!-- Placeholder for future goals -->
-                <div class="profile-panel rounded-2xl p-4 border border-dashed border-white/6">
-                  <div class="flex items-center gap-2 text-slate-400 mb-2">
-                    <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-500/50"></i>
+                <div class="profile-panel rounded-2xl p-4 border border-dashed border-line-subtle">
+                  <div class="flex items-center gap-2 text-ink-soft mb-2">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5 text-accent/50"></i>
                     <span class="text-[10px] font-bold uppercase tracking-[0.15em]"
                       >More goals coming soon</span
                     >
                   </div>
-                  <p class="text-[11px] text-slate-400 leading-relaxed">
+                  <p class="text-[11px] text-ink-soft leading-relaxed">
                     Writing streak goals, word count targets, and contribution milestones will be
                     available in a future update.
                   </p>
@@ -1476,14 +1463,14 @@
             <!-- ── Tab: Account & Danger Zone ─────────── -->
             <div id="tab-panel-account" hidden class="space-y-5">
               <!-- Archive Preservation Notice -->
-              <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 space-y-2">
+              <div class="p-4 rounded-2xl bg-rune/10 border border-rune/20 space-y-2">
                 <div
-                  class="flex items-center gap-2 text-amber-300 text-xs font-bold uppercase tracking-wider"
+                  class="flex items-center gap-2 text-rune text-xs font-bold uppercase tracking-wider"
                 >
-                  <i data-lucide="shield-check" class="w-4 h-4 text-amber-400"></i>
+                  <i data-lucide="shield-check" class="w-4 h-4 text-rune"></i>
                   Chronicle Preservation Policy
                 </div>
-                <p class="text-[11px] text-amber-200/80 leading-relaxed">
+                <p class="text-[11px] text-rune/80 leading-relaxed">
                   TaleTranscend is a living cultural archive. When you dissolve your account, your
                   personal profile, reading streaks, and bookmarks are removed, but
                   <strong
@@ -1494,12 +1481,12 @@
               </div>
 
               <!-- Request Tale Deletion to Admin -->
-              <div class="p-4 rounded-2xl bg-white/3 border border-white/8 space-y-3">
+              <div class="p-4 rounded-2xl bg-surface-1 border border-line space-y-3">
                 <div>
                   <h3 class="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">
                     Request Chronicle Removal
                   </h3>
-                  <p class="text-[11px] text-slate-400 mt-0.5 leading-relaxed">
+                  <p class="text-[11px] text-ink-soft mt-0.5 leading-relaxed">
                     Published tales cannot be deleted directly by contributors. You may submit an
                     archive removal petition to the administration for review.
                   </p>
@@ -1507,23 +1494,23 @@
                 <button
                   type="button"
                   id="btn-open-tale-deletion-request"
-                  class="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-slate-300 hover:text-white hover:bg-white/10 transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                  class="w-full py-2.5 px-4 rounded-xl bg-surface-1 border border-line text-xs font-bold text-ink hover:text-ink hover:bg-surface-2 transition-colors flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <i data-lucide="mail" class="w-3.5 h-3.5 text-indigo-400"></i>
+                  <i data-lucide="mail" class="w-3.5 h-3.5 text-accent-tint"></i>
                   <span>Submit Removal Petition to Admin</span>
                 </button>
               </div>
 
               <!-- Danger Zone: Account Dissolution -->
-              <div class="p-4 rounded-2xl bg-rose-500/5 border border-rose-500/20 space-y-3">
+              <div class="p-4 rounded-2xl bg-danger/5 border border-danger/20 space-y-3">
                 <div>
                   <h3
-                    class="text-xs font-bold text-rose-300 uppercase tracking-wider flex items-center gap-2"
+                    class="text-xs font-bold text-danger uppercase tracking-wider flex items-center gap-2"
                   >
-                    <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400"></i>
+                    <i data-lucide="alert-triangle" class="w-4 h-4 text-danger"></i>
                     Dissolve Chronicler Identity
                   </h3>
-                  <p class="text-[11px] text-rose-200/70 mt-1 leading-relaxed">
+                  <p class="text-[11px] text-danger/70 mt-1 leading-relaxed">
                     Permanently delete your account and personal reading records. Your contributed
                     tales will remain sealed in the living archive. This action cannot be undone.
                   </p>
@@ -1531,7 +1518,7 @@
                 <button
                   type="button"
                   id="btn-delete-account-trigger"
-                  class="w-full py-2.5 px-4 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 hover:bg-rose-500/25 hover:text-white transition-all text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                  class="w-full py-2.5 px-4 rounded-xl bg-danger/15 border border-danger/30 text-danger hover:bg-danger/25 hover:text-on-accent transition-all text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                 >
                   <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                   <span>Delete My Account</span>
@@ -1548,7 +1535,7 @@
                 type="button"
                 id="btn-cancel-modal"
                 aria-label="Cancel profile edits"
-                class="flex-1 btn-ghost py-3.5 text-slate-300 rounded-xl font-semibold text-sm"
+                class="flex-1 btn-ghost py-3.5 text-ink rounded-xl font-semibold text-sm"
               >
                 Cancel
               </button>
@@ -1556,7 +1543,7 @@
                 type="submit"
                 id="btn-save-profile"
                 aria-label="Save profile changes"
-                class="flex-1 btn-primary py-3.5 text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-2"
+                class="flex-1 btn-primary py-3.5 text-ink rounded-xl font-semibold text-sm flex items-center justify-center gap-2"
               >
                 <i data-lucide="check" class="w-4 h-4"></i>
                 Save Changes
@@ -1576,13 +1563,13 @@
       aria-labelledby="profile-author-modal-title"
     >
       <div
-        class="glass-card-strong w-full max-w-lg p-6 sm:p-8 rounded-3xl border border-white/10 shadow-2xl relative space-y-6"
+        class="glass-card-strong w-full max-w-lg p-6 sm:p-8 rounded-3xl border border-line shadow-2xl relative space-y-6"
       >
         <!-- Header -->
-        <div class="space-y-2 border-b border-white/6 pb-5">
-          <div class="flex items-center gap-2 text-indigo-400">
+        <div class="space-y-2 border-b border-line-subtle pb-5">
+          <div class="flex items-center gap-2 text-accent-tint">
             <i data-lucide="feather" class="w-4 h-4"></i>
-            <span class="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-300">
+            <span class="text-[10px] font-black uppercase tracking-[0.25em] text-accent-tint">
               Scribe Registry
             </span>
           </div>
@@ -1600,18 +1587,22 @@
 
         <!-- Scribe Verification Steps Shield -->
         <div
-          class="grid grid-cols-3 gap-2 py-2 px-3 rounded-xl bg-white/2 border border-white/5 text-[10px] text-center"
+          class="grid grid-cols-3 gap-2 py-2 px-3 rounded-xl bg-surface-1 border border-line-subtle text-[10px] text-center"
           aria-label="Registration steps"
         >
           <div
-            class="p-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 font-bold"
+            class="p-1.5 rounded-lg bg-accent-soft border border-accent-line text-accent-tint font-bold"
           >
             1. Identity &amp; Inbox
           </div>
-          <div class="p-1.5 rounded-lg bg-white/2 border border-white/5 text-slate-400 font-medium">
+          <div
+            class="p-1.5 rounded-lg bg-surface-1 border border-line-subtle text-ink-soft font-medium"
+          >
             2. Creed &amp; Style
           </div>
-          <div class="p-1.5 rounded-lg bg-white/2 border border-white/5 text-slate-400 font-medium">
+          <div
+            class="p-1.5 rounded-lg bg-surface-1 border border-line-subtle text-ink-soft font-medium"
+          >
             3. Archive Sealed
           </div>
         </div>
@@ -1621,9 +1612,9 @@
           <div class="space-y-1.5">
             <label
               for="profile-pen-name-input"
-              class="block text-xs font-bold uppercase tracking-wider text-slate-300"
+              class="block text-xs font-bold uppercase tracking-wider text-ink"
             >
-              Pen Name / Moniker <span class="text-indigo-400">*</span>
+              Pen Name / Moniker <span class="text-accent-tint">*</span>
             </label>
             <input
               type="text"
@@ -1638,9 +1629,9 @@
           <div class="space-y-1.5">
             <label
               for="profile-author-email-input"
-              class="block text-xs font-bold uppercase tracking-wider text-slate-300"
+              class="block text-xs font-bold uppercase tracking-wider text-ink"
             >
-              Correspondence Email <span class="text-indigo-400">*</span>
+              Correspondence Email <span class="text-accent-tint">*</span>
             </label>
             <input
               type="email"
@@ -1650,7 +1641,7 @@
               class="input-mythic w-full rounded-xl px-4 py-3 text-sm"
               placeholder="author@example.com"
             />
-            <p class="text-[10px] text-slate-400 leading-tight">
+            <p class="text-[10px] text-ink-soft leading-tight">
               Missives dispatched from The Chronicler's Letter will connect to this inbox.
             </p>
           </div>
@@ -1658,10 +1649,10 @@
           <div class="space-y-1.5">
             <label
               for="profile-author-bio-input"
-              class="block text-xs font-bold uppercase tracking-wider text-slate-300"
+              class="block text-xs font-bold uppercase tracking-wider text-ink"
             >
               Scribe Creed / Bio
-              <span class="text-slate-500 font-normal text-[10px] lowercase">(optional)</span>
+              <span class="text-muted font-normal text-[10px] lowercase">(optional)</span>
             </label>
             <textarea
               id="profile-author-bio-input"
@@ -1672,10 +1663,10 @@
             ></textarea>
           </div>
 
-          <p id="profile-author-form-error" class="hidden text-xs text-rose-400 font-medium"></p>
+          <p id="profile-author-form-error" class="hidden text-xs text-danger font-medium"></p>
 
           <!-- Actions -->
-          <div class="flex items-center justify-end gap-3 pt-3 border-t border-white/6">
+          <div class="flex items-center justify-end gap-3 pt-3 border-t border-line-subtle">
             <button
               type="button"
               id="btn-cancel-profile-author"
@@ -1705,12 +1696,12 @@
       aria-labelledby="tale-deletion-modal-title"
     >
       <div
-        class="glass-card-strong w-full max-w-lg p-6 sm:p-8 rounded-3xl border border-white/10 shadow-2xl relative space-y-6"
+        class="glass-card-strong w-full max-w-lg p-6 sm:p-8 rounded-3xl border border-line shadow-2xl relative space-y-6"
       >
-        <div class="space-y-2 border-b border-white/6 pb-5">
-          <div class="flex items-center gap-2 text-indigo-400">
+        <div class="space-y-2 border-b border-line-subtle pb-5">
+          <div class="flex items-center gap-2 text-accent-tint">
             <i data-lucide="mail" class="w-4 h-4"></i>
-            <span class="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-300">
+            <span class="text-[10px] font-black uppercase tracking-[0.25em] text-accent-tint">
               Admin Petition
             </span>
           </div>
@@ -1731,9 +1722,9 @@
           <div class="space-y-1.5">
             <label
               for="input-deletion-tale-id"
-              class="block text-xs font-bold uppercase tracking-wider text-slate-300"
+              class="block text-xs font-bold uppercase tracking-wider text-ink"
             >
-              Chronicle ID or Title <span class="text-indigo-400">*</span>
+              Chronicle ID or Title <span class="text-accent-tint">*</span>
             </label>
             <input
               type="text"
@@ -1747,9 +1738,9 @@
           <div class="space-y-1.5">
             <label
               for="input-deletion-reason"
-              class="block text-xs font-bold uppercase tracking-wider text-slate-300"
+              class="block text-xs font-bold uppercase tracking-wider text-ink"
             >
-              Reason for Removal <span class="text-indigo-400">*</span>
+              Reason for Removal <span class="text-accent-tint">*</span>
             </label>
             <textarea
               id="input-deletion-reason"
@@ -1761,7 +1752,7 @@
             ></textarea>
           </div>
 
-          <div class="flex items-center justify-end gap-3 pt-3 border-t border-white/6">
+          <div class="flex items-center justify-end gap-3 pt-3 border-t border-line-subtle">
             <button
               type="button"
               id="btn-cancel-tale-deletion"
@@ -1791,12 +1782,12 @@
       aria-labelledby="confirm-delete-modal-title"
     >
       <div
-        class="glass-card-strong w-full max-w-lg p-6 sm:p-8 rounded-3xl border border-rose-500/30 shadow-2xl relative space-y-6"
+        class="glass-card-strong w-full max-w-lg p-6 sm:p-8 rounded-3xl border border-danger/30 shadow-2xl relative space-y-6"
       >
-        <div class="space-y-2 border-b border-rose-500/20 pb-5">
-          <div class="flex items-center gap-2 text-rose-400">
-            <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400"></i>
-            <span class="text-[10px] font-black uppercase tracking-[0.25em] text-rose-300">
+        <div class="space-y-2 border-b border-danger/20 pb-5">
+          <div class="flex items-center gap-2 text-danger">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-danger"></i>
+            <span class="text-[10px] font-black uppercase tracking-[0.25em] text-danger">
               Irreversible Action
             </span>
           </div>
@@ -1807,7 +1798,7 @@
             Dissolve Chronicler Identity
           </h2>
           <div
-            class="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-200/90 leading-relaxed mt-2"
+            class="p-3.5 rounded-xl bg-rune/10 border border-rune/20 text-xs text-rune/90 leading-relaxed mt-2"
           >
             <strong>Archive Notice:</strong> Any chronicles you have contributed to TaleTranscend
             will <strong>remain permanently preserved</strong> in the library. Dissolving your
@@ -1816,9 +1807,9 @@
         </div>
 
         <form id="form-confirm-delete-account" class="space-y-4">
-          <p class="text-xs text-slate-300 leading-relaxed">
+          <p class="text-xs text-ink leading-relaxed">
             To confirm this permanent dissolution, please type
-            <strong class="text-rose-400 tracking-wider">DELETE</strong> in the box below:
+            <strong class="text-danger tracking-wider">DELETE</strong> in the box below:
           </p>
 
           <input
@@ -1826,11 +1817,11 @@
             id="input-confirm-delete-account"
             required
             autocomplete="off"
-            class="input-mythic w-full rounded-xl px-4 py-3 text-sm text-center font-mono border-rose-500/30 focus:border-rose-400"
+            class="input-mythic w-full rounded-xl px-4 py-3 text-sm text-center font-mono border-danger/30 focus:border-danger"
             placeholder="Type DELETE to confirm"
           />
 
-          <div class="flex items-center justify-end gap-3 pt-3 border-t border-white/6">
+          <div class="flex items-center justify-end gap-3 pt-3 border-t border-line-subtle">
             <button
               type="button"
               id="btn-cancel-delete-account"
@@ -1842,7 +1833,7 @@
               type="submit"
               id="btn-confirm-delete-account"
               disabled
-              class="btn px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2 cursor-pointer bg-rose-600 hover:bg-rose-500 text-white disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-rose-600/30"
+              class="btn px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2 cursor-pointer bg-danger hover:bg-danger text-on-accent disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-rose-600/30"
             >
               <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
               <span>Dissolve Identity</span>
