@@ -108,13 +108,23 @@ example, added because the profile page's motion needed a step the
 original four-step duration scale didn't have) — not be worked around with
 a page-local re-declaration of the same name.
 
-**Known gap (measured 2026-11-13, partially closed 2026-11-15):** roughly 70%
-of spacing declarations and 49% of radius declarations in page stylesheets
-still bypass the token layer, and raw colour literals in markup (199 hex, 153
-`rgba()`) are outside the guardrail. `lint:tokens` now also scans `.html`,
-`.js` and `.ts` for stock Tailwind palette utilities, which is why the
-146 measured light-theme contrast failures are resolved rather than merely
-documented — but spacing, radius and markup-level hex are still unguarded.
+**Contrast, 2026-11-15.** The audit's 146 light-theme failures came from two
+buckets: stock Tailwind palette utilities in markup, and raw colours in page
+stylesheets. Both are now closed by construction — palette utilities are gone
+(`grep`-verified zero across `.html`, `.js`, `.ts`) and `lint:tokens` fails on
+one, and page stylesheets contain no raw colour literal, only
+`rgb(var(--token-rgb) / alpha)` compositions. Three light-theme tokens were
+also re-derived because they failed AA on their own surfaces: `--success`
+2.06:1, `--rune` 2.88:1, `--danger` 3.40:1. `scripts/audit-contrast.mjs`
+(`npm run audit:contrast`) measures the rendered result per page and theme;
+run it after any colour or theme change. It reports 0 failures on the static
+shell of every page, but a populated page needs an authenticated Firebase
+session, which the headless harness cannot establish — so populated-state
+verification still has to be run in a real browser.
+
+**Still unguarded (measured 2026-11-13):** roughly 70% of spacing declarations
+and 49% of radius declarations in page stylesheets bypass the token layer, and
+raw colour literals in markup (199 hex, 153 `rgba()`) sit outside the lint.
 Read `docs/DESIGN_AUDIT.md` (and its §13.1 remediation log) before adding a
 new page stylesheet.
 
